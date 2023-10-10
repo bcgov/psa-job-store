@@ -1,0 +1,25 @@
+# Versioning and metadata
+.git
+.gitignore
+.dockerignore
+
+# Build dependencies
+**/build
+**/dist
+**/node_modules
+coverage
+
+# Environment (contains sensitive data)
+**/.env
+
+# Files not required for production
+*.code-workspace
+*.log
+.editorconfig
+**/Dockerfile
+**/README.md
+**/tslint.json
+**/nodemon.json
+
+# Next.js
+**/.next

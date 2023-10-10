@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+PROTECTED_BRANCHES="^(main|stage|develop)"
+
+if [[ "$BRANCH" =~ $PROTECTED_BRANCHES ]]
+then
+    echo "\n🚫 Pushing directly to remote '$BRANCH' branch is not allowed.  Push your feature branch and create a Pull Request instead.\n"
+    exit 1
+fi

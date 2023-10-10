@@ -1,0 +1,72 @@
+{
+  "extensions": {
+    "recommendations": [
+      "christian-kohler.path-intellisense",
+      "bradlc.vscode-tailwindcss",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "orta.vscode-jest",
+      "vscode-icons-team.vscode-icons"
+    ]
+  },
+  "folders": [
+    {
+      "name": "psa-job-store",
+      "path": "."
+    },
+    {
+      "name": "apps/api",
+      "path": "apps/api"
+    },
+    {
+      "name": "apps/app",
+      "path": "apps/app"
+    },
+    {
+      "name": "packages/eslint-config-custom",
+      "path": "packages/eslint-config-custom"
+    },
+    {
+      "name": "packages/tsconfig",
+      "path": "packages/tsconfig"
+    },
+    {
+      "name": "packages/ui",
+      "path": "packages/ui"
+    }
+  ],
+  "settings": {
+    "[javascript][javascriptreact][json][jsonc][typescript][typescriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.tabSize": 2
+    },
+    "editor.codeActionsOnSave": {
+      "source.fixAll": true,
+      "source.organizeImports": true
+    },
+    "editor.formatOnSave": true,
+    "editor.rulers": [120],
+    "files.exclude": {
+      "**/.git": false,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/Thumbs.db": true,
+      "apps": true,
+      "packages": true
+    },
+    "javascript.format.semicolons": "insert",
+    "javascript.preferences.quoteStyle": "single",
+    "jest.disabledWorkspaceFolders": [
+      "psa-job-store",
+      "packages/eslint-config-custom",
+      "packages/tsconfig",
+      "packages/ui"
+    ],
+    "typescript.format.semicolons": "insert",
+    "typescript.preferences.importModuleSpecifier": "project-relative",
+    "typescript.preferences.quoteStyle": "single",
+    "typescript.tsdk": "psa-job-store/node_modules/typescript/lib"
+  }
+}
