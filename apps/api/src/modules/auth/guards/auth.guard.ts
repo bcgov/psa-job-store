@@ -1,5 +1,6 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 import { PUBLIC_ROUTE } from '../decorators/public-route.decorator';
@@ -15,5 +16,10 @@ export class AuthGuard extends PassportAuthGuard('keycloak') {
     if (isPublicRoute) return true;
 
     return super.canActivate(context);
+  }
+
+  getRequest(context: ExecutionContext) {
+    const gqlContext = GqlExecutionContext.create(context);
+    return gqlContext.getContext().req;
   }
 }
