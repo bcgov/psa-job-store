@@ -35,6 +35,23 @@
       "path": "packages/ui"
     }
   ],
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "NestJS API",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "npm",
+        "runtimeArgs": ["-w", "api", "run", "start:debug"],
+        "outputCapture": "std",
+        "internalConsoleOptions": "openOnSessionStart",
+        "console": "internalConsole",
+        "cwd": "${workspaceFolder}/apps/api"
+      }
+    ],
+    "compounds": []
+  },
   "settings": {
     "[javascript][javascriptreact][json][jsonc][typescript][typescriptreact]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode",
