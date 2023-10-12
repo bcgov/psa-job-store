@@ -1,0 +1,33 @@
+
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: api
+spec:
+  # lookupPolicy:
+  #   local: true
+  tags:
+    - name: develop-latest
+      from:
+        kind: DockerImage
+        name: artifacts.developer.gov.bc.ca/tf15-images/api:develop-latest
+      importPolicy:
+        scheduled: true
+      referencePolicy:
+        type: Source
+    - name: stage-latest
+      from:
+        kind: DockerImage
+        name: artifacts.developer.gov.bc.ca/tf15-images/api:stage-latest
+      importPolicy:
+        scheduled: true
+      referencePolicy:
+        type: Source
+    - name: latest
+      from:
+        kind: DockerImage
+        name: artifacts.developer.gov.bc.ca/tf15-images/api:latest
+      importPolicy:
+        scheduled: true
+      referencePolicy:
+        type: Source

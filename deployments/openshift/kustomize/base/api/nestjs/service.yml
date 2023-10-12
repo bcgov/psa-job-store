@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nestjs-app
+spec:
+  selector:
+    name: nestjs-app
+  ports:
+  - protocol: TCP
+    port: 4000
+    targetPort: 4000
