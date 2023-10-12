@@ -1,0 +1,25 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: nestjs-app
+spec:
+  strategy:
+    type: Rolling
+  triggers:
+      - type: ConfigChange
+      - imageChangeParams:
+          automatic: true
+          containerNames:
+            - nestjs-app
+          from:
+            kind: ImageStreamTag
+            name: api:stage-latest
+            namespace: f3c07a-tools
+        type: ImageChange
+---          
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+    name: nestjs-app
+spec:
+  host: pjs-api-test.apps.silver.devops.gov.bc.ca

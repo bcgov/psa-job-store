@@ -1,0 +1,12 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-all-ingress-nestjs
+spec:
+  podSelector:
+    matchLabels:
+      name: nestjs-app
+  ingress:
+    - {}
+  policyTypes:
+    - Ingress

@@ -1,0 +1,38 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: nestjs-app
+spec:
+  strategy:
+    type: Rolling
+  triggers:
+      - type: ConfigChange
+      - imageChangeParams:
+          automatic: true
+          containerNames:
+            - nestjs-app
+          from:
+            kind: ImageStreamTag
+            name: api:develop-latest
+            namespace: f3c07a-tools
+        type: ImageChange
+  replicas: 1
+  selector:
+    name: nestjs-app
+  template:
+    metadata:
+      labels:
+        name: nestjs-app
+    spec:
+      containers:
+      - name: nestjs-app
+        image: api:develop-latest
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        envFrom:
+        # - configMapRef:
+        #     name: api-configmap
+        - secretRef:
+            name: secrets
+

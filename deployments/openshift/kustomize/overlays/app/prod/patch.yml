@@ -1,0 +1,18 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: app
+spec:
+  triggers:
+      - imageChangeParams:
+          from:
+            kind: ImageStreamTag
+            name: app:latest
+            namespace: f3c07a-tools
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+    name: app
+spec:
+  host: pjs.digital.gov.bc.ca

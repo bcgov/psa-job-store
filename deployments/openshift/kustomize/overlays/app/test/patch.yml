@@ -1,0 +1,25 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: app
+spec:
+  strategy:
+    type: Rolling
+  triggers:
+      - type: ConfigChange
+      - imageChangeParams:
+          automatic: true
+          containerNames:
+            - app
+          from:
+            kind: ImageStreamTag
+            name: app:stage-latest
+            namespace: f3c07a-tools
+        type: ImageChange
+---          
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+    name: app
+spec:
+  host: pjs-test.apps.silver.devops.gov.bc.ca

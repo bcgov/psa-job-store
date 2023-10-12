@@ -1,0 +1,12 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-all-ingress-app
+spec:
+  podSelector:
+    matchLabels:
+      name: app
+  ingress:
+    - {}
+  policyTypes:
+    - Ingress
