@@ -1,0 +1,67 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: api-postgres
+spec:
+  replicas: 1
+  selector:
+    name: api-postgres
+  strategy:
+    type: Recreate
+    recreateParams:
+      post:
+        failurePolicy: Ignore
+        execNewPod:
+          containerName: api-postgres
+          command:
+            - "/bin/sh"
+            - "-c"
+            - >-
+              sleep 20 && psql postgresql://postgres:$POSTGRESQL_ADMIN_PASSWORD@api-postgres:5432/$POSTGRES_DB -c "ALTER USER $POSTGRESQL_USER WITH CREATEDB;"
+
+  template:
+    metadata:
+      labels:
+        name: api-postgres
+    spec:
+      containers:
+      - env:
+        - name: POSTGRESQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: secrets
+              key: POSTGRES_DB        
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: secrets
+              key: DATABASE_URL
+        - name: POSTGRESQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: secrets
+              key: POSTGRES_USER
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secrets
+              key: POSTGRES_PASSWORD
+        # Added the following environment variable for superuser
+        - name: POSTGRESQL_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secrets
+              key: POSTGRES_ADMIN_PASSWORD
+        image: 'registry.access.redhat.com/rhscl/postgresql-10-rhel7:latest'
+        name: api-postgres
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - mountPath: /var/lib/pgsql/data
+          name: api-postgres-data
+      volumes:
+      - name: api-postgres-data
+        persistentVolumeClaim:
+          claimName: api-postgres-data
+  triggers:
+  - type: ConfigChange

@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Points to the overlay that creates the images.
+resources:
+- ../../../base/app
+namespace: f3c07a-dev
+patchesStrategicMerge:
+- patch.yml
