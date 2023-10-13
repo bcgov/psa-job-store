@@ -25,7 +25,6 @@ jobs:
       - name: Login to Artifactory
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.ARTIFACTORY_URL }}
           username: ${{ env.ARTIFACTORY_SA_USERNAME }}
           password: ${{ env.ARTIFACTORY_SA_PASSWORD }}
           
