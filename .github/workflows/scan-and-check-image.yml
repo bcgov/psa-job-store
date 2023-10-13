@@ -1,3 +1,8 @@
+name: Deploy to Stage
+
+on:
+  workflow_dispatch:
+  
 jobs:
   scan:
     runs-on: ubuntu-latest
