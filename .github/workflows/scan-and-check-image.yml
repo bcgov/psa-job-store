@@ -1,4 +1,4 @@
-name: Deploy to Stage
+name: Run ACS
 
 on:
   workflow_dispatch:
