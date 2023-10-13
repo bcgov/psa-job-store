@@ -32,7 +32,7 @@ jobs:
       - name: Build and Push API Image
         uses: docker/build-push-action@v4
         with:
-          context: apps/api
+          context: .
           file: apps/api/Dockerfile
           push: true
           tags: alex-struk/api:latest
