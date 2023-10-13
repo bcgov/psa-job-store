@@ -6,7 +6,7 @@ on:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    name: Scan image
+    name: Run ACS checks
     steps:
       - uses: actions/checkout@v2
       # - id: scan
@@ -21,9 +21,21 @@ jobs:
       #     image: 'alexstruk/api:latest'
       #     central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
       #     api-token: ${{ secrets.ROX_API_TOKEN }}
-      - id: check-api-dc
+      - id: check-api-nestjs-dc
         uses: ./.github/actions/stackrox-dc-check
         with:
           path: 'deployments/openshift/kustomize/base/api/nestjs/dc.yml'
+          central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
+          api-token: ${{ secrets.ROX_API_TOKEN }}
+      - id: check-api-postgres-dc
+        uses: ./.github/actions/stackrox-dc-check
+        with:
+          path: 'deployments/openshift/kustomize/base/api/postsgres/dc.yml'
+          central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
+          api-token: ${{ secrets.ROX_API_TOKEN }}
+      - id: check-app-dc
+        uses: ./.github/actions/stackrox-dc-check
+        with:
+          path: 'deployments/openshift/kustomize/base/app/dc.yml'
           central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
           api-token: ${{ secrets.ROX_API_TOKEN }}
