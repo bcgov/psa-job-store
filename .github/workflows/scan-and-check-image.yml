@@ -9,15 +9,15 @@ jobs:
     name: Scan image
     steps:
       - uses: actions/checkout@v2
-      - id: scan
-        uses: ./.github/actions/stackrox-scan
-        with:
-          image: 'alexstruk/api:latest'
-          central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
-          api-token: ${{ secrets.ROX_API_TOKEN }}
-      # - id: check
-      #   uses: ./.github/actions/stackrox-check
+      # - id: scan
+      #   uses: ./.github/actions/stackrox-scan
       #   with:
       #     image: 'alexstruk/api:latest'
       #     central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
       #     api-token: ${{ secrets.ROX_API_TOKEN }}
+      - id: check
+        uses: ./.github/actions/stackrox-check
+        with:
+          image: 'alexstruk/api:latest'
+          central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
+          api-token: ${{ secrets.ROX_API_TOKEN }}
