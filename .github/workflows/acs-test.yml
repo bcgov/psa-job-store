@@ -35,7 +35,7 @@ jobs:
           context: .
           file: apps/api/Dockerfile
           push: true
-          tags: ${{ env.ARTIFACTORY_SA_USERNAME }}/api:latest
+          tags: alexstruk/api:latest
           build-args: |
             KEYCLOAK_REDIRECT_URL=${{ secrets.KEYCLOAK_REDIRECT_URL }}
             KEYCLOAK_CLIENT_ID_PRIVATE=${{ secrets.KEYCLOAK_CLIENT_ID_PRIVATE }}
