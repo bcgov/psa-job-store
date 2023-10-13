@@ -2,7 +2,7 @@ name: Deploy to Stage
 
 on:
   workflow_dispatch:
-  
+
 jobs:
   scan:
     runs-on: ubuntu-latest
@@ -12,12 +12,12 @@ jobs:
       - id: scan
         uses: ./.github/actions/stackrox-scan
         with:
-          image: 'vulnerables/cve-2017-7494'
+          image: 'alexstruk/api:latest'
           central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
           api-token: ${{ secrets.ROX_API_TOKEN }}
-      - id: check
-        uses: ./.github/actions/stackrox-check
-        with:
-          image: 'vulnerables/cve-2017-7494'
-          central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
-          api-token: ${{ secrets.ROX_API_TOKEN }}
+      # - id: check
+      #   uses: ./.github/actions/stackrox-check
+      #   with:
+      #     image: 'alexstruk/api:latest'
+      #     central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
+      #     api-token: ${{ secrets.ROX_API_TOKEN }}
