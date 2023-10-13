@@ -13,14 +13,14 @@ ARG KEYCLOAK_CLIENT_ID_PRIVATE
 ARG KEYCLOAK_CLIENT_ID_PUBLIC
 
 
-RUN pwd
-RUN test -n "$POSTGRES_DB"
-RUN test -n "$POSTGRES_USER"
-RUN test -n "$POSTGRES_PASSWORD"
-RUN test -n "$DATABASE_URL"
-RUN test -n "$KEYCLOAK_REALM_URL"
-RUN test -n "$KEYCLOAK_CLIENT_ID_PRIVATE"
-RUN test -n "$KEYCLOAK_CLIENT_ID_PUBLIC"
+# RUN pwd
+# RUN test -n "$POSTGRES_DB"
+# RUN test -n "$POSTGRES_USER"
+# RUN test -n "$POSTGRES_PASSWORD"
+# RUN test -n "$DATABASE_URL"
+# RUN test -n "$KEYCLOAK_REALM_URL"
+# RUN test -n "$KEYCLOAK_CLIENT_ID_PRIVATE"
+# RUN test -n "$KEYCLOAK_CLIENT_ID_PUBLIC"
 
 
 # Copy application dependency manifests to the container image.
@@ -69,7 +69,7 @@ RUN mkdir /.npm
 RUN chgrp -R 0 /.npm && chmod -R g=u /.npm
 
 # Set execute permissions for the start.sh script.
-RUN chmod +x ./start.sh
+RUN chmod +x ./apps/api/start.sh
 
 # Expose port 4000
 EXPOSE 4000
