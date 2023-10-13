@@ -30,7 +30,7 @@ jobs:
       - id: check-api-postgres-dc
         uses: ./.github/actions/stackrox-dc-check
         with:
-          path: 'deployments/openshift/kustomize/base/api/postsgres/dc.yml'
+          path: 'deployments/openshift/kustomize/base/api/postgres/dc.yml'
           central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
           api-token: ${{ secrets.ROX_API_TOKEN }}
       - id: check-app-dc
