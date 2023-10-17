@@ -24,15 +24,18 @@ spec:
       labels:
         name: app
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: app
         image: app:latest
         ports:
         - containerPort: 5173
           protocol: TCP
-        # envFrom:
-        # - configMapRef:
-        #     name: app-configmap
-        # - secretRef:
-        #     name: secrets
+        resources:
+            requests:
+              cpu: 200m 
+              memory: 100Mi 
+            limits:
+              cpu: 400m 
+              memory: 200Mi
 
