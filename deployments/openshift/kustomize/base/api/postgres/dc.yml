@@ -52,13 +52,20 @@ spec:
             secretKeyRef:
               name: secrets
               key: POSTGRES_ADMIN_PASSWORD
-        image: 'registry.access.redhat.com/rhscl/postgresql-10-rhel7:latest'
+        image: 'registry.redhat.io/rhel8/postgresql-15'
         name: api-postgres
         ports:
         - containerPort: 5432
         volumeMounts:
         - mountPath: /var/lib/pgsql/data
           name: api-postgres-data
+        resources:
+          requests:
+            cpu: 400m 
+            memory: 500Mi 
+          limits:
+            cpu: 800m 
+            memory: 1Gi 
       volumes:
       - name: api-postgres-data
         persistentVolumeClaim:
