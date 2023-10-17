@@ -12,8 +12,8 @@ inputs:
     required: true
   format:
     description: 'Format of output.  Valid values are json, table, csv, or junit'
-    required: 'false'
-    default: 'table'
+    required: false
+    default: 'pretty'
 runs:
   using: 'composite'
   steps:
