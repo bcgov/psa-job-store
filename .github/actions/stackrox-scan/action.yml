@@ -13,7 +13,7 @@ inputs:
   format:
     description: 'Format of output.  Valid values are json, table, csv, or junit'
     required: false
-    default: 'pretty'
+    default: 'table'
 runs:
   using: 'composite'
   steps:
