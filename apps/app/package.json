@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
+    "@ant-design/pro-layout": "^7.17.8",
     "@reduxjs/toolkit": "^1.9.7",
     "antd": "^5.9.4",
     "oidc-client-ts": "^2.3.0",
