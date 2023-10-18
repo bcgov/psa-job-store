@@ -1,0 +1,91 @@
+name: Build Docker Images
+
+on:
+  push:
+    branches: [main, stage, develop]
+
+jobs:
+  metadata:
+    name: Get Metadata
+    runs-on: ubuntu-20.04
+    outputs:
+      changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
+      short-sha: ${{ steps.get-short-sha.outputs.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+      - name: Get Changed Apps
+        id: get-changed-apps
+        uses: dorny/paths-filter@v2
+        with:
+          base: ${{ github.ref }}
+          filters: |
+            api:
+              - 'apps/api/**'
+            app:
+              - 'apps/app/**'
+      - name: Get Short SHA
+        id: get-short-sha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+  build-apps:
+    name: Build ${{ matrix.app }}
+    needs: metadata
+    if: ${{ needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != '' }}
+    runs-on: ubuntu-20.04
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+    strategy:
+      fail-fast: false # Continue with other matrix jobs even if one fails
+      matrix:
+        app: ${{ fromJSON(needs.metadata.outputs.changed-apps) }}
+    env:
+      ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+      ARTIFACTORY_SA_USERNAME: ${{ secrets.ARTIFACTORY_SA_USERNAME }}
+      ARTIFACTORY_SA_PASSWORD: ${{ secrets.ARTIFACTORY_SA_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+      - name: Login to Artifactory
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.ARTIFACTORY_URL }}
+          username: ${{ env.ARTIFACTORY_SA_USERNAME }}
+          password: ${{ env.ARTIFACTORY_SA_PASSWORD }}
+      - name: Get App Version
+        id: app-version
+        uses: notiz-dev/github-action-json-property@release
+        with:
+          path: apps/${{ matrix.app }}/package.json
+          prop_path: version
+      - name: Prepare Container Metadata
+        id: docker-metadata
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ env.ARTIFACTORY_URL }}/af3c-gen-docker-local/${{ matrix.app }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.app-version.outputs.prop }},enable={{is_default_branch}}
+            type=raw,value=${{ github.ref_name }}-latest,enable=${{ github.ref != github.event.repository.default_branch }}
+            type=raw,value=${{ github.ref_name }}-${{ steps.app-version.outputs.prop }}@${{ needs.metadata.outputs.short-sha }},enable=${{ github.ref != github.event.repository.default_branch }}
+      - name: Build and Push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: true
+          tags: ${{ steps.docker-metadata.outputs.tags }}
+          labels: ${{ steps.docker-metadata.outputs.labels }}
+          build-args: |
+            VITE_KEYCLOAK_REDIRECT_URL=${{ secrets.KEYCLOAK_REDIRECT_URL }}
+            KEYCLOAK_CLIENT_ID_PRIVATE=${{ secrets.KEYCLOAK_CLIENT_ID_PRIVATE }}
+            KEYCLOAK_CLIENT_ID_PUBLIC=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
+            VITE_KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
+            KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+            KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
+            VITE_KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
+            VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
