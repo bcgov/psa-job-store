@@ -61,10 +61,10 @@ spec:
           name: api-postgres-data
         resources:
           requests:
-            cpu: 400m 
+            cpu: 200m 
             memory: 500Mi 
           limits:
-            cpu: 800m 
+            cpu: 400m 
             memory: 1Gi 
       volumes:
       - name: api-postgres-data
