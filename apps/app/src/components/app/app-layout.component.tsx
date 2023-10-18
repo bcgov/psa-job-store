@@ -63,7 +63,7 @@ export const AppLayout = () => {
           <div style={{ margin: 'auto', height: '100%' }}>Header</div>
         </div> */}
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
-          <Content style={{ flex: '1 0 auto' }}>
+          <Content style={{ backgroundColor: '#FFF', flex: '1 0 auto' }}>
             <Outlet />
           </Content>
           <Footer style={{ flexShrink: 0, padding: '1rem' }}>Footer</Footer>

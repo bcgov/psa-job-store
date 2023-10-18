@@ -1,0 +1,11 @@
+.job_profile_search_results_ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    
+}
+
+.job_profile_search_results_ul li:not(:last-child) {
+    border-bottom: 1px solid #CCC;
+}

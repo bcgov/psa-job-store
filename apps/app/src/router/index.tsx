@@ -52,6 +52,14 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <JobProfilesPage />,
               },
+              {
+                path: ':id',
+                element: <JobProfilesPage />,
+                handle: {
+                  breadcrumb: () => 'Job Profilez',
+                  icon: <FileTextOutlined />,
+                },
+              },
             ],
           },
         ],
