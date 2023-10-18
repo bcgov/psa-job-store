@@ -24,6 +24,7 @@ spec:
       labels:
         name: nestjs-app
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: nestjs-app
         image: api:develop-latest
@@ -41,5 +42,3 @@ spec:
             memory: 500Mi 
           limits:
             cpu: 200m 
-            memory: 1Gi 
-

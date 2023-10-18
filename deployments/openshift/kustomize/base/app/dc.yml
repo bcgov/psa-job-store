@@ -24,6 +24,7 @@ spec:
       labels:
         name: app
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: app
         image: app:latest

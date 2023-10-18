@@ -1,0 +1,44 @@
+name: Manually Triggered API Build
+
+on:
+  workflow_dispatch: 
+    inputs:
+      version:
+        description: 'Version'     
+        required: true
+        default: 'latest'
+
+jobs:
+  build-api:
+    name: Build API Docker Image
+    runs-on: ubuntu-20.04
+    
+    env:
+      ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+      ARTIFACTORY_SA_USERNAME: ${{ secrets.ARTIFACTORY_SA_USERNAME }}
+      ARTIFACTORY_SA_PASSWORD: ${{ secrets.ARTIFACTORY_SA_PASSWORD }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Login to Artifactory
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.ARTIFACTORY_SA_USERNAME }}
+          password: ${{ env.ARTIFACTORY_SA_PASSWORD }}
+          
+      - name: Build and Push API Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: alexstruk/api:latest
+          build-args: |
+            KEYCLOAK_REDIRECT_URL=${{ secrets.KEYCLOAK_REDIRECT_URL }}
+            KEYCLOAK_CLIENT_ID_PRIVATE=${{ secrets.KEYCLOAK_CLIENT_ID_PRIVATE }}
+            KEYCLOAK_CLIENT_ID_PUBLIC=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
+            KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+            KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
+            HMS_API_URL=${{ secrets.HMS_API_URL }}
