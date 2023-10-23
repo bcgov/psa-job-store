@@ -13,6 +13,7 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
+import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { validateAppConfig } from './utils/validate-app-config.util';
 
 @Module({
@@ -46,6 +47,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
       },
     }),
     AuthModule,
+    JobProfileModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
