@@ -1,16 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { FindManyJobProfileArgs } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
+import { FindManyJobProfileWithSearchArgs } from './models/find-many-job-profile-with-search.args';
 
 @Injectable()
 export class JobProfileService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getJobProfiles(args?: FindManyJobProfileArgs) {
-    return this.prisma.jobProfile.findMany(args);
-  }
+  async getJobProfiles(args?: FindManyJobProfileWithSearchArgs) {
+    const { search } = args;
 
-  async getJobProfile(id: number) {
-    return this.prisma.jobProfile.findUnique({ where: { id } });
+    console.log('search: ', search);
+
+    return this.prisma.jobProfile.findMany({
+      where: {
+        title: {
+          search,
+        },
+        context: {
+          search,
+        },
+        overview: {
+          search,
+        },
+      },
+    });
   }
 }
