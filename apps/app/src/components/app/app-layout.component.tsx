@@ -1,4 +1,4 @@
-import { FileTextOutlined, HomeOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import { FileTextOutlined, HomeOutlined, MenuFoldOutlined, MenuUnfoldOutlined, StarOutlined } from '@ant-design/icons';
 import { Avatar, Button, Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
@@ -39,6 +39,11 @@ export const AppLayout = () => {
                   icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
                   title: 'Job Profiles',
                   to: '/job-profiles',
+                },
+                {
+                  icon: <StarOutlined style={{ fontSize: '1.25rem' }} />,
+                  title: 'Wizard',
+                  to: '/wizard',
                 },
               ]}
             />
