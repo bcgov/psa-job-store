@@ -1,4 +1,4 @@
-import { FileTextOutlined, HomeOutlined } from '@ant-design/icons';
+import { FileTextOutlined, HomeOutlined, StarOutlined } from '@ant-design/icons';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
 import { RouteGuard } from '../components/guards/route.guard';
@@ -8,6 +8,10 @@ import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/home.page';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
+import { WizardRoute } from '../routes/wizard';
+import { WizardPage } from '../routes/wizard/wizard.page';
+import { WizardReviewRoute } from '../routes/wizardReview';
+import { WizardReviewPage } from '../routes/wizardReview/wizard.page';
 
 export const router = createBrowserRouter([
   {
@@ -59,6 +63,34 @@ export const router = createBrowserRouter([
                   breadcrumb: () => 'Job Profilez',
                   icon: <FileTextOutlined />,
                 },
+              },
+            ],
+          },
+          {
+            path: '/wizard',
+            element: <WizardRoute />,
+            handle: {
+              breadcrumb: () => 'Wizard',
+              icon: <StarOutlined />,
+            },
+            children: [
+              {
+                index: true,
+                element: <WizardPage />,
+              },
+            ],
+          },
+          {
+            path: '/wizard2',
+            element: <WizardReviewRoute />,
+            handle: {
+              breadcrumb: () => 'Wizard2',
+              icon: <StarOutlined />,
+            },
+            children: [
+              {
+                index: true,
+                element: <WizardReviewPage />,
               },
             ],
           },
