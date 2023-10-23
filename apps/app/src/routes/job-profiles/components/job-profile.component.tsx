@@ -8,9 +8,14 @@ import data from '../job-profiles.json';
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
-export const JobProfile = () => {
-  const params = useParams();
-  const jobProfile = () => data.find((d) => d.id === params.id);
+interface JobProfileProps {
+  id?: string; // The id is optional, as it can also be retrieved from the params
+}
+
+export const JobProfile: React.FC<JobProfileProps> = ({ id }) => {
+  const params = useParams<{ id?: string }>();
+  const resolvedId = id ?? params.id; // Use the prop if available, otherwise use the param
+  const jobProfile = () => data.find((d) => d.id === resolvedId);
   const screens = useBreakpoint();
 
   const items: DescriptionsProps['items'] = [
