@@ -1,77 +1,79 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Descriptions, DescriptionsProps, Grid, Typography } from 'antd';
-import dayjs from 'dayjs';
+import { Descriptions, DescriptionsProps, Grid } from 'antd';
 import { Link, useParams } from 'react-router-dom';
-import data from '../job-profiles.json';
+import { useGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 
-const { Text } = Typography;
+// const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
-interface JobProfileProps {
-  id?: string; // The id is optional, as it can also be retrieved from the params
-}
+export const JobProfile = () => {
+  const params = useParams();
+  if (!params.id) throw new Error('No ID');
+  const { data } = useGetJobProfileQuery({ id: +params.id });
 
-export const JobProfile: React.FC<JobProfileProps> = ({ id }) => {
-  const params = useParams<{ id?: string }>();
-  const resolvedId = id ?? params.id; // Use the prop if available, otherwise use the param
-  const jobProfile = () => data.find((d) => d.id === resolvedId);
   const screens = useBreakpoint();
 
   const items: DescriptionsProps['items'] = [
     {
       key: 'title',
       label: 'Title',
-      children: jobProfile()?.title,
+      children: data?.jobProfile.title,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'classification',
       label: 'Classification',
-      children: `${jobProfile()?.classification.occupation_group.name} ${jobProfile()?.classification.grid.name}`,
+      children: ``,
+      // children: `${data?.jobProfile.classification.occupation_group.name} ${data?.jobProfile.classification.grid.name}`,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'number',
       label: 'Job Store #',
-      children: jobProfile()?.number,
+      children: data?.jobProfile.number,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'updated_at',
       label: 'Last Updated',
-      children: dayjs(jobProfile()?.updated_at).format('MMMM D, YYYY @ h:mm:ss A'),
+      children: <div />,
+      // children: dayjs(data?.jobProfile.updated_at).format('MMMM D, YYYY @ h:mm:ss A'),
 
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'context',
       label: 'Job Context',
-      children: jobProfile()?.context,
+      children: data?.jobProfile.context,
       span: 24,
     },
     {
       key: 'overview',
       label: 'Job Overview',
-      children: jobProfile()?.overview,
+      children: data?.jobProfile.overview,
       span: 24,
     },
     {
       key: 'required_accountabilities',
       label: 'Required Accountabilities',
-      children: <ul>{jobProfile()?.accountabilities.required.map((accountability) => <li>{accountability}</li>)}</ul>,
+      children: (
+        <ul>{/* {data?.jobProfile.accountabilities.required.map((accountability) => <li>{accountability}</li>)} */}</ul>
+      ),
       span: 24,
     },
     {
       key: 'optional_accountabilities',
       label: 'Optional Accountabilities',
-      children: <ul>{jobProfile()?.accountabilities.optional.map((accountability) => <li>{accountability}</li>)}</ul>,
+      children: (
+        <ul>{/* {data?.jobProfile.accountabilities.optional.map((accountability) => <li>{accountability}</li>)} */}</ul>
+      ),
       span: 24,
     },
     {
       key: 'requirements',
       label: 'Minimum Job Requirements',
-      children: <ul>{jobProfile()?.requirements.map((requirement) => <li>{requirement}</li>)}</ul>,
+      children: <ul>{/* {data?.jobProfile.requirements.map((requirement) => <li>{requirement}</li>)} */}</ul>,
       span: 24,
     },
     {
@@ -79,11 +81,11 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id }) => {
       label: 'Behavioural Competencies',
       children: (
         <ul>
-          {jobProfile()?.behavioural_competencies.map((competency) => (
+          {/* {data?.jobProfile.behavioural_competencies.map((competency) => (
             <li>
               <Text strong>{competency.name}</Text> {competency.description}
             </li>
-          ))}
+          ))} */}
         </ul>
       ),
       span: 24,

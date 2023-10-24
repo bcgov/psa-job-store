@@ -1,20 +1,25 @@
 import { FileTextFilled } from '@ant-design/icons';
 import { Breakpoint, Col, Empty, Grid, Row, Space, Typography } from 'antd';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '../../components/app/page-header.component';
+import { useLazyGetJobProfilesQuery } from '../../redux/services/graphql-api/job-profile.api';
 import { JobProfileSearchResults } from './components/job-profile-search-results.component';
+import { JobProfileSearch } from './components/job-profile-search.component';
 import { JobProfile } from './components/job-profile.component';
-import { JobProfileSearch } from './components/search.component';
-import data from './job-profiles.json';
 
 const { Text, Title } = Typography;
 const { useBreakpoint } = Grid;
 
 export const JobProfilesPage = () => {
+  const [trigger, { data }] = useLazyGetJobProfilesQuery();
+
+  useEffect(() => {
+    trigger({});
+  }, []);
+
   const params = useParams();
   const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
-
-  console.log('screens: ', screens);
 
   const renderJobProfile = () => {
     return params.id ? (
