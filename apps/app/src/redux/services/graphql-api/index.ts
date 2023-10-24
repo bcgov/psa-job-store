@@ -1,8 +1,9 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { graphqlRequestBaseQuery } from '@rtk-query/graphql-request-base-query';
 import { oidcConfig } from '../../../main';
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: `${import.meta.env.VITE_BACKEND_URL}`,
+const baseQuery = graphqlRequestBaseQuery({
+  url: `${import.meta.env.VITE_BACKEND_URL}/graphql`,
   prepareHeaders: async (headers) => {
     const storageString =
       (await oidcConfig.userStore?.get(
@@ -19,7 +20,7 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-export const api = createApi({
+export const graphqlApi = createApi({
   baseQuery,
   tagTypes: [],
   endpoints: () => ({}),
