@@ -12,4 +12,9 @@ export class JobProfileResolver {
     console.log('args: ', args);
     return this.jobProfileService.getJobProfiles(args);
   }
+
+  @Query(() => JobProfile, { name: 'jobProfile' })
+  async getJobProfile(@Args('id') id: string) {
+    return this.jobProfileService.getJobProfile(+id);
+  }
 }
