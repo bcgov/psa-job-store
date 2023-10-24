@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Space, Typography } from 'antd';
 import { useParams } from 'react-router-dom';
+import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile.api';
 
 const { Title, Text, Paragraph } = Typography;
 
 export interface JobProfileCardProps {
-  data: Record<string, any>;
+  data: JobProfileModel;
 }
 
 export const JobProfileCard = ({ data }: JobProfileCardProps) => {
@@ -19,7 +20,7 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       style={{
         width: '100%',
         cursor: 'pointer',
-        borderLeft: data.id === params.id ? '4px solid #5a7def' : '4px solid transparent',
+        borderLeft: data.id === +(params.id ?? 0) ? '4px solid #5a7def' : '4px solid transparent',
         padding: '1rem',
       }}
     >
@@ -28,7 +29,8 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       </Title>
       <div>
         <Text type="secondary">
-          {data.classification.occupation_group.name} {data.classification.grid.name} | Job Store # {data.number}
+          {/* {data.classification.occupation_group.name} {data.classification.grid.name} | Job Store # {data.number} */}
+          {/* {data.classification.occupation_group.name} {data.classification.grid.name} | Job Store # {data.number} */}
         </Text>
         <br />
         <Text type="secondary">Reports to excluded manager</Text>
