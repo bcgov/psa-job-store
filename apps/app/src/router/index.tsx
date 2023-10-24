@@ -10,6 +10,8 @@ import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
 import { WizardRoute } from '../routes/wizard';
 import { WizardPage } from '../routes/wizard/wizard.page';
+import { WizardEditRoute } from '../routes/wizardEdit';
+import { WizardEditPage } from '../routes/wizardEdit/wizard.page';
 import { WizardResultRoute } from '../routes/wizardResult';
 import { WizardResultPage } from '../routes/wizardResult/wizard.page';
 import { WizardReviewRoute } from '../routes/wizardReview';
@@ -79,6 +81,20 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 element: <WizardPage />,
+              },
+            ],
+          },
+          {
+            path: '/wizard-edit',
+            element: <WizardEditRoute />,
+            handle: {
+              breadcrumb: () => 'Wizard Review',
+              icon: <StarOutlined />,
+            },
+            children: [
+              {
+                index: true,
+                element: <WizardEditPage />,
               },
             ],
           },

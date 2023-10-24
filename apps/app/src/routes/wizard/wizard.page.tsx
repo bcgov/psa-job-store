@@ -52,7 +52,7 @@ export const WizardPage = () => {
 
   const onSubmit: SubmitHandler<IFormInput> = () => {
     // actions.updateAction(data);
-    navigate('/wizard-review');
+    navigate('/wizard-edit');
   };
 
   return (

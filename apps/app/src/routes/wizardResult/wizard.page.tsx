@@ -32,7 +32,7 @@ export const WizardResultPage = () => {
         <div style={{ margin: '0 1rem  1rem' }}>
           <Row justify="center">
             <Col xs={24} md={22} lg={18}>
-              <WizardSteps current={2}></WizardSteps>
+              <WizardSteps current={3}></WizardSteps>
               <Result
                 status="success"
                 title="Your position has been created."
