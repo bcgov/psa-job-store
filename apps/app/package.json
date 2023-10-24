@@ -13,6 +13,7 @@
     "@ant-design/icons": "^5.2.6",
     "@ant-design/pro-layout": "^7.17.8",
     "@reduxjs/toolkit": "^1.9.7",
+    "@rtk-query/graphql-request-base-query": "^2.2.0",
     "antd": "^5.9.4",
     "dayjs": "^1.11.10",
     "oidc-client-ts": "^2.3.0",
