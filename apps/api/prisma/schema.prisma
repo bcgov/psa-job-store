@@ -2,7 +2,25 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+generator nestgraphql {
+  provider             = "prisma-nestjs-graphql"
+  output               = "../src/@generated/prisma-nestjs-graphql"
+  combineScalarFilters = true
+  noAtomicOperations   = true
+  noTypeId             = true
+  omitModelsCount      = true
+  purgeOutput          = true
+  reExport             = Single
+
+  decorate_1_type      = "FindMany*Args"
+  decorate_1_field     = "@(cursor|distinct)"
+  decorate_1_name      = "HideField"
+  decorate_1_from      = "@nestjs/graphql"
+  decorate_1_arguments = "[]"
 }
 
 datasource db {
@@ -35,4 +53,73 @@ model Identity {
 
   @@id([sub, identity_provider])
   @@map("identity")
+}
+
+model Ministry {
+  id   Int    @id @default(autoincrement())
+  code String
+  name String
+
+  job_profiles JobProfile[]
+
+  @@map("ministry")
+}
+
+model JobFamily {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  @@map("job_family")
+}
+
+model Classification {
+  id                  Int @id @default(autoincrement())
+  grid_id             Int
+  occupation_group_id Int
+
+  grid             Grid            @relation(fields: [grid_id], references: [id])
+  occupation_group OccupationGroup @relation(fields: [occupation_group_id], references: [id])
+  job_profiles     JobProfile[]
+
+  @@map("classification")
+}
+
+model Grid {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  classifications Classification[]
+
+  @@map("grid")
+}
+
+model OccupationGroup {
+  id   Int    @id @default(autoincrement())
+  code String
+  name String
+
+  classifications Classification[]
+
+  @@map("occupation_group")
+}
+
+enum JobStream {
+  CORPORATE
+  MINISTRY
+}
+
+model JobProfile {
+  id                Int       @id @default(autoincrement())
+  classification_id Int
+  ministry_id       Int?
+  stream            JobStream
+  title             String
+  number            Int
+  context           String
+  overview          String
+
+  classification Classification @relation(fields: [classification_id], references: [id])
+  ministry       Ministry?      @relation(fields: [ministry_id], references: [id])
+
+  @@map("job_profile")
 }

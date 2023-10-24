@@ -1,0 +1,36 @@
+import { Field } from '@nestjs/graphql';
+import { InputType } from '@nestjs/graphql';
+import { IntFilter } from '../prisma/int-filter.input';
+import { GridRelationFilter } from '../grid/grid-relation-filter.input';
+import { OccupationGroupRelationFilter } from '../occupation-group/occupation-group-relation-filter.input';
+import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
+
+@InputType()
+export class ClassificationWhereInput {
+  @Field(() => [ClassificationWhereInput], { nullable: true })
+  AND?: Array<ClassificationWhereInput>;
+
+  @Field(() => [ClassificationWhereInput], { nullable: true })
+  OR?: Array<ClassificationWhereInput>;
+
+  @Field(() => [ClassificationWhereInput], { nullable: true })
+  NOT?: Array<ClassificationWhereInput>;
+
+  @Field(() => IntFilter, { nullable: true })
+  id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
+  grid_id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
+  occupation_group_id?: IntFilter;
+
+  @Field(() => GridRelationFilter, { nullable: true })
+  grid?: GridRelationFilter;
+
+  @Field(() => OccupationGroupRelationFilter, { nullable: true })
+  occupation_group?: OccupationGroupRelationFilter;
+
+  @Field(() => JobProfileListRelationFilter, { nullable: true })
+  job_profiles?: JobProfileListRelationFilter;
+}
