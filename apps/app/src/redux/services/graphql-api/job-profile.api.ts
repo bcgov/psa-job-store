@@ -14,6 +14,7 @@ export interface JobProfileModel {
 }
 
 export interface GetJobProfilesArgs {
+  search?: string;
   where?: Record<string, any>;
   orderBy?: Record<string, 'asc' | 'desc'>;
   take?: number;
@@ -35,11 +36,13 @@ export interface GetJobProfileResponse {
 export const jobProfileApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
     getJobProfiles: build.query<GetJobProfilesResponse, GetJobProfilesArgs | undefined>({
-      query: (args: GetJobProfilesArgs = {}) => {
+      query: (args?: GetJobProfilesArgs | undefined) => {
+        console.log('args: ', args);
+
         return {
           document: gql`
-            query JobProfiles($where: JobProfileWhereInput) {
-              jobProfiles(where: $where) {
+            query JobProfiles {
+              jobProfiles(search: "Assistant") {
                 id
                 classification_id
                 ministry_id
@@ -51,9 +54,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               }
             }
           `,
-          variables: {
-            where: args.where,
-          },
         };
       },
     }),
