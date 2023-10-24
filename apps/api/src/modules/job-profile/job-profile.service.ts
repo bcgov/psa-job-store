@@ -25,4 +25,8 @@ export class JobProfileService {
       },
     });
   }
+
+  async getJobProfile(id: number) {
+    return this.prisma.jobProfile.findUnique({ where: { id } });
+  }
 }
