@@ -13,8 +13,6 @@ export const PageHeader = (props: Omit<PageHeaderProps, 'breadcrumb'>) => {
       path: match.path,
     }));
 
-  console.log('breadcrumbs: ', breadcrumbs);
-
   return (
     <AntdProPageHeader
       breadcrumb={{

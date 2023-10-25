@@ -71,6 +71,7 @@
       "**/.DS_Store": true,
       "**/Thumbs.db": true,
       "apps": true,
+      "dist": true,
       "packages": true
     },
     "javascript.format.semicolons": "insert",
