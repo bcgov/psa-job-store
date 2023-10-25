@@ -12,8 +12,6 @@ export interface JobProfileCardProps {
 export const JobProfileCard = ({ data }: JobProfileCardProps) => {
   const params = useParams();
 
-  console.log('params: ', params);
-
   return (
     <Space
       direction="vertical"

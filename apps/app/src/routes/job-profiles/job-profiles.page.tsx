@@ -1,7 +1,7 @@
 import { FileTextFilled } from '@ant-design/icons';
 import { Breakpoint, Col, Empty, Grid, Row, Space, Typography } from 'antd';
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useLazyGetJobProfilesQuery } from '../../redux/services/graphql-api/job-profile.api';
 import { JobProfileSearchResults } from './components/job-profile-search-results.component';
@@ -12,11 +12,32 @@ const { Text, Title } = Typography;
 const { useBreakpoint } = Grid;
 
 export const JobProfilesPage = () => {
-  const [trigger, { data }] = useLazyGetJobProfilesQuery();
+  const [searchParams] = useSearchParams();
+  const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
 
   useEffect(() => {
-    trigger({});
-  }, []);
+    const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
+
+    trigger({
+      where: {
+        AND: [
+          {
+            ...(search != null && {
+              title: {
+                search,
+              },
+              context: {
+                search,
+              },
+              overview: {
+                search,
+              },
+            }),
+          },
+        ],
+      },
+    });
+  }, [searchParams, trigger]);
 
   const params = useParams();
   const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
@@ -49,14 +70,14 @@ export const JobProfilesPage = () => {
             {screens['xl'] === true ? (
               <>
                 <Col span={8}>
-                  <JobProfileSearchResults data={data} />
+                  <JobProfileSearchResults data={data} isLoading={isLoading} />
                 </Col>
                 <Col span={16}>{renderJobProfile()}</Col>
               </>
             ) : params.id ? (
               <Col span={24}>{renderJobProfile()}</Col>
             ) : (
-              <JobProfileSearchResults data={data} />
+              <JobProfileSearchResults data={data} isLoading={isLoading} />
             )}
           </Row>
 

@@ -8,7 +8,6 @@ export class JobProfileResolver {
 
   @Query(() => [JobProfile], { name: 'jobProfiles' })
   async getJobProfiles(@Args() args?: FindManyJobProfileArgs) {
-    console.log('args: ', args);
     return this.jobProfileService.getJobProfiles(args);
   }
 
