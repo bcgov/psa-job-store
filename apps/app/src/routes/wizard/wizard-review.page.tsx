@@ -1,10 +1,10 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { PageHeader } from '@ant-design/pro-layout';
-import { Button, Col, Modal, Row, Space } from 'antd';
+import { Button, Modal } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 
 export const WizardReviewPage = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export const WizardReviewPage = () => {
 
   const handleOk = () => {
     setIsModalVisible(false);
-    navigate('/wizard-result');
+    navigate('/wizard/result');
   };
 
   const handleCancel = () => {
@@ -29,24 +29,16 @@ export const WizardReviewPage = () => {
   };
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }} size="large">
-      <PageHeader title="Review and submit" subTitle="Review the profile before creating a new position" />
-      <div style={{ margin: '0 1rem 1rem' }}>
-        <Row justify="center">
-          <Col xs={24} md={22} lg={18}>
-            <WizardSteps current={2}></WizardSteps>
-            <JobProfile id="a0539fb2-938a-48b9-9ddb-3f9e7a508b09" />
-            {/* <form onSubmit={handleSubmit(onSubmit)}> */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <Button onClick={handleBackClick}>Go Back</Button>
-              <Button type="primary" onClick={showModal}>
-                Create Position
-              </Button>
-            </div>
-            {/* </form> */}
-          </Col>
-        </Row>
+    <WizardPageWrapper title="Review and submit" subTitle="Review the profile before creating a new position">
+      <WizardSteps current={2}></WizardSteps>
+      <JobProfile id="a0539fb2-938a-48b9-9ddb-3f9e7a508b09" />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+        <Button onClick={handleBackClick}>Go Back</Button>
+        <Button type="primary" onClick={showModal}>
+          Create Position
+        </Button>
       </div>
+
       <Modal
         title="Affirmation"
         open={isModalVisible}
@@ -77,6 +69,6 @@ export const WizardReviewPage = () => {
           </div>
         </div>
       </Modal>
-    </Space>
+    </WizardPageWrapper>
   );
 };
