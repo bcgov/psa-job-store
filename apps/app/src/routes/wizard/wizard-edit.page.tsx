@@ -1,32 +1,36 @@
 import { Button } from 'antd';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { JobProfilesPage } from '../job-profiles/job-profiles.page';
+import { JobProfile } from '../job-profiles/components/job-profile.component';
+import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
-import { WizardSteps } from './components/wizard-steps.component';
 
 interface IFormInput {
   firstName: string;
   lastName: string;
 }
 
-export const WizardPage = () => {
+export const WizardEditPage = () => {
   const navigate = useNavigate();
   const { handleSubmit } = useForm<IFormInput>();
 
   const onSubmit: SubmitHandler<IFormInput> = () => {
-    navigate('/wizard/edit');
+    navigate('/wizard/review');
+  };
+
+  const handleBackClick = () => {
+    navigate(-1);
   };
 
   return (
-    <WizardPageWrapper title="Choose a job profile" subTitle="Choose a job profile to modify for the new positions">
-      <WizardSteps current={0}></WizardSteps>
-      <JobProfilesPage></JobProfilesPage>
+    <WizardPageWrapper title="Edit profile" subTitle="Make changes to an approved job profile (optional)">
+      <WizardSteps current={1}></WizardSteps>
+      <JobProfile id="1" config={{ isEditable: true }} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-          <div></div>
+          <Button onClick={handleBackClick}>Go Back</Button>
           <Button type="primary" htmlType="submit">
-            Next
+            Review Profile
           </Button>
         </div>
       </form>
