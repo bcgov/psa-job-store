@@ -148,16 +148,15 @@ model JobProfile {
   ministry_id       Int?
   role_id           Int?
 
-  stream                    JobStream
-  title                     String
-  number                    Int
-  context                   String
-  overview                  String
-  accountabilities_required String[]
-  accountabilities_optional String[]
-  requirements              String[]
-  behavioural_competencies  JobProfileBehaviouralCompetency[]
-  reports_to                JobProfileReportsTo[]
+  stream                   JobStream
+  title                    String
+  number                   Int
+  context                  String
+  overview                 String
+  accountabilities         Json                              @db.JsonB
+  requirements             String[]
+  behavioural_competencies JobProfileBehaviouralCompetency[]
+  reports_to               JobProfileReportsTo[]
 
   category       JobCategory?   @relation(fields: [category_id], references: [id])
   classification Classification @relation(fields: [classification_id], references: [id])

@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { JobStream } from '../prisma/job-stream.enum';
 import { Int } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-update-many-without-job-profile-nested.input';
 import { JobCategoryUpdateOneWithoutProfilesNestedInput } from '../job-category/job-category-update-one-without-profiles-nested.input';
 import { ClassificationUpdateOneRequiredWithoutJob_profilesNestedInput } from '../classification/classification-update-one-required-without-job-profiles-nested.input';
@@ -26,11 +27,8 @@ export class JobProfileUpdateWithoutReports_toInput {
   @Field(() => String, { nullable: true })
   overview?: string;
 
-  @Field(() => [String], { nullable: true })
-  accountabilities_required?: Array<string>;
-
-  @Field(() => [String], { nullable: true })
-  accountabilities_optional?: Array<string>;
+  @Field(() => GraphQLJSON, { nullable: true })
+  accountabilities?: any;
 
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;

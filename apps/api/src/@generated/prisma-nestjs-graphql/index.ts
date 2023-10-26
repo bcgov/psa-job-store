@@ -505,8 +505,6 @@ export { JobProfileCreateWithoutMinistryInput } from './job-profile/job-profile-
 export { JobProfileCreateWithoutReports_toInput } from './job-profile/job-profile-create-without-reports-to.input';
 export { JobProfileCreateWithoutRoleInput } from './job-profile/job-profile-create-without-role.input';
 export { JobProfileCreateInput } from './job-profile/job-profile-create.input';
-export { JobProfileCreateaccountabilities_optionalInput } from './job-profile/job-profile-createaccountabilities-optional.input';
-export { JobProfileCreateaccountabilities_requiredInput } from './job-profile/job-profile-createaccountabilities-required.input';
 export { JobProfileCreaterequirementsInput } from './job-profile/job-profile-createrequirements.input';
 export { JobProfileGroupByArgs } from './job-profile/job-profile-group-by.args';
 export { JobProfileGroupBy } from './job-profile/job-profile-group-by.output';
@@ -589,8 +587,6 @@ export { JobProfileUpdateWithoutMinistryInput } from './job-profile/job-profile-
 export { JobProfileUpdateWithoutReports_toInput } from './job-profile/job-profile-update-without-reports-to.input';
 export { JobProfileUpdateWithoutRoleInput } from './job-profile/job-profile-update-without-role.input';
 export { JobProfileUpdateInput } from './job-profile/job-profile-update.input';
-export { JobProfileUpdateaccountabilities_optionalInput } from './job-profile/job-profile-updateaccountabilities-optional.input';
-export { JobProfileUpdateaccountabilities_requiredInput } from './job-profile/job-profile-updateaccountabilities-required.input';
 export { JobProfileUpdaterequirementsInput } from './job-profile/job-profile-updaterequirements.input';
 export { JobProfileUpsertWithWhereUniqueWithoutCategoryInput } from './job-profile/job-profile-upsert-with-where-unique-without-category.input';
 export { JobProfileUpsertWithWhereUniqueWithoutClassificationInput } from './job-profile/job-profile-upsert-with-where-unique-without-classification.input';
