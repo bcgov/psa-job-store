@@ -3,6 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.input';
 import { EnumJobStreamWithAggregatesFilter } from '../prisma/enum-job-stream-with-aggregates-filter.input';
 import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
+import { StringListFilter } from '../prisma/string-list-filter.input';
 
 @InputType()
 export class JobProfileScalarWhereWithAggregatesInput {
@@ -19,10 +20,19 @@ export class JobProfileScalarWhereWithAggregatesInput {
   id?: IntWithAggregatesFilter;
 
   @Field(() => IntWithAggregatesFilter, { nullable: true })
+  category_id?: IntWithAggregatesFilter;
+
+  @Field(() => IntWithAggregatesFilter, { nullable: true })
   classification_id?: IntWithAggregatesFilter;
 
   @Field(() => IntWithAggregatesFilter, { nullable: true })
+  family_id?: IntWithAggregatesFilter;
+
+  @Field(() => IntWithAggregatesFilter, { nullable: true })
   ministry_id?: IntWithAggregatesFilter;
+
+  @Field(() => IntWithAggregatesFilter, { nullable: true })
+  role_id?: IntWithAggregatesFilter;
 
   @Field(() => EnumJobStreamWithAggregatesFilter, { nullable: true })
   stream?: EnumJobStreamWithAggregatesFilter;
@@ -38,4 +48,13 @@ export class JobProfileScalarWhereWithAggregatesInput {
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   overview?: StringWithAggregatesFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  accountabilities_required?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  accountabilities_optional?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  requirements?: StringListFilter;
 }

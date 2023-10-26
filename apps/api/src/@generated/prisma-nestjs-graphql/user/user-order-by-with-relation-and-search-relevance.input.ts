@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
 import { SortOrderInput } from '../prisma/sort-order.input';
+import { CommentOrderByRelationAggregateInput } from '../comment/comment-order-by-relation-aggregate.input';
 import { IdentityOrderByRelationAggregateInput } from '../identity/identity-order-by-relation-aggregate.input';
 import { UserOrderByRelevanceInput } from './user-order-by-relevance.input';
 
@@ -27,6 +28,9 @@ export class UserOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => SortOrderInput, { nullable: true })
   deleted_at?: SortOrderInput;
+
+  @Field(() => CommentOrderByRelationAggregateInput, { nullable: true })
+  comments?: CommentOrderByRelationAggregateInput;
 
   @Field(() => IdentityOrderByRelationAggregateInput, { nullable: true })
   identities?: IdentityOrderByRelationAggregateInput;
