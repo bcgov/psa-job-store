@@ -10,9 +10,10 @@ const { Text } = Typography;
 export interface JobProfileSearchResultsProps {
   data: GetJobProfilesResponse | undefined;
   isLoading: boolean;
+  onSelectProfile?: (id: string) => void;
 }
 
-export const JobProfileSearchResults = ({ data, isLoading }: JobProfileSearchResultsProps) => {
+export const JobProfileSearchResults = ({ data, isLoading, onSelectProfile }: JobProfileSearchResultsProps) => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
@@ -37,7 +38,7 @@ export const JobProfileSearchResults = ({ data, isLoading }: JobProfileSearchRes
           <Empty style={{ margin: '1rem' }} />
         ) : (
           (data?.jobProfiles ?? []).map((d) => (
-            <li key={d.id}>
+            <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d.id.toString())}>
               <Link
                 to={`${getBasePath(location.pathname)}/${d.id}${
                   searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
