@@ -11,6 +11,9 @@ export class Grid {
   @Field(() => String, { nullable: false })
   name!: string;
 
+  @Field(() => [Int], { nullable: true })
+  steps!: Array<number>;
+
   @Field(() => [Classification], { nullable: true })
   classifications?: Array<Classification>;
 }
