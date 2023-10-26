@@ -413,6 +413,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
         labelStyle={{
           fontWeight: 700,
           width: '100px',
+          verticalAlign: 'top',
         }}
       />
     </>
