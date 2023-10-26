@@ -15,6 +15,9 @@ export class GridOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   name?: keyof typeof SortOrder;
 
+  @Field(() => SortOrder, { nullable: true })
+  steps?: keyof typeof SortOrder;
+
   @Field(() => GridCountOrderByAggregateInput, { nullable: true })
   _count?: GridCountOrderByAggregateInput;
 

@@ -90,9 +90,9 @@ model Classification {
 }
 
 model Grid {
-  id   Int    @id @default(autoincrement())
-  name String
-
+  id              Int              @id @default(autoincrement())
+  name            String
+  steps           Int[]
   classifications Classification[]
 
   @@map("grid")

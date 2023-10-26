@@ -432,5 +432,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/certificates,linux,macos,node,react,reactnative,turbo,visualstudiocode,windows
-
-*@generated*

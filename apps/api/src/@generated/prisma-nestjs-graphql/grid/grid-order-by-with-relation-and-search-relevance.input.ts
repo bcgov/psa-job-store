@@ -12,6 +12,9 @@ export class GridOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrder, { nullable: true })
   name?: keyof typeof SortOrder;
 
+  @Field(() => SortOrder, { nullable: true })
+  steps?: keyof typeof SortOrder;
+
   @Field(() => ClassificationOrderByRelationAggregateInput, { nullable: true })
   classifications?: ClassificationOrderByRelationAggregateInput;
 

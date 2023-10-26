@@ -5,4 +5,7 @@ import { InputType } from '@nestjs/graphql';
 export class GridAvgAggregateInput {
   @Field(() => Boolean, { nullable: true })
   id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  steps?: true;
 }

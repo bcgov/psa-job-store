@@ -9,4 +9,7 @@ export class GridUncheckedUpdateManyInput {
 
   @Field(() => String, { nullable: true })
   name?: string;
+
+  @Field(() => [Int], { nullable: true })
+  steps?: Array<number>;
 }

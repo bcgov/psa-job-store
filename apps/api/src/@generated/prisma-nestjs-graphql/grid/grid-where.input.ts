@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { IntFilter } from '../prisma/int-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
+import { IntListFilter } from '../prisma/int-list-filter.input';
 import { ClassificationListRelationFilter } from '../classification/classification-list-relation-filter.input';
 
 @InputType()
@@ -20,6 +21,9 @@ export class GridWhereInput {
 
   @Field(() => StringFilter, { nullable: true })
   name?: StringFilter;
+
+  @Field(() => IntListFilter, { nullable: true })
+  steps?: IntListFilter;
 
   @Field(() => ClassificationListRelationFilter, { nullable: true })
   classifications?: ClassificationListRelationFilter;
