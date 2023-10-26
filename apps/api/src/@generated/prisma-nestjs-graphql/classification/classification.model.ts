@@ -4,6 +4,7 @@ import { Int } from '@nestjs/graphql';
 import { Grid } from '../grid/grid.model';
 import { OccupationGroup } from '../occupation-group/occupation-group.model';
 import { JobProfile } from '../job-profile/job-profile.model';
+import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
 
 @ObjectType()
 export class Classification {
@@ -24,4 +25,7 @@ export class Classification {
 
   @Field(() => [JobProfile], { nullable: true })
   job_profiles?: Array<JobProfile>;
+
+  @Field(() => [JobProfileReportsTo], { nullable: true })
+  dependent_job_profiles?: Array<JobProfileReportsTo>;
 }

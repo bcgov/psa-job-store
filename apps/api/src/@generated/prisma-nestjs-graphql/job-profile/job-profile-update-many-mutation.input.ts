@@ -19,4 +19,13 @@ export class JobProfileUpdateManyMutationInput {
 
   @Field(() => String, { nullable: true })
   overview?: string;
+
+  @Field(() => [String], { nullable: true })
+  accountabilities_required?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  accountabilities_optional?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  requirements?: Array<string>;
 }

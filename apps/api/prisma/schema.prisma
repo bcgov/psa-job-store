@@ -37,6 +37,7 @@ model User {
   updated_at DateTime  @default(now()) @updatedAt
   deleted_at DateTime?
 
+  comments   Comment[]
   identities Identity[]
 
   @@map("user")
@@ -55,6 +56,16 @@ model Identity {
   @@map("identity")
 }
 
+model BehaviouralCompetency {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+
+  job_profiles JobProfileBehaviouralCompetency[]
+
+  @@map("behavioural_competency")
+}
+
 model Ministry {
   id   Int    @id @default(autoincrement())
   code String
@@ -65,21 +76,15 @@ model Ministry {
   @@map("ministry")
 }
 
-model JobFamily {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  @@map("job_family")
-}
-
 model Classification {
   id                  Int @id @default(autoincrement())
   grid_id             Int
   occupation_group_id Int
 
-  grid             Grid            @relation(fields: [grid_id], references: [id])
-  occupation_group OccupationGroup @relation(fields: [occupation_group_id], references: [id])
-  job_profiles     JobProfile[]
+  grid                   Grid                  @relation(fields: [grid_id], references: [id])
+  occupation_group       OccupationGroup       @relation(fields: [occupation_group_id], references: [id])
+  job_profiles           JobProfile[]
+  dependent_job_profiles JobProfileReportsTo[]
 
   @@map("classification")
 }
@@ -103,23 +108,114 @@ model OccupationGroup {
   @@map("occupation_group")
 }
 
+model JobCategory {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  profiles JobProfile[]
+
+  @@map("job_category")
+}
+
+model JobFamily {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  profiles JobProfile[]
+
+  @@map("job_family")
+}
+
+model JobRole {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  profiles JobProfile[]
+
+  @@map("job_role")
+}
+
 enum JobStream {
   CORPORATE
   MINISTRY
 }
 
 model JobProfile {
-  id                Int       @id @default(autoincrement())
+  id                Int  @id @default(autoincrement())
+  category_id       Int?
   classification_id Int
+  family_id         Int?
   ministry_id       Int?
-  stream            JobStream
-  title             String
-  number            Int
-  context           String
-  overview          String
+  role_id           Int?
 
+  stream                    JobStream
+  title                     String
+  number                    Int
+  context                   String
+  overview                  String
+  accountabilities_required String[]
+  accountabilities_optional String[]
+  requirements              String[]
+  behavioural_competencies  JobProfileBehaviouralCompetency[]
+  reports_to                JobProfileReportsTo[]
+
+  category       JobCategory?   @relation(fields: [category_id], references: [id])
   classification Classification @relation(fields: [classification_id], references: [id])
+  family         JobFamily?     @relation(fields: [family_id], references: [id])
   ministry       Ministry?      @relation(fields: [ministry_id], references: [id])
+  role           JobRole?       @relation(fields: [role_id], references: [id])
 
   @@map("job_profile")
+}
+
+model JobProfileBehaviouralCompetency {
+  behavioural_competency_id Int
+  job_profile_id            Int
+
+  behavioral_competency BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
+  job_profile           JobProfile            @relation(fields: [job_profile_id], references: [id])
+
+  @@id([behavioural_competency_id, job_profile_id])
+  @@map("job_profile_behavioural_competency")
+}
+
+model JobProfileReportsTo {
+  classification_id Int
+  job_profile_id    Int
+
+  classification Classification @relation(fields: [classification_id], references: [id])
+  job_profile    JobProfile     @relation(fields: [job_profile_id], references: [id])
+
+  @@id([classification_id, job_profile_id])
+  @@map("job_profile_reports_to")
+}
+
+model JobProfileHistory {
+  id             Int       @id @default(autoincrement())
+  job_profile_id Int
+  json           Json      @db.JsonB
+  created_at     DateTime  @default(now())
+  created_by     Int
+  updated_at     DateTime  @default(now())
+  updated_by     Int
+  deleted_at     DateTime?
+  deleted_by     Int
+
+  @@map("job_profile_history")
+}
+
+model Comment {
+  id          Int    @id @default(autoincrement())
+  author_id   String @db.Uuid
+  record_id   Int
+  record_type String
+  text        String
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  deleted_at DateTime?
+
+  author User @relation(fields: [author_id], references: [id])
+
+  @@map("comment")
 }

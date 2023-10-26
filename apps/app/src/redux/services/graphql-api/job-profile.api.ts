@@ -80,4 +80,5 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
   }),
 });
 
-export const { useGetJobProfileQuery, useGetJobProfilesQuery, useLazyGetJobProfilesQuery } = jobProfileApi;
+export const { useGetJobProfileQuery, useLazyGetJobProfileQuery, useGetJobProfilesQuery, useLazyGetJobProfilesQuery } =
+  jobProfileApi;

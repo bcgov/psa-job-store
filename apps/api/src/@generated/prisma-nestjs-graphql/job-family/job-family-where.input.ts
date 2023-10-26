@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { IntFilter } from '../prisma/int-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
+import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
 
 @InputType()
 export class JobFamilyWhereInput {
@@ -19,4 +20,7 @@ export class JobFamilyWhereInput {
 
   @Field(() => StringFilter, { nullable: true })
   name?: StringFilter;
+
+  @Field(() => JobProfileListRelationFilter, { nullable: true })
+  profiles?: JobProfileListRelationFilter;
 }

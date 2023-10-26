@@ -13,11 +13,20 @@ export class JobProfileOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   id?: keyof typeof SortOrder;
 
+  @Field(() => SortOrderInput, { nullable: true })
+  category_id?: SortOrderInput;
+
   @Field(() => SortOrder, { nullable: true })
   classification_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrderInput, { nullable: true })
+  family_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
   ministry_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  role_id?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   stream?: keyof typeof SortOrder;
@@ -33,6 +42,15 @@ export class JobProfileOrderByWithAggregationInput {
 
   @Field(() => SortOrder, { nullable: true })
   overview?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  accountabilities_required?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  accountabilities_optional?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  requirements?: keyof typeof SortOrder;
 
   @Field(() => JobProfileCountOrderByAggregateInput, { nullable: true })
   _count?: JobProfileCountOrderByAggregateInput;

@@ -6,6 +6,7 @@ import { IntFilter } from '../prisma/int-filter.input';
 import { GridRelationFilter } from '../grid/grid-relation-filter.input';
 import { OccupationGroupRelationFilter } from '../occupation-group/occupation-group-relation-filter.input';
 import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
+import { JobProfileReportsToListRelationFilter } from '../job-profile-reports-to/job-profile-reports-to-list-relation-filter.input';
 
 @InputType()
 export class ClassificationWhereUniqueInput {
@@ -35,4 +36,7 @@ export class ClassificationWhereUniqueInput {
 
   @Field(() => JobProfileListRelationFilter, { nullable: true })
   job_profiles?: JobProfileListRelationFilter;
+
+  @Field(() => JobProfileReportsToListRelationFilter, { nullable: true })
+  dependent_job_profiles?: JobProfileReportsToListRelationFilter;
 }

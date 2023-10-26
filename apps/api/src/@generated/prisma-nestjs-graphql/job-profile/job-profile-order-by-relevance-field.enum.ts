@@ -4,6 +4,9 @@ export enum JobProfileOrderByRelevanceFieldEnum {
   title = 'title',
   context = 'context',
   overview = 'overview',
+  accountabilities_required = 'accountabilities_required',
+  accountabilities_optional = 'accountabilities_optional',
+  requirements = 'requirements',
 }
 
 registerEnumType(JobProfileOrderByRelevanceFieldEnum, {
