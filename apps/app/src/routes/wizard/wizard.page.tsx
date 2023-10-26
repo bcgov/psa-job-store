@@ -1,4 +1,5 @@
 import { Button } from 'antd';
+import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import JobProfiles from '../job-profiles/components/job-profiles.component';
@@ -13,9 +14,15 @@ interface IFormInput {
 export const WizardPage = () => {
   const navigate = useNavigate();
   const { handleSubmit } = useForm<IFormInput>();
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
 
   const onSubmit: SubmitHandler<IFormInput> = () => {
-    navigate('/wizard/edit');
+    if (selectedProfileId) {
+      navigate(`/wizard/edit/${selectedProfileId}`);
+    } else {
+      // Here you can display an error message.
+      alert('Please select a profile before proceeding.');
+    }
   };
 
   const [searchParams] = useSearchParams();
@@ -24,7 +31,7 @@ export const WizardPage = () => {
   return (
     <WizardPageWrapper title="Choose a job profile" subTitle="Choose a job profile to modify for the new positions">
       <WizardSteps current={0}></WizardSteps>
-      <JobProfiles searchQuery={searchQuery} />
+      <JobProfiles searchQuery={searchQuery} onSelectProfile={setSelectedProfileId} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
           <div></div>

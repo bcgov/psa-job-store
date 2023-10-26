@@ -85,10 +85,22 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'edit',
-                element: <WizardEditPage />,
-                handle: {
-                  breadcrumb: () => 'Edit profile',
-                },
+                children: [
+                  {
+                    index: true,
+                    element: <WizardEditPage />,
+                    handle: {
+                      breadcrumb: () => 'Edit profile',
+                    },
+                  },
+                  {
+                    path: ':profileId', // matches "/wizard/edit/3"
+                    element: <WizardEditPage />,
+                    handle: {
+                      breadcrumb: () => 'Edit profile',
+                    },
+                  },
+                ],
               },
               {
                 path: 'review',

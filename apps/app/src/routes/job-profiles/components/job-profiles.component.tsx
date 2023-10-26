@@ -13,9 +13,10 @@ const { useBreakpoint } = Grid;
 
 interface JobProfilesContentProps {
   searchQuery: string | null;
+  onSelectProfile?: (id: string) => void;
 }
 
-const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchQuery }) => {
+const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchQuery, onSelectProfile }) => {
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
 
   useEffect(() => {
@@ -70,14 +71,14 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchQuery }) => {
         {screens['xl'] === true ? (
           <>
             <Col span={8}>
-              <JobProfileSearchResults data={data} isLoading={isLoading} />
+              <JobProfileSearchResults data={data} isLoading={isLoading} onSelectProfile={onSelectProfile} />
             </Col>
             <Col span={16}>{renderJobProfile()}</Col>
           </>
         ) : params.id ? (
           <Col span={24}>{renderJobProfile()}</Col>
         ) : (
-          <JobProfileSearchResults data={data} isLoading={isLoading} />
+          <JobProfileSearchResults data={data} isLoading={isLoading} onSelectProfile={onSelectProfile} />
         )}
       </Row>
       {/* <Row justify="center" gutter={16}>
