@@ -19,6 +19,10 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({ current }) => {
           description: 'Choose and modify a job profile.',
         },
         {
+          title: 'Edit profile',
+          description: 'Make changes to an approved job profile (optional).',
+        },
+        {
           title: 'Review',
           description: 'Review the profile before creating the position.',
         },
