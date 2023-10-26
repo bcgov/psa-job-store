@@ -6,4 +6,7 @@ import { Int } from '@nestjs/graphql';
 export class ClassificationCount {
   @Field(() => Int, { nullable: false })
   job_profiles?: number;
+
+  @Field(() => Int, { nullable: false })
+  dependent_job_profiles?: number;
 }

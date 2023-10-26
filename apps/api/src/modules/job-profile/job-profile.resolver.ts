@@ -1,5 +1,5 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
-import { FindManyJobProfileArgs, JobProfile } from '../../@generated/prisma-nestjs-graphql';
+import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Classification, FindManyJobProfileArgs, JobProfile } from '../../@generated/prisma-nestjs-graphql';
 import { JobProfileService } from './job-profile.service';
 
 @Resolver(() => JobProfile)
@@ -14,5 +14,10 @@ export class JobProfileResolver {
   @Query(() => JobProfile, { name: 'jobProfile' })
   async getJobProfile(@Args('id') id: string) {
     return this.jobProfileService.getJobProfile(+id);
+  }
+
+  @ResolveField(() => Classification)
+  async classification(@Parent() jobProfile: JobProfile) {
+    return this.jobProfileService.getClassification(jobProfile.classification_id);
   }
 }

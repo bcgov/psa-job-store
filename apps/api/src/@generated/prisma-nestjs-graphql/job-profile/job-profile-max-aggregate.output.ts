@@ -9,10 +9,19 @@ export class JobProfileMaxAggregate {
   id?: number;
 
   @Field(() => Int, { nullable: true })
+  category_id?: number;
+
+  @Field(() => Int, { nullable: true })
   classification_id?: number;
 
   @Field(() => Int, { nullable: true })
+  family_id?: number;
+
+  @Field(() => Int, { nullable: true })
   ministry_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  role_id?: number;
 
   @Field(() => JobStream, { nullable: true })
   stream?: keyof typeof JobStream;

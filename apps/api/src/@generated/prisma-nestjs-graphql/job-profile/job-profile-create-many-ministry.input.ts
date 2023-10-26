@@ -8,8 +8,17 @@ export class JobProfileCreateManyMinistryInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
+  @Field(() => Int, { nullable: true })
+  category_id?: number;
+
   @Field(() => Int, { nullable: false })
   classification_id!: number;
+
+  @Field(() => Int, { nullable: true })
+  family_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  role_id?: number;
 
   @Field(() => JobStream, { nullable: false })
   stream!: keyof typeof JobStream;
@@ -25,4 +34,13 @@ export class JobProfileCreateManyMinistryInput {
 
   @Field(() => String, { nullable: false })
   overview!: string;
+
+  @Field(() => [String], { nullable: true })
+  accountabilities_required?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  accountabilities_optional?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  requirements?: Array<string>;
 }

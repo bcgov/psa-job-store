@@ -9,11 +9,10 @@ import { HomePage } from '../routes/home/home.page';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
 import { WizardRoute } from '../routes/wizard';
+import { WizardEditPage } from '../routes/wizard/wizard-edit.page';
+import { WizardResultPage } from '../routes/wizard/wizard-result.page';
+import { WizardReviewPage } from '../routes/wizard/wizard-review.page';
 import { WizardPage } from '../routes/wizard/wizard.page';
-import { WizardResultRoute } from '../routes/wizardResult';
-import { WizardResultPage } from '../routes/wizardResult/wizard.page';
-import { WizardReviewRoute } from '../routes/wizardReview';
-import { WizardReviewPage } from '../routes/wizardReview/wizard.page';
 
 export const router = createBrowserRouter([
   {
@@ -80,33 +79,26 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <WizardPage />,
               },
-            ],
-          },
-          {
-            path: '/wizard-review',
-            element: <WizardReviewRoute />,
-            handle: {
-              breadcrumb: () => 'Wizard Review',
-              icon: <StarOutlined />,
-            },
-            children: [
               {
-                index: true,
-                element: <WizardReviewPage />,
+                path: 'edit',
+                element: <WizardEditPage />,
+                handle: {
+                  breadcrumb: () => 'Edit profile',
+                },
               },
-            ],
-          },
-          {
-            path: '/wizard-result',
-            element: <WizardResultRoute />,
-            handle: {
-              breadcrumb: () => 'Wizard Result',
-              icon: <StarOutlined />,
-            },
-            children: [
               {
-                index: true,
+                path: 'review',
+                element: <WizardReviewPage />,
+                handle: {
+                  breadcrumb: () => 'Review profile',
+                },
+              },
+              {
+                path: 'result',
                 element: <WizardResultPage />,
+                handle: {
+                  breadcrumb: () => 'Profile',
+                },
               },
             ],
           },

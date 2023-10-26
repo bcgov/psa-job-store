@@ -8,10 +8,19 @@ export class JobProfileMinOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  category_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   classification_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  family_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   ministry_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   stream?: keyof typeof SortOrder;
