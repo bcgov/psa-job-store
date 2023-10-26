@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DownOutlined } from '@ant-design/icons';
 import { Button, Col, Input, Row, Space } from 'antd';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 const { Search } = Input;
 
@@ -27,21 +27,26 @@ const filters: Record<string, any>[] = [
 export const JobProfileSearch = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getBasePath = (path: string) => {
+    const pathParts = path.split('/');
+    // Check if the last part is a number (ID), if so, remove it
+    if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
+      pathParts.pop(); // Remove the last part (job profile ID)
+    }
+    return pathParts.join('/');
+  };
 
   const handleSearch = (value: string) => {
     const trimmedValue = value.trim();
+    const basePath = getBasePath(location.pathname);
 
     if (trimmedValue.length === 0) {
-      searchParams.delete('search');
+      navigate(basePath); // Navigate without search params if the search is empty
     } else {
-      searchParams.set('search', value);
+      navigate(`${basePath}?search=${trimmedValue}`); // Update the path and search param
     }
-
-    // setSearchParams(searchParams);
-    navigate({
-      pathname: '/job-profiles',
-      search: searchParams.toString(),
-    });
   };
 
   return (

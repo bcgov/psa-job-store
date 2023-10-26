@@ -80,6 +80,10 @@ export const router = createBrowserRouter([
                 element: <WizardPage />,
               },
               {
+                path: ':id',
+                element: <WizardPage />,
+              },
+              {
                 path: 'edit',
                 element: <WizardEditPage />,
                 handle: {
