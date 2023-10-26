@@ -1,7 +1,7 @@
 import { Button } from 'antd';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { JobProfilesPage } from '../job-profiles/job-profiles.page';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import JobProfiles from '../job-profiles/components/job-profiles.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 
@@ -18,10 +18,13 @@ export const WizardPage = () => {
     navigate('/wizard/edit');
   };
 
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search');
+
   return (
     <WizardPageWrapper title="Choose a job profile" subTitle="Choose a job profile to modify for the new positions">
       <WizardSteps current={0}></WizardSteps>
-      <JobProfilesPage></JobProfilesPage>
+      <JobProfiles searchQuery={searchQuery} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
           <div></div>
