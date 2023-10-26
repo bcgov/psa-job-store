@@ -6,7 +6,7 @@ import { Descriptions, DescriptionsProps, Form, Grid, Input } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, Length, ValidateNested } from 'class-validator';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useParams } from 'react-router-dom';
 import { useGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
@@ -77,19 +77,12 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
   const resolver = classValidatorResolver(JobProfileValidationModel);
   const { register, control, handleSubmit, reset } = useForm<JobProfileValidationModel>({
     resolver,
-    defaultValues: {
-      title: data?.jobProfile.title,
-      context: data?.jobProfile.context,
-      overview: data?.jobProfile.overview,
-      // todo: uncomment once API is complete
-      // classification:data?.jobProfile.classification.occupation_group.name + ' ' + data?.jobProfile.classification.grid.name,
-      // required_accountabilities: data?.jobProfile.accountabilities.required || [],
-      // optional_accountabilities: data?.jobProfile.accountabilities.optional || [],
-      // requirements: data?.jobProfile.requirements || [],
-      // behavioural_competencies: data?.jobProfile.behavioural_competencies || [],
-    },
     mode: 'onChange',
   });
+
+  // State to force re-render. Todo: for some reason ForItem doesn't render consistently after receving data
+  // and resetting of the form via useEffect. This is a hack to force re-render after the data was reset
+  const [renderKey, setRenderKey] = useState(0);
 
   // Reset form with fetched data once it's available
   useEffect(() => {
@@ -108,7 +101,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
         // behavioural_competencies: data?.jobProfile.behavioural_competencies || [],
       });
     }
-  }, [data, isLoading, reset]);
+    setRenderKey((prevKey) => prevKey + 1); // Force a re-render by updating state
+  }, [data, isLoading]);
 
   const classificationOptions = ['Option1', 'Option2', 'Clerk 9'];
 
@@ -156,6 +150,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       children: renderField(
         'title',
         data?.jobProfile.title,
+        // <input type="text" {...register('title')}></input>,
         <FormItem name="title" control={control}>
           <Input />
         </FormItem>,
@@ -201,6 +196,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       children: renderField(
         'context',
         data?.jobProfile.context,
+        // <input type="text" {...register('context')}></input>,
         <FormItem name="context" control={control}>
           <TextArea />
         </FormItem>,
@@ -213,6 +209,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       children: renderField(
         'overview',
         data?.jobProfile.overview,
+        // <input type="text" {...register('overview')}></input>,
         <FormItem name="overview" control={control}>
           <TextArea />
         </FormItem>,
@@ -423,6 +420,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
 
   return config?.isEditable ? (
     <Form
+      key={renderKey}
       onFinish={handleSubmit((data) => {
         console.log(data);
       })}
