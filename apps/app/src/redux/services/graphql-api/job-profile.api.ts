@@ -6,6 +6,7 @@ export interface JobProfileModel {
   id: number;
   classification_id: number;
   ministry_id: number;
+  family_id: number;
   stream: string;
   title: string;
   number: number;
@@ -43,6 +44,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 id
                 classification_id
                 ministry_id
+                family_id
                 stream
                 title
                 number
@@ -66,6 +68,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 id
                 classification_id
                 ministry_id
+                family_id
                 stream
                 title
                 number
