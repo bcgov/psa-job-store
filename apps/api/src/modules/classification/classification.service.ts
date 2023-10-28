@@ -8,4 +8,15 @@ export class ClassificationService {
   async getClassifications() {
     return this.prisma.classification.findMany();
   }
+
+  async getResolvedClassifications() {
+    const classificationsWithGrid = this.prisma.classification.findMany({
+      include: {
+        grid: true,
+        occupation_group: true,
+      },
+    });
+
+    return classificationsWithGrid;
+  }
 }
