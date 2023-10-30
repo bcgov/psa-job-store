@@ -7,10 +7,11 @@ import TextArea from 'antd/es/input/TextArea';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, Length, ValidateNested } from 'class-validator';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useParams } from 'react-router-dom';
-import { useGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import { JobProfileModel, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { FormItem } from '../../../utils/FormItem';
+import WizardControls from '../../wizard/components/wizard-controls.component';
 
 // const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -20,8 +21,12 @@ interface ConfigProps {
 }
 
 interface JobProfileProps {
+  profileData?: any;
   id?: string; // The id is optional, as it can also be retrieved from the params
   config?: ConfigProps;
+  submitHandler?: SubmitHandler<Record<string, any>>;
+  submitText?: string;
+  showBackButton?: boolean;
 }
 
 class BehaviouralCompetency {
@@ -33,16 +38,16 @@ class BehaviouralCompetency {
 }
 
 class JobProfileValidationModel {
-  @Length(2, 30)
+  @Length(2, 60)
   title: string;
 
   @IsNotEmpty({ message: 'Classification is required.' })
   classification: string;
 
-  @Length(2, 30)
+  @Length(2, 60)
   context: string;
 
-  @Length(2, 30)
+  @Length(2, 60)
   overview: string;
 
   required_accountabilities: string[];
@@ -56,43 +61,52 @@ class JobProfileValidationModel {
   behavioural_competencies: BehaviouralCompetency[];
 }
 
-export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
+export const JobProfile: React.FC<JobProfileProps> = ({
+  id,
+  profileData,
+  config,
+  submitHandler,
+  submitText,
+  showBackButton,
+}) => {
+  // Resolving the ID either from the props or from the URL parameters
   const params = useParams();
   const resolvedId = id ?? params.id; // Use the prop if available, otherwise use the param
-  if (!resolvedId) throw new Error('No ID');
 
-  const { data, isLoading, error } = useGetJobProfileQuery({ id: +resolvedId });
-  console.log('data: ', data);
-  const screens = useBreakpoint();
+  // If neither resolvedId nor profileData is present, throw an error
+  if (!resolvedId && !profileData) throw new Error('No ID');
 
-  const renderField = (fieldKey: string, displayValue: any, editableComponent: JSX.Element) => {
-    // console.log('renderField: ', fieldKey);
-    if (config?.isEditable ?? false) {
-      // console.log('rendering..');
-      return editableComponent;
+  // Using the lazy query to have control over when the fetch action is dispatched
+  // (not dispatching if profileData was already provided)
+  const [triggerGetJobProfile, { data, isLoading, error }] = useLazyGetJobProfileQuery();
+
+  // State to hold the effectiveData which can be from profileData prop or fetched from API
+  const [effectiveData, setEffectiveData] = useState<JobProfileModel | undefined>(profileData);
+
+  // useEffect to trigger the job profile fetch based on the resolvedId or profileData
+  useEffect(() => {
+    if (profileData) {
+      setEffectiveData(profileData);
+    } else if (resolvedId) {
+      triggerGetJobProfile({ id: +resolvedId });
     }
-    return displayValue;
-  };
+  }, [resolvedId, profileData]);
 
-  const resolver = classValidatorResolver(JobProfileValidationModel);
-  const { register, control, handleSubmit, reset } = useForm<JobProfileValidationModel>({
-    resolver,
-    mode: 'onChange',
-  });
+  // useEffect to set effectiveData when data is fetched from the API
+  useEffect(() => {
+    if (data && !isLoading) {
+      setEffectiveData(data.jobProfile);
+    }
+  }, [data, isLoading]);
 
-  // State to force re-render. Todo: for some reason ForItem doesn't render consistently after receving data
-  // and resetting of the form via useEffect. This is a hack to force re-render after the data was reset
-  const [renderKey, setRenderKey] = useState(0);
-
-  // Reset form with fetched data once it's available
+  // Resetting form with fetched data once it's available
   useEffect(() => {
     console.log('useEffect', data, isLoading);
-    if (data && !isLoading) {
-      console.log('resetting title: ', data?.jobProfile.title, 'context: ', data?.jobProfile.context);
+    if (effectiveData && !isLoading) {
       reset({
-        title: data?.jobProfile.title,
-        context: data?.jobProfile.context,
-        overview: data?.jobProfile.overview,
+        title: effectiveData?.title,
+        context: effectiveData?.context,
+        overview: effectiveData?.overview,
         // todo: uncomment once API is complete
         // classification:data?.jobProfile.classification.occupation_group.name + ' ' + data?.jobProfile.classification.grid.name,
         // required_accountabilities: data?.jobProfile.accountabilities.required || [],
@@ -102,7 +116,30 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       });
     }
     setRenderKey((prevKey) => prevKey + 1); // Force a re-render by updating state
-  }, [data, isLoading]);
+  }, [effectiveData]);
+
+  // Handling breakpoints for responsive design
+  const screens = useBreakpoint();
+
+  // Function to render fields, either as editable or display-only based on config
+  const renderField = (fieldKey: string, displayValue: any, editableComponent: JSX.Element) => {
+    // console.log('renderField: ', fieldKey);
+    if (config?.isEditable ?? false) {
+      // console.log('rendering..');
+      return editableComponent;
+    }
+    return displayValue;
+  };
+
+  // Setting up form handling with react-hook-form
+  const resolver = classValidatorResolver(JobProfileValidationModel);
+  const { register, control, handleSubmit, reset } = useForm<JobProfileValidationModel>({
+    resolver,
+    mode: 'onChange',
+  });
+
+  // State to force re-render, solving an issue with FormItem not rendering consistently
+  const [renderKey, setRenderKey] = useState(0);
 
   const classificationOptions = ['Option1', 'Option2', 'Clerk 9'];
 
@@ -149,7 +186,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       label: 'Title',
       children: renderField(
         'title',
-        data?.jobProfile.title,
+        effectiveData?.title,
         // <input type="text" {...register('title')}></input>,
         <FormItem name="title" control={control}>
           <Input />
@@ -163,7 +200,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       children: '',
       // children: renderField(
       //   'classification',
-      //   `${data?.jobProfile.classification.occupation_group.name} ${data?.jobProfile.classification.grid.name}`,
+      //   `${effectiveData?.classification.occupation_group.name} ${effectiveData?.classification.grid.name}`,
       //   <FormItem name="classification" control={control}>
       //     <Select {...register('classification')}>
       //       {classificationOptions.map((option) => (
@@ -179,14 +216,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
     {
       key: 'number',
       label: 'Job Store #',
-      children: data?.jobProfile.number,
+      children: effectiveData?.number,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'updated_at',
       label: 'Last Updated',
       children: <div />,
-      // children: dayjs(data?.jobProfile.updated_at).format('MMMM D, YYYY @ h:mm:ss A'),
+      // children: dayjs(effectiveData?.updated_at).format('MMMM D, YYYY @ h:mm:ss A'),
 
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
@@ -195,7 +232,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       label: 'Job Context',
       children: renderField(
         'context',
-        data?.jobProfile.context,
+        effectiveData?.context,
         // <input type="text" {...register('context')}></input>,
         <FormItem name="context" control={control}>
           <TextArea />
@@ -208,7 +245,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       label: 'Job Overview',
       children: renderField(
         'overview',
-        data?.jobProfile.overview,
+        effectiveData?.overview,
         // <input type="text" {...register('overview')}></input>,
         <FormItem name="overview" control={control}>
           <TextArea />
@@ -220,11 +257,11 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       key: 'required_accountabilities',
       label: 'Required Accountabilities',
       children: (
-        <ul>{/* {data?.jobProfile.accountabilities.required.map((accountability) => <li>{accountability}</li>)} */}</ul>
+        <ul>{/* {effectiveData?.accountabilities.required.map((accountability) => <li>{accountability}</li>)} */}</ul>
       ),
       // children: renderField(
       //   'required_accountabilities',
-      //   <ul>{data?.jobProfile.accountabilities.required.map((accountability) => <li>{accountability}</li>)}</ul>,
+      //   <ul>{effectiveData?.accountabilities.required.map((accountability) => <li>{accountability}</li>)}</ul>,
       //   <>
       //     <List
       //       dataSource={fields}
@@ -262,11 +299,11 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       key: 'optional_accountabilities',
       label: 'Optional Accountabilities',
       children: (
-        <ul>{/* {data?.jobProfile.accountabilities.optional.map((accountability) => <li>{accountability}</li>)} */}</ul>
+        <ul>{/* {effectiveData?.accountabilities.optional.map((accountability) => <li>{accountability}</li>)} */}</ul>
       ),
       // children: renderField(
       //   'optional_accountabilities',
-      //   <ul>{data?.jobProfile.accountabilities.optional.map((accountability) => <li>{accountability}</li>)}</ul>,
+      //   <ul>{effectiveData?.accountabilities.optional.map((accountability) => <li>{accountability}</li>)}</ul>,
       //   <>
       //     <List
       //       dataSource={opt_fields}
@@ -303,10 +340,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
     {
       key: 'requirements',
       label: 'Minimum Job Requirements',
-      children: <ul>{/* {data?.jobProfile.requirements.map((requirement) => <li>{requirement}</li>)} */}</ul>,
+      children: <ul>{/* {effectiveData?.requirements.map((requirement) => <li>{requirement}</li>)} */}</ul>,
       // children: renderField(
       //   'requirements',
-      //   <ul>{data?.jobProfile?.requirements.map((requirement) => <li>{requirement}</li>)}</ul>,
+      //   <ul>{effectiveData?.requirements.map((requirement) => <li>{requirement}</li>)}</ul>,
       //   <>
       //     <List
       //       dataSource={requirements_fields}
@@ -341,7 +378,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       label: 'Behavioural Competencies',
       children: (
         <ul>
-          {/* {data?.jobProfile.behavioural_competencies.map((competency) => (
+          {/* {effectiveData?.behavioural_competencies.map((competency) => (
             <li>
               <Text strong>{competency.name}</Text> {competency.description}
             </li>
@@ -351,7 +388,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
       // children: renderField(
       //   'behavioural_competencies',
       //   <ul>
-      //     {data?.jobProfile?.behavioural_competencies.map((competency) => (
+      //     {effectiveData?.behavioural_competencies.map((competency) => (
       //       <li>
       //         <Text strong>{competency.name}</Text> {competency.description}
       //       </li>
@@ -421,11 +458,19 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
   return config?.isEditable ? (
     <Form
       key={renderKey}
-      onFinish={handleSubmit((data) => {
-        console.log(data);
-      })}
+      onFinish={(data) => {
+        console.log('onFinish, submitHandler: ', submitHandler);
+        if (submitHandler) submitHandler(data);
+      }}
     >
       {renderContent()}
+      <WizardControls submitText={submitText} showBackButton={showBackButton} />
+      {/* <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+        {showBackButton ? <Button onClick={handleBackClick}>Go Back</Button> : null}
+        <Button type="primary" htmlType="submit">
+          {submitText}
+        </Button>
+      </div> */}
     </Form>
   ) : (
     renderContent()

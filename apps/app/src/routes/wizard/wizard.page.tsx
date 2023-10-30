@@ -1,8 +1,8 @@
-import { Button } from 'antd';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import JobProfiles from '../job-profiles/components/job-profiles.component';
+import WizardControls from './components/wizard-controls.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 
@@ -33,12 +33,13 @@ export const WizardPage = () => {
       <WizardSteps current={0}></WizardSteps>
       <JobProfiles searchQuery={searchQuery} onSelectProfile={setSelectedProfileId} />
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+        <WizardControls submitText={'Next'} showBackButton={false} />
+        {/* <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
           <div></div>
           <Button type="primary" htmlType="submit">
             Next
           </Button>
-        </div>
+        </div> */}
       </form>
     </WizardPageWrapper>
   );

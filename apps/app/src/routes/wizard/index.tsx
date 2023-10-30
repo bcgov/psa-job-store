@@ -1,9 +1,12 @@
 import { Outlet } from 'react-router-dom';
+import { WizardProvider } from './components/wizard.provider';
 
 export const WizardRoute = () => {
   return (
     <div>
-      <Outlet />
+      <WizardProvider>
+        <Outlet />
+      </WizardProvider>
     </div>
   );
 };
