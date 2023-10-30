@@ -3,7 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 
 @InputType()
-export class JobProfileBehaviouralCompetencyUncheckedCreateWithoutBehavioral_competencyInput {
+export class JobProfileBehaviouralCompetencyCreateManyBehavioural_competencyInput {
   @Field(() => Int, { nullable: false })
   job_profile_id!: number;
 }

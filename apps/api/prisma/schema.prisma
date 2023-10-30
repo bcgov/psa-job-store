@@ -171,8 +171,8 @@ model JobProfileBehaviouralCompetency {
   behavioural_competency_id Int
   job_profile_id            Int
 
-  behavioral_competency BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
-  job_profile           JobProfile            @relation(fields: [job_profile_id], references: [id])
+  behavioural_competency BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
+  job_profile            JobProfile            @relation(fields: [job_profile_id], references: [id])
 
   @@id([behavioural_competency_id, job_profile_id])
   @@map("job_profile_behavioural_competency")

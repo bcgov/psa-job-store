@@ -13,7 +13,7 @@ export interface ClassificationModel {
 }
 
 export interface GetClassificationsResponse {
-  resolvedClassifications: ClassificationModel[];
+  classifications: ClassificationModel[];
 }
 
 export const classificationApi = graphqlApi.injectEndpoints({
@@ -22,8 +22,8 @@ export const classificationApi = graphqlApi.injectEndpoints({
       query: () => {
         return {
           document: gql`
-            query GetAllClassifications {
-              resolvedClassifications {
+            query Classifications {
+              classifications {
                 id
                 grid {
                   name

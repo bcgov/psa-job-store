@@ -6,7 +6,7 @@ import { JobProfileCreateNestedOneWithoutBehavioural_competenciesInput } from '.
 @InputType()
 export class JobProfileBehaviouralCompetencyCreateInput {
   @Field(() => BehaviouralCompetencyCreateNestedOneWithoutJob_profilesInput, { nullable: false })
-  behavioral_competency!: BehaviouralCompetencyCreateNestedOneWithoutJob_profilesInput;
+  behavioural_competency!: BehaviouralCompetencyCreateNestedOneWithoutJob_profilesInput;
 
   @Field(() => JobProfileCreateNestedOneWithoutBehavioural_competenciesInput, { nullable: false })
   job_profile!: JobProfileCreateNestedOneWithoutBehavioural_competenciesInput;

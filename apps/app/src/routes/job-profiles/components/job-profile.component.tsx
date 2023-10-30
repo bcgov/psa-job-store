@@ -2,17 +2,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Descriptions, DescriptionsProps, Form, Grid, Input } from 'antd';
+import { Button, Descriptions, DescriptionsProps, Form, Grid, Input, List, Select, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, Length, ValidateNested } from 'class-validator';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { Link, useParams } from 'react-router-dom';
 import { useGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { FormItem } from '../../../utils/FormItem';
 
-// const { Text } = Typography;
+const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
 interface ConfigProps {
@@ -53,7 +53,7 @@ class JobProfileValidationModel {
 
   @ValidateNested({ each: true })
   @Type(() => BehaviouralCompetency)
-  behavioural_competencies: BehaviouralCompetency[];
+  behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 }
 
 export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
@@ -94,11 +94,12 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
         context: data?.jobProfile.context,
         overview: data?.jobProfile.overview,
         // todo: uncomment once API is complete
-        // classification:data?.jobProfile.classification.occupation_group.name + ' ' + data?.jobProfile.classification.grid.name,
-        // required_accountabilities: data?.jobProfile.accountabilities.required || [],
-        // optional_accountabilities: data?.jobProfile.accountabilities.optional || [],
-        // requirements: data?.jobProfile.requirements || [],
-        // behavioural_competencies: data?.jobProfile.behavioural_competencies || [],
+        classification:
+          data?.jobProfile.classification.occupation_group.name + ' ' + data?.jobProfile.classification.grid.name,
+        required_accountabilities: data?.jobProfile.accountabilities.required || [],
+        optional_accountabilities: data?.jobProfile.accountabilities.optional || [],
+        requirements: data?.jobProfile.requirements || [],
+        behavioural_competencies: data?.jobProfile.behavioural_competencies || [],
       });
     }
     setRenderKey((prevKey) => prevKey + 1); // Force a re-render by updating state
@@ -107,37 +108,43 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
   const classificationOptions = ['Option1', 'Option2', 'Clerk 9'];
 
   // todo: uncomment once API is complete
-  // const { fields, append, remove } = useFieldArray<any>({
-  //   control,
-  //   name: 'required_accountabilities' as any,
-  // });
+  // Required Accountability Fields
+  const {
+    fields: acc_req_fields,
+    append: acc_req_append,
+    remove: acc_req_remove,
+  } = useFieldArray<any>({
+    control,
+    name: 'required_accountabilities' as any,
+  });
 
-  // const {
-  //   fields: opt_fields,
-  //   append: opt_append,
-  //   remove: opt_remove,
-  // } = useFieldArray<any>({
-  //   control,
-  //   name: 'optional_accountabilities' as any,
-  // });
+  // Optional Accountability Fields
+  const {
+    fields: acc_opt_fields,
+    append: acc_opt_append,
+    remove: acc_opt_remove,
+  } = useFieldArray<any>({
+    control,
+    name: 'optional_accountabilities' as any,
+  });
 
-  // const {
-  //   fields: requirements_fields,
-  //   append: requirements_append,
-  //   remove: requirements_remove,
-  // } = useFieldArray<any>({
-  //   control,
-  //   name: 'requirements' as any,
-  // });
+  const {
+    fields: requirement_fields,
+    append: requirement_append,
+    remove: requirement_remove,
+  } = useFieldArray<any>({
+    control,
+    name: 'requirements' as any,
+  });
 
-  // const {
-  //   fields: competencyFields,
-  //   append: competencyAppend,
-  //   remove: competencyRemove,
-  // } = useFieldArray({
-  //   control,
-  //   name: 'behavioural_competencies',
-  // });
+  const {
+    fields: competency_fields,
+    append: competency_append,
+    remove: competency_remove,
+  } = useFieldArray({
+    control,
+    name: 'behavioural_competencies',
+  });
 
   if (isLoading) {
     return <p>Loading...</p>; // or render a spinner/loader
@@ -160,20 +167,19 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
     {
       key: 'classification',
       label: 'Classification',
-      children: '',
-      // children: renderField(
-      //   'classification',
-      //   `${data?.jobProfile.classification.occupation_group.name} ${data?.jobProfile.classification.grid.name}`,
-      //   <FormItem name="classification" control={control}>
-      //     <Select {...register('classification')}>
-      //       {classificationOptions.map((option) => (
-      //         <Select.Option value={option} key={option}>
-      //           {option}
-      //         </Select.Option>
-      //       ))}
-      //     </Select>
-      //   </FormItem>,
-      // ),
+      children: renderField(
+        'classification',
+        `${data?.jobProfile.classification.occupation_group.name} ${data?.jobProfile.classification.grid.name}`,
+        <FormItem name="classification" control={control}>
+          <Select {...register('classification')}>
+            {classificationOptions.map((option) => (
+              <Select.Option value={option} key={option}>
+                {option}
+              </Select.Option>
+            ))}
+          </Select>
+        </FormItem>,
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -219,180 +225,172 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, config }) => {
     {
       key: 'required_accountabilities',
       label: 'Required Accountabilities',
-      children: (
-        <ul>{/* {data?.jobProfile.accountabilities.required.map((accountability) => <li>{accountability}</li>)} */}</ul>
+      children: renderField(
+        'required_accountabilities',
+        <ul>{data?.jobProfile.accountabilities.required.map((accountability) => <li>{accountability}</li>)}</ul>,
+        <>
+          <List
+            dataSource={acc_req_fields}
+            renderItem={(field, index) => (
+              <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <FormItem
+                  name={`required_accountabilities.${index}`}
+                  control={control}
+                  style={{ flex: 1, marginRight: '10px' }}
+                >
+                  <TextArea defaultValue={(field as any).value} style={{ width: '100%' }} />
+                </FormItem>
+
+                <Button type="primary" danger onClick={() => acc_req_remove(index)}>
+                  Delete
+                </Button>
+              </List.Item>
+            )}
+          />
+
+          <Button
+            type="dashed"
+            onClick={() => {
+              acc_req_append('');
+            }}
+            style={{ marginTop: '20px' }}
+          >
+            Add Accountability
+          </Button>
+        </>,
       ),
-      // children: renderField(
-      //   'required_accountabilities',
-      //   <ul>{data?.jobProfile.accountabilities.required.map((accountability) => <li>{accountability}</li>)}</ul>,
-      //   <>
-      //     <List
-      //       dataSource={fields}
-      //       renderItem={(field, index) => (
-      //         <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-      //           <FormItem
-      //             name={`required_accountabilities.${index}`}
-      //             control={control}
-      //             style={{ flex: 1, marginRight: '10px' }}
-      //           >
-      //             <TextArea defaultValue={(field as any).value} style={{ width: '100%' }} />
-      //           </FormItem>
-
-      //           <Button type="primary" danger onClick={() => remove(index)}>
-      //             Delete
-      //           </Button>
-      //         </List.Item>
-      //       )}
-      //     />
-
-      //     <Button
-      //       type="dashed"
-      //       onClick={() => {
-      //         append('');
-      //       }}
-      //       style={{ marginTop: '20px' }}
-      //     >
-      //       Add Accountability
-      //     </Button>
-      //   </>,
-      // ),
       span: 24,
     },
     {
       key: 'optional_accountabilities',
       label: 'Optional Accountabilities',
-      children: (
-        <ul>{/* {data?.jobProfile.accountabilities.optional.map((accountability) => <li>{accountability}</li>)} */}</ul>
+      children: renderField(
+        'optional_accountabilities',
+        <ul>{data?.jobProfile.accountabilities.optional.map((accountability) => <li>{accountability}</li>)}</ul>,
+        <>
+          <List
+            dataSource={acc_opt_fields}
+            renderItem={(field, index) => (
+              <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <FormItem
+                  name={`optional_accountabilities.${index}`}
+                  control={control}
+                  style={{ flex: 1, marginRight: '10px' }}
+                >
+                  <TextArea defaultValue={(field as any).value} style={{ width: '100%' }} />
+                </FormItem>
+
+                <Button type="primary" danger onClick={() => acc_opt_remove(index)}>
+                  Delete
+                </Button>
+              </List.Item>
+            )}
+          />
+
+          <Button
+            type="dashed"
+            onClick={() => {
+              acc_opt_append('');
+            }}
+            style={{ marginTop: '20px' }}
+          >
+            Add Optional Accountability
+          </Button>
+        </>,
       ),
-      // children: renderField(
-      //   'optional_accountabilities',
-      //   <ul>{data?.jobProfile.accountabilities.optional.map((accountability) => <li>{accountability}</li>)}</ul>,
-      //   <>
-      //     <List
-      //       dataSource={opt_fields}
-      //       renderItem={(field, index) => (
-      //         <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-      //           <FormItem
-      //             name={`optional_accountabilities.${index}`}
-      //             control={control}
-      //             style={{ flex: 1, marginRight: '10px' }}
-      //           >
-      //             <TextArea defaultValue={(field as any).value} style={{ width: '100%' }} />
-      //           </FormItem>
-
-      //           <Button type="primary" danger onClick={() => opt_remove(index)}>
-      //             Delete
-      //           </Button>
-      //         </List.Item>
-      //       )}
-      //     />
-
-      //     <Button
-      //       type="dashed"
-      //       onClick={() => {
-      //         opt_append('');
-      //       }}
-      //       style={{ marginTop: '20px' }}
-      //     >
-      //       Add Optional Accountability
-      //     </Button>
-      //   </>,
-      // ),
       span: 24,
     },
     {
       key: 'requirements',
       label: 'Minimum Job Requirements',
-      children: <ul>{/* {data?.jobProfile.requirements.map((requirement) => <li>{requirement}</li>)} */}</ul>,
-      // children: renderField(
-      //   'requirements',
-      //   <ul>{data?.jobProfile?.requirements.map((requirement) => <li>{requirement}</li>)}</ul>,
-      //   <>
-      //     <List
-      //       dataSource={requirements_fields}
-      //       renderItem={(field, index) => (
-      //         <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-      //           <FormItem name={`requirements.${index}`} control={control} style={{ flex: 1, marginRight: '10px' }}>
-      //             <TextArea defaultValue={(field as any).value} style={{ width: '100%' }} />
-      //           </FormItem>
+      children: renderField(
+        'requirements',
+        <ul>{data?.jobProfile?.requirements.map((requirement) => <li>{requirement}</li>)}</ul>,
+        <>
+          <List
+            dataSource={requirement_fields}
+            renderItem={(field, index) => (
+              <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <FormItem name={`requirements.${index}`} control={control} style={{ flex: 1, marginRight: '10px' }}>
+                  <TextArea defaultValue={(field as any).value} style={{ width: '100%' }} />
+                </FormItem>
 
-      //           <Button type="primary" danger onClick={() => requirements_remove(index)}>
-      //             Delete
-      //           </Button>
-      //         </List.Item>
-      //       )}
-      //     />
+                <Button type="primary" danger onClick={() => requirement_remove(index)}>
+                  Delete
+                </Button>
+              </List.Item>
+            )}
+          />
 
-      //     <Button
-      //       type="dashed"
-      //       onClick={() => {
-      //         requirements_append('');
-      //       }}
-      //       style={{ marginTop: '20px' }}
-      //     >
-      //       Add Requirement
-      //     </Button>
-      //   </>,
-      // ),
+          <Button
+            type="dashed"
+            onClick={() => {
+              requirement_append('');
+            }}
+            style={{ marginTop: '20px' }}
+          >
+            Add Requirement
+          </Button>
+        </>,
+      ),
       span: 24,
     },
     {
       key: 'behavioural_competencies',
       label: 'Behavioural Competencies',
-      children: (
+      children: renderField(
+        'behavioural_competencies',
         <ul>
-          {/* {data?.jobProfile.behavioural_competencies.map((competency) => (
-            <li>
-              <Text strong>{competency.name}</Text> {competency.description}
-            </li>
-          ))} */}
-        </ul>
+          {(data?.jobProfile?.behavioural_competencies ?? []).map(
+            ({ behavioural_competency: { name, description } }) => {
+              return (
+                <li>
+                  <Text strong>{name}</Text> {description}
+                </li>
+              );
+            },
+          )}
+        </ul>,
+        <>
+          <List
+            dataSource={competency_fields}
+            renderItem={(item, index) => (
+              <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <FormItem
+                  name={`behavioural_competencies.${index}.behavioural_competency.name`}
+                  control={control}
+                  style={{ flex: 1, marginRight: '10px' }}
+                >
+                  <Input defaultValue={item.behavioural_competency.name} placeholder="Name" style={{ width: '100%' }} />
+                </FormItem>
+
+                <FormItem
+                  name={`behavioural_competencies.${index}.behavioural_competency.description`}
+                  control={control}
+                  style={{ flex: 2, marginRight: '10px' }}
+                >
+                  <TextArea
+                    defaultValue={item.behavioural_competency.description}
+                    placeholder="Description"
+                    style={{ width: '100%' }}
+                  />
+                </FormItem>
+
+                <Button type="primary" danger onClick={() => competency_remove(index)}>
+                  Delete
+                </Button>
+              </List.Item>
+            )}
+          />
+          <Button
+            type="dashed"
+            onClick={() => competency_append({ behavioural_competency: { name: '', description: '' } })}
+            style={{ marginTop: '20px' }}
+          >
+            Add Competency
+          </Button>
+        </>,
       ),
-      // children: renderField(
-      //   'behavioural_competencies',
-      //   <ul>
-      //     {data?.jobProfile?.behavioural_competencies.map((competency) => (
-      //       <li>
-      //         <Text strong>{competency.name}</Text> {competency.description}
-      //       </li>
-      //     ))}
-      //   </ul>,
-      //   <>
-      //     <List
-      //       dataSource={competencyFields}
-      //       renderItem={(item, index) => (
-      //         <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-      //           <FormItem
-      //             name={`behavioural_competencies.${index}.name`}
-      //             control={control}
-      //             style={{ flex: 1, marginRight: '10px' }}
-      //           >
-      //             <Input defaultValue={item.name} placeholder="Name" style={{ width: '100%' }} />
-      //           </FormItem>
-
-      //           <FormItem
-      //             name={`behavioural_competencies.${index}.description`}
-      //             control={control}
-      //             style={{ flex: 2, marginRight: '10px' }}
-      //           >
-      //             <TextArea defaultValue={item.description} placeholder="Description" style={{ width: '100%' }} />
-      //           </FormItem>
-
-      //           <Button type="primary" danger onClick={() => competencyRemove(index)}>
-      //             Delete
-      //           </Button>
-      //         </List.Item>
-      //       )}
-      //     />
-      //     <Button
-      //       type="dashed"
-      //       onClick={() => competencyAppend({ name: '', description: '' })}
-      //       style={{ marginTop: '20px' }}
-      //     >
-      //       Add Competency
-      //     </Button>
-      //   </>,
-      // ),
       span: 24,
     },
   ];
