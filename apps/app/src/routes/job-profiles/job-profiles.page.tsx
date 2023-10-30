@@ -1,6 +1,6 @@
-import { PageHeader } from '@ant-design/pro-layout';
 import { Space } from 'antd';
 import { useSearchParams } from 'react-router-dom';
+import { PageHeader } from '../../components/app/page-header.component';
 import JobProfiles from './components/job-profiles.component';
 
 export const JobProfilesPage = () => {
