@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobStream } from '../prisma/job-stream.enum';
+import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
 import { JobCategory } from '../job-category/job-category.model';
@@ -45,11 +46,8 @@ export class JobProfile {
   @Field(() => String, { nullable: false })
   overview!: string;
 
-  @Field(() => [String], { nullable: true })
-  accountabilities_required!: Array<string>;
-
-  @Field(() => [String], { nullable: true })
-  accountabilities_optional!: Array<string>;
+  @Field(() => GraphQLJSON, { nullable: false, defaultValue: '{"optional": [], "required": []}' })
+  accountabilities!: any;
 
   @Field(() => [String], { nullable: true })
   requirements!: Array<string>;

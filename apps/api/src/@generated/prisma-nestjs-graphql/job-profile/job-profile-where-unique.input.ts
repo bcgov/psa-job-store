@@ -5,6 +5,7 @@ import { JobProfileWhereInput } from './job-profile-where.input';
 import { IntFilter } from '../prisma/int-filter.input';
 import { EnumJobStreamFilter } from '../prisma/enum-job-stream-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
+import { JsonFilter } from '../prisma/json-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
 import { JobProfileBehaviouralCompetencyListRelationFilter } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-list-relation-filter.input';
 import { JobProfileReportsToListRelationFilter } from '../job-profile-reports-to/job-profile-reports-to-list-relation-filter.input';
@@ -58,11 +59,8 @@ export class JobProfileWhereUniqueInput {
   @Field(() => StringFilter, { nullable: true })
   overview?: StringFilter;
 
-  @Field(() => StringListFilter, { nullable: true })
-  accountabilities_required?: StringListFilter;
-
-  @Field(() => StringListFilter, { nullable: true })
-  accountabilities_optional?: StringListFilter;
+  @Field(() => JsonFilter, { nullable: true })
+  accountabilities?: JsonFilter;
 
   @Field(() => StringListFilter, { nullable: true })
   requirements?: StringListFilter;

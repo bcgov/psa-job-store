@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobStream } from '../prisma/job-stream.enum';
+import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileCountAggregate } from './job-profile-count-aggregate.output';
 import { JobProfileAvgAggregate } from './job-profile-avg-aggregate.output';
 import { JobProfileSumAggregate } from './job-profile-sum-aggregate.output';
@@ -43,11 +44,8 @@ export class JobProfileGroupBy {
   @Field(() => String, { nullable: false })
   overview!: string;
 
-  @Field(() => [String], { nullable: true })
-  accountabilities_required?: Array<string>;
-
-  @Field(() => [String], { nullable: true })
-  accountabilities_optional?: Array<string>;
+  @Field(() => GraphQLJSON, { nullable: false })
+  accountabilities!: any;
 
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;

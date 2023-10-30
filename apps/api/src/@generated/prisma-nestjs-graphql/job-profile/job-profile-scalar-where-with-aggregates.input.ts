@@ -3,6 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.input';
 import { EnumJobStreamWithAggregatesFilter } from '../prisma/enum-job-stream-with-aggregates-filter.input';
 import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
+import { JsonWithAggregatesFilter } from '../prisma/json-with-aggregates-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
 
 @InputType()
@@ -49,11 +50,8 @@ export class JobProfileScalarWhereWithAggregatesInput {
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   overview?: StringWithAggregatesFilter;
 
-  @Field(() => StringListFilter, { nullable: true })
-  accountabilities_required?: StringListFilter;
-
-  @Field(() => StringListFilter, { nullable: true })
-  accountabilities_optional?: StringListFilter;
+  @Field(() => JsonWithAggregatesFilter, { nullable: true })
+  accountabilities?: JsonWithAggregatesFilter;
 
   @Field(() => StringListFilter, { nullable: true })
   requirements?: StringListFilter;

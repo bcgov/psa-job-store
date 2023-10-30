@@ -13,7 +13,7 @@ export class JobProfileBehaviouralCompetencyOrderByWithRelationAndSearchRelevanc
   job_profile_id?: keyof typeof SortOrder;
 
   @Field(() => BehaviouralCompetencyOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
-  behavioral_competency?: BehaviouralCompetencyOrderByWithRelationAndSearchRelevanceInput;
+  behavioural_competency?: BehaviouralCompetencyOrderByWithRelationAndSearchRelevanceInput;
 
   @Field(() => JobProfileOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   job_profile?: JobProfileOrderByWithRelationAndSearchRelevanceInput;

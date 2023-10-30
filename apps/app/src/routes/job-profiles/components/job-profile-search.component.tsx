@@ -37,7 +37,7 @@ export const JobProfileSearch = () => {
   const ministryData = useGetMinistriesQuery().data?.ministries;
   const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
   const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
-  const classificationData = useGetClassificationsQuery().data?.resolvedClassifications;
+  const classificationData = useGetClassificationsQuery().data?.classifications;
 
   const filterData = useMemo(() => {
     return {

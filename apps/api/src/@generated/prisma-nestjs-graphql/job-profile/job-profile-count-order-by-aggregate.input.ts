@@ -38,10 +38,7 @@ export class JobProfileCountOrderByAggregateInput {
   overview?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  accountabilities_required?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  accountabilities_optional?: keyof typeof SortOrder;
+  accountabilities?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   requirements?: keyof typeof SortOrder;

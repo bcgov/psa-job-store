@@ -12,8 +12,7 @@ export enum JobProfileScalarFieldEnum {
   number = 'number',
   context = 'context',
   overview = 'overview',
-  accountabilities_required = 'accountabilities_required',
-  accountabilities_optional = 'accountabilities_optional',
+  accountabilities = 'accountabilities',
   requirements = 'requirements',
 }
 

@@ -1,5 +1,5 @@
-import { Query, Resolver } from '@nestjs/graphql';
-import { Classification } from '../../@generated/prisma-nestjs-graphql';
+import { Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Classification, Grid, OccupationGroup } from '../../@generated/prisma-nestjs-graphql';
 import { ClassificationService } from './classification.service';
 
 @Resolver(() => Classification)
@@ -10,14 +10,14 @@ export class ClassificationResolver {
   getClassifications() {
     return this.classificationService.getClassifications();
   }
-  @Query(() => [Classification], { name: 'resolvedClassifications' })
-  async getResolvedClassifications() {
-    const rawData = await this.classificationService.getResolvedClassifications();
 
-    return rawData.map((item) => ({
-      id: item.id,
-      grid_name: item.grid?.name,
-      occupation_group_name: item.occupation_group?.name,
-    }));
+  @ResolveField(() => Grid)
+  async grid(@Parent() { grid_id }: Classification) {
+    return this.classificationService.getGrid(grid_id);
+  }
+
+  @ResolveField(() => OccupationGroup)
+  async occupation_group(@Parent() { occupation_group_id }: Classification) {
+    return this.classificationService.getOccupationGroup(occupation_group_id);
   }
 }

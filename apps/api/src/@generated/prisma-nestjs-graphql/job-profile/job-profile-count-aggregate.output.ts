@@ -38,10 +38,7 @@ export class JobProfileCountAggregate {
   overview!: number;
 
   @Field(() => Int, { nullable: false })
-  accountabilities_required!: number;
-
-  @Field(() => Int, { nullable: false })
-  accountabilities_optional!: number;
+  accountabilities!: number;
 
   @Field(() => Int, { nullable: false })
   requirements!: number;

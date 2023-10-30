@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobStream } from '../prisma/job-stream.enum';
+import { GraphQLJSON } from 'graphql-type-json';
 
 @InputType()
 export class JobProfileUncheckedUpdateManyWithoutClassificationInput {
@@ -35,11 +36,8 @@ export class JobProfileUncheckedUpdateManyWithoutClassificationInput {
   @Field(() => String, { nullable: true })
   overview?: string;
 
-  @Field(() => [String], { nullable: true })
-  accountabilities_required?: Array<string>;
-
-  @Field(() => [String], { nullable: true })
-  accountabilities_optional?: Array<string>;
+  @Field(() => GraphQLJSON, { nullable: true })
+  accountabilities?: any;
 
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;

@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { JobProfileBehaviouralCompetencyCreateNestedManyWithoutBehavioral_competencyInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-create-nested-many-without-behavioral-competency.input';
+import { JobProfileBehaviouralCompetencyCreateNestedManyWithoutBehavioural_competencyInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-create-nested-many-without-behavioural-competency.input';
 
 @InputType()
 export class BehaviouralCompetencyCreateInput {
@@ -10,6 +10,6 @@ export class BehaviouralCompetencyCreateInput {
   @Field(() => String, { nullable: false })
   description!: string;
 
-  @Field(() => JobProfileBehaviouralCompetencyCreateNestedManyWithoutBehavioral_competencyInput, { nullable: true })
-  job_profiles?: JobProfileBehaviouralCompetencyCreateNestedManyWithoutBehavioral_competencyInput;
+  @Field(() => JobProfileBehaviouralCompetencyCreateNestedManyWithoutBehavioural_competencyInput, { nullable: true })
+  job_profiles?: JobProfileBehaviouralCompetencyCreateNestedManyWithoutBehavioural_competencyInput;
 }
