@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DownOutlined } from '@ant-design/icons';
 import { Col, Input, Row, Select, Space } from 'antd';
+import { useMemo } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
+import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
+import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-role.api';
+import { useGetMinistriesQuery } from '../../../redux/services/graphql-api/ministry.api';
 
 const { Search } = Input;
 
@@ -24,10 +29,36 @@ const filters: Record<string, any>[] = [
   },
 ];
 
-export const JobProfileSearch = ({ filterData }: any) => {
+export const JobProfileSearch = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const ministryData = useGetMinistriesQuery().data?.ministries;
+  const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
+  const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
+  const classificationData = useGetClassificationsQuery().data?.resolvedClassifications;
+
+  const filterData = useMemo(() => {
+    return {
+      Ministry: ministryData?.map((ministry) => ({
+        value: ministry.id.toString(),
+        label: ministry.name,
+      })),
+      'Job Family': jobFamilyData?.map((jobFamily) => ({
+        value: jobFamily.id.toString(),
+        label: jobFamily.name,
+      })),
+      'Job Roles': jobRoleData?.map((jobRole) => ({
+        value: jobRole.id.toString(),
+        label: jobRole.name,
+      })),
+      Classification: classificationData?.map((classification) => ({
+        value: classification.id.toString(),
+        label: classification.occupation_group.name + classification.grid.name,
+      })),
+    } as Record<string, any>;
+  }, [ministryData, jobFamilyData, jobRoleData, classificationData]);
 
   const getBasePath = (path: string) => {
     const pathParts = path.split('/');
@@ -50,8 +81,10 @@ export const JobProfileSearch = ({ filterData }: any) => {
   };
 
   const handleFilters = () => {
+    const basePath = getBasePath(location.pathname);
+
     navigate({
-      pathname: '/job-profiles',
+      pathname: basePath,
       search: searchParams.toString(),
     });
   };

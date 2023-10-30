@@ -18,7 +18,7 @@ export interface GetClassificationsResponse {
 
 export const classificationApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
-    getClassifications: build.query<GetClassificationsResponse, null>({
+    getClassifications: build.query<GetClassificationsResponse, void>({
       query: () => {
         return {
           document: gql`

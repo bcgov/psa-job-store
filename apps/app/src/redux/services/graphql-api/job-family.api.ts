@@ -14,7 +14,7 @@ export interface GetJobFamilysResponse {
 
 export const jobFamilyApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
-    getJobFamilies: build.query<GetJobFamilysResponse, null>({
+    getJobFamilies: build.query<GetJobFamilysResponse, void>({
       query: () => {
         return {
           document: gql`
