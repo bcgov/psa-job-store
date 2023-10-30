@@ -29,7 +29,7 @@ export class JobProfileBehaviouralCompetencyWhereUniqueInput {
   job_profile_id?: IntFilter;
 
   @Field(() => BehaviouralCompetencyRelationFilter, { nullable: true })
-  behavioral_competency?: BehaviouralCompetencyRelationFilter;
+  behavioural_competency?: BehaviouralCompetencyRelationFilter;
 
   @Field(() => JobProfileRelationFilter, { nullable: true })
   job_profile?: JobProfileRelationFilter;

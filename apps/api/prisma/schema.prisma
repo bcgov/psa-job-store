@@ -148,16 +148,15 @@ model JobProfile {
   ministry_id       Int?
   role_id           Int?
 
-  stream                    JobStream
-  title                     String
-  number                    Int
-  context                   String
-  overview                  String
-  accountabilities_required String[]
-  accountabilities_optional String[]
-  requirements              String[]
-  behavioural_competencies  JobProfileBehaviouralCompetency[]
-  reports_to                JobProfileReportsTo[]
+  stream                   JobStream
+  title                    String
+  number                   Int
+  context                  String
+  overview                 String
+  accountabilities         Json                              @default("{\"optional\": [], \"required\": []}") @db.JsonB
+  requirements             String[]
+  behavioural_competencies JobProfileBehaviouralCompetency[]
+  reports_to               JobProfileReportsTo[]
 
   category       JobCategory?   @relation(fields: [category_id], references: [id])
   classification Classification @relation(fields: [classification_id], references: [id])
@@ -172,8 +171,8 @@ model JobProfileBehaviouralCompetency {
   behavioural_competency_id Int
   job_profile_id            Int
 
-  behavioral_competency BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
-  job_profile           JobProfile            @relation(fields: [job_profile_id], references: [id])
+  behavioural_competency BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
+  job_profile            JobProfile            @relation(fields: [job_profile_id], references: [id])
 
   @@id([behavioural_competency_id, job_profile_id])
   @@map("job_profile_behavioural_competency")

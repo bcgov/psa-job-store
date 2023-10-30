@@ -37,10 +37,7 @@ export class JobProfileCountAggregateInput {
   overview?: true;
 
   @Field(() => Boolean, { nullable: true })
-  accountabilities_required?: true;
-
-  @Field(() => Boolean, { nullable: true })
-  accountabilities_optional?: true;
+  accountabilities?: true;
 
   @Field(() => Boolean, { nullable: true })
   requirements?: true;
