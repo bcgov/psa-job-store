@@ -4,19 +4,17 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import WizardControls from './components/wizard-controls.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import { useWizardContext } from './components/wizard.provider';
 
 export const WizardReviewPage = () => {
   const navigate = useNavigate();
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
-
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const showModal = () => {
     setIsModalVisible(true);
+    return false;
   };
 
   const handleOk = () => {
@@ -28,17 +26,15 @@ export const WizardReviewPage = () => {
     setIsModalVisible(false);
   };
 
+  const { wizardData } = useWizardContext();
+
+  console.log('review wizardData: ', wizardData);
+
   return (
     <WizardPageWrapper title="Review and submit" subTitle="Review the profile before creating a new position">
       <WizardSteps current={2}></WizardSteps>
-      <JobProfile id="1" />
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-        <Button onClick={handleBackClick}>Go Back</Button>
-        <Button type="primary" onClick={showModal}>
-          Create Position
-        </Button>
-      </div>
-
+      <JobProfile profileData={wizardData} />
+      <WizardControls submitText={'Create Position'} onNextClick={showModal} />.
       <Modal
         title="Affirmation"
         open={isModalVisible}
