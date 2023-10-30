@@ -12,15 +12,20 @@ const { Text, Title } = Typography;
 const { useBreakpoint } = Grid;
 
 interface JobProfilesContentProps {
-  searchQuery: string | null;
+  searchParams: URLSearchParams;
+  // searchQuery: string | null;
   onSelectProfile?: (id: string) => void;
 }
 
-const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchQuery, onSelectProfile }) => {
+const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile }) => {
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
 
   useEffect(() => {
-    const search = searchQuery?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
+    const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
+    const ministryFilter = searchParams.get('ministry');
+    const jobRoleFilter = searchParams.get('job-role');
+    const classificationFilter = searchParams.get('classification');
+    const jobFamilyFilter = searchParams.get('job-family');
 
     trigger({
       where: {
@@ -38,10 +43,38 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchQuery, onSelectP
               },
             }),
           },
+          {
+            ...(ministryFilter != null && {
+              ministry_id: {
+                equals: parseInt(ministryFilter),
+              },
+            }),
+          },
+          {
+            ...(classificationFilter != null && {
+              classification_id: {
+                equals: parseInt(classificationFilter),
+              },
+            }),
+          },
+          {
+            ...(jobFamilyFilter != null && {
+              family_id: {
+                equals: parseInt(jobFamilyFilter),
+              },
+            }),
+          },
+          {
+            ...(jobRoleFilter != null && {
+              role_id: {
+                equals: parseInt(jobRoleFilter),
+              },
+            }),
+          },
         ],
       },
     });
-  }, [searchQuery, trigger]);
+  }, [searchParams, trigger]);
 
   const params = useParams();
   const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
@@ -81,30 +114,6 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchQuery, onSelectP
           <JobProfileSearchResults data={data} isLoading={isLoading} onSelectProfile={onSelectProfile} />
         )}
       </Row>
-      {/* <Row justify="center" gutter={16}>
-            <Col lg={24}>{params.id ? <JobProfile /> : <JobProfileSearchResults data={data} />}</Col>
-          </Row> */}
-
-      {/* <Row justify="center" gutter={16}>
-            <Col lg={params.id ? 0 : 24} xl={8}>
-              <JobProfileSearchResults data={data} />
-            </Col>
-            <Col lg={params.id ? 0 : 24} xl={14}>
-              {params.id ? (
-                <JobProfile />
-              ) : (
-                <Empty
-                  description={
-                    <Space direction="vertical" style={{ marginTop: '16rem', userSelect: 'none' }}>
-                      <Title level={1}>Select a Job Profile</Title>
-                      <Text>Nothing is selected</Text>
-                    </Space>
-                  }
-                  image={<FileTextFilled style={{ fontSize: '60pt' }} />}
-                />
-              )}
-            </Col>
-          </Row> */}
     </div>
   );
 };

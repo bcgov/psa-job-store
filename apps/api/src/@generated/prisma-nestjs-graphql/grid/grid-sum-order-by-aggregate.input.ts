@@ -6,4 +6,7 @@ import { SortOrder } from '../prisma/sort-order.enum';
 export class GridSumOrderByAggregateInput {
   @Field(() => SortOrder, { nullable: true })
   id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  steps?: keyof typeof SortOrder;
 }

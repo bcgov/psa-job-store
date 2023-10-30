@@ -6,4 +6,7 @@ import { Float } from '@nestjs/graphql';
 export class GridAvgAggregate {
   @Field(() => Float, { nullable: true })
   id?: number;
+
+  @Field(() => Float, { nullable: true })
+  steps?: number;
 }

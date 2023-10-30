@@ -15,6 +15,9 @@ export class GridGroupBy {
   @Field(() => String, { nullable: false })
   name!: string;
 
+  @Field(() => [Int], { nullable: true })
+  steps?: Array<number>;
+
   @Field(() => GridCountAggregate, { nullable: true })
   _count?: GridCountAggregate;
 

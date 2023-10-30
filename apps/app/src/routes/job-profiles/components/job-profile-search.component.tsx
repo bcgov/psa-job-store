@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DownOutlined } from '@ant-design/icons';
-import { Button, Col, Input, Row, Space } from 'antd';
+import { Col, Input, Row, Select, Space } from 'antd';
+import { useMemo } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
+import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
+import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-role.api';
+import { useGetMinistriesQuery } from '../../../redux/services/graphql-api/ministry.api';
 
 const { Search } = Input;
 
@@ -29,6 +34,32 @@ export const JobProfileSearch = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const ministryData = useGetMinistriesQuery().data?.ministries;
+  const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
+  const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
+  const classificationData = useGetClassificationsQuery().data?.resolvedClassifications;
+
+  const filterData = useMemo(() => {
+    return {
+      Ministry: ministryData?.map((ministry) => ({
+        value: ministry.id.toString(),
+        label: ministry.name,
+      })),
+      'Job Family': jobFamilyData?.map((jobFamily) => ({
+        value: jobFamily.id.toString(),
+        label: jobFamily.name,
+      })),
+      'Job Roles': jobRoleData?.map((jobRole) => ({
+        value: jobRole.id.toString(),
+        label: jobRole.name,
+      })),
+      Classification: classificationData?.map((classification) => ({
+        value: classification.id.toString(),
+        label: classification.occupation_group.name + classification.grid.name,
+      })),
+    } as Record<string, any>;
+  }, [ministryData, jobFamilyData, jobRoleData, classificationData]);
+
   const getBasePath = (path: string) => {
     const pathParts = path.split('/');
     // Check if the last part is a number (ID), if so, remove it
@@ -49,6 +80,15 @@ export const JobProfileSearch = () => {
     }
   };
 
+  const handleFilters = () => {
+    const basePath = getBasePath(location.pathname);
+
+    navigate({
+      pathname: basePath,
+      search: searchParams.toString(),
+    });
+  };
+
   return (
     <Row justify="center" gutter={8} style={{ margin: '0 1rem' }}>
       <Col xs={24} sm={18} md={18} lg={18} xl={14} style={{ margin: '1rem' }}>
@@ -63,12 +103,42 @@ export const JobProfileSearch = () => {
           <Space direction="horizontal" style={{ width: '100%', overflowX: 'auto' }}>
             {filters.map((filter) => {
               return (
-                <Button type="default">
-                  <Space>
-                    {filter.title}
-                    {filter.icon}
-                  </Space>
-                </Button>
+                <Select
+                  placeholder={filter.title}
+                  options={filterData[filter.title]}
+                  onChange={(value: string) => {
+                    switch (filter.title) {
+                      case 'Job Family':
+                        value ? searchParams.set('job-family', value) : searchParams.delete('job-family');
+                        break;
+                      case 'Job Roles':
+                        value ? searchParams.set('job-role', value) : searchParams.delete('job-role');
+                        break;
+                      case 'Classification':
+                        value ? searchParams.set('classification', value) : searchParams.delete('job-family');
+                        break;
+                      case 'Ministry':
+                        console.log('setting ministry to ', value);
+                        value ? searchParams.set('ministry', value) : searchParams.delete('ministry');
+                        break;
+                      default:
+                        break;
+                    }
+                    handleFilters();
+                  }}
+                  value={
+                    // Set the value on page load from URL
+                    filter.title === 'Job Family'
+                      ? searchParams.get('job-family')
+                      : filter.title === 'Job Roles'
+                      ? searchParams.get('job-role')
+                      : filter.title === 'Classification'
+                      ? searchParams.get('classification')
+                      : filter.title === 'Ministry'
+                      ? searchParams.get('ministry')
+                      : undefined
+                  }
+                />
               );
             })}
           </Space>

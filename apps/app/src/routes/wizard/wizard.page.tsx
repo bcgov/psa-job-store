@@ -26,12 +26,11 @@ export const WizardPage = () => {
   };
 
   const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get('search');
 
   return (
     <WizardPageWrapper title="Choose a job profile" subTitle="Choose a job profile to modify for the new positions">
       <WizardSteps current={0}></WizardSteps>
-      <JobProfiles searchQuery={searchQuery} onSelectProfile={setSelectedProfileId} />
+      <JobProfiles searchParams={searchParams} onSelectProfile={setSelectedProfileId} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
           <div></div>

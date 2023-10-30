@@ -9,4 +9,7 @@ export class GridCountOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   name?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  steps?: keyof typeof SortOrder;
 }

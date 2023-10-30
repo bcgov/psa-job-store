@@ -9,4 +9,7 @@ export class GridUncheckedUpdateWithoutClassificationsInput {
 
   @Field(() => String, { nullable: true })
   name?: string;
+
+  @Field(() => [Int], { nullable: true })
+  steps?: Array<number>;
 }
