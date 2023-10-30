@@ -46,7 +46,7 @@ export class JobProfile {
   @Field(() => String, { nullable: false })
   overview!: string;
 
-  @Field(() => GraphQLJSON, { nullable: false })
+  @Field(() => GraphQLJSON, { nullable: false, defaultValue: '{"optional": [], "required": []}' })
   accountabilities!: any;
 
   @Field(() => [String], { nullable: true })

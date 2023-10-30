@@ -153,7 +153,7 @@ model JobProfile {
   number                   Int
   context                  String
   overview                 String
-  accountabilities         Json                              @db.JsonB
+  accountabilities         Json                              @default("{\"optional\": [], \"required\": []}") @db.JsonB
   requirements             String[]
   behavioural_competencies JobProfileBehaviouralCompetency[]
   reports_to               JobProfileReportsTo[]

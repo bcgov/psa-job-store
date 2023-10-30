@@ -36,8 +36,8 @@ export class JobProfileCreateManyMinistryInput {
   @Field(() => String, { nullable: false })
   overview!: string;
 
-  @Field(() => GraphQLJSON, { nullable: false })
-  accountabilities!: any;
+  @Field(() => GraphQLJSON, { nullable: true })
+  accountabilities?: any;
 
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;
