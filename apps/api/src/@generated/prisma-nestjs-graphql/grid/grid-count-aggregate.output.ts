@@ -11,5 +11,8 @@ export class GridCountAggregate {
   name!: number;
 
   @Field(() => Int, { nullable: false })
+  steps!: number;
+
+  @Field(() => Int, { nullable: false })
   _all!: number;
 }

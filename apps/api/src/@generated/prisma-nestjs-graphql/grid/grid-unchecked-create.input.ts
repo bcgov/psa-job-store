@@ -11,6 +11,9 @@ export class GridUncheckedCreateInput {
   @Field(() => String, { nullable: false })
   name!: string;
 
+  @Field(() => [Int], { nullable: true })
+  steps?: Array<number>;
+
   @Field(() => ClassificationUncheckedCreateNestedManyWithoutGridInput, { nullable: true })
   classifications?: ClassificationUncheckedCreateNestedManyWithoutGridInput;
 }

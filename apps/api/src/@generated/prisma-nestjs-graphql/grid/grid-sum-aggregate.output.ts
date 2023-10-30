@@ -6,4 +6,7 @@ import { Int } from '@nestjs/graphql';
 export class GridSumAggregate {
   @Field(() => Int, { nullable: true })
   id?: number;
+
+  @Field(() => [Int], { nullable: true })
+  steps?: Array<number>;
 }

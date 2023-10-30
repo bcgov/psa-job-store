@@ -10,5 +10,8 @@ export class GridCountAggregateInput {
   name?: true;
 
   @Field(() => Boolean, { nullable: true })
+  steps?: true;
+
+  @Field(() => Boolean, { nullable: true })
   _all?: true;
 }
