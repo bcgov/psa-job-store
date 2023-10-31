@@ -23,6 +23,8 @@ RUN npm ci
 COPY tsconfig.json ./
 COPY packages/tsconfig ./tsconfig/
 COPY apps/api ./apps/api
+# generates the prisma client
+RUN npx prisma generate
 #generates the dist folder for nest to run
 RUN npm -w api run build
 
@@ -43,8 +45,7 @@ COPY /apps/api/prisma ./apps/api/prisma
 COPY /apps/api/package*.json ./apps/api/
 
 WORKDIR /usr/src/apps/api/
-# generates the prisma client
-RUN npx prisma generate
+
 
 # openshift runs as a different user than what docker builds with
 # this fixes the issue as related to the npm cache
