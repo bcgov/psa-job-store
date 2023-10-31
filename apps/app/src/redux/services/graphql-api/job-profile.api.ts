@@ -39,6 +39,49 @@ export interface JobProfileModel {
   overview: string;
 }
 
+interface Accountabilities {
+  optional: string[];
+  required: string[];
+}
+
+interface BehaviouralCompetencyCreate {
+  name: string;
+  description: string;
+}
+
+interface BehaviouralCompetency {
+  create: {
+    behavioural_competency: {
+      create: BehaviouralCompetencyCreate;
+    };
+  }[];
+}
+
+interface ClassificationConnectInput {
+  connect: {
+    id: number;
+  };
+}
+
+// The main interface representing the overall data structure
+export interface CreateJobProfileInput {
+  stream: string;
+  title: string;
+  number: number;
+  context: string;
+  overview: string;
+  accountabilities: Accountabilities;
+  requirements: string[];
+  behavioural_competencies: BehaviouralCompetency;
+  classification: ClassificationConnectInput;
+  state: string;
+  parent: ClassificationConnectInput;
+}
+
+export interface CreateJobProfileResponse {
+  id: number;
+}
+
 export interface GetJobProfilesArgs {
   where?: Record<string, any>;
   orderBy?: Record<string, 'asc' | 'desc'>;
@@ -189,8 +232,27 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    createJobProfile: build.mutation<CreateJobProfileResponse, CreateJobProfileInput>({
+      query: (input: CreateJobProfileInput) => {
+        return {
+          document: gql`
+            mutation CreateJobProfile($data: JobProfileCreateInput!) {
+              createJobProfile(data: $data)
+            }
+          `,
+          variables: {
+            data: input,
+          },
+        };
+      },
+    }),
   }),
 });
 
-export const { useGetJobProfileQuery, useLazyGetJobProfileQuery, useGetJobProfilesQuery, useLazyGetJobProfilesQuery } =
-  jobProfileApi;
+export const {
+  useGetJobProfileQuery,
+  useLazyGetJobProfileQuery,
+  useGetJobProfilesQuery,
+  useLazyGetJobProfilesQuery,
+  useCreateJobProfileMutation,
+} = jobProfileApi;
