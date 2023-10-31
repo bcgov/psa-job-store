@@ -18,7 +18,6 @@ import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
 import { MinistryModule } from './modules/ministry/ministry.module';
-import { SeedModule } from './modules/seeds/seed.module';
 import { validateAppConfig } from './utils/validate-app-config.util';
 
 @Module({
@@ -57,7 +56,6 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     ClassificationModule,
     JobFamilyModule,
     JobRoleModule,
-    SeedModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
