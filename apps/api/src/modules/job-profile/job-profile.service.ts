@@ -15,7 +15,7 @@ export class JobProfileService {
       ...args,
       include: {
         behavioural_competencies: true,
-        category: true,
+        career_group: true,
         classification: true,
         family: true,
         ministry: true,
@@ -29,7 +29,7 @@ export class JobProfileService {
     return this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
-        category: true,
+        career_group: true,
         classification: true,
         family: true,
         ministry: true,
@@ -43,6 +43,15 @@ export class JobProfileService {
       where: { job_profile_id },
       include: {
         behavioural_competency: true,
+      },
+    });
+  }
+
+  async getReportsTo(job_profile_id: number) {
+    return this.prisma.jobProfileReportsTo.findMany({
+      where: { job_profile_id },
+      include: {
+        classification: true,
       },
     });
   }

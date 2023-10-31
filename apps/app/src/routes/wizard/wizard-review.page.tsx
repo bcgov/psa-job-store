@@ -28,8 +28,6 @@ export const WizardReviewPage = () => {
 
   const { wizardData } = useWizardContext();
 
-  console.log('review wizardData: ', wizardData);
-
   return (
     <WizardPageWrapper title="Review and submit" subTitle="Review the profile before creating a new position">
       <WizardSteps current={2}></WizardSteps>

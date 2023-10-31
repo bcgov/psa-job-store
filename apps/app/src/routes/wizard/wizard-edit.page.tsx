@@ -12,7 +12,6 @@ export const WizardEditPage = () => {
   const { setWizardData } = useWizardContext();
 
   const onSubmit: SubmitHandler<Record<string, string>> = (data) => {
-    console.log('edit on submit: ', data);
     setWizardData(data);
     navigate('/wizard/review');
   };

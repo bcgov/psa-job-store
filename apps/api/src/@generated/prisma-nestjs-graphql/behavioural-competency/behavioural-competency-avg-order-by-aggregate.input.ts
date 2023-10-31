@@ -6,4 +6,7 @@ import { SortOrder } from '../prisma/sort-order.enum';
 export class BehaviouralCompetencyAvgOrderByAggregateInput {
   @Field(() => SortOrder, { nullable: true })
   id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  ministry_id?: keyof typeof SortOrder;
 }

@@ -23,7 +23,7 @@ export class JobProfileScalarWhereInput {
   id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
-  category_id?: IntFilter;
+  career_group_id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
   classification_id?: IntFilter;

@@ -16,7 +16,7 @@ export class JobProfileGroupBy {
   id!: number;
 
   @Field(() => Int, { nullable: true })
-  category_id?: number;
+  career_group_id?: number;
 
   @Field(() => Int, { nullable: false })
   classification_id!: number;

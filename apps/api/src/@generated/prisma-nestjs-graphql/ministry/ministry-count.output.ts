@@ -6,4 +6,7 @@ import { Int } from '@nestjs/graphql';
 export class MinistryCount {
   @Field(() => Int, { nullable: false })
   job_profiles?: number;
+
+  @Field(() => Int, { nullable: false })
+  BehaviouralCompetency?: number;
 }

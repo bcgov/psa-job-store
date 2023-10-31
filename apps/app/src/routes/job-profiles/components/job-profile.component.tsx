@@ -271,9 +271,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return <p>Loading...</p>; // or render a spinner/loader
   }
 
-  console.log('rendering.. effective data: ', effectiveData);
-  console.log('renderKey: ', renderKey);
-
   const items: DescriptionsProps['items'] = [
     {
       key: 'title',
@@ -543,7 +540,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     <Form
       key={renderKey}
       onFinish={(data) => {
-        console.log('onFinish, submitHandler: ', submitHandler);
         if (submitHandler) submitHandler(data);
       }}
     >

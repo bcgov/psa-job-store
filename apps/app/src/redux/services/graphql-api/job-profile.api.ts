@@ -101,7 +101,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                category {
+                career_group {
                   id
                   name
                 }
@@ -113,8 +113,13 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 reports_to {
                   classification {
                     id
-                    grid_id
-                    occupation_group_id
+                    grid {
+                      name
+                    }
+                    occupation_group {
+                      code
+                      name
+                    }
                   }
                 }
               }
@@ -167,7 +172,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                category {
+                career_group {
                   id
                   name
                 }

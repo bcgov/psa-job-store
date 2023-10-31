@@ -14,7 +14,7 @@ export class JobProfileOrderByWithAggregationInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrderInput, { nullable: true })
-  category_id?: SortOrderInput;
+  career_group_id?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   classification_id?: keyof typeof SortOrder;

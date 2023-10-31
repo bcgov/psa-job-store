@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobProfileUncheckedUpdateManyWithoutMinistryNestedInput } from '../job-profile/job-profile-unchecked-update-many-without-ministry-nested.input';
+import { BehaviouralCompetencyUncheckedUpdateManyWithoutMinistryNestedInput } from '../behavioural-competency/behavioural-competency-unchecked-update-many-without-ministry-nested.input';
 
 @InputType()
 export class MinistryUncheckedUpdateInput {
@@ -16,4 +17,7 @@ export class MinistryUncheckedUpdateInput {
 
   @Field(() => JobProfileUncheckedUpdateManyWithoutMinistryNestedInput, { nullable: true })
   job_profiles?: JobProfileUncheckedUpdateManyWithoutMinistryNestedInput;
+
+  @Field(() => BehaviouralCompetencyUncheckedUpdateManyWithoutMinistryNestedInput, { nullable: true })
+  BehaviouralCompetency?: BehaviouralCompetencyUncheckedUpdateManyWithoutMinistryNestedInput;
 }
