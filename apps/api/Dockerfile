@@ -12,16 +12,14 @@ ARG KEYCLOAK_REALM_URL
 ARG KEYCLOAK_CLIENT_ID_PRIVATE
 ARG KEYCLOAK_CLIENT_ID_PUBLIC
 
-
-# RUN pwd
-# RUN test -n "$POSTGRES_DB"
-# RUN test -n "$POSTGRES_USER"
-# RUN test -n "$POSTGRES_PASSWORD"
-# RUN test -n "$DATABASE_URL"
-# RUN test -n "$KEYCLOAK_REALM_URL"
-# RUN test -n "$KEYCLOAK_CLIENT_ID_PRIVATE"
-# RUN test -n "$KEYCLOAK_CLIENT_ID_PUBLIC"
-
+RUN pwd
+RUN test -n "$POSTGRES_DB"
+RUN test -n "$POSTGRES_USER"
+RUN test -n "$POSTGRES_PASSWORD"
+RUN test -n "$DATABASE_URL"
+RUN test -n "$KEYCLOAK_REALM_URL"
+RUN test -n "$KEYCLOAK_CLIENT_ID_PRIVATE"
+RUN test -n "$KEYCLOAK_CLIENT_ID_PUBLIC"
 
 # Copy application dependency manifests to the container image.
 COPY package*.json ./
@@ -55,11 +53,13 @@ ENV KEYCLOAK_CLIENT_ID_PRIVATE $KEYCLOAK_CLIENT_ID_PRIVATE
 ENV KEYCLOAK_CLIENT_ID_PUBLIC $KEYCLOAK_CLIENT_ID_PUBLIC
 ENV NODE_ENV "production"
 
-WORKDIR /usr/src/api
+WORKDIR /usr/src
 COPY --from=builder /tmp/build ./
 COPY /apps/api/start.sh ./apps/api/start.sh
 COPY /apps/api/prisma ./apps/api/prisma
 COPY /apps/api/package*.json ./apps/api/
+
+WORKDIR /usr/src/apps/api/
 # generates the prisma client
 RUN npx prisma generate
 
@@ -69,7 +69,7 @@ RUN mkdir /.npm
 RUN chgrp -R 0 /.npm && chmod -R g=u /.npm
 
 # Set execute permissions for the start.sh script.
-RUN chmod +x ./apps/api/start.sh
+RUN chmod +x ./start.sh
 
 # Expose port 4000
 EXPOSE 4000
