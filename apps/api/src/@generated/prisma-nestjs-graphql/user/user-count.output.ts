@@ -9,4 +9,7 @@ export class UserCount {
 
   @Field(() => Int, { nullable: false })
   identities?: number;
+
+  @Field(() => Int, { nullable: false })
+  JobProfile?: number;
 }

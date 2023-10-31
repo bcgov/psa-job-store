@@ -19,7 +19,16 @@ export class JobProfileMaxAggregateInput {
   ministry_id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  owner_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  parent_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   role_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  state?: true;
 
   @Field(() => Boolean, { nullable: true })
   stream?: true;

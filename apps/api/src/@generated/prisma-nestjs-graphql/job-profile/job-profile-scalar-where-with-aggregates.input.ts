@@ -1,6 +1,8 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.input';
+import { UuidWithAggregatesFilter } from '../prisma/uuid-with-aggregates-filter.input';
+import { EnumJobProfileStateWithAggregatesFilter } from '../prisma/enum-job-profile-state-with-aggregates-filter.input';
 import { EnumJobStreamWithAggregatesFilter } from '../prisma/enum-job-stream-with-aggregates-filter.input';
 import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
 import { JsonWithAggregatesFilter } from '../prisma/json-with-aggregates-filter.input';
@@ -32,8 +34,17 @@ export class JobProfileScalarWhereWithAggregatesInput {
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   ministry_id?: IntWithAggregatesFilter;
 
+  @Field(() => UuidWithAggregatesFilter, { nullable: true })
+  owner_id?: UuidWithAggregatesFilter;
+
+  @Field(() => IntWithAggregatesFilter, { nullable: true })
+  parent_id?: IntWithAggregatesFilter;
+
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   role_id?: IntWithAggregatesFilter;
+
+  @Field(() => EnumJobProfileStateWithAggregatesFilter, { nullable: true })
+  state?: EnumJobProfileStateWithAggregatesFilter;
 
   @Field(() => EnumJobStreamWithAggregatesFilter, { nullable: true })
   stream?: EnumJobStreamWithAggregatesFilter;

@@ -1,6 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
+import { JobProfileState } from '../prisma/job-profile-state.enum';
 import { JobStream } from '../prisma/job-stream.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
@@ -9,6 +10,7 @@ import { JobCategory } from '../job-category/job-category.model';
 import { Classification } from '../classification/classification.model';
 import { JobFamily } from '../job-family/job-family.model';
 import { Ministry } from '../ministry/ministry.model';
+import { User } from '../user/user.model';
 import { JobRole } from '../job-role/job-role.model';
 
 @ObjectType()
@@ -28,8 +30,17 @@ export class JobProfile {
   @Field(() => Int, { nullable: true })
   ministry_id!: number | null;
 
+  @Field(() => String, { nullable: true })
+  owner_id!: string | null;
+
+  @Field(() => Int, { nullable: true })
+  parent_id!: number | null;
+
   @Field(() => Int, { nullable: true })
   role_id!: number | null;
+
+  @Field(() => JobProfileState, { nullable: false })
+  state!: keyof typeof JobProfileState;
 
   @Field(() => JobStream, { nullable: false })
   stream!: keyof typeof JobStream;
@@ -37,8 +48,8 @@ export class JobProfile {
   @Field(() => String, { nullable: false })
   title!: string;
 
-  @Field(() => Int, { nullable: false })
-  number!: number;
+  @Field(() => Int, { nullable: true })
+  number!: number | null;
 
   @Field(() => String, { nullable: false })
   context!: string;
@@ -61,6 +72,9 @@ export class JobProfile {
   @Field(() => JobCategory, { nullable: true })
   category?: JobCategory | null;
 
+  @Field(() => [JobProfile], { nullable: true })
+  children?: Array<JobProfile>;
+
   @Field(() => Classification, { nullable: false })
   classification?: Classification;
 
@@ -69,6 +83,12 @@ export class JobProfile {
 
   @Field(() => Ministry, { nullable: true })
   ministry?: Ministry | null;
+
+  @Field(() => User, { nullable: true })
+  owner?: User | null;
+
+  @Field(() => JobProfile, { nullable: true })
+  parent?: JobProfile | null;
 
   @Field(() => JobRole, { nullable: true })
   role?: JobRole | null;
