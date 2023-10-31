@@ -20,7 +20,16 @@ export class JobProfileCountAggregate {
   ministry_id!: number;
 
   @Field(() => Int, { nullable: false })
+  owner_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  parent_id!: number;
+
+  @Field(() => Int, { nullable: false })
   role_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  state!: number;
 
   @Field(() => Int, { nullable: false })
   stream!: number;

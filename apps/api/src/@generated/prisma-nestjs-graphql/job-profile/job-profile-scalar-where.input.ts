@@ -1,6 +1,8 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { IntFilter } from '../prisma/int-filter.input';
+import { UuidFilter } from '../prisma/uuid-filter.input';
+import { EnumJobProfileStateFilter } from '../prisma/enum-job-profile-state-filter.input';
 import { EnumJobStreamFilter } from '../prisma/enum-job-stream-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { JsonFilter } from '../prisma/json-filter.input';
@@ -32,8 +34,17 @@ export class JobProfileScalarWhereInput {
   @Field(() => IntFilter, { nullable: true })
   ministry_id?: IntFilter;
 
+  @Field(() => UuidFilter, { nullable: true })
+  owner_id?: UuidFilter;
+
+  @Field(() => IntFilter, { nullable: true })
+  parent_id?: IntFilter;
+
   @Field(() => IntFilter, { nullable: true })
   role_id?: IntFilter;
+
+  @Field(() => EnumJobProfileStateFilter, { nullable: true })
+  state?: EnumJobProfileStateFilter;
 
   @Field(() => EnumJobStreamFilter, { nullable: true })
   stream?: EnumJobStreamFilter;

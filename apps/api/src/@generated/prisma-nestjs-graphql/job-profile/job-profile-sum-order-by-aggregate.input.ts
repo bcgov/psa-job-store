@@ -20,6 +20,9 @@ export class JobProfileSumOrderByAggregateInput {
   ministry_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  parent_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

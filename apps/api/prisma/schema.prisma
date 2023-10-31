@@ -39,6 +39,7 @@ model User {
 
   comments   Comment[]
   identities Identity[]
+  JobProfile JobProfile[]
 
   @@map("user")
 }
@@ -135,22 +136,32 @@ model JobRole {
   @@map("job_role")
 }
 
+enum JobProfileState {
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
 enum JobStream {
   CORPORATE
   MINISTRY
+  USER
 }
 
 model JobProfile {
-  id                Int  @id @default(autoincrement())
+  id                Int     @id @default(autoincrement())
   category_id       Int?
   classification_id Int
   family_id         Int?
   ministry_id       Int?
+  owner_id          String? @db.Uuid
+  parent_id         Int?
   role_id           Int?
 
+  state                    JobProfileState
   stream                   JobStream
   title                    String
-  number                   Int
+  number                   Int?
   context                  String
   overview                 String
   accountabilities         Json                              @default("{\"optional\": [], \"required\": []}") @db.JsonB
@@ -159,9 +170,12 @@ model JobProfile {
   reports_to               JobProfileReportsTo[]
 
   category       JobCategory?   @relation(fields: [category_id], references: [id])
+  children       JobProfile[]   @relation("JobProfileParentChild")
   classification Classification @relation(fields: [classification_id], references: [id])
   family         JobFamily?     @relation(fields: [family_id], references: [id])
   ministry       Ministry?      @relation(fields: [ministry_id], references: [id])
+  owner          User?          @relation(fields: [owner_id], references: [id]) // Who created the job profile
+  parent         JobProfile?    @relation("JobProfileParentChild", fields: [parent_id], references: [id])
   role           JobRole?       @relation(fields: [role_id], references: [id])
 
   @@map("job_profile")

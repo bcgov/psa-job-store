@@ -9,4 +9,7 @@ export class JobProfileCount {
 
   @Field(() => Int, { nullable: false })
   reports_to?: number;
+
+  @Field(() => Int, { nullable: false })
+  children?: number;
 }

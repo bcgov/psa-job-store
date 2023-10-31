@@ -1,9 +1,11 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
+import { JobProfileState } from '../prisma/job-profile-state.enum';
 import { JobStream } from '../prisma/job-stream.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-unchecked-update-many-without-job-profile-nested.input';
+import { JobProfileUncheckedUpdateManyWithoutParentNestedInput } from './job-profile-unchecked-update-many-without-parent-nested.input';
 
 @InputType()
 export class JobProfileUncheckedUpdateWithoutReports_toInput {
@@ -22,8 +24,17 @@ export class JobProfileUncheckedUpdateWithoutReports_toInput {
   @Field(() => Int, { nullable: true })
   ministry_id?: number;
 
+  @Field(() => String, { nullable: true })
+  owner_id?: string;
+
+  @Field(() => Int, { nullable: true })
+  parent_id?: number;
+
   @Field(() => Int, { nullable: true })
   role_id?: number;
+
+  @Field(() => JobProfileState, { nullable: true })
+  state?: keyof typeof JobProfileState;
 
   @Field(() => JobStream, { nullable: true })
   stream?: keyof typeof JobStream;
@@ -48,4 +59,7 @@ export class JobProfileUncheckedUpdateWithoutReports_toInput {
 
   @Field(() => JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput;
+
+  @Field(() => JobProfileUncheckedUpdateManyWithoutParentNestedInput, { nullable: true })
+  children?: JobProfileUncheckedUpdateManyWithoutParentNestedInput;
 }
