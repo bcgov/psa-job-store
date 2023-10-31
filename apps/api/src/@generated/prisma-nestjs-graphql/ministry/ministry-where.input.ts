@@ -3,6 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { IntFilter } from '../prisma/int-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
+import { BehaviouralCompetencyListRelationFilter } from '../behavioural-competency/behavioural-competency-list-relation-filter.input';
 
 @InputType()
 export class MinistryWhereInput {
@@ -26,4 +27,7 @@ export class MinistryWhereInput {
 
   @Field(() => JobProfileListRelationFilter, { nullable: true })
   job_profiles?: JobProfileListRelationFilter;
+
+  @Field(() => BehaviouralCompetencyListRelationFilter, { nullable: true })
+  BehaviouralCompetency?: BehaviouralCompetencyListRelationFilter;
 }

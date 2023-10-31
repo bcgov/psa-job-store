@@ -4,6 +4,7 @@ import { Int } from '@nestjs/graphql';
 import { MinistryWhereInput } from './ministry-where.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
+import { BehaviouralCompetencyListRelationFilter } from '../behavioural-competency/behavioural-competency-list-relation-filter.input';
 
 @InputType()
 export class MinistryWhereUniqueInput {
@@ -27,4 +28,7 @@ export class MinistryWhereUniqueInput {
 
   @Field(() => JobProfileListRelationFilter, { nullable: true })
   job_profiles?: JobProfileListRelationFilter;
+
+  @Field(() => BehaviouralCompetencyListRelationFilter, { nullable: true })
+  BehaviouralCompetency?: BehaviouralCompetencyListRelationFilter;
 }

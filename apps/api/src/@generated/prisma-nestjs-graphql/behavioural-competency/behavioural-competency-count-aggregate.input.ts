@@ -7,6 +7,15 @@ export class BehaviouralCompetencyCountAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  ministry_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  membership?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  group?: true;
+
+  @Field(() => Boolean, { nullable: true })
   name?: true;
 
   @Field(() => Boolean, { nullable: true })

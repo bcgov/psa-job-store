@@ -6,8 +6,6 @@ export class MinistryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getMinistries() {
-    console.log('get ministries ');
-
     return this.prisma.ministry.findMany();
   }
 

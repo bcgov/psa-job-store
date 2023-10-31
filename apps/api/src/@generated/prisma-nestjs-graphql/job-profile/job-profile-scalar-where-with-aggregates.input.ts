@@ -23,7 +23,7 @@ export class JobProfileScalarWhereWithAggregatesInput {
   id?: IntWithAggregatesFilter;
 
   @Field(() => IntWithAggregatesFilter, { nullable: true })
-  category_id?: IntWithAggregatesFilter;
+  career_group_id?: IntWithAggregatesFilter;
 
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   classification_id?: IntWithAggregatesFilter;

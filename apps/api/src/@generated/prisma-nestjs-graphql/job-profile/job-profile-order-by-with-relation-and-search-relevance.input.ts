@@ -4,7 +4,7 @@ import { SortOrder } from '../prisma/sort-order.enum';
 import { SortOrderInput } from '../prisma/sort-order.input';
 import { JobProfileBehaviouralCompetencyOrderByRelationAggregateInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-order-by-relation-aggregate.input';
 import { JobProfileReportsToOrderByRelationAggregateInput } from '../job-profile-reports-to/job-profile-reports-to-order-by-relation-aggregate.input';
-import { JobCategoryOrderByWithRelationAndSearchRelevanceInput } from '../job-category/job-category-order-by-with-relation-and-search-relevance.input';
+import { CareerGroupOrderByWithRelationAndSearchRelevanceInput } from '../career-group/career-group-order-by-with-relation-and-search-relevance.input';
 import { JobProfileOrderByRelationAggregateInput } from './job-profile-order-by-relation-aggregate.input';
 import { ClassificationOrderByWithRelationAndSearchRelevanceInput } from '../classification/classification-order-by-with-relation-and-search-relevance.input';
 import { JobFamilyOrderByWithRelationAndSearchRelevanceInput } from '../job-family/job-family-order-by-with-relation-and-search-relevance.input';
@@ -19,7 +19,7 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrderInput, { nullable: true })
-  category_id?: SortOrderInput;
+  career_group_id?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   classification_id?: keyof typeof SortOrder;
@@ -69,8 +69,8 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => JobProfileReportsToOrderByRelationAggregateInput, { nullable: true })
   reports_to?: JobProfileReportsToOrderByRelationAggregateInput;
 
-  @Field(() => JobCategoryOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
-  category?: JobCategoryOrderByWithRelationAndSearchRelevanceInput;
+  @Field(() => CareerGroupOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
+  career_group?: CareerGroupOrderByWithRelationAndSearchRelevanceInput;
 
   @Field(() => JobProfileOrderByRelationAggregateInput, { nullable: true })
   children?: JobProfileOrderByRelationAggregateInput;
