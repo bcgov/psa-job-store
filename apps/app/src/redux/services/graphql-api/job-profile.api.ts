@@ -43,18 +43,18 @@ interface Accountabilities {
   optional: string[];
   required: string[];
 }
-
-interface BehaviouralCompetencyCreate {
-  name: string;
-  description: string;
+interface BehaviouralCompetencyConnect {
+  id: number;
 }
 
-interface BehaviouralCompetency {
-  create: {
-    behavioural_competency: {
-      create: BehaviouralCompetencyCreate;
-    };
-  }[];
+interface BehaviouralCompetencyItem {
+  behavioural_competency: {
+    connect: BehaviouralCompetencyConnect;
+  };
+}
+
+interface BehaviouralCompetencies {
+  create: BehaviouralCompetencyItem[];
 }
 
 interface ClassificationConnectInput {
@@ -72,7 +72,7 @@ export interface CreateJobProfileInput {
   overview: string;
   accountabilities: Accountabilities;
   requirements: string[];
-  behavioural_competencies: BehaviouralCompetency;
+  behavioural_competencies: BehaviouralCompetencies;
   classification: ClassificationConnectInput;
   state: string;
   parent: ClassificationConnectInput;

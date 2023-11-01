@@ -12,6 +12,7 @@ import { useWizardContext } from './components/wizard.provider';
 export interface BehaviouralCompetency {
   name: string;
   description: string;
+  id: number;
 }
 
 interface Classification {
@@ -35,14 +36,17 @@ export interface CreateJobProfileInputPreTransform {
 }
 
 function transformJobProfileDataForCreation(inputData: CreateJobProfileInputPreTransform): CreateJobProfileInput {
+  // console.log('transformJobProfileDataForCreation input: ', inputData);
   const transformedData = { ...inputData } as unknown as CreateJobProfileInput;
 
   // Transform behavioural_competencies
-  if (inputData.behavioural_competencies) {
+  if (inputData.behavioural_competencies && inputData.behavioural_competencies.length > 0) {
     transformedData.behavioural_competencies = {
-      create: inputData.behavioural_competencies.map((competency) => ({
+      create: inputData.behavioural_competencies.map(({ behavioural_competency }) => ({
         behavioural_competency: {
-          create: competency.behavioural_competency,
+          connect: {
+            id: behavioural_competency.id,
+          },
         },
       })),
     };
@@ -57,6 +61,7 @@ function transformJobProfileDataForCreation(inputData: CreateJobProfileInputPreT
     };
   }
 
+  // console.log('transformJobProfileDataForCreation output: ', transformedData);
   return transformedData;
 }
 
@@ -74,7 +79,7 @@ export const WizardReviewPage = () => {
     setIsModalVisible(false);
 
     if (wizardData != null) {
-      console.log('review wizard data: ', wizardData);
+      // console.log('review wizard data: ', wizardData);
       const transformedData = transformFormData(wizardData);
       const createInput = transformedData as unknown as CreateJobProfileInputPreTransform;
       const id = createInput['id'];
@@ -82,7 +87,7 @@ export const WizardReviewPage = () => {
       createInput['state'] = 'SUBMITTED';
       const inpt = transformJobProfileDataForCreation(createInput);
       if (id) inpt.parent = { connect: { id: id } };
-      console.log('createInput: ', inpt);
+      // console.log('createInput: ', inpt);
       await createJobProfile(inpt);
     }
     navigate('/wizard/result');
