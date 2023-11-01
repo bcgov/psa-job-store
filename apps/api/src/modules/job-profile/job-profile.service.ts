@@ -60,7 +60,6 @@ export class JobProfileService {
         requirements: data.requirements,
         behavioural_competencies: data.behavioural_competencies,
         reports_to: data.reports_to,
-        category: data.category,
         children: data.children,
         classification: data.classification,
         family: data.family,
@@ -72,7 +71,6 @@ export class JobProfileService {
       include: {
         behavioural_competencies: true,
         reports_to: true,
-        category: true,
         children: true,
         classification: true,
         family: true,

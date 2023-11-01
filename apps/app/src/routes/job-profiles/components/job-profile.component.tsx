@@ -40,16 +40,16 @@ class BehaviouralCompetency {
 class JobProfileValidationModel {
   id: number;
 
-  @Length(2, 60)
+  @Length(2, 500)
   title: string;
 
   @IsNotEmpty({ message: 'Classification is required.' })
   classification: string;
 
-  @Length(2, 60)
+  @Length(2, 500)
   context: string;
 
-  @Length(2, 60)
+  @Length(2, 500)
   overview: string;
 
   required_accountabilities: string[];
