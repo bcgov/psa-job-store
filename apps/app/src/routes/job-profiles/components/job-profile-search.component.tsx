@@ -12,11 +12,7 @@ const { Search } = Input;
 
 const filters: Record<string, any>[] = [
   {
-    title: 'Job Family',
-    icon: <DownOutlined />,
-  },
-  {
-    title: 'Job Roles',
+    title: 'Ministry',
     icon: <DownOutlined />,
   },
   {
@@ -24,9 +20,13 @@ const filters: Record<string, any>[] = [
     icon: <DownOutlined />,
   },
   {
-    title: 'Ministry',
+    title: 'Job Family',
     icon: <DownOutlined />,
   },
+  // {
+  //   title: 'Job Roles',
+  //   icon: <DownOutlined />,
+  // },
 ];
 
 export const JobProfileSearch = () => {
