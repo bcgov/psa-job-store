@@ -84,7 +84,7 @@ export interface CreateJobProfileResponse {
 
 export interface GetJobProfilesArgs {
   where?: Record<string, any>;
-  orderBy?: Record<string, 'asc' | 'desc'>;
+  orderBy?: Record<string, any>;
   take?: number;
   skip?: number;
 }
