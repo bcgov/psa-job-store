@@ -46,7 +46,6 @@ COPY /apps/api/package*.json ./apps/api/
 
 WORKDIR /usr/src/apps/api/
 
-
 # openshift runs as a different user than what docker builds with
 # this fixes the issue as related to the npm cache
 RUN mkdir /.npm
