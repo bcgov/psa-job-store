@@ -74,10 +74,15 @@ export const JobProfileSearch = () => {
     const basePath = getBasePath(location.pathname);
 
     if (trimmedValue.length === 0) {
-      navigate(basePath); // Navigate without search params if the search is empty
+      searchParams.delete('search');
     } else {
-      navigate(`${basePath}?search=${trimmedValue}`); // Update the path and search param
+      searchParams.set('search', trimmedValue);
     }
+
+    navigate({
+      pathname: basePath,
+      search: searchParams.toString(),
+    });
   };
 
   const handleFilters = () => {
@@ -96,9 +101,10 @@ export const JobProfileSearch = () => {
           <Search
             onSearch={handleSearch}
             onPressEnter={(e) => handleSearch(e.currentTarget.value)}
-            placeholder="Search by job title or keyword"
-            enterButton="Find job profiles"
+            allowClear
             defaultValue={searchParams.get('search') ?? undefined}
+            enterButton="Find job profiles"
+            placeholder="Search by job title or keyword"
           />
           <Space direction="horizontal" style={{ width: '100%', overflowX: 'auto' }}>
             {filters.map((filter) => {
