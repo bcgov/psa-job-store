@@ -24,7 +24,7 @@ COPY tsconfig.json ./
 COPY packages/tsconfig ./tsconfig/
 COPY apps/api ./apps/api
 # generates the prisma client
-RUN npx prisma generate
+RUN npx -w api prisma generate
 #generates the dist folder for nest to run
 RUN npm -w api run build
 
