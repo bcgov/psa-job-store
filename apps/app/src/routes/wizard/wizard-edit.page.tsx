@@ -7,7 +7,6 @@ import { useWizardContext } from './components/wizard.provider';
 
 export const WizardEditPage = () => {
   const navigate = useNavigate();
-  // const { handleSubmit } = useForm();
 
   const { setWizardData } = useWizardContext();
 
@@ -15,10 +14,6 @@ export const WizardEditPage = () => {
     setWizardData(data);
     navigate('/wizard/review');
   };
-
-  // const handleBackClick = () => {
-  //   navigate(-1);
-  // };
 
   const { profileId } = useParams();
 
@@ -32,14 +27,6 @@ export const WizardEditPage = () => {
         submitHandler={onSubmit}
         showBackButton={true}
       />
-      {/* <form onSubmit={handleSubmit(onSubmit)}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-          <Button onClick={handleBackClick}>Go Back</Button>
-          <Button type="primary" htmlType="submit">
-            Review Profile
-          </Button>
-        </div>
-      </form> */}
     </WizardPageWrapper>
   );
 };
