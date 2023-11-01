@@ -212,7 +212,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     }
   }, [data, isLoading, profileData]);
 
-  const { register, control, handleSubmit, reset } = useForm<JobProfileValidationModel>({
+  const { register, control, reset } = useForm<JobProfileValidationModel>({
     resolver: classValidatorResolver(JobProfileValidationModel),
     mode: 'onChange',
   });
@@ -237,7 +237,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     }
   }, [effectiveData, isLoading]);
 
-  const renderField = (fieldKey: string, displayValue: any, editableComponent: JSX.Element) =>
+  const renderField = (displayValue: any, editableComponent: JSX.Element) =>
     config?.isEditable ?? false ? editableComponent : displayValue;
 
   const classificationOptions = ['Clerk 15', 'Clerk 12', 'Clerk 9'];
@@ -280,7 +280,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'title',
       label: 'Title',
       children: renderField(
-        'title',
         effectiveData?.title,
         // <input type="text" {...register('title')}></input>,
         <FormItem name="title" control={control}>
@@ -293,7 +292,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'classification',
       label: 'Classification',
       children: renderField(
-        'classification',
         `${effectiveData?.classification.occupation_group.name} ${effectiveData?.classification.grid.name}`,
         <FormItem name="classification" control={control}>
           <Select {...register('classification')}>
@@ -325,7 +323,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'context',
       label: 'Job Context',
       children: renderField(
-        'context',
         effectiveData?.context,
         // <input type="text" {...register('context')}></input>,
         <FormItem name="context" control={control}>
@@ -338,7 +335,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'overview',
       label: 'Job Overview',
       children: renderField(
-        'overview',
         effectiveData?.overview,
         // <input type="text" {...register('overview')}></input>,
         <FormItem name="overview" control={control}>
@@ -351,7 +347,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'required_accountabilities',
       label: 'Required Accountabilities',
       children: renderField(
-        'required_accountabilities',
         <ul>{effectiveData?.accountabilities.required.map((accountability) => <li>{accountability}</li>)}</ul>,
         <>
           <List
@@ -390,7 +385,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'optional_accountabilities',
       label: 'Optional Accountabilities',
       children: renderField(
-        'optional_accountabilities',
         <ul>{effectiveData?.accountabilities.optional.map((accountability) => <li>{accountability}</li>)}</ul>,
         <>
           <List
@@ -429,7 +423,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'requirements',
       label: 'Minimum Job Requirements',
       children: renderField(
-        'requirements',
         <ul>{effectiveData?.requirements.map((requirement) => <li>{requirement}</li>)}</ul>,
         <>
           <List
