@@ -544,7 +544,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     <Form
       key={renderKey}
       onFinish={(data) => {
-        console.log('onFinish, submitHandler, data: ', submitHandler, data);
         if (submitHandler) submitHandler(data);
       }}
     >

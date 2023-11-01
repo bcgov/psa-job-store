@@ -9,7 +9,7 @@ import { JsonFilter } from '../prisma/json-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
 import { JobProfileBehaviouralCompetencyListRelationFilter } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-list-relation-filter.input';
 import { JobProfileReportsToListRelationFilter } from '../job-profile-reports-to/job-profile-reports-to-list-relation-filter.input';
-import { JobCategoryRelationFilter } from '../job-category/job-category-relation-filter.input';
+import { CareerGroupRelationFilter } from '../career-group/career-group-relation-filter.input';
 import { JobProfileListRelationFilter } from './job-profile-list-relation-filter.input';
 import { ClassificationRelationFilter } from '../classification/classification-relation-filter.input';
 import { JobFamilyRelationFilter } from '../job-family/job-family-relation-filter.input';
@@ -33,7 +33,7 @@ export class JobProfileWhereInput {
   id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
-  category_id?: IntFilter;
+  career_group_id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
   classification_id?: IntFilter;
@@ -83,8 +83,8 @@ export class JobProfileWhereInput {
   @Field(() => JobProfileReportsToListRelationFilter, { nullable: true })
   reports_to?: JobProfileReportsToListRelationFilter;
 
-  @Field(() => JobCategoryRelationFilter, { nullable: true })
-  category?: JobCategoryRelationFilter;
+  @Field(() => CareerGroupRelationFilter, { nullable: true })
+  career_group?: CareerGroupRelationFilter;
 
   @Field(() => JobProfileListRelationFilter, { nullable: true })
   children?: JobProfileListRelationFilter;

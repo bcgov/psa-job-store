@@ -6,7 +6,7 @@ import { JobStream } from '../prisma/job-stream.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
-import { JobCategory } from '../job-category/job-category.model';
+import { CareerGroup } from '../career-group/career-group.model';
 import { Classification } from '../classification/classification.model';
 import { JobFamily } from '../job-family/job-family.model';
 import { Ministry } from '../ministry/ministry.model';
@@ -19,7 +19,7 @@ export class JobProfile {
   id!: number;
 
   @Field(() => Int, { nullable: true })
-  category_id!: number | null;
+  career_group_id!: number | null;
 
   @Field(() => Int, { nullable: false })
   classification_id!: number;
@@ -69,8 +69,8 @@ export class JobProfile {
   @Field(() => [JobProfileReportsTo], { nullable: true })
   reports_to?: Array<JobProfileReportsTo>;
 
-  @Field(() => JobCategory, { nullable: true })
-  category?: JobCategory | null;
+  @Field(() => CareerGroup, { nullable: true })
+  career_group?: CareerGroup | null;
 
   @Field(() => [JobProfile], { nullable: true })
   children?: Array<JobProfile>;

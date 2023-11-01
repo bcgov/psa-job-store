@@ -10,7 +10,7 @@ export class JobProfileMinAggregate {
   id?: number;
 
   @Field(() => Int, { nullable: true })
-  category_id?: number;
+  career_group_id?: number;
 
   @Field(() => Int, { nullable: true })
   classification_id?: number;

@@ -8,7 +8,7 @@ export class JobProfileAvgAggregate {
   id?: number;
 
   @Field(() => Float, { nullable: true })
-  category_id?: number;
+  career_group_id?: number;
 
   @Field(() => Float, { nullable: true })
   classification_id?: number;

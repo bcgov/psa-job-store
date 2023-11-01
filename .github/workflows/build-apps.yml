@@ -89,3 +89,4 @@ jobs:
             KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
             VITE_KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
             VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
+            KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}

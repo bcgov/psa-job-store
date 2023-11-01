@@ -4,6 +4,7 @@ import {
   JobProfile,
   JobProfileBehaviouralCompetency,
   JobProfileCreateInput,
+  JobProfileReportsTo,
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JobFamilyService } from '../job-family/job-family.service';
@@ -40,5 +41,10 @@ export class JobProfileResolver {
     data.owner = { connect: { id: userId } };
     const newJobProfile = await this.jobProfileService.createJobProfile(data);
     return newJobProfile.id;
+  }
+
+  @ResolveField(() => JobProfileReportsTo)
+  async reports_to(@Parent() { id }: JobProfile) {
+    return this.jobProfileService.getReportsTo(id);
   }
 }

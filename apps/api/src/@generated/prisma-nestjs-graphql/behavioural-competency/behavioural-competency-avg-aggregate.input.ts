@@ -5,4 +5,7 @@ import { InputType } from '@nestjs/graphql';
 export class BehaviouralCompetencyAvgAggregateInput {
   @Field(() => Boolean, { nullable: true })
   id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  ministry_id?: true;
 }

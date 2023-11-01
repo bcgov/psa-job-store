@@ -104,8 +104,28 @@ export const JobProfileSearch = () => {
             {filters.map((filter) => {
               return (
                 <Select
+                  allowClear
                   placeholder={filter.title}
                   options={filterData[filter.title]}
+                  onClear={() => {
+                    switch (filter.title) {
+                      case 'Job Family':
+                        searchParams.delete('job-family');
+                        break;
+                      case 'Job Roles':
+                        searchParams.delete('job-role');
+                        break;
+                      case 'Classification':
+                        searchParams.delete('classification');
+                        break;
+                      case 'Ministry':
+                        searchParams.delete('ministry');
+                        break;
+                      default:
+                        break;
+                    }
+                    handleFilters();
+                  }}
                   onChange={(value: string) => {
                     switch (filter.title) {
                       case 'Job Family':
@@ -115,10 +135,9 @@ export const JobProfileSearch = () => {
                         value ? searchParams.set('job-role', value) : searchParams.delete('job-role');
                         break;
                       case 'Classification':
-                        value ? searchParams.set('classification', value) : searchParams.delete('job-family');
+                        value ? searchParams.set('classification', value) : searchParams.delete('classification');
                         break;
                       case 'Ministry':
-                        console.log('setting ministry to ', value);
                         value ? searchParams.set('ministry', value) : searchParams.delete('ministry');
                         break;
                       default:

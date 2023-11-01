@@ -5,7 +5,7 @@ import { JobStream } from '../prisma/job-stream.enum';
 import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-update-many-without-job-profile-nested.input';
-import { JobCategoryUpdateOneWithoutProfilesNestedInput } from '../job-category/job-category-update-one-without-profiles-nested.input';
+import { CareerGroupUpdateOneWithoutProfilesNestedInput } from '../career-group/career-group-update-one-without-profiles-nested.input';
 import { JobProfileUpdateManyWithoutParentNestedInput } from './job-profile-update-many-without-parent-nested.input';
 import { ClassificationUpdateOneRequiredWithoutJob_profilesNestedInput } from '../classification/classification-update-one-required-without-job-profiles-nested.input';
 import { JobFamilyUpdateOneWithoutProfilesNestedInput } from '../job-family/job-family-update-one-without-profiles-nested.input';
@@ -43,8 +43,8 @@ export class JobProfileUpdateWithoutReports_toInput {
   @Field(() => JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput;
 
-  @Field(() => JobCategoryUpdateOneWithoutProfilesNestedInput, { nullable: true })
-  category?: JobCategoryUpdateOneWithoutProfilesNestedInput;
+  @Field(() => CareerGroupUpdateOneWithoutProfilesNestedInput, { nullable: true })
+  career_group?: CareerGroupUpdateOneWithoutProfilesNestedInput;
 
   @Field(() => JobProfileUpdateManyWithoutParentNestedInput, { nullable: true })
   children?: JobProfileUpdateManyWithoutParentNestedInput;
