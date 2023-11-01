@@ -4,7 +4,32 @@ import { graphqlApi } from '.';
 
 export interface JobProfileModel {
   id: number;
-  classification_id: number;
+  accountabilities: {
+    optional: string[];
+    required: string[];
+  };
+  behavioural_competencies: [
+    {
+      behavioural_competency: {
+        id: number;
+        name: string;
+        description: string;
+      };
+    },
+  ];
+  classification: {
+    id: number;
+    grid: {
+      id: number;
+      name: string;
+    };
+    occupation_group: {
+      id: number;
+      code: string;
+      name: string;
+    };
+  };
+  requirements: string[];
   ministry_id: number;
   family_id: number;
   stream: string;
@@ -42,14 +67,61 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfiles($where: JobProfileWhereInput) {
               jobProfiles(where: $where) {
                 id
-                classification_id
-                ministry_id
-                family_id
                 stream
                 title
                 number
                 context
                 overview
+                accountabilities
+                requirements
+                behavioural_competencies {
+                  behavioural_competency {
+                    id
+                    name
+                    description
+                  }
+                }
+                classification {
+                  id
+                  occupation_group {
+                    id
+                    code
+                    name
+                  }
+                  grid {
+                    id
+                    name
+                  }
+                }
+                family {
+                  id
+                  name
+                }
+                role {
+                  id
+                  name
+                }
+                career_group {
+                  id
+                  name
+                }
+                ministry {
+                  id
+                  code
+                  name
+                }
+                reports_to {
+                  classification {
+                    id
+                    grid {
+                      name
+                    }
+                    occupation_group {
+                      code
+                      name
+                    }
+                  }
+                }
               }
             }
           `,
@@ -66,14 +138,56 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfile {
               jobProfile(id: "${args.id}") {
                 id
-                classification_id
-                ministry_id
-                family_id
                 stream
                 title
                 number
                 context
                 overview
+                accountabilities
+                requirements
+                behavioural_competencies {
+                  behavioural_competency {
+                    id
+                    name
+                    description
+                  }
+                }
+                classification {
+                  id
+                  occupation_group {
+                    id
+                    code
+                    name
+                  }
+                  grid {
+                    id
+                    name
+                  }
+                }
+                family {
+                  id
+                  name
+                }
+                role {
+                  id
+                  name
+                }
+                career_group {
+                  id
+                  name
+                }
+                ministry {
+                  id
+                  code
+                  name
+                }
+                reports_to {
+                  classification {
+                    id
+                    grid_id
+                    occupation_group_id
+                  }
+                }
               }
             }
           `,

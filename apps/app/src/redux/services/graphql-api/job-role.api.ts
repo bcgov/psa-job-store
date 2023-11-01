@@ -14,7 +14,7 @@ export interface GetJobRolesResponse {
 
 export const jobRoleApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
-    getJobRoles: build.query<GetJobRolesResponse, null>({
+    getJobRoles: build.query<GetJobRolesResponse, void>({
       query: () => {
         return {
           document: gql`

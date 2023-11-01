@@ -1,12 +1,23 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
-import { JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutBehavioral_competencyNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-unchecked-update-many-without-behavioral-competency-nested.input';
+import { BehaviouralCompetencyMembership } from '../prisma/behavioural-competency-membership.enum';
+import { BehaviouralCompetencyGroup } from '../prisma/behavioural-competency-group.enum';
+import { JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutBehavioural_competencyNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-unchecked-update-many-without-behavioural-competency-nested.input';
 
 @InputType()
 export class BehaviouralCompetencyUncheckedUpdateInput {
   @Field(() => Int, { nullable: true })
   id?: number;
+
+  @Field(() => Int, { nullable: true })
+  ministry_id?: number;
+
+  @Field(() => BehaviouralCompetencyMembership, { nullable: true })
+  membership?: keyof typeof BehaviouralCompetencyMembership;
+
+  @Field(() => BehaviouralCompetencyGroup, { nullable: true })
+  group?: keyof typeof BehaviouralCompetencyGroup;
 
   @Field(() => String, { nullable: true })
   name?: string;
@@ -14,8 +25,8 @@ export class BehaviouralCompetencyUncheckedUpdateInput {
   @Field(() => String, { nullable: true })
   description?: string;
 
-  @Field(() => JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutBehavioral_competencyNestedInput, {
+  @Field(() => JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutBehavioural_competencyNestedInput, {
     nullable: true,
   })
-  job_profiles?: JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutBehavioral_competencyNestedInput;
+  job_profiles?: JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutBehavioural_competencyNestedInput;
 }

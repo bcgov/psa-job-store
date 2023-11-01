@@ -6,17 +6,33 @@ export class ClassificationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getClassifications() {
-    return this.prisma.classification.findMany();
-  }
-
-  async getResolvedClassifications() {
-    const classificationsWithGrid = this.prisma.classification.findMany({
+    return this.prisma.classification.findMany({
       include: {
         grid: true,
         occupation_group: true,
+        dependent_job_profiles: true,
       },
     });
+  }
 
-    return classificationsWithGrid;
+  async getClassification(id: number) {
+    return this.prisma.classification.findUnique({
+      where: { id },
+      include: {
+        grid: true,
+        occupation_group: true,
+        dependent_job_profiles: true,
+      },
+    });
+  }
+
+  async getGrid(id: number) {
+    return this.prisma.grid.findUnique({
+      where: { id },
+    });
+  }
+
+  async getOccupationGroup(id: number) {
+    return this.prisma.occupationGroup.findUnique({ where: { id } });
   }
 }

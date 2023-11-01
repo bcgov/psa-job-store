@@ -48,6 +48,5 @@ RUN set -x \
     && chgrp -R 0 /var/run/ && chmod -R g=u /var/run \
     && rm /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh /docker-entrypoint.d/30-tune-worker-processes.sh
 
-
 EXPOSE 5173
 CMD ["nginx", "-g", "daemon off;"]

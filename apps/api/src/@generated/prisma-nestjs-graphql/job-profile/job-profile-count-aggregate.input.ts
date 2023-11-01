@@ -7,7 +7,7 @@ export class JobProfileCountAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  category_id?: true;
+  career_group_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   classification_id?: true;
@@ -19,7 +19,16 @@ export class JobProfileCountAggregateInput {
   ministry_id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  owner_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  parent_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   role_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  state?: true;
 
   @Field(() => Boolean, { nullable: true })
   stream?: true;
@@ -37,10 +46,7 @@ export class JobProfileCountAggregateInput {
   overview?: true;
 
   @Field(() => Boolean, { nullable: true })
-  accountabilities_required?: true;
-
-  @Field(() => Boolean, { nullable: true })
-  accountabilities_optional?: true;
+  accountabilities?: true;
 
   @Field(() => Boolean, { nullable: true })
   requirements?: true;

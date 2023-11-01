@@ -39,6 +39,7 @@ model User {
 
   comments   Comment[]
   identities Identity[]
+  JobProfile JobProfile[]
 
   @@map("user")
 }
@@ -56,12 +57,29 @@ model Identity {
   @@map("identity")
 }
 
+enum BehaviouralCompetencyMembership {
+  EXCLUDED
+  INCLUDED
+  INDIGENOUS
+}
+
+enum BehaviouralCompetencyGroup {
+  ACHIEVING_BUSINESS_RESULTS
+  INTERPERSONAL_RELATIONSHIPS
+  LEADING_PEOPLE
+  PERSONAL_EFFECTIVENESS
+}
+
 model BehaviouralCompetency {
-  id          Int    @id @default(autoincrement())
+  id          Int                             @id @default(autoincrement())
+  ministry_id Int?
+  membership  BehaviouralCompetencyMembership
+  group       BehaviouralCompetencyGroup
   name        String
   description String
 
   job_profiles JobProfileBehaviouralCompetency[]
+  ministry     Ministry?                         @relation(fields: [ministry_id], references: [id])
 
   @@map("behavioural_competency")
 }
@@ -71,7 +89,8 @@ model Ministry {
   code String
   name String
 
-  job_profiles JobProfile[]
+  job_profiles          JobProfile[]
+  BehaviouralCompetency BehaviouralCompetency[]
 
   @@map("ministry")
 }
@@ -108,13 +127,13 @@ model OccupationGroup {
   @@map("occupation_group")
 }
 
-model JobCategory {
+model CareerGroup {
   id   Int    @id @default(autoincrement())
   name String
 
   profiles JobProfile[]
 
-  @@map("job_category")
+  @@map("career_group")
 }
 
 model JobFamily {
@@ -135,34 +154,46 @@ model JobRole {
   @@map("job_role")
 }
 
+enum JobProfileState {
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
 enum JobStream {
   CORPORATE
   MINISTRY
+  USER
 }
 
 model JobProfile {
-  id                Int  @id @default(autoincrement())
-  category_id       Int?
+  id                Int     @id @default(autoincrement())
+  career_group_id   Int?
   classification_id Int
   family_id         Int?
   ministry_id       Int?
+  owner_id          String? @db.Uuid
+  parent_id         Int?
   role_id           Int?
 
-  stream                    JobStream
-  title                     String
-  number                    Int
-  context                   String
-  overview                  String
-  accountabilities_required String[]
-  accountabilities_optional String[]
-  requirements              String[]
-  behavioural_competencies  JobProfileBehaviouralCompetency[]
-  reports_to                JobProfileReportsTo[]
+  state                    JobProfileState
+  stream                   JobStream
+  title                    String
+  number                   Int?
+  context                  String
+  overview                 String
+  accountabilities         Json                              @default("{\"optional\": [], \"required\": []}") @db.JsonB
+  requirements             String[]
+  behavioural_competencies JobProfileBehaviouralCompetency[]
+  reports_to               JobProfileReportsTo[]
 
-  category       JobCategory?   @relation(fields: [category_id], references: [id])
+  career_group   CareerGroup?   @relation(fields: [career_group_id], references: [id])
+  children       JobProfile[]   @relation("JobProfileParentChild")
   classification Classification @relation(fields: [classification_id], references: [id])
   family         JobFamily?     @relation(fields: [family_id], references: [id])
   ministry       Ministry?      @relation(fields: [ministry_id], references: [id])
+  owner          User?          @relation(fields: [owner_id], references: [id]) // Who created the job profile
+  parent         JobProfile?    @relation("JobProfileParentChild", fields: [parent_id], references: [id])
   role           JobRole?       @relation(fields: [role_id], references: [id])
 
   @@map("job_profile")
@@ -172,8 +203,8 @@ model JobProfileBehaviouralCompetency {
   behavioural_competency_id Int
   job_profile_id            Int
 
-  behavioral_competency BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
-  job_profile           JobProfile            @relation(fields: [job_profile_id], references: [id])
+  behavioural_competency BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
+  job_profile            JobProfile            @relation(fields: [job_profile_id], references: [id])
 
   @@id([behavioural_competency_id, job_profile_id])
   @@map("job_profile_behavioural_competency")

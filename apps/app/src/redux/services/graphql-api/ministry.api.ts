@@ -14,7 +14,7 @@ export interface GetMinistrysResponse {
 
 export const ministryApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
-    getMinistries: build.query<GetMinistrysResponse, null>({
+    getMinistries: build.query<GetMinistrysResponse, void>({
       query: () => {
         return {
           document: gql`

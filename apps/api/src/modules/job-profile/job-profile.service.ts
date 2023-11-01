@@ -1,26 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import { FindManyJobProfileArgs } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
+import { ClassificationService } from '../classification/classification.service';
 
 @Injectable()
 export class JobProfileService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly classificationService: ClassificationService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async getJobProfiles(args?: FindManyJobProfileArgs) {
-    return this.prisma.jobProfile.findMany(args);
+    return this.prisma.jobProfile.findMany({
+      ...args,
+      include: {
+        behavioural_competencies: true,
+        career_group: true,
+        classification: true,
+        family: true,
+        ministry: true,
+        reports_to: true,
+        role: true,
+      },
+    });
   }
 
   async getJobProfile(id: number) {
-    return this.prisma.jobProfile.findUnique({ where: { id } });
-  }
-
-  async getClassification(id: number) {
-    return this.prisma.classification.findUnique({
+    return this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
-        grid: true,
-        job_profiles: true,
-        occupation_group: true,
+        career_group: true,
+        classification: true,
+        family: true,
+        ministry: true,
+        role: true,
+      },
+    });
+  }
+
+  async getBehaviouralCompetencies(job_profile_id: number) {
+    return this.prisma.jobProfileBehaviouralCompetency.findMany({
+      where: { job_profile_id },
+      include: {
+        behavioural_competency: true,
+      },
+    });
+  }
+
+  async getReportsTo(job_profile_id: number) {
+    return this.prisma.jobProfileReportsTo.findMany({
+      where: { job_profile_id },
+      include: {
+        classification: true,
       },
     });
   }

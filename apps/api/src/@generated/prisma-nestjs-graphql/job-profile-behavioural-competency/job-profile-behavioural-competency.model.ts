@@ -13,7 +13,7 @@ export class JobProfileBehaviouralCompetency {
   job_profile_id!: number;
 
   @Field(() => BehaviouralCompetency, { nullable: false })
-  behavioral_competency?: BehaviouralCompetency;
+  behavioural_competency?: BehaviouralCompetency;
 
   @Field(() => JobProfile, { nullable: false })
   job_profile?: JobProfile;

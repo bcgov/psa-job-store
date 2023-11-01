@@ -7,7 +7,7 @@ export class JobProfileSumAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  category_id?: true;
+  career_group_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   classification_id?: true;
@@ -17,6 +17,9 @@ export class JobProfileSumAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   ministry_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  parent_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   role_id?: true;

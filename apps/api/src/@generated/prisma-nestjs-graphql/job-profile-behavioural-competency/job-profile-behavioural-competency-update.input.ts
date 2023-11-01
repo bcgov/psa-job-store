@@ -6,7 +6,7 @@ import { JobProfileUpdateOneRequiredWithoutBehavioural_competenciesNestedInput }
 @InputType()
 export class JobProfileBehaviouralCompetencyUpdateInput {
   @Field(() => BehaviouralCompetencyUpdateOneRequiredWithoutJob_profilesNestedInput, { nullable: true })
-  behavioral_competency?: BehaviouralCompetencyUpdateOneRequiredWithoutJob_profilesNestedInput;
+  behavioural_competency?: BehaviouralCompetencyUpdateOneRequiredWithoutJob_profilesNestedInput;
 
   @Field(() => JobProfileUpdateOneRequiredWithoutBehavioural_competenciesNestedInput, { nullable: true })
   job_profile?: JobProfileUpdateOneRequiredWithoutBehavioural_competenciesNestedInput;

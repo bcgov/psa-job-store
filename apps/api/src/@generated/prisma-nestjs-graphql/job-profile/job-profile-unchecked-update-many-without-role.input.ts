@@ -1,7 +1,9 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
+import { JobProfileState } from '../prisma/job-profile-state.enum';
 import { JobStream } from '../prisma/job-stream.enum';
+import { GraphQLJSON } from 'graphql-type-json';
 
 @InputType()
 export class JobProfileUncheckedUpdateManyWithoutRoleInput {
@@ -9,7 +11,7 @@ export class JobProfileUncheckedUpdateManyWithoutRoleInput {
   id?: number;
 
   @Field(() => Int, { nullable: true })
-  category_id?: number;
+  career_group_id?: number;
 
   @Field(() => Int, { nullable: true })
   classification_id?: number;
@@ -19,6 +21,15 @@ export class JobProfileUncheckedUpdateManyWithoutRoleInput {
 
   @Field(() => Int, { nullable: true })
   ministry_id?: number;
+
+  @Field(() => String, { nullable: true })
+  owner_id?: string;
+
+  @Field(() => Int, { nullable: true })
+  parent_id?: number;
+
+  @Field(() => JobProfileState, { nullable: true })
+  state?: keyof typeof JobProfileState;
 
   @Field(() => JobStream, { nullable: true })
   stream?: keyof typeof JobStream;
@@ -35,11 +46,8 @@ export class JobProfileUncheckedUpdateManyWithoutRoleInput {
   @Field(() => String, { nullable: true })
   overview?: string;
 
-  @Field(() => [String], { nullable: true })
-  accountabilities_required?: Array<string>;
-
-  @Field(() => [String], { nullable: true })
-  accountabilities_optional?: Array<string>;
+  @Field(() => GraphQLJSON, { nullable: true })
+  accountabilities?: any;
 
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;

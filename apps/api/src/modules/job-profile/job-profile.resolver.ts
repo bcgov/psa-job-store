@@ -1,10 +1,19 @@
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { Classification, FindManyJobProfileArgs, JobProfile } from '../../@generated/prisma-nestjs-graphql';
+import {
+  FindManyJobProfileArgs,
+  JobProfile,
+  JobProfileBehaviouralCompetency,
+  JobProfileReportsTo,
+} from '../../@generated/prisma-nestjs-graphql';
+import { JobFamilyService } from '../job-family/job-family.service';
 import { JobProfileService } from './job-profile.service';
 
 @Resolver(() => JobProfile)
 export class JobProfileResolver {
-  constructor(private readonly jobProfileService: JobProfileService) {}
+  constructor(
+    private readonly jobFamilyService: JobFamilyService,
+    private readonly jobProfileService: JobProfileService,
+  ) {}
 
   @Query(() => [JobProfile], { name: 'jobProfiles' })
   async getJobProfiles(@Args() args?: FindManyJobProfileArgs) {
@@ -16,8 +25,13 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfile(+id);
   }
 
-  @ResolveField(() => Classification)
-  async classification(@Parent() jobProfile: JobProfile) {
-    return this.jobProfileService.getClassification(jobProfile.classification_id);
+  @ResolveField(() => JobProfileBehaviouralCompetency)
+  async behavioural_competencies(@Parent() { id }: JobProfile) {
+    return this.jobProfileService.getBehaviouralCompetencies(id);
+  }
+
+  @ResolveField(() => JobProfileReportsTo)
+  async reports_to(@Parent() { id }: JobProfile) {
+    return this.jobProfileService.getReportsTo(id);
   }
 }
