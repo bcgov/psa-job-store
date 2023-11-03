@@ -55,15 +55,17 @@ class JobProfileValidationModel {
   @Length(2, 500)
   overview: string;
 
-  required_accountabilities: string[];
+  required_accountabilities: Array<{ value: string }>;
 
-  optional_accountabilities: string[];
+  optional_accountabilities: Array<{ value: string }>;
 
-  requirements: string[];
+  requirements: Array<{ value: string }>;
 
   @ValidateNested({ each: true })
   @Type(() => BehaviouralCompetency)
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
+
+  test?: Array<{ value: string }>;
 }
 
 interface InputData {
@@ -217,6 +219,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     mode: 'onChange',
   });
 
+  // todo: usage of this approach is undesirable, however it fixes various render issues
+  // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
+  // of this state
   const [renderKey, setRenderKey] = useState(0);
 
   useEffect(() => {
@@ -228,9 +233,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         overview: effectiveData?.overview,
         classification:
           effectiveData?.classification.occupation_group.name + ' ' + effectiveData?.classification.grid.name,
-        required_accountabilities: effectiveData?.accountabilities.required || [],
-        optional_accountabilities: effectiveData?.accountabilities.optional || [],
-        requirements: effectiveData?.requirements || [],
+        required_accountabilities: effectiveData?.accountabilities.required
+          ? effectiveData.accountabilities.required.map((item) => ({ value: item }))
+          : [],
+        optional_accountabilities: effectiveData?.accountabilities.optional
+          ? effectiveData.accountabilities.optional.map((item) => ({ value: item }))
+          : [],
+        requirements: effectiveData?.requirements ? effectiveData.requirements.map((item) => ({ value: item })) : [],
         behavioural_competencies: effectiveData?.behavioural_competencies || [],
       });
       setRenderKey((prevKey) => prevKey + 1);
@@ -243,6 +252,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const classificationOptions = ['Clerk 15', 'Clerk 12', 'Clerk 9'];
 
   // Required Accountability Fields
+
   const {
     fields: acc_req_fields,
     append: acc_req_append,
@@ -251,6 +261,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     control,
     name: 'required_accountabilities' as any,
   });
+
+  console.log('acc_req_fields: ', acc_req_fields);
 
   // Optional Accountability Fields
   const {
@@ -270,6 +282,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     control,
     name: 'requirements' as any,
   });
+
+  // State to force re-render
+  const [forceRerenderi, forceRerender] = useState(0);
+
+  const handleRerender = () => {
+    // Updating the state to a new object forces a re-render
+    setRenderKey((prevKey) => prevKey + 1);
+  };
 
   if (isLoading || renderKey === 0) {
     return <p>Loading...</p>; // or render a spinner/loader
@@ -354,14 +374,21 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             renderItem={(field, index) => (
               <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                 <FormItem
-                  name={`required_accountabilities.${index}`}
+                  name={`required_accountabilities.${index}.value`}
                   control={control}
                   style={{ flex: 1, marginRight: '10px' }}
                 >
-                  <TextArea defaultValue={(field as any).value} style={{ width: '100%' }} />
+                  <TextArea style={{ width: '100%' }} />
                 </FormItem>
 
-                <Button type="primary" danger onClick={() => acc_req_remove(index)}>
+                <Button
+                  type="primary"
+                  danger
+                  onClick={() => {
+                    acc_req_remove(index);
+                    setRenderKey((prevKey) => prevKey + 1); // fixes issue where deleting item doesn't render properly
+                  }}
+                >
                   Delete
                 </Button>
               </List.Item>
@@ -371,7 +398,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <Button
             type="dashed"
             onClick={() => {
-              acc_req_append('');
+              acc_req_append({ value: '' });
             }}
             style={{ marginTop: '20px' }}
           >
@@ -392,14 +419,21 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             renderItem={(field, index) => (
               <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                 <FormItem
-                  name={`optional_accountabilities.${index}`}
+                  name={`optional_accountabilities.${index}.value`}
                   control={control}
                   style={{ flex: 1, marginRight: '10px' }}
                 >
-                  <TextArea defaultValue={(field as any).value} style={{ width: '100%' }} />
+                  <TextArea style={{ width: '100%' }} />
                 </FormItem>
 
-                <Button type="primary" danger onClick={() => acc_opt_remove(index)}>
+                <Button
+                  type="primary"
+                  danger
+                  onClick={() => {
+                    acc_opt_remove(index);
+                    setRenderKey((prevKey) => prevKey + 1); // fixes issue where deleting item doesn't render properly
+                  }}
+                >
                   Delete
                 </Button>
               </List.Item>
@@ -409,7 +443,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <Button
             type="dashed"
             onClick={() => {
-              acc_opt_append('');
+              acc_opt_append({ value: '' });
             }}
             style={{ marginTop: '20px' }}
           >
@@ -429,11 +463,22 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             dataSource={requirement_fields}
             renderItem={(field, index) => (
               <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <FormItem name={`requirements.${index}`} control={control} style={{ flex: 1, marginRight: '10px' }}>
-                  <TextArea defaultValue={(field as any).value} style={{ width: '100%' }} />
+                <FormItem
+                  name={`requirements.${index}.value`}
+                  control={control}
+                  style={{ flex: 1, marginRight: '10px' }}
+                >
+                  <TextArea style={{ width: '100%' }} />
                 </FormItem>
 
-                <Button type="primary" danger onClick={() => requirement_remove(index)}>
+                <Button
+                  type="primary"
+                  danger
+                  onClick={() => {
+                    requirement_remove(index);
+                    setRenderKey((prevKey) => prevKey + 1); // fixes issue where deleting item doesn't render properly
+                  }}
+                >
                   Delete
                 </Button>
               </List.Item>
@@ -443,7 +488,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <Button
             type="dashed"
             onClick={() => {
-              requirement_append('');
+              requirement_append({ value: '' });
             }}
             style={{ marginTop: '20px' }}
           >
@@ -470,7 +515,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     control={control}
                     hidden
                   >
-                    <Input defaultValue={id} />
+                    <Input />
                   </FormItem>
                   {/* Todo: this is just to pass data to next screen for display, refactor this once editing capability is implemented */}
                   <FormItem
@@ -479,7 +524,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     control={control}
                     style={{ flex: 1, marginRight: '10px' }}
                   >
-                    <Input defaultValue={name} placeholder="Name" style={{ width: '100%' }} />
+                    <Input placeholder="Name" style={{ width: '100%' }} />
                   </FormItem>
                   <FormItem
                     hidden
@@ -487,7 +532,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     control={control}
                     style={{ flex: 2, marginRight: '10px' }}
                   >
-                    <TextArea defaultValue={description} placeholder="Description" style={{ width: '100%' }} />
+                    <TextArea placeholder="Description" style={{ width: '100%' }} />
                   </FormItem>
                 </li>
               );
@@ -522,24 +567,21 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   );
 
   return config?.isEditable ? (
-    <Form
-      key={renderKey}
-      onFinish={(data) => {
-        if (submitHandler) submitHandler(data);
-      }}
-    >
-      <FormItem name="id" control={control} hidden>
-        <Input defaultValue={effectiveData?.id} />
-      </FormItem>
-      {renderContent()}
-      <WizardControls submitText={submitText} showBackButton={showBackButton} />
-      {/* <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-        {showBackButton ? <Button onClick={handleBackClick}>Go Back</Button> : null}
-        <Button type="primary" htmlType="submit">
-          {submitText}
-        </Button>
-      </div> */}
-    </Form>
+    <>
+      <button onClick={handleRerender}>Re-render</button>
+      <Form
+        key={renderKey}
+        onFinish={(data) => {
+          if (submitHandler) submitHandler(data);
+        }}
+      >
+        <FormItem name="id" control={control} hidden>
+          <Input />
+        </FormItem>
+        {renderContent()}
+        <WizardControls submitText={submitText} showBackButton={showBackButton} />
+      </Form>
+    </>
   ) : (
     renderContent()
   );
