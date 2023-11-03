@@ -3,4 +3,4 @@ kind: Route
 metadata:
     name: app
 spec:
-  host: pjs.apps.silver.devops.gov.bc.ca
+  host: pjs-dev.apps.silver.devops.gov.bc.ca
