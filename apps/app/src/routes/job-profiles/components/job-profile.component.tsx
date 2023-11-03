@@ -200,16 +200,20 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const initialData = profileData ? transformFormData(profileData) : null;
   const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
 
-  // useEffect to trigger the job profile fetch based on the resolvedId
   useEffect(() => {
-    if (!profileData && resolvedId) {
+    // If profileData exists, use it to set the form state
+    if (profileData) {
+      setEffectiveData(transformFormData(profileData));
+    } else if (!profileData && resolvedId) {
+      // If no profileData is provided and an id exists, fetch the data
       triggerGetJobProfile({ id: +resolvedId });
     }
-  }, [resolvedId, profileData]);
+  }, [resolvedId, profileData, triggerGetJobProfile]);
 
   // useEffect to set effectiveData when data is fetched from the API
   useEffect(() => {
-    if (data && !isLoading) {
+    if (!profileData && data && !isLoading) {
+      // Only set effectiveData from fetched data if profileData is not provided
       setEffectiveData(data.jobProfile);
     }
   }, [data, isLoading, profileData]);
@@ -262,8 +266,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     name: 'required_accountabilities' as any,
   });
 
-  console.log('acc_req_fields: ', acc_req_fields);
-
   // Optional Accountability Fields
   const {
     fields: acc_opt_fields,
@@ -282,14 +284,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     control,
     name: 'requirements' as any,
   });
-
-  // State to force re-render
-  const [forceRerenderi, forceRerender] = useState(0);
-
-  const handleRerender = () => {
-    // Updating the state to a new object forces a re-render
-    setRenderKey((prevKey) => prevKey + 1);
-  };
 
   if (isLoading || renderKey === 0) {
     return <p>Loading...</p>; // or render a spinner/loader
@@ -568,7 +562,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
   return config?.isEditable ? (
     <>
-      <button onClick={handleRerender}>Re-render</button>
       <Form
         key={renderKey}
         onFinish={(data) => {
