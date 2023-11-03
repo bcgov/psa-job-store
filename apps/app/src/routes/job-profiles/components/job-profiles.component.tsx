@@ -21,7 +21,10 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
 
   useEffect(() => {
-    const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
+    // Use the following for the `search` property.
+    // Search terms need to be joined with specific syntax, <-> in this case
+    // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
+    const search = searchParams.get('search');
     const ministryFilter = searchParams.get('ministry');
     const jobRoleFilter = searchParams.get('job-role');
     const classificationFilter = searchParams.get('classification');
@@ -31,46 +34,67 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
       where: {
         AND: [
           {
-            ...(search != null && {
-              title: {
-                search,
-              },
-              context: {
-                search,
-              },
-              overview: {
-                search,
-              },
-            }),
+            OR: [
+              ...(search != null
+                ? [
+                    {
+                      title: {
+                        contains: searchParams.get('search'),
+                        mode: 'insensitive',
+                      },
+                    },
+                    {
+                      context: {
+                        contains: searchParams.get('search'),
+                        mode: 'insensitive',
+                      },
+                    },
+                    {
+                      overview: {
+                        contains: searchParams.get('search'),
+                        mode: 'insensitive',
+                      },
+                    },
+                  ]
+                : []),
+            ],
           },
-          {
-            ...(ministryFilter != null && {
-              ministry_id: {
-                equals: parseInt(ministryFilter),
-              },
-            }),
-          },
-          {
-            ...(classificationFilter != null && {
-              classification_id: {
-                equals: parseInt(classificationFilter),
-              },
-            }),
-          },
-          {
-            ...(jobFamilyFilter != null && {
-              family_id: {
-                equals: parseInt(jobFamilyFilter),
-              },
-            }),
-          },
-          {
-            ...(jobRoleFilter != null && {
-              role_id: {
-                equals: parseInt(jobRoleFilter),
-              },
-            }),
-          },
+          ...(ministryFilter != null
+            ? [
+                {
+                  ministry_id: {
+                    equals: parseInt(ministryFilter),
+                  },
+                },
+              ]
+            : []),
+          ...(classificationFilter != null
+            ? [
+                {
+                  classification_id: {
+                    equals: parseInt(classificationFilter),
+                  },
+                },
+              ]
+            : []),
+          ...(jobFamilyFilter !== null
+            ? [
+                {
+                  family_id: {
+                    equals: parseInt(jobFamilyFilter),
+                  },
+                },
+              ]
+            : []),
+          ...(jobRoleFilter !== null
+            ? [
+                {
+                  role_id: {
+                    equals: parseInt(jobRoleFilter),
+                  },
+                },
+              ]
+            : []),
         ],
       },
     });
