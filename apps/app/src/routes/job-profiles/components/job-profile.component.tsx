@@ -365,7 +365,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         <>
           <List
             dataSource={acc_req_fields}
-            renderItem={(field, index) => (
+            renderItem={(_field, index) => (
               <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                 <FormItem
                   name={`required_accountabilities.${index}.value`}
@@ -410,7 +410,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         <>
           <List
             dataSource={acc_opt_fields}
-            renderItem={(field, index) => (
+            renderItem={(_field, index) => (
               <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                 <FormItem
                   name={`optional_accountabilities.${index}.value`}
@@ -455,7 +455,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         <>
           <List
             dataSource={requirement_fields}
-            renderItem={(field, index) => (
+            renderItem={(_field, index) => (
               <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                 <FormItem
                   name={`requirements.${index}.value`}
@@ -498,7 +498,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       children: (
         <ul>
           {(effectiveData?.behavioural_competencies ?? []).map(
-            ({ behavioural_competency: { id, name, description } }, index) => {
+            ({ behavioural_competency: { name, description } }, index) => {
               return (
                 <li key={index}>
                   {/* Displaying the competency name and description */}
