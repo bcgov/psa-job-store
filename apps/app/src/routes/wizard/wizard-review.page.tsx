@@ -2,67 +2,47 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Button, Modal } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreateJobProfileInput, useCreateJobProfileMutation } from '../../redux/services/graphql-api/job-profile.api';
-import { JobProfile, transformFormData } from '../job-profiles/components/job-profile.component';
+import {
+  CreateJobProfileInput,
+  JobProfileModel,
+  useCreateJobProfileMutation,
+} from '../../redux/services/graphql-api/job-profile.api';
+import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardControls from './components/wizard-controls.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
 
-export interface BehaviouralCompetency {
-  name: string;
-  description: string;
-  id: number;
-}
+function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJobProfileInput {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { behavioural_competencies, classification, id, ministry_id, family_id, ...rest } = inputData;
 
-interface Classification {
-  id: number;
-}
+  // Exclude 'id' from the rest spread as it's not part of CreateJobProfileInput
 
-export interface CreateJobProfileInputPreTransform {
-  id?: number;
-  stream: string;
-  title: string;
-  number: number;
-  context: string;
-  overview: string;
-  accountabilities: object;
-  requirements: string[];
-  behavioural_competencies: Array<{
-    behavioural_competency: BehaviouralCompetency;
-  }>;
-  classification: Classification;
-  state: string;
-}
+  // Map behavioural competencies if they exist
+  const behaviouralCompetenciesInput = behavioural_competencies?.length
+    ? {
+        create: behavioural_competencies.map(({ behavioural_competency: { id } }) => ({
+          behavioural_competency: { connect: { id } },
+        })),
+      }
+    : undefined;
 
-function transformJobProfileDataForCreation(inputData: CreateJobProfileInputPreTransform): CreateJobProfileInput {
-  // console.log('transformJobProfileDataForCreation input: ', inputData);
-  const transformedData = { ...inputData } as unknown as CreateJobProfileInput;
+  // Connect classification if it exists
+  const classificationConnectInput = classification?.id
+    ? { connect: { id: classification.id } }
+    : { connect: { id: -1 } };
 
-  // Transform behavioural_competencies
-  if (inputData.behavioural_competencies && inputData.behavioural_competencies.length > 0) {
-    transformedData.behavioural_competencies = {
-      create: inputData.behavioural_competencies.map(({ behavioural_competency }) => ({
-        behavioural_competency: {
-          connect: {
-            id: behavioural_competency.id,
-          },
-        },
-      })),
-    };
-  }
+  // Construct the result with the correct type and provide default values or handle them as required by the API
+  const result: CreateJobProfileInput = {
+    ...rest,
+    behavioural_competencies: behaviouralCompetenciesInput,
+    classification: classificationConnectInput,
+    state: 'SUBMITTED',
+    parent: { connect: { id: id } },
+  };
 
-  // Transform classification
-  if (inputData.classification && inputData.classification.id) {
-    transformedData.classification = {
-      connect: {
-        id: inputData.classification.id,
-      },
-    };
-  }
-
-  // console.log('transformJobProfileDataForCreation output: ', transformedData);
-  return transformedData;
+  return result;
 }
 
 export const WizardReviewPage = () => {
@@ -76,17 +56,21 @@ export const WizardReviewPage = () => {
   };
 
   const handleOk = async () => {
+    // User pressed next on the review screen
+    // A modal appeared with terms
+    // User confirmed the terms in the modal by pressing OK
+
+    // Hide the modal
     setIsModalVisible(false);
 
     if (wizardData != null) {
       // console.log('review wizard data: ', wizardData);
-      const transformedData = transformFormData(wizardData);
-      const createInput = transformedData as unknown as CreateJobProfileInputPreTransform;
-      const id = createInput['id'];
-      delete createInput['id'];
-      createInput['state'] = 'SUBMITTED';
+
+      // Convert form data into API data format
+      // e.g. remove references such as "required_accountabilities.0"
+      // const transformedData = transformFormData(wizardData);
+      const createInput = wizardData; // as unknown as CreateJobProfileInputPreTransform;
       const inpt = transformJobProfileDataForCreation(createInput);
-      if (id) inpt.parent = { connect: { id: id } };
       // console.log('createInput: ', inpt);
       await createJobProfile(inpt);
     }
