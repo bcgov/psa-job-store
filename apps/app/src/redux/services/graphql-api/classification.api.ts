@@ -5,9 +5,11 @@ import { graphqlApi } from '.';
 export interface ClassificationModel {
   id: number;
   grid: {
+    id: number;
     name: string;
   };
   occupation_group: {
+    id: number;
     name: string;
   };
 }
@@ -26,9 +28,11 @@ export const classificationApi = graphqlApi.injectEndpoints({
               classifications {
                 id
                 grid {
+                  id
                   name
                 }
                 occupation_group {
+                  id
                   name
                 }
               }

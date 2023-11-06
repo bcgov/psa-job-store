@@ -1,34 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
+import { ClassificationModel } from './classification.api';
 
 export interface JobProfileModel {
   id: number;
-  accountabilities: {
-    optional: string[];
-    required: string[];
-  };
-  behavioural_competencies: [
-    {
-      behavioural_competency: {
-        id: number;
-        name: string;
-        description: string;
-      };
-    },
-  ];
-  classification: {
-    id: number;
-    grid: {
-      id: number;
-      name: string;
-    };
-    occupation_group: {
-      id: number;
-      code: string;
-      name: string;
-    };
-  };
+  accountabilities: Accountabilities;
+  behavioural_competencies: BehaviouralCompetencies[];
+  classification: ClassificationModel | null;
   requirements: string[];
   ministry_id: number;
   family_id: number;
@@ -39,10 +18,21 @@ export interface JobProfileModel {
   overview: string;
 }
 
+export interface BehaviouralCompetencies {
+  behavioural_competency: BehaviouralCompetency;
+}
+
+export interface BehaviouralCompetency {
+  id: number;
+  name: string;
+  description: string;
+}
+
 interface Accountabilities {
   optional: string[];
   required: string[];
 }
+
 interface BehaviouralCompetencyConnect {
   id: number;
 }
@@ -53,7 +43,7 @@ interface BehaviouralCompetencyItem {
   };
 }
 
-interface BehaviouralCompetencies {
+interface BehaviouralCompetenciesInput {
   create: BehaviouralCompetencyItem[];
 }
 
@@ -63,7 +53,6 @@ interface ClassificationConnectInput {
   };
 }
 
-// The main interface representing the overall data structure
 export interface CreateJobProfileInput {
   stream: string;
   title: string;
@@ -72,7 +61,7 @@ export interface CreateJobProfileInput {
   overview: string;
   accountabilities: Accountabilities;
   requirements: string[];
-  behavioural_competencies: BehaviouralCompetencies;
+  behavioural_competencies?: BehaviouralCompetenciesInput;
   classification: ClassificationConnectInput;
   state: string;
   parent: ClassificationConnectInput;
