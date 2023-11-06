@@ -274,7 +274,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     },
     {
       key: 'required_accountabilities',
-      label: 'Required Accountabilities',
+      label: config?.isEditable ? (
+        <div>
+          Required Accountabilities
+          <p style={{ fontWeight: 'initial', marginTop: '1rem' }}>
+            ⚠️ Removing required accountabilities <strong>may</strong> trigger a classification review
+          </p>
+        </div>
+      ) : (
+        'Required Accountabilities'
+      ),
       children: renderField(
         <ul>{effectiveData?.accountabilities.required.map((accountability) => <li>{accountability}</li>)}</ul>,
         <>
@@ -364,7 +373,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     },
     {
       key: 'requirements',
-      label: 'Minimum Job Requirements',
+      label: config?.isEditable ? (
+        <div>
+          Minimum Job Requirements
+          <p style={{ fontWeight: 'initial', marginTop: '1rem' }}>
+            ⚠️ Significant changes to this area <strong>may</strong> trigger a classification review
+          </p>
+        </div>
+      ) : (
+        'Minimum Job Requirements'
+      ),
       children: renderField(
         <ul>{effectiveData?.requirements.map((requirement) => <li>{requirement}</li>)}</ul>,
         <>
