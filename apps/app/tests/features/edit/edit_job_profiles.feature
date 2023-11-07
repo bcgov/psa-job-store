@@ -1,57 +1,57 @@
 Feature: Edit Job Profiles
 
     As a user,
-    I want to edit job profiles and then review my changes,
+    I want to edit job profiles and review my changes,
     So that I can confirm all edits before saving my personalized job profile copy.
 
     Background:
-        Given the user has searched and selected a job profile to edit
-        And the user is on the job profile edit page
+        Given the user is logged in
+        And the test environment has a set of job profiles with known attributes
+        And the user has navigated to the job profile search page
+        And the user has searched for and selected a specific job profile "Senior Developer Role"
+        And the user is on the job profile edit page for "Senior Developer Role"
 
     Scenario: Change classification and update job context and overview
-        When the user selects "Senior Developer" from the classification dropdown
-        And the user edits the job context to "Context updated"
-        And the user edits the job overview to "Overview updated"
+        When the user selects "Band 1" from the classification dropdown
+        And the user updates the job context to "Context updated"
+        And the user updates the job overview to "Overview updated"
         And the user clicks the "Next" button
         Then the user should be taken to the review edits page
-        And the review page should reflect the updated classification, context, and overview
+        And the review page should display the updated classification "Band 1"
+        And the review page should show the updated context "Context updated"
+        And the review page should show the updated overview "Overview updated"
 
-    Scenario: Add and remove required accountabilities
-        Given the user is editing the required accountabilities
-        When the user clicks the "Add" button in the required accountabilities section
-        And the user enters "New accountability" into the new text field
-        And the user clicks on "Delete" next to an existing accountability
+    Scenario: Add and delete required accountabilities
+        When the user adds a new required accountability "Lead successful deployments"
+        And the user deletes an existing required accountability "Manage team meetings"
         And the user clicks the "Next" button
-        Then the user should see "New accountability" in the list on the review page
-        And the deleted accountability should not be present
+        Then the review page should include the new accountability "Lead successful deployments"
+        And the review page should not list the deleted accountability "Manage team meetings"
 
-    Scenario: Edit minimum job requirements with validation
-        When the user edits a minimum job requirement to an invalid format
+    Scenario: Validate minimum job requirements during editing
+        When the user inputs an invalid job requirement "Too short"
         And the user attempts to navigate to the next page
-        Then the user should see a validation error message
-        When the user corrects the minimum job requirement to a valid format
+        Then a validation error message should display "Requirement must be more than 10 characters"
+        When the user corrects the job requirement to "Two years of project management experience"
         And the user clicks the "Next" button
-        Then the user should be taken to the review edits page without error
+        Then the user should be taken to the review edits page without any validation errors
 
-    Scenario: Add and remove optional accountabilities
-        Given the user is editing the optional accountabilities
-        When the user adds a new optional accountability
-        And the user enters "New optional accountability" into the new text field
-        And the user removes an existing optional accountability
+    Scenario: Add and delete optional accountabilities
+        When the user adds a new optional accountability "Participate in continuous learning"
+        And the user deletes an existing optional accountability "Attend weekly sector meetings"
         And the user clicks the "Next" button
-        Then the user should see the changes reflected on the review page
+        Then the review page should include the new optional accountability "Participate in continuous learning"
+        And the review page should not list the deleted optional accountability "Attend weekly sector meetings"
 
-    Scenario: Add and remove behavioural competencies
-        Given the user is on the behavioural competencies section
-        When the user selects a new competency from the predefined options
-        And the user deselects an existing competency
+    Scenario: Modify behavioural competencies
+        When the user selects the competency "Effective Communication" from the predefined list
+        And the user deselects the competency "Advanced Spreadsheet Skills"
         And the user clicks the "Next" button
-        Then the user should see the new competency added on the review page
-        And the deselected competency should not be present
+        Then the review page should display the competency "Effective Communication"
+        And the review page should not list the competency "Advanced Spreadsheet Skills"
 
     Scenario: Confirm edits and save profile on the review page
-        Given the user has completed edits and is on the review edits page
-        When the user reads and confirms the disclaimer
+        When the user reads and agrees to the disclaimer
         And the user clicks the "Confirm" button
-        Then a copy of the job profile with the user's edits should be saved
-        And the user should see a confirmation message "Your personalized job profile has been saved"
+        Then the system should save a copy of the job profile with the user's edits
+        And the user should see the message "Your personalized job profile has been saved"
