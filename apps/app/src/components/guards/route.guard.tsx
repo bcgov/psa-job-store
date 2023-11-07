@@ -10,7 +10,7 @@ export const RouteGuard = () => {
     if (auth.isAuthenticated) {
       const redirectPath = sessionStorage.getItem('redirectPath');
       if (redirectPath) {
-        navigate(redirectPath, { replace: true });
+        navigate(decodeURIComponent(redirectPath), { replace: true });
         sessionStorage.removeItem('redirectPath');
       }
     }
@@ -18,8 +18,9 @@ export const RouteGuard = () => {
 
   if (!auth.isAuthenticated && !auth.isLoading) {
     if (!sessionStorage.getItem('redirectPath')) {
-      const currentPath = window.location.pathname + window.location.search;
-      sessionStorage.setItem('redirectPath', currentPath);
+      const currentUrl = new URL(window.location.href);
+      const currentPath = currentUrl.pathname + currentUrl.search;
+      sessionStorage.setItem('redirectPath', encodeURIComponent(currentPath));
     }
     return <Navigate replace to="/auth/login" />;
   }
