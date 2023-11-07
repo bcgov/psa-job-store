@@ -1,11 +1,12 @@
 {
   "extensions": {
     "recommendations": [
-      "christian-kohler.path-intellisense",
       "bradlc.vscode-tailwindcss",
+      "christian-kohler.path-intellisense",
       "dbaeumer.vscode-eslint",
       "esbenp.prettier-vscode",
       "orta.vscode-jest",
+      "prisma.prisma",
       "vscode-icons-team.vscode-icons"
     ]
   },
@@ -71,6 +72,7 @@
       "**/.DS_Store": true,
       "**/Thumbs.db": true,
       "apps": true,
+      "dist": true,
       "packages": true
     },
     "javascript.format.semicolons": "insert",

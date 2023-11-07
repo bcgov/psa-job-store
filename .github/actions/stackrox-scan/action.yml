@@ -12,16 +12,11 @@ inputs:
     required: true
   format:
     description: 'Format of output.  Valid values are json, table, csv, or junit'
-    required: 'false'
+    required: false
     default: 'table'
 runs:
   using: 'composite'
   steps:
-    - run: >
-        curl -s -k -L -H "Authorization: Bearer ${{ inputs.api-token }}" https://${{ inputs.central-endpoint }}/api/cli/download/roxctl-linux --output ./roxctl
-      shell: bash
-    - run: chmod +x ./roxctl
-      shell: bash
     - id: scan-info
       run: |
         ./roxctl --insecure-skip-tls-verify --direct-grpc image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }} -o ${{ inputs.format }}

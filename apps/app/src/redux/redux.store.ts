@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
-import { api } from './services/api';
+import { graphqlApi } from './services/graphql-api';
 
 export const store = configureStore({
   reducer: {
-    [api.reducerPath]: api.reducer,
+    [graphqlApi.reducerPath]: graphqlApi.reducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(graphqlApi.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;
