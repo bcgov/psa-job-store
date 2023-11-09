@@ -1,15 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card } from 'antd';
-import { CSSProperties, memo } from 'react';
+import { PlusOutlined } from '@ant-design/icons';
+import { Button, Card, Popover, Space, Typography } from 'antd';
+import { memo } from 'react';
+import { Link } from 'react-router-dom';
 import { Connection, Edge, Handle, NodeProps, Position } from 'reactflow';
 
-const targetHandleStyle: CSSProperties = { background: '#555' };
-const sourceHandleStyleA: CSSProperties = { ...targetHandleStyle, top: 10 };
-const sourceHandleStyleB: CSSProperties = {
-  ...targetHandleStyle,
-  bottom: 10,
-  top: 'auto',
-};
+const { Text } = Typography;
+
+// const targetHandleStyle: CSSProperties = { background: '#555' };
+// const sourceHandleStyleA: CSSProperties = { ...targetHandleStyle, top: 10 };
+// const sourceHandleStyleB: CSSProperties = {
+//   ...targetHandleStyle,
+//   bottom: 10,
+//   top: 'auto',
+// };
 
 const onConnect = (params: Connection | Edge) => console.log('handle onConnect', params);
 
@@ -26,23 +30,36 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
 
   return (
     <>
-      <Handle type="target" position={Position.Left} style={targetHandleStyle} onConnect={onConnect} />
-      <Card size="small">
-        <p>Title</p>
-        <p>Classification</p>
-        <input className="" type="color" onChange={data.onChange} defaultValue={data.color} />
-      </Card>
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="a"
-        style={sourceHandleStyleA}
-        isConnectable={isConnectable}
-        onMouseDown={(e) => {
-          console.log('You trigger mousedown event', e);
-        }}
-      />
-      <Handle type="source" position={Position.Right} id="b" style={sourceHandleStyleB} isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Top} onConnect={onConnect} />
+      <Popover
+        placement="bottom"
+        trigger="click"
+        content={
+          <Link to="/wizard">
+            <Button type="default" icon={<PlusOutlined />}>
+              Create a New Position
+            </Button>
+          </Link>
+        }
+      >
+        <Card
+          size="small"
+          style={{ border: '1px solid #A1A1A1', cursor: 'pointer' }}
+          title={
+            <Space>
+              <Text ellipsis>
+                {data.title} {data.classification}
+              </Text>
+            </Space>
+          }
+        >
+          Employee: {data.employee_name}
+          <br />
+          Position: {data.number}
+        </Card>
+      </Popover>
+
+      <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </>
   );
 });
