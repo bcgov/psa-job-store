@@ -10,7 +10,7 @@ spec:
     - name: develop-latest
       from:
         kind: DockerImage
-        name: artifacts.developer.gov.bc.ca/tf15-images/app:develop-latest
+        name: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/app:develop-latest
       importPolicy:
         scheduled: true
       referencePolicy:
@@ -18,7 +18,7 @@ spec:
     - name: stage-latest
       from:
         kind: DockerImage
-        name: artifacts.developer.gov.bc.ca/tf15-images/app:stage-latest
+        name: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/app:stage-latest
       importPolicy:
         scheduled: true
       referencePolicy:
@@ -26,7 +26,7 @@ spec:
     - name: latest
       from:
         kind: DockerImage
-        name: artifacts.developer.gov.bc.ca/tf15-images/app:latest
+        name: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/app:latest
       importPolicy:
         scheduled: true
       referencePolicy:
