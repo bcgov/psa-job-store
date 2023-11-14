@@ -1,4 +1,4 @@
-<mxfile modified="2023-11-10T20:11:46.317Z" host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.3 Chrome/114.0.5735.289 Electron/25.8.4 Safari/537.36" etag="221n7ttf9nLDOiJCyedI" version="22.0.3" type="device" pages="3">
+<mxfile modified="2023-11-11T00:44:59.039Z" host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.3 Chrome/114.0.5735.289 Electron/25.8.4 Safari/537.36" etag="onS7KUOjRHHMrpJIgyno" version="22.0.3" type="device" pages="3">
   <diagram id="6HLd_mwrC9RvBNphtoS-" name="Current State (2023)">
     <mxGraphModel dx="1343" dy="875" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="850" math="0" shadow="0">
       <root>
@@ -91,7 +91,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="lvxmBx3G2S1z5PVKEt38-3" value="React OIDC" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#808080;fontColor=#FFFFFF;fontStyle=1" parent="K_QBuxMU5SZqhzT2xsRf-1" vertex="1">
-          <mxGeometry x="576" y="101" width="120" height="130" as="geometry" />
+          <mxGeometry x="576" y="180" width="120" height="51" as="geometry" />
         </mxCell>
         <mxCell id="K_QBuxMU5SZqhzT2xsRf-35" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=none;endArrow=classic;endFill=0;fontColor=#FFFFFF;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=3;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" parent="K_QBuxMU5SZqhzT2xsRf-1" source="lvxmBx3G2S1z5PVKEt38-3" target="K_QBuxMU5SZqhzT2xsRf-29" edge="1">
           <mxGeometry relative="1" as="geometry">
@@ -163,6 +163,9 @@
             <mxPoint x="780" y="206.5" as="sourcePoint" />
             <mxPoint x="904" y="209.5" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="Iuz-hMjxtsss1dIR_W5j-1" value="NGINX" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#808080;fontColor=#FFFFFF;fontStyle=1" vertex="1" parent="K_QBuxMU5SZqhzT2xsRf-1">
+          <mxGeometry x="576" y="107.5" width="120" height="51" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
