@@ -1,36 +1,23 @@
-import { SubmitHandler } from 'react-hook-form';
-import { useNavigate, useParams } from 'react-router-dom';
+import { FormInstance } from 'antd';
+import { useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { ClassificationModel, GetClassificationsResponse } from '../../redux/services/graphql-api/classification.api';
 import { BehaviouralCompetencies, JobProfileModel } from '../../redux/services/graphql-api/job-profile.api';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import WizardEditControlBar from './components/wizard-edit-control-bar';
+import WizardEditProfile from './components/wizard-edit-profile';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
 
-interface InputData {
+export interface InputData {
   [key: string]: string;
 }
 
 export const WizardEditPage = () => {
-  const navigate = useNavigate();
-
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
   const { wizardData, setWizardData, classificationsData } = useWizardContext();
-
-  const onSubmit: SubmitHandler<Record<string, string>> = (data) => {
-    // User pressed "next" on the edit screen:
-    // put form data into context - it will be accessed on review screen to display the profile
-
-    // Convert form data into API data format
-    // e.g. remove references such as "required_accountabilities.0"
-
-    const transformedData = transformFormData(data);
-
-    // console.log('setWizardData transformedData: ', transformedData);
-    setWizardData(transformedData);
-    navigate('/wizard/review');
-  };
 
   function getClassificationById(id: number): ClassificationModel | undefined {
     // If data is loaded, find the classification by ID
@@ -129,19 +116,53 @@ export const WizardEditPage = () => {
     setClassificationsData(data);
   }
 
+  const [editMode, setEditMode] = useState(false);
+
+  const enterEditMode = () => setEditMode(true);
+  const exitEditMode = () => setEditMode(false);
+
+  const wizardEditProfileRef = useRef<{
+    submit: () => void;
+    getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
+  }>(null);
+
+  const onSave = () => {
+    console.log('wizard-edit onSave, wizardEditProfileRef: ', wizardEditProfileRef.current);
+    wizardEditProfileRef.current?.submit();
+    const formData = wizardEditProfileRef.current?.getFormData();
+    const transformedData = transformFormData(formData);
+    setWizardData(transformedData);
+    console.log('Form Data:', formData);
+    setEditMode(false);
+  };
+
   return (
     <WizardPageWrapper title="Edit profile" subTitle="Make changes to an approved job profile (optional)">
       <WizardSteps current={1}></WizardSteps>
-      <JobProfile
-        // "wizardData" will be null if this is first call, in that case data will be fetched from API
-        profileData={wizardData}
-        id={profileId}
-        config={{ isEditable: true }}
-        submitText="Review Profile"
-        submitHandler={onSubmit}
-        showBackButton={true}
-        receivedClassificationsDataCallback={receivedClassificationsDataCallback}
+      <WizardEditControlBar
+        style={{ marginBottom: '1rem' }}
+        editMode={editMode}
+        onEdit={enterEditMode}
+        onSave={onSave}
+        onCancel={exitEditMode}
       />
+      {!editMode ? (
+        <JobProfile
+          // "wizardData" will be null if this is first call, in that case data will be fetched from API
+          profileData={wizardData}
+          id={profileId}
+        />
+      ) : (
+        <WizardEditProfile
+          ref={wizardEditProfileRef}
+          profileData={wizardData}
+          id={profileId}
+          submitText="Review Profile"
+          // submitHandler={onSubmit}
+          showBackButton={true}
+          receivedClassificationsDataCallback={receivedClassificationsDataCallback}
+        ></WizardEditProfile>
+      )}
     </WizardPageWrapper>
   );
 };
