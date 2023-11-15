@@ -23,9 +23,6 @@ export class PositionMaxOrderByAggregateInput {
   title?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  number?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   job_profile_number?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

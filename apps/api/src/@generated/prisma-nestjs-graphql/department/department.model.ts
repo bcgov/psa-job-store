@@ -19,8 +19,8 @@ export class Department {
   organization?: Organization;
 
   @Field(() => [Position], { nullable: true })
-  Position?: Array<Position>;
+  positions?: Array<Position>;
 
   @Field(() => [Employee], { nullable: true })
-  Employee?: Array<Employee>;
+  employees?: Array<Employee>;
 }

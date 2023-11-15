@@ -16,8 +16,8 @@ export class ClassificationUpdateWithoutJob_profilesInput {
   reportees?: JobProfileReportsToUpdateManyWithoutClassificationNestedInput;
 
   @Field(() => EmployeeUpdateManyWithoutClassificationNestedInput, { nullable: true })
-  Employee?: EmployeeUpdateManyWithoutClassificationNestedInput;
+  employees?: EmployeeUpdateManyWithoutClassificationNestedInput;
 
   @Field(() => PositionUpdateManyWithoutClassificationNestedInput, { nullable: true })
-  Position?: PositionUpdateManyWithoutClassificationNestedInput;
+  positions?: PositionUpdateManyWithoutClassificationNestedInput;
 }

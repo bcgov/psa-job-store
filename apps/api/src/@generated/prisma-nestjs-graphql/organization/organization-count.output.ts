@@ -8,8 +8,8 @@ export class OrganizationCount {
   departments?: number;
 
   @Field(() => Int, { nullable: false })
-  Position?: number;
+  positions?: number;
 
   @Field(() => Int, { nullable: false })
-  Employee?: number;
+  employees?: number;
 }

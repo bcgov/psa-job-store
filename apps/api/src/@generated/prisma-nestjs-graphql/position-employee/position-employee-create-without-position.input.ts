@@ -1,9 +1,9 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { EmployeeCreateNestedOneWithoutPositionEmployeeInput } from '../employee/employee-create-nested-one-without-position-employee.input';
+import { EmployeeCreateNestedOneWithoutPositionsInput } from '../employee/employee-create-nested-one-without-positions.input';
 
 @InputType()
 export class PositionEmployeeCreateWithoutPositionInput {
-  @Field(() => EmployeeCreateNestedOneWithoutPositionEmployeeInput, { nullable: false })
-  employee!: EmployeeCreateNestedOneWithoutPositionEmployeeInput;
+  @Field(() => EmployeeCreateNestedOneWithoutPositionsInput, { nullable: false })
+  employee!: EmployeeCreateNestedOneWithoutPositionsInput;
 }

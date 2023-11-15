@@ -20,8 +20,8 @@ export class Classification {
   reportees?: Array<JobProfileReportsTo>;
 
   @Field(() => [Employee], { nullable: true })
-  Employee?: Array<Employee>;
+  employees?: Array<Employee>;
 
   @Field(() => [Position], { nullable: true })
-  Position?: Array<Position>;
+  positions?: Array<Position>;
 }

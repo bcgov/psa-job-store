@@ -26,9 +26,6 @@ export class Position {
   title!: string;
 
   @Field(() => String, { nullable: true })
-  number!: string | null;
-
-  @Field(() => String, { nullable: true })
   job_profile_number!: string | null;
 
   @Field(() => Boolean, { nullable: false })

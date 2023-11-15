@@ -18,10 +18,10 @@ export class OrganizationOrderByWithRelationAndSearchRelevanceInput {
   departments?: DepartmentOrderByRelationAggregateInput;
 
   @Field(() => PositionOrderByRelationAggregateInput, { nullable: true })
-  Position?: PositionOrderByRelationAggregateInput;
+  positions?: PositionOrderByRelationAggregateInput;
 
   @Field(() => EmployeeOrderByRelationAggregateInput, { nullable: true })
-  Employee?: EmployeeOrderByRelationAggregateInput;
+  employees?: EmployeeOrderByRelationAggregateInput;
 
   @Field(() => OrganizationOrderByRelevanceInput, { nullable: true })
   _relevance?: OrganizationOrderByRelevanceInput;

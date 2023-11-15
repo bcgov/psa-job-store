@@ -36,5 +36,5 @@ export class Employee {
   organization?: Organization;
 
   @Field(() => [PositionEmployee], { nullable: true })
-  PositionEmployee?: Array<PositionEmployee>;
+  positions?: Array<PositionEmployee>;
 }

@@ -27,9 +27,6 @@ export class PositionOrderByWithAggregationInput {
   title?: keyof typeof SortOrder;
 
   @Field(() => SortOrderInput, { nullable: true })
-  number?: SortOrderInput;
-
-  @Field(() => SortOrderInput, { nullable: true })
   job_profile_number?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })

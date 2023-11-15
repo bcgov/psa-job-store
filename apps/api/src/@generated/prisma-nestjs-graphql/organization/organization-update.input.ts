@@ -16,8 +16,8 @@ export class OrganizationUpdateInput {
   departments?: DepartmentUpdateManyWithoutOrganizationNestedInput;
 
   @Field(() => PositionUpdateManyWithoutOrganizationNestedInput, { nullable: true })
-  Position?: PositionUpdateManyWithoutOrganizationNestedInput;
+  positions?: PositionUpdateManyWithoutOrganizationNestedInput;
 
   @Field(() => EmployeeUpdateManyWithoutOrganizationNestedInput, { nullable: true })
-  Employee?: EmployeeUpdateManyWithoutOrganizationNestedInput;
+  employees?: EmployeeUpdateManyWithoutOrganizationNestedInput;
 }

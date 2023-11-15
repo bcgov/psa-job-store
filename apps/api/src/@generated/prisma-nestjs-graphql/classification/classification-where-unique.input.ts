@@ -31,8 +31,8 @@ export class ClassificationWhereUniqueInput {
   reportees?: JobProfileReportsToListRelationFilter;
 
   @Field(() => EmployeeListRelationFilter, { nullable: true })
-  Employee?: EmployeeListRelationFilter;
+  employees?: EmployeeListRelationFilter;
 
   @Field(() => PositionListRelationFilter, { nullable: true })
-  Position?: PositionListRelationFilter;
+  positions?: PositionListRelationFilter;
 }

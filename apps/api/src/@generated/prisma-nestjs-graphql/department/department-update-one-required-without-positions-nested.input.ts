@@ -1,0 +1,32 @@
+import { Field } from '@nestjs/graphql';
+import { InputType } from '@nestjs/graphql';
+import { DepartmentCreateWithoutPositionsInput } from './department-create-without-positions.input';
+import { Type } from 'class-transformer';
+import { DepartmentCreateOrConnectWithoutPositionsInput } from './department-create-or-connect-without-positions.input';
+import { DepartmentUpsertWithoutPositionsInput } from './department-upsert-without-positions.input';
+import { Prisma } from '@prisma/client';
+import { DepartmentWhereUniqueInput } from './department-where-unique.input';
+import { DepartmentUpdateToOneWithWhereWithoutPositionsInput } from './department-update-to-one-with-where-without-positions.input';
+
+@InputType()
+export class DepartmentUpdateOneRequiredWithoutPositionsNestedInput {
+  @Field(() => DepartmentCreateWithoutPositionsInput, { nullable: true })
+  @Type(() => DepartmentCreateWithoutPositionsInput)
+  create?: DepartmentCreateWithoutPositionsInput;
+
+  @Field(() => DepartmentCreateOrConnectWithoutPositionsInput, { nullable: true })
+  @Type(() => DepartmentCreateOrConnectWithoutPositionsInput)
+  connectOrCreate?: DepartmentCreateOrConnectWithoutPositionsInput;
+
+  @Field(() => DepartmentUpsertWithoutPositionsInput, { nullable: true })
+  @Type(() => DepartmentUpsertWithoutPositionsInput)
+  upsert?: DepartmentUpsertWithoutPositionsInput;
+
+  @Field(() => DepartmentWhereUniqueInput, { nullable: true })
+  @Type(() => DepartmentWhereUniqueInput)
+  connect?: Prisma.AtLeast<DepartmentWhereUniqueInput, 'id'>;
+
+  @Field(() => DepartmentUpdateToOneWithWhereWithoutPositionsInput, { nullable: true })
+  @Type(() => DepartmentUpdateToOneWithWhereWithoutPositionsInput)
+  update?: DepartmentUpdateToOneWithWhereWithoutPositionsInput;
+}

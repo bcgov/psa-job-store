@@ -22,10 +22,10 @@ export class ClassificationOrderByWithRelationAndSearchRelevanceInput {
   reportees?: JobProfileReportsToOrderByRelationAggregateInput;
 
   @Field(() => EmployeeOrderByRelationAggregateInput, { nullable: true })
-  Employee?: EmployeeOrderByRelationAggregateInput;
+  employees?: EmployeeOrderByRelationAggregateInput;
 
   @Field(() => PositionOrderByRelationAggregateInput, { nullable: true })
-  Position?: PositionOrderByRelationAggregateInput;
+  positions?: PositionOrderByRelationAggregateInput;
 
   @Field(() => ClassificationOrderByRelevanceInput, { nullable: true })
   _relevance?: ClassificationOrderByRelevanceInput;

@@ -16,8 +16,8 @@ export class OrganizationUncheckedUpdateInput {
   departments?: DepartmentUncheckedUpdateManyWithoutOrganizationNestedInput;
 
   @Field(() => PositionUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
-  Position?: PositionUncheckedUpdateManyWithoutOrganizationNestedInput;
+  positions?: PositionUncheckedUpdateManyWithoutOrganizationNestedInput;
 
   @Field(() => EmployeeUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
-  Employee?: EmployeeUncheckedUpdateManyWithoutOrganizationNestedInput;
+  employees?: EmployeeUncheckedUpdateManyWithoutOrganizationNestedInput;
 }

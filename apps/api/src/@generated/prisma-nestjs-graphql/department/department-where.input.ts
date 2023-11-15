@@ -29,8 +29,8 @@ export class DepartmentWhereInput {
   organization?: OrganizationRelationFilter;
 
   @Field(() => PositionListRelationFilter, { nullable: true })
-  Position?: PositionListRelationFilter;
+  positions?: PositionListRelationFilter;
 
   @Field(() => EmployeeListRelationFilter, { nullable: true })
-  Employee?: EmployeeListRelationFilter;
+  employees?: EmployeeListRelationFilter;
 }

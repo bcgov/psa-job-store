@@ -20,8 +20,8 @@ export class ClassificationUncheckedCreateInput {
   reportees?: JobProfileReportsToUncheckedCreateNestedManyWithoutClassificationInput;
 
   @Field(() => EmployeeUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
-  Employee?: EmployeeUncheckedCreateNestedManyWithoutClassificationInput;
+  employees?: EmployeeUncheckedCreateNestedManyWithoutClassificationInput;
 
   @Field(() => PositionUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
-  Position?: PositionUncheckedCreateNestedManyWithoutClassificationInput;
+  positions?: PositionUncheckedCreateNestedManyWithoutClassificationInput;
 }
