@@ -9,7 +9,8 @@ import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-rol
 import { useGetMinistriesQuery } from '../../../redux/services/graphql-api/ministry.api';
 
 const { Search } = Input;
-type Option = { label: string; value: number };
+
+type Option = { label: string; value: string };
 type FilterData = {
   [key: string]: Option[];
 };
@@ -33,6 +34,9 @@ const filters: Record<string, any>[] = [
   // },
 ];
 
+const filterOption = (input: string, option?: { label: string; value: string }) =>
+  (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
+
 export const JobProfileSearch = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -46,32 +50,32 @@ export const JobProfileSearch = () => {
   const ministryDataOptions = useMemo(() => {
     return (
       ministryData?.map((item) => ({
-        label: item.name,
-        value: item.id,
+        label: item.name != null && item.name.length > 0 ? item.name : item.id,
+        value: `${item.id}`,
       })) || []
     );
   }, [ministryData]);
   const jobFamilyDataOptions = useMemo(() => {
     return (
       jobFamilyData?.map((item) => ({
-        label: item.name,
-        value: item.id,
+        label: item.name != null && item.name.length > 0 ? item.name : item.id,
+        value: `${item.id}`,
       })) || []
     );
   }, [jobFamilyData]);
   const classificationDataOptions = useMemo(() => {
     return (
       classificationData?.map((item) => ({
-        label: item.occupation_group.name + ' ' + item.grid.name,
-        value: item.id,
+        label: item.code != null && item.code.length > 0 ? item.code : item.id,
+        value: `${item.id}`,
       })) || []
     );
   }, [classificationData]);
   const jobRoleDataOptions = useMemo(() => {
     return (
       jobRoleData?.map((item) => ({
-        label: item.name,
-        value: item.id,
+        label: item.name != null && item.name.length > 0 ? item.name : item.id,
+        value: `${item.id}`,
       })) || []
     );
   }, [jobRoleData]);
@@ -175,6 +179,7 @@ export const JobProfileSearch = () => {
                     allowClear
                     placeholder={filter.title}
                     options={filterData[filter.title]}
+                    filterOption={filterOption}
                     style={{
                       flexGrow: 1,
                       flexBasis: 0,

@@ -72,7 +72,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
             ? [
                 {
                   classification_id: {
-                    in: JSON.parse(`[${classificationFilter}]`),
+                    in: JSON.parse(`[${classificationFilter.split(',').map((v) => `"${v}"`)}]`),
                   },
                 },
               ]

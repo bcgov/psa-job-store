@@ -39,7 +39,7 @@ export class JobProfileValidationModel {
   // @IsNotEmpty({ message: 'Classification is required.' })
   // @ValidateNested()
   // @Type(() => Classification)
-  classification: number | null;
+  classification: string | null;
 
   @Length(2, 500)
   context: string;
@@ -108,11 +108,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
     {
       key: 'classification',
       label: 'Classification',
-      children: (
-        <div>
-          {`${effectiveData?.classification?.occupation_group.name} ${effectiveData?.classification?.grid.name}`}
-        </div>
-      ),
+      children: <div>{`${effectiveData?.classification?.code}`}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
