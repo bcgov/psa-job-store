@@ -225,8 +225,8 @@ model Organization {
   name String
 
   departments Department[]
-  Position    Position[]
-  Employee    Employee[]
+  positions   Position[]
+  employees   Employee[]
 
   @@map("organization")
 }
@@ -237,8 +237,8 @@ model Department {
   name            String
 
   organization Organization @relation(fields: [organization_id], references: [id])
-  Position     Position[]
-  Employee     Employee[]
+  positions    Position[]
+  employees    Employee[]
 
   @@map("department")
 }
@@ -248,8 +248,8 @@ model Classification {
   code         String
   job_profiles JobProfile[]
   reportees    JobProfileReportsTo[]
-  Employee     Employee[]
-  Position     Position[]
+  employees    Employee[]
+  positions    Position[]
 
   @@map("classification")
 }
@@ -299,10 +299,10 @@ model Employee {
   name   String
   status EmployeeStatus?
 
-  classification   Classification     @relation(fields: [classification_id], references: [id])
-  department       Department         @relation(fields: [department_id], references: [id])
-  organization     Organization       @relation(fields: [organization_id], references: [id])
-  PositionEmployee PositionEmployee[]
+  classification Classification     @relation(fields: [classification_id], references: [id])
+  department     Department         @relation(fields: [department_id], references: [id])
+  organization   Organization       @relation(fields: [organization_id], references: [id])
+  positions      PositionEmployee[]
 
   @@map("employee")
 }

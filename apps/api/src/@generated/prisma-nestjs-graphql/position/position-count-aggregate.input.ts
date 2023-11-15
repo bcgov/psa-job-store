@@ -22,9 +22,6 @@ export class PositionCountAggregateInput {
   title?: true;
 
   @Field(() => Boolean, { nullable: true })
-  number?: true;
-
-  @Field(() => Boolean, { nullable: true })
   job_profile_number?: true;
 
   @Field(() => Boolean, { nullable: true })

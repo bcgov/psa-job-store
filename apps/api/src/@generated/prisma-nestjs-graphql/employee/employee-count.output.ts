@@ -5,5 +5,5 @@ import { Int } from '@nestjs/graphql';
 @ObjectType()
 export class EmployeeCount {
   @Field(() => Int, { nullable: false })
-  PositionEmployee?: number;
+  positions?: number;
 }

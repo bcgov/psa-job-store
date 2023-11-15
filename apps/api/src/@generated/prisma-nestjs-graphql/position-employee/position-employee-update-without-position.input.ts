@@ -1,9 +1,9 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { EmployeeUpdateOneRequiredWithoutPositionEmployeeNestedInput } from '../employee/employee-update-one-required-without-position-employee-nested.input';
+import { EmployeeUpdateOneRequiredWithoutPositionsNestedInput } from '../employee/employee-update-one-required-without-positions-nested.input';
 
 @InputType()
 export class PositionEmployeeUpdateWithoutPositionInput {
-  @Field(() => EmployeeUpdateOneRequiredWithoutPositionEmployeeNestedInput, { nullable: true })
-  employee?: EmployeeUpdateOneRequiredWithoutPositionEmployeeNestedInput;
+  @Field(() => EmployeeUpdateOneRequiredWithoutPositionsNestedInput, { nullable: true })
+  employee?: EmployeeUpdateOneRequiredWithoutPositionsNestedInput;
 }

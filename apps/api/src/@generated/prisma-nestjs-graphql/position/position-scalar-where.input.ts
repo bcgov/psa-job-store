@@ -33,9 +33,6 @@ export class PositionScalarWhereInput {
   title?: StringFilter;
 
   @Field(() => StringFilter, { nullable: true })
-  number?: StringFilter;
-
-  @Field(() => StringFilter, { nullable: true })
   job_profile_number?: StringFilter;
 
   @Field(() => BoolFilter, { nullable: true })

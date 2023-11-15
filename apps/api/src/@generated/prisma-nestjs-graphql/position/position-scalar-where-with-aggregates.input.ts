@@ -33,9 +33,6 @@ export class PositionScalarWhereWithAggregatesInput {
   title?: StringWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
-  number?: StringWithAggregatesFilter;
-
-  @Field(() => StringWithAggregatesFilter, { nullable: true })
   job_profile_number?: StringWithAggregatesFilter;
 
   @Field(() => BoolWithAggregatesFilter, { nullable: true })

@@ -38,7 +38,7 @@ export class EmployeeOrderByWithRelationAndSearchRelevanceInput {
   organization?: OrganizationOrderByWithRelationAndSearchRelevanceInput;
 
   @Field(() => PositionEmployeeOrderByRelationAggregateInput, { nullable: true })
-  PositionEmployee?: PositionEmployeeOrderByRelationAggregateInput;
+  positions?: PositionEmployeeOrderByRelationAggregateInput;
 
   @Field(() => EmployeeOrderByRelevanceInput, { nullable: true })
   _relevance?: EmployeeOrderByRelevanceInput;

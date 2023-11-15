@@ -1,7 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { ClassificationCreateNestedOneWithoutPositionInput } from '../classification/classification-create-nested-one-without-position.input';
-import { OrganizationCreateNestedOneWithoutPositionInput } from '../organization/organization-create-nested-one-without-position.input';
+import { ClassificationCreateNestedOneWithoutPositionsInput } from '../classification/classification-create-nested-one-without-positions.input';
+import { OrganizationCreateNestedOneWithoutPositionsInput } from '../organization/organization-create-nested-one-without-positions.input';
 import { PositionEmployeeCreateNestedManyWithoutPositionInput } from '../position-employee/position-employee-create-nested-many-without-position.input';
 
 @InputType()
@@ -16,9 +16,6 @@ export class PositionCreateWithoutDepartmentInput {
   title!: string;
 
   @Field(() => String, { nullable: true })
-  number?: string;
-
-  @Field(() => String, { nullable: true })
   job_profile_number?: string;
 
   @Field(() => Boolean, { nullable: false })
@@ -27,11 +24,11 @@ export class PositionCreateWithoutDepartmentInput {
   @Field(() => Boolean, { nullable: false })
   is_vacant!: boolean;
 
-  @Field(() => ClassificationCreateNestedOneWithoutPositionInput, { nullable: false })
-  classification!: ClassificationCreateNestedOneWithoutPositionInput;
+  @Field(() => ClassificationCreateNestedOneWithoutPositionsInput, { nullable: false })
+  classification!: ClassificationCreateNestedOneWithoutPositionsInput;
 
-  @Field(() => OrganizationCreateNestedOneWithoutPositionInput, { nullable: false })
-  organization!: OrganizationCreateNestedOneWithoutPositionInput;
+  @Field(() => OrganizationCreateNestedOneWithoutPositionsInput, { nullable: false })
+  organization!: OrganizationCreateNestedOneWithoutPositionsInput;
 
   @Field(() => PositionEmployeeCreateNestedManyWithoutPositionInput, { nullable: true })
   employees?: PositionEmployeeCreateNestedManyWithoutPositionInput;

@@ -19,9 +19,6 @@ export class PositionUncheckedUpdateManyWithoutDepartmentInput {
   title?: string;
 
   @Field(() => String, { nullable: true })
-  number?: string;
-
-  @Field(() => String, { nullable: true })
   job_profile_number?: string;
 
   @Field(() => Boolean, { nullable: true })

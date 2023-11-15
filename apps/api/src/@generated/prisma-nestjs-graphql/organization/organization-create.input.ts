@@ -16,8 +16,8 @@ export class OrganizationCreateInput {
   departments?: DepartmentCreateNestedManyWithoutOrganizationInput;
 
   @Field(() => PositionCreateNestedManyWithoutOrganizationInput, { nullable: true })
-  Position?: PositionCreateNestedManyWithoutOrganizationInput;
+  positions?: PositionCreateNestedManyWithoutOrganizationInput;
 
   @Field(() => EmployeeCreateNestedManyWithoutOrganizationInput, { nullable: true })
-  Employee?: EmployeeCreateNestedManyWithoutOrganizationInput;
+  employees?: EmployeeCreateNestedManyWithoutOrganizationInput;
 }

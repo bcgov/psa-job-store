@@ -23,9 +23,6 @@ export class PositionCountAggregate {
   title!: number;
 
   @Field(() => Int, { nullable: false })
-  number!: number;
-
-  @Field(() => Int, { nullable: false })
   job_profile_number!: number;
 
   @Field(() => Int, { nullable: false })

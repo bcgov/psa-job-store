@@ -1,8 +1,8 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { EmployeeStatus } from '../prisma/employee-status.enum';
-import { DepartmentCreateNestedOneWithoutEmployeeInput } from '../department/department-create-nested-one-without-employee.input';
-import { OrganizationCreateNestedOneWithoutEmployeeInput } from '../organization/organization-create-nested-one-without-employee.input';
+import { DepartmentCreateNestedOneWithoutEmployeesInput } from '../department/department-create-nested-one-without-employees.input';
+import { OrganizationCreateNestedOneWithoutEmployeesInput } from '../organization/organization-create-nested-one-without-employees.input';
 import { PositionEmployeeCreateNestedManyWithoutEmployeeInput } from '../position-employee/position-employee-create-nested-many-without-employee.input';
 
 @InputType()
@@ -16,12 +16,12 @@ export class EmployeeCreateWithoutClassificationInput {
   @Field(() => EmployeeStatus, { nullable: true })
   status?: keyof typeof EmployeeStatus;
 
-  @Field(() => DepartmentCreateNestedOneWithoutEmployeeInput, { nullable: false })
-  department!: DepartmentCreateNestedOneWithoutEmployeeInput;
+  @Field(() => DepartmentCreateNestedOneWithoutEmployeesInput, { nullable: false })
+  department!: DepartmentCreateNestedOneWithoutEmployeesInput;
 
-  @Field(() => OrganizationCreateNestedOneWithoutEmployeeInput, { nullable: false })
-  organization!: OrganizationCreateNestedOneWithoutEmployeeInput;
+  @Field(() => OrganizationCreateNestedOneWithoutEmployeesInput, { nullable: false })
+  organization!: OrganizationCreateNestedOneWithoutEmployeesInput;
 
   @Field(() => PositionEmployeeCreateNestedManyWithoutEmployeeInput, { nullable: true })
-  PositionEmployee?: PositionEmployeeCreateNestedManyWithoutEmployeeInput;
+  positions?: PositionEmployeeCreateNestedManyWithoutEmployeeInput;
 }

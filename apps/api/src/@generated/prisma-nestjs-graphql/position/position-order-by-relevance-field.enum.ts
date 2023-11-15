@@ -7,7 +7,6 @@ export enum PositionOrderByRelevanceFieldEnum {
   organization_id = 'organization_id',
   supervisor_id = 'supervisor_id',
   title = 'title',
-  number = 'number',
   job_profile_number = 'job_profile_number',
 }
 

@@ -21,5 +21,5 @@ export class EmployeeUncheckedCreateWithoutOrganizationInput {
   status?: keyof typeof EmployeeStatus;
 
   @Field(() => PositionEmployeeUncheckedCreateNestedManyWithoutEmployeeInput, { nullable: true })
-  PositionEmployee?: PositionEmployeeUncheckedCreateNestedManyWithoutEmployeeInput;
+  positions?: PositionEmployeeUncheckedCreateNestedManyWithoutEmployeeInput;
 }
