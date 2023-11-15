@@ -136,8 +136,14 @@ export const WizardEditPage = () => {
   // };
 
   return (
-    <WizardPageWrapper title="Edit profile" subTitle="Make changes to an approved job profile (optional)">
-      <WizardSteps current={1}></WizardSteps>
+    <WizardPageWrapper
+      title="Edit profile"
+      subTitle="Make changes to an approved job profile (optional)"
+      xxl={14}
+      xl={18}
+      lg={18}
+    >
+      <WizardSteps current={1} xl={24}></WizardSteps>
       <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} showChooseDifferentProfile={true} />
 
       {/* // <Testt></Testt> */}

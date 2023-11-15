@@ -15,6 +15,7 @@ interface JobProfileProps {
   profileData?: any;
   id?: string; // The id is optional, as it can also be retrieved from the params
   onProfileLoad?: (profileData: JobProfileModel) => void;
+  showBackToResults?: boolean;
 }
 
 class BehaviouralCompetency {
@@ -58,7 +59,7 @@ export class JobProfileValidationModel {
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 }
 
-export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfileLoad }) => {
+export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfileLoad, showBackToResults = true }) => {
   const params = useParams();
   const resolvedId = id ?? params.id; // Using prop ID or param ID
   const screens = useBreakpoint();
@@ -179,7 +180,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
 
   return (
     <>
-      {screens.xl === false ? (
+      {screens.xl === false && showBackToResults ? (
         <Link to="/job-profiles">
           <ArrowLeftOutlined /> Back to Search Results
         </Link>

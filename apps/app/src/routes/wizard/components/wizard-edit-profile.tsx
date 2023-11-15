@@ -247,7 +247,7 @@ const WizardEditProfile = forwardRef(
          */}
 
         <Row gutter={24}>
-          <Col xs={24} sm={16} md={16}>
+          <Col xl={16}>
             <FormItem
               labelCol={{ span: 24 }}
               wrapperCol={{ span: 24 }}

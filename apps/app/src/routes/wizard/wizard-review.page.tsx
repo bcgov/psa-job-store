@@ -18,10 +18,15 @@ export const WizardReviewPage = () => {
   };
 
   return (
-    <WizardPageWrapper title="Review and submit" subTitle="Review the profile before creating a new position">
-      <WizardSteps current={2}></WizardSteps>
+    <WizardPageWrapper
+      title="Review and submit"
+      subTitle="Review the profile before creating a new position"
+      xxl={14}
+      xl={18}
+    >
+      <WizardSteps current={2} xl={24}></WizardSteps>
       <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} onBack={onBack} />
-      <JobProfile profileData={wizardData} />
+      <JobProfile profileData={wizardData} showBackToResults={false} />
     </WizardPageWrapper>
   );
 };
