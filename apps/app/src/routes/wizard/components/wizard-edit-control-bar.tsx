@@ -3,54 +3,37 @@ import React, { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 
 interface WizardEditControlBarProps {
-  editMode?: boolean;
-  onEdit?: () => void;
   onSave?: () => void;
-  onCancel?: () => void;
   onNext?: () => void;
   onBack?: () => void;
+  showChooseDifferentProfile?: boolean;
   style?: CSSProperties;
   nextText?: string;
 }
 
 const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
-  editMode,
-  onEdit,
   onSave,
-  onCancel,
   style,
   onNext,
   nextText,
   onBack,
+  showChooseDifferentProfile,
 }) => {
   const buttonPlaceholder = <div style={{ display: 'inline-block', width: '68px' }} />;
 
   return (
     <div style={{ ...style, padding: '16px', background: '#f0f2f5', display: 'flex', justifyContent: 'space-between' }}>
+      <Space>{buttonPlaceholder}</Space>
       <Space>
-        {onEdit ? (
-          editMode ? (
-            buttonPlaceholder
-          ) : (
-            <Button type="default" onClick={onEdit}>
-              Edit
-            </Button>
-          )
-        ) : (
-          buttonPlaceholder
-        )}
-      </Space>
-      <Space>
-        {editMode ? (
+        {onSave ? (
           <>
-            <Button onClick={onCancel}>Cancel</Button>
             <Button type="primary" onClick={onSave}>
               Save
             </Button>
           </>
         ) : (
           <>
-            {onEdit ? (
+            {showChooseDifferentProfile ? (
               <Link to="/wizard">
                 <Button type="primary">Choose different profile</Button>
               </Link>

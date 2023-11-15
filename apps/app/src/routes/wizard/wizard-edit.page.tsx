@@ -1,9 +1,8 @@
 import { FormInstance } from 'antd';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ClassificationModel, GetClassificationsResponse } from '../../redux/services/graphql-api/classification.api';
 import { BehaviouralCompetencies, JobProfileModel } from '../../redux/services/graphql-api/job-profile.api';
-import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import WizardEditProfile from './components/wizard-edit-profile';
@@ -118,70 +117,39 @@ export const WizardEditPage = () => {
     setClassificationsData(data);
   }
 
-  const [editMode, setEditMode] = useState(false);
-
-  const enterEditMode = () => setEditMode(true);
-  const exitEditMode = () => setEditMode(false);
-
   const wizardEditProfileRef = useRef<{
     submit: () => void;
     getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
   }>(null);
 
-  const onSave = () => {
-    console.log('wizard-edit onSave, wizardEditProfileRef: ', wizardEditProfileRef.current);
-    // wizardEditProfileRef.current?.submit();
+  const navigate = useNavigate();
+  const onNext = () => {
     const formData = wizardEditProfileRef.current?.getFormData();
     const transformedData = transformFormData(formData);
     setWizardData(transformedData);
-    console.log('Form Data:', formData);
-    setEditMode(false);
-  };
-
-  const navigate = useNavigate();
-  const onNext = () => {
-    // const transformedData = transformFormData(data);
-
-    // // console.log('setWizardData transformedData: ', transformedData);
-    // setWizardData(transformedData);
     navigate('/wizard/review');
   };
 
-  const handleProfileLoad = (profileData: JobProfileModel) => {
-    console.log('handleProfileLoad profileData: ', profileData);
-    setWizardData(profileData);
-  };
+  // const handleProfileLoad = (profileData: JobProfileModel) => {
+  //   console.log('handleProfileLoad profileData: ', profileData);
+  //   setWizardData(profileData);
+  // };
 
   return (
     <WizardPageWrapper title="Edit profile" subTitle="Make changes to an approved job profile (optional)">
       <WizardSteps current={1}></WizardSteps>
-      <WizardEditControlBar
-        style={{ marginBottom: '1rem' }}
-        editMode={editMode}
-        onEdit={enterEditMode}
-        onSave={onSave}
-        onCancel={exitEditMode}
-        onNext={onNext}
-      />
-      {!editMode ? (
-        <JobProfile
-          // "wizardData" will be null if this is first call, in that case data will be fetched from API
-          profileData={wizardData}
-          id={profileId}
-          onProfileLoad={handleProfileLoad}
-        />
-      ) : (
-        // <Testt></Testt>
-        <WizardEditProfile
-          ref={wizardEditProfileRef}
-          profileData={wizardData}
-          id={profileId}
-          submitText="Review Profile"
-          // submitHandler={onSubmit}
-          showBackButton={true}
-          receivedClassificationsDataCallback={receivedClassificationsDataCallback}
-        ></WizardEditProfile>
-      )}
+      <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} showChooseDifferentProfile={true} />
+
+      {/* // <Testt></Testt> */}
+      <WizardEditProfile
+        ref={wizardEditProfileRef}
+        profileData={wizardData}
+        id={profileId}
+        submitText="Review Profile"
+        // submitHandler={onSubmit}
+        showBackButton={true}
+        receivedClassificationsDataCallback={receivedClassificationsDataCallback}
+      ></WizardEditProfile>
     </WizardPageWrapper>
   );
 };
