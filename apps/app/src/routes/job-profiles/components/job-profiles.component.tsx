@@ -25,10 +25,10 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     // Search terms need to be joined with specific syntax, <-> in this case
     // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
     const search = searchParams.get('search');
-    const ministryFilter = searchParams.get('ministry');
-    const jobRoleFilter = searchParams.get('job-role');
-    const classificationFilter = searchParams.get('classification');
-    const jobFamilyFilter = searchParams.get('job-family');
+    const ministryFilter = searchParams.get('ministry_id__in');
+    const jobRoleFilter = searchParams.get('job_role_id__in');
+    const classificationFilter = searchParams.get('classification_id__in');
+    const jobFamilyFilter = searchParams.get('job_family_id__in');
 
     trigger({
       where: {
@@ -63,7 +63,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
             ? [
                 {
                   ministry_id: {
-                    equals: parseInt(ministryFilter),
+                    in: JSON.parse(`[${ministryFilter}]`),
                   },
                 },
               ]
@@ -72,7 +72,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
             ? [
                 {
                   classification_id: {
-                    equals: parseInt(classificationFilter),
+                    in: JSON.parse(`[${classificationFilter}]`),
                   },
                 },
               ]
@@ -81,7 +81,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
             ? [
                 {
                   family_id: {
-                    equals: parseInt(jobFamilyFilter),
+                    in: JSON.parse(`[${jobFamilyFilter}]`),
                   },
                 },
               ]
@@ -90,7 +90,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
             ? [
                 {
                   role_id: {
-                    equals: parseInt(jobRoleFilter),
+                    in: JSON.parse(`[${jobRoleFilter}]`),
                   },
                 },
               ]
