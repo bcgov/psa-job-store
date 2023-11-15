@@ -15,8 +15,8 @@ export class JobProfileUncheckedUpdateWithoutChildrenInput {
   @Field(() => Int, { nullable: true })
   career_group_id?: number;
 
-  @Field(() => Int, { nullable: true })
-  classification_id?: number;
+  @Field(() => String, { nullable: true })
+  classification_id?: string;
 
   @Field(() => Int, { nullable: true })
   family_id?: number;

@@ -11,7 +11,7 @@ import { JobProfileUpdateManyWithoutParentNestedInput } from './job-profile-upda
 import { ClassificationUpdateOneRequiredWithoutJob_profilesNestedInput } from '../classification/classification-update-one-required-without-job-profiles-nested.input';
 import { JobFamilyUpdateOneWithoutProfilesNestedInput } from '../job-family/job-family-update-one-without-profiles-nested.input';
 import { MinistryUpdateOneWithoutJob_profilesNestedInput } from '../ministry/ministry-update-one-without-job-profiles-nested.input';
-import { UserUpdateOneWithoutJobProfileNestedInput } from '../user/user-update-one-without-job-profile-nested.input';
+import { UserUpdateOneWithoutJob_profilesNestedInput } from '../user/user-update-one-without-job-profiles-nested.input';
 import { JobProfileUpdateOneWithoutChildrenNestedInput } from './job-profile-update-one-without-children-nested.input';
 import { JobRoleUpdateOneWithoutProfilesNestedInput } from '../job-role/job-role-update-one-without-profiles-nested.input';
 
@@ -62,8 +62,8 @@ export class JobProfileUpdateInput {
   @Field(() => MinistryUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
   ministry?: MinistryUpdateOneWithoutJob_profilesNestedInput;
 
-  @Field(() => UserUpdateOneWithoutJobProfileNestedInput, { nullable: true })
-  owner?: UserUpdateOneWithoutJobProfileNestedInput;
+  @Field(() => UserUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  owner?: UserUpdateOneWithoutJob_profilesNestedInput;
 
   @Field(() => JobProfileUpdateOneWithoutChildrenNestedInput, { nullable: true })
   parent?: JobProfileUpdateOneWithoutChildrenNestedInput;

@@ -15,6 +15,7 @@ import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
+import { ExternalModule } from './modules/external/external.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
@@ -58,6 +59,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobFamilyModule,
     JobRoleModule,
     BehaviouralComptencyModule,
+    ExternalModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],

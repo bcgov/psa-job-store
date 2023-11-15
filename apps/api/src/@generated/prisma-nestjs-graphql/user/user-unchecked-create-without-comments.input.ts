@@ -30,5 +30,5 @@ export class UserUncheckedCreateWithoutCommentsInput {
   identities?: IdentityUncheckedCreateNestedManyWithoutUserInput;
 
   @Field(() => JobProfileUncheckedCreateNestedManyWithoutOwnerInput, { nullable: true })
-  JobProfile?: JobProfileUncheckedCreateNestedManyWithoutOwnerInput;
+  job_profiles?: JobProfileUncheckedCreateNestedManyWithoutOwnerInput;
 }

@@ -34,5 +34,5 @@ export class User {
   identities?: Array<Identity>;
 
   @Field(() => [JobProfile], { nullable: true })
-  JobProfile?: Array<JobProfile>;
+  job_profiles?: Array<JobProfile>;
 }

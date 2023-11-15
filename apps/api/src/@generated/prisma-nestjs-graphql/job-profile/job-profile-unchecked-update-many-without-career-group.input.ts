@@ -10,8 +10,8 @@ export class JobProfileUncheckedUpdateManyWithoutCareer_groupInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
-  @Field(() => Int, { nullable: true })
-  classification_id?: number;
+  @Field(() => String, { nullable: true })
+  classification_id?: string;
 
   @Field(() => Int, { nullable: true })
   family_id?: number;
