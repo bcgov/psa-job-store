@@ -21,8 +21,8 @@ export class JobProfile {
   @Field(() => Int, { nullable: true })
   career_group_id!: number | null;
 
-  @Field(() => Int, { nullable: false })
-  classification_id!: number;
+  @Field(() => String, { nullable: false })
+  classification_id!: string;
 
   @Field(() => Int, { nullable: true })
   family_id!: number | null;

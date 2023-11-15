@@ -34,5 +34,5 @@ export class UserUncheckedUpdateInput {
   identities?: IdentityUncheckedUpdateManyWithoutUserNestedInput;
 
   @Field(() => JobProfileUncheckedUpdateManyWithoutOwnerNestedInput, { nullable: true })
-  JobProfile?: JobProfileUncheckedUpdateManyWithoutOwnerNestedInput;
+  job_profiles?: JobProfileUncheckedUpdateManyWithoutOwnerNestedInput;
 }

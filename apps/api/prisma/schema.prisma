@@ -37,9 +37,9 @@ model User {
   updated_at DateTime  @default(now()) @updatedAt
   deleted_at DateTime?
 
-  comments   Comment[]
-  identities Identity[]
-  JobProfile JobProfile[]
+  comments     Comment[]
+  identities   Identity[]
+  job_profiles JobProfile[]
 
   @@map("user")
 }
@@ -95,38 +95,6 @@ model Ministry {
   @@map("ministry")
 }
 
-model Classification {
-  id                  Int @id @default(autoincrement())
-  grid_id             Int
-  occupation_group_id Int
-
-  grid                   Grid                  @relation(fields: [grid_id], references: [id])
-  occupation_group       OccupationGroup       @relation(fields: [occupation_group_id], references: [id])
-  job_profiles           JobProfile[]
-  dependent_job_profiles JobProfileReportsTo[]
-
-  @@map("classification")
-}
-
-model Grid {
-  id              Int              @id @default(autoincrement())
-  name            String
-  steps           Int[]
-  classifications Classification[]
-
-  @@map("grid")
-}
-
-model OccupationGroup {
-  id   Int    @id @default(autoincrement())
-  code String
-  name String
-
-  classifications Classification[]
-
-  @@map("occupation_group")
-}
-
 model CareerGroup {
   id   Int    @id @default(autoincrement())
   name String
@@ -169,7 +137,7 @@ enum JobStream {
 model JobProfile {
   id                Int     @id @default(autoincrement())
   career_group_id   Int?
-  classification_id Int
+  classification_id String
   family_id         Int?
   ministry_id       Int?
   owner_id          String? @db.Uuid
@@ -211,7 +179,7 @@ model JobProfileBehaviouralCompetency {
 }
 
 model JobProfileReportsTo {
-  classification_id Int
+  classification_id String
   job_profile_id    Int
 
   classification Classification @relation(fields: [classification_id], references: [id])
@@ -249,4 +217,92 @@ model Comment {
   author User @relation(fields: [author_id], references: [id])
 
   @@map("comment")
+}
+
+// PeopleSoft Tables
+model Organization {
+  id   String @id
+  name String
+
+  departments Department[]
+  Position    Position[]
+  Employee    Employee[]
+
+  @@map("organization")
+}
+
+model Department {
+  id              String @id
+  organization_id String
+  name            String
+
+  organization Organization @relation(fields: [organization_id], references: [id])
+  Position     Position[]
+  Employee     Employee[]
+
+  @@map("department")
+}
+
+model Classification {
+  id           String                @id
+  code         String
+  job_profiles JobProfile[]
+  reportees    JobProfileReportsTo[]
+  Employee     Employee[]
+  Position     Position[]
+
+  @@map("classification")
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  LEAVE
+  LEAVE_WO_PAY
+}
+
+model Position {
+  id                 String  @id
+  classification_id  String
+  department_id      String
+  organization_id    String
+  supervisor_id      String
+  title              String
+  job_profile_number String?
+  is_empty           Boolean
+  is_vacant          Boolean
+
+  classification Classification     @relation(fields: [classification_id], references: [id])
+  department     Department         @relation(fields: [department_id], references: [id])
+  organization   Organization       @relation(fields: [organization_id], references: [id])
+  employees      PositionEmployee[]
+
+  @@map("position")
+}
+
+model PositionEmployee {
+  employee_id String
+  position_id String
+
+  employee Employee @relation(fields: [employee_id], references: [id])
+  position Position @relation(fields: [position_id], references: [id])
+
+  @@id([employee_id, position_id])
+  @@map("position_employee")
+}
+
+model Employee {
+  id                String @id
+  classification_id String
+  department_id     String
+  organization_id   String
+
+  name   String
+  status EmployeeStatus?
+
+  classification   Classification     @relation(fields: [classification_id], references: [id])
+  department       Department         @relation(fields: [department_id], references: [id])
+  organization     Organization       @relation(fields: [organization_id], references: [id])
+  PositionEmployee PositionEmployee[]
+
+  @@map("employee")
 }

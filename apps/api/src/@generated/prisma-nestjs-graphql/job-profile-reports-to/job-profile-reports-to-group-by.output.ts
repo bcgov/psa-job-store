@@ -9,8 +9,8 @@ import { JobProfileReportsToMaxAggregate } from './job-profile-reports-to-max-ag
 
 @ObjectType()
 export class JobProfileReportsToGroupBy {
-  @Field(() => Int, { nullable: false })
-  classification_id!: number;
+  @Field(() => String, { nullable: false })
+  classification_id!: string;
 
   @Field(() => Int, { nullable: false })
   job_profile_id!: number;

@@ -11,5 +11,5 @@ export class UserCount {
   identities?: number;
 
   @Field(() => Int, { nullable: false })
-  JobProfile?: number;
+  job_profiles?: number;
 }

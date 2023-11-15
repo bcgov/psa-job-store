@@ -10,8 +10,8 @@ export class JobProfileCreateManyCareer_groupInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
-  @Field(() => Int, { nullable: false })
-  classification_id!: number;
+  @Field(() => String, { nullable: false })
+  classification_id!: string;
 
   @Field(() => Int, { nullable: true })
   family_id?: number;
