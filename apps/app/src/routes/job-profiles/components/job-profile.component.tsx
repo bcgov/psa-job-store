@@ -14,6 +14,7 @@ const { useBreakpoint } = Grid;
 interface JobProfileProps {
   profileData?: any;
   id?: string; // The id is optional, as it can also be retrieved from the params
+  onProfileLoad?: (profileData: JobProfileModel) => void;
 }
 
 class BehaviouralCompetency {
@@ -29,6 +30,8 @@ class BehaviouralCompetency {
 
 export class JobProfileValidationModel {
   id: number;
+
+  number: number;
 
   @Length(2, 500)
   title: string;
@@ -53,11 +56,9 @@ export class JobProfileValidationModel {
   @ValidateNested({ each: true })
   @Type(() => BehaviouralCompetency)
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
-
-  test?: Array<{ value: string }>;
 }
 
-export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData }) => {
+export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfileLoad }) => {
   const params = useParams();
   const resolvedId = id ?? params.id; // Using prop ID or param ID
   const screens = useBreakpoint();
@@ -87,9 +88,11 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData }) => {
   useEffect(() => {
     if (!profileData && data && !isLoading) {
       // Only set effectiveData from fetched data if profileData is not provided
+      if (onProfileLoad) onProfileLoad(data.jobProfile);
+
       setEffectiveData(data.jobProfile);
     }
-  }, [data, isLoading, profileData]);
+  }, [data, isLoading, profileData, onProfileLoad]);
 
   if (isLoading) {
     return <p>Loading...</p>;

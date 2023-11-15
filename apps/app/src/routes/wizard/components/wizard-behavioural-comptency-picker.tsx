@@ -1,10 +1,9 @@
-import { Button, Form, Select, Typography } from 'antd';
-import React, { useState } from 'react';
+import { Button, Card, Col, Row, Select, Space } from 'antd';
+import React, { CSSProperties, useState } from 'react';
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
 import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile.api';
 
 const { Option } = Select;
-const { Paragraph } = Typography;
 
 // Utility function to format enum strings to a more readable form
 const formatEnumString = (str: string): string => {
@@ -22,9 +21,10 @@ export interface BehaviouralCompetencyData {
 interface BehaviouralComptencyPickerProps {
   onAdd: (competencyData: BehaviouralCompetencyData) => void;
   onCancel: () => void;
+  style?: CSSProperties;
 }
 
-const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({ onAdd, onCancel }) => {
+const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({ onAdd, onCancel, style }) => {
   const [selectedGroup, setSelectedGroup] = useState<string>('');
   const [selectedName, setSelectedName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -62,47 +62,79 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     ));
 
   const handleAddCompetency = () => {
-    const newCompetencyData: BehaviouralCompetencyData = {
-      behavioural_competency: {
-        id: Date.now(), // Replace with actual ID assignment logic
-        name: selectedName,
-        description: description,
-      },
-      // id: uuidv4(), // Generate a UUID for the outer object's ID
-    };
+    // Find the selected competency based on the selectedName
+    const selectedCompetency = data?.behaviouralComptencies.find((c) => c.name === selectedName);
 
-    onAdd(newCompetencyData);
+    if (selectedCompetency) {
+      const newCompetencyData: BehaviouralCompetencyData = {
+        behavioural_competency: {
+          id: parseInt(selectedCompetency.id), // Set the id from the selected competency
+          name: selectedName,
+          description: description,
+        },
+      };
+
+      onAdd(newCompetencyData);
+    }
   };
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>An error occurred</p>;
 
   return (
-    <>
-      <Form.Item label="Categories">
-        <Select placeholder="Select a category" onChange={handleGroupChange} value={selectedGroup}>
-          {groupOptions}
-        </Select>
-      </Form.Item>
+    <div style={{ ...style }}>
+      <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
+        <Col xs={24} sm={11} lg={6} style={{ paddingRight: '8px' }}>
+          {/* Adjust the column span for different screen sizes */}
+          <Select
+            placeholder="Categories"
+            onChange={handleGroupChange}
+            style={{ width: '100%' }}
+            aria-label="Categories"
+          >
+            {groupOptions}
+          </Select>
+        </Col>
 
-      <Form.Item label="Behavioural Competency">
-        <Select
-          placeholder="Select a competency"
-          onChange={handleNameChange}
-          value={selectedName}
-          disabled={!selectedGroup} // Disable this select when no group is selected
-        >
-          {nameOptions}
-        </Select>
-      </Form.Item>
+        <Col xs={24} sm={11} lg={6} style={{ paddingRight: '8px' }}>
+          {/* Adjust the column span for different screen sizes */}
+          <Select
+            placeholder="Behavioural Competency"
+            onChange={handleNameChange}
+            disabled={!selectedGroup}
+            style={{ width: '100%' }}
+            aria-label="Behavioural Competency"
+          >
+            {nameOptions}
+          </Select>
+        </Col>
+      </Row>
 
-      <Paragraph>{description}</Paragraph>
+      <Card
+        bordered={!!description} // Only show the border when there is a description
+        style={{
+          backgroundColor: description ? 'white' : '#f0f0f0', // Change background color when active/inactive
+          minHeight: '50px',
+          margin: '16px 0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'start',
+        }}
+      >
+        {description ? (
+          <>
+            <strong>{selectedName}</strong>: {description}
+          </>
+        ) : null}
+      </Card>
 
-      <Button type="primary" onClick={handleAddCompetency} disabled={!selectedName}>
-        Add
-      </Button>
-      <Button onClick={onCancel}>Cancel</Button>
-    </>
+      <Space size="small">
+        <Button type="primary" onClick={handleAddCompetency} disabled={!selectedName}>
+          Add
+        </Button>
+        <Button onClick={onCancel}>Cancel</Button>
+      </Space>
+    </div>
   );
 };
 

@@ -69,10 +69,16 @@ const WizardEditProfile = forwardRef(
       }
     }, [data, isLoading, profileData]);
 
+    const [form] = Form.useForm();
+
     // todo: usage of this approach is undesirable, however it fixes various render issues
     // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
     // of this state
     const [renderKey, setRenderKey] = useState(0);
+    useEffect(() => {
+      form.resetFields(); // "form" is needed to use with ref and to get the state. Must do "resetFields"
+      // as part of the render hack. todo: get rid of this if possible
+    }, [renderKey, form]);
 
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData) {
@@ -84,8 +90,10 @@ const WizardEditProfile = forwardRef(
             )?.id
           : null;
 
+        console.log('effectiveData: ', effectiveData);
         reset({
           id: effectiveData?.id,
+          number: effectiveData?.number,
           title: effectiveData?.title,
           context: effectiveData?.context,
           overview: effectiveData?.overview,
@@ -145,8 +153,6 @@ const WizardEditProfile = forwardRef(
 
     console.log('behavioural_competencies_fields: ', behavioural_competencies_fields);
 
-    const [form] = Form.useForm();
-
     // useImperativeHandle to expose the submitForm function
     useImperativeHandle(ref, () => ({
       // You can expose any method you need from the form instance here
@@ -177,9 +183,10 @@ const WizardEditProfile = forwardRef(
     }
 
     console.log('rendering edit form with effectiveData: ', effectiveData);
+    console.log('acc_req_fields: ', acc_req_fields);
 
     const titleStyle = {
-      fontSize: '16px', // Adjust the font size as needed
+      fontSize: '24px', // Adjust the font size as needed
       color: 'rgba(0, 0, 0, 0.85)', // This is the default color for antd titles
       marginBottom: '0px', // Adjust spacing as needed
       fontWeight: '500', // Default font weight for antd titles
@@ -189,7 +196,7 @@ const WizardEditProfile = forwardRef(
       padding: 0,
       height: 'auto',
       lineHeight: 'inherit',
-      marginTop: '-30px',
+      marginTop: '5px',
       marginBottom: '3rem',
       display: 'block',
     };
@@ -203,9 +210,30 @@ const WizardEditProfile = forwardRef(
           submitHandler?.(data);
         })}
       >
+        {/*         
+        <Button
+          onClick={() => {
+            setRenderKey((prevKey) => {
+              console.log('prevKey: ', prevKey);
+              return prevKey + 1;
+            }); // Fixes issue where deleting item doesn't render properly
+          }}
+        >
+          Re-render
+        </Button> */}
+
         <FormItem name="id" control={control} hidden>
           <Input />
         </FormItem>
+
+        <FormItem name="number" control={control} hidden>
+          <Input />
+        </FormItem>
+
+        <FormItem name="classification" control={control} hidden>
+          <Input />
+        </FormItem>
+
         {/* // <JobProfileEditableField
         //   fieldId="title"
         //   control={control}
@@ -257,7 +285,7 @@ const WizardEditProfile = forwardRef(
               colon={false}
               label={<span style={titleStyle}>Context</span>}
             >
-              <TextArea />
+              <TextArea autoSize />
             </FormItem>
 
             <FormItem
@@ -268,7 +296,7 @@ const WizardEditProfile = forwardRef(
               colon={false}
               label={<span style={titleStyle}>Overview</span>}
             >
-              <TextArea />
+              <TextArea autoSize />
             </FormItem>
 
             <Title level={4} style={titleStyle}>
@@ -285,18 +313,25 @@ const WizardEditProfile = forwardRef(
               <List
                 dataSource={acc_req_fields}
                 renderItem={(_field, index) => (
-                  <List.Item style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '10px' }}>
+                  <List.Item
+                    style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
+                    key={_field.id}
+                  >
                     <FormItem
                       name={`required_accountabilities.${index}.value`}
                       control={control}
-                      style={{ flex: 1, marginRight: '10px' }}
+                      style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
                     >
-                      <TextArea autoSize />
+                      <TextArea {...register(`required_accountabilities.${index}.value`)} autoSize />
                     </FormItem>
+                    {/* <input
+                      // key={field.id} // important to include key with field's id
+                      {...register(`required_accountabilities.${index}.value`)}
+                    /> */}
 
                     <Button
                       type="text" // Changed to 'text' for an icon-only button
-                      icon={<DeleteOutlined />} // Using the DeleteOutlined icon
+                      icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
                       onClick={() => {
                         acc_req_remove(index);
                         setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
@@ -304,8 +339,6 @@ const WizardEditProfile = forwardRef(
                       style={{
                         border: 'none', // Removes the border
                         padding: 0, // Removes padding
-                        // Adjust the following to align the icon properly with your design
-                        marginTop: '4px', // Aligns the button with the top of the text area
                       }}
                     />
                   </List.Item>
@@ -331,10 +364,13 @@ const WizardEditProfile = forwardRef(
               <List
                 dataSource={acc_opt_fields}
                 renderItem={(_field, index) => (
-                  <List.Item style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '10px' }}>
+                  <List.Item
+                    style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
+                    key={_field.id}
+                  >
                     <FormItem
                       name={`optional_accountabilities.${index}.value`}
-                      style={{ flex: 1, marginRight: '10px' }}
+                      style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
                       control={control}
                     >
                       <TextArea autoSize />
@@ -342,7 +378,7 @@ const WizardEditProfile = forwardRef(
 
                     <Button
                       type="text" // Changed to 'text' for an icon-only button
-                      icon={<DeleteOutlined />} // Using the DeleteOutlined icon
+                      icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
                       onClick={() => {
                         acc_opt_remove(index);
                         setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
@@ -350,8 +386,6 @@ const WizardEditProfile = forwardRef(
                       style={{
                         border: 'none', // Removes the border
                         padding: 0, // Removes padding
-                        // Adjust the following to align the icon properly with your design
-                        marginTop: '4px', // Aligns the button with the top of the text area
                       }}
                     />
                   </List.Item>
@@ -383,10 +417,18 @@ const WizardEditProfile = forwardRef(
               <List
                 dataSource={requirement_fields}
                 renderItem={(_field, index) => (
-                  <List.Item style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '10px' }}>
+                  <List.Item
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      marginBottom: '0px',
+                      borderBottom: 'none',
+                    }}
+                    key={_field.id}
+                  >
                     <FormItem
                       name={`requirements.${index}.value`}
-                      style={{ flex: 1, marginRight: '10px' }}
+                      style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
                       control={control}
                     >
                       <TextArea autoSize />
@@ -394,7 +436,7 @@ const WizardEditProfile = forwardRef(
 
                     <Button
                       type="text" // Changed to 'text' for an icon-only button
-                      icon={<DeleteOutlined />} // Using the DeleteOutlined icon
+                      icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
                       onClick={() => {
                         requirement_remove(index);
                         setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
@@ -403,7 +445,6 @@ const WizardEditProfile = forwardRef(
                         border: 'none', // Removes the border
                         padding: 0, // Removes padding
                         // Adjust the following to align the icon properly with your design
-                        marginTop: '4px', // Aligns the button with the top of the text area
                       }}
                     />
                   </List.Item>
@@ -427,41 +468,19 @@ const WizardEditProfile = forwardRef(
             </Title>
             {/* Behavioural competencies */}
 
-            {/* todo: these were some hidden fields+something else from before <>
-                      <FormItem
-                        name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                        control={control}
-                        hidden
-                      >
-                        <Input />
-                      </FormItem>
-                      <FormItem
-                        hidden
-                        name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                        control={control}
-                        style={{ flex: 1, marginRight: '10px' }}
-                      >
-                        <Input placeholder="Name" style={{ width: '100%' }} />
-                      </FormItem>
-                      <FormItem
-                        hidden
-                        name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                        control={control}
-                        style={{ flex: 2, marginRight: '10px' }}
-                      >
-                        <TextArea placeholder="Description" style={{ width: '100%' }} />
-                      </FormItem>
-                    </> */}
-
             <>
               <List
+                style={{ marginTop: '7px' }}
                 dataSource={behavioural_competencies_fields}
                 renderItem={(field, index) => (
                   <List.Item
                     style={{
                       display: 'flex',
                       alignItems: 'flex-start', // Align items to the top
-                      marginBottom: '10px',
+                      marginBottom: '0px',
+                      borderBottom: 'none',
+
+                      padding: '5px 0',
                     }}
                     key={field.id} // Ensure this is a unique value
                   >
@@ -478,15 +497,44 @@ const WizardEditProfile = forwardRef(
                       style={{
                         border: 'none',
                         padding: 0,
-                        marginTop: '4px', // Adjust if necessary to align with the text
+                        color: '#D9D9D9',
                       }}
                     />
+
+                    {/* Hidden fields to submit actual data */}
+                    <FormItem
+                      name={`behavioural_competencies.${index}.behavioural_competency.id`}
+                      control={control}
+                      hidden
+                    >
+                      <Input />
+                    </FormItem>
+                    <FormItem
+                      hidden
+                      name={`behavioural_competencies.${index}.behavioural_competency.name`}
+                      control={control}
+                      style={{ flex: 1, marginRight: '10px' }}
+                    >
+                      <Input placeholder="Name" style={{ width: '100%' }} />
+                    </FormItem>
+                    <FormItem
+                      hidden
+                      name={`behavioural_competencies.${index}.behavioural_competency.description`}
+                      control={control}
+                      style={{ flex: 2, marginRight: '10px' }}
+                    >
+                      <TextArea placeholder="Description" style={{ width: '100%' }} />
+                    </FormItem>
                   </List.Item>
                 )}
               />
 
               {isPickerVisible ? (
-                <BehaviouralComptencyPicker onAdd={addBehaviouralCompetency} onCancel={() => setPickerVisible(false)} />
+                <BehaviouralComptencyPicker
+                  onAdd={addBehaviouralCompetency}
+                  onCancel={() => setPickerVisible(false)}
+                  style={{ marginTop: '20px' }}
+                />
               ) : (
                 <Button
                   type="link"

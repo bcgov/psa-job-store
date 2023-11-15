@@ -1,6 +1,6 @@
 import { FormInstance } from 'antd';
 import { useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ClassificationModel, GetClassificationsResponse } from '../../redux/services/graphql-api/classification.api';
 import { BehaviouralCompetencies, JobProfileModel } from '../../redux/services/graphql-api/job-profile.api';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
@@ -46,12 +46,12 @@ export const WizardEditPage = () => {
     //   "family":null,"role":null,"category":null,"ministry":null,"reports_to":null}
 
     // this is so that the edited data can be displayed for review (since this component uses API format data)
-
+    console.log('input.number: ', input);
     const output: JobProfileModel = {
       id: parseInt(input.id),
       stream: 'USER',
       title: input.title,
-      number: -1,
+      number: parseInt(input.number),
       ministry_id: -1,
       family_id: -1,
       context: input.context,
@@ -62,7 +62,9 @@ export const WizardEditPage = () => {
       },
       requirements: [] as string[],
       behavioural_competencies: [] as BehaviouralCompetencies[],
-      classification: null,
+      classification: {
+        id: parseInt(input.classification),
+      } as ClassificationModel,
     };
 
     Object.keys(input).forEach((key) => {
@@ -128,12 +130,26 @@ export const WizardEditPage = () => {
 
   const onSave = () => {
     console.log('wizard-edit onSave, wizardEditProfileRef: ', wizardEditProfileRef.current);
-    wizardEditProfileRef.current?.submit();
+    // wizardEditProfileRef.current?.submit();
     const formData = wizardEditProfileRef.current?.getFormData();
     const transformedData = transformFormData(formData);
     setWizardData(transformedData);
     console.log('Form Data:', formData);
     setEditMode(false);
+  };
+
+  const navigate = useNavigate();
+  const onNext = () => {
+    // const transformedData = transformFormData(data);
+
+    // // console.log('setWizardData transformedData: ', transformedData);
+    // setWizardData(transformedData);
+    navigate('/wizard/review');
+  };
+
+  const handleProfileLoad = (profileData: JobProfileModel) => {
+    console.log('handleProfileLoad profileData: ', profileData);
+    setWizardData(profileData);
   };
 
   return (
@@ -145,14 +161,17 @@ export const WizardEditPage = () => {
         onEdit={enterEditMode}
         onSave={onSave}
         onCancel={exitEditMode}
+        onNext={onNext}
       />
       {!editMode ? (
         <JobProfile
           // "wizardData" will be null if this is first call, in that case data will be fetched from API
           profileData={wizardData}
           id={profileId}
+          onProfileLoad={handleProfileLoad}
         />
       ) : (
+        // <Testt></Testt>
         <WizardEditProfile
           ref={wizardEditProfileRef}
           profileData={wizardData}

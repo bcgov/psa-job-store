@@ -1,5 +1,5 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Button, Modal } from 'antd';
+import { Button, Card, Modal, Typography } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -7,11 +7,11 @@ import {
   JobProfileModel,
   useCreateJobProfileMutation,
 } from '../../redux/services/graphql-api/job-profile.api';
-import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
-import WizardControls from './components/wizard-controls.component';
+import WizardEditControlBar from './components/wizard-edit-control-bar';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
+const { Text } = Typography;
 
 function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJobProfileInput {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -82,12 +82,33 @@ export const WizardReviewPage = () => {
   };
 
   const { wizardData } = useWizardContext();
+  const onBack = () => {
+    navigate(-1);
+  };
 
   return (
     <WizardPageWrapper title="Review and submit" subTitle="Review the profile before creating a new position">
       <WizardSteps current={2}></WizardSteps>
-      <JobProfile profileData={wizardData} />
-      <WizardControls submitText={'Create Position'} onNextClick={showModal} />.
+      <WizardEditControlBar
+        style={{ marginBottom: '1rem' }}
+        onNext={showModal}
+        onBack={onBack}
+        nextText="Submit for a new position #"
+      />
+      {/* <JobProfile profileData={wizardData} />
+      <WizardControls submitText={'Create Position'} onNextClick={showModal} />. */}
+      <Card
+        style={{
+          width: '100%',
+          textAlign: 'center',
+          boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+          borderRadius: '10px',
+        }}
+      >
+        <ExclamationCircleOutlined style={{ fontSize: '48px', color: '#ccc', marginBottom: '20px' }} />
+        <br></br>
+        <Text type="secondary">We will ask you for some additional information on this page in the future.</Text>
+      </Card>
       <Modal
         title="Affirmation"
         open={isModalVisible}
