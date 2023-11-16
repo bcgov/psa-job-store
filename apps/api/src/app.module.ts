@@ -13,6 +13,7 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
+import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
@@ -56,6 +57,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     ClassificationModule,
     JobFamilyModule,
     JobRoleModule,
+    BehaviouralComptencyModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
