@@ -118,10 +118,11 @@ export const JobProfileSearch = () => {
   };
 
   return (
-    <Row justify="center" gutter={8} style={{ margin: '0 1rem' }}>
+    <Row justify="center" gutter={8} style={{ margin: '0 1rem' }} role="search">
       <Col xs={24} sm={18} md={18} lg={18} xl={14} style={{ margin: '1rem' }}>
         <Space direction="vertical" size="small" style={{ width: '100%' }}>
           <Search
+            aria-label="Search by job title or keyword"
             onSearch={handleSearch}
             onPressEnter={(e) => handleSearch(e.currentTarget.value)}
             allowClear
@@ -164,6 +165,7 @@ export const JobProfileSearch = () => {
                       padding: '0 5px', // Padding around the label text
                       fontSize: '14px', // Optional: Font size adjustment
                     }}
+                    htmlFor={filter.title}
                   >
                     {filter.title}
                   </label>
@@ -171,6 +173,8 @@ export const JobProfileSearch = () => {
                     mode="multiple"
                     // maxTagCount={'responsive'}
                     allowClear
+                    // aria-label={filter.title}
+                    id={filter.title}
                     placeholder={filter.title}
                     options={filterData[filter.title]}
                     style={{
