@@ -6,6 +6,7 @@ services:
         - .env
     build:
       context: .
+      image: pjs-frontend:18-alpine
       dockerfile: apps/api/Dockerfile.dev
       args:
         - POSTGRES_DB=${POSTGRES_DB}

@@ -1,3 +1,5 @@
+
+
 # Get current directory, without special '.' character
 VOLUME=$(subst .,,$(shell basename $(PWD)))
 
@@ -12,16 +14,16 @@ NOCOLOUR=\033[0m
 # To avoid console output of environment var with local credentials
 .SILENT: db.gui
 
-.PHONY: develop clean build run 
-	db.reset db.seed db.data-delete:
-	db.export db.start  db.root-shell db.psql
-	app-shell app.wp-cli
+.PHONY: develop clean build run db.reset db.seed db.data-delete
+# db.export db.start  
+	db.root-shell db.psql be.shell db.gui echo.params
 
 develop: clean build run
 
 clean:
 		docker compose down
 		docker compose rm -vf
+		rm -rf ./node_modules
 
 build:
 		docker-compose build --no-cache
@@ -50,8 +52,15 @@ db.root-shell:
 db.psql:
 		docker-compose exec db /usr/bin/bash -c 'psql -U $${POSTGRES_USER} $${POSTGRES_DB}'
 
-api.shell:
+be.shell:
 		docker-compose exec -u root -w /usr/src/apps/api nestjs-app /usr/bin/bash
 
 db.gui: 
 		DATABASE_URL=${STUDIO_DATABASE_URL} npx -w api prisma studio
+
+echo.params: 
+		@printf "$(filter-out $@,$(MAKECMDGOALS))\n"
+
+# ref: https://stackoverflow.com/questions/6273608/how-to-pass-argument-to-makefile-from-command-line
+%:
+	@:
