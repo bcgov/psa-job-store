@@ -16,18 +16,22 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({ current }) => {
       items={[
         {
           title: 'Choose a job profile',
-          description: 'Choose and modify a job profile.',
+          description: 'Choose and modify a job profile',
         },
         {
-          title: 'Edit profile',
-          description: 'Make changes to an approved job profile (optional).',
+          title: 'Edit',
+          description: 'Make changes to the job profile',
         },
         {
           title: 'Review',
-          description: 'Review the profile before creating the position.',
+          description: 'Review the job profile',
         },
         {
-          title: 'Result',
+          title: 'Confirm details',
+          description: 'Provide additional info',
+        },
+        {
+          title: 'Submission Result',
           description: 'Find out the result of your request',
         },
       ]}

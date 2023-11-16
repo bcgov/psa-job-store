@@ -1,36 +1,22 @@
-import { SubmitHandler } from 'react-hook-form';
+import { FormInstance } from 'antd';
+import { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ClassificationModel, GetClassificationsResponse } from '../../redux/services/graphql-api/classification.api';
 import { BehaviouralCompetencies, JobProfileModel } from '../../redux/services/graphql-api/job-profile.api';
-import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import WizardEditControlBar from './components/wizard-edit-control-bar';
+import WizardEditProfile from './components/wizard-edit-profile';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
 
-interface InputData {
+export interface InputData {
   [key: string]: string;
 }
 
 export const WizardEditPage = () => {
-  const navigate = useNavigate();
-
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
   const { wizardData, setWizardData, classificationsData } = useWizardContext();
-
-  const onSubmit: SubmitHandler<Record<string, string>> = (data) => {
-    // User pressed "next" on the edit screen:
-    // put form data into context - it will be accessed on review screen to display the profile
-
-    // Convert form data into API data format
-    // e.g. remove references such as "required_accountabilities.0"
-
-    const transformedData = transformFormData(data);
-
-    // console.log('setWizardData transformedData: ', transformedData);
-    setWizardData(transformedData);
-    navigate('/wizard/review');
-  };
 
   function getClassificationById(id: number): ClassificationModel | undefined {
     // If data is loaded, find the classification by ID
@@ -59,12 +45,12 @@ export const WizardEditPage = () => {
     //   "family":null,"role":null,"category":null,"ministry":null,"reports_to":null}
 
     // this is so that the edited data can be displayed for review (since this component uses API format data)
-
+    console.log('input.number: ', input);
     const output: JobProfileModel = {
       id: parseInt(input.id),
       stream: 'USER',
       title: input.title,
-      number: -1,
+      number: parseInt(input.number),
       ministry_id: -1,
       family_id: -1,
       context: input.context,
@@ -75,7 +61,9 @@ export const WizardEditPage = () => {
       },
       requirements: [] as string[],
       behavioural_competencies: [] as BehaviouralCompetencies[],
-      classification: null,
+      classification: {
+        id: parseInt(input.classification),
+      } as ClassificationModel,
     };
 
     Object.keys(input).forEach((key) => {
@@ -129,19 +117,39 @@ export const WizardEditPage = () => {
     setClassificationsData(data);
   }
 
+  const wizardEditProfileRef = useRef<{
+    submit: () => void;
+    getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
+  }>(null);
+
+  const navigate = useNavigate();
+  const onNext = () => {
+    const formData = wizardEditProfileRef.current?.getFormData();
+    const transformedData = transformFormData(formData);
+    setWizardData(transformedData);
+    navigate('/wizard/review');
+  };
+
+  // const handleProfileLoad = (profileData: JobProfileModel) => {
+  //   console.log('handleProfileLoad profileData: ', profileData);
+  //   setWizardData(profileData);
+  // };
+
   return (
     <WizardPageWrapper title="Edit profile" subTitle="Make changes to an approved job profile (optional)">
       <WizardSteps current={1}></WizardSteps>
-      <JobProfile
-        // "wizardData" will be null if this is first call, in that case data will be fetched from API
+      <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} showChooseDifferentProfile={true} />
+
+      {/* // <Testt></Testt> */}
+      <WizardEditProfile
+        ref={wizardEditProfileRef}
         profileData={wizardData}
         id={profileId}
-        config={{ isEditable: true }}
         submitText="Review Profile"
-        submitHandler={onSubmit}
+        // submitHandler={onSubmit}
         showBackButton={true}
         receivedClassificationsDataCallback={receivedClassificationsDataCallback}
-      />
+      ></WizardEditProfile>
     </WizardPageWrapper>
   );
 };

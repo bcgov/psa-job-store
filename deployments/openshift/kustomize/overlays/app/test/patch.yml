@@ -3,8 +3,6 @@ kind: DeploymentConfig
 metadata:
   name: app
 spec:
-  strategy:
-    type: Rolling
   triggers:
       - type: ConfigChange
       - imageChangeParams:
