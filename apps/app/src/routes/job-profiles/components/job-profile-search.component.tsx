@@ -146,30 +146,32 @@ export const JobProfileSearch = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'flex-start',
-                    border: '1px solid #d9d9d9', // Thin border
-                    borderRadius: '4px', // Optional: Rounded corners
-                    padding: '20px 10px 10px', // Adjusted padding for label positioning
-                    marginRight: '8px', // Space between filters
+                    border: '1px solid #d9d9d9',
+                    borderRadius: '4px',
+                    padding: '20px 10px 10px',
+                    marginRight: '8px',
                     marginTop: '10px',
-                    flexShrink: 1, // Allows the item to shrink
+                    flexShrink: 1,
                     minWidth: '20%',
                   }}
                 >
                   <label
                     style={{
-                      position: 'absolute', // Absolute positioning for the label
-                      top: '-12px', // Adjust as needed to place the label over the border
-                      left: '10px', // Horizontal position of the label
-                      backgroundColor: 'white', // Background to cover the border
-                      padding: '0 5px', // Padding around the label text
-                      fontSize: '14px', // Optional: Font size adjustment
+                      position: 'absolute',
+                      top: '-12px',
+                      left: '10px',
+                      backgroundColor: 'white',
+                      padding: '0 5px',
+                      fontSize: '14px',
                     }}
                   >
                     {filter.title}
                   </label>
                   <Select
                     mode="multiple"
-                    // maxTagCount={'responsive'}
+                    filterOption={(inputValue, option) => {
+                      return option ? option.label.toLowerCase().includes(inputValue.toLowerCase()) : false;
+                    }}
                     allowClear
                     placeholder={filter.title}
                     options={filterData[filter.title]}
