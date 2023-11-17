@@ -18,7 +18,7 @@ export const WizardEditPage = () => {
   // functionality from the review screen (so that form contains data the user has previously entered)
   const { wizardData, setWizardData, classificationsData } = useWizardContext();
 
-  function getClassificationById(id: number): ClassificationModel | undefined {
+  function getClassificationById(id: string): ClassificationModel | undefined {
     // If data is loaded, find the classification by ID
     if (classificationsData) {
       return classificationsData.classifications.find(
@@ -51,7 +51,7 @@ export const WizardEditPage = () => {
       stream: 'USER',
       title: input.title,
       number: parseInt(input.number),
-      ministry_id: -1,
+      organization_id: -1,
       family_id: -1,
       context: input.context,
       overview: input.overview,
@@ -62,7 +62,7 @@ export const WizardEditPage = () => {
       requirements: [] as string[],
       behavioural_competencies: [] as BehaviouralCompetencies[],
       classification: {
-        id: parseInt(input.classification),
+        id: input.classification,
       } as ClassificationModel,
     };
 

@@ -34,5 +34,5 @@ export class UserUpdateInput {
   identities?: IdentityUpdateManyWithoutUserNestedInput;
 
   @Field(() => JobProfileUpdateManyWithoutOwnerNestedInput, { nullable: true })
-  JobProfile?: JobProfileUpdateManyWithoutOwnerNestedInput;
+  job_profiles?: JobProfileUpdateManyWithoutOwnerNestedInput;
 }

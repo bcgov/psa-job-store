@@ -9,7 +9,7 @@ export interface JobProfileModel {
   behavioural_competencies: BehaviouralCompetencies[];
   classification: ClassificationModel | null;
   requirements: string[];
-  ministry_id: number;
+  organization_id: string;
   family_id: number;
   stream: string;
   title: string;
@@ -49,7 +49,7 @@ interface BehaviouralCompetenciesInput {
 
 interface ClassificationConnectInput {
   connect: {
-    id: number;
+    id: string;
   };
 }
 
@@ -115,15 +115,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 classification {
                   id
-                  occupation_group {
-                    id
-                    code
-                    name
-                  }
-                  grid {
-                    id
-                    name
-                  }
+                  code
                 }
                 family {
                   id
@@ -137,21 +129,14 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                ministry {
+                organization {
                   id
-                  code
                   name
                 }
                 reports_to {
                   classification {
                     id
-                    grid {
-                      name
-                    }
-                    occupation_group {
-                      code
-                      name
-                    }
+                    code
                   }
                 }
               }
@@ -186,15 +171,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 classification {
                   id
-                  occupation_group {
-                    id
-                    code
-                    name
-                  }
-                  grid {
-                    id
-                    name
-                  }
+                  code
                 }
                 family {
                   id
@@ -208,16 +185,14 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                ministry {
+                organization {
                   id
-                  code
                   name
                 }
                 reports_to {
                   classification {
                     id
-                    grid_id
-                    occupation_group_id
+                    code
                   }
                 }
               }

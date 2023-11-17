@@ -6,8 +6,8 @@ import { JobProfile } from '../job-profile/job-profile.model';
 
 @ObjectType()
 export class JobProfileReportsTo {
-  @Field(() => Int, { nullable: false })
-  classification_id!: number;
+  @Field(() => String, { nullable: false })
+  classification_id!: string;
 
   @Field(() => Int, { nullable: false })
   job_profile_id!: number;

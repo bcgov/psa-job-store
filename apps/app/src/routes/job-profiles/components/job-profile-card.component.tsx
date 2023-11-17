@@ -28,7 +28,7 @@ export const JobProfileCard = ({ data, link }: JobProfileCardProps) => {
       </Title>
       <div>
         <Text type="secondary">
-          {data.classification?.occupation_group.name} {data.classification?.grid.name} | Job Store # {data.number}
+          {data.classification?.code} | Job Store # {data.number}
         </Text>
         <br />
         <Text type="secondary">Reports to excluded manager</Text>

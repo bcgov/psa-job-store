@@ -16,14 +16,14 @@ export class JobProfileUncheckedCreateWithoutOwnerInput {
   @Field(() => Int, { nullable: true })
   career_group_id?: number;
 
-  @Field(() => Int, { nullable: false })
-  classification_id!: number;
+  @Field(() => String, { nullable: false })
+  classification_id!: string;
 
   @Field(() => Int, { nullable: true })
   family_id?: number;
 
-  @Field(() => Int, { nullable: true })
-  ministry_id?: number;
+  @Field(() => String, { nullable: true })
+  organization_id?: string;
 
   @Field(() => Int, { nullable: true })
   parent_id?: number;

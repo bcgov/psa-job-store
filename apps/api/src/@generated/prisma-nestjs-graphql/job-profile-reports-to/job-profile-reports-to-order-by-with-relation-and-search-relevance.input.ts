@@ -3,6 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
 import { ClassificationOrderByWithRelationAndSearchRelevanceInput } from '../classification/classification-order-by-with-relation-and-search-relevance.input';
 import { JobProfileOrderByWithRelationAndSearchRelevanceInput } from '../job-profile/job-profile-order-by-with-relation-and-search-relevance.input';
+import { JobProfileReportsToOrderByRelevanceInput } from './job-profile-reports-to-order-by-relevance.input';
 
 @InputType()
 export class JobProfileReportsToOrderByWithRelationAndSearchRelevanceInput {
@@ -17,4 +18,7 @@ export class JobProfileReportsToOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => JobProfileOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   job_profile?: JobProfileOrderByWithRelationAndSearchRelevanceInput;
+
+  @Field(() => JobProfileReportsToOrderByRelevanceInput, { nullable: true })
+  _relevance?: JobProfileReportsToOrderByRelevanceInput;
 }

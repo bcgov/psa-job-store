@@ -3,15 +3,8 @@ import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
 
 export interface ClassificationModel {
-  id: number;
-  grid: {
-    id: number;
-    name: string;
-  };
-  occupation_group: {
-    id: number;
-    name: string;
-  };
+  id: string;
+  code: string;
 }
 
 export interface GetClassificationsResponse {
@@ -25,16 +18,9 @@ export const classificationApi = graphqlApi.injectEndpoints({
         return {
           document: gql`
             query Classifications {
-              classifications {
+              classifications(orderBy: [{ code: asc }, { id: asc }]) {
                 id
-                grid {
-                  id
-                  name
-                }
-                occupation_group {
-                  id
-                  name
-                }
+                code
               }
             }
           `,
