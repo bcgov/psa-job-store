@@ -51,7 +51,7 @@ export const WizardEditPage = () => {
       stream: 'USER',
       title: input.title,
       number: parseInt(input.number),
-      organization_id: -1,
+      organization_id: '-1',
       family_id: -1,
       context: input.context,
       overview: input.overview,
@@ -72,8 +72,7 @@ export const WizardEditPage = () => {
 
       if (keys.length === 1) {
         if (key === 'classification') {
-          const classificationId = parseInt(value, 10);
-          const classificationData = getClassificationById(classificationId);
+          const classificationData = getClassificationById(value);
 
           if (classificationData) {
             output.classification = classificationData;

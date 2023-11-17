@@ -173,9 +173,6 @@ export const JobProfileSearch = () => {
                   </label>
                   <Select
                     mode="multiple"
-                    filterOption={(inputValue, option) => {
-                      return option ? option.label.toLowerCase().includes(inputValue.toLowerCase()) : false;
-                    }}
                     allowClear
                     placeholder={filter.title}
                     options={filterData[filter.title]}
