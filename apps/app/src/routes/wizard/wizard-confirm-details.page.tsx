@@ -39,7 +39,7 @@ function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJ
     behavioural_competencies: behaviouralCompetenciesInput,
     classification: classificationConnectInput,
     state: 'SUBMITTED',
-    parent: { connect: { id: `${id}` } },
+    parent: { connect: { id: id } },
   };
 
   return result;

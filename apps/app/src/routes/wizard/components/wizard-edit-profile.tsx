@@ -83,13 +83,7 @@ const WizardEditProfile = forwardRef(
 
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData) {
-        const classificationId = effectiveData?.classification
-          ? classificationsData.classifications.find(
-              (c) =>
-                c.occupation_group.id === effectiveData.classification?.occupation_group.id &&
-                c.grid.id === effectiveData.classification.grid.id,
-            )?.id
-          : null;
+        const classificationId = effectiveData?.classification?.id ?? null;
 
         console.log('effectiveData: ', effectiveData);
         reset({
@@ -287,6 +281,10 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
+          <FormItem name="context" control={control} hidden>
+            <Input />
+          </FormItem>
+
           {/* // <JobProfileEditableField
         //   fieldId="title"
         //   control={control}
@@ -319,8 +317,7 @@ const WizardEditProfile = forwardRef(
           {!config?.classificationEditable ? (
             <div style={{ marginBottom: '24px' }}>
               <Title level={4} style={titleStyle}>
-                Classification -{' '}
-                {`${effectiveData?.classification?.occupation_group.name} ${effectiveData?.classification?.grid.name}`}
+                Classification - {`${effectiveData?.classification?.code}`}
               </Title>
             </div>
           ) : (
@@ -345,7 +342,7 @@ const WizardEditProfile = forwardRef(
                   <Select {...register('classification')}>
                     {classificationsData?.classifications.map((classification: ClassificationModel) => (
                       <Select.Option value={classification.id} key={classification.id}>
-                        {`${classification.occupation_group.name} ${classification.grid.name}`}
+                        {`${classification.code}`}
                       </Select.Option>
                     ))}
                   </Select>

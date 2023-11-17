@@ -216,7 +216,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
           <p>{effectiveData?.title}</p>
 
           <h3>Classification</h3>
-          <p>{`${effectiveData?.classification?.occupation_group.name} ${effectiveData?.classification?.grid.name}`}</p>
+          <p>{`${effectiveData?.classification?.code}`}</p>
 
           <h3>Job Store #</h3>
           <p>{effectiveData?.number}</p>
