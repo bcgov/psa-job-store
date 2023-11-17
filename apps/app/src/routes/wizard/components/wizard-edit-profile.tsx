@@ -185,7 +185,7 @@ const WizardEditProfile = forwardRef(
     const [reqalertShown, setReqAlertShown] = useState(false);
 
     // Function to handle focus
-    const showMinReqModal = (action, showCancel) => {
+    const showMinReqModal = (action: () => void, showCancel: boolean) => {
       if (!minReqalertShown) {
         setMinReqAlertShown(true);
         Modal.confirm({
@@ -209,7 +209,7 @@ const WizardEditProfile = forwardRef(
       }
     };
 
-    const showReqModal = (action, showCancel) => {
+    const showReqModal = (action: () => void, showCancel: boolean) => {
       if (!reqalertShown) {
         setReqAlertShown(true);
         Modal.confirm({
