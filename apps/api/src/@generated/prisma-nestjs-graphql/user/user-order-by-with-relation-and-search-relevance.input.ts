@@ -37,7 +37,7 @@ export class UserOrderByWithRelationAndSearchRelevanceInput {
   identities?: IdentityOrderByRelationAggregateInput;
 
   @Field(() => JobProfileOrderByRelationAggregateInput, { nullable: true })
-  JobProfile?: JobProfileOrderByRelationAggregateInput;
+  job_profiles?: JobProfileOrderByRelationAggregateInput;
 
   @Field(() => UserOrderByRelevanceInput, { nullable: true })
   _relevance?: UserOrderByRelevanceInput;

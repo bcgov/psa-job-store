@@ -7,10 +7,7 @@ export class ClassificationCountAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  grid_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
-  occupation_group_id?: true;
+  code?: true;
 
   @Field(() => Boolean, { nullable: true })
   _all?: true;

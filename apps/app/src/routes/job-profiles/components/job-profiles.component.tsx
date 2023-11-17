@@ -25,7 +25,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     // Search terms need to be joined with specific syntax, <-> in this case
     // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
     const search = searchParams.get('search');
-    const ministryFilter = searchParams.get('ministry_id__in');
+    const organizationFilter = searchParams.get('organization_id__in');
     const jobRoleFilter = searchParams.get('job_role_id__in');
     const classificationFilter = searchParams.get('classification_id__in');
     const jobFamilyFilter = searchParams.get('job_family_id__in');
@@ -59,11 +59,11 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
                 : []),
             ],
           },
-          ...(ministryFilter != null
+          ...(organizationFilter != null
             ? [
                 {
-                  ministry_id: {
-                    in: JSON.parse(`[${ministryFilter}]`),
+                  organization_id: {
+                    in: JSON.parse(`[${organizationFilter.split(',').map((v) => `"${v}"`)}]`),
                   },
                 },
               ]
@@ -72,7 +72,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
             ? [
                 {
                   classification_id: {
-                    in: JSON.parse(`[${classificationFilter}]`),
+                    in: JSON.parse(`[${classificationFilter.split(',').map((v) => `"${v}"`)}]`),
                   },
                 },
               ]

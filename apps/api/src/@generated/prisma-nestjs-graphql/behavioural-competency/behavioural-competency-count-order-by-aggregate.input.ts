@@ -8,9 +8,6 @@ export class BehaviouralCompetencyCountOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  ministry_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   membership?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

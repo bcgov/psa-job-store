@@ -34,5 +34,5 @@ export class UserUncheckedCreateInput {
   identities?: IdentityUncheckedCreateNestedManyWithoutUserInput;
 
   @Field(() => JobProfileUncheckedCreateNestedManyWithoutOwnerInput, { nullable: true })
-  JobProfile?: JobProfileUncheckedCreateNestedManyWithoutOwnerInput;
+  job_profiles?: JobProfileUncheckedCreateNestedManyWithoutOwnerInput;
 }
