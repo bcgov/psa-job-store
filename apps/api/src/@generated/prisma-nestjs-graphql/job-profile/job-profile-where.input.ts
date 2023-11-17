@@ -13,7 +13,7 @@ import { CareerGroupRelationFilter } from '../career-group/career-group-relation
 import { JobProfileListRelationFilter } from './job-profile-list-relation-filter.input';
 import { ClassificationRelationFilter } from '../classification/classification-relation-filter.input';
 import { JobFamilyRelationFilter } from '../job-family/job-family-relation-filter.input';
-import { MinistryRelationFilter } from '../ministry/ministry-relation-filter.input';
+import { OrganizationRelationFilter } from '../organization/organization-relation-filter.input';
 import { UserRelationFilter } from '../user/user-relation-filter.input';
 import { JobProfileRelationFilter } from './job-profile-relation-filter.input';
 import { JobRoleRelationFilter } from '../job-role/job-role-relation-filter.input';
@@ -41,8 +41,8 @@ export class JobProfileWhereInput {
   @Field(() => IntFilter, { nullable: true })
   family_id?: IntFilter;
 
-  @Field(() => IntFilter, { nullable: true })
-  ministry_id?: IntFilter;
+  @Field(() => StringFilter, { nullable: true })
+  organization_id?: StringFilter;
 
   @Field(() => UuidFilter, { nullable: true })
   owner_id?: UuidFilter;
@@ -95,8 +95,8 @@ export class JobProfileWhereInput {
   @Field(() => JobFamilyRelationFilter, { nullable: true })
   family?: JobFamilyRelationFilter;
 
-  @Field(() => MinistryRelationFilter, { nullable: true })
-  ministry?: MinistryRelationFilter;
+  @Field(() => OrganizationRelationFilter, { nullable: true })
+  organization?: OrganizationRelationFilter;
 
   @Field(() => UserRelationFilter, { nullable: true })
   owner?: UserRelationFilter;

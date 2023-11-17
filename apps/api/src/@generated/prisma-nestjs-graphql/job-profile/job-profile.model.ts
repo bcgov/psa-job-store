@@ -9,7 +9,7 @@ import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-repor
 import { CareerGroup } from '../career-group/career-group.model';
 import { Classification } from '../classification/classification.model';
 import { JobFamily } from '../job-family/job-family.model';
-import { Ministry } from '../ministry/ministry.model';
+import { Organization } from '../organization/organization.model';
 import { User } from '../user/user.model';
 import { JobRole } from '../job-role/job-role.model';
 
@@ -27,8 +27,8 @@ export class JobProfile {
   @Field(() => Int, { nullable: true })
   family_id!: number | null;
 
-  @Field(() => Int, { nullable: true })
-  ministry_id!: number | null;
+  @Field(() => String, { nullable: true })
+  organization_id!: string | null;
 
   @Field(() => String, { nullable: true })
   owner_id!: string | null;
@@ -81,8 +81,8 @@ export class JobProfile {
   @Field(() => JobFamily, { nullable: true })
   family?: JobFamily | null;
 
-  @Field(() => Ministry, { nullable: true })
-  ministry?: Ministry | null;
+  @Field(() => Organization, { nullable: true })
+  organization?: Organization | null;
 
   @Field(() => User, { nullable: true })
   owner?: User | null;

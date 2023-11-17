@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { DepartmentUncheckedCreateNestedManyWithoutOrganizationInput } from '../department/department-unchecked-create-nested-many-without-organization.input';
 import { PositionUncheckedCreateNestedManyWithoutOrganizationInput } from '../position/position-unchecked-create-nested-many-without-organization.input';
+import { JobProfileUncheckedCreateNestedManyWithoutOrganizationInput } from '../job-profile/job-profile-unchecked-create-nested-many-without-organization.input';
 
 @InputType()
 export class OrganizationUncheckedCreateWithoutEmployeesInput {
@@ -16,4 +17,7 @@ export class OrganizationUncheckedCreateWithoutEmployeesInput {
 
   @Field(() => PositionUncheckedCreateNestedManyWithoutOrganizationInput, { nullable: true })
   positions?: PositionUncheckedCreateNestedManyWithoutOrganizationInput;
+
+  @Field(() => JobProfileUncheckedCreateNestedManyWithoutOrganizationInput, { nullable: true })
+  job_proviles?: JobProfileUncheckedCreateNestedManyWithoutOrganizationInput;
 }

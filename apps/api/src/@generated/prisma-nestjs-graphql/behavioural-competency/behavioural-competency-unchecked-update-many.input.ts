@@ -9,9 +9,6 @@ export class BehaviouralCompetencyUncheckedUpdateManyInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
-  @Field(() => Int, { nullable: true })
-  ministry_id?: number;
-
   @Field(() => BehaviouralCompetencyMembership, { nullable: true })
   membership?: keyof typeof BehaviouralCompetencyMembership;
 

@@ -72,27 +72,14 @@ enum BehaviouralCompetencyGroup {
 
 model BehaviouralCompetency {
   id          Int                             @id @default(autoincrement())
-  ministry_id Int?
   membership  BehaviouralCompetencyMembership
   group       BehaviouralCompetencyGroup
   name        String
   description String
 
   job_profiles JobProfileBehaviouralCompetency[]
-  ministry     Ministry?                         @relation(fields: [ministry_id], references: [id])
 
   @@map("behavioural_competency")
-}
-
-model Ministry {
-  id   Int    @id @default(autoincrement())
-  code String
-  name String
-
-  job_profiles          JobProfile[]
-  BehaviouralCompetency BehaviouralCompetency[]
-
-  @@map("ministry")
 }
 
 model CareerGroup {
@@ -130,7 +117,7 @@ enum JobProfileState {
 
 enum JobStream {
   CORPORATE
-  MINISTRY
+  ORGANIZATION
   USER
 }
 
@@ -139,7 +126,7 @@ model JobProfile {
   career_group_id   Int?
   classification_id String
   family_id         Int?
-  ministry_id       Int?
+  organization_id   String?
   owner_id          String? @db.Uuid
   parent_id         Int?
   role_id           Int?
@@ -159,7 +146,7 @@ model JobProfile {
   children       JobProfile[]   @relation("JobProfileParentChild")
   classification Classification @relation(fields: [classification_id], references: [id])
   family         JobFamily?     @relation(fields: [family_id], references: [id])
-  ministry       Ministry?      @relation(fields: [ministry_id], references: [id])
+  organization   Organization?  @relation(fields: [organization_id], references: [id])
   owner          User?          @relation(fields: [owner_id], references: [id]) // Who created the job profile
   parent         JobProfile?    @relation("JobProfileParentChild", fields: [parent_id], references: [id])
   role           JobRole?       @relation(fields: [role_id], references: [id])
@@ -224,9 +211,10 @@ model Organization {
   id   String @id
   name String
 
-  departments Department[]
-  positions   Position[]
-  employees   Employee[]
+  departments  Department[]
+  positions    Position[]
+  employees    Employee[]
+  job_proviles JobProfile[]
 
   @@map("organization")
 }

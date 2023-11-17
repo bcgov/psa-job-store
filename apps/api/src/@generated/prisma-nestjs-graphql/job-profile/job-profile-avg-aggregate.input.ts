@@ -13,9 +13,6 @@ export class JobProfileAvgAggregateInput {
   family_id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  ministry_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
   parent_id?: true;
 
   @Field(() => Boolean, { nullable: true })

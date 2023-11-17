@@ -19,7 +19,6 @@ import { ExternalModule } from './modules/external/external.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
-import { MinistryModule } from './modules/ministry/ministry.module';
 import { validateAppConfig } from './utils/validate-app-config.util';
 
 @Module({
@@ -54,7 +53,6 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     }),
     AuthModule,
     JobProfileModule,
-    MinistryModule,
     ClassificationModule,
     JobFamilyModule,
     JobRoleModule,

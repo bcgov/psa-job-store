@@ -31,8 +31,8 @@ export class JobProfileScalarWhereInput {
   @Field(() => IntFilter, { nullable: true })
   family_id?: IntFilter;
 
-  @Field(() => IntFilter, { nullable: true })
-  ministry_id?: IntFilter;
+  @Field(() => StringFilter, { nullable: true })
+  organization_id?: StringFilter;
 
   @Field(() => UuidFilter, { nullable: true })
   owner_id?: UuidFilter;

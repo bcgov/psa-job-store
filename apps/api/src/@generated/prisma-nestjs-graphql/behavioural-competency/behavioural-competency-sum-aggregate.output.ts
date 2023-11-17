@@ -6,7 +6,4 @@ import { Int } from '@nestjs/graphql';
 export class BehaviouralCompetencySumAggregate {
   @Field(() => Int, { nullable: true })
   id?: number;
-
-  @Field(() => Int, { nullable: true })
-  ministry_id?: number;
 }
