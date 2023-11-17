@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Empty, Skeleton, Typography } from 'antd';
+import { Empty, Pagination, Skeleton, Typography } from 'antd';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile.api';
 import { JobProfileCard } from './job-profile-card.component';
@@ -11,9 +11,21 @@ export interface JobProfileSearchResultsProps {
   data: GetJobProfilesResponse | undefined;
   isLoading: boolean;
   onSelectProfile?: (id: string) => void;
+  currentPage: number;
+  pageSize: number;
+  totalResults: number;
+  onPageChange: (page: number, pageSize: number) => void;
 }
 
-export const JobProfileSearchResults = ({ data, isLoading, onSelectProfile }: JobProfileSearchResultsProps) => {
+export const JobProfileSearchResults = ({
+  data,
+  isLoading,
+  onSelectProfile,
+  currentPage,
+  pageSize,
+  totalResults,
+  onPageChange,
+}: JobProfileSearchResultsProps) => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
@@ -29,9 +41,13 @@ export const JobProfileSearchResults = ({ data, isLoading, onSelectProfile }: Jo
   return (
     <div style={{ border: '1px solid #CCC' }}>
       <div style={{ borderBottom: '1px solid #CCC', padding: '1rem' }}>
-        <Text style={{ fontSize: '10pt' }}>Showing 1-{0} of 25 results</Text>
+        <Text style={{ fontSize: '10pt' }}>
+          Showing {(currentPage - 1) * pageSize + 1}-{currentPage * pageSize} of {totalResults} results
+        </Text>
       </div>
-      <ul className={styles.job_profile_search_results_ul}>
+      <ul
+        className={styles.job_profile_search_results_ul + ' ant-tree-list-scrollbar ant-tree-list-scrollbar-vertical'}
+      >
         {isLoading ? (
           <Skeleton loading={isLoading} />
         ) : data?.jobProfiles.length === 0 ? (
@@ -50,6 +66,15 @@ export const JobProfileSearchResults = ({ data, isLoading, onSelectProfile }: Jo
           ))
         )}
       </ul>
+      <Pagination
+        showSizeChanger
+        current={currentPage}
+        pageSize={pageSize}
+        pageSizeOptions={[1, 2, 3, 5, 10]}
+        total={totalResults}
+        onChange={onPageChange}
+        style={{ textAlign: 'center', margin: '1rem' }}
+      />
     </div>
   );
 };
