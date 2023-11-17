@@ -14,9 +14,6 @@ export class JobProfileAvgOrderByAggregateInput {
   family_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  ministry_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   parent_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

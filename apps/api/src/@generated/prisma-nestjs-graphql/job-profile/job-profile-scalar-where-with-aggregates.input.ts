@@ -31,8 +31,8 @@ export class JobProfileScalarWhereWithAggregatesInput {
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   family_id?: IntWithAggregatesFilter;
 
-  @Field(() => IntWithAggregatesFilter, { nullable: true })
-  ministry_id?: IntWithAggregatesFilter;
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  organization_id?: StringWithAggregatesFilter;
 
   @Field(() => UuidWithAggregatesFilter, { nullable: true })
   owner_id?: UuidWithAggregatesFilter;

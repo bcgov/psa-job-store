@@ -9,7 +9,7 @@ export interface JobProfileModel {
   behavioural_competencies: BehaviouralCompetencies[];
   classification: ClassificationModel | null;
   requirements: string[];
-  ministry_id: number;
+  organization_id: string;
   family_id: number;
   stream: string;
   title: string;
@@ -49,7 +49,7 @@ interface BehaviouralCompetenciesInput {
 
 interface ClassificationConnectInput {
   connect: {
-    id: number;
+    id: string;
   };
 }
 
@@ -129,9 +129,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                ministry {
+                organization {
                   id
-                  code
                   name
                 }
                 reports_to {
@@ -186,9 +185,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                ministry {
+                organization {
                   id
-                  code
                   name
                 }
                 reports_to {

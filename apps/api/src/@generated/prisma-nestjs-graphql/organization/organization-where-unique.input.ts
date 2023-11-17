@@ -5,6 +5,7 @@ import { StringFilter } from '../prisma/string-filter.input';
 import { DepartmentListRelationFilter } from '../department/department-list-relation-filter.input';
 import { PositionListRelationFilter } from '../position/position-list-relation-filter.input';
 import { EmployeeListRelationFilter } from '../employee/employee-list-relation-filter.input';
+import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
 
 @InputType()
 export class OrganizationWhereUniqueInput {
@@ -31,4 +32,7 @@ export class OrganizationWhereUniqueInput {
 
   @Field(() => EmployeeListRelationFilter, { nullable: true })
   employees?: EmployeeListRelationFilter;
+
+  @Field(() => JobProfileListRelationFilter, { nullable: true })
+  job_proviles?: JobProfileListRelationFilter;
 }

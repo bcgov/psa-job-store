@@ -7,9 +7,6 @@ export class BehaviouralCompetencyMaxAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  ministry_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
   membership?: true;
 
   @Field(() => Boolean, { nullable: true })

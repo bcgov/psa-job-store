@@ -15,7 +15,7 @@ const { Text } = Typography;
 
 function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJobProfileInput {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { behavioural_competencies, classification, id, ministry_id, family_id, ...rest } = inputData;
+  const { behavioural_competencies, classification, id, organization_id, family_id, ...rest } = inputData;
 
   // Exclude 'id' from the rest spread as it's not part of CreateJobProfileInput
 
@@ -31,7 +31,7 @@ function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJ
   // Connect classification if it exists
   const classificationConnectInput = classification?.id
     ? { connect: { id: classification.id } }
-    : { connect: { id: -1 } };
+    : { connect: { id: '-1' } };
 
   // Construct the result with the correct type and provide default values or handle them as required by the API
   const result: CreateJobProfileInput = {

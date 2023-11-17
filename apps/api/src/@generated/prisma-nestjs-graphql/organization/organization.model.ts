@@ -3,6 +3,7 @@ import { ObjectType } from '@nestjs/graphql';
 import { Department } from '../department/department.model';
 import { Position } from '../position/position.model';
 import { Employee } from '../employee/employee.model';
+import { JobProfile } from '../job-profile/job-profile.model';
 
 @ObjectType()
 export class Organization {
@@ -20,4 +21,7 @@ export class Organization {
 
   @Field(() => [Employee], { nullable: true })
   employees?: Array<Employee>;
+
+  @Field(() => [JobProfile], { nullable: true })
+  job_proviles?: Array<JobProfile>;
 }

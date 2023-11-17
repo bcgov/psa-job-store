@@ -14,9 +14,6 @@ export class JobProfileAvgAggregate {
   family_id?: number;
 
   @Field(() => Float, { nullable: true })
-  ministry_id?: number;
-
-  @Field(() => Float, { nullable: true })
   parent_id?: number;
 
   @Field(() => Float, { nullable: true })

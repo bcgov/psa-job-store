@@ -12,4 +12,7 @@ export class OrganizationCount {
 
   @Field(() => Int, { nullable: false })
   employees?: number;
+
+  @Field(() => Int, { nullable: false })
+  job_proviles?: number;
 }
