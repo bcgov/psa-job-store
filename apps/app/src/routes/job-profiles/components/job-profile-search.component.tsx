@@ -175,9 +175,6 @@ export const JobProfileSearch = () => {
                   </label>
                   <Select
                     mode="multiple"
-                    filterOption={(inputValue, option) => {
-                      return option ? option.label.toLowerCase().includes(inputValue.toLowerCase()) : false;
-                    }}
                     allowClear
                     // aria-label={filter.title}
                     id={filter.title}
