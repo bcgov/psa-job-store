@@ -1,6 +1,6 @@
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Button, Col, Form, Input, List, Row, Select } from 'antd';
+import { Alert, Button, Col, Form, Input, List, Modal, Row, Select } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/typography/Title';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
@@ -17,6 +17,7 @@ import BehaviouralComptencyPicker, { BehaviouralCompetencyData } from './wizard-
 
 interface ConfigProps {
   classificationEditable?: boolean;
+  contextEditable?: boolean;
 }
 
 interface WizardEditProfileProps {
@@ -172,12 +173,63 @@ const WizardEditProfile = forwardRef(
       setPickerVisible(false); // Hide picker after adding
     };
 
+    // FOCUS ALERTS
+    // when user focuses on required accountabilities and minimum requirements fields, show an alert once
+    const [minReqalertShown, setMinReqAlertShown] = useState(false);
+    const [reqalertShown, setReqAlertShown] = useState(false);
+
+    // Function to handle focus
+    const showMinReqModal = (action: () => void, showCancel: boolean) => {
+      if (!minReqalertShown) {
+        setMinReqAlertShown(true);
+        Modal.confirm({
+          title: 'Attention',
+          content: (
+            <div role="alert">
+              Significant changes to this area <strong>may</strong> trigger a classification review.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
+
+    const showReqModal = (action: () => void, showCancel: boolean) => {
+      if (!reqalertShown) {
+        setReqAlertShown(true);
+        Modal.confirm({
+          title: 'Attention',
+          content: (
+            <div role="alert">
+              Removing required accountabilities <strong>may</strong> trigger a classification review
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
+
     if (isLoading || renderKey === 0) {
       return <p>Loading...</p>;
     }
-
-    console.log('rendering edit form with effectiveData: ', effectiveData);
-    console.log('acc_req_fields: ', acc_req_fields);
 
     const titleStyle = {
       fontSize: '24px', // Adjust the font size as needed
@@ -196,15 +248,16 @@ const WizardEditProfile = forwardRef(
     };
 
     return (
-      <Form
-        form={form}
-        key={renderKey}
-        onFinish={handleSubmit((data) => {
-          console.log('wizard-edit-profile form onFinish, data: ', data);
-          submitHandler?.(data);
-        })}
-      >
-        {/*         
+      <>
+        <Form
+          form={form}
+          key={renderKey}
+          onFinish={handleSubmit((data) => {
+            console.log('wizard-edit-profile form onFinish, data: ', data);
+            submitHandler?.(data);
+          })}
+        >
+          {/*         
         <Button
           onClick={() => {
             setRenderKey((prevKey) => {
@@ -216,19 +269,23 @@ const WizardEditProfile = forwardRef(
           Re-render
         </Button> */}
 
-        <FormItem name="id" control={control} hidden>
-          <Input />
-        </FormItem>
+          <FormItem name="id" control={control} hidden>
+            <Input />
+          </FormItem>
 
-        <FormItem name="number" control={control} hidden>
-          <Input />
-        </FormItem>
+          <FormItem name="number" control={control} hidden>
+            <Input />
+          </FormItem>
 
-        <FormItem name="classification" control={control} hidden>
-          <Input />
-        </FormItem>
+          <FormItem name="classification" control={control} hidden>
+            <Input />
+          </FormItem>
 
-        {/* // <JobProfileEditableField
+          <FormItem name="context" control={control} hidden>
+            <Input />
+          </FormItem>
+
+          {/* // <JobProfileEditableField
         //   fieldId="title"
         //   control={control}
         //   renderViewMode={(formValue) => <>{formValue}</>}
@@ -240,310 +297,364 @@ const WizardEditProfile = forwardRef(
         // />
          */}
 
-        <Row gutter={24}>
-          <Col xs={24} sm={16} md={16}>
-            <FormItem
-              labelCol={{ span: 24 }}
-              wrapperCol={{ span: 24 }}
-              name="title"
-              control={control}
-              colon={false}
-              label={<span style={titleStyle}>Title</span>}
-            >
-              <Input />
-            </FormItem>
-
-            {config?.classificationEditable ? (
-              <FormItem name="classification" control={control} label="Classification">
-                <Select {...register('classification')}>
-                  {classificationsData?.classifications.map((classification: ClassificationModel) => (
-                    <Select.Option value={classification.id} key={classification.id}>
-                      {`${classification.code}`}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </FormItem>
-            ) : (
-              <></>
-              // <div>
-              //   Classification:{' '}
-              //   {`${effectiveData?.classification?.occupation_group.name} ${effectiveData?.classification?.grid.name}`}
-              // </div>
-            )}
-
-            <FormItem
-              labelCol={{ span: 24 }}
-              wrapperCol={{ span: 24 }}
-              name="context"
-              control={control}
-              colon={false}
-              label={<span style={titleStyle}>Context</span>}
-            >
-              <TextArea autoSize />
-            </FormItem>
-
-            <FormItem
-              labelCol={{ span: 24 }}
-              wrapperCol={{ span: 24 }}
-              name="overview"
-              control={control}
-              colon={false}
-              label={<span style={titleStyle}>Overview</span>}
-            >
-              <TextArea autoSize />
-            </FormItem>
-
-            <Title level={4} style={titleStyle}>
-              Required Accountabilities
-            </Title>
-
-            <div>
-              <p style={{ fontWeight: 'initial', marginTop: '1rem' }}>
-                ⚠️ Removing required accountabilities <strong>may</strong> trigger a classification review
-              </p>
+          {!config?.contextEditable ? (
+            <Alert
+              role="note"
+              style={{ marginBottom: '24px' }}
+              message="Your organization must follow the following criteria in order for this role to be feasible"
+              description={
+                <>
+                  <div></div>
+                  <b style={{ marginTop: '10px', display: 'block' }}>{effectiveData?.context}</b>
+                </>
+              }
+              type="warning"
+              showIcon
+            />
+          ) : (
+            <></>
+          )}
+          {!config?.classificationEditable ? (
+            <div style={{ marginBottom: '24px' }}>
+              <Title level={4} style={titleStyle}>
+                Classification - {`${effectiveData?.classification?.code}`}
+              </Title>
             </div>
+          ) : (
+            <></>
+          )}
 
-            <>
-              <List
-                dataSource={acc_req_fields}
-                renderItem={(_field, index) => (
-                  <List.Item
-                    style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
-                    key={_field.id}
-                  >
-                    <FormItem
-                      name={`required_accountabilities.${index}.value`}
-                      control={control}
-                      style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          <Row gutter={24}>
+            <Col xl={16}>
+              <FormItem
+                labelCol={{ span: 24 }}
+                wrapperCol={{ span: 24 }}
+                name="title"
+                control={control}
+                colon={false}
+                label={<span style={titleStyle}>Title</span>}
+              >
+                <Input />
+              </FormItem>
+
+              {config?.classificationEditable ? (
+                <FormItem name="classification" control={control} label="Classification">
+                  <Select {...register('classification')}>
+                    {classificationsData?.classifications.map((classification: ClassificationModel) => (
+                      <Select.Option value={classification.id} key={classification.id}>
+                        {`${classification.code}`}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </FormItem>
+              ) : (
+                <></>
+              )}
+
+              {config?.contextEditable ? (
+                <FormItem
+                  labelCol={{ span: 24 }}
+                  wrapperCol={{ span: 24 }}
+                  name="context"
+                  control={control}
+                  colon={false}
+                  label={<span style={titleStyle}>Context</span>}
+                >
+                  <TextArea autoSize />
+                </FormItem>
+              ) : (
+                <></>
+              )}
+              <FormItem
+                labelCol={{ span: 24 }}
+                wrapperCol={{ span: 24 }}
+                name="overview"
+                control={control}
+                colon={false}
+                label={<span style={titleStyle}>Overview</span>}
+              >
+                <TextArea autoSize />
+              </FormItem>
+
+              <Title level={4} style={titleStyle}>
+                Required Accountabilities
+              </Title>
+
+              <Alert
+                role="note"
+                style={{ marginBottom: '10px', marginTop: '1rem' }}
+                message={
+                  <>
+                    Removing required accountabilities <strong>may</strong> trigger a classification review
+                  </>
+                }
+                type="warning"
+                showIcon
+              />
+
+              <>
+                <List
+                  dataSource={acc_req_fields}
+                  renderItem={(_field, index) => (
+                    <List.Item
+                      style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
+                      key={_field.id}
                     >
-                      <TextArea {...register(`required_accountabilities.${index}.value`)} autoSize />
-                    </FormItem>
-                    {/* <input
+                      <FormItem
+                        name={`required_accountabilities.${index}.value`}
+                        control={control}
+                        style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+                      >
+                        <TextArea
+                          {...register(`required_accountabilities.${index}.value`)}
+                          autoSize
+                          onFocus={() => showReqModal(() => {}, false)}
+                        />
+                      </FormItem>
+                      {/* <input
                       // key={field.id} // important to include key with field's id
                       {...register(`required_accountabilities.${index}.value`)}
                     /> */}
 
-                    <Button
-                      type="text" // Changed to 'text' for an icon-only button
-                      icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
-                      onClick={() => {
-                        acc_req_remove(index);
-                        setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                      }}
-                      style={{
-                        border: 'none', // Removes the border
-                        padding: 0, // Removes padding
-                      }}
-                    />
-                  </List.Item>
-                )}
-              />
-
-              <Button
-                type="link"
-                icon={<PlusOutlined />}
-                style={addStyle}
-                onClick={() => {
-                  acc_req_append({ value: '' });
-                }}
-              >
-                Add another accountability
-              </Button>
-            </>
-
-            <Title level={4} style={titleStyle}>
-              Optional Accountabilities
-            </Title>
-            <>
-              <List
-                dataSource={acc_opt_fields}
-                renderItem={(_field, index) => (
-                  <List.Item
-                    style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
-                    key={_field.id}
-                  >
-                    <FormItem
-                      name={`optional_accountabilities.${index}.value`}
-                      style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-                      control={control}
-                    >
-                      <TextArea autoSize />
-                    </FormItem>
-
-                    <Button
-                      type="text" // Changed to 'text' for an icon-only button
-                      icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
-                      onClick={() => {
-                        acc_opt_remove(index);
-                        setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                      }}
-                      style={{
-                        border: 'none', // Removes the border
-                        padding: 0, // Removes padding
-                      }}
-                    />
-                  </List.Item>
-                )}
-              />
-
-              <Button
-                type="link"
-                icon={<PlusOutlined />}
-                style={addStyle}
-                onClick={() => {
-                  acc_opt_append({ value: '' });
-                }}
-              >
-                Add optional accountability
-              </Button>
-            </>
-
-            <Title level={4} style={titleStyle}>
-              Minimum Job Requirements
-            </Title>
-            <div>
-              <p style={{ fontWeight: 'initial', marginTop: '1rem' }}>
-                ⚠️ Significant changes to this area <strong>may</strong> trigger a classification review
-              </p>
-            </div>
-
-            <>
-              <List
-                dataSource={requirement_fields}
-                renderItem={(_field, index) => (
-                  <List.Item
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      marginBottom: '0px',
-                      borderBottom: 'none',
-                    }}
-                    key={_field.id}
-                  >
-                    <FormItem
-                      name={`requirements.${index}.value`}
-                      style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-                      control={control}
-                    >
-                      <TextArea autoSize />
-                    </FormItem>
-
-                    <Button
-                      type="text" // Changed to 'text' for an icon-only button
-                      icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
-                      onClick={() => {
-                        requirement_remove(index);
-                        setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                      }}
-                      style={{
-                        border: 'none', // Removes the border
-                        padding: 0, // Removes padding
-                        // Adjust the following to align the icon properly with your design
-                      }}
-                    />
-                  </List.Item>
-                )}
-              />
-
-              <Button
-                type="link"
-                icon={<PlusOutlined />}
-                style={addStyle}
-                onClick={() => {
-                  requirement_append({ value: '' });
-                }}
-              >
-                Add another requirement
-              </Button>
-            </>
-
-            <Title level={4} style={titleStyle}>
-              Behavioural competencies
-            </Title>
-            {/* Behavioural competencies */}
-
-            <>
-              <List
-                style={{ marginTop: '7px' }}
-                dataSource={behavioural_competencies_fields}
-                renderItem={(field, index) => (
-                  <List.Item
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start', // Align items to the top
-                      marginBottom: '0px',
-                      borderBottom: 'none',
-
-                      padding: '5px 0',
-                    }}
-                    key={field.id} // Ensure this is a unique value
-                  >
-                    {/* Display behavioural competency name and description */}
-                    <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
-                      <strong>{field.behavioural_competency.name}</strong>: {field.behavioural_competency.description}
-                    </p>
-
-                    {/* Trash icon/button for deletion */}
-                    <Button
-                      type="text" // No button styling, just the icon
-                      icon={<DeleteOutlined />}
-                      onClick={() => behavioural_competencies_remove(index)}
-                      style={{
-                        border: 'none',
-                        padding: 0,
-                        color: '#D9D9D9',
-                      }}
-                    />
-
-                    {/* Hidden fields to submit actual data */}
-                    <FormItem
-                      name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                      control={control}
-                      hidden
-                    >
-                      <Input />
-                    </FormItem>
-                    <FormItem
-                      hidden
-                      name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                      control={control}
-                      style={{ flex: 1, marginRight: '10px' }}
-                    >
-                      <Input placeholder="Name" style={{ width: '100%' }} />
-                    </FormItem>
-                    <FormItem
-                      hidden
-                      name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                      control={control}
-                      style={{ flex: 2, marginRight: '10px' }}
-                    >
-                      <TextArea placeholder="Description" style={{ width: '100%' }} />
-                    </FormItem>
-                  </List.Item>
-                )}
-              />
-
-              {isPickerVisible ? (
-                <BehaviouralComptencyPicker
-                  onAdd={addBehaviouralCompetency}
-                  onCancel={() => setPickerVisible(false)}
-                  style={{ marginTop: '20px' }}
+                      <Button
+                        type="text" // Changed to 'text' for an icon-only button
+                        icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
+                        onClick={() =>
+                          showReqModal(() => {
+                            acc_req_remove(index);
+                            setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                          }, false)
+                        }
+                        style={{
+                          border: 'none', // Removes the border
+                          padding: 0, // Removes padding
+                        }}
+                      />
+                    </List.Item>
+                  )}
                 />
-              ) : (
+
                 <Button
                   type="link"
                   icon={<PlusOutlined />}
-                  style={{ ...addStyle, marginTop: '10px' }}
-                  onClick={() => setPickerVisible(true)} // Show picker when "Add" button is clicked
+                  style={addStyle}
+                  onClick={() =>
+                    showReqModal(() => {
+                      acc_req_append({ value: '' });
+                      setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                    }, false)
+                  }
                 >
-                  Add a behavioural competency
+                  Add another accountability
                 </Button>
-              )}
-            </>
-          </Col>
-        </Row>
-        {/* <WizardControls submitText={submitText} showBackButton={showBackButton} /> */}
-      </Form>
+              </>
+
+              <Title level={4} style={titleStyle}>
+                Optional Accountabilities
+              </Title>
+              <>
+                <List
+                  dataSource={acc_opt_fields}
+                  renderItem={(_field, index) => (
+                    <List.Item
+                      style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
+                      key={_field.id}
+                    >
+                      <FormItem
+                        name={`optional_accountabilities.${index}.value`}
+                        style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+                        control={control}
+                      >
+                        <TextArea autoSize />
+                      </FormItem>
+
+                      <Button
+                        type="text" // Changed to 'text' for an icon-only button
+                        icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
+                        onClick={() => {
+                          acc_opt_remove(index);
+                          setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                        }}
+                        style={{
+                          border: 'none', // Removes the border
+                          padding: 0, // Removes padding
+                        }}
+                      />
+                    </List.Item>
+                  )}
+                />
+
+                <Button
+                  type="link"
+                  icon={<PlusOutlined />}
+                  style={addStyle}
+                  onClick={() => {
+                    acc_opt_append({ value: '' });
+                  }}
+                >
+                  Add optional accountability
+                </Button>
+              </>
+
+              <Title level={4} style={titleStyle}>
+                Minimum Job Requirements
+              </Title>
+
+              <Alert
+                role="note"
+                style={{ marginBottom: '10px', marginTop: '1rem' }}
+                message={
+                  <>
+                    Significant changes to this area <strong>may</strong> trigger a classification review
+                  </>
+                }
+                type="warning"
+                showIcon
+              />
+
+              <>
+                <List
+                  dataSource={requirement_fields}
+                  renderItem={(_field, index) => (
+                    <List.Item
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        marginBottom: '0px',
+                        borderBottom: 'none',
+                      }}
+                      key={_field.id}
+                    >
+                      <FormItem
+                        name={`requirements.${index}.value`}
+                        style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+                        control={control}
+                      >
+                        <TextArea autoSize onFocus={() => showMinReqModal(() => {}, false)} />
+                      </FormItem>
+
+                      <Button
+                        type="text" // Changed to 'text' for an icon-only button
+                        icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
+                        onClick={() => {
+                          showMinReqModal(() => {
+                            requirement_remove(index);
+                            setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                          }, false);
+                        }}
+                        style={{
+                          border: 'none', // Removes the border
+                          padding: 0, // Removes padding
+                          // Adjust the following to align the icon properly with your design
+                        }}
+                      />
+                    </List.Item>
+                  )}
+                />
+
+                <Button
+                  type="link"
+                  icon={<PlusOutlined />}
+                  style={addStyle}
+                  onClick={() => {
+                    showMinReqModal(() => {
+                      requirement_append({ value: '' });
+                      setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                    }, false);
+                  }}
+                >
+                  Add another requirement
+                </Button>
+              </>
+
+              <Title level={4} style={titleStyle}>
+                Behavioural competencies
+              </Title>
+              {/* Behavioural competencies */}
+
+              <>
+                <List
+                  style={{ marginTop: '7px' }}
+                  dataSource={behavioural_competencies_fields}
+                  renderItem={(field, index) => (
+                    <List.Item
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start', // Align items to the top
+                        marginBottom: '0px',
+                        borderBottom: 'none',
+
+                        padding: '5px 0',
+                      }}
+                      key={field.id} // Ensure this is a unique value
+                    >
+                      {/* Display behavioural competency name and description */}
+                      <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
+                        <strong>{field.behavioural_competency.name}</strong>: {field.behavioural_competency.description}
+                      </p>
+
+                      {/* Trash icon/button for deletion */}
+                      <Button
+                        type="text" // No button styling, just the icon
+                        icon={<DeleteOutlined />}
+                        onClick={() => behavioural_competencies_remove(index)}
+                        style={{
+                          border: 'none',
+                          padding: 0,
+                          color: '#D9D9D9',
+                        }}
+                      />
+
+                      {/* Hidden fields to submit actual data */}
+                      <FormItem
+                        name={`behavioural_competencies.${index}.behavioural_competency.id`}
+                        control={control}
+                        hidden
+                      >
+                        <Input />
+                      </FormItem>
+                      <FormItem
+                        hidden
+                        name={`behavioural_competencies.${index}.behavioural_competency.name`}
+                        control={control}
+                        style={{ flex: 1, marginRight: '10px' }}
+                      >
+                        <Input placeholder="Name" style={{ width: '100%' }} />
+                      </FormItem>
+                      <FormItem
+                        hidden
+                        name={`behavioural_competencies.${index}.behavioural_competency.description`}
+                        control={control}
+                        style={{ flex: 2, marginRight: '10px' }}
+                      >
+                        <TextArea placeholder="Description" style={{ width: '100%' }} />
+                      </FormItem>
+                    </List.Item>
+                  )}
+                />
+
+                {isPickerVisible ? (
+                  <BehaviouralComptencyPicker
+                    onAdd={addBehaviouralCompetency}
+                    onCancel={() => setPickerVisible(false)}
+                    style={{ marginTop: '20px' }}
+                  />
+                ) : (
+                  <Button
+                    type="link"
+                    icon={<PlusOutlined />}
+                    style={{ ...addStyle, marginTop: '10px' }}
+                    onClick={() => setPickerVisible(true)} // Show picker when "Add" button is clicked
+                  >
+                    Add a behavioural competency
+                  </Button>
+                )}
+              </>
+            </Col>
+          </Row>
+          {/* <WizardControls submitText={submitText} showBackButton={showBackButton} /> */}
+        </Form>
+      </>
     );
   },
 );
