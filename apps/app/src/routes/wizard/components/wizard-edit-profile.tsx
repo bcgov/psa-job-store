@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import { Alert, Button, Col, Form, Input, List, Modal, Row, Select } from 'antd';
@@ -13,6 +14,7 @@ import {
 import { JobProfileModel, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
+import { IsIndigenousCompetency } from './is-indigenous-competency.component';
 import BehaviouralComptencyPicker, { BehaviouralCompetencyData } from './wizard-behavioural-comptency-picker';
 
 interface ConfigProps {
@@ -590,7 +592,11 @@ const WizardEditProfile = forwardRef(
                     >
                       {/* Display behavioural competency name and description */}
                       <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
-                        <strong>{field.behavioural_competency.name}</strong>: {field.behavioural_competency.description}
+                        <strong>
+                          {field.behavioural_competency.name}
+                          <IsIndigenousCompetency competency={field.behavioural_competency} />
+                        </strong>
+                        : {field.behavioural_competency.description}
                       </p>
 
                       {/* Trash icon/button for deletion */}
@@ -631,6 +637,13 @@ const WizardEditProfile = forwardRef(
                       </FormItem>
                     </List.Item>
                   )}
+                />
+                <Alert
+                  role="note"
+                  style={{ marginBottom: '10px', marginTop: '1rem', fontStyle: 'italic' }}
+                  message="* denotes an Indigenous Behavioural Competency"
+                  type="info"
+                  showIcon
                 />
 
                 {isPickerVisible ? (
