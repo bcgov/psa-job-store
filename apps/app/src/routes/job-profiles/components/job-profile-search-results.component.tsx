@@ -39,12 +39,14 @@ export const JobProfileSearchResults = ({
   };
 
   return (
-    <div style={{ border: '1px solid #CCC' }}>
+    <div style={{ border: '1px solid #CCC' }} role="region" aria-label="job profiles list">
       <div style={{ borderBottom: '1px solid #CCC', padding: '1rem' }}>
+       <h1>
         <Text style={{ fontSize: '10pt' }}>
           Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
           results
         </Text>
+       </h1>
       </div>
       <ul className={styles.job_profile_search_results_ul}>
         {isLoading ? (
@@ -55,11 +57,17 @@ export const JobProfileSearchResults = ({
           (data?.jobProfiles ?? []).map((d) => (
             <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d.id.toString())}>
               <Link
+                tabIndex={-1}
                 to={`${getBasePath(location.pathname)}/${d.id}${
                   searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
                 }`}
               >
-                <JobProfileCard data={d} />
+                <JobProfileCard
+                  data={d}
+                  link={`${getBasePath(location.pathname)}/${d.id}${
+                    searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
+                  }`}
+                />
               </Link>
             </li>
           ))

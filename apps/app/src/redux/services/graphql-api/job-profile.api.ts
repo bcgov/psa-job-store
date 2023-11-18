@@ -53,6 +53,12 @@ interface ClassificationConnectInput {
   };
 }
 
+interface ParentConnectInput {
+  connect: {
+    id: number;
+  };
+}
+
 export interface CreateJobProfileInput {
   stream: string;
   title: string;
@@ -64,7 +70,7 @@ export interface CreateJobProfileInput {
   behavioural_competencies?: BehaviouralCompetenciesInput;
   classification: ClassificationConnectInput;
   state: string;
-  parent: ClassificationConnectInput;
+  parent: ParentConnectInput;
 }
 
 export interface CreateJobProfileResponse {

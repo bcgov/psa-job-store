@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Space, Typography } from 'antd';
-import { useParams } from 'react-router-dom';
+import { Button, Space, Typography } from 'antd';
+import { Link, useParams } from 'react-router-dom';
 import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile.api';
 
 const { Title, Text, Paragraph } = Typography;
 
 export interface JobProfileCardProps {
   data: JobProfileModel;
+  link: string;
 }
 
-export const JobProfileCard = ({ data }: JobProfileCardProps) => {
+export const JobProfileCard = ({ data, link }: JobProfileCardProps) => {
   const params = useParams();
 
   return (
@@ -22,7 +23,7 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
         padding: '1rem',
       }}
     >
-      <Title level={1} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }}>
+      <Title level={2} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }}>
         {data.title}
       </Title>
       <div>
@@ -40,6 +41,11 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
         <Text strong>Overview:</Text>
         <Paragraph ellipsis={{ rows: 3 }}>{data.overview}</Paragraph>
       </div>
+      <Link to={link} tabIndex={-1}>
+        <Button type="link" aria-label={`click to see details for ${data.title}`} style={{ padding: '0' }}>
+          See details
+        </Button>
+      </Link>
     </Space>
   );
 };

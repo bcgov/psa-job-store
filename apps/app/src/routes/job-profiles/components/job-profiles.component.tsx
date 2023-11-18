@@ -156,7 +156,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
   };
 
   return (
-    <div style={{ margin: '0 1rem' }}>
+    <>
       <JobProfileSearch />
       <Row justify="center" gutter={16}>
         {screens['xl'] === true ? (
@@ -188,7 +188,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
           />
         )}
       </Row>
-    </div>
+    </>
   );
 };
 

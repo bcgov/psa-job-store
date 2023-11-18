@@ -39,7 +39,7 @@ function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJ
     behavioural_competencies: behaviouralCompetenciesInput,
     classification: classificationConnectInput,
     state: 'SUBMITTED',
-    parent: { connect: { id: `${id}` } },
+    parent: { connect: { id: id } },
   };
 
   return result;
@@ -87,8 +87,13 @@ export const WizardConfirmDetailsPage = () => {
   };
 
   return (
-    <WizardPageWrapper title="Review and submit" subTitle="Review the profile before creating a new position">
-      <WizardSteps current={3}></WizardSteps>
+    <WizardPageWrapper
+      title="Review and submit"
+      subTitle="Review the profile before creating a new position"
+      xxl={14}
+      xl={18}
+    >
+      <WizardSteps current={3} xl={24}></WizardSteps>
       <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
         onNext={showModal}
