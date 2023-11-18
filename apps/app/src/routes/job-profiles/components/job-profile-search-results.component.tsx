@@ -42,12 +42,11 @@ export const JobProfileSearchResults = ({
     <div style={{ border: '1px solid #CCC' }}>
       <div style={{ borderBottom: '1px solid #CCC', padding: '1rem' }}>
         <Text style={{ fontSize: '10pt' }}>
-          Showing {(currentPage - 1) * pageSize + 1}-{currentPage * pageSize} of {totalResults} results
+          Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
+          results
         </Text>
       </div>
-      <ul
-        className={styles.job_profile_search_results_ul + ' ant-tree-list-scrollbar ant-tree-list-scrollbar-vertical'}
-      >
+      <ul className={styles.job_profile_search_results_ul}>
         {isLoading ? (
           <Skeleton loading={isLoading} />
         ) : data?.jobProfiles.length === 0 ? (
