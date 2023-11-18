@@ -86,6 +86,7 @@ export interface GetJobProfilesArgs {
 
 export interface GetJobProfilesResponse {
   jobProfiles: JobProfileModel[];
+  jobProfilesCount: number;
 }
 
 export interface GetJobProfileArgs {
@@ -102,8 +103,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       query: (args: GetJobProfilesArgs = {}) => {
         return {
           document: gql`
-            query JobProfiles($where: JobProfileWhereInput) {
-              jobProfiles(where: $where) {
+            query JobProfiles($where: JobProfileWhereInput, $take: Int, $skip: Int) {
+              jobProfiles(where: $where, take: $take, skip: $skip) {
                 id
                 stream
                 title
@@ -146,16 +147,20 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   }
                 }
               }
+              jobProfilesCount(where: $where)
             }
           `,
           variables: {
             where: args.where,
+            skip: args.skip,
+            take: args.take,
           },
         };
       },
     }),
     getJobProfile: build.query<GetJobProfileResponse, GetJobProfileArgs>({
       query: (args: GetJobProfileArgs) => {
+        console.log('args,', args);
         return {
           document: gql`
             query JobProfile {

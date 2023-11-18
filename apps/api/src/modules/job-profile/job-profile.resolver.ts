@@ -22,6 +22,13 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfiles(args);
   }
 
+  @Query(() => Int, { name: 'jobProfilesCount' })
+  async jobProfilesCount(@Args() args?: FindManyJobProfileArgs) {
+    return await this.jobProfileService.getJobProfileCount({
+      where: args.where,
+    });
+  }
+
   @Query(() => JobProfile, { name: 'jobProfile' })
   async getJobProfile(@Args('id') id: string) {
     return this.jobProfileService.getJobProfile(+id);

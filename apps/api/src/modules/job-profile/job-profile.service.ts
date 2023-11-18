@@ -38,6 +38,12 @@ export class JobProfileService {
     });
   }
 
+  async getJobProfileCount(args?: FindManyJobProfileArgs) {
+    return await this.prisma.jobProfile.count({
+      where: args.where,
+    });
+  }
+
   async getBehaviouralCompetencies(job_profile_id: number) {
     return this.prisma.jobProfileBehaviouralCompetency.findMany({
       where: { job_profile_id },
