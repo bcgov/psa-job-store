@@ -11,11 +11,16 @@ import {
   GetClassificationsResponse,
   useLazyGetClassificationsQuery,
 } from '../../../redux/services/graphql-api/classification.api';
-import { JobProfileModel, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import {
+  JobProfileModel,
+  TrackedFieldArrayItem,
+  useLazyGetJobProfileQuery,
+} from '../../../redux/services/graphql-api/job-profile.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
 import BehaviouralComptencyPicker, { BehaviouralCompetencyData } from './wizard-behavioural-comptency-picker';
+import './wizard-edit-profile.css';
 
 interface ConfigProps {
   classificationEditable?: boolean;
@@ -47,7 +52,6 @@ const WizardEditProfile = forwardRef(
         setEffectiveData(profileData);
       } else if (!profileData && id) {
         // If no profileData is provided and an id exists, fetch the data
-        console.log('edit triggerGetJobProfile with id: ', id);
         triggerGetJobProfile({ id: +id });
       }
       triggerGetClassificationData(); // get data to populate classification dropdown. Todo: cache this?
@@ -59,7 +63,7 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
-    const { register, control, reset, handleSubmit } = useForm<JobProfileValidationModel>({
+    const { register, control, reset, handleSubmit, getValues } = useForm<JobProfileValidationModel>({
       resolver: classValidatorResolver(JobProfileValidationModel),
       mode: 'onChange',
     });
@@ -83,11 +87,65 @@ const WizardEditProfile = forwardRef(
       // as part of the render hack. todo: get rid of this if possible
     }, [renderKey, form]);
 
+    const [originalAccReqFields, setOriginalAccReqFields] = useState<any[]>([]);
+    const [originalOptReqFields, setOriginalOptReqFields] = useState<any[]>([]);
+    const [originalMinReqFields, setOriginalMinReqFields] = useState<any[]>([]);
+
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData) {
         const classificationId = effectiveData?.classification?.id ?? null;
 
-        console.log('effectiveData: ', effectiveData);
+        const originalAccReqFields = effectiveData.accountabilities.required.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        setOriginalAccReqFields(originalAccReqFields);
+
+        const originalOptReqFields = effectiveData.accountabilities.optional.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        setOriginalOptReqFields(originalOptReqFields);
+
+        const originalMinReqFields = effectiveData.requirements.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        setOriginalMinReqFields(originalMinReqFields);
+
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
@@ -96,13 +154,9 @@ const WizardEditProfile = forwardRef(
           overview: effectiveData?.overview,
           classification: classificationId,
           // array fileds are required to be nested in objects, so wrap string values in {value: item}
-          required_accountabilities: effectiveData?.accountabilities.required
-            ? effectiveData.accountabilities.required.map((item) => ({ value: item }))
-            : [],
-          optional_accountabilities: effectiveData?.accountabilities.optional
-            ? effectiveData.accountabilities.optional.map((item) => ({ value: item }))
-            : [],
-          requirements: effectiveData?.requirements ? effectiveData.requirements.map((item) => ({ value: item })) : [],
+          required_accountabilities: originalAccReqFields,
+          optional_accountabilities: originalOptReqFields,
+          requirements: originalMinReqFields,
           behavioural_competencies: effectiveData?.behavioural_competencies || [],
         });
       }
@@ -115,6 +169,7 @@ const WizardEditProfile = forwardRef(
       fields: acc_req_fields,
       append: acc_req_append,
       remove: acc_req_remove,
+      update: acc_req_update,
     } = useFieldArray({
       control,
       name: 'required_accountabilities',
@@ -125,6 +180,7 @@ const WizardEditProfile = forwardRef(
       fields: acc_opt_fields,
       append: acc_opt_append,
       remove: acc_opt_remove,
+      update: acc_opt_update,
     } = useFieldArray({
       control,
       name: 'optional_accountabilities',
@@ -134,6 +190,7 @@ const WizardEditProfile = forwardRef(
       fields: requirement_fields,
       append: requirement_append,
       remove: requirement_remove,
+      update: requirement_update,
     } = useFieldArray({
       control,
       name: 'requirements',
@@ -148,13 +205,10 @@ const WizardEditProfile = forwardRef(
       name: 'behavioural_competencies',
     });
 
-    console.log('behavioural_competencies_fields: ', behavioural_competencies_fields);
-
     // useImperativeHandle to expose the submitForm function
     useImperativeHandle(ref, () => ({
       // You can expose any method you need from the form instance here
       submit: () => {
-        console.log('userImperative submit?');
         form.submit();
       },
       getFormData: () => {
@@ -170,7 +224,6 @@ const WizardEditProfile = forwardRef(
     // ... other state and handlers for behavioural_competencies_fields ...
 
     const addBehaviouralCompetency = (competency: BehaviouralCompetencyData) => {
-      console.log('addBehaviouralCompetency, competency: ', competency);
       behavioural_competencies_append(competency);
       setPickerVisible(false); // Hide picker after adding
     };
@@ -229,6 +282,320 @@ const WizardEditProfile = forwardRef(
       }
     };
 
+    // DIFF HANDLING
+    // Cross out deleted core items, allow ability to add back
+    // Show fields that were edited
+
+    // Required accountabilities
+    const handleAccReqRemove = (index: number) => {
+      const currentValues = getValues('required_accountabilities');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            acc_req_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+    };
+
+    // Function to add back a removed field
+    const handleAccReqAddBack = (index: number) => {
+      const currentValues = getValues('required_accountabilities');
+      acc_req_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleAccReqAddNew = () => {
+      acc_req_append({ value: '', isCustom: true, disabled: false });
+    };
+
+    const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
+
+    const renderAccReqFields = (field: any, index: number) => {
+      const isEdited = editedAccReqFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.value }));
+      };
+
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`required_accountabilities.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`required_accountabilities.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`required_accountabilities.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onFocus={() => showReqModal(() => {}, false)}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() =>
+                showReqModal(() => {
+                  // acc_req_remove(index);
+                  handleAccReqAddBack(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                }, false)
+              }
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() =>
+                showReqModal(() => {
+                  // acc_req_remove(index);
+                  handleAccReqRemove(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                }, false)
+              }
+            />
+          )}
+        </List.Item>
+      );
+    };
+
+    // OPTIONAL ACCOUNTABILITIES DIFF
+    const handleOptReqRemove = (index: number) => {
+      const currentValues = getValues('optional_accountabilities');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            acc_opt_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        acc_opt_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+    };
+
+    // Function to add back a removed field
+    const handleOptReqAddBack = (index: number) => {
+      const currentValues = getValues('optional_accountabilities');
+      acc_opt_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleOptReqAddNew = () => {
+      acc_opt_append({ value: '', isCustom: true, disabled: false });
+    };
+
+    const [editedOptReqFields, setEditedOptReqFields] = useState<{ [key: number]: boolean }>({});
+
+    const renderOptReqFields = (field: any, index: number) => {
+      const isEdited = editedOptReqFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedOptReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalOptReqFields[index]?.value }));
+      };
+
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`optional_accountabilities.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`optional_accountabilities.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`optional_accountabilities.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                // acc_req_remove(index);
+                handleOptReqAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleOptReqRemove(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          )}
+        </List.Item>
+      );
+    };
+
+    // MINIMUM REQUIREMENTS DIFF
+    const handleMinReqRemove = (index: number) => {
+      const currentValues = getValues('requirements');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            requirement_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        requirement_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+    };
+
+    // Function to add back a removed field
+    const handleMinReqAddBack = (index: number) => {
+      const currentValues = getValues('requirements');
+      requirement_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleMinReqAddNew = () => {
+      requirement_append({ value: '', isCustom: true, disabled: false });
+    };
+
+    const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
+
+    const renderMinReqFields = (field: any, index: number) => {
+      const isEdited = editedMinReqFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.value }));
+      };
+
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`requirements.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`requirements.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`requirements.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onFocus={() => showMinReqModal(() => {}, false)}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() =>
+                showMinReqModal(() => {
+                  handleMinReqAddBack(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                }, false)
+              }
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() =>
+                showMinReqModal(() => {
+                  handleMinReqRemove(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                }, false)
+              }
+            />
+          )}
+        </List.Item>
+      );
+    };
+
     if (isLoading || renderKey === 0) {
       return <p>Loading...</p>;
     }
@@ -255,7 +622,6 @@ const WizardEditProfile = forwardRef(
           form={form}
           key={renderKey}
           onFinish={handleSubmit((data) => {
-            console.log('wizard-edit-profile form onFinish, data: ', data);
             submitHandler?.(data);
           })}
         >
@@ -395,46 +761,7 @@ const WizardEditProfile = forwardRef(
               />
 
               <>
-                <List
-                  dataSource={acc_req_fields}
-                  renderItem={(_field, index) => (
-                    <List.Item
-                      style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
-                      key={_field.id}
-                    >
-                      <FormItem
-                        name={`required_accountabilities.${index}.value`}
-                        control={control}
-                        style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-                      >
-                        <TextArea
-                          {...register(`required_accountabilities.${index}.value`)}
-                          autoSize
-                          onFocus={() => showReqModal(() => {}, false)}
-                        />
-                      </FormItem>
-                      {/* <input
-                      // key={field.id} // important to include key with field's id
-                      {...register(`required_accountabilities.${index}.value`)}
-                    /> */}
-
-                      <Button
-                        type="text" // Changed to 'text' for an icon-only button
-                        icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
-                        onClick={() =>
-                          showReqModal(() => {
-                            acc_req_remove(index);
-                            setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                          }, false)
-                        }
-                        style={{
-                          border: 'none', // Removes the border
-                          padding: 0, // Removes padding
-                        }}
-                      />
-                    </List.Item>
-                  )}
-                />
+                <List dataSource={acc_req_fields} renderItem={renderAccReqFields} />
 
                 <Button
                   type="link"
@@ -442,7 +769,7 @@ const WizardEditProfile = forwardRef(
                   style={addStyle}
                   onClick={() =>
                     showReqModal(() => {
-                      acc_req_append({ value: '' });
+                      handleAccReqAddNew();
                       setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                     }, false)
                   }
@@ -455,7 +782,9 @@ const WizardEditProfile = forwardRef(
                 Optional Accountabilities
               </Title>
               <>
-                <List
+                <List dataSource={acc_opt_fields} renderItem={renderOptReqFields} />
+
+                {/* <List
                   dataSource={acc_opt_fields}
                   renderItem={(_field, index) => (
                     <List.Item
@@ -484,14 +813,15 @@ const WizardEditProfile = forwardRef(
                       />
                     </List.Item>
                   )}
-                />
+                /> */}
 
                 <Button
                   type="link"
                   icon={<PlusOutlined />}
                   style={addStyle}
                   onClick={() => {
-                    acc_opt_append({ value: '' });
+                    handleOptReqAddNew();
+                    setRenderKey((prevKey) => prevKey + 1);
                   }}
                 >
                   Add optional accountability
@@ -515,7 +845,8 @@ const WizardEditProfile = forwardRef(
               />
 
               <>
-                <List
+                <List dataSource={requirement_fields} renderItem={renderMinReqFields} />
+                {/* <List
                   dataSource={requirement_fields}
                   renderItem={(_field, index) => (
                     <List.Item
@@ -552,7 +883,7 @@ const WizardEditProfile = forwardRef(
                       />
                     </List.Item>
                   )}
-                />
+                /> */}
 
                 <Button
                   type="link"
@@ -560,8 +891,8 @@ const WizardEditProfile = forwardRef(
                   style={addStyle}
                   onClick={() => {
                     showMinReqModal(() => {
-                      requirement_append({ value: '' });
-                      setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                      handleMinReqAddNew();
+                      setRenderKey((prevKey) => prevKey + 1);
                     }, false);
                   }}
                 >

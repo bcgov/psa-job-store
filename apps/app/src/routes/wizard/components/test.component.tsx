@@ -22,7 +22,6 @@ export const Testt = () => {
   });
 
   const onSubmit = (data: any) => {
-    console.log('Form Data: ', data);
     // submitHandler?.(data);
   };
 
@@ -33,7 +32,6 @@ export const Testt = () => {
     form.resetFields();
   }, [renderKey, form]);
 
-  console.log('form: ', form);
   return (
     <Form onFinish={handleSubmit(onSubmit)} key={renderKey} form={form}>
       <h1>Field Array </h1>

@@ -6,7 +6,11 @@ import { Type } from 'class-transformer';
 import { IsNotEmpty, Length, ValidateNested } from 'class-validator';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { JobProfileModel, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import {
+  JobProfileModel,
+  TrackedFieldArrayItem,
+  useLazyGetJobProfileQuery,
+} from '../../../redux/services/graphql-api/job-profile.api';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -29,6 +33,10 @@ class BehaviouralCompetency {
   description: string;
 }
 
+export interface ValueString {
+  value: string;
+}
+
 export class JobProfileValidationModel {
   id: number;
 
@@ -48,11 +56,11 @@ export class JobProfileValidationModel {
   @Length(2, 500)
   overview: string;
 
-  required_accountabilities: Array<{ value: string }>;
+  required_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
-  optional_accountabilities: Array<{ value: string }>;
+  optional_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
-  requirements: Array<{ value: string }>;
+  requirements: (TrackedFieldArrayItem | ValueString)[];
 
   @ValidateNested({ each: true })
   @Type(() => BehaviouralCompetency)
@@ -139,19 +147,65 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
     {
       key: 'required_accountabilities',
       label: 'Required Accountabilities',
-      children: <ul>{effectiveData?.accountabilities.required.map((accountability) => <li>{accountability}</li>)}</ul>,
+      children: (
+        <ul>
+          {effectiveData?.accountabilities.required.map((accountability, index) => {
+            // Check if the accountability is a string
+            if (typeof accountability === 'string') {
+              return <li key={index}>{accountability}</li>;
+            }
+
+            // Check if the accountability is an object and not disabled
+            if (accountability.disabled) {
+              return null;
+            }
+
+            return <li key={accountability.value}>{accountability.value}</li>;
+          })}
+        </ul>
+      ),
       span: 24,
     },
     {
       key: 'optional_accountabilities',
       label: 'Optional Accountabilities',
-      children: <ul>{effectiveData?.accountabilities.optional.map((accountability) => <li>{accountability}</li>)}</ul>,
+      children: (
+        <ul>
+          {effectiveData?.accountabilities.optional.map((accountability, index) => {
+            // Check if the accountability is a string
+            if (typeof accountability === 'string') {
+              return <li key={index}>{accountability}</li>;
+            }
+
+            // Check if the accountability is an object and not disabled
+            if (accountability.disabled) {
+              return null;
+            }
+
+            return <li key={accountability.value}>{accountability.value}</li>;
+          })}
+        </ul>
+      ),
       span: 24,
     },
     {
       key: 'requirements',
       label: 'Minimum Job Requirements',
-      children: <ul>{effectiveData?.requirements.map((requirement) => <li>{requirement}</li>)}</ul>,
+      children: (
+        <ul>
+          {effectiveData?.requirements.map((requirement, index) => {
+            if (typeof requirement === 'string') {
+              return <li key={index}>{requirement}</li>;
+            }
+
+            if (requirement.disabled) {
+              return null;
+            }
+
+            return <li key={requirement.value}>{requirement.value}</li>;
+          })}
+        </ul>
+      ),
       span: 24,
     },
     {
@@ -232,20 +286,52 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
 
           <h3>Required Accountabilities</h3>
           <ul>
-            {effectiveData?.accountabilities.required.map((accountability, index) => (
-              <li key={index}>{accountability}</li>
-            ))}
+            {effectiveData?.accountabilities.required.map((accountability, index) => {
+              // Check if the accountability is a string
+              if (typeof accountability === 'string') {
+                return <li key={index}>{accountability}</li>;
+              }
+
+              // Check if the accountability is an object and not disabled
+              if (accountability.disabled) {
+                return null;
+              }
+
+              return <li key={accountability.value}>{accountability.value}</li>;
+            })}
           </ul>
 
           <h3>Optional Accountabilities</h3>
           <ul>
-            {effectiveData?.accountabilities.optional.map((accountability, index) => (
-              <li key={index}>{accountability}</li>
-            ))}
+            {effectiveData?.accountabilities.optional.map((accountability, index) => {
+              // Check if the accountability is a string
+              if (typeof accountability === 'string') {
+                return <li key={index}>{accountability}</li>;
+              }
+
+              // Check if the accountability is an object and not disabled
+              if (accountability.disabled) {
+                return null;
+              }
+
+              return <li key={accountability.value}>{accountability.value}</li>;
+            })}
           </ul>
 
           <h3>Minimum Job Requirements</h3>
-          <ul>{effectiveData?.requirements.map((requirement, index) => <li key={index}>{requirement}</li>)}</ul>
+          <ul>
+            {effectiveData?.requirements.map((requirement, index) => {
+              if (typeof requirement === 'string') {
+                return <li key={index}>{requirement}</li>;
+              }
+
+              if (requirement.disabled) {
+                return null;
+              }
+
+              return <li key={requirement.value}>{requirement.value}</li>;
+            })}
+          </ul>
 
           <h3>Behavioural Competencies</h3>
           <ul>
