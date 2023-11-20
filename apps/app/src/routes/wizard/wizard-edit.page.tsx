@@ -2,7 +2,11 @@ import { FormInstance } from 'antd';
 import { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ClassificationModel, GetClassificationsResponse } from '../../redux/services/graphql-api/classification.api';
-import { BehaviouralCompetencies, JobProfileModel } from '../../redux/services/graphql-api/job-profile.api';
+import {
+  BehaviouralCompetencies,
+  JobProfileModel,
+  TrackedFieldArrayItem,
+} from '../../redux/services/graphql-api/job-profile.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import WizardEditProfile from './components/wizard-edit-profile';
@@ -10,7 +14,8 @@ import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
 
 export interface InputData {
-  [key: string]: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }
 
 export const WizardEditPage = () => {
@@ -45,7 +50,6 @@ export const WizardEditPage = () => {
     //   "family":null,"role":null,"category":null,"ministry":null,"reports_to":null}
 
     // this is so that the edited data can be displayed for review (since this component uses API format data)
-    console.log('input.number: ', input);
     const output: JobProfileModel = {
       id: parseInt(input.id),
       stream: 'USER',
@@ -56,8 +60,8 @@ export const WizardEditPage = () => {
       context: input.context,
       overview: input.overview,
       accountabilities: {
-        optional: [] as string[],
-        required: [] as string[],
+        optional: [] as TrackedFieldArrayItem[],
+        required: [] as TrackedFieldArrayItem[],
       },
       requirements: [] as string[],
       behavioural_competencies: [] as BehaviouralCompetencies[],
@@ -80,11 +84,38 @@ export const WizardEditPage = () => {
         }
       } else {
         if (key.startsWith('required_accountabilities')) {
-          output.accountabilities.required.push(value);
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+
+          if (!output.accountabilities.required[index]) {
+            output.accountabilities.required[index] = {
+              value: input[`required_accountabilities.${index}.value`],
+              isCustom: input[`required_accountabilities.${index}.isCustom`],
+              disabled: input[`required_accountabilities.${index}.disabled`],
+            };
+          }
         } else if (key.startsWith('optional_accountabilities')) {
-          output.accountabilities.optional.push(value);
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+
+          if (!output.accountabilities.optional[index]) {
+            output.accountabilities.optional[index] = {
+              value: input[`optional_accountabilities.${index}.value`],
+              isCustom: input[`optional_accountabilities.${index}.isCustom`],
+              disabled: input[`optional_accountabilities.${index}.disabled`],
+            };
+          }
         } else if (key.startsWith('requirements')) {
-          output.requirements.push(value);
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+
+          if (!output.requirements[index]) {
+            output.requirements[index] = {
+              value: input[`requirements.${index}.value`],
+              isCustom: input[`requirements.${index}.isCustom`],
+              disabled: input[`requirements.${index}.disabled`],
+            };
+          }
         } else if (key.startsWith('behavioural_competencies')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
@@ -128,11 +159,6 @@ export const WizardEditPage = () => {
     setWizardData(transformedData);
     navigate('/wizard/review');
   };
-
-  // const handleProfileLoad = (profileData: JobProfileModel) => {
-  //   console.log('handleProfileLoad profileData: ', profileData);
-  //   setWizardData(profileData);
-  // };
 
   return (
     <WizardPageWrapper

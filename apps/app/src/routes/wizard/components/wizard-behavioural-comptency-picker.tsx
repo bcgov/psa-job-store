@@ -57,8 +57,6 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   const nameOptions = data?.behaviouralComptencies
     .filter((c) => c.group === selectedGroup)
     .map((competency) => {
-      console.log('Competency: ', competency.membership);
-
       return (
         <Option key={competency.id} value={competency.name}>
           {competency.name}

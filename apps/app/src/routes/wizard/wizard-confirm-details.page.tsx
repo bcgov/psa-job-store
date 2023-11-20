@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   CreateJobProfileInput,
   JobProfileModel,
+  TrackedFieldArrayItem,
   useCreateJobProfileMutation,
 } from '../../redux/services/graphql-api/job-profile.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
@@ -17,7 +18,17 @@ function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJ
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { behavioural_competencies, classification, id, organization_id, family_id, ...rest } = inputData;
 
-  // Exclude 'id' from the rest spread as it's not part of CreateJobProfileInput
+  const requiredAccountabilities = inputData.accountabilities.required
+    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+    .map((item) => item.value);
+
+  const optionalAccountabilities = inputData.accountabilities.optional
+    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+    .map((item) => item.value);
+
+  const requirements = inputData.requirements
+    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+    .map((item) => item.value);
 
   // Map behavioural competencies if they exist
   const behaviouralCompetenciesInput = behavioural_competencies?.length
@@ -36,6 +47,11 @@ function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJ
   // Construct the result with the correct type and provide default values or handle them as required by the API
   const result: CreateJobProfileInput = {
     ...rest,
+    requirements: requirements,
+    accountabilities: {
+      optional: optionalAccountabilities,
+      required: requiredAccountabilities,
+    },
     behavioural_competencies: behaviouralCompetenciesInput,
     classification: classificationConnectInput,
     state: 'SUBMITTED',

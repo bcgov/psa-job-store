@@ -8,7 +8,7 @@ export interface JobProfileModel {
   accountabilities: Accountabilities;
   behavioural_competencies: BehaviouralCompetencies[];
   classification: ClassificationModel | null;
-  requirements: string[];
+  requirements: (string | TrackedFieldArrayItem)[];
   organization_id: string;
   family_id: number;
   stream: string;
@@ -29,8 +29,14 @@ export interface BehaviouralCompetency {
 }
 
 interface Accountabilities {
-  optional: string[];
-  required: string[];
+  optional: (string | TrackedFieldArrayItem)[];
+  required: (string | TrackedFieldArrayItem)[];
+}
+
+export interface TrackedFieldArrayItem {
+  value: string;
+  disabled?: boolean;
+  isCustom?: boolean;
 }
 
 interface BehaviouralCompetencyConnect {
@@ -160,7 +166,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
     }),
     getJobProfile: build.query<GetJobProfileResponse, GetJobProfileArgs>({
       query: (args: GetJobProfileArgs) => {
-        console.log('args,', args);
         return {
           document: gql`
             query JobProfile {
