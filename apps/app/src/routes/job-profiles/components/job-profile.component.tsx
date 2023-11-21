@@ -116,55 +116,62 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     }
   }, [data, isLoading, profileData, onProfileLoad, showDiff]);
 
-  const compareData = (original, modified) => {
-    if (typeof original === 'string' && typeof modified === 'string') {
-      const dmp = new diff_match_patch();
-      const diff = dmp.diff_main(original, modified);
-      dmp.diff_cleanupSemantic(diff); // Improves the quality of the diff
+  const compareData = (original: string | undefined, modified: string | undefined): JSX.Element[] => {
+    const blank: JSX.Element[] = [];
+    if (!original || !modified) return blank;
 
-      return diff.map(([operation, text], index) => {
-        const style = {};
-        if (operation === 1) {
-          // Insertion
-          style.backgroundColor = 'lightgreen';
-        } else if (operation === -1) {
-          // Deletion
-          style.backgroundColor = 'salmon';
-        }
+    const dmp = new diff_match_patch();
+    const diff = dmp.diff_main(original, modified);
+    dmp.diff_cleanupSemantic(diff);
 
-        return (
-          <span key={index} style={style}>
-            {text}
-          </span>
-        );
-      });
-    }
-    // Add logic for array data
+    return diff.map(([operation, text], index) => {
+      const style: React.CSSProperties = {};
+      if (operation === 1) {
+        // Insertion
+        style.backgroundColor = 'lightgreen';
+      } else if (operation === -1) {
+        // Deletion
+        style.backgroundColor = 'salmon';
+      }
+
+      return (
+        <span key={index} style={style}>
+          {text}
+        </span>
+      );
+    });
   };
 
-  const compareLists = (original, modified) => {
+  const compareLists = (
+    original: (string | TrackedFieldArrayItem)[],
+    modified: (string | TrackedFieldArrayItem)[] | undefined,
+  ): JSX.Element[] => {
+    const comparisonResult: JSX.Element[] = [];
+
+    if (!modified) return comparisonResult;
+
     const maxLength = Math.max(original.length, modified.length);
-    const comparisonResult = [];
     const dmp = new diff_match_patch();
 
     for (let i = 0; i < maxLength; i++) {
-      const originalItem = original[i] ? (typeof original[i] === 'string' ? original[i] : original[i].value) : '';
-      const modifiedItem = modified[i]
-        ? typeof modified[i] === 'string'
-          ? modified[i]
-          : modified[i].disabled
-          ? ''
-          : modified[i].value
-        : '';
+      const originalItemValue =
+        typeof original[i] === 'string'
+          ? (original[i] as string)
+          : 'value' in (original[i] as TrackedFieldArrayItem)
+          ? (original[i] as TrackedFieldArrayItem).value
+          : '';
+      const modifiedItem = modified[i];
+      const modifiedItemValue =
+        typeof modifiedItem === 'string' ? modifiedItem : modifiedItem?.disabled ? '' : modifiedItem?.value || '';
 
-      if (originalItem || modifiedItem) {
-        const diff = dmp.diff_main(originalItem, modifiedItem);
+      if (originalItemValue || modifiedItemValue) {
+        const diff = dmp.diff_main(originalItemValue, modifiedItemValue);
         dmp.diff_cleanupSemantic(diff);
 
         comparisonResult.push(
           <li key={i}>
             {diff.map(([operation, text], index) => {
-              const style = {};
+              const style: React.CSSProperties = {};
               if (operation === 1) {
                 // Insertion
                 style.backgroundColor = 'lightgreen';
@@ -187,33 +194,30 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return comparisonResult;
   };
 
-  const compareCompetencies = (original, modified) => {
+  const compareCompetencies = (original: BehaviouralCompetency[], modified: BehaviouralCompetency[]): JSX.Element[] => {
     const allNames = new Set([...original.map((item) => item.name), ...modified.map((item) => item.name)]);
-    const comparisonResult = [];
+    const comparisonResult: JSX.Element[] = [];
 
     allNames.forEach((name) => {
       const originalItem = original.find((item) => item.name === name);
       const modifiedItem = modified.find((item) => item.name === name);
 
       if (originalItem && modifiedItem) {
-        // Item unmodified
         comparisonResult.push(
           <li key={name}>
-            <Text strong>{originalItem.name}</Text> {originalItem.description}
+            <strong>{originalItem.name}</strong> {originalItem.description}
           </li>,
         );
       } else if (originalItem && !modifiedItem) {
-        // Item removed
         comparisonResult.push(
           <li key={name} style={{ backgroundColor: 'salmon' }}>
-            <Text strong>{originalItem.name}</Text> {originalItem.description}
+            <strong>{originalItem.name}</strong> {originalItem.description}
           </li>,
         );
       } else if (!originalItem && modifiedItem) {
-        // Item added
         comparisonResult.push(
           <li key={name} style={{ backgroundColor: 'lightgreen' }}>
-            <Text strong>{modifiedItem.name}</Text> {modifiedItem.description}
+            <strong>{modifiedItem.name}</strong> {modifiedItem.description}
           </li>,
         );
       }
