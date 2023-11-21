@@ -4,6 +4,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Descriptions, DescriptionsProps, Grid, Typography } from 'antd';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, Length, ValidateNested } from 'class-validator';
+import { diff_match_patch } from 'diff-match-patch';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
@@ -20,6 +21,7 @@ interface JobProfileProps {
   id?: string; // The id is optional, as it can also be retrieved from the params
   onProfileLoad?: (profileData: JobProfileModel) => void;
   showBackToResults?: boolean;
+  showDiff?: boolean;
 }
 
 class BehaviouralCompetency {
@@ -67,13 +69,21 @@ export class JobProfileValidationModel {
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 }
 
-export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfileLoad, showBackToResults = true }) => {
+export const JobProfile: React.FC<JobProfileProps> = ({
+  id,
+  profileData,
+  onProfileLoad,
+  showBackToResults = true,
+  showDiff = false,
+}) => {
   const params = useParams();
   const resolvedId = id ?? params.id; // Using prop ID or param ID
   const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
   if (!resolvedId && !profileData) throw new Error('No ID');
+
+  const [originalData, setOriginalData] = useState<JobProfileModel | null>(null); // for diff
 
   // Using the lazy query to have control over when the fetch action is dispatched
   // (not dispatching if profileData was already provided)
@@ -85,23 +95,136 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
 
   useEffect(() => {
     // If profileData exists, use it to set the form state
-    if (profileData) {
+    if (profileData && !showDiff) {
       setEffectiveData(profileData);
-    } else if (!profileData && resolvedId) {
+    } else if ((!profileData && resolvedId) || (profileData && showDiff && resolvedId)) {
       // If no profileData is provided and an id exists, fetch the data
+      // OR profileData was provided, but we also want to run a diff
       triggerGetJobProfile({ id: +resolvedId });
     }
-  }, [resolvedId, profileData, triggerGetJobProfile]);
+  }, [resolvedId, profileData, triggerGetJobProfile, showDiff]);
 
   // useEffect to set effectiveData when data is fetched from the API
   useEffect(() => {
     if (!profileData && data && !isLoading) {
       // Only set effectiveData from fetched data if profileData is not provided
       if (onProfileLoad) onProfileLoad(data.jobProfile);
-
       setEffectiveData(data.jobProfile);
+    } else if (profileData && showDiff && data && !isLoading) {
+      if (onProfileLoad) onProfileLoad(data.jobProfile);
+      setOriginalData(data.jobProfile); // for diff
     }
-  }, [data, isLoading, profileData, onProfileLoad]);
+  }, [data, isLoading, profileData, onProfileLoad, showDiff]);
+
+  const compareData = (original: string | undefined, modified: string | undefined): JSX.Element[] => {
+    const blank: JSX.Element[] = [];
+    if (!original || !modified) return blank;
+
+    const dmp = new diff_match_patch();
+    const diff = dmp.diff_main(original, modified);
+    dmp.diff_cleanupSemantic(diff);
+
+    return diff.map(([operation, text], index) => {
+      const style: React.CSSProperties = {};
+      if (operation === 1) {
+        // Insertion
+        style.backgroundColor = 'lightgreen';
+      } else if (operation === -1) {
+        // Deletion
+        style.backgroundColor = 'salmon';
+      }
+
+      return (
+        <span key={index} style={style}>
+          {text}
+        </span>
+      );
+    });
+  };
+
+  const compareLists = (
+    original: (string | TrackedFieldArrayItem)[],
+    modified: (string | TrackedFieldArrayItem)[] | undefined,
+  ): JSX.Element[] => {
+    const comparisonResult: JSX.Element[] = [];
+
+    if (!modified) return comparisonResult;
+
+    const maxLength = Math.max(original.length, modified.length);
+    const dmp = new diff_match_patch();
+
+    for (let i = 0; i < maxLength; i++) {
+      const originalItemValue =
+        typeof original[i] === 'string'
+          ? (original[i] as string)
+          : 'value' in (original[i] as TrackedFieldArrayItem)
+          ? (original[i] as TrackedFieldArrayItem).value
+          : '';
+      const modifiedItem = modified[i];
+      const modifiedItemValue =
+        typeof modifiedItem === 'string' ? modifiedItem : modifiedItem?.disabled ? '' : modifiedItem?.value || '';
+
+      if (originalItemValue || modifiedItemValue) {
+        const diff = dmp.diff_main(originalItemValue, modifiedItemValue);
+        dmp.diff_cleanupSemantic(diff);
+
+        comparisonResult.push(
+          <li key={i}>
+            {diff.map(([operation, text], index) => {
+              const style: React.CSSProperties = {};
+              if (operation === 1) {
+                // Insertion
+                style.backgroundColor = 'lightgreen';
+              } else if (operation === -1) {
+                // Deletion
+                style.backgroundColor = 'salmon';
+              }
+
+              return (
+                <span key={index} style={style}>
+                  {text}
+                </span>
+              );
+            })}
+          </li>,
+        );
+      }
+    }
+
+    return comparisonResult;
+  };
+
+  const compareCompetencies = (original: BehaviouralCompetency[], modified: BehaviouralCompetency[]): JSX.Element[] => {
+    const allNames = new Set([...original.map((item) => item.name), ...modified.map((item) => item.name)]);
+    const comparisonResult: JSX.Element[] = [];
+
+    allNames.forEach((name) => {
+      const originalItem = original.find((item) => item.name === name);
+      const modifiedItem = modified.find((item) => item.name === name);
+
+      if (originalItem && modifiedItem) {
+        comparisonResult.push(
+          <li key={name}>
+            <strong>{originalItem.name}</strong> {originalItem.description}
+          </li>,
+        );
+      } else if (originalItem && !modifiedItem) {
+        comparisonResult.push(
+          <li key={name} style={{ backgroundColor: 'salmon' }}>
+            <strong>{originalItem.name}</strong> {originalItem.description}
+          </li>,
+        );
+      } else if (!originalItem && modifiedItem) {
+        comparisonResult.push(
+          <li key={name} style={{ backgroundColor: 'lightgreen' }}>
+            <strong>{modifiedItem.name}</strong> {modifiedItem.description}
+          </li>,
+        );
+      }
+    });
+
+    return comparisonResult;
+  };
 
   if (isLoading) {
     return <p aria-live="polite">Loading job profile...</p>;
@@ -111,7 +234,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
     {
       key: 'title',
       label: 'Title',
-      children: effectiveData?.title,
+      children: showDiff && originalData ? compareData(originalData.title, effectiveData?.title) : effectiveData?.title,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -135,13 +258,17 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
     {
       key: 'context',
       label: 'Job Context',
-      children: effectiveData?.context,
+      children:
+        showDiff && originalData ? compareData(originalData.context, effectiveData?.context) : effectiveData?.context,
       span: 24,
     },
     {
       key: 'overview',
       label: 'Job Overview',
-      children: effectiveData?.overview,
+      children:
+        showDiff && originalData
+          ? compareData(originalData.overview, effectiveData?.overview)
+          : effectiveData?.overview,
       span: 24,
     },
     {
@@ -149,19 +276,17 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
       label: 'Required Accountabilities',
       children: (
         <ul>
-          {effectiveData?.accountabilities.required.map((accountability, index) => {
-            // Check if the accountability is a string
-            if (typeof accountability === 'string') {
-              return <li key={index}>{accountability}</li>;
-            }
-
-            // Check if the accountability is an object and not disabled
-            if (accountability.disabled) {
-              return null;
-            }
-
-            return <li key={accountability.value}>{accountability.value}</li>;
-          })}
+          {showDiff && originalData
+            ? compareLists(originalData.accountabilities.required, effectiveData?.accountabilities.required)
+            : effectiveData?.accountabilities.required.map((accountability, index) => {
+                if (typeof accountability === 'string') {
+                  return <li key={index}>{accountability}</li>;
+                }
+                if (accountability.disabled) {
+                  return null;
+                }
+                return <li key={accountability.value}>{accountability.value}</li>;
+              })}
         </ul>
       ),
       span: 24,
@@ -171,19 +296,17 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
       label: 'Optional Accountabilities',
       children: (
         <ul>
-          {effectiveData?.accountabilities.optional.map((accountability, index) => {
-            // Check if the accountability is a string
-            if (typeof accountability === 'string') {
-              return <li key={index}>{accountability}</li>;
-            }
-
-            // Check if the accountability is an object and not disabled
-            if (accountability.disabled) {
-              return null;
-            }
-
-            return <li key={accountability.value}>{accountability.value}</li>;
-          })}
+          {showDiff && originalData
+            ? compareLists(originalData.accountabilities.optional, effectiveData?.accountabilities.optional)
+            : effectiveData?.accountabilities.optional.map((accountability, index) => {
+                if (typeof accountability === 'string') {
+                  return <li key={index}>{accountability}</li>;
+                }
+                if (accountability.disabled) {
+                  return null;
+                }
+                return <li key={accountability.value}>{accountability.value}</li>;
+              })}
         </ul>
       ),
       span: 24,
@@ -193,17 +316,17 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
       label: 'Minimum Job Requirements',
       children: (
         <ul>
-          {effectiveData?.requirements.map((requirement, index) => {
-            if (typeof requirement === 'string') {
-              return <li key={index}>{requirement}</li>;
-            }
-
-            if (requirement.disabled) {
-              return null;
-            }
-
-            return <li key={requirement.value}>{requirement.value}</li>;
-          })}
+          {showDiff && originalData
+            ? compareLists(originalData.requirements, effectiveData?.requirements)
+            : effectiveData?.requirements.map((requirement, index) => {
+                if (typeof requirement === 'string') {
+                  return <li key={index}>{requirement}</li>;
+                }
+                if (requirement.disabled) {
+                  return null;
+                }
+                return <li key={requirement.value}>{requirement.value}</li>;
+              })}
         </ul>
       ),
       span: 24,
@@ -213,15 +336,20 @@ export const JobProfile: React.FC<JobProfileProps> = ({ id, profileData, onProfi
       label: 'Behavioural Competencies',
       children: (
         <ul>
-          {(effectiveData?.behavioural_competencies ?? []).map(
-            ({ behavioural_competency: { name, description } }, index) => {
-              return (
-                <li key={index}>
-                  <Text strong>{name}</Text> {description}
-                </li>
-              );
-            },
-          )}
+          {showDiff && originalData
+            ? compareCompetencies(
+                originalData.behavioural_competencies.map((item) => item.behavioural_competency),
+                effectiveData?.behavioural_competencies.map((item) => item.behavioural_competency) ?? [],
+              )
+            : (effectiveData?.behavioural_competencies ?? []).map(
+                ({ behavioural_competency: { name, description } }, index) => {
+                  return (
+                    <li key={index}>
+                      <Text strong>{name}</Text> {description}
+                    </li>
+                  );
+                },
+              )}
         </ul>
       ),
       span: 24,
