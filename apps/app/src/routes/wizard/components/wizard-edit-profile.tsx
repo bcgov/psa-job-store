@@ -824,18 +824,6 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          {/* // <JobProfileEditableField
-        //   fieldId="title"
-        //   control={control}
-        //   renderViewMode={(formValue) => <>{formValue}</>}
-        //   renderEditMode={() => (
-        //     <FormItem name="title" control={control}>
-        //       <Input />
-        //     </FormItem>
-        //   )}
-        // />
-         */}
-
           {!config?.contextEditable ? (
             <Alert
               role="note"
