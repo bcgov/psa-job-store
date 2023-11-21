@@ -155,7 +155,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
     for (let i = 0; i < maxLength; i++) {
       const originalItemValue =
-        typeof original[i] === 'string'
+        typeof original[i] === 'undefined'
+          ? ''
+          : typeof original[i] === 'string'
           ? (original[i] as string)
           : 'value' in (original[i] as TrackedFieldArrayItem)
           ? (original[i] as TrackedFieldArrayItem).value
