@@ -12,10 +12,10 @@ export interface JobProfileModel {
   organization_id: string;
   family_id: number;
   stream: string;
-  title: string;
+  title: string | TrackedFieldArrayItem;
   number: number;
   context: string;
-  overview: string;
+  overview: string | TrackedFieldArrayItem;
 }
 
 export interface BehaviouralCompetencies {

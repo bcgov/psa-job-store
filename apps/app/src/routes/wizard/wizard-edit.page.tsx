@@ -53,12 +53,16 @@ export const WizardEditPage = () => {
     const output: JobProfileModel = {
       id: parseInt(input.id),
       stream: 'USER',
-      title: input.title,
+      title: { value: input['title.value'], isCustom: input['title.isCustom'], disabled: input['title.disabled'] },
       number: parseInt(input.number),
       organization_id: '-1',
       family_id: -1,
       context: input.context,
-      overview: input.overview,
+      overview: {
+        value: input['overview.value'],
+        isCustom: input['overview.isCustom'],
+        disabled: input['overview.disabled'],
+      },
       accountabilities: {
         optional: [] as TrackedFieldArrayItem[],
         required: [] as TrackedFieldArrayItem[],
@@ -155,7 +159,9 @@ export const WizardEditPage = () => {
   const navigate = useNavigate();
   const onNext = () => {
     const formData = wizardEditProfileRef.current?.getFormData();
+    // console.log('formData: ', formData);
     const transformedData = transformFormData(formData);
+    // console.log('transformedData: ', transformedData);
     setWizardData(transformedData);
     navigate('/wizard/review');
   };
