@@ -17,6 +17,9 @@ interface WizardContextProps {
 
   classificationsData: GetClassificationsResponse | null;
   setClassificationsData: React.Dispatch<React.SetStateAction<GetClassificationsResponse | null>>;
+
+  isValid: boolean;
+  setIsValid: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -36,12 +39,15 @@ export const useWizardContext = () => {
 export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [wizardData, setWizardData] = useState<JobProfileModel | null>(null);
   const [classificationsData, setClassificationsData] = useState<GetClassificationsResponse | null>(null);
+  const [isValid, setIsValid] = useState<boolean>(false);
 
   const value = {
     wizardData,
     classificationsData,
+    isValid,
     setWizardData,
     setClassificationsData,
+    setIsValid,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

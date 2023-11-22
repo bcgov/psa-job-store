@@ -35,10 +35,14 @@ interface WizardEditProfileProps {
   submitText?: string;
   showBackButton?: boolean;
   receivedClassificationsDataCallback?: (data: GetClassificationsResponse) => void;
+  setIsValid: (isValid: boolean) => void;
 }
 
 const WizardEditProfile = forwardRef(
-  ({ id, profileData, config, submitHandler, receivedClassificationsDataCallback }: WizardEditProfileProps, ref) => {
+  (
+    { id, profileData, config, submitHandler, receivedClassificationsDataCallback, setIsValid }: WizardEditProfileProps,
+    ref,
+  ) => {
     const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
       useLazyGetClassificationsQuery();
 
@@ -63,10 +67,15 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
-    const { register, control, reset, handleSubmit, getValues } = useForm<JobProfileValidationModel>({
-      resolver: classValidatorResolver(JobProfileValidationModel),
-      mode: 'onChange',
-    });
+    const { register, control, reset, handleSubmit, getValues, formState, trigger } =
+      useForm<JobProfileValidationModel>({
+        resolver: classValidatorResolver(JobProfileValidationModel),
+        mode: 'onChange',
+      });
+    useEffect(() => {
+      // Update the `isValid` state based on the form's validation state
+      setIsValid(formState.isValid);
+    }, [formState.isValid, setIsValid]);
 
     // useEffect to set effectiveData when data is fetched from the API
     useEffect(() => {
@@ -161,7 +170,8 @@ const WizardEditProfile = forwardRef(
         });
       }
       setRenderKey((prevKey) => prevKey + 1);
-    }, [effectiveData, isLoading, classificationsData, reset]);
+      trigger();
+    }, [effectiveData, isLoading, classificationsData, reset, trigger]);
 
     // Required Accountability Fields
 
@@ -622,6 +632,7 @@ const WizardEditProfile = forwardRef(
           form={form}
           key={renderKey}
           onFinish={handleSubmit((data) => {
+            console.log('hello');
             submitHandler?.(data);
           })}
         >

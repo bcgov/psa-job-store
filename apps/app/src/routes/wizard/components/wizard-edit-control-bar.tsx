@@ -12,6 +12,7 @@ interface WizardEditControlBarProps {
   onToggleShowDiff?: (checked: boolean) => void;
   showDiffToggle?: boolean;
   showDiff?: boolean;
+  isValid?: boolean;
 }
 
 const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
@@ -24,6 +25,7 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
   onToggleShowDiff,
   showDiffToggle,
   showDiff,
+  isValid = true,
 }) => {
   const buttonPlaceholder = <div style={{ display: 'inline-block', width: '68px' }} />;
 
@@ -55,7 +57,7 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
               </Link>
             ) : null}
             {onBack ? <Button onClick={onBack}>Back</Button> : null}
-            <Button type="primary" onClick={onNext}>
+            <Button type="primary" onClick={onNext} disabled={!isValid}>
               {nextText ? nextText : 'Next'}
             </Button>
           </>

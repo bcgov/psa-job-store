@@ -21,8 +21,13 @@ export interface InputData {
 export const WizardEditPage = () => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
-  const { wizardData, setWizardData, classificationsData } = useWizardContext();
+  const { wizardData, setWizardData, classificationsData, setClassificationsData, isValid, setIsValid } =
+    useWizardContext();
+  const { profileId } = useParams();
 
+  function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
+    setClassificationsData(data);
+  }
   function getClassificationById(id: string): ClassificationModel | undefined {
     // If data is loaded, find the classification by ID
     if (classificationsData) {
@@ -139,14 +144,6 @@ export const WizardEditPage = () => {
     return output as unknown as JobProfileModel;
   }
 
-  const { profileId } = useParams();
-
-  const { setClassificationsData } = useWizardContext();
-
-  function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
-    setClassificationsData(data);
-  }
-
   const wizardEditProfileRef = useRef<{
     submit: () => void;
     getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
@@ -169,7 +166,12 @@ export const WizardEditPage = () => {
       lg={18}
     >
       <WizardSteps current={1} xl={24}></WizardSteps>
-      <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} showChooseDifferentProfile={true} />
+      <WizardEditControlBar
+        style={{ marginBottom: '1rem' }}
+        onNext={onNext}
+        showChooseDifferentProfile={true}
+        isValid={isValid}
+      />
 
       {/* // <Testt></Testt> */}
       <WizardEditProfile
@@ -180,6 +182,7 @@ export const WizardEditPage = () => {
         // submitHandler={onSubmit}
         showBackButton={true}
         receivedClassificationsDataCallback={receivedClassificationsDataCallback}
+        setIsValid={setIsValid}
       ></WizardEditProfile>
     </WizardPageWrapper>
   );
