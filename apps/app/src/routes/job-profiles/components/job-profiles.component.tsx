@@ -35,34 +35,9 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
 
     trigger({
+      ...(search != null && { search }),
       where: {
         AND: [
-          {
-            OR: [
-              ...(search != null
-                ? [
-                    {
-                      title: {
-                        contains: searchParams.get('search'),
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      context: {
-                        contains: searchParams.get('search'),
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      overview: {
-                        contains: searchParams.get('search'),
-                        mode: 'insensitive',
-                      },
-                    },
-                  ]
-                : []),
-            ],
-          },
           ...(organizationFilter != null
             ? [
                 {

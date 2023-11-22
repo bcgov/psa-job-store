@@ -9,8 +9,9 @@ export class AppConfigDto {
   @IsString()
   DATABASE_URL: string;
 
-  @IsString({ each: true })
-  ELASTIC_NODES: string[];
+  @IsNotEmpty()
+  @IsString()
+  ELASTIC_NODE: string;
 
   @IsNotEmpty()
   @IsString()

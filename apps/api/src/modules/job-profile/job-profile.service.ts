@@ -1,17 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { FindManyJobProfileArgs, JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
+import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { ClassificationService } from '../classification/classification.service';
+import { SearchService } from '../search/search.service';
+import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 
 @Injectable()
 export class JobProfileService {
   constructor(
     private readonly classificationService: ClassificationService,
     private readonly prisma: PrismaService,
+    private readonly searchService: SearchService,
   ) {}
 
-  async getJobProfiles(args?: FindManyJobProfileArgs) {
+  async getJobProfiles({ search, where, ...args }: FindManyJobProfileWithSearch) {
+    const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+
     return this.prisma.jobProfile.findMany({
+      where: {
+        ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        ...where,
+      },
       ...args,
       include: {
         behavioural_competencies: true,
@@ -38,9 +47,14 @@ export class JobProfileService {
     });
   }
 
-  async getJobProfileCount(args?: FindManyJobProfileArgs) {
+  async getJobProfileCount({ search, where }: FindManyJobProfileWithSearch) {
+    const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+
     return await this.prisma.jobProfile.count({
-      where: args.where,
+      where: {
+        ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        ...where,
+      },
     });
   }
 
