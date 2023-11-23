@@ -84,6 +84,7 @@ export interface CreateJobProfileResponse {
 }
 
 export interface GetJobProfilesArgs {
+  search?: string;
   where?: Record<string, any>;
   orderBy?: Record<string, any>;
   take?: number;
@@ -109,8 +110,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       query: (args: GetJobProfilesArgs = {}) => {
         return {
           document: gql`
-            query JobProfiles($where: JobProfileWhereInput, $take: Int, $skip: Int) {
-              jobProfiles(where: $where, take: $take, skip: $skip) {
+            query JobProfiles($search: String, $where: JobProfileWhereInput, $take: Int, $skip: Int) {
+              jobProfiles(search: $search, where: $where, take: $take, skip: $skip) {
                 id
                 stream
                 title
@@ -153,10 +154,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   }
                 }
               }
-              jobProfilesCount(where: $where)
+              jobProfilesCount(search: $search, where: $where)
             }
           `,
           variables: {
+            search: args.search,
             where: args.where,
             skip: args.skip,
             take: args.take,
