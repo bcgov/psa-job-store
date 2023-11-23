@@ -31,61 +31,99 @@ export class SearchService {
         bool: {
           should: [
             {
+              match_phrase_prefix: {
+                title: value,
+              },
+            },
+            {
               match: {
                 title: {
                   query: value,
+                  fuzziness: 1,
                   operator: 'and',
                 },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                context: value,
               },
             },
             {
               match: {
                 context: {
                   query: value,
+                  fuzziness: 1,
                   operator: 'and',
                 },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                overview: value,
               },
             },
             {
               match: {
                 overview: {
                   query: value,
+                  fuzziness: 1,
                   operator: 'and',
                 },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                requirements: value,
               },
             },
             {
               match: {
                 requirements: {
                   query: value,
+                  fuzziness: 1,
                   operator: 'and',
                 },
               },
             },
             {
-              nested: {
-                path: 'accountabilities',
-                query: {
-                  match: {
-                    'accountabilities.optional': value,
-                  },
+              match_phrase_prefix: {
+                'accountabilities.optional': value,
+              },
+            },
+            {
+              match: {
+                'accountabilities.optional': {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
                 },
               },
             },
             {
-              nested: {
-                path: 'accountabilities',
-                query: {
-                  match: {
-                    'accountabilities.required': value,
-                  },
+              match_phrase_prefix: {
+                'accountabilities.required': value,
+              },
+            },
+            {
+              match: {
+                'accountabilities.required': {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
                 },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                behavioural_competencies: value,
               },
             },
             {
               match: {
                 behavioural_competencies: {
                   query: value,
+                  fuzziness: 1,
                   operator: 'and',
                 },
               },
