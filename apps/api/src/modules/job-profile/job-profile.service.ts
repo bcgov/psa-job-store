@@ -19,6 +19,7 @@ export class JobProfileService {
     return this.prisma.jobProfile.findMany({
       where: {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        stream: { notIn: ['USER'] },
         ...where,
       },
       ...args,
@@ -53,6 +54,7 @@ export class JobProfileService {
     return await this.prisma.jobProfile.count({
       where: {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        stream: { notIn: ['USER'] },
         ...where,
       },
     });
