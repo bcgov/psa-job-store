@@ -45,7 +45,7 @@ export class JobProfileValidationModel {
   number: number;
 
   @Length(2, 500)
-  title: string;
+  title: TrackedFieldArrayItem | string;
 
   // @IsNotEmpty({ message: 'Classification is required.' })
   // @ValidateNested()
@@ -56,7 +56,7 @@ export class JobProfileValidationModel {
   context: string;
 
   @Length(2, 500)
-  overview: string;
+  overview: TrackedFieldArrayItem | string;
 
   required_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
@@ -155,11 +155,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
     for (let i = 0; i < maxLength; i++) {
       const originalItemValue =
-        typeof original[i] === 'string'
-          ? (original[i] as string)
-          : 'value' in (original[i] as TrackedFieldArrayItem)
-          ? (original[i] as TrackedFieldArrayItem).value
-          : '';
+        typeof original[i] === 'undefined'
+          ? ''
+          : typeof original[i] === 'string'
+            ? (original[i] as string)
+            : 'value' in (original[i] as TrackedFieldArrayItem)
+              ? (original[i] as TrackedFieldArrayItem).value
+              : '';
       const modifiedItem = modified[i];
       const modifiedItemValue =
         typeof modifiedItem === 'string' ? modifiedItem : modifiedItem?.disabled ? '' : modifiedItem?.value || '';
@@ -234,7 +236,15 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'title',
       label: 'Title',
-      children: showDiff && originalData ? compareData(originalData.title, effectiveData?.title) : effectiveData?.title,
+      children:
+        showDiff && originalData
+          ? compareData(
+              typeof originalData.title === 'string' ? originalData.title : originalData.title.value,
+              typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value,
+            )
+          : typeof effectiveData?.title === 'string'
+            ? effectiveData?.title
+            : effectiveData?.title?.value,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -267,8 +277,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: 'Job Overview',
       children:
         showDiff && originalData
-          ? compareData(originalData.overview, effectiveData?.overview)
-          : effectiveData?.overview,
+          ? compareData(
+              typeof originalData.overview === 'string' ? originalData.overview : originalData?.overview?.value,
+              typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value,
+            )
+          : typeof effectiveData?.overview === 'string'
+            ? effectiveData?.overview
+            : effectiveData?.overview?.value,
       span: 24,
     },
     {
@@ -395,7 +410,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       >
         <section>
           <h3>Title</h3>
-          <p>{effectiveData?.title}</p>
+          <p>{typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value}</p>
 
           <h3>Classification</h3>
           <p>{`${effectiveData?.classification?.code}`}</p>
@@ -410,7 +425,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <p>{effectiveData?.context}</p>
 
           <h3>Job Overview</h3>
-          <p>{effectiveData?.overview}</p>
+          <p>
+            {typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value}
+          </p>
 
           <h3>Required Accountabilities</h3>
           <ul>

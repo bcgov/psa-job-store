@@ -18,6 +18,9 @@ function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJ
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { behavioural_competencies, classification, id, organization_id, family_id, ...rest } = inputData;
 
+  const title = typeof inputData.title === 'string' ? inputData.title : inputData.title.value;
+  const overview = typeof inputData.overview === 'string' ? inputData.overview : inputData.overview.value;
+
   const requiredAccountabilities = inputData.accountabilities.required
     .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
     .map((item) => item.value);
@@ -47,6 +50,8 @@ function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJ
   // Construct the result with the correct type and provide default values or handle them as required by the API
   const result: CreateJobProfileInput = {
     ...rest,
+    overview: overview,
+    title: title,
     requirements: requirements,
     accountabilities: {
       optional: optionalAccountabilities,

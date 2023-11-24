@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ReactNode, useContext, useState } from 'react';
 import { GetClassificationsResponse } from '../../../redux/services/graphql-api/classification.api';
 import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile.api';
@@ -20,6 +21,25 @@ interface WizardContextProps {
 
   isValid: boolean;
   setIsValid: React.Dispatch<React.SetStateAction<boolean>>;
+  minReqAlertShown: boolean;
+  setMinReqAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
+  reqAlertShown: boolean;
+  setReqAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
+  originalValuesSet: boolean;
+  originalAccReqFields: any[];
+  originalOptReqFields: any[];
+  originalMinReqFields: any[];
+  originalTitle: any;
+  originalOverview: any;
+
+  setOriginalValuesSet: React.Dispatch<React.SetStateAction<boolean>>;
+  setOriginalAccReqFields: React.Dispatch<React.SetStateAction<any[]>>;
+  setOriginalOptReqFields: React.Dispatch<React.SetStateAction<any[]>>;
+  setOriginalMinReqFields: React.Dispatch<React.SetStateAction<any[]>>;
+  setOriginalTitle: React.Dispatch<React.SetStateAction<any>>;
+  setOriginalOverview: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -40,14 +60,38 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [wizardData, setWizardData] = useState<JobProfileModel | null>(null);
   const [classificationsData, setClassificationsData] = useState<GetClassificationsResponse | null>(null);
   const [isValid, setIsValid] = useState<boolean>(false);
+  const [minReqAlertShown, setMinReqAlertShown] = useState<boolean>(false);
+  const [reqAlertShown, setReqAlertShown] = useState<boolean>(false);
+  const [originalValuesSet, setOriginalValuesSet] = useState<boolean>(false);
+  const [originalAccReqFields, setOriginalAccReqFields] = useState<any[]>([]);
+  const [originalOptReqFields, setOriginalOptReqFields] = useState<any[]>([]);
+  const [originalMinReqFields, setOriginalMinReqFields] = useState<any[]>([]);
+  const [originalTitle, setOriginalTitle] = useState<any>({});
+  const [originalOverview, setOriginalOverview] = useState<any>({});
 
   const value = {
     wizardData,
-    classificationsData,
-    isValid,
     setWizardData,
+    classificationsData,
     setClassificationsData,
+    isValid,
     setIsValid,
+    minReqAlertShown,
+    setMinReqAlertShown,
+    reqAlertShown,
+    setReqAlertShown,
+    originalValuesSet,
+    setOriginalValuesSet,
+    originalAccReqFields,
+    setOriginalAccReqFields,
+    originalOptReqFields,
+    setOriginalOptReqFields,
+    originalMinReqFields,
+    setOriginalMinReqFields,
+    originalTitle,
+    setOriginalTitle,
+    originalOverview,
+    setOriginalOverview,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

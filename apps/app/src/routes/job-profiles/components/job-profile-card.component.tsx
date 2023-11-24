@@ -24,7 +24,7 @@ export const JobProfileCard = ({ data, link }: JobProfileCardProps) => {
       }}
     >
       <Title level={2} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }}>
-        {data.title}
+        {typeof data?.title === 'string' ? data?.title : data?.title?.value}
       </Title>
       <div>
         <Text type="secondary">
@@ -39,7 +39,9 @@ export const JobProfileCard = ({ data, link }: JobProfileCardProps) => {
       </div>
       <div>
         <Text strong>Overview:</Text>
-        <Paragraph ellipsis={{ rows: 3 }}>{data.overview}</Paragraph>
+        <Paragraph ellipsis={{ rows: 3 }}>
+          {typeof data?.overview === 'string' ? data?.overview : data?.overview?.value}
+        </Paragraph>
       </div>
       <Link to={link} tabIndex={-1}>
         <Button type="link" aria-label={`click to see details for ${data.title}`} style={{ padding: '0' }}>

@@ -20,6 +20,7 @@ import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
 import { validateAppConfig } from './utils/validate-app-config.util';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobRoleModule,
     BehaviouralComptencyModule,
     ExternalModule,
+    SearchModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],

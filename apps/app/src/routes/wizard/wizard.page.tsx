@@ -5,6 +5,7 @@ import JobProfiles from '../job-profiles/components/job-profiles.component';
 import WizardControls from './components/wizard-controls.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
+import { useWizardContext } from './components/wizard.provider';
 
 interface IFormInput {
   firstName: string;
@@ -26,6 +27,15 @@ export const WizardPage = () => {
   };
 
   const [searchParams] = useSearchParams();
+
+  // Ensure form alerts get displayed again
+  const { setReqAlertShown, setOriginalValuesSet, setMinReqAlertShown, setWizardData } = useWizardContext();
+
+  setMinReqAlertShown(false);
+  setReqAlertShown(false);
+
+  setOriginalValuesSet(false); // ensures original values get re-set once user navigates to edit page
+  setWizardData(null); // this ensures that any previous edits are cleared
 
   return (
     <WizardPageWrapper

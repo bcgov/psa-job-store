@@ -21,6 +21,7 @@ import { JobProfileValidationModel } from '../../job-profiles/components/job-pro
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
 import BehaviouralComptencyPicker, { BehaviouralCompetencyData } from './wizard-behavioural-comptency-picker';
 import './wizard-edit-profile.css';
+import { useWizardContext } from './wizard.provider';
 
 interface ConfigProps {
   classificationEditable?: boolean;
@@ -67,11 +68,10 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
-    const { register, control, reset, handleSubmit, getValues, formState, trigger } =
-      useForm<JobProfileValidationModel>({
-        resolver: classValidatorResolver(JobProfileValidationModel),
-        mode: 'onChange',
-      });
+    const { register, control, reset, handleSubmit, getValues, formState } = useForm<JobProfileValidationModel>({
+      resolver: classValidatorResolver(JobProfileValidationModel),
+      mode: 'onChange',
+    });
     useEffect(() => {
       // Update the `isValid` state based on the form's validation state
       setIsValid(formState.isValid);
@@ -96,15 +96,26 @@ const WizardEditProfile = forwardRef(
       // as part of the render hack. todo: get rid of this if possible
     }, [renderKey, form]);
 
-    const [originalAccReqFields, setOriginalAccReqFields] = useState<any[]>([]);
-    const [originalOptReqFields, setOriginalOptReqFields] = useState<any[]>([]);
-    const [originalMinReqFields, setOriginalMinReqFields] = useState<any[]>([]);
+    const {
+      originalValuesSet,
+      setOriginalValuesSet,
+      originalOverview,
+      setOriginalOverview,
+      originalTitle,
+      setOriginalTitle,
+      originalMinReqFields,
+      setOriginalMinReqFields,
+      originalAccReqFields,
+      setOriginalAccReqFields,
+      originalOptReqFields,
+      setOriginalOptReqFields,
+    } = useWizardContext();
 
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData) {
         const classificationId = effectiveData?.classification?.id ?? null;
 
-        const originalAccReqFields = effectiveData.accountabilities.required.map((item) => {
+        const originalAccReqFieldsValue = effectiveData.accountabilities.required.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -119,26 +130,23 @@ const WizardEditProfile = forwardRef(
             };
           }
         });
-        setOriginalAccReqFields(originalAccReqFields);
 
-        const originalOptReqFields = effectiveData.accountabilities.optional.map((item) => {
-          if (typeof item === 'string') {
-            return {
-              value: item,
-              isCustom: false,
-              disabled: false,
-            };
-          } else {
-            return {
-              value: item.value,
-              isCustom: item.isCustom,
-              disabled: item.disabled,
-            };
-          }
-        });
-        setOriginalOptReqFields(originalOptReqFields);
+        if (!originalValuesSet) setOriginalAccReqFields(originalAccReqFieldsValue);
 
-        const originalMinReqFields = effectiveData.requirements.map((item) => {
+        // Initialize an object to track the edit status of each field
+        let initialEditStatus: { [key: number]: boolean } = {};
+
+        // Iterate over each minimum requirement field and compare with the original value
+        originalAccReqFieldsValue.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalAccReqFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        // Set the editedMinReqFields state
+        setEditedAccReqFields(initialEditStatus);
+
+        const originalOptReqFieldsValue = effectiveData.accountabilities.optional.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -153,25 +161,114 @@ const WizardEditProfile = forwardRef(
             };
           }
         });
-        setOriginalMinReqFields(originalMinReqFields);
+        if (!originalValuesSet) setOriginalOptReqFields(originalOptReqFieldsValue);
+
+        // Iterate over each minimum requirement field and compare with the original value
+        originalOptReqFieldsValue.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalOptReqFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        // Set the editedMinReqFields state
+        setEditedOptReqFields(initialEditStatus);
+
+        const originalMinReqFieldsValue = effectiveData.requirements.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        if (!originalValuesSet) setOriginalMinReqFields(originalMinReqFieldsValue);
+
+        // Initialize an object to track the edit status of each field
+        initialEditStatus = {};
+
+        // Iterate over each minimum requirement field and compare with the original value
+        originalMinReqFieldsValue.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalMinReqFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        // Set the editedMinReqFields state
+        setEditedMinReqFields(initialEditStatus);
+
+        const originalTitleValue =
+          typeof effectiveData.title === 'string'
+            ? {
+                value: effectiveData.title,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: effectiveData.title.value,
+                isCustom: effectiveData.title.isCustom,
+                disabled: effectiveData.title.disabled,
+              };
+
+        if (!originalValuesSet) setOriginalTitle(originalTitleValue);
+        setTitleEdited(originalTitle.value !== originalTitleValue.value);
+
+        const originalOverviewValue =
+          typeof effectiveData.overview === 'string'
+            ? {
+                value: effectiveData.overview,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: effectiveData.overview.value,
+                isCustom: effectiveData.overview.isCustom,
+                disabled: effectiveData.overview.disabled,
+              };
+        if (!originalValuesSet) setOriginalOverview(originalOverviewValue);
+        setOverviewEdited(originalOverview.value !== originalOverviewValue.value);
+
+        if (!originalValuesSet) setOriginalValuesSet(true);
 
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
-          title: effectiveData?.title,
+          title: originalTitleValue,
           context: effectiveData?.context,
-          overview: effectiveData?.overview,
+          overview: originalOverviewValue,
           classification: classificationId,
           // array fileds are required to be nested in objects, so wrap string values in {value: item}
-          required_accountabilities: originalAccReqFields,
-          optional_accountabilities: originalOptReqFields,
-          requirements: originalMinReqFields,
+          required_accountabilities: originalAccReqFieldsValue,
+          optional_accountabilities: originalOptReqFieldsValue,
+          requirements: originalMinReqFieldsValue,
           behavioural_competencies: effectiveData?.behavioural_competencies || [],
         });
       }
       setRenderKey((prevKey) => prevKey + 1);
-      trigger();
-    }, [effectiveData, isLoading, classificationsData, reset, trigger]);
+    }, [
+      effectiveData,
+      isLoading,
+      classificationsData,
+      reset,
+      originalValuesSet,
+      setOriginalAccReqFields,
+      setOriginalMinReqFields,
+      setOriginalOptReqFields,
+      setOriginalOverview,
+      setOriginalTitle,
+      setOriginalValuesSet,
+      originalOverview.value,
+      originalTitle.value,
+      originalAccReqFields,
+      originalMinReqFields,
+      originalOptReqFields,
+    ]);
 
     // Required Accountability Fields
 
@@ -240,12 +337,12 @@ const WizardEditProfile = forwardRef(
 
     // FOCUS ALERTS
     // when user focuses on required accountabilities and minimum requirements fields, show an alert once
-    const [minReqalertShown, setMinReqAlertShown] = useState(false);
-    const [reqalertShown, setReqAlertShown] = useState(false);
+    const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
+    const { reqAlertShown, setReqAlertShown } = useWizardContext();
 
     // Function to handle focus
     const showMinReqModal = (action: () => void, showCancel: boolean) => {
-      if (!minReqalertShown) {
+      if (!minReqAlertShown) {
         setMinReqAlertShown(true);
         Modal.confirm({
           title: 'Attention',
@@ -269,7 +366,7 @@ const WizardEditProfile = forwardRef(
     };
 
     const showReqModal = (action: () => void, showCancel: boolean) => {
-      if (!reqalertShown) {
+      if (!reqAlertShown) {
         setReqAlertShown(true);
         Modal.confirm({
           title: 'Attention',
@@ -606,6 +703,78 @@ const WizardEditProfile = forwardRef(
       );
     };
 
+    // TITLE DIFF
+
+    const [titleEdited, setTitleEdited] = useState<boolean>(false);
+
+    const renderTitle = (field: any) => {
+      if (!field) return null;
+
+      const isEdited = titleEdited || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setTitleEdited(() => updatedValue !== originalTitle?.value);
+      };
+
+      return (
+        <>
+          <FormItem name={`title.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`title.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
+            name="title.value"
+            control={control}
+            colon={false}
+            label={<span style={titleStyle}>Title</span>}
+          >
+            <Input className={`${isEdited ? 'edited-textarea' : ''}`} onChange={handleFieldChange} />
+          </FormItem>
+        </>
+      );
+    };
+
+    // OVERVIEW DIFF
+
+    const [overviewEdited, setOverviewEdited] = useState<boolean>(false);
+
+    const renderOverview = (field: any) => {
+      if (!field) return null;
+
+      const isEdited = overviewEdited || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setOverviewEdited(() => updatedValue !== originalOverview?.value);
+      };
+
+      return (
+        <>
+          <FormItem name={`overview.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`overview.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
+            name="overview.value"
+            control={control}
+            colon={false}
+            label={<span style={titleStyle}>Overview</span>}
+          >
+            <TextArea autoSize className={`${isEdited ? 'edited-textarea' : ''}`} onChange={handleFieldChange} />
+          </FormItem>
+        </>
+      );
+    };
+
     if (isLoading || renderKey === 0) {
       return <p>Loading...</p>;
     }
@@ -664,18 +833,6 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          {/* // <JobProfileEditableField
-        //   fieldId="title"
-        //   control={control}
-        //   renderViewMode={(formValue) => <>{formValue}</>}
-        //   renderEditMode={() => (
-        //     <FormItem name="title" control={control}>
-        //       <Input />
-        //     </FormItem>
-        //   )}
-        // />
-         */}
-
           {!config?.contextEditable ? (
             <Alert
               role="note"
@@ -705,16 +862,7 @@ const WizardEditProfile = forwardRef(
 
           <Row gutter={24}>
             <Col xl={16}>
-              <FormItem
-                labelCol={{ span: 24 }}
-                wrapperCol={{ span: 24 }}
-                name="title"
-                control={control}
-                colon={false}
-                label={<span style={titleStyle}>Title</span>}
-              >
-                <Input />
-              </FormItem>
+              {renderTitle(getValues('title'))}
 
               {config?.classificationEditable ? (
                 <FormItem name="classification" control={control} label="Classification">
@@ -744,16 +892,7 @@ const WizardEditProfile = forwardRef(
               ) : (
                 <></>
               )}
-              <FormItem
-                labelCol={{ span: 24 }}
-                wrapperCol={{ span: 24 }}
-                name="overview"
-                control={control}
-                colon={false}
-                label={<span style={titleStyle}>Overview</span>}
-              >
-                <TextArea autoSize />
-              </FormItem>
+              {renderOverview(getValues('overview'))}
 
               <Title level={4} style={titleStyle}>
                 Required Accountabilities
@@ -945,7 +1084,10 @@ const WizardEditProfile = forwardRef(
                       <Button
                         type="text" // No button styling, just the icon
                         icon={<DeleteOutlined />}
-                        onClick={() => behavioural_competencies_remove(index)}
+                        onClick={() => {
+                          behavioural_competencies_remove(index);
+                          setRenderKey((prevKey) => prevKey + 1);
+                        }}
                         style={{
                           border: 'none',
                           padding: 0,
