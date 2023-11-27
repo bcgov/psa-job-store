@@ -6,7 +6,16 @@ export class JobFamilyService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getJobFamilies() {
-    return this.prisma.jobFamily.findMany();
+    const profileJobFamilies = await this.prisma.jobProfile.findMany({
+      select: { family_id: true },
+      distinct: ['family_id'],
+    });
+
+    return this.prisma.jobFamily.findMany({
+      where: {
+        id: { in: profileJobFamilies.map((p) => p.family_id) },
+      },
+    });
   }
 
   async getJobFamily(id: number) {

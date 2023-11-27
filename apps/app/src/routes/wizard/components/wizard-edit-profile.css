@@ -1,0 +1,8 @@
+.strikethrough-textarea.ant-input {
+    text-decoration: line-through;
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .edited-textarea.ant-input {
+    background-color: rgba(0, 0, 0, 0.04);
+  }

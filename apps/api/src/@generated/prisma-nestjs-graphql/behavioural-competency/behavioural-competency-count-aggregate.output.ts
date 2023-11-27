@@ -8,9 +8,6 @@ export class BehaviouralCompetencyCountAggregate {
   id!: number;
 
   @Field(() => Int, { nullable: false })
-  ministry_id!: number;
-
-  @Field(() => Int, { nullable: false })
   membership!: number;
 
   @Field(() => Int, { nullable: false })

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   CreateJobProfileInput,
   JobProfileModel,
+  TrackedFieldArrayItem,
   useCreateJobProfileMutation,
 } from '../../redux/services/graphql-api/job-profile.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
@@ -15,9 +16,22 @@ const { Text } = Typography;
 
 function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJobProfileInput {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { behavioural_competencies, classification, id, ministry_id, family_id, ...rest } = inputData;
+  const { behavioural_competencies, classification, id, organization_id, family_id, ...rest } = inputData;
 
-  // Exclude 'id' from the rest spread as it's not part of CreateJobProfileInput
+  const title = typeof inputData.title === 'string' ? inputData.title : inputData.title.value;
+  const overview = typeof inputData.overview === 'string' ? inputData.overview : inputData.overview.value;
+
+  const requiredAccountabilities = inputData.accountabilities.required
+    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+    .map((item) => item.value);
+
+  const optionalAccountabilities = inputData.accountabilities.optional
+    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+    .map((item) => item.value);
+
+  const requirements = inputData.requirements
+    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+    .map((item) => item.value);
 
   // Map behavioural competencies if they exist
   const behaviouralCompetenciesInput = behavioural_competencies?.length
@@ -31,11 +45,18 @@ function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJ
   // Connect classification if it exists
   const classificationConnectInput = classification?.id
     ? { connect: { id: classification.id } }
-    : { connect: { id: -1 } };
+    : { connect: { id: '-1' } };
 
   // Construct the result with the correct type and provide default values or handle them as required by the API
   const result: CreateJobProfileInput = {
     ...rest,
+    overview: overview,
+    title: title,
+    requirements: requirements,
+    accountabilities: {
+      optional: optionalAccountabilities,
+      required: requiredAccountabilities,
+    },
     behavioural_competencies: behaviouralCompetenciesInput,
     classification: classificationConnectInput,
     state: 'SUBMITTED',
@@ -87,8 +108,13 @@ export const WizardConfirmDetailsPage = () => {
   };
 
   return (
-    <WizardPageWrapper title="Review and submit" subTitle="Review the profile before creating a new position">
-      <WizardSteps current={3}></WizardSteps>
+    <WizardPageWrapper
+      title="Review and submit"
+      subTitle="Review the profile before creating a new position"
+      xxl={14}
+      xl={18}
+    >
+      <WizardSteps current={3} xl={24}></WizardSteps>
       <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
         onNext={showModal}

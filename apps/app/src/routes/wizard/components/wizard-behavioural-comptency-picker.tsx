@@ -2,6 +2,7 @@ import { Button, Card, Col, Row, Select, Space } from 'antd';
 import React, { CSSProperties, useState } from 'react';
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
 import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile.api';
+import { IsIndigenousCompetency } from './is-indigenous-competency.component';
 
 const { Option } = Select;
 
@@ -55,11 +56,14 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   // Generate name options based on the selected group
   const nameOptions = data?.behaviouralComptencies
     .filter((c) => c.group === selectedGroup)
-    .map((competency) => (
-      <Option key={competency.id} value={competency.name}>
-        {competency.name}
-      </Option>
-    ));
+    .map((competency) => {
+      return (
+        <Option key={competency.id} value={competency.name}>
+          {competency.name}
+          <IsIndigenousCompetency competency={competency} />
+        </Option>
+      );
+    });
 
   const handleAddCompetency = () => {
     // Find the selected competency based on the selectedName
@@ -68,7 +72,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     if (selectedCompetency) {
       const newCompetencyData: BehaviouralCompetencyData = {
         behavioural_competency: {
-          id: parseInt(selectedCompetency.id), // Set the id from the selected competency
+          id: selectedCompetency.id, // Set the id from the selected competency
           name: selectedName,
           description: description,
         },
@@ -84,7 +88,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   return (
     <div style={{ ...style }}>
       <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-        <Col xs={24} sm={11} lg={6} style={{ paddingRight: '8px' }}>
+        <Col xs={24} sm={12} lg={12} style={{ paddingRight: '8px' }}>
           {/* Adjust the column span for different screen sizes */}
           <Select
             placeholder="Categories"
@@ -96,7 +100,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
           </Select>
         </Col>
 
-        <Col xs={24} sm={11} lg={6} style={{ paddingRight: '8px' }}>
+        <Col xs={24} sm={24} lg={24} style={{ paddingRight: '8px' }}>
           {/* Adjust the column span for different screen sizes */}
           <Select
             placeholder="Behavioural Competency"

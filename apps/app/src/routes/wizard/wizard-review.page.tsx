@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
@@ -17,11 +18,34 @@ export const WizardReviewPage = () => {
     navigate(-1);
   };
 
+  const [showDiff, setShowDiff] = useState(true);
+
+  const handleToggleShowDiff = (checked: boolean) => {
+    setShowDiff(checked);
+  };
+
   return (
-    <WizardPageWrapper title="Review and submit" subTitle="Review the profile before creating a new position">
-      <WizardSteps current={2}></WizardSteps>
-      <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} onBack={onBack} />
-      <JobProfile profileData={wizardData} />
+    <WizardPageWrapper
+      title="Review and submit"
+      subTitle="Review the profile before creating a new position"
+      xxl={14}
+      xl={18}
+    >
+      <WizardSteps current={2} xl={24}></WizardSteps>
+      <WizardEditControlBar
+        onNext={onNext}
+        onBack={onBack}
+        onToggleShowDiff={handleToggleShowDiff}
+        showDiffToggle={true}
+        showDiff={showDiff}
+        style={{ marginBottom: '1rem' }}
+      />
+      <JobProfile
+        profileData={wizardData}
+        showBackToResults={false}
+        showDiff={showDiff}
+        id={wizardData?.id.toString()}
+      />
     </WizardPageWrapper>
   );
 };

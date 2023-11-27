@@ -47,5 +47,5 @@ export class UserWhereUniqueInput {
   identities?: IdentityListRelationFilter;
 
   @Field(() => JobProfileListRelationFilter, { nullable: true })
-  JobProfile?: JobProfileListRelationFilter;
+  job_profiles?: JobProfileListRelationFilter;
 }

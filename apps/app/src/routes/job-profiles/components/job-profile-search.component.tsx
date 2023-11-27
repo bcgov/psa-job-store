@@ -6,17 +6,18 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
 import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-role.api';
-import { useGetMinistriesQuery } from '../../../redux/services/graphql-api/ministry.api';
+import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
 
 const { Search } = Input;
-type Option = { label: string; value: number };
+
+type Option = { label: string; value: string };
 type FilterData = {
   [key: string]: Option[];
 };
 
 const filters: Record<string, any>[] = [
   {
-    title: 'Ministry',
+    title: 'Organization',
     icon: <DownOutlined />,
   },
   {
@@ -33,51 +34,54 @@ const filters: Record<string, any>[] = [
   // },
 ];
 
+const filterOption = (input: string, option?: { label: string; value: string }) =>
+  (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
+
 export const JobProfileSearch = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const ministryData = useGetMinistriesQuery().data?.ministries;
+  const organizationData = useGetOrganizationsQuery().data?.organizations;
   const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
   const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
   const classificationData = useGetClassificationsQuery().data?.classifications;
 
-  const ministryDataOptions = useMemo(() => {
+  const organizationDataOptions = useMemo(() => {
     return (
-      ministryData?.map((item) => ({
-        label: item.name,
-        value: item.id,
+      organizationData?.map((item) => ({
+        label: `${item.name != null && item.name.length > 0 ? item.name : item.id}`,
+        value: `${item.id}`,
       })) || []
     );
-  }, [ministryData]);
+  }, [organizationData]);
   const jobFamilyDataOptions = useMemo(() => {
     return (
       jobFamilyData?.map((item) => ({
-        label: item.name,
-        value: item.id,
+        label: `${item.name != null && item.name.length > 0 ? item.name : item.id}`,
+        value: `${item.id}`,
       })) || []
     );
   }, [jobFamilyData]);
   const classificationDataOptions = useMemo(() => {
     return (
       classificationData?.map((item) => ({
-        label: item.occupation_group.name + ' ' + item.grid.name,
-        value: item.id,
+        label: `${item.code != null && item.code.length > 0 ? item.code : item.id}`,
+        value: `${item.id}`,
       })) || []
     );
   }, [classificationData]);
   const jobRoleDataOptions = useMemo(() => {
     return (
       jobRoleData?.map((item) => ({
-        label: item.name,
-        value: item.id,
+        label: `${item.name != null && item.name.length > 0 ? item.name : item.id}`,
+        value: `${item.id}`,
       })) || []
     );
   }, [jobRoleData]);
 
   const filterData: FilterData = {
-    Ministry: ministryDataOptions,
+    Organization: organizationDataOptions,
     'Job Family': jobFamilyDataOptions,
     'Job Roles': jobRoleDataOptions,
     Classification: classificationDataOptions,
@@ -118,10 +122,11 @@ export const JobProfileSearch = () => {
   };
 
   return (
-    <Row justify="center" gutter={8} style={{ margin: '0 1rem' }}>
+    <Row justify="center" gutter={8} style={{ margin: '0 1rem' }} role="search">
       <Col xs={24} sm={18} md={18} lg={18} xl={14} style={{ margin: '1rem' }}>
         <Space direction="vertical" size="small" style={{ width: '100%' }}>
           <Search
+            aria-label="Search by job title or keyword"
             onSearch={handleSearch}
             onPressEnter={(e) => handleSearch(e.currentTarget.value)}
             allowClear
@@ -146,33 +151,36 @@ export const JobProfileSearch = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'flex-start',
-                    border: '1px solid #d9d9d9', // Thin border
-                    borderRadius: '4px', // Optional: Rounded corners
-                    padding: '20px 10px 10px', // Adjusted padding for label positioning
-                    marginRight: '8px', // Space between filters
+                    border: '1px solid #d9d9d9',
+                    borderRadius: '4px',
+                    padding: '20px 10px 10px',
+                    marginRight: '8px',
                     marginTop: '10px',
-                    flexShrink: 1, // Allows the item to shrink
+                    flexShrink: 1,
                     minWidth: '20%',
                   }}
                 >
                   <label
                     style={{
-                      position: 'absolute', // Absolute positioning for the label
-                      top: '-12px', // Adjust as needed to place the label over the border
-                      left: '10px', // Horizontal position of the label
-                      backgroundColor: 'white', // Background to cover the border
-                      padding: '0 5px', // Padding around the label text
-                      fontSize: '14px', // Optional: Font size adjustment
+                      position: 'absolute',
+                      top: '-12px',
+                      left: '10px',
+                      backgroundColor: 'white',
+                      padding: '0 5px',
+                      fontSize: '14px',
                     }}
+                    htmlFor={filter.title}
                   >
                     {filter.title}
                   </label>
                   <Select
                     mode="multiple"
-                    // maxTagCount={'responsive'}
                     allowClear
+                    // aria-label={filter.title}
+                    id={filter.title}
                     placeholder={filter.title}
                     options={filterData[filter.title]}
+                    filterOption={filterOption}
                     style={{
                       flexGrow: 1,
                       flexBasis: 0,
@@ -192,8 +200,8 @@ export const JobProfileSearch = () => {
                         case 'Classification':
                           searchParams.delete('classification_id__in');
                           break;
-                        case 'Ministry':
-                          searchParams.delete('ministry_id__in');
+                        case 'Organization':
+                          searchParams.delete('organization_id__in');
                           break;
                         default:
                           break;
@@ -215,9 +223,9 @@ export const JobProfileSearch = () => {
                           !searchParams.get('classification_id__in') && searchParams.delete('classification_id__in');
 
                           break;
-                        case 'Ministry':
-                          searchParams.set('ministry_id__in', value);
-                          !searchParams.get('ministry_id__in') && searchParams.delete('ministry_id__in');
+                        case 'Organization':
+                          searchParams.set('organization_id__in', value);
+                          !searchParams.get('organization_id__in') && searchParams.delete('organization_id__in');
                           break;
                         default:
                           break;
@@ -228,19 +236,19 @@ export const JobProfileSearch = () => {
                       // Set the value on page load from URL
                       filter.title === 'Job Family'
                         ? searchParams.has('job_family_id__in')
-                          ? eval('[' + searchParams.get('job_family_id__in') + ']')
+                          ? searchParams.get('job_family_id__in')
                           : undefined
                         : filter.title === 'Job Roles'
                         ? searchParams.has('job_role_id__in')
-                          ? eval('[' + searchParams.get('job_role_id__in') + ']')
+                          ? searchParams.get('job_role_id__in')
                           : undefined
                         : filter.title === 'Classification'
                         ? searchParams.has('classification_id__in')
-                          ? eval('[' + searchParams.get('classification_id__in') + ']')
+                          ? searchParams.get('classification_id__in')
                           : undefined
-                        : filter.title === 'Ministry'
-                        ? searchParams.has('ministry_id__in')
-                          ? eval('[' + searchParams.get('ministry_id__in') + ']')
+                        : filter.title === 'Organization'
+                        ? searchParams.has('organization_id__in')
+                          ? searchParams.get('organization_id__in')
                           : undefined
                         : undefined
                     }

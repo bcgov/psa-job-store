@@ -1,6 +1,7 @@
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Button, Col, Form, Input, List, Row, Select } from 'antd';
+import { Alert, Button, Col, Form, Input, List, Modal, Row, Select } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/typography/Title';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
@@ -10,13 +11,21 @@ import {
   GetClassificationsResponse,
   useLazyGetClassificationsQuery,
 } from '../../../redux/services/graphql-api/classification.api';
-import { JobProfileModel, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import {
+  JobProfileModel,
+  TrackedFieldArrayItem,
+  useLazyGetJobProfileQuery,
+} from '../../../redux/services/graphql-api/job-profile.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
+import { IsIndigenousCompetency } from './is-indigenous-competency.component';
 import BehaviouralComptencyPicker, { BehaviouralCompetencyData } from './wizard-behavioural-comptency-picker';
+import './wizard-edit-profile.css';
+import { useWizardContext } from './wizard.provider';
 
 interface ConfigProps {
   classificationEditable?: boolean;
+  contextEditable?: boolean;
 }
 
 interface WizardEditProfileProps {
@@ -44,7 +53,6 @@ const WizardEditProfile = forwardRef(
         setEffectiveData(profileData);
       } else if (!profileData && id) {
         // If no profileData is provided and an id exists, fetch the data
-        console.log('edit triggerGetJobProfile with id: ', id);
         triggerGetJobProfile({ id: +id });
       }
       triggerGetClassificationData(); // get data to populate classification dropdown. Todo: cache this?
@@ -56,7 +64,7 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
-    const { register, control, reset, handleSubmit } = useForm<JobProfileValidationModel>({
+    const { register, control, reset, handleSubmit, getValues } = useForm<JobProfileValidationModel>({
       resolver: classValidatorResolver(JobProfileValidationModel),
       mode: 'onChange',
     });
@@ -80,37 +88,179 @@ const WizardEditProfile = forwardRef(
       // as part of the render hack. todo: get rid of this if possible
     }, [renderKey, form]);
 
+    const {
+      originalValuesSet,
+      setOriginalValuesSet,
+      originalOverview,
+      setOriginalOverview,
+      originalTitle,
+      setOriginalTitle,
+      originalMinReqFields,
+      setOriginalMinReqFields,
+      originalAccReqFields,
+      setOriginalAccReqFields,
+      originalOptReqFields,
+      setOriginalOptReqFields,
+    } = useWizardContext();
+
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData) {
-        const classificationId = effectiveData?.classification
-          ? classificationsData.classifications.find(
-              (c) =>
-                c.occupation_group.id === effectiveData.classification?.occupation_group.id &&
-                c.grid.id === effectiveData.classification.grid.id,
-            )?.id
-          : null;
+        const classificationId = effectiveData?.classification?.id ?? null;
 
-        console.log('effectiveData: ', effectiveData);
+        const originalAccReqFieldsValue = effectiveData.accountabilities.required.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+
+        if (!originalValuesSet) setOriginalAccReqFields(originalAccReqFieldsValue);
+
+        // Initialize an object to track the edit status of each field
+        let initialEditStatus: { [key: number]: boolean } = {};
+
+        // Iterate over each minimum requirement field and compare with the original value
+        originalAccReqFieldsValue.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalAccReqFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        // Set the editedMinReqFields state
+        setEditedAccReqFields(initialEditStatus);
+
+        const originalOptReqFieldsValue = effectiveData.accountabilities.optional.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        if (!originalValuesSet) setOriginalOptReqFields(originalOptReqFieldsValue);
+
+        // Iterate over each minimum requirement field and compare with the original value
+        originalOptReqFieldsValue.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalOptReqFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        // Set the editedMinReqFields state
+        setEditedOptReqFields(initialEditStatus);
+
+        const originalMinReqFieldsValue = effectiveData.requirements.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        if (!originalValuesSet) setOriginalMinReqFields(originalMinReqFieldsValue);
+
+        // Initialize an object to track the edit status of each field
+        initialEditStatus = {};
+
+        // Iterate over each minimum requirement field and compare with the original value
+        originalMinReqFieldsValue.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalMinReqFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        // Set the editedMinReqFields state
+        setEditedMinReqFields(initialEditStatus);
+
+        const originalTitleValue =
+          typeof effectiveData.title === 'string'
+            ? {
+                value: effectiveData.title,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: effectiveData.title.value,
+                isCustom: effectiveData.title.isCustom,
+                disabled: effectiveData.title.disabled,
+              };
+
+        if (!originalValuesSet) setOriginalTitle(originalTitleValue);
+        setTitleEdited(originalTitle.value !== originalTitleValue.value);
+
+        const originalOverviewValue =
+          typeof effectiveData.overview === 'string'
+            ? {
+                value: effectiveData.overview,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: effectiveData.overview.value,
+                isCustom: effectiveData.overview.isCustom,
+                disabled: effectiveData.overview.disabled,
+              };
+        if (!originalValuesSet) setOriginalOverview(originalOverviewValue);
+        setOverviewEdited(originalOverview.value !== originalOverviewValue.value);
+
+        if (!originalValuesSet) setOriginalValuesSet(true);
+
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
-          title: effectiveData?.title,
+          title: originalTitleValue,
           context: effectiveData?.context,
-          overview: effectiveData?.overview,
+          overview: originalOverviewValue,
           classification: classificationId,
           // array fileds are required to be nested in objects, so wrap string values in {value: item}
-          required_accountabilities: effectiveData?.accountabilities.required
-            ? effectiveData.accountabilities.required.map((item) => ({ value: item }))
-            : [],
-          optional_accountabilities: effectiveData?.accountabilities.optional
-            ? effectiveData.accountabilities.optional.map((item) => ({ value: item }))
-            : [],
-          requirements: effectiveData?.requirements ? effectiveData.requirements.map((item) => ({ value: item })) : [],
+          required_accountabilities: originalAccReqFieldsValue,
+          optional_accountabilities: originalOptReqFieldsValue,
+          requirements: originalMinReqFieldsValue,
           behavioural_competencies: effectiveData?.behavioural_competencies || [],
         });
       }
       setRenderKey((prevKey) => prevKey + 1);
-    }, [effectiveData, isLoading, classificationsData, reset]);
+    }, [
+      effectiveData,
+      isLoading,
+      classificationsData,
+      reset,
+      originalValuesSet,
+      setOriginalAccReqFields,
+      setOriginalMinReqFields,
+      setOriginalOptReqFields,
+      setOriginalOverview,
+      setOriginalTitle,
+      setOriginalValuesSet,
+      originalOverview.value,
+      originalTitle.value,
+      originalAccReqFields,
+      originalMinReqFields,
+      originalOptReqFields,
+    ]);
 
     // Required Accountability Fields
 
@@ -118,6 +268,7 @@ const WizardEditProfile = forwardRef(
       fields: acc_req_fields,
       append: acc_req_append,
       remove: acc_req_remove,
+      update: acc_req_update,
     } = useFieldArray({
       control,
       name: 'required_accountabilities',
@@ -128,6 +279,7 @@ const WizardEditProfile = forwardRef(
       fields: acc_opt_fields,
       append: acc_opt_append,
       remove: acc_opt_remove,
+      update: acc_opt_update,
     } = useFieldArray({
       control,
       name: 'optional_accountabilities',
@@ -137,6 +289,7 @@ const WizardEditProfile = forwardRef(
       fields: requirement_fields,
       append: requirement_append,
       remove: requirement_remove,
+      update: requirement_update,
     } = useFieldArray({
       control,
       name: 'requirements',
@@ -151,13 +304,10 @@ const WizardEditProfile = forwardRef(
       name: 'behavioural_competencies',
     });
 
-    console.log('behavioural_competencies_fields: ', behavioural_competencies_fields);
-
     // useImperativeHandle to expose the submitForm function
     useImperativeHandle(ref, () => ({
       // You can expose any method you need from the form instance here
       submit: () => {
-        console.log('userImperative submit?');
         form.submit();
       },
       getFormData: () => {
@@ -173,17 +323,453 @@ const WizardEditProfile = forwardRef(
     // ... other state and handlers for behavioural_competencies_fields ...
 
     const addBehaviouralCompetency = (competency: BehaviouralCompetencyData) => {
-      console.log('addBehaviouralCompetency, competency: ', competency);
       behavioural_competencies_append(competency);
       setPickerVisible(false); // Hide picker after adding
+    };
+
+    // FOCUS ALERTS
+    // when user focuses on required accountabilities and minimum requirements fields, show an alert once
+    const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
+    const { reqAlertShown, setReqAlertShown } = useWizardContext();
+
+    // Function to handle focus
+    const showMinReqModal = (action: () => void, showCancel: boolean) => {
+      if (!minReqAlertShown) {
+        setMinReqAlertShown(true);
+        Modal.confirm({
+          title: 'Attention',
+          content: (
+            <div role="alert">
+              Significant changes to this area <strong>may</strong> trigger a classification review.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
+
+    const showReqModal = (action: () => void, showCancel: boolean) => {
+      if (!reqAlertShown) {
+        setReqAlertShown(true);
+        Modal.confirm({
+          title: 'Attention',
+          content: (
+            <div role="alert">
+              Removing required accountabilities <strong>may</strong> trigger a classification review
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
+
+    // DIFF HANDLING
+    // Cross out deleted core items, allow ability to add back
+    // Show fields that were edited
+
+    // Required accountabilities
+    const handleAccReqRemove = (index: number) => {
+      const currentValues = getValues('required_accountabilities');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            acc_req_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+    };
+
+    // Function to add back a removed field
+    const handleAccReqAddBack = (index: number) => {
+      const currentValues = getValues('required_accountabilities');
+      acc_req_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleAccReqAddNew = () => {
+      acc_req_append({ value: '', isCustom: true, disabled: false });
+    };
+
+    const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
+
+    const renderAccReqFields = (field: any, index: number) => {
+      const isEdited = editedAccReqFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.value }));
+      };
+
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`required_accountabilities.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`required_accountabilities.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`required_accountabilities.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onFocus={() => showReqModal(() => {}, false)}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() =>
+                showReqModal(() => {
+                  // acc_req_remove(index);
+                  handleAccReqAddBack(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                }, false)
+              }
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() =>
+                showReqModal(() => {
+                  // acc_req_remove(index);
+                  handleAccReqRemove(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                }, false)
+              }
+            />
+          )}
+        </List.Item>
+      );
+    };
+
+    // OPTIONAL ACCOUNTABILITIES DIFF
+    const handleOptReqRemove = (index: number) => {
+      const currentValues = getValues('optional_accountabilities');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            acc_opt_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        acc_opt_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+    };
+
+    // Function to add back a removed field
+    const handleOptReqAddBack = (index: number) => {
+      const currentValues = getValues('optional_accountabilities');
+      acc_opt_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleOptReqAddNew = () => {
+      acc_opt_append({ value: '', isCustom: true, disabled: false });
+    };
+
+    const [editedOptReqFields, setEditedOptReqFields] = useState<{ [key: number]: boolean }>({});
+
+    const renderOptReqFields = (field: any, index: number) => {
+      const isEdited = editedOptReqFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedOptReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalOptReqFields[index]?.value }));
+      };
+
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`optional_accountabilities.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`optional_accountabilities.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`optional_accountabilities.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                // acc_req_remove(index);
+                handleOptReqAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleOptReqRemove(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          )}
+        </List.Item>
+      );
+    };
+
+    // MINIMUM REQUIREMENTS DIFF
+    const handleMinReqRemove = (index: number) => {
+      const currentValues = getValues('requirements');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            requirement_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        requirement_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+    };
+
+    // Function to add back a removed field
+    const handleMinReqAddBack = (index: number) => {
+      const currentValues = getValues('requirements');
+      requirement_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleMinReqAddNew = () => {
+      requirement_append({ value: '', isCustom: true, disabled: false });
+    };
+
+    const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
+
+    const renderMinReqFields = (field: any, index: number) => {
+      const isEdited = editedMinReqFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.value }));
+      };
+
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`requirements.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`requirements.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`requirements.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onFocus={() => showMinReqModal(() => {}, false)}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() =>
+                showMinReqModal(() => {
+                  handleMinReqAddBack(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                }, false)
+              }
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() =>
+                showMinReqModal(() => {
+                  handleMinReqRemove(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                }, false)
+              }
+            />
+          )}
+        </List.Item>
+      );
+    };
+
+    // TITLE DIFF
+
+    const [titleEdited, setTitleEdited] = useState<boolean>(false);
+
+    const renderTitle = (field: any) => {
+      if (!field) return null;
+
+      const isEdited = titleEdited || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setTitleEdited(() => updatedValue !== originalTitle?.value);
+      };
+
+      return (
+        <>
+          <FormItem name={`title.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`title.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
+            name="title.value"
+            control={control}
+            colon={false}
+            label={<span style={titleStyle}>Title</span>}
+          >
+            <Input className={`${isEdited ? 'edited-textarea' : ''}`} onChange={handleFieldChange} />
+          </FormItem>
+        </>
+      );
+    };
+
+    // OVERVIEW DIFF
+
+    const [overviewEdited, setOverviewEdited] = useState<boolean>(false);
+
+    const renderOverview = (field: any) => {
+      if (!field) return null;
+
+      const isEdited = overviewEdited || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setOverviewEdited(() => updatedValue !== originalOverview?.value);
+      };
+
+      return (
+        <>
+          <FormItem name={`overview.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`overview.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
+            name="overview.value"
+            control={control}
+            colon={false}
+            label={<span style={titleStyle}>Overview</span>}
+          >
+            <TextArea autoSize className={`${isEdited ? 'edited-textarea' : ''}`} onChange={handleFieldChange} />
+          </FormItem>
+        </>
+      );
     };
 
     if (isLoading || renderKey === 0) {
       return <p>Loading...</p>;
     }
-
-    console.log('rendering edit form with effectiveData: ', effectiveData);
-    console.log('acc_req_fields: ', acc_req_fields);
 
     const titleStyle = {
       fontSize: '24px', // Adjust the font size as needed
@@ -202,15 +788,15 @@ const WizardEditProfile = forwardRef(
     };
 
     return (
-      <Form
-        form={form}
-        key={renderKey}
-        onFinish={handleSubmit((data) => {
-          console.log('wizard-edit-profile form onFinish, data: ', data);
-          submitHandler?.(data);
-        })}
-      >
-        {/*         
+      <>
+        <Form
+          form={form}
+          key={renderKey}
+          onFinish={handleSubmit((data) => {
+            submitHandler?.(data);
+          })}
+        >
+          {/*         
         <Button
           onClick={() => {
             setRenderKey((prevKey) => {
@@ -222,334 +808,341 @@ const WizardEditProfile = forwardRef(
           Re-render
         </Button> */}
 
-        <FormItem name="id" control={control} hidden>
-          <Input />
-        </FormItem>
+          <FormItem name="id" control={control} hidden>
+            <Input />
+          </FormItem>
 
-        <FormItem name="number" control={control} hidden>
-          <Input />
-        </FormItem>
+          <FormItem name="number" control={control} hidden>
+            <Input />
+          </FormItem>
 
-        <FormItem name="classification" control={control} hidden>
-          <Input />
-        </FormItem>
+          <FormItem name="classification" control={control} hidden>
+            <Input />
+          </FormItem>
 
-        {/* // <JobProfileEditableField
-        //   fieldId="title"
-        //   control={control}
-        //   renderViewMode={(formValue) => <>{formValue}</>}
-        //   renderEditMode={() => (
-        //     <FormItem name="title" control={control}>
-        //       <Input />
-        //     </FormItem>
-        //   )}
-        // />
-         */}
+          <FormItem name="context" control={control} hidden>
+            <Input />
+          </FormItem>
 
-        <Row gutter={24}>
-          <Col xs={24} sm={16} md={16}>
-            <FormItem
-              labelCol={{ span: 24 }}
-              wrapperCol={{ span: 24 }}
-              name="title"
-              control={control}
-              colon={false}
-              label={<span style={titleStyle}>Title</span>}
-            >
-              <Input />
-            </FormItem>
-
-            {config?.classificationEditable ? (
-              <FormItem name="classification" control={control} label="Classification">
-                <Select {...register('classification')}>
-                  {classificationsData?.classifications.map((classification: ClassificationModel) => (
-                    <Select.Option value={classification.id} key={classification.id}>
-                      {`${classification.occupation_group.name} ${classification.grid.name}`}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </FormItem>
-            ) : (
-              <></>
-              // <div>
-              //   Classification:{' '}
-              //   {`${effectiveData?.classification?.occupation_group.name} ${effectiveData?.classification?.grid.name}`}
-              // </div>
-            )}
-
-            <FormItem
-              labelCol={{ span: 24 }}
-              wrapperCol={{ span: 24 }}
-              name="context"
-              control={control}
-              colon={false}
-              label={<span style={titleStyle}>Context</span>}
-            >
-              <TextArea autoSize />
-            </FormItem>
-
-            <FormItem
-              labelCol={{ span: 24 }}
-              wrapperCol={{ span: 24 }}
-              name="overview"
-              control={control}
-              colon={false}
-              label={<span style={titleStyle}>Overview</span>}
-            >
-              <TextArea autoSize />
-            </FormItem>
-
-            <Title level={4} style={titleStyle}>
-              Required Accountabilities
-            </Title>
-
-            <div>
-              <p style={{ fontWeight: 'initial', marginTop: '1rem' }}>
-                ⚠️ Removing required accountabilities <strong>may</strong> trigger a classification review
-              </p>
+          {!config?.contextEditable ? (
+            <Alert
+              role="note"
+              style={{ marginBottom: '24px' }}
+              message="Your organization must follow the following criteria in order for this role to be feasible"
+              description={
+                <>
+                  <div></div>
+                  <b style={{ marginTop: '10px', display: 'block' }}>{effectiveData?.context}</b>
+                </>
+              }
+              type="warning"
+              showIcon
+            />
+          ) : (
+            <></>
+          )}
+          {!config?.classificationEditable ? (
+            <div style={{ marginBottom: '24px' }}>
+              <Title level={4} style={titleStyle}>
+                Classification - {`${effectiveData?.classification?.code}`}
+              </Title>
             </div>
+          ) : (
+            <></>
+          )}
 
-            <>
-              <List
-                dataSource={acc_req_fields}
-                renderItem={(_field, index) => (
-                  <List.Item
-                    style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
-                    key={_field.id}
-                  >
-                    <FormItem
-                      name={`required_accountabilities.${index}.value`}
-                      control={control}
-                      style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-                    >
-                      <TextArea {...register(`required_accountabilities.${index}.value`)} autoSize />
-                    </FormItem>
-                    {/* <input
-                      // key={field.id} // important to include key with field's id
-                      {...register(`required_accountabilities.${index}.value`)}
-                    /> */}
+          <Row gutter={24}>
+            <Col xl={16}>
+              {renderTitle(getValues('title'))}
 
-                    <Button
-                      type="text" // Changed to 'text' for an icon-only button
-                      icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
-                      onClick={() => {
-                        acc_req_remove(index);
-                        setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                      }}
-                      style={{
-                        border: 'none', // Removes the border
-                        padding: 0, // Removes padding
-                      }}
-                    />
-                  </List.Item>
-                )}
-              />
-
-              <Button
-                type="link"
-                icon={<PlusOutlined />}
-                style={addStyle}
-                onClick={() => {
-                  acc_req_append({ value: '' });
-                }}
-              >
-                Add another accountability
-              </Button>
-            </>
-
-            <Title level={4} style={titleStyle}>
-              Optional Accountabilities
-            </Title>
-            <>
-              <List
-                dataSource={acc_opt_fields}
-                renderItem={(_field, index) => (
-                  <List.Item
-                    style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
-                    key={_field.id}
-                  >
-                    <FormItem
-                      name={`optional_accountabilities.${index}.value`}
-                      style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-                      control={control}
-                    >
-                      <TextArea autoSize />
-                    </FormItem>
-
-                    <Button
-                      type="text" // Changed to 'text' for an icon-only button
-                      icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
-                      onClick={() => {
-                        acc_opt_remove(index);
-                        setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                      }}
-                      style={{
-                        border: 'none', // Removes the border
-                        padding: 0, // Removes padding
-                      }}
-                    />
-                  </List.Item>
-                )}
-              />
-
-              <Button
-                type="link"
-                icon={<PlusOutlined />}
-                style={addStyle}
-                onClick={() => {
-                  acc_opt_append({ value: '' });
-                }}
-              >
-                Add optional accountability
-              </Button>
-            </>
-
-            <Title level={4} style={titleStyle}>
-              Minimum Job Requirements
-            </Title>
-            <div>
-              <p style={{ fontWeight: 'initial', marginTop: '1rem' }}>
-                ⚠️ Significant changes to this area <strong>may</strong> trigger a classification review
-              </p>
-            </div>
-
-            <>
-              <List
-                dataSource={requirement_fields}
-                renderItem={(_field, index) => (
-                  <List.Item
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      marginBottom: '0px',
-                      borderBottom: 'none',
-                    }}
-                    key={_field.id}
-                  >
-                    <FormItem
-                      name={`requirements.${index}.value`}
-                      style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-                      control={control}
-                    >
-                      <TextArea autoSize />
-                    </FormItem>
-
-                    <Button
-                      type="text" // Changed to 'text' for an icon-only button
-                      icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
-                      onClick={() => {
-                        requirement_remove(index);
-                        setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                      }}
-                      style={{
-                        border: 'none', // Removes the border
-                        padding: 0, // Removes padding
-                        // Adjust the following to align the icon properly with your design
-                      }}
-                    />
-                  </List.Item>
-                )}
-              />
-
-              <Button
-                type="link"
-                icon={<PlusOutlined />}
-                style={addStyle}
-                onClick={() => {
-                  requirement_append({ value: '' });
-                }}
-              >
-                Add another requirement
-              </Button>
-            </>
-
-            <Title level={4} style={titleStyle}>
-              Behavioural competencies
-            </Title>
-            {/* Behavioural competencies */}
-
-            <>
-              <List
-                style={{ marginTop: '7px' }}
-                dataSource={behavioural_competencies_fields}
-                renderItem={(field, index) => (
-                  <List.Item
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start', // Align items to the top
-                      marginBottom: '0px',
-                      borderBottom: 'none',
-
-                      padding: '5px 0',
-                    }}
-                    key={field.id} // Ensure this is a unique value
-                  >
-                    {/* Display behavioural competency name and description */}
-                    <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
-                      <strong>{field.behavioural_competency.name}</strong>: {field.behavioural_competency.description}
-                    </p>
-
-                    {/* Trash icon/button for deletion */}
-                    <Button
-                      type="text" // No button styling, just the icon
-                      icon={<DeleteOutlined />}
-                      onClick={() => behavioural_competencies_remove(index)}
-                      style={{
-                        border: 'none',
-                        padding: 0,
-                        color: '#D9D9D9',
-                      }}
-                    />
-
-                    {/* Hidden fields to submit actual data */}
-                    <FormItem
-                      name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                      control={control}
-                      hidden
-                    >
-                      <Input />
-                    </FormItem>
-                    <FormItem
-                      hidden
-                      name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                      control={control}
-                      style={{ flex: 1, marginRight: '10px' }}
-                    >
-                      <Input placeholder="Name" style={{ width: '100%' }} />
-                    </FormItem>
-                    <FormItem
-                      hidden
-                      name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                      control={control}
-                      style={{ flex: 2, marginRight: '10px' }}
-                    >
-                      <TextArea placeholder="Description" style={{ width: '100%' }} />
-                    </FormItem>
-                  </List.Item>
-                )}
-              />
-
-              {isPickerVisible ? (
-                <BehaviouralComptencyPicker
-                  onAdd={addBehaviouralCompetency}
-                  onCancel={() => setPickerVisible(false)}
-                  style={{ marginTop: '20px' }}
-                />
+              {config?.classificationEditable ? (
+                <FormItem name="classification" control={control} label="Classification">
+                  <Select {...register('classification')}>
+                    {classificationsData?.classifications.map((classification: ClassificationModel) => (
+                      <Select.Option value={classification.id} key={classification.id}>
+                        {`${classification.code}`}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </FormItem>
               ) : (
+                <></>
+              )}
+
+              {config?.contextEditable ? (
+                <FormItem
+                  labelCol={{ span: 24 }}
+                  wrapperCol={{ span: 24 }}
+                  name="context"
+                  control={control}
+                  colon={false}
+                  label={<span style={titleStyle}>Context</span>}
+                >
+                  <TextArea autoSize />
+                </FormItem>
+              ) : (
+                <></>
+              )}
+              {renderOverview(getValues('overview'))}
+
+              <Title level={4} style={titleStyle}>
+                Required Accountabilities
+              </Title>
+
+              <Alert
+                role="note"
+                style={{ marginBottom: '10px', marginTop: '1rem' }}
+                message={
+                  <>
+                    Removing required accountabilities <strong>may</strong> trigger a classification review
+                  </>
+                }
+                type="warning"
+                showIcon
+              />
+
+              <>
+                <List dataSource={acc_req_fields} renderItem={renderAccReqFields} />
+
                 <Button
                   type="link"
                   icon={<PlusOutlined />}
-                  style={{ ...addStyle, marginTop: '10px' }}
-                  onClick={() => setPickerVisible(true)} // Show picker when "Add" button is clicked
+                  style={addStyle}
+                  onClick={() =>
+                    showReqModal(() => {
+                      handleAccReqAddNew();
+                      setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                    }, false)
+                  }
                 >
-                  Add a behavioural competency
+                  Add another accountability
                 </Button>
-              )}
-            </>
-          </Col>
-        </Row>
-        {/* <WizardControls submitText={submitText} showBackButton={showBackButton} /> */}
-      </Form>
+              </>
+
+              <Title level={4} style={titleStyle}>
+                Optional Accountabilities
+              </Title>
+              <>
+                <List dataSource={acc_opt_fields} renderItem={renderOptReqFields} />
+
+                {/* <List
+                  dataSource={acc_opt_fields}
+                  renderItem={(_field, index) => (
+                    <List.Item
+                      style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
+                      key={_field.id}
+                    >
+                      <FormItem
+                        name={`optional_accountabilities.${index}.value`}
+                        style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+                        control={control}
+                      >
+                        <TextArea autoSize />
+                      </FormItem>
+
+                      <Button
+                        type="text" // Changed to 'text' for an icon-only button
+                        icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
+                        onClick={() => {
+                          acc_opt_remove(index);
+                          setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                        }}
+                        style={{
+                          border: 'none', // Removes the border
+                          padding: 0, // Removes padding
+                        }}
+                      />
+                    </List.Item>
+                  )}
+                /> */}
+
+                <Button
+                  type="link"
+                  icon={<PlusOutlined />}
+                  style={addStyle}
+                  onClick={() => {
+                    handleOptReqAddNew();
+                    setRenderKey((prevKey) => prevKey + 1);
+                  }}
+                >
+                  Add optional accountability
+                </Button>
+              </>
+
+              <Title level={4} style={titleStyle}>
+                Minimum Job Requirements
+              </Title>
+
+              <Alert
+                role="note"
+                style={{ marginBottom: '10px', marginTop: '1rem' }}
+                message={
+                  <>
+                    Significant changes to this area <strong>may</strong> trigger a classification review
+                  </>
+                }
+                type="warning"
+                showIcon
+              />
+
+              <>
+                <List dataSource={requirement_fields} renderItem={renderMinReqFields} />
+                {/* <List
+                  dataSource={requirement_fields}
+                  renderItem={(_field, index) => (
+                    <List.Item
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        marginBottom: '0px',
+                        borderBottom: 'none',
+                      }}
+                      key={_field.id}
+                    >
+                      <FormItem
+                        name={`requirements.${index}.value`}
+                        style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+                        control={control}
+                      >
+                        <TextArea autoSize onFocus={() => showMinReqModal(() => {}, false)} />
+                      </FormItem>
+
+                      <Button
+                        type="text" // Changed to 'text' for an icon-only button
+                        icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
+                        onClick={() => {
+                          showMinReqModal(() => {
+                            requirement_remove(index);
+                            setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                          }, false);
+                        }}
+                        style={{
+                          border: 'none', // Removes the border
+                          padding: 0, // Removes padding
+                          // Adjust the following to align the icon properly with your design
+                        }}
+                      />
+                    </List.Item>
+                  )}
+                /> */}
+
+                <Button
+                  type="link"
+                  icon={<PlusOutlined />}
+                  style={addStyle}
+                  onClick={() => {
+                    showMinReqModal(() => {
+                      handleMinReqAddNew();
+                      setRenderKey((prevKey) => prevKey + 1);
+                    }, false);
+                  }}
+                >
+                  Add another requirement
+                </Button>
+              </>
+
+              <Title level={4} style={titleStyle}>
+                Behavioural competencies
+              </Title>
+              {/* Behavioural competencies */}
+
+              <>
+                <List
+                  style={{ marginTop: '7px' }}
+                  dataSource={behavioural_competencies_fields}
+                  renderItem={(field, index) => (
+                    <List.Item
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start', // Align items to the top
+                        marginBottom: '0px',
+                        borderBottom: 'none',
+
+                        padding: '5px 0',
+                      }}
+                      key={field.id} // Ensure this is a unique value
+                    >
+                      {/* Display behavioural competency name and description */}
+                      <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
+                        <strong>
+                          {field.behavioural_competency.name}
+                          <IsIndigenousCompetency competency={field.behavioural_competency} />
+                        </strong>
+                        : {field.behavioural_competency.description}
+                      </p>
+
+                      {/* Trash icon/button for deletion */}
+                      <Button
+                        type="text" // No button styling, just the icon
+                        icon={<DeleteOutlined />}
+                        onClick={() => {
+                          behavioural_competencies_remove(index);
+                          setRenderKey((prevKey) => prevKey + 1);
+                        }}
+                        style={{
+                          border: 'none',
+                          padding: 0,
+                          color: '#D9D9D9',
+                        }}
+                      />
+
+                      {/* Hidden fields to submit actual data */}
+                      <FormItem
+                        name={`behavioural_competencies.${index}.behavioural_competency.id`}
+                        control={control}
+                        hidden
+                      >
+                        <Input />
+                      </FormItem>
+                      <FormItem
+                        hidden
+                        name={`behavioural_competencies.${index}.behavioural_competency.name`}
+                        control={control}
+                        style={{ flex: 1, marginRight: '10px' }}
+                      >
+                        <Input placeholder="Name" style={{ width: '100%' }} />
+                      </FormItem>
+                      <FormItem
+                        hidden
+                        name={`behavioural_competencies.${index}.behavioural_competency.description`}
+                        control={control}
+                        style={{ flex: 2, marginRight: '10px' }}
+                      >
+                        <TextArea placeholder="Description" style={{ width: '100%' }} />
+                      </FormItem>
+                    </List.Item>
+                  )}
+                />
+                <Alert
+                  role="note"
+                  style={{ marginBottom: '10px', marginTop: '1rem', fontStyle: 'italic' }}
+                  message="* denotes an Indigenous Behavioural Competency"
+                  type="info"
+                  showIcon
+                />
+
+                {isPickerVisible ? (
+                  <BehaviouralComptencyPicker
+                    onAdd={addBehaviouralCompetency}
+                    onCancel={() => setPickerVisible(false)}
+                    style={{ marginTop: '20px' }}
+                  />
+                ) : (
+                  <Button
+                    type="link"
+                    icon={<PlusOutlined />}
+                    style={{ ...addStyle, marginTop: '10px' }}
+                    onClick={() => setPickerVisible(true)} // Show picker when "Add" button is clicked
+                  >
+                    Add a behavioural competency
+                  </Button>
+                )}
+              </>
+            </Col>
+          </Row>
+          {/* <WizardControls submitText={submitText} showBackButton={showBackButton} /> */}
+        </Form>
+      </>
     );
   },
 );

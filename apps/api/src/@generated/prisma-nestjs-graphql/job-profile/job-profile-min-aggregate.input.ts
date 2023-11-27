@@ -16,7 +16,7 @@ export class JobProfileMinAggregateInput {
   family_id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  ministry_id?: true;
+  organization_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   owner_id?: true;

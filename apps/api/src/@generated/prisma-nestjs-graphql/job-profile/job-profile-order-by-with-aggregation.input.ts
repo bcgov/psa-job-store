@@ -23,7 +23,7 @@ export class JobProfileOrderByWithAggregationInput {
   family_id?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
-  ministry_id?: SortOrderInput;
+  organization_id?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   owner_id?: SortOrderInput;

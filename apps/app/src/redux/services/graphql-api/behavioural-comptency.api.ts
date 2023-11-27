@@ -2,9 +2,8 @@ import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
 
 export interface BehaviouralCompetencyModel {
-  id: string;
-  ministry_id: string;
-  membership: string[];
+  id: number;
+  membership: string;
   group: string;
   name: string;
   description: string;
@@ -21,9 +20,8 @@ export const behaviouralCompetenciesApi = graphqlApi.injectEndpoints({
         return {
           document: gql`
             query BehaviouralComptencies {
-              behaviouralComptencies {
+              behaviouralComptencies(orderBy: { name: asc }) {
                 id
-                ministry_id
                 membership
                 group
                 name

@@ -1,4 +1,4 @@
-import { Button, Space } from 'antd';
+import { Button, Space, Switch } from 'antd';
 import React, { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -9,6 +9,9 @@ interface WizardEditControlBarProps {
   showChooseDifferentProfile?: boolean;
   style?: CSSProperties;
   nextText?: string;
+  onToggleShowDiff?: (checked: boolean) => void;
+  showDiffToggle?: boolean;
+  showDiff?: boolean;
 }
 
 const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
@@ -18,12 +21,23 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
   nextText,
   onBack,
   showChooseDifferentProfile,
+  onToggleShowDiff,
+  showDiffToggle,
+  showDiff,
 }) => {
   const buttonPlaceholder = <div style={{ display: 'inline-block', width: '68px' }} />;
 
   return (
     <div style={{ ...style, padding: '16px', background: '#f0f2f5', display: 'flex', justifyContent: 'space-between' }}>
-      <Space>{buttonPlaceholder}</Space>
+      <Space>
+        {showDiffToggle && onToggleShowDiff ? (
+          <Space direction="horizontal">
+            <span>See Changes:</span>
+            <Switch checked={showDiff} checkedChildren="On" unCheckedChildren="Off" onChange={onToggleShowDiff} />
+          </Space>
+        ) : null}
+        {buttonPlaceholder}
+      </Space>
       <Space>
         {onSave ? (
           <>
