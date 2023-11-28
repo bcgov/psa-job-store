@@ -33,12 +33,10 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
     <div style={{ ...style, padding: '16px', background: '#f0f2f5', display: 'flex', justifyContent: 'space-between' }}>
       <Space>
         {showDiffToggle && onToggleShowDiff ? (
-          <Switch
-            checked={showDiff}
-            checkedChildren="Diff On"
-            unCheckedChildren="Diff Off"
-            onChange={onToggleShowDiff}
-          />
+          <Space direction="horizontal">
+            <span>See Changes:</span>
+            <Switch checked={showDiff} checkedChildren="On" unCheckedChildren="Off" onChange={onToggleShowDiff} />
+          </Space>
         ) : null}
         {buttonPlaceholder}
       </Space>
