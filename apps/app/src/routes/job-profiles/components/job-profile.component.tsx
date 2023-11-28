@@ -39,13 +39,24 @@ export interface ValueString {
   value: string;
 }
 
+export class TitleField extends TrackedFieldArrayItem {
+  @Length(2, 500)
+  declare value: string;
+}
+
+export class OverviewField extends TrackedFieldArrayItem {
+  @Length(2, 500)
+  declare value: string;
+}
+
 export class JobProfileValidationModel {
   id: number;
 
   number: number;
 
-  @Length(2, 500)
-  title: TrackedFieldArrayItem | string;
+  @ValidateNested()
+  @Type(() => TitleField)
+  title: TitleField | string;
 
   // @IsNotEmpty({ message: 'Classification is required.' })
   // @ValidateNested()
@@ -55,8 +66,9 @@ export class JobProfileValidationModel {
   @Length(2, 500)
   context: string;
 
-  @Length(2, 500)
-  overview: TrackedFieldArrayItem | string;
+  @ValidateNested()
+  @Type(() => OverviewField)
+  overview: OverviewField | string;
 
   required_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
