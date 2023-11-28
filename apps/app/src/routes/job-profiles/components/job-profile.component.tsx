@@ -39,13 +39,24 @@ export interface ValueString {
   value: string;
 }
 
+export class TitleField extends TrackedFieldArrayItem {
+  @Length(2, 500)
+  declare value: string;
+}
+
+export class OverviewField extends TrackedFieldArrayItem {
+  @Length(2, 500)
+  declare value: string;
+}
+
 export class JobProfileValidationModel {
   id: number;
 
   number: number;
 
-  @Length(2, 500)
-  title: TrackedFieldArrayItem | string;
+  @ValidateNested()
+  @Type(() => TitleField)
+  title: TitleField | string;
 
   // @IsNotEmpty({ message: 'Classification is required.' })
   // @ValidateNested()
@@ -55,8 +66,9 @@ export class JobProfileValidationModel {
   @Length(2, 500)
   context: string;
 
-  @Length(2, 500)
-  overview: TrackedFieldArrayItem | string;
+  @ValidateNested()
+  @Type(() => OverviewField)
+  overview: OverviewField | string;
 
   required_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
@@ -158,10 +170,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         typeof original[i] === 'undefined'
           ? ''
           : typeof original[i] === 'string'
-          ? (original[i] as string)
-          : 'value' in (original[i] as TrackedFieldArrayItem)
-          ? (original[i] as TrackedFieldArrayItem).value
-          : '';
+            ? (original[i] as string)
+            : 'value' in (original[i] as TrackedFieldArrayItem)
+              ? (original[i] as TrackedFieldArrayItem).value
+              : '';
       const modifiedItem = modified[i];
       const modifiedItemValue =
         typeof modifiedItem === 'string' ? modifiedItem : modifiedItem?.disabled ? '' : modifiedItem?.value || '';
@@ -243,8 +255,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value,
             )
           : typeof effectiveData?.title === 'string'
-          ? effectiveData?.title
-          : effectiveData?.title?.value,
+            ? effectiveData?.title
+            : effectiveData?.title?.value,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -282,8 +294,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value,
             )
           : typeof effectiveData?.overview === 'string'
-          ? effectiveData?.overview
-          : effectiveData?.overview?.value,
+            ? effectiveData?.overview
+            : effectiveData?.overview?.value,
       span: 24,
     },
     {

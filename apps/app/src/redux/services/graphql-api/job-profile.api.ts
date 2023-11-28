@@ -33,7 +33,7 @@ interface Accountabilities {
   required: (string | TrackedFieldArrayItem)[];
 }
 
-export interface TrackedFieldArrayItem {
+export class TrackedFieldArrayItem {
   value: string;
   disabled?: boolean;
   isCustom?: boolean;
