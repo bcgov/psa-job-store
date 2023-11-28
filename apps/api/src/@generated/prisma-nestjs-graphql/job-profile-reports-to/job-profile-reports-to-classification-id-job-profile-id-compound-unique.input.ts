@@ -4,8 +4,8 @@ import { Int } from '@nestjs/graphql';
 
 @InputType()
 export class JobProfileReportsToClassification_idJob_profile_idCompoundUniqueInput {
-  @Field(() => Int, { nullable: false })
-  classification_id!: number;
+  @Field(() => String, { nullable: false })
+  classification_id!: string;
 
   @Field(() => Int, { nullable: false })
   job_profile_id!: number;

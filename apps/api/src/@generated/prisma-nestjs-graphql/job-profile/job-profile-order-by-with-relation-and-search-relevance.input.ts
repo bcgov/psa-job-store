@@ -8,7 +8,7 @@ import { CareerGroupOrderByWithRelationAndSearchRelevanceInput } from '../career
 import { JobProfileOrderByRelationAggregateInput } from './job-profile-order-by-relation-aggregate.input';
 import { ClassificationOrderByWithRelationAndSearchRelevanceInput } from '../classification/classification-order-by-with-relation-and-search-relevance.input';
 import { JobFamilyOrderByWithRelationAndSearchRelevanceInput } from '../job-family/job-family-order-by-with-relation-and-search-relevance.input';
-import { MinistryOrderByWithRelationAndSearchRelevanceInput } from '../ministry/ministry-order-by-with-relation-and-search-relevance.input';
+import { OrganizationOrderByWithRelationAndSearchRelevanceInput } from '../organization/organization-order-by-with-relation-and-search-relevance.input';
 import { UserOrderByWithRelationAndSearchRelevanceInput } from '../user/user-order-by-with-relation-and-search-relevance.input';
 import { JobRoleOrderByWithRelationAndSearchRelevanceInput } from '../job-role/job-role-order-by-with-relation-and-search-relevance.input';
 import { JobProfileOrderByRelevanceInput } from './job-profile-order-by-relevance.input';
@@ -28,7 +28,7 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
   family_id?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
-  ministry_id?: SortOrderInput;
+  organization_id?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   owner_id?: SortOrderInput;
@@ -81,8 +81,8 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => JobFamilyOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   family?: JobFamilyOrderByWithRelationAndSearchRelevanceInput;
 
-  @Field(() => MinistryOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
-  ministry?: MinistryOrderByWithRelationAndSearchRelevanceInput;
+  @Field(() => OrganizationOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
+  organization?: OrganizationOrderByWithRelationAndSearchRelevanceInput;
 
   @Field(() => UserOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   owner?: UserOrderByWithRelationAndSearchRelevanceInput;

@@ -16,7 +16,7 @@ const WizardControls: FC<WizardControlsProps> = ({ submitText = 'Submit', showBa
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', padding: '1rem' }}>
       {showBackButton ? <Button onClick={handleBackClick}>Go Back</Button> : <div></div>}
       {onNextClick ? (
         <Button type="primary" onClick={onNextClick}>

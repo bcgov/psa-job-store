@@ -19,9 +19,6 @@ export class BehaviouralCompetencyScalarWhereWithAggregatesInput {
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   id?: IntWithAggregatesFilter;
 
-  @Field(() => IntWithAggregatesFilter, { nullable: true })
-  ministry_id?: IntWithAggregatesFilter;
-
   @Field(() => EnumBehaviouralCompetencyMembershipWithAggregatesFilter, { nullable: true })
   membership?: EnumBehaviouralCompetencyMembershipWithAggregatesFilter;
 
