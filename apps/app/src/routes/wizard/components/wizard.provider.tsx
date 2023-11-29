@@ -19,6 +19,8 @@ interface WizardContextProps {
   classificationsData: GetClassificationsResponse | null;
   setClassificationsData: React.Dispatch<React.SetStateAction<GetClassificationsResponse | null>>;
 
+  errors: string[];
+  setErrors: React.Dispatch<React.SetStateAction<string[]>>;
   minReqAlertShown: boolean;
   setMinReqAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -57,6 +59,7 @@ export const useWizardContext = () => {
 export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [wizardData, setWizardData] = useState<JobProfileModel | null>(null);
   const [classificationsData, setClassificationsData] = useState<GetClassificationsResponse | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
   const [minReqAlertShown, setMinReqAlertShown] = useState<boolean>(false);
   const [reqAlertShown, setReqAlertShown] = useState<boolean>(false);
   const [originalValuesSet, setOriginalValuesSet] = useState<boolean>(false);
@@ -71,6 +74,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setWizardData,
     classificationsData,
     setClassificationsData,
+    errors,
+    setErrors,
     minReqAlertShown,
     setMinReqAlertShown,
     reqAlertShown,

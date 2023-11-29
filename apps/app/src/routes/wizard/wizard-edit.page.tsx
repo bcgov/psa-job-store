@@ -1,4 +1,4 @@
-import { FormInstance } from 'antd';
+import { FormInstance, List, Modal } from 'antd';
 import { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ClassificationModel, GetClassificationsResponse } from '../../redux/services/graphql-api/classification.api';
@@ -21,8 +21,13 @@ export interface InputData {
 export const WizardEditPage = () => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
-  const { wizardData, setWizardData, classificationsData } = useWizardContext();
+  const { wizardData, setWizardData, classificationsData, setClassificationsData, errors, setErrors } =
+    useWizardContext();
+  const { profileId } = useParams();
 
+  function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
+    setClassificationsData(data);
+  }
   function getClassificationById(id: string): ClassificationModel | undefined {
     // If data is loaded, find the classification by ID
     if (classificationsData) {
@@ -92,33 +97,39 @@ export const WizardEditPage = () => {
           const index = parseInt(parts[1]);
 
           if (!output.accountabilities.required[index]) {
-            output.accountabilities.required[index] = {
-              value: input[`required_accountabilities.${index}.value`],
-              isCustom: input[`required_accountabilities.${index}.isCustom`],
-              disabled: input[`required_accountabilities.${index}.disabled`],
-            };
+            if (input[`required_accountabilities.${index}.value`] != '') {
+              output.accountabilities.required[index] = {
+                value: input[`required_accountabilities.${index}.value`],
+                isCustom: input[`required_accountabilities.${index}.isCustom`],
+                disabled: input[`required_accountabilities.${index}.disabled`],
+              };
+            }
           }
         } else if (key.startsWith('optional_accountabilities')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
 
           if (!output.accountabilities.optional[index]) {
-            output.accountabilities.optional[index] = {
-              value: input[`optional_accountabilities.${index}.value`],
-              isCustom: input[`optional_accountabilities.${index}.isCustom`],
-              disabled: input[`optional_accountabilities.${index}.disabled`],
-            };
+            if (input[`optional_accountabilities.${index}.value`] != '') {
+              output.accountabilities.optional[index] = {
+                value: input[`optional_accountabilities.${index}.value`],
+                isCustom: input[`optional_accountabilities.${index}.isCustom`],
+                disabled: input[`optional_accountabilities.${index}.disabled`],
+              };
+            }
           }
         } else if (key.startsWith('requirements')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
 
           if (!output.requirements[index]) {
-            output.requirements[index] = {
-              value: input[`requirements.${index}.value`],
-              isCustom: input[`requirements.${index}.isCustom`],
-              disabled: input[`requirements.${index}.disabled`],
-            };
+            if (input[`requirements.${index}.value`] != '') {
+              output.requirements[index] = {
+                value: input[`requirements.${index}.value`],
+                isCustom: input[`requirements.${index}.isCustom`],
+                disabled: input[`requirements.${index}.disabled`],
+              };
+            }
           }
         } else if (key.startsWith('behavioural_competencies')) {
           const parts = key.split('.');
@@ -143,14 +154,6 @@ export const WizardEditPage = () => {
     return output as unknown as JobProfileModel;
   }
 
-  const { profileId } = useParams();
-
-  const { setClassificationsData } = useWizardContext();
-
-  function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
-    setClassificationsData(data);
-  }
-
   const wizardEditProfileRef = useRef<{
     submit: () => void;
     getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
@@ -158,10 +161,23 @@ export const WizardEditPage = () => {
 
   const navigate = useNavigate();
   const onNext = () => {
+    if (errors.length) {
+      Modal.error({
+        title: 'Errors',
+        content: (
+          <List>
+            {errors.map((message, index) => (
+              <List.Item>
+                <p key={index}>{message}</p>
+              </List.Item>
+            ))}
+          </List>
+        ),
+      });
+      return;
+    }
     const formData = wizardEditProfileRef.current?.getFormData();
-    // console.log('formData: ', formData);
     const transformedData = transformFormData(formData);
-    // console.log('transformedData: ', transformedData);
     setWizardData(transformedData);
     navigate('/wizard/review');
   };
@@ -177,7 +193,6 @@ export const WizardEditPage = () => {
       <WizardSteps current={1} xl={24}></WizardSteps>
       <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} showChooseDifferentProfile={true} />
 
-      {/* // <Testt></Testt> */}
       <WizardEditProfile
         ref={wizardEditProfileRef}
         profileData={wizardData}
@@ -186,6 +201,7 @@ export const WizardEditPage = () => {
         // submitHandler={onSubmit}
         showBackButton={true}
         receivedClassificationsDataCallback={receivedClassificationsDataCallback}
+        setErrors={setErrors}
       ></WizardEditProfile>
     </WizardPageWrapper>
   );
