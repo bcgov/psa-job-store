@@ -3,7 +3,16 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Descriptions, DescriptionsProps, Grid, Typography } from 'antd';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, Length, ValidateNested } from 'class-validator';
+import {
+  IsNotEmpty,
+  Length,
+  ValidateNested,
+  ValidationArguments,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  registerDecorator,
+} from 'class-validator';
 import { diff_match_patch } from 'diff-match-patch';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -40,13 +49,39 @@ export interface ValueString {
 }
 
 export class TitleField extends TrackedFieldArrayItem {
-  @Length(2, 500)
+  @Length(5, 500, { message: 'Title must be between 5 and 500 characters.' })
   declare value: string;
 }
 
 export class OverviewField extends TrackedFieldArrayItem {
-  @Length(2, 500)
+  @Length(5, 500, { message: 'Overview must be between 5 and 500 characters.' })
   declare value: string;
+}
+
+@ValidatorConstraint({ async: false })
+class AllDisabledConstraint implements ValidatorConstraintInterface {
+  validate(array: (TrackedFieldArrayItem | string)[]) {
+    return !array.every((item) => {
+      // Check if the item is disabled or empty
+      return typeof item === 'object' && (item.disabled === true || item.value.length == 0);
+    });
+  }
+
+  defaultMessage(args: ValidationArguments) {
+    return 'All items must be disabled.';
+  }
+}
+
+function AllDisabled(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: AllDisabledConstraint,
+    });
+  };
 }
 
 export class JobProfileValidationModel {
@@ -58,26 +93,22 @@ export class JobProfileValidationModel {
   @Type(() => TitleField)
   title: TitleField | string;
 
-  // @IsNotEmpty({ message: 'Classification is required.' })
-  // @ValidateNested()
-  // @Type(() => Classification)
   classification: string | null;
 
-  @Length(2, 500)
   context: string;
 
   @ValidateNested()
   @Type(() => OverviewField)
   overview: OverviewField | string;
 
+  @AllDisabled({ message: 'There must be at least one required accountability.' })
   required_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
   optional_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
+  @AllDisabled({ message: 'There must be at least one job requirement.' })
   requirements: (TrackedFieldArrayItem | ValueString)[];
 
-  @ValidateNested({ each: true })
-  @Type(() => BehaviouralCompetency)
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 }
 
@@ -166,14 +197,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     const dmp = new diff_match_patch();
 
     for (let i = 0; i < maxLength; i++) {
+      const originalVal = original[i] ?? '';
       const originalItemValue =
-        typeof original[i] === 'undefined'
-          ? ''
-          : typeof original[i] === 'string'
-            ? (original[i] as string)
-            : 'value' in (original[i] as TrackedFieldArrayItem)
-              ? (original[i] as TrackedFieldArrayItem).value
-              : '';
+        typeof originalVal === 'string'
+          ? (originalVal as string)
+          : 'value' in (originalVal as TrackedFieldArrayItem)
+            ? (originalVal as TrackedFieldArrayItem).value
+            : '';
       const modifiedItem = modified[i];
       const modifiedItemValue =
         typeof modifiedItem === 'string' ? modifiedItem : modifiedItem?.disabled ? '' : modifiedItem?.value || '';
@@ -243,7 +273,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   if (isLoading) {
     return <p aria-live="polite">Loading job profile...</p>;
   }
-
   const items: DescriptionsProps['items'] = [
     {
       key: 'title',
@@ -423,7 +452,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         <section>
           <h3>Title</h3>
           <p>{typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value}</p>
-
           <h3>Classification</h3>
           <p>{`${effectiveData?.classification?.code}`}</p>
 
@@ -440,7 +468,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <p>
             {typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value}
           </p>
-
           <h3>Required Accountabilities</h3>
           <ul>
             {effectiveData?.accountabilities.required.map((accountability, index) => {

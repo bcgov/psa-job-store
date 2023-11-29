@@ -36,12 +36,12 @@ interface WizardEditProfileProps {
   submitText?: string;
   showBackButton?: boolean;
   receivedClassificationsDataCallback?: (data: GetClassificationsResponse) => void;
-  setIsValid: (isValid: boolean) => void;
+  setErrors: (errors: string[]) => void;
 }
 
 const WizardEditProfile = forwardRef(
   (
-    { id, profileData, config, submitHandler, receivedClassificationsDataCallback, setIsValid }: WizardEditProfileProps,
+    { id, profileData, config, submitHandler, receivedClassificationsDataCallback, setErrors }: WizardEditProfileProps,
     ref,
   ) => {
     const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
@@ -68,24 +68,45 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
-    const { register, control, reset, handleSubmit, getValues, formState } = useForm<JobProfileValidationModel>({
-      resolver: classValidatorResolver(JobProfileValidationModel),
-      mode: 'onChange',
-    });
-    useEffect(() => {
-      // Update the `isValid` state based on the form's validation state
-      setIsValid(formState.isValid);
-    }, [formState.isValid, setIsValid]);
+    const { register, control, reset, handleSubmit, getValues, formState, trigger } =
+      useForm<JobProfileValidationModel>({
+        resolver: classValidatorResolver(JobProfileValidationModel),
+        mode: 'onChange',
+      });
 
-    // useEffect to set effectiveData when data is fetched from the API
     useEffect(() => {
       if (!profileData && data && !isLoading) {
         // Only set effectiveData from fetched data if profileData is not provided
         setEffectiveData(data.jobProfile);
+        trigger();
       }
-    }, [data, isLoading, profileData]);
+    }, [data, isLoading, profileData, trigger]);
 
     const [form] = Form.useForm();
+
+    useEffect(() => {
+      // console.log('isvalidating', formState.isValidating);
+      console.log('errors', JSON.stringify(formState.errors));
+      // console.log('isvalid', formState.isValid);
+      // console.log(getValues('title'));
+      //console.log('required', getValues('requirements'));
+      setErrors(
+        Object.values(formState.errors).map((error: any) => {
+          console.log('error', error);
+          const message =
+            error.message != null
+              ? error.message
+              : error.root != null
+                ? error.root?.message
+                : error.value != null
+                  ? error.value.message
+                  : 'Error';
+          console.log('err', error.root);
+          console.log('message', message);
+          return message;
+        }),
+      );
+    }, [formState.errors, formState.isValid, formState.isValidating, getValues, setErrors]);
 
     // todo: usage of this approach is undesirable, however it fixes various render issues
     // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
@@ -431,6 +452,7 @@ const WizardEditProfile = forwardRef(
       const handleFieldChange = (event: any) => {
         const updatedValue = event.target.value;
         setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.value }));
+        trigger();
       };
 
       return (
@@ -637,8 +659,9 @@ const WizardEditProfile = forwardRef(
       const handleFieldChange = (event: any) => {
         const updatedValue = event.target.value;
         setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.value }));
+        trigger();
       };
-
+      // console.log('field', JSON.stringify(field));
       return (
         <List.Item
           key={field.id}
