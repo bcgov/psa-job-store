@@ -85,14 +85,8 @@ const WizardEditProfile = forwardRef(
     const [form] = Form.useForm();
 
     useEffect(() => {
-      // console.log('isvalidating', formState.isValidating);
-      console.log('errors', JSON.stringify(formState.errors));
-      // console.log('isvalid', formState.isValid);
-      // console.log(getValues('title'));
-      //console.log('required', getValues('requirements'));
       setErrors(
         Object.values(formState.errors).map((error: any) => {
-          console.log('error', error);
           const message =
             error.message != null
               ? error.message
@@ -101,8 +95,6 @@ const WizardEditProfile = forwardRef(
                 : error.value != null
                   ? error.value.message
                   : 'Error';
-          console.log('err', error.root);
-          console.log('message', message);
           return message;
         }),
       );
@@ -430,6 +422,7 @@ const WizardEditProfile = forwardRef(
       } else {
         // If it's an original field, mark as disabled
         acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+        trigger();
       }
     };
 
@@ -442,6 +435,7 @@ const WizardEditProfile = forwardRef(
     // Function to handle adding a new field
     const handleAccReqAddNew = () => {
       acc_req_append({ value: '', isCustom: true, disabled: false });
+      trigger();
     };
 
     const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
@@ -638,6 +632,7 @@ const WizardEditProfile = forwardRef(
         // If it's an original field, mark as disabled
         requirement_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
+      trigger();
     };
 
     // Function to add back a removed field
@@ -649,6 +644,7 @@ const WizardEditProfile = forwardRef(
     // Function to handle adding a new field
     const handleMinReqAddNew = () => {
       requirement_append({ value: '', isCustom: true, disabled: false });
+      trigger();
     };
 
     const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
@@ -824,7 +820,6 @@ const WizardEditProfile = forwardRef(
           form={form}
           key={renderKey}
           onFinish={handleSubmit((data) => {
-            console.log('hello');
             submitHandler?.(data);
           })}
         >
