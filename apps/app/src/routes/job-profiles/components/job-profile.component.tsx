@@ -7,7 +7,6 @@ import {
   IsNotEmpty,
   Length,
   ValidateNested,
-  ValidationArguments,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -67,7 +66,7 @@ class AllDisabledConstraint implements ValidatorConstraintInterface {
     });
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage() {
     return 'All items must be disabled.';
   }
 }
