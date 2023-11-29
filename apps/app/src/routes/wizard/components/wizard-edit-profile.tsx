@@ -6,16 +6,15 @@ import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/typography/Title';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+
+import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
   ClassificationModel,
   GetClassificationsResponse,
-  useLazyGetClassificationsQuery,
-} from '../../../redux/services/graphql-api/classification.api';
-import {
   JobProfileModel,
   TrackedFieldArrayItem,
-  useLazyGetJobProfileQuery,
-} from '../../../redux/services/graphql-api/job-profile.api';
+} from '../../../redux/services/graphql-api/job-profile-types';
+import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';

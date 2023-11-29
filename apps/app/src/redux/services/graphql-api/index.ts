@@ -1,14 +1,13 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { graphqlRequestBaseQuery } from '@rtk-query/graphql-request-base-query';
+import { VITE_BACKEND_URL, VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../../../../envConfig';
 import { oidcConfig } from '../../../main';
 
 const baseQuery = graphqlRequestBaseQuery({
-  url: `${import.meta.env.VITE_BACKEND_URL}/graphql`,
+  url: `${VITE_BACKEND_URL}/graphql`,
   prepareHeaders: async (headers) => {
     const storageString =
-      (await oidcConfig.userStore?.get(
-        `user:${import.meta.env.VITE_KEYCLOAK_REALM_URL}:${import.meta.env.VITE_KEYCLOAK_CLIENT_ID}`,
-      )) ?? '{}';
+      (await oidcConfig.userStore?.get(`user:${VITE_KEYCLOAK_REALM_URL}:${VITE_KEYCLOAK_CLIENT_ID}`)) ?? '{}';
 
     const { access_token } = JSON.parse(storageString);
 

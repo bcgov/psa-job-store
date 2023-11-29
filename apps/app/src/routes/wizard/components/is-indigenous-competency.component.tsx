@@ -1,5 +1,5 @@
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
-import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile.api';
+import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile-types';
 
 interface Props {
   competency: BehaviouralCompetency;

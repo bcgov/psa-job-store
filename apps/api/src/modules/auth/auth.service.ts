@@ -56,7 +56,7 @@ export class AuthService {
   }
 
   async getUserFromPayload(data: JwtPayload) {
-    console.log('getUserFromPayload data:', data);
+    // console.log('getUserFromPayload data:', data);
     const { sub, identity_provider, name, email, client_roles, exp } = data;
 
     // const id = this.getUserIdFromSub(sub);

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Empty, Pagination, Skeleton, Typography } from 'antd';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile.api';
+import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileCard } from './job-profile-card.component';
 import styles from './job-profile-search-results.module.css';
 
@@ -48,7 +48,7 @@ export const JobProfileSearchResults = ({
           </Text>
         </h1>
       </div>
-      <ul className={styles.job_profile_search_results_ul}>
+      <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list">
         {isLoading ? (
           <Skeleton loading={isLoading} />
         ) : data?.jobProfiles.length === 0 ? (

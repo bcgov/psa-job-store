@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ReactNode, useContext, useState } from 'react';
-import { GetClassificationsResponse } from '../../../redux/services/graphql-api/classification.api';
-import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile.api';
+import { GetClassificationsResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 
 // interface WizardData {
 //   [key: string]: string;

@@ -53,9 +53,26 @@ Cypress.Commands.add('login', () => {
       };
     },
   });
+
+  Cypress.log({
+    name: 'setSessionStorage',
+    // shorter name for the Command Log
+    displayName: 'CYPRESS_VITE_KEYCLOAK_REALM_URL',
+    message: `CYPRESS_VITE_KEYCLOAK_REALM_URL ${Cypress.env('VITE_KEYCLOAK_REALM_URL')}`,
+    consoleProps: () => {
+      // return an object which will
+      // print to dev tools console on click
+      return {
+        // Key: key,
+        // Value: value,
+        // 'Session Storage': window.sessionStorage,
+      };
+    },
+  });
+
   // Simulate a login
   window.localStorage.setItem(
-    'oidc.user:xxx:xxx',
+    `oidc.user:${Cypress.env('VITE_KEYCLOAK_REALM_URL')}:${Cypress.env('VITE_KEYCLOAK_CLIENT_ID')}`,
     JSON.stringify({
       access_token: token,
       profile: {

@@ -7,11 +7,8 @@ import { IsNotEmpty, Length, ValidateNested } from 'class-validator';
 import { diff_match_patch } from 'diff-match-patch';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  JobProfileModel,
-  TrackedFieldArrayItem,
-  useLazyGetJobProfileQuery,
-} from '../../../redux/services/graphql-api/job-profile.api';
+import { JobProfileModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
+import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;

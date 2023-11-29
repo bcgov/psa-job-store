@@ -177,6 +177,7 @@ export const JobProfileSearch = () => {
                     mode="multiple"
                     allowClear
                     // aria-label={filter.title}
+                    data-cy={`${filter.title}-filter`}
                     id={filter.title}
                     placeholder={filter.title}
                     options={filterData[filter.title]}
@@ -239,18 +240,18 @@ export const JobProfileSearch = () => {
                           ? searchParams.get('job_family_id__in')
                           : undefined
                         : filter.title === 'Job Roles'
-                        ? searchParams.has('job_role_id__in')
-                          ? searchParams.get('job_role_id__in')
-                          : undefined
-                        : filter.title === 'Classification'
-                        ? searchParams.has('classification_id__in')
-                          ? searchParams.get('classification_id__in')
-                          : undefined
-                        : filter.title === 'Organization'
-                        ? searchParams.has('organization_id__in')
-                          ? searchParams.get('organization_id__in')
-                          : undefined
-                        : undefined
+                          ? searchParams.has('job_role_id__in')
+                            ? searchParams.get('job_role_id__in')
+                            : undefined
+                          : filter.title === 'Classification'
+                            ? searchParams.has('classification_id__in')
+                              ? searchParams.get('classification_id__in')
+                              : undefined
+                            : filter.title === 'Organization'
+                              ? searchParams.has('organization_id__in')
+                                ? searchParams.get('organization_id__in')
+                                : undefined
+                              : undefined
                     }
                   />
                 </div>

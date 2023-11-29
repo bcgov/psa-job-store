@@ -6,8 +6,8 @@ import {
   CreateJobProfileInput,
   JobProfileModel,
   TrackedFieldArrayItem,
-  useCreateJobProfileMutation,
-} from '../../redux/services/graphql-api/job-profile.api';
+} from '../../redux/services/graphql-api/job-profile-types';
+import { useCreateJobProfileMutation } from '../../redux/services/graphql-api/job-profile.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
