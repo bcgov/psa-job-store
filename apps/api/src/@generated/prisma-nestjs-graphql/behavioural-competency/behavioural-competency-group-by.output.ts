@@ -14,9 +14,6 @@ export class BehaviouralCompetencyGroupBy {
   @Field(() => Int, { nullable: false })
   id!: number;
 
-  @Field(() => Int, { nullable: true })
-  ministry_id?: number;
-
   @Field(() => BehaviouralCompetencyMembership, { nullable: false })
   membership!: keyof typeof BehaviouralCompetencyMembership;
 

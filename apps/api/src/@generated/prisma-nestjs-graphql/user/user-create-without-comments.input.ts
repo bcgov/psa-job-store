@@ -30,5 +30,5 @@ export class UserCreateWithoutCommentsInput {
   identities?: IdentityCreateNestedManyWithoutUserInput;
 
   @Field(() => JobProfileCreateNestedManyWithoutOwnerInput, { nullable: true })
-  JobProfile?: JobProfileCreateNestedManyWithoutOwnerInput;
+  job_profiles?: JobProfileCreateNestedManyWithoutOwnerInput;
 }

@@ -7,8 +7,5 @@ export class ClassificationMaxAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  grid_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
-  occupation_group_id?: true;
+  code?: true;
 }

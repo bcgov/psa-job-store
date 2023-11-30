@@ -4,8 +4,8 @@ import { Int } from '@nestjs/graphql';
 
 @InputType()
 export class JobProfileReportsToUncheckedUpdateInput {
-  @Field(() => Int, { nullable: true })
-  classification_id?: number;
+  @Field(() => String, { nullable: true })
+  classification_id?: string;
 
   @Field(() => Int, { nullable: true })
   job_profile_id?: number;

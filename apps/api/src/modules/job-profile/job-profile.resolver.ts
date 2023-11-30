@@ -1,6 +1,5 @@
 import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import {
-  FindManyJobProfileArgs,
   JobProfile,
   JobProfileBehaviouralCompetency,
   JobProfileCreateInput,
@@ -8,6 +7,7 @@ import {
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JobFamilyService } from '../job-family/job-family.service';
+import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 import { JobProfileService } from './job-profile.service';
 
 @Resolver(() => JobProfile)
@@ -18,8 +18,13 @@ export class JobProfileResolver {
   ) {}
 
   @Query(() => [JobProfile], { name: 'jobProfiles' })
-  async getJobProfiles(@Args() args?: FindManyJobProfileArgs) {
+  async getJobProfiles(@Args() args?: FindManyJobProfileWithSearch) {
     return this.jobProfileService.getJobProfiles(args);
+  }
+
+  @Query(() => Int, { name: 'jobProfilesCount' })
+  async jobProfilesCount(@Args() args?: FindManyJobProfileWithSearch) {
+    return await this.jobProfileService.getJobProfileCount(args);
   }
 
   @Query(() => JobProfile, { name: 'jobProfile' })

@@ -17,7 +17,7 @@ export class JobProfileMaxOrderByAggregateInput {
   family_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  ministry_id?: keyof typeof SortOrder;
+  organization_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   owner_id?: keyof typeof SortOrder;

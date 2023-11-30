@@ -10,7 +10,9 @@ export const JobProfilesPage = () => {
     <>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
         <PageHeader title="Job Profiles" subTitle="Find a Job Profile which suits your needs" />
-        <JobProfiles searchParams={searchParams} />
+        <div style={{ padding: '0 1rem' }}>
+          <JobProfiles searchParams={searchParams} />
+        </div>
       </Space>
     </>
   );
