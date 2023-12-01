@@ -1,35 +1,35 @@
 version: '3.8'
 
 services:
-  # nestjs-app:
-  #   env_file:
-  #     - .env.docker
-  #   build:
-  #     context: ../../
-  #     dockerfile: apps/api/Dockerfile.dev
-  #     args:
-  #       - POSTGRES_DB=${POSTGRES_DB}
-  #       - POSTGRES_USER=${POSTGRES_USER}
-  #       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-  #       - DATABASE_URL=${DATABASE_URL}
-  #       - KEYCLOAK_REALM_URL=${KEYCLOAK_REALM_URL}
-  #       - KEYCLOAK_CLIENT_ID_PRIVATE=${KEYCLOAK_CLIENT_ID_PRIVATE}
-  #       - KEYCLOAK_CLIENT_ID_PUBLIC=${KEYCLOAK_CLIENT_ID_PUBLIC}
-  #       - KEYCLOAK_REDIRECT_URL=${KEYCLOAK_REDIRECT_URL}
-  #   ports:
-  #     - 4000:4000
-  #   depends_on:
-  #     - postgres
-  #   volumes:
-  #     - ./src:/usr/src/app/src
-  #     - api-nodemodules:/node_modules
-  #     - ./prisma:/usr/src/app/prisma
-  # postgres:
-  #   image: postgres:latest
-  #   ports:
-  #     - 5432:5432
-  #   env_file:
-  #     - .env.docker
+  nestjs-app:
+    env_file:
+      - .env.docker
+    build:
+      context: ../../
+      dockerfile: apps/api/Dockerfile.dev
+      args:
+        - POSTGRES_DB=${POSTGRES_DB}
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        - DATABASE_URL=${DATABASE_URL}
+        - KEYCLOAK_REALM_URL=${KEYCLOAK_REALM_URL}
+        - KEYCLOAK_CLIENT_ID_PRIVATE=${KEYCLOAK_CLIENT_ID_PRIVATE}
+        - KEYCLOAK_CLIENT_ID_PUBLIC=${KEYCLOAK_CLIENT_ID_PUBLIC}
+        - KEYCLOAK_REDIRECT_URL=${KEYCLOAK_REDIRECT_URL}
+    ports:
+      - 4000:4000
+    depends_on:
+      - postgres
+    volumes:
+      - ./src:/usr/src/app/src
+      - api-nodemodules:/node_modules
+      - ./prisma:/usr/src/app/prisma
+  postgres:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    env_file:
+      - .env.docker
   elasticsearch:
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}

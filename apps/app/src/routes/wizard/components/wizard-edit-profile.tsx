@@ -35,10 +35,14 @@ interface WizardEditProfileProps {
   submitText?: string;
   showBackButton?: boolean;
   receivedClassificationsDataCallback?: (data: GetClassificationsResponse) => void;
+  setErrors: (errors: string[]) => void;
 }
 
 const WizardEditProfile = forwardRef(
-  ({ id, profileData, config, submitHandler, receivedClassificationsDataCallback }: WizardEditProfileProps, ref) => {
+  (
+    { id, profileData, config, submitHandler, receivedClassificationsDataCallback, setErrors }: WizardEditProfileProps,
+    ref,
+  ) => {
     const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
       useLazyGetClassificationsQuery();
 
@@ -63,20 +67,37 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
-    const { register, control, reset, handleSubmit, getValues } = useForm<JobProfileValidationModel>({
-      resolver: classValidatorResolver(JobProfileValidationModel),
-      mode: 'onChange',
-    });
+    const { register, control, reset, handleSubmit, getValues, formState, trigger } =
+      useForm<JobProfileValidationModel>({
+        resolver: classValidatorResolver(JobProfileValidationModel),
+        mode: 'onChange',
+      });
 
-    // useEffect to set effectiveData when data is fetched from the API
     useEffect(() => {
       if (!profileData && data && !isLoading) {
         // Only set effectiveData from fetched data if profileData is not provided
         setEffectiveData(data.jobProfile);
+        trigger();
       }
-    }, [data, isLoading, profileData]);
+    }, [data, isLoading, profileData, trigger]);
 
     const [form] = Form.useForm();
+
+    useEffect(() => {
+      setErrors(
+        Object.values(formState.errors).map((error: any) => {
+          const message =
+            error.message != null
+              ? error.message
+              : error.root != null
+                ? error.root?.message
+                : error.value != null
+                  ? error.value.message
+                  : 'Error';
+          return message;
+        }),
+      );
+    }, [formState.errors, formState.isValid, formState.isValidating, getValues, setErrors]);
 
     // todo: usage of this approach is undesirable, however it fixes various render issues
     // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
@@ -400,6 +421,7 @@ const WizardEditProfile = forwardRef(
       } else {
         // If it's an original field, mark as disabled
         acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+        trigger();
       }
     };
 
@@ -412,6 +434,7 @@ const WizardEditProfile = forwardRef(
     // Function to handle adding a new field
     const handleAccReqAddNew = () => {
       acc_req_append({ value: '', isCustom: true, disabled: false });
+      trigger();
     };
 
     const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
@@ -422,6 +445,7 @@ const WizardEditProfile = forwardRef(
       const handleFieldChange = (event: any) => {
         const updatedValue = event.target.value;
         setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.value }));
+        trigger();
       };
 
       return (
@@ -607,6 +631,7 @@ const WizardEditProfile = forwardRef(
         // If it's an original field, mark as disabled
         requirement_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
+      trigger();
     };
 
     // Function to add back a removed field
@@ -618,6 +643,7 @@ const WizardEditProfile = forwardRef(
     // Function to handle adding a new field
     const handleMinReqAddNew = () => {
       requirement_append({ value: '', isCustom: true, disabled: false });
+      trigger();
     };
 
     const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
@@ -628,8 +654,9 @@ const WizardEditProfile = forwardRef(
       const handleFieldChange = (event: any) => {
         const updatedValue = event.target.value;
         setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.value }));
+        trigger();
       };
-
+      // console.log('field', JSON.stringify(field));
       return (
         <List.Item
           key={field.id}

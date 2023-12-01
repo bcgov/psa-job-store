@@ -436,3 +436,6 @@ $RECYCLE.BIN/
 # Do not commit the seed file
 apps/api/src/assets/positions.csv
 apps/api/prisma/seed.ts
+
+# Ignore temporary DrawIO artifacts
+*.drawio.bkp
