@@ -122,7 +122,7 @@ export const JobProfileSearch = () => {
   };
 
   return (
-    <Row justify="center" gutter={8} style={{ margin: '0 1rem' }} role="search">
+    <Row justify="center" gutter={8} style={{ margin: '0 1rem' }} role="search" data-testid="job-profile-search">
       <Col xs={24} sm={18} md={18} lg={18} xl={14} style={{ margin: '1rem' }}>
         <Space direction="vertical" size="small" style={{ width: '100%' }}>
           <Search
@@ -177,6 +177,7 @@ export const JobProfileSearch = () => {
                     mode="multiple"
                     allowClear
                     // aria-label={filter.title}
+                    data-cy={`${filter.title}-filter`}
                     id={filter.title}
                     placeholder={filter.title}
                     options={filterData[filter.title]}
@@ -239,18 +240,18 @@ export const JobProfileSearch = () => {
                           ? searchParams.get('job_family_id__in')
                           : undefined
                         : filter.title === 'Job Roles'
-                        ? searchParams.has('job_role_id__in')
-                          ? searchParams.get('job_role_id__in')
-                          : undefined
-                        : filter.title === 'Classification'
-                        ? searchParams.has('classification_id__in')
-                          ? searchParams.get('classification_id__in')
-                          : undefined
-                        : filter.title === 'Organization'
-                        ? searchParams.has('organization_id__in')
-                          ? searchParams.get('organization_id__in')
-                          : undefined
-                        : undefined
+                          ? searchParams.has('job_role_id__in')
+                            ? searchParams.get('job_role_id__in')
+                            : undefined
+                          : filter.title === 'Classification'
+                            ? searchParams.has('classification_id__in')
+                              ? searchParams.get('classification_id__in')
+                              : undefined
+                            : filter.title === 'Organization'
+                              ? searchParams.has('organization_id__in')
+                                ? searchParams.get('organization_id__in')
+                                : undefined
+                              : undefined
                     }
                   />
                 </div>

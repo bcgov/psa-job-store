@@ -8,6 +8,7 @@ import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
 import 'reflect-metadata';
+import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL, VITE_KEYCLOAK_REDIRECT_URL } from '../envConfig';
 import { store } from './redux/redux.store';
 import { router } from './router/index';
 
@@ -15,9 +16,9 @@ export const oidcConfig: AuthProviderProps = {
   userStore: new WebStorageStateStore({
     store: localStorage,
   }),
-  authority: import.meta.env.VITE_KEYCLOAK_REALM_URL,
-  client_id: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
-  redirect_uri: import.meta.env.VITE_KEYCLOAK_REDIRECT_URL,
+  authority: VITE_KEYCLOAK_REALM_URL,
+  client_id: VITE_KEYCLOAK_CLIENT_ID,
+  redirect_uri: VITE_KEYCLOAK_REDIRECT_URL,
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

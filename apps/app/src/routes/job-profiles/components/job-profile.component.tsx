@@ -15,11 +15,8 @@ import {
 import { diff_match_patch } from 'diff-match-patch';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  JobProfileModel,
-  TrackedFieldArrayItem,
-  useLazyGetJobProfileQuery,
-} from '../../../redux/services/graphql-api/job-profile.api';
+import { JobProfileModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
+import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -412,7 +409,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   ];
 
   return (
-    <>
+    <div data-testid="job-profile">
       {screens.xl === false && showBackToResults ? (
         <nav aria-label="Breadcrumb">
           <Link to="/job-profiles">
@@ -528,6 +525,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           </ul>
         </section>
       </div>
-    </>
+    </div>
   );
 };

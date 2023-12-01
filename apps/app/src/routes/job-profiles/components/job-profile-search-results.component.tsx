@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Empty, Pagination, Skeleton, Typography } from 'antd';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile.api';
+import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileCard } from './job-profile-card.component';
 import styles from './job-profile-search-results.module.css';
 
@@ -39,16 +39,21 @@ export const JobProfileSearchResults = ({
   };
 
   return (
-    <div style={{ border: '1px solid #CCC' }} role="region" aria-label="job profiles list">
+    <div
+      style={{ border: '1px solid #CCC' }}
+      role="region"
+      aria-label="job profiles list"
+      data-testid="job-profile-search-results"
+    >
       <div style={{ borderBottom: '1px solid #CCC', padding: '1rem' }}>
-       <h1>
-        <Text style={{ fontSize: '10pt' }}>
-          Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
-          results
-        </Text>
-       </h1>
+        <h1>
+          <Text style={{ fontSize: '10pt' }}>
+            Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of{' '}
+            {totalResults} results
+          </Text>
+        </h1>
       </div>
-      <ul className={styles.job_profile_search_results_ul}>
+      <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list">
         {isLoading ? (
           <Skeleton loading={isLoading} />
         ) : data?.jobProfiles.length === 0 ? (
@@ -74,6 +79,7 @@ export const JobProfileSearchResults = ({
         )}
       </ul>
       <Pagination
+        data-testid="pagination"
         showSizeChanger
         current={currentPage}
         pageSize={pageSize}

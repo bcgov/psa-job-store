@@ -1,12 +1,13 @@
 import { FormInstance, List, Modal } from 'antd';
 import { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ClassificationModel, GetClassificationsResponse } from '../../redux/services/graphql-api/classification.api';
 import {
   BehaviouralCompetencies,
+  ClassificationModel,
+  GetClassificationsResponse,
   JobProfileModel,
   TrackedFieldArrayItem,
-} from '../../redux/services/graphql-api/job-profile.api';
+} from '../../redux/services/graphql-api/job-profile-types';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import WizardEditProfile from './components/wizard-edit-profile';

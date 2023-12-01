@@ -1,7 +1,7 @@
 import { Button, Card, Col, Row, Select, Space } from 'antd';
 import React, { CSSProperties, useState } from 'react';
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
-import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile.api';
+import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile-types';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
 
 const { Option } = Select;

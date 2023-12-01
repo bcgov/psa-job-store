@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Space, Typography } from 'antd';
 import { Link, useParams } from 'react-router-dom';
-import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile.api';
+import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -27,7 +27,7 @@ export const JobProfileCard = ({ data, link }: JobProfileCardProps) => {
         {typeof data?.title === 'string' ? data?.title : data?.title?.value}
       </Title>
       <div>
-        <Text type="secondary">
+        <Text type="secondary" data-cy="card-classification">
           {data.classification?.code} | Job Store # {data.number}
         </Text>
         <br />
