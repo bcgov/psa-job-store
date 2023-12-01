@@ -381,7 +381,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   ];
 
   return (
-    <>
+    <div data-testid="job-profile">
       {screens.xl === false && showBackToResults ? (
         <nav aria-label="Breadcrumb">
           <Link to="/job-profiles">
@@ -499,6 +499,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           </ul>
         </section>
       </div>
-    </>
+    </div>
   );
 };

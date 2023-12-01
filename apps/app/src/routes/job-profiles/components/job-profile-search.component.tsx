@@ -122,7 +122,7 @@ export const JobProfileSearch = () => {
   };
 
   return (
-    <Row justify="center" gutter={8} style={{ margin: '0 1rem' }} role="search">
+    <Row justify="center" gutter={8} style={{ margin: '0 1rem' }} role="search" data-testid="job-profile-search">
       <Col xs={24} sm={18} md={18} lg={18} xl={14} style={{ margin: '1rem' }}>
         <Space direction="vertical" size="small" style={{ width: '100%' }}>
           <Search

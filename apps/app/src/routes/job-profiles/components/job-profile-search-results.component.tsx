@@ -39,7 +39,12 @@ export const JobProfileSearchResults = ({
   };
 
   return (
-    <div style={{ border: '1px solid #CCC' }} role="region" aria-label="job profiles list">
+    <div
+      style={{ border: '1px solid #CCC' }}
+      role="region"
+      aria-label="job profiles list"
+      data-testid="job-profile-search-results"
+    >
       <div style={{ borderBottom: '1px solid #CCC', padding: '1rem' }}>
         <h1>
           <Text style={{ fontSize: '10pt' }}>
@@ -74,6 +79,7 @@ export const JobProfileSearchResults = ({
         )}
       </ul>
       <Pagination
+        data-testid="pagination"
         showSizeChanger
         current={currentPage}
         pageSize={pageSize}
