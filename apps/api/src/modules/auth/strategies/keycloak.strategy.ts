@@ -12,7 +12,6 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
 
   async validate(payload: string, done: (err, user) => void) {
     // Check if JWT verification should be skipped
-    // console.log('validate: ', payload);
     if (process.env.SKIP_JWT_SIGNATURE_VERIFICATION === 'true') {
       // Assuming payload is a valid JWT, decode it without verification
       const decoded = decodeJwt(payload) as JwtPayload;
@@ -32,10 +31,10 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
         audience: expectedAudiences,
       }) as JwtPayload;
       const user = await this.authService.getUserFromPayload(data);
-
       done(null, user);
     } catch (error) {
-      if (error instanceof TokenExpiredError) throw new UnauthorizedException();
+      if (error instanceof TokenExpiredError)
+        throw new UnauthorizedException('Your session has expired. Please log in again.');
       throw error;
     }
   }
