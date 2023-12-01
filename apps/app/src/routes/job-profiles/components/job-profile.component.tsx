@@ -17,6 +17,7 @@ import { CSSProperties, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { JobProfileModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import WizardEditControlBar from '../../wizard/components/wizard-edit-control-bar';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -28,6 +29,7 @@ interface JobProfileProps {
   showBackToResults?: boolean;
   showDiff?: boolean;
   style?: CSSProperties;
+  onUseProfile?: () => void;
 }
 
 class BehaviouralCompetency {
@@ -116,6 +118,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   showBackToResults = true,
   showDiff = false,
   style,
+  onUseProfile,
 }) => {
   const params = useParams();
   const resolvedId = id ?? params.id; // Using prop ID or param ID
@@ -247,19 +250,19 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       if (originalItem && modifiedItem) {
         comparisonResult.push(
           <li key={name}>
-            <strong>{originalItem.name}</strong> {originalItem.description}
+            <Text strong>{originalItem.name}</Text> {originalItem.description}
           </li>,
         );
       } else if (originalItem && !modifiedItem) {
         comparisonResult.push(
           <li key={name} style={{ textDecoration: 'line-through' }}>
-            <strong>{originalItem.name}</strong> {originalItem.description}
+            <Text strong>{originalItem.name}</Text> {originalItem.description}
           </li>,
         );
       } else if (!originalItem && modifiedItem) {
         comparisonResult.push(
           <li key={name} style={{ backgroundColor: 'yellow' }}>
-            <strong>{modifiedItem.name}</strong> {modifiedItem.description}
+            <Text strong>{modifiedItem.name}</Text> {modifiedItem.description}
           </li>,
         );
       }
@@ -421,6 +424,12 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       ) : (
         <div />
       )}
+      {onUseProfile ? (
+        <WizardEditControlBar onNext={onUseProfile} nextText="Use Profile" style={{ marginBottom: '1rem' }} />
+      ) : // <Button onClick={() => onUseProfile()} type="primary">
+      //   Use Profile
+      // </Button>
+      null}
       <Descriptions
         aria-hidden="true"
         bordered

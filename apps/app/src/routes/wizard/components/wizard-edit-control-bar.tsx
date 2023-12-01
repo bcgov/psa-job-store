@@ -1,6 +1,7 @@
 import { Button, Space, Switch } from 'antd';
 import React, { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
+import './wizard-edit-control-bar.css';
 
 interface WizardEditControlBarProps {
   onSave?: () => void;
@@ -28,7 +29,7 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
   const buttonPlaceholder = <div style={{ display: 'inline-block', width: '68px' }} />;
 
   return (
-    <div style={{ ...style, padding: '16px', background: '#f0f2f5', display: 'flex', justifyContent: 'space-between' }}>
+    <div className="wizard-edit-control-bar" style={{ ...style }} id="wizardEditControlBar">
       <Space>
         {showDiffToggle && onToggleShowDiff ? (
           <Space direction="horizontal">

@@ -15,9 +15,10 @@ interface JobProfilesContentProps {
   searchParams: URLSearchParams;
   // searchQuery: string | null;
   onSelectProfile?: (id: string) => void;
+  onUseProfile?: () => void;
 }
 
-const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile }) => {
+const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile, onUseProfile }) => {
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(2); // Default page size, adjust as needed
@@ -114,7 +115,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
 
   const renderJobProfile = () => {
     return params.id ? (
-      <JobProfile />
+      <JobProfile onUseProfile={onUseProfile} />
     ) : (
       <div style={{ marginTop: '16rem' }}>
         <Empty
