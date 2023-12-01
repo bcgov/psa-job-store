@@ -5,3 +5,10 @@
 .ant-collapse-content-box{
     padding-left: 16px !important;
 }
+
+.no-animation {
+    .ant-collapse-content,
+    .ant-collapse-header {
+      transition: none !important;
+    }
+  }

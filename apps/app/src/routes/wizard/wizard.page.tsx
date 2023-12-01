@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import JobProfiles from '../job-profiles/components/job-profiles.component';
-import WizardControls from './components/wizard-controls.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';
@@ -44,11 +43,15 @@ export const WizardPage = () => {
       hpad={false}
     >
       <WizardSteps current={0}></WizardSteps>
-      <JobProfiles searchParams={searchParams} onSelectProfile={setSelectedProfileId} />
+      <JobProfiles
+        searchParams={searchParams}
+        onSelectProfile={setSelectedProfileId}
+        onUseProfile={handleSubmit(onSubmit)}
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      {/* <form onSubmit={handleSubmit(onSubmit)}>
         <WizardControls submitText={'Next'} showBackButton={false} />
-      </form>
+      </form> */}
     </WizardPageWrapper>
   );
 };

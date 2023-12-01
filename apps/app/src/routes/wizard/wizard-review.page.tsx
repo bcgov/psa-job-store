@@ -1,5 +1,5 @@
 import { Collapse } from 'antd';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
@@ -38,6 +38,34 @@ export const WizardReviewPage = () => {
     </>
   );
 
+  const [hasScrolledPast, setHasScrolledPast] = useState(false);
+
+  const handleScroll = () => {
+    const layoutScrollContainer = document.querySelector('.ant-layout > div > div') as HTMLElement;
+    if (layoutScrollContainer && collapseRef.current) {
+      const collapseTop = collapseRef.current.getBoundingClientRect().top;
+      const containerTop = layoutScrollContainer.getBoundingClientRect().top;
+
+      // Check if the Collapse top is above the container top
+      setHasScrolledPast(collapseTop < containerTop);
+    }
+  };
+
+  useEffect(() => {
+    const layoutScrollContainer = document.querySelector('.ant-layout > div > div');
+    if (layoutScrollContainer) {
+      layoutScrollContainer.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (layoutScrollContainer) {
+        layoutScrollContainer.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
+
+  const collapseRef = useRef<HTMLDivElement>(null);
+
   return (
     <WizardPageWrapper
       title="Review and submit"
@@ -54,9 +82,11 @@ export const WizardReviewPage = () => {
         showDiff={showDiff}
       />
       <Collapse
+        ref={collapseRef}
         bordered={false}
         ghost
         activeKey={showDiff ? ['1'] : []} // Control the active key based on showDiff
+        className={hasScrolledPast ? 'no-animation' : ''}
       >
         <Collapse.Panel key="1" showArrow={false} header="">
           {diffLegendContent}
