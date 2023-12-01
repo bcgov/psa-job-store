@@ -13,7 +13,7 @@ import {
   registerDecorator,
 } from 'class-validator';
 import { diff_match_patch } from 'diff-match-patch';
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { JobProfileModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
@@ -27,6 +27,7 @@ interface JobProfileProps {
   onProfileLoad?: (profileData: JobProfileModel) => void;
   showBackToResults?: boolean;
   showDiff?: boolean;
+  style?: CSSProperties;
 }
 
 class BehaviouralCompetency {
@@ -114,6 +115,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   onProfileLoad,
   showBackToResults = true,
   showDiff = false,
+  style,
 }) => {
   const params = useParams();
   const resolvedId = id ?? params.id; // Using prop ID or param ID
@@ -167,10 +169,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       const style: React.CSSProperties = {};
       if (operation === 1) {
         // Insertion
-        style.backgroundColor = 'lightgreen';
+        style.backgroundColor = 'yellow';
       } else if (operation === -1) {
         // Deletion
-        style.backgroundColor = 'salmon';
+        style.textDecoration = 'line-through';
       }
 
       return (
@@ -214,10 +216,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               const style: React.CSSProperties = {};
               if (operation === 1) {
                 // Insertion
-                style.backgroundColor = 'lightgreen';
+                style.backgroundColor = 'yellow';
               } else if (operation === -1) {
                 // Deletion
-                style.backgroundColor = 'salmon';
+                style.textDecoration = 'line-through';
               }
 
               return (
@@ -250,13 +252,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         );
       } else if (originalItem && !modifiedItem) {
         comparisonResult.push(
-          <li key={name} style={{ backgroundColor: 'salmon' }}>
+          <li key={name} style={{ textDecoration: 'line-through' }}>
             <strong>{originalItem.name}</strong> {originalItem.description}
           </li>,
         );
       } else if (!originalItem && modifiedItem) {
         comparisonResult.push(
-          <li key={name} style={{ backgroundColor: 'lightgreen' }}>
+          <li key={name} style={{ backgroundColor: 'yellow' }}>
             <strong>{modifiedItem.name}</strong> {modifiedItem.description}
           </li>,
         );
@@ -409,7 +411,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   ];
 
   return (
-    <div data-testid="job-profile">
+    <div data-testid="job-profile" style={{ ...style }}>
       {screens.xl === false && showBackToResults ? (
         <nav aria-label="Breadcrumb">
           <Link to="/job-profiles">
