@@ -2,6 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { JwtPayload } from 'jsonwebtoken';
 import { catchError, firstValueFrom, map } from 'rxjs';
@@ -74,10 +75,10 @@ export class AuthService {
 
       let id = '';
       if (identity) {
-        // user was found in db, get id
+        // user was found in db (identity table), get id
         id = identity.user_id;
       } else {
-        // user was not found in db, look up user in the user table by email
+        // user was not found in db (identity table), look up user in the user table by email
         const existingUser = await this.prisma.user.findUnique({
           where: { email },
         });
@@ -88,7 +89,30 @@ export class AuthService {
       const user: Express.User = { id, name, email, roles: ((client_roles as string[]) ?? []).sort() };
 
       // upsert user and identity
-      await this.upsertUser(user, sub, identity_provider);
+      try {
+        // console.log('trying to upsert..');
+        await this.upsertUser(user, sub, identity_provider);
+        // console.log('upsert succeeded');
+      } catch (error) {
+        // console.log('upsert error!, ', error);
+        // failure due to concurrency (upsert )
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          // Re-fetch the existing user if unique constraint violation occurs
+          const identity = await this.prisma.identity.findUnique({
+            // try to get user from db
+            where: { sub_identity_provider: { identity_provider, sub } },
+          });
+          // console.log('refetched after error: ', identity);
+          if (identity) {
+            user.id = identity.user_id;
+          } else {
+            throw error; // If user still not found, throw the original error
+          }
+        } else {
+          throw error;
+        }
+      }
+
       // set cache
       await this.cacheManager.set(CACHE_KEY, user, (exp ?? 0) * 1000 - Date.now());
       // get user from cache
