@@ -13,6 +13,9 @@ export class ClassificationUncheckedCreateInput {
   @Field(() => String, { nullable: false })
   code!: string;
 
+  @Field(() => String, { nullable: false })
+  name!: string;
+
   @Field(() => JobProfileUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
   job_profiles?: JobProfileUncheckedCreateNestedManyWithoutClassificationInput;
 

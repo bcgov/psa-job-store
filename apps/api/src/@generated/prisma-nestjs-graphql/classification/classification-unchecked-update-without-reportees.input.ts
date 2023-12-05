@@ -12,6 +12,9 @@ export class ClassificationUncheckedUpdateWithoutReporteesInput {
   @Field(() => String, { nullable: true })
   code?: string;
 
+  @Field(() => String, { nullable: true })
+  name?: string;
+
   @Field(() => JobProfileUncheckedUpdateManyWithoutClassificationNestedInput, { nullable: true })
   job_profiles?: JobProfileUncheckedUpdateManyWithoutClassificationNestedInput;
 

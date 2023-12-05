@@ -13,6 +13,9 @@ export class Classification {
   @Field(() => String, { nullable: false })
   code!: string;
 
+  @Field(() => String, { nullable: false })
+  name!: string;
+
   @Field(() => [JobProfile], { nullable: true })
   job_profiles?: Array<JobProfile>;
 

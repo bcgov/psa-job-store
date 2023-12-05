@@ -24,6 +24,9 @@ export class ClassificationWhereUniqueInput {
   @Field(() => StringFilter, { nullable: true })
   code?: StringFilter;
 
+  @Field(() => StringFilter, { nullable: true })
+  name?: StringFilter;
+
   @Field(() => JobProfileListRelationFilter, { nullable: true })
   job_profiles?: JobProfileListRelationFilter;
 

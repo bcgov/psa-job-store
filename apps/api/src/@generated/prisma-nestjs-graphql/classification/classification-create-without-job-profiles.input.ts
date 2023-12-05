@@ -12,6 +12,9 @@ export class ClassificationCreateWithoutJob_profilesInput {
   @Field(() => String, { nullable: false })
   code!: string;
 
+  @Field(() => String, { nullable: false })
+  name!: string;
+
   @Field(() => JobProfileReportsToCreateNestedManyWithoutClassificationInput, { nullable: true })
   reportees?: JobProfileReportsToCreateNestedManyWithoutClassificationInput;
 

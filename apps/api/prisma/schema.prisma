@@ -234,6 +234,7 @@ model Department {
 model Classification {
   id           String                @id
   code         String
+  name         String
   job_profiles JobProfile[]
   reportees    JobProfileReportsTo[]
   employees    Employee[]

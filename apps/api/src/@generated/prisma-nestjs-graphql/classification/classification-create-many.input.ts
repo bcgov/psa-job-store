@@ -8,4 +8,7 @@ export class ClassificationCreateManyInput {
 
   @Field(() => String, { nullable: false })
   code!: string;
+
+  @Field(() => String, { nullable: false })
+  name!: string;
 }

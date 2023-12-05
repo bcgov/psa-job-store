@@ -13,6 +13,9 @@ export class ClassificationUpdateInput {
   @Field(() => String, { nullable: true })
   code?: string;
 
+  @Field(() => String, { nullable: true })
+  name?: string;
+
   @Field(() => JobProfileUpdateManyWithoutClassificationNestedInput, { nullable: true })
   job_profiles?: JobProfileUpdateManyWithoutClassificationNestedInput;
 
