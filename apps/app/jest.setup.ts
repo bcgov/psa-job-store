@@ -32,15 +32,15 @@ jest.mock('./envConfig', () => ({
 // }));
 
 jest.mock('./src/redux/services/graphql-api/organization', () => ({
-  useGetOrganizationsQuery: jest.fn().mockReturnValue([
-    jest.fn(), // mock trigger function
-    {
-      data: {
-        organizations: [],
-      },
-      isLoading: false,
+  useGetOrganizationsQuery: jest.fn().mockReturnValue({
+    data: {
+      organizations: [
+        { id: 0, name: 'Organization A' },
+        { id: 1, name: 'Organization B' },
+      ],
     },
-  ]),
+    isLoading: false,
+  }),
 }));
 
 jest.mock('./src/redux/services/graphql-api', () => {
@@ -62,77 +62,71 @@ jest.mock('./src/redux/services/graphql-api', () => {
 });
 
 jest.mock('./src/redux/services/graphql-api/job-family.api', () => ({
-  useGetJobFamiliesQuery: jest.fn().mockReturnValue([
-    jest.fn(), // mock trigger function
-    {
-      data: {
-        jobFamilies: [
-          {
-            id: 2,
-            name: 'A',
-          },
-          {
-            id: 3,
-            name: 'B',
-          },
-        ],
-      },
-      isLoading: false,
+  useGetJobFamiliesQuery: jest.fn().mockReturnValue({
+    data: {
+      jobFamilies: [
+        {
+          id: 2,
+          name: 'Engineering',
+        },
+        {
+          id: 3,
+          name: 'Science',
+        },
+      ],
     },
-  ]),
+    isLoading: false,
+  }),
 }));
 
 jest.mock('./src/redux/services/graphql-api/job-role.api', () => ({
-  useGetJobRolesQuery: jest.fn().mockReturnValue([
-    jest.fn(), // mock trigger function
-    {
-      data: {
-        jobRoles: [],
-      },
-      isLoading: false,
+  useGetJobRolesQuery: jest.fn().mockReturnValue({
+    data: {
+      jobRoles: [
+        { id: 1, name: 'Developer' },
+        { id: 1, name: 'Administrator' },
+      ],
     },
-  ]),
+    isLoading: false,
+  }),
 }));
 
 jest.mock('./src/redux/services/graphql-api/classification.api', () => ({
-  useGetClassificationsQuery: jest.fn().mockReturnValue([
-    jest.fn(), // mock trigger function
-    {
-      data: {
-        classifications: [
-          {
-            id: '1',
-            code: 'A 1',
-          },
-          {
-            id: '2',
-            code: 'B 2',
-          },
-          {
-            id: '3',
-            code: 'C 3',
-          },
-          {
-            id: '4',
-            code: 'D 4',
-          },
-          {
-            id: '5',
-            code: 'E 5',
-          },
-          {
-            id: '6',
-            code: 'F 6',
-          },
-          {
-            id: '7',
-            code: 'G 7',
-          },
-        ],
-      },
-      isLoading: false,
+  useGetClassificationsQuery: jest.fn().mockReturnValue({
+    data: {
+      classifications: [
+        {
+          id: '1',
+          code: 'A 1',
+        },
+        {
+          id: '2',
+          code: 'B 2',
+        },
+        {
+          id: '3',
+          code: 'C 3',
+        },
+        {
+          id: '4',
+          code: 'D 4',
+        },
+        {
+          id: '5',
+          code: 'E 5',
+        },
+        {
+          id: '6',
+          code: 'F 6',
+        },
+        {
+          id: '7',
+          code: 'G 7',
+        },
+      ],
     },
-  ]),
+    isLoading: false,
+  }),
 }));
 
 jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
