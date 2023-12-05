@@ -1,0 +1,13 @@
+
+kind: Service
+apiVersion: v1
+metadata:
+    name: kibana
+    labels:
+        "app.kubernetes.io/part-of": ek-stack
+spec:
+    selector:
+        app: kibana
+    ports:
+        - name: http
+          port: 5601
