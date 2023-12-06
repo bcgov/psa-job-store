@@ -60,7 +60,7 @@ export class OverviewField extends TrackedFieldArrayItem {
 @ValidatorConstraint({ async: false })
 class AllDisabledConstraint implements ValidatorConstraintInterface {
   validate(array: (TrackedFieldArrayItem | string)[]) {
-    return !array.every((item) => {
+    return !array?.every((item) => {
       // Check if the item is disabled or empty
       return typeof item === 'object' && (item.disabled === true || item.value.length == 0);
     });
