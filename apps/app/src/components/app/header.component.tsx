@@ -13,7 +13,7 @@ export const AppHeader = () => {
     <Header className={styles.appHeader}>
       <Row align="middle" justify="space-between" style={{ width: '100%' }}>
         <Col className={styles.left}>
-          <img className={styles.bcLogo} src="src/assets/BC_logo.png" alt="BC Logo" />
+          <img className={styles.bcLogo} src="/BC_logo.png" alt="BC Logo" />
           <div className={styles.titleContainer}>
             <Text className={styles.titleContent}>Job Store</Text>
             <Text className={styles.titleContentBeta}>βeta</Text>

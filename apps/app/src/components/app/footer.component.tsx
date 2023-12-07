@@ -31,7 +31,7 @@ export const AppFooter = () => {
         </Col>
         <Col>
           <div className={styles.footerImage}>
-            <img src="src/assets/BCDevExchange_Logo.png" alt="BCDevExchange Logo" />
+            <img src="/BCDevExchange_Logo.png" alt="BCDevExchange Logo" />
           </div>
         </Col>
       </Row>
