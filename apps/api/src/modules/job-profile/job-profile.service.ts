@@ -90,17 +90,17 @@ export class JobProfileService {
         parent: data.parent,
         role: data.role,
       },
-      include: {
-        behavioural_competencies: true,
-        reports_to: true,
-        children: true,
-        classification: true,
-        family: true,
-        organization: true,
-        owner: true,
-        parent: true,
-        role: true,
-      },
+      // include: {
+      //   behavioural_competencies: true,
+      //   reports_to: true,
+      //   children: true,
+      //   classification: true,
+      //   family: true,
+      //   organization: true,
+      //   owner: true,
+      //   parent: true,
+      //   role: true,
+      // },
     });
   }
 

@@ -28,6 +28,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PositionRequestStatus {
+  DRAFT
+  IN_REVIEW
+  COMPLETED
+}
+
+model PositionRequest {
+  id                     Int                    @id @default(autoincrement())
+  step                   Int
+  reports_to_position_id Int
+  parent_job_profile_id  Int
+  profile_json           Json                   @db.JsonB
+  user_id                String                 @db.Uuid
+  title                  String
+  position_number        Int?
+  classification         String
+  submission_id          String?
+  status                 PositionRequestStatus?
+
+  // TODO: AL-146
+  // user        User       @relation(fields: [user_id], references: [id])
+  parent_job_profile JobProfile @relation(fields: [parent_job_profile_id], references: [id])
+
+  @@map("position_request")
+}
+
 model User {
   id         String    @id @default(uuid()) @db.Uuid
   name       String?
@@ -40,6 +66,9 @@ model User {
   comments     Comment[]
   identities   Identity[]
   job_profiles JobProfile[]
+
+  // TODO: AL-146
+  // PositionRequest PositionRequest[]
 
   @@map("user")
 }
@@ -141,6 +170,7 @@ model JobProfile {
   requirements             String[]
   behavioural_competencies JobProfileBehaviouralCompetency[]
   reports_to               JobProfileReportsTo[]
+  position_request         PositionRequest[]
 
   career_group   CareerGroup?   @relation(fields: [career_group_id], references: [id])
   children       JobProfile[]   @relation("JobProfileParentChild")

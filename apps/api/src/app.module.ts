@@ -19,6 +19,7 @@ import { ExternalModule } from './modules/external/external.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
+import { PositionRequestModule } from './modules/position-request/position-request.module';
 import { SearchModule } from './modules/search/search.module';
 import { SiteMinderGuidTestApiModule } from './modules/site-minder-guid-test/siteminder-guid-test.module';
 import { validateAppConfig } from './utils/validate-app-config.util';
@@ -54,6 +55,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
       },
     }),
     AuthModule,
+    PositionRequestModule,
     JobProfileModule,
     ClassificationModule,
     JobFamilyModule,

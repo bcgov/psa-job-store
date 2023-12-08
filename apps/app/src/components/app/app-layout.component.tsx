@@ -4,6 +4,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   PartitionOutlined,
+  UserAddOutlined,
 } from '@ant-design/icons';
 import { Avatar, Button, Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
@@ -54,6 +55,11 @@ export const AppLayout = () => {
                     icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
                     title: 'Job Profiles',
                     to: '/job-profiles',
+                  },
+                  {
+                    icon: <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
+                    title: 'My Positions',
+                    to: '/my-positions',
                   },
                   // {
                   //   icon: <StarOutlined style={{ fontSize: '1.25rem' }} />,
