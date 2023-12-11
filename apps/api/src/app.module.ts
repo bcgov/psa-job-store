@@ -4,6 +4,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
+import { ScheduleModule } from '@nestjs/schedule';
 import { Request } from 'express';
 import { LoggerModule } from 'nestjs-pino';
 import { v4 as uuidv4 } from 'uuid';
@@ -53,6 +54,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
         };
       },
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     JobProfileModule,
     ClassificationModule,

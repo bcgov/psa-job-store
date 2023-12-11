@@ -13,6 +13,9 @@ export class ClassificationOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   code?: keyof typeof SortOrder;
 
+  @Field(() => SortOrder, { nullable: true })
+  name?: keyof typeof SortOrder;
+
   @Field(() => ClassificationCountOrderByAggregateInput, { nullable: true })
   _count?: ClassificationCountOrderByAggregateInput;
 

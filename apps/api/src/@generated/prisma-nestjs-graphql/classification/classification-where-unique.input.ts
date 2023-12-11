@@ -4,8 +4,6 @@ import { ClassificationWhereInput } from './classification-where.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
 import { JobProfileReportsToListRelationFilter } from '../job-profile-reports-to/job-profile-reports-to-list-relation-filter.input';
-import { EmployeeListRelationFilter } from '../employee/employee-list-relation-filter.input';
-import { PositionListRelationFilter } from '../position/position-list-relation-filter.input';
 
 @InputType()
 export class ClassificationWhereUniqueInput {
@@ -24,15 +22,12 @@ export class ClassificationWhereUniqueInput {
   @Field(() => StringFilter, { nullable: true })
   code?: StringFilter;
 
+  @Field(() => StringFilter, { nullable: true })
+  name?: StringFilter;
+
   @Field(() => JobProfileListRelationFilter, { nullable: true })
   job_profiles?: JobProfileListRelationFilter;
 
   @Field(() => JobProfileReportsToListRelationFilter, { nullable: true })
   reportees?: JobProfileReportsToListRelationFilter;
-
-  @Field(() => EmployeeListRelationFilter, { nullable: true })
-  employees?: EmployeeListRelationFilter;
-
-  @Field(() => PositionListRelationFilter, { nullable: true })
-  positions?: PositionListRelationFilter;
 }

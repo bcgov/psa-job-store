@@ -12,6 +12,9 @@ export class ClassificationGroupBy {
   @Field(() => String, { nullable: false })
   code!: string;
 
+  @Field(() => String, { nullable: false })
+  name!: string;
+
   @Field(() => ClassificationCountAggregate, { nullable: true })
   _count?: ClassificationCountAggregate;
 
