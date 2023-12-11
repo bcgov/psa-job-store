@@ -22,10 +22,16 @@ export interface BehaviouralCompetencyData {
 interface BehaviouralComptencyPickerProps {
   onAdd: (competencyData: BehaviouralCompetencyData) => void;
   onCancel: () => void;
+  filterIds: number[];
   style?: CSSProperties;
 }
 
-const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({ onAdd, onCancel, style }) => {
+const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
+  onAdd,
+  onCancel,
+  filterIds,
+  style,
+}) => {
   const [selectedGroup, setSelectedGroup] = useState<string>('');
   const [selectedName, setSelectedName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -52,10 +58,9 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
       {formatEnumString(group)}
     </Option>
   ));
-
   // Generate name options based on the selected group
   const nameOptions = data?.behaviouralComptencies
-    .filter((c) => c.group === selectedGroup)
+    .filter((c) => c.group === selectedGroup && !filterIds.includes(c.id))
     .map((competency) => {
       return (
         <Option key={competency.id} value={competency.name}>
