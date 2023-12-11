@@ -1151,6 +1151,7 @@ const WizardEditProfile = forwardRef(
                   <BehaviouralComptencyPicker
                     onAdd={addBehaviouralCompetency}
                     onCancel={() => setPickerVisible(false)}
+                    filterIds={behavioural_competencies_fields.map((b) => b.behavioural_competency.id)}
                     style={{ marginTop: '20px' }}
                   />
                 ) : (

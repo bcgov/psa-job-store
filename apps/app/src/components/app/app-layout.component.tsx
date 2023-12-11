@@ -8,82 +8,83 @@ import {
 import { Avatar, Button, Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
+import { AppFooter } from './footer.component';
+import { AppHeader } from './header.component';
 import { SiderNav } from './sider-nav/sider-nav.component';
 
-const { Content, Footer, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 export const AppLayout = () => {
   const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', true);
 
   return (
-    <Layout hasSider style={{ height: '100vh' }}>
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        collapsedWidth="3.5rem"
-        onCollapse={setCollapsed}
-        trigger={null}
-        style={{
-          boxShadow: '2px 0 5px 0 #CCC',
-          zIndex: 1000,
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <Avatar shape="square" style={{ margin: '0.5rem 0 0.5rem 0.75rem', flexShrink: 0 }}>
-            PSA
-          </Avatar>
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', flex: 'auto' }}>
-            <SiderNav
-              collapsed={collapsed}
-              items={[
-                {
-                  icon: <HomeOutlined style={{ fontSize: '1.25rem' }} />,
-                  title: 'Home',
-                  to: '/',
-                },
-                {
-                  icon: <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
-                  title: 'Org Chart',
-                  to: '/org-chart',
-                },
-                {
-                  icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
-                  title: 'Job Profiles',
-                  to: '/job-profiles',
-                },
-                // {
-                //   icon: <StarOutlined style={{ fontSize: '1.25rem' }} />,
-                //   title: 'Wizard',
-                //   to: '/wizard',
-                // },
-              ]}
-            />
+    <Layout style={{ height: '100vh' }}>
+      <AppHeader></AppHeader>
+      <Layout hasSider style={{ height: '100%' }}>
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          collapsedWidth="3.5rem"
+          onCollapse={setCollapsed}
+          trigger={null}
+          style={{
+            boxShadow: '2px 0 5px 0 #CCC',
+            zIndex: 1000,
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <Avatar shape="square" style={{ margin: '0.5rem 0 0.5rem 0.75rem', flexShrink: 0 }}>
+              PSA
+            </Avatar>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', flex: 'auto' }}>
+              <SiderNav
+                collapsed={collapsed}
+                items={[
+                  {
+                    icon: <HomeOutlined style={{ fontSize: '1.25rem' }} />,
+                    title: 'Home',
+                    to: '/',
+                  },
+                  {
+                    icon: <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
+                    title: 'Org Chart',
+                    to: '/org-chart',
+                  },
+                  {
+                    icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
+                    title: 'Job Profiles',
+                    to: '/job-profiles',
+                  },
+                  // {
+                  //   icon: <StarOutlined style={{ fontSize: '1.25rem' }} />,
+                  //   title: 'Wizard',
+                  //   to: '/wizard',
+                  // },
+                ]}
+              />
+            </div>
+            <div style={{ borderTop: '1px solid #CCC', flexShrink: 0 }}>
+              <Button
+                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => setCollapsed(!collapsed)}
+                type="link"
+                style={{
+                  color: '#000',
+                  fontSize: '16px',
+                  margin: '0.5rem 0 0.5rem 0.75rem',
+                }}
+              />
+            </div>
           </div>
-          <div style={{ borderTop: '1px solid #CCC', flexShrink: 0 }}>
-            <Button
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              type="link"
-              style={{
-                color: '#000',
-                fontSize: '16px',
-                margin: '0.5rem 0 0.5rem 0.75rem',
-              }}
-            />
+        </Sider>
+        <Layout>
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
+            <Content style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#FFF', flex: '1 0 auto' }}>
+              <Outlet />
+            </Content>
           </div>
-        </div>
-      </Sider>
-      <Layout style={{ height: '100vh' }}>
-        {/* Header */}
-        {/* <div style={{ height: '3.5rem' }}>
-          <div style={{ margin: 'auto', height: '100%' }}>Header</div>
-        </div> */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
-          <Content style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#FFF', flex: '1 0 auto' }}>
-            <Outlet />
-          </Content>
-          <Footer style={{ flexShrink: 0, padding: '1rem' }}>Footer</Footer>
-        </div>
+          <AppFooter></AppFooter>
+        </Layout>
       </Layout>
     </Layout>
   );

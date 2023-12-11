@@ -129,4 +129,111 @@ describe('JobProfiles', () => {
     // Assert that the expected number of elements are found
     expect(itSpecialistElements.length).toBeGreaterThanOrEqual(1);
   });
+
+  it('renders different layouts based on screen size xl', async () => {
+    // Mock useParams to simulate the presence of an ID
+    (useParams as jest.Mock).mockReturnValue({ id: '123' });
+
+    // First, mock the useBreakpoint hook for xl screen
+    (Grid.useBreakpoint as jest.Mock).mockReturnValue({ xl: true });
+
+    // Render the component under test for xl screen
+    const { getByTestId: getByTestIdXL, unmount: unmountXL } = render(
+      <MemoryRouter>
+        <JobProfiles searchParams={new URLSearchParams()} />
+      </MemoryRouter>,
+    );
+
+    // Expectations for xl screen
+    expect(getByTestIdXL('job-profile-search')).toBeInTheDocument();
+    expect(getByTestIdXL('job-profile-search-results')).toBeInTheDocument();
+    expect(getByTestIdXL('job-profile')).toBeInTheDocument(); // or any other elements specific to xl layout
+
+    unmountXL();
+
+    // Now, mock the useBreakpoint hook for non-xl screen
+    (Grid.useBreakpoint as jest.Mock).mockReturnValue({ xl: false });
+
+    // Render the component under test for non-xl screen
+    const { getByTestId: getByTestIdNonXL, queryByTestId: queryByTestIdNonXL } = render(
+      <MemoryRouter>
+        <JobProfiles searchParams={new URLSearchParams()} />
+      </MemoryRouter>,
+    );
+
+    // Expectations for non-xl screen
+    expect(getByTestIdNonXL('job-profile-search')).toBeInTheDocument();
+    expect(queryByTestIdNonXL('job-profile-search-results')).not.toBeInTheDocument();
+    expect(getByTestIdNonXL('job-profile')).toBeInTheDocument(); // or any other elements that should not be present in non-xl layout
+  });
+
+  it('renders different layouts based on screen size xl - no profile selected', async () => {
+    // Mock useParams to simulate the presence of an ID
+    (useParams as jest.Mock).mockReturnValue({});
+
+    // First, mock the useBreakpoint hook for xl screen
+    (Grid.useBreakpoint as jest.Mock).mockReturnValue({ xl: true });
+
+    // Render the component under test for xl screen
+    const { getByTestId: getByTestIdXL, unmount: unmountXL } = render(
+      <MemoryRouter>
+        <JobProfiles searchParams={new URLSearchParams()} />
+      </MemoryRouter>,
+    );
+
+    // Expectations for xl screen
+    expect(getByTestIdXL('job-profile-search')).toBeInTheDocument();
+    expect(getByTestIdXL('job-profile-search-results')).toBeInTheDocument();
+    expect(getByTestIdXL('job-profile-empty')).toBeInTheDocument(); // or any other elements specific to xl layout
+
+    unmountXL();
+
+    // Now, mock the useBreakpoint hook for non-xl screen
+    (Grid.useBreakpoint as jest.Mock).mockReturnValue({ xl: false });
+
+    // Render the component under test for non-xl screen
+    const { getByTestId: getByTestIdNonXL, queryByTestId: queryByTestIdNonXL } = render(
+      <MemoryRouter>
+        <JobProfiles searchParams={new URLSearchParams()} />
+      </MemoryRouter>,
+    );
+
+    // Expectations for non-xl screen
+    expect(getByTestIdNonXL('job-profile-search')).toBeInTheDocument();
+    expect(getByTestIdNonXL('job-profile-search-results')).toBeInTheDocument();
+    expect(queryByTestIdNonXL('job-profile-empty')).not.toBeInTheDocument(); // or any other elements that should not be present in non-xl layout
+  });
+
+  it('displays error state when data fetch fails', () => {
+    expect('proper error handling').toBe('implemented');
+
+    // (useParams as jest.Mock).mockReturnValue({ id: '123' });
+    // (Grid.useBreakpoint as jest.Mock).mockReturnValue({ xl: true });
+    // (useLazyGetJobProfilesQuery as jest.Mock).mockReturnValue([jest.fn(), { error: 'Error fetching data', data: null, isLoading: false }]);
+
+    // const { getByText } = render(
+    //   <MemoryRouter>
+    //     <JobProfiles searchParams={new URLSearchParams()} />
+    //   </MemoryRouter>,
+    // );
+
+    // expect(getByText('Error fetching data')).toBeInTheDocument();
+  });
+
+  it('displays loading state when data is fetching', () => {
+    expect('loading state').toBe('implemented');
+
+    // (useParams as jest.Mock).mockReturnValue({ id: '123' });
+    // (Grid.useBreakpoint as jest.Mock).mockReturnValue({ xl: true });
+    // (useLazyGetJobProfilesQuery as jest.Mock).mockReturnValue([jest.fn(), { data: null, isLoading: true }]);
+
+    // const { getByTestId } = render(
+    //   <MemoryRouter>
+    //     <JobProfiles searchParams={new URLSearchParams()} />
+    //   </MemoryRouter>,
+    // );
+
+    // // Assuming there's a test ID for the loading component
+    // expect(getByTestId('loading-indicator')).toBeInTheDocument();
+  });
 });

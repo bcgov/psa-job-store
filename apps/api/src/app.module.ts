@@ -21,6 +21,7 @@ import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
 import { SearchModule } from './modules/search/search.module';
+import { SiteMinderGuidTestApiModule } from './modules/site-minder-guid-test/siteminder-guid-test.module';
 import { validateAppConfig } from './utils/validate-app-config.util';
 
 @Module({
@@ -62,6 +63,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     BehaviouralComptencyModule,
     ExternalModule,
     SearchModule,
+    SiteMinderGuidTestApiModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],

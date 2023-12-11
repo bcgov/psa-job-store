@@ -43,6 +43,7 @@ export const JobProfileSearch = () => {
   const location = useLocation();
 
   const organizationData = useGetOrganizationsQuery().data?.organizations;
+  console.log('organizationData: ', useGetOrganizationsQuery());
   const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
   const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
   const classificationData = useGetClassificationsQuery().data?.classifications;
@@ -161,6 +162,7 @@ export const JobProfileSearch = () => {
                   }}
                 >
                   <label
+                    data-testid={`label-${filter.title}`}
                     style={{
                       position: 'absolute',
                       top: '-12px',
@@ -178,6 +180,7 @@ export const JobProfileSearch = () => {
                     allowClear
                     // aria-label={filter.title}
                     data-cy={`${filter.title}-filter`}
+                    data-testid={`${filter.title}-filter`}
                     id={filter.title}
                     placeholder={filter.title}
                     options={filterData[filter.title]}

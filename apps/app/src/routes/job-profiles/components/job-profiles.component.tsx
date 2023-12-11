@@ -117,7 +117,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     return params.id ? (
       <JobProfile onUseProfile={onUseProfile} />
     ) : (
-      <div style={{ marginTop: '16rem' }}>
+      <div style={{ marginTop: '16rem' }} data-testid="job-profile-empty">
         <Empty
           description={
             <Space direction="vertical" style={{ userSelect: 'none' }}>
