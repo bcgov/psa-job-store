@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Popover, Space, Typography } from 'antd';
+import { Button, Card, Col, Popover, Row, Typography } from 'antd';
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Connection, Edge, Handle, NodeProps, Position } from 'reactflow';
@@ -52,11 +52,14 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
           size="small"
           style={{ border: '1px solid #A1A1A1', cursor: 'pointer' }}
           title={
-            <Space>
-              <Text ellipsis>
-                {data.title} {data.classification?.code}
-              </Text>
-            </Space>
+            <Row style={{ width: '100%' }} gutter={8}>
+              <Col span={18}>
+                <Text ellipsis>{data.title}</Text>
+              </Col>
+              <Col span={6}>
+                <Text ellipsis>{data.classification?.code}</Text>
+              </Col>
+            </Row>
           }
         >
           Employee: {data.employees.length}
