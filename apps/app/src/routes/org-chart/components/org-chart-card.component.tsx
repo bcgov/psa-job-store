@@ -28,19 +28,25 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
   //   onEnd,
   // });
 
+  console.log('data: ', data);
+
   return (
     <>
       <Handle type="target" position={Position.Top} onConnect={onConnect} />
       <Popover
         placement="bottom"
         trigger="click"
-        content={
-          <Link to="/wizard">
-            <Button type="default" icon={<PlusOutlined />}>
-              Create a New Position
-            </Button>
-          </Link>
-        }
+        content={() => {
+          console.log(data.employees);
+
+          return (
+            <Link to="/wizard">
+              <Button type="default" icon={<PlusOutlined />}>
+                Create a New Position
+              </Button>
+            </Link>
+          );
+        }}
       >
         <Card
           size="small"
@@ -48,14 +54,22 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
           title={
             <Space>
               <Text ellipsis>
-                {data.title} {data.classification}
+                {data.title} {data.classification?.code}
               </Text>
             </Space>
           }
         >
-          Employee: {data.employee_name}
+          Employee: {data.employees.length}
           <br />
-          Position: {data.number}
+          Employees:
+          <ul>
+            {data.employees.map((e: any) => (
+              <>
+                <b>{e.name}</b>,
+              </>
+            ))}
+          </ul>
+          Position: {data.id}
         </Card>
       </Popover>
 

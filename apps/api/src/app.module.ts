@@ -4,6 +4,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
+import { ScheduleModule } from '@nestjs/schedule';
 import { Request } from 'express';
 import { LoggerModule } from 'nestjs-pino';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,7 +15,6 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
-import { BIModule } from './modules/bi/bi.module';
 import { ClassificationModule } from './modules/classification/classification.module';
 import { ExternalModule } from './modules/external/external.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
@@ -53,8 +53,8 @@ import { validateAppConfig } from './utils/validate-app-config.util';
         };
       },
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
-    BIModule,
     JobProfileModule,
     ClassificationModule,
     JobFamilyModule,

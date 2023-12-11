@@ -23,7 +23,7 @@ const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
 const nodeWidth = 300;
-const nodeHeight = 125;
+const nodeHeight = 200;
 
 const getLayoutedElements = (nodes: any, edges: any, direction = 'TB') => {
   const isHorizontal = direction === 'LR';

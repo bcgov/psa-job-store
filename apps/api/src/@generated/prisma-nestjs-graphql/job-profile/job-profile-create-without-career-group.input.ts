@@ -9,7 +9,7 @@ import { JobProfileReportsToCreateNestedManyWithoutJob_profileInput } from '../j
 import { JobProfileCreateNestedManyWithoutParentInput } from './job-profile-create-nested-many-without-parent.input';
 import { ClassificationCreateNestedOneWithoutJob_profilesInput } from '../classification/classification-create-nested-one-without-job-profiles.input';
 import { JobFamilyCreateNestedOneWithoutProfilesInput } from '../job-family/job-family-create-nested-one-without-profiles.input';
-import { OrganizationCreateNestedOneWithoutJob_provilesInput } from '../organization/organization-create-nested-one-without-job-proviles.input';
+import { OrganizationCreateNestedOneWithoutJob_profilesInput } from '../organization/organization-create-nested-one-without-job-profiles.input';
 import { UserCreateNestedOneWithoutJob_profilesInput } from '../user/user-create-nested-one-without-job-profiles.input';
 import { JobProfileCreateNestedOneWithoutChildrenInput } from './job-profile-create-nested-one-without-children.input';
 import { JobRoleCreateNestedOneWithoutProfilesInput } from '../job-role/job-role-create-nested-one-without-profiles.input';
@@ -55,8 +55,8 @@ export class JobProfileCreateWithoutCareer_groupInput {
   @Field(() => JobFamilyCreateNestedOneWithoutProfilesInput, { nullable: true })
   family?: JobFamilyCreateNestedOneWithoutProfilesInput;
 
-  @Field(() => OrganizationCreateNestedOneWithoutJob_provilesInput, { nullable: true })
-  organization?: OrganizationCreateNestedOneWithoutJob_provilesInput;
+  @Field(() => OrganizationCreateNestedOneWithoutJob_profilesInput, { nullable: true })
+  organization?: OrganizationCreateNestedOneWithoutJob_profilesInput;
 
   @Field(() => UserCreateNestedOneWithoutJob_profilesInput, { nullable: true })
   owner?: UserCreateNestedOneWithoutJob_profilesInput;

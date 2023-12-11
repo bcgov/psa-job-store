@@ -8,11 +8,5 @@ export class OrganizationCount {
   departments?: number;
 
   @Field(() => Int, { nullable: false })
-  positions?: number;
-
-  @Field(() => Int, { nullable: false })
-  employees?: number;
-
-  @Field(() => Int, { nullable: false })
-  job_proviles?: number;
+  job_profiles?: number;
 }

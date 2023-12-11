@@ -1,8 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Organization } from '../organization/organization.model';
-import { Position } from '../position/position.model';
-import { Employee } from '../employee/employee.model';
 
 @ObjectType()
 export class Department {
@@ -17,10 +15,4 @@ export class Department {
 
   @Field(() => Organization, { nullable: false })
   organization?: Organization;
-
-  @Field(() => [Position], { nullable: true })
-  positions?: Array<Position>;
-
-  @Field(() => [Employee], { nullable: true })
-  employees?: Array<Employee>;
 }
