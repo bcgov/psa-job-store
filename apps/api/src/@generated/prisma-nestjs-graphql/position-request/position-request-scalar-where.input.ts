@@ -42,7 +42,7 @@ export class PositionRequestScalarWhereInput {
   position_number?: IntFilter;
 
   @Field(() => StringFilter, { nullable: true })
-  classification?: StringFilter;
+  classification_id?: StringFilter;
 
   @Field(() => StringFilter, { nullable: true })
   submission_id?: StringFilter;

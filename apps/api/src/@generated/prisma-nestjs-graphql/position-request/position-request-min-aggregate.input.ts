@@ -25,7 +25,7 @@ export class PositionRequestMinAggregateInput {
   position_number?: true;
 
   @Field(() => Boolean, { nullable: true })
-  classification?: true;
+  classification_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   submission_id?: true;

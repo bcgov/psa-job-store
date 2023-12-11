@@ -3,6 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
+import { ClassificationCreateNestedOneWithoutPositionRequestInput } from '../classification/classification-create-nested-one-without-position-request.input';
 
 @InputType()
 export class PositionRequestCreateWithoutParent_job_profileInput {
@@ -24,12 +25,12 @@ export class PositionRequestCreateWithoutParent_job_profileInput {
   @Field(() => Int, { nullable: true })
   position_number?: number;
 
-  @Field(() => String, { nullable: false })
-  classification!: string;
-
   @Field(() => String, { nullable: true })
   submission_id?: string;
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;
+
+  @Field(() => ClassificationCreateNestedOneWithoutPositionRequestInput, { nullable: false })
+  classification!: ClassificationCreateNestedOneWithoutPositionRequestInput;
 }

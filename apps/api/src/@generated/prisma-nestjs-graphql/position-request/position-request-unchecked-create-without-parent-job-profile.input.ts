@@ -28,7 +28,7 @@ export class PositionRequestUncheckedCreateWithoutParent_job_profileInput {
   position_number?: number;
 
   @Field(() => String, { nullable: false })
-  classification!: string;
+  classification_id!: string;
 
   @Field(() => String, { nullable: true })
   submission_id?: string;

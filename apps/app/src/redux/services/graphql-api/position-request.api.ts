@@ -59,15 +59,23 @@ export interface UpdatePositionRequestInput {
   status?: string;
 }
 
+export interface GetPositionRequestsArgs {
+  search?: string;
+  where?: Record<string, any>;
+  orderBy?: Record<string, any>;
+  take?: number;
+  skip?: number;
+}
+
 export const positionRequestApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
-    getPositionRequests: build.query<GetPositionsRequestResponse, void>({
+    getPositionRequests: build.query<GetPositionsRequestResponse, GetPositionRequestsArgs | undefined>({
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      query: () => {
+      query: (args: GetPositionRequestsArgs = {}) => {
         return {
           document: gql`
-            query PositionRequests {
-              positionRequests {
+            query PositionRequests($search: String, $where: PositionRequestWhereInput, $take: Int, $skip: Int) {
+              positionRequests(search: $search, where: $where, take: $take, skip: $skip) {
                 id
                 step
                 reports_to_position_id
@@ -79,8 +87,15 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 submission_id
                 status
               }
+              positionRequestsCount(search: $search, where: $where)
             }
           `,
+          variables: {
+            search: args.search,
+            where: args.where,
+            skip: args.skip,
+            take: args.take,
+          },
         };
       },
     }),
@@ -141,6 +156,26 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    // getPositionRequestUserClassifications: build.query<GetPositionRequestResponse, void>({
+    //   query: () => {
+    //     return {
+    //       document: gql`
+    //         mutation UpdatePositionRequest($id: Int!, $updateData: PositionRequestUpdateInput!) {
+    //           updatePositionRequest(id: $id, updateData: $updateData) {
+    //             id
+    //           }
+    //         }
+    //       `,
+    //       variables: {
+    //         id: input.id,
+    //         updateData: {
+    //           ...input,
+    //           id: undefined,
+    //         },
+    //       },
+    //     };
+    //   },
+    // }),
   }),
 });
 

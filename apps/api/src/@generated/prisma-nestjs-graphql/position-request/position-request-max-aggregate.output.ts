@@ -27,7 +27,7 @@ export class PositionRequestMaxAggregate {
   position_number?: number;
 
   @Field(() => String, { nullable: true })
-  classification?: string;
+  classification_id?: string;
 
   @Field(() => String, { nullable: true })
   submission_id?: string;

@@ -28,3 +28,12 @@
 .tableWithHeader .ant-table, .tableWithHeader table, .tableWithHeader th{
     border-radius: 0 !important;
 }
+
+/* .customTagControlled .ant-select-selection-item {
+    display: none;
+  }
+  
+  .customTagControlled .ant-select-selector {
+    height: 32px !important;
+    align-items: center;
+  } */

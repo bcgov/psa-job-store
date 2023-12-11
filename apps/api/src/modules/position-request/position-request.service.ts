@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Field, ObjectType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
-import {
-  FindManyPositionRequestArgs,
-  PositionRequestCreateInput,
-  PositionRequestUpdateInput,
-} from '../../@generated/prisma-nestjs-graphql';
+import { PositionRequestCreateInput, PositionRequestUpdateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../prisma/prisma.service';
+import { FindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -28,6 +25,8 @@ export class PositionRequestResponse {
 
 @Injectable()
 export class PositionRequestApiService {
+  // ...(searchResultIds != null && { id: { in: searchResultIds } }),
+
   constructor(private readonly prisma: PrismaService) {}
 
   async createPositionRequest(data: PositionRequestCreateInput) {
@@ -52,9 +51,11 @@ export class PositionRequestApiService {
     });
   }
 
-  async getPositionRequests(args: FindManyPositionRequestArgs, userId: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getPositionRequests({ search, where, ...args }: FindManyPositionRequestWithSearch, userId: string) {
     return this.prisma.positionRequest.findMany({
       where: {
+        ...where,
         user_id: userId,
       },
       select: {
@@ -76,6 +77,24 @@ export class PositionRequestApiService {
     return this.prisma.positionRequest.findUnique({
       where: { id: id, user_id: userId },
     });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getPositionRequestCount({ search, where }: FindManyPositionRequestWithSearch, userId: string) {
+    // const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+
+    return await this.prisma.positionRequest.count({
+      where: {
+        // ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        user_id: userId,
+        ...where,
+      },
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getPositionRequestUserClassifications(userId: string) {
+    throw new Error('Method not implemented.');
   }
 
   async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {

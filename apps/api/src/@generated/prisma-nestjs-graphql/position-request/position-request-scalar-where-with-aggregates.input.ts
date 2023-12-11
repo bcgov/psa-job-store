@@ -42,7 +42,7 @@ export class PositionRequestScalarWhereWithAggregatesInput {
   position_number?: IntWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
-  classification?: StringWithAggregatesFilter;
+  classification_id?: StringWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   submission_id?: StringWithAggregatesFilter;

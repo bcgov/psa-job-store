@@ -43,13 +43,14 @@ model PositionRequest {
   user_id                String                 @db.Uuid
   title                  String
   position_number        Int?
-  classification         String
+  classification_id      String
   submission_id          String?
   status                 PositionRequestStatus?
 
   // TODO: AL-146
   // user        User       @relation(fields: [user_id], references: [id])
-  parent_job_profile JobProfile @relation(fields: [parent_job_profile_id], references: [id])
+  classification     Classification @relation(fields: [classification_id], references: [id])
+  parent_job_profile JobProfile     @relation(fields: [parent_job_profile_id], references: [id])
 
   @@map("position_request")
 }
@@ -262,12 +263,13 @@ model Department {
 }
 
 model Classification {
-  id           String                @id
-  code         String
-  job_profiles JobProfile[]
-  reportees    JobProfileReportsTo[]
-  employees    Employee[]
-  positions    Position[]
+  id              String                @id
+  code            String
+  job_profiles    JobProfile[]
+  reportees       JobProfileReportsTo[]
+  employees       Employee[]
+  positions       Position[]
+  PositionRequest PositionRequest[]
 
   @@map("classification")
 }
