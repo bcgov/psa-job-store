@@ -1,8 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { OrganizationUpdateOneRequiredWithoutDepartmentsNestedInput } from '../organization/organization-update-one-required-without-departments-nested.input';
-import { PositionUpdateManyWithoutDepartmentNestedInput } from '../position/position-update-many-without-department-nested.input';
-import { EmployeeUpdateManyWithoutDepartmentNestedInput } from '../employee/employee-update-many-without-department-nested.input';
 
 @InputType()
 export class DepartmentUpdateInput {
@@ -14,10 +12,4 @@ export class DepartmentUpdateInput {
 
   @Field(() => OrganizationUpdateOneRequiredWithoutDepartmentsNestedInput, { nullable: true })
   organization?: OrganizationUpdateOneRequiredWithoutDepartmentsNestedInput;
-
-  @Field(() => PositionUpdateManyWithoutDepartmentNestedInput, { nullable: true })
-  positions?: PositionUpdateManyWithoutDepartmentNestedInput;
-
-  @Field(() => EmployeeUpdateManyWithoutDepartmentNestedInput, { nullable: true })
-  employees?: EmployeeUpdateManyWithoutDepartmentNestedInput;
 }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Popover, Space, Typography } from 'antd';
+import { Button, Card, Col, Popover, Row, Typography } from 'antd';
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Connection, Edge, Handle, NodeProps, Position } from 'reactflow';
@@ -28,34 +28,51 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
   //   onEnd,
   // });
 
+  console.log('data: ', data);
+
   return (
     <>
       <Handle type="target" position={Position.Top} onConnect={onConnect} />
       <Popover
         placement="bottom"
         trigger="click"
-        content={
-          <Link to="/wizard">
-            <Button type="default" icon={<PlusOutlined />}>
-              Create a New Position
-            </Button>
-          </Link>
-        }
+        content={() => {
+          console.log(data.employees);
+
+          return (
+            <Link to="/wizard">
+              <Button type="default" icon={<PlusOutlined />}>
+                Create a New Position
+              </Button>
+            </Link>
+          );
+        }}
       >
         <Card
           size="small"
           style={{ border: '1px solid #A1A1A1', cursor: 'pointer' }}
           title={
-            <Space>
-              <Text ellipsis>
-                {data.title} {data.classification}
-              </Text>
-            </Space>
+            <Row style={{ width: '100%' }} gutter={8}>
+              <Col span={18}>
+                <Text ellipsis>{data.title}</Text>
+              </Col>
+              <Col span={6}>
+                <Text ellipsis>{data.classification?.code}</Text>
+              </Col>
+            </Row>
           }
         >
-          Employee: {data.employee_name}
+          Employee: {data.employees.length}
           <br />
-          Position: {data.number}
+          Employees:
+          <ul>
+            {data.employees.map((e: any) => (
+              <>
+                <b>{e.name}</b>,
+              </>
+            ))}
+          </ul>
+          Position: {data.id}
         </Card>
       </Popover>
 

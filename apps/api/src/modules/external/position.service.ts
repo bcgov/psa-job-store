@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { FindManyPositionArgs } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -57,15 +56,15 @@ export class PositionService {
     // }
   }
 
-  async getPositions(args?: FindManyPositionArgs) {
-    return this.prisma.position.findMany({
-      ...args,
-      include: {
-        classification: true,
-        department: true,
-        employees: true,
-        organization: true,
-      },
-    });
-  }
+  // async getPositions(args?: FindManyPositionArgs) {
+  //   return this.prisma.position.findMany({
+  //     ...args,
+  //     include: {
+  //       classification: true,
+  //       department: true,
+  //       employees: true,
+  //       organization: true,
+  //     },
+  //   });
+  // }
 }

@@ -11,5 +11,8 @@ export class ClassificationCountAggregate {
   code!: number;
 
   @Field(() => Int, { nullable: false })
+  name!: number;
+
+  @Field(() => Int, { nullable: false })
   _all!: number;
 }

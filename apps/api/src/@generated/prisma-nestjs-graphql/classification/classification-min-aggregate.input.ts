@@ -8,4 +8,7 @@ export class ClassificationMinAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   code?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  name?: true;
 }

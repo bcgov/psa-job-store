@@ -244,9 +244,7 @@ model Organization {
   name String
 
   departments  Department[]
-  positions    Position[]
-  employees    Employee[]
-  job_proviles JobProfile[]
+  job_profiles JobProfile[]
 
   @@map("organization")
 }
@@ -257,8 +255,6 @@ model Department {
   name            String
 
   organization Organization @relation(fields: [organization_id], references: [id])
-  positions    Position[]
-  employees    Employee[]
 
   @@map("department")
 }
@@ -266,63 +262,62 @@ model Department {
 model Classification {
   id           String                @id
   code         String
+  name         String
   job_profiles JobProfile[]
   reportees    JobProfileReportsTo[]
-  employees    Employee[]
-  positions    Position[]
 
   @@map("classification")
 }
 
-enum EmployeeStatus {
-  ACTIVE
-  LEAVE
-  LEAVE_WO_PAY
-}
+// enum EmployeeStatus {
+//   ACTIVE
+//   LEAVE
+//   LEAVE_WO_PAY
+// }
 
-model Position {
-  id                 String  @id
-  classification_id  String
-  department_id      String
-  organization_id    String
-  supervisor_id      String
-  title              String
-  job_profile_number String?
-  is_empty           Boolean
-  is_vacant          Boolean
+// model Position {
+//   id                 String  @id
+//   classification_id  String
+//   department_id      String
+//   organization_id    String
+//   supervisor_id      String
+//   title              String
+//   job_profile_number String?
+//   is_empty           Boolean
+//   is_vacant          Boolean
 
-  classification Classification     @relation(fields: [classification_id], references: [id])
-  department     Department         @relation(fields: [department_id], references: [id])
-  organization   Organization       @relation(fields: [organization_id], references: [id])
-  employees      PositionEmployee[]
+//   classification Classification     @relation(fields: [classification_id], references: [id])
+//   department     Department         @relation(fields: [department_id], references: [id])
+//   organization   Organization       @relation(fields: [organization_id], references: [id])
+//   employees      PositionEmployee[]
 
-  @@map("position")
-}
+//   @@map("position")
+// }
 
-model PositionEmployee {
-  employee_id String
-  position_id String
+// model PositionEmployee {
+//   employee_id String
+//   position_id String
 
-  employee Employee @relation(fields: [employee_id], references: [id])
-  position Position @relation(fields: [position_id], references: [id])
+//   employee Employee @relation(fields: [employee_id], references: [id])
+//   position Position @relation(fields: [position_id], references: [id])
 
-  @@id([employee_id, position_id])
-  @@map("position_employee")
-}
+//   @@id([employee_id, position_id])
+//   @@map("position_employee")
+// }
 
-model Employee {
-  id                String @id
-  classification_id String
-  department_id     String
-  organization_id   String
+// model Employee {
+//   id                String @id
+//   classification_id String
+//   department_id     String
+//   organization_id   String
 
-  name   String
-  status EmployeeStatus?
+//   name   String
+//   status EmployeeStatus?
 
-  classification Classification     @relation(fields: [classification_id], references: [id])
-  department     Department         @relation(fields: [department_id], references: [id])
-  organization   Organization       @relation(fields: [organization_id], references: [id])
-  positions      PositionEmployee[]
+//   classification Classification     @relation(fields: [classification_id], references: [id])
+//   department     Department         @relation(fields: [department_id], references: [id])
+//   organization   Organization       @relation(fields: [organization_id], references: [id])
+//   positions      PositionEmployee[]
 
-  @@map("employee")
-}
+//   @@map("employee")
+// }

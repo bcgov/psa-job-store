@@ -9,4 +9,7 @@ export class ClassificationMinOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   code?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  name?: keyof typeof SortOrder;
 }
