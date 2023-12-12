@@ -42,7 +42,9 @@ export class PositionRequestApiService {
         submission_id: 'SUBM_ID',
         status: 'DRAFT',
         title: data.title,
-        classification: data.classification,
+        // TODO: AL-146
+        // classification: data.classification,
+        classification_id: data.classification_id,
       },
       // include: {
       //   user: true,
@@ -53,7 +55,7 @@ export class PositionRequestApiService {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequests({ search, where, ...args }: FindManyPositionRequestWithSearch, userId: string) {
-    return this.prisma.positionRequest.findMany({
+    const positionRequests = await this.prisma.positionRequest.findMany({
       where: {
         ...where,
         user_id: userId,
@@ -66,11 +68,38 @@ export class PositionRequestApiService {
         user_id: true,
         title: true,
         position_number: true,
-        classification: true,
+        classification_id: true,
         submission_id: true,
         status: true,
       },
     });
+
+    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
+
+    // Collect all unique classification IDs from the position requests
+    const classificationIds = [...new Set(positionRequests.map((pr) => pr.classification_id))];
+
+    // Fetch classifications based on the collected IDs
+    const classifications = await this.prisma.classification.findMany({
+      where: {
+        id: { in: classificationIds },
+      },
+      select: {
+        id: true,
+        code: true,
+      },
+    });
+
+    // Create a map for easy lookup
+    const classificationMap = new Map(classifications.map((c) => [c.id, c.code]));
+
+    // Merge position requests with classification codes
+    const mergedResults = positionRequests.map((pr) => ({
+      ...pr,
+      classification_code: classificationMap.get(pr.classification_id),
+    }));
+
+    return mergedResults;
   }
 
   async getPositionRequest(id: number, userId: string) {
@@ -93,8 +122,43 @@ export class PositionRequestApiService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getPositionRequestUserClassifications(userId: string) {
-    throw new Error('Method not implemented.');
+  async getPositionRequestUserClassifications(userId: string) {
+    const positionRequests = await this.prisma.positionRequest.findMany({
+      where: {
+        user_id: userId,
+      },
+      select: {
+        id: true,
+        parent_job_profile_id: true,
+        step: true,
+        reports_to_position_id: true,
+        user_id: true,
+        title: true,
+        position_number: true,
+        classification_id: true,
+        submission_id: true,
+        status: true,
+      },
+    });
+
+    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
+
+    // Collect all unique classification IDs from the position requests
+    const classificationIds = [...new Set(positionRequests.map((pr) => pr.classification_id))];
+
+    // Fetch classifications based on the collected IDs
+    const classifications = await this.prisma.classification.findMany({
+      where: {
+        id: { in: classificationIds },
+      },
+      select: {
+        id: true,
+        code: true,
+      },
+    });
+
+    console.log('returning: ', classifications);
+    return classifications;
   }
 
   async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
@@ -117,8 +181,11 @@ export class PositionRequestApiService {
       updatePayload.title = updateData.title;
     }
 
-    if (updateData.classification !== undefined) {
-      updatePayload.classification = updateData.classification;
+    // if (updateData.classification !== undefined) {
+    //   updatePayload.classification = updateData.classification;
+    // }
+    if (updateData.classification_id !== undefined) {
+      updatePayload.classification_id = updateData.classification_id;
     }
 
     if (updateData.status !== undefined) {

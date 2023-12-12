@@ -45,6 +45,9 @@ export class PositionRequestScalarWhereWithAggregatesInput {
   classification_id?: StringWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
+  classification_code?: StringWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
   submission_id?: StringWithAggregatesFilter;
 
   @Field(() => EnumPositionRequestStatusWithAggregatesFilter, { nullable: true })

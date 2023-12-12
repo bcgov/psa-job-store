@@ -28,6 +28,9 @@ export class PositionRequestMinAggregateInput {
   classification_id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  classification_code?: true;
+
+  @Field(() => Boolean, { nullable: true })
   submission_id?: true;
 
   @Field(() => Boolean, { nullable: true })

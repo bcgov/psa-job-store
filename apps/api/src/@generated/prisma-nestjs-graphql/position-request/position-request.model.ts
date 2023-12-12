@@ -3,7 +3,6 @@ import { ObjectType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
-import { Classification } from '../classification/classification.model';
 import { JobProfile } from '../job-profile/job-profile.model';
 
 @ObjectType()
@@ -36,13 +35,13 @@ export class PositionRequest {
   classification_id!: string;
 
   @Field(() => String, { nullable: true })
+  classification_code!: string | null;
+
+  @Field(() => String, { nullable: true })
   submission_id!: string | null;
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status!: keyof typeof PositionRequestStatus | null;
-
-  @Field(() => Classification, { nullable: false })
-  classification?: Classification;
 
   @Field(() => JobProfile, { nullable: false })
   parent_job_profile?: JobProfile;

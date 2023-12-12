@@ -7,7 +7,6 @@ import { JsonFilter } from '../prisma/json-filter.input';
 import { UuidFilter } from '../prisma/uuid-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { EnumPositionRequestStatusFilter } from '../prisma/enum-position-request-status-filter.input';
-import { ClassificationRelationFilter } from '../classification/classification-relation-filter.input';
 import { JobProfileRelationFilter } from '../job-profile/job-profile-relation-filter.input';
 
 @InputType()
@@ -49,13 +48,13 @@ export class PositionRequestWhereUniqueInput {
   classification_id?: StringFilter;
 
   @Field(() => StringFilter, { nullable: true })
+  classification_code?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
   submission_id?: StringFilter;
 
   @Field(() => EnumPositionRequestStatusFilter, { nullable: true })
   status?: EnumPositionRequestStatusFilter;
-
-  @Field(() => ClassificationRelationFilter, { nullable: true })
-  classification?: ClassificationRelationFilter;
 
   @Field(() => JobProfileRelationFilter, { nullable: true })
   parent_job_profile?: JobProfileRelationFilter;

@@ -83,7 +83,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 user_id
                 title
                 position_number
-                classification
+                classification_code
                 submission_id
                 status
               }
@@ -156,30 +156,25 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    // getPositionRequestUserClassifications: build.query<GetPositionRequestResponse, void>({
-    //   query: () => {
-    //     return {
-    //       document: gql`
-    //         mutation UpdatePositionRequest($id: Int!, $updateData: PositionRequestUpdateInput!) {
-    //           updatePositionRequest(id: $id, updateData: $updateData) {
-    //             id
-    //           }
-    //         }
-    //       `,
-    //       variables: {
-    //         id: input.id,
-    //         updateData: {
-    //           ...input,
-    //           id: undefined,
-    //         },
-    //       },
-    //     };
-    //   },
-    // }),
+    getPositionRequestUserClassifications: build.query<GetPositionRequestResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query PositionRequestUserClassifications {
+              positionRequestUserClassifications {
+                id
+                code
+              }
+            }
+          `,
+        };
+      },
+    }),
   }),
 });
 
 export const {
+  useGetPositionRequestUserClassificationsQuery,
   useGetPositionRequestsQuery,
   useLazyGetPositionRequestsQuery,
   useGetPositionRequestQuery,

@@ -45,6 +45,9 @@ export class PositionRequestScalarWhereInput {
   classification_id?: StringFilter;
 
   @Field(() => StringFilter, { nullable: true })
+  classification_code?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
   submission_id?: StringFilter;
 
   @Field(() => EnumPositionRequestStatusFilter, { nullable: true })

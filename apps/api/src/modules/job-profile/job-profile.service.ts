@@ -48,6 +48,18 @@ import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-
 // }
 
 // @InputType()
+// class OwnerConnectInput {
+//   @Field(() => Int)
+//   id!: number;
+// }
+
+// @InputType()
+// class OwnerInput {
+//   @Field(() => OwnerConnectInput)
+//   connect!: OwnerConnectInput;
+// }
+
+// @InputType()
 // export class JobProfileCreateInput {
 //   @Field(() => JobProfileState, { nullable: false })
 //   state!: keyof typeof JobProfileState;
@@ -78,6 +90,9 @@ import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-
 
 //   @Field(() => ClassificationInput, { nullable: false })
 //   classification!: ClassificationInput;
+
+//   @Field(() => OwnerInput, { nullable: false })
+//   owner!: OwnerInput;
 
 //   @Field(() => ParentInput, { nullable: true })
 //   parent?: ParentInput;
@@ -165,8 +180,9 @@ export class JobProfileService {
         family: data.family,
         organization: data.organization,
         owner: data.owner,
-        parent: data.parent,
         role: data.role,
+
+        parent: data.parent,
       },
     });
   }

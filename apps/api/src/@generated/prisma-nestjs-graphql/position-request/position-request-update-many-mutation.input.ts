@@ -25,6 +25,12 @@ export class PositionRequestUpdateManyMutationInput {
   position_number?: number;
 
   @Field(() => String, { nullable: true })
+  classification_id?: string;
+
+  @Field(() => String, { nullable: true })
+  classification_code?: string;
+
+  @Field(() => String, { nullable: true })
   submission_id?: string;
 
   @Field(() => PositionRequestStatus, { nullable: true })

@@ -32,6 +32,9 @@ export class PositionRequestCountAggregate {
   classification_id!: number;
 
   @Field(() => Int, { nullable: false })
+  classification_code!: number;
+
+  @Field(() => Int, { nullable: false })
   submission_id!: number;
 
   @Field(() => Int, { nullable: false })
