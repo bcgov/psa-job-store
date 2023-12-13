@@ -1,6 +1,7 @@
-import { Collapse } from 'antd';
+import { Collapse, Modal } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
@@ -10,12 +11,26 @@ import './wizard-review.page.css';
 
 export const WizardReviewPage = () => {
   const navigate = useNavigate();
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  const { wizardData, positionRequestId } = useWizardContext();
 
   const onNext = async () => {
-    navigate('/wizard/confirm');
+    try {
+      if (positionRequestId) {
+        await updatePositionRequest({ id: positionRequestId, step: 2 }).unwrap();
+        navigate('/wizard/confirm');
+      } else {
+        throw Error('Position request not found');
+      }
+    } catch (error) {
+      // Handle the error, possibly showing another modal
+      Modal.error({
+        title: 'Error Creating Position',
+        content: 'An unknown error occurred', //error.data?.message ||
+      });
+    }
   };
 
-  const { wizardData } = useWizardContext();
   const onBack = () => {
     navigate(-1);
   };
@@ -80,6 +95,7 @@ export const WizardReviewPage = () => {
         onToggleShowDiff={handleToggleShowDiff}
         showDiffToggle={true}
         showDiff={showDiff}
+        nextText="Save and Next"
       />
       <Collapse
         ref={collapseRef}

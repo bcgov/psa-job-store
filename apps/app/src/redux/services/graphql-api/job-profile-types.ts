@@ -77,12 +77,12 @@ export interface CreateJobProfileInput {
   number: number;
   context: string;
   overview: string;
-  accountabilities: Accountabilities;
   requirements: string[];
+  accountabilities: Accountabilities;
   behavioural_competencies?: BehaviouralCompetenciesInput;
   classification: ClassificationConnectInput;
-  state: string;
   parent: ParentConnectInput;
+  state: string;
 }
 
 export interface CreateJobProfileResponse {

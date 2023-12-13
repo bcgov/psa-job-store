@@ -5,6 +5,99 @@ import { ClassificationService } from '../classification/classification.service'
 import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 
+// @InputType()
+// class BehaviouralCompetencyConnectInput {
+//   @Field(() => Int)
+//   id!: number;
+// }
+
+// @InputType()
+// class BehaviouralCompetencyItemInput {
+//   @Field(() => BehaviouralCompetencyConnectInput)
+//   behavioural_competency!: BehaviouralCompetencyConnectInput;
+// }
+
+// @InputType()
+// class BehaviouralCompetenciesInput {
+//   @Field(() => [BehaviouralCompetencyItemInput])
+//   create!: BehaviouralCompetencyItemInput[];
+// }
+
+// @InputType()
+// class ClassificationConnectInput {
+//   @Field(() => String)
+//   id!: string;
+// }
+
+// @InputType()
+// class ClassificationInput {
+//   @Field(() => ClassificationConnectInput)
+//   connect!: ClassificationConnectInput;
+// }
+
+// @InputType()
+// class ParentConnectInput {
+//   @Field(() => Int)
+//   id!: number;
+// }
+
+// @InputType()
+// class ParentInput {
+//   @Field(() => ParentConnectInput)
+//   connect!: ParentConnectInput;
+// }
+
+// @InputType()
+// class OwnerConnectInput {
+//   @Field(() => Int)
+//   id!: number;
+// }
+
+// @InputType()
+// class OwnerInput {
+//   @Field(() => OwnerConnectInput)
+//   connect!: OwnerConnectInput;
+// }
+
+// @InputType()
+// export class JobProfileCreateInput {
+//   @Field(() => JobProfileState, { nullable: false })
+//   state!: keyof typeof JobProfileState;
+
+//   @Field(() => JobStream, { nullable: false })
+//   stream!: keyof typeof JobStream;
+
+//   @Field(() => String, { nullable: false })
+//   title!: string;
+
+//   @Field(() => Int, { nullable: true })
+//   number?: number;
+
+//   @Field(() => String, { nullable: false })
+//   context!: string;
+
+//   @Field(() => String, { nullable: false })
+//   overview!: string;
+
+//   @Field(() => [String], { nullable: true })
+//   requirements?: Array<string>;
+
+//   @Field(() => GraphQLJSON, { nullable: true })
+//   accountabilities?: any;
+
+//   @Field(() => BehaviouralCompetenciesInput, { nullable: true })
+//   behavioural_competencies?: BehaviouralCompetenciesInput;
+
+//   @Field(() => ClassificationInput, { nullable: false })
+//   classification!: ClassificationInput;
+
+//   @Field(() => OwnerInput, { nullable: false })
+//   owner!: OwnerInput;
+
+//   @Field(() => ParentInput, { nullable: true })
+//   parent?: ParentInput;
+// }
+
 @Injectable()
 export class JobProfileService {
   constructor(
@@ -77,29 +170,19 @@ export class JobProfileService {
         title: data.title,
         context: data.context,
         overview: data.overview,
-        classification: data.classification,
         number: data.number,
         accountabilities: data.accountabilities,
         requirements: data.requirements,
+        classification: data.classification,
         behavioural_competencies: data.behavioural_competencies,
         reports_to: data.reports_to,
         children: data.children,
         family: data.family,
         organization: data.organization,
         owner: data.owner,
-        parent: data.parent,
         role: data.role,
-      },
-      include: {
-        behavioural_competencies: true,
-        reports_to: true,
-        children: true,
-        classification: true,
-        family: true,
-        organization: true,
-        owner: true,
-        parent: true,
-        role: true,
+
+        parent: data.parent,
       },
     });
   }

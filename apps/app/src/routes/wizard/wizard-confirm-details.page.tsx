@@ -8,6 +8,7 @@ import {
   TrackedFieldArrayItem,
 } from '../../redux/services/graphql-api/job-profile-types';
 import { useCreateJobProfileMutation } from '../../redux/services/graphql-api/job-profile.api';
+import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -70,6 +71,8 @@ export const WizardConfirmDetailsPage = () => {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [createJobProfile] = useCreateJobProfileMutation();
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  const { positionRequestId } = useWizardContext();
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -95,7 +98,26 @@ export const WizardConfirmDetailsPage = () => {
       // console.log('createInput: ', inpt);
       await createJobProfile(inpt);
     }
-    navigate('/wizard/result');
+
+    try {
+      if (positionRequestId) {
+        await updatePositionRequest({
+          id: positionRequestId,
+          step: 3,
+          status: 'COMPLETED',
+          position_number: 123456,
+        }).unwrap();
+        navigate('/wizard/result');
+      } else {
+        throw Error('Position request not found');
+      }
+    } catch (error) {
+      // Handle the error, possibly showing another modal
+      Modal.error({
+        title: 'Error Creating Position',
+        content: 'An unknown error occurred', //error.data?.message ||
+      });
+    }
   };
 
   const handleCancel = () => {

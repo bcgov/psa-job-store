@@ -5,6 +5,7 @@ import { JobStream } from '../prisma/job-stream.enum';
 import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyCreateNestedManyWithoutJob_profileInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-create-nested-many-without-job-profile.input';
+import { PositionRequestCreateNestedManyWithoutParent_job_profileInput } from '../position-request/position-request-create-nested-many-without-parent-job-profile.input';
 import { CareerGroupCreateNestedOneWithoutProfilesInput } from '../career-group/career-group-create-nested-one-without-profiles.input';
 import { JobProfileCreateNestedManyWithoutParentInput } from './job-profile-create-nested-many-without-parent.input';
 import { ClassificationCreateNestedOneWithoutJob_profilesInput } from '../classification/classification-create-nested-one-without-job-profiles.input';
@@ -42,6 +43,9 @@ export class JobProfileCreateWithoutReports_toInput {
 
   @Field(() => JobProfileBehaviouralCompetencyCreateNestedManyWithoutJob_profileInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyCreateNestedManyWithoutJob_profileInput;
+
+  @Field(() => PositionRequestCreateNestedManyWithoutParent_job_profileInput, { nullable: true })
+  position_request?: PositionRequestCreateNestedManyWithoutParent_job_profileInput;
 
   @Field(() => CareerGroupCreateNestedOneWithoutProfilesInput, { nullable: true })
   career_group?: CareerGroupCreateNestedOneWithoutProfilesInput;

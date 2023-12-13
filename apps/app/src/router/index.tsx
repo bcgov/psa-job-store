@@ -1,4 +1,4 @@
-import { FileTextOutlined, HomeOutlined, PartitionOutlined, StarOutlined } from '@ant-design/icons';
+import { FileTextOutlined, HomeOutlined, PartitionOutlined, StarOutlined, UserAddOutlined } from '@ant-design/icons';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
 import { RouteGuard } from '../components/guards/route.guard';
@@ -8,6 +8,8 @@ import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/home.page';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
+import { MyPositionsRoute } from '../routes/my-positions';
+import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { WizardRoute } from '../routes/wizard';
@@ -45,6 +47,20 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 element: <HomePage />,
+              },
+            ],
+          },
+          {
+            path: '/my-positions',
+            element: <MyPositionsRoute />,
+            handle: {
+              breadcrumb: () => 'My Positions',
+              icon: <UserAddOutlined />,
+            },
+            children: [
+              {
+                index: true,
+                element: <MyPositionsPage />,
               },
             ],
           },
