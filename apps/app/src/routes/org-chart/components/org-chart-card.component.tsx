@@ -28,8 +28,6 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
   //   onEnd,
   // });
 
-  console.log('data: ', data);
-
   return (
     <>
       <Handle type="target" position={Position.Top} onConnect={onConnect} />
@@ -62,17 +60,28 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
             </Row>
           }
         >
-          Employee: {data.employees.length}
-          <br />
-          Employees:
+          {/* Employees:
           <ul>
             {data.employees.map((e: any) => (
               <>
                 <b>{e.name}</b>,
               </>
             ))}
-          </ul>
-          Position: {data.id}
+          </ul> */}
+          {data.employees.length > 0 ? (
+            <Text strong title={`Employees:\n${data.employees.map((e: any) => `${e.name}\n`)}`}>
+              {data.employees[0].name}
+              {data.employees.length > 1 ? <Text type="secondary"> +{data.employees.length - 1}</Text> : <></>}
+            </Text>
+          ) : (
+            <Text type="secondary" strong italic>
+              Vacant
+            </Text>
+          )}
+          <br />
+          Dept. ID: {data.department.id}
+          <br />
+          Position: {data.id.replace(/^0+/, '')}
         </Card>
       </Popover>
 
