@@ -81,7 +81,7 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
           <br />
           Dept. ID: {data.department.id}
           <br />
-          Position: {data.id.replace(/^0+/, '')}
+          Position: {data.id}
         </Card>
       </Popover>
 
