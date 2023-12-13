@@ -82,6 +82,7 @@ export class PositionRequestApiService {
         user_id: userId,
       },
       ...args,
+      orderBy: [...(args.orderBy || []), { id: 'desc' }],
       select: {
         id: true,
         parent_job_profile_id: true,
@@ -121,7 +122,7 @@ export class PositionRequestApiService {
       classification_code: classificationMap.get(pr.classification_id),
     }));
 
-    return mergedResults;
+    return mergedResults; //.reverse();
   }
 
   async getPositionRequest(id: number, userId: string) {
@@ -197,7 +198,6 @@ export class PositionRequestApiService {
       },
     });
 
-    console.log('returning: ', classifications);
     return classifications;
   }
 
@@ -211,6 +211,10 @@ export class PositionRequestApiService {
 
     if (updateData.reports_to_position_id !== undefined) {
       updatePayload.reports_to_position_id = updateData.reports_to_position_id;
+    }
+
+    if (updateData.position_number !== undefined) {
+      updatePayload.position_number = updateData.position_number;
     }
 
     if (updateData.profile_json !== undefined) {

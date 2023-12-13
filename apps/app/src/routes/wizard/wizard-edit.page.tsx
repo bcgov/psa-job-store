@@ -23,8 +23,15 @@ export interface InputData {
 export const WizardEditPage = () => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
-  const { wizardData, setWizardData, classificationsData, setClassificationsData, errors, setErrors } =
-    useWizardContext();
+  const {
+    wizardData,
+    setWizardData,
+    classificationsData,
+    setClassificationsData,
+    errors,
+    setErrors,
+    setPositionRequestId,
+  } = useWizardContext();
   const { profileId } = useParams();
   const [createPositionRequest] = useCreatePositionRequestMutation();
 
@@ -199,7 +206,8 @@ export const WizardEditPage = () => {
       // console.log('positionRequestInput: ', positionRequestInput);
       // console.log('formData: ', formData);
 
-      await createPositionRequest(positionRequestInput).unwrap();
+      const resp = await createPositionRequest(positionRequestInput).unwrap();
+      setPositionRequestId(resp.createPositionRequest);
 
       // Handle the response if needed, or navigate to the next page
       navigate('/wizard/review');
@@ -210,8 +218,6 @@ export const WizardEditPage = () => {
         content: 'An unknown error occurred', //error.data?.message ||
       });
     }
-
-    navigate('/wizard/review');
   };
 
   return (

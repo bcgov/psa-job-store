@@ -40,6 +40,7 @@ export interface GetPositionRequestResponse {
 
 export interface GetPositionsRequestResponse {
   positionRequests: GetPositionRequestResponse[];
+  positionRequestsCount: number;
 }
 
 export interface GetPositionRequestArgs {
@@ -69,6 +70,15 @@ export interface GetPositionRequestsArgs {
   orderBy?: Record<string, any>;
   take?: number;
   skip?: number;
+}
+
+export interface GetPositionRequestUserClassificationsResponse {
+  positionRequestUserClassifications: PositionRequestUserClassification[];
+}
+
+export interface PositionRequestUserClassification {
+  id: string;
+  code: string;
 }
 
 export const positionRequestApi = graphqlApi.injectEndpoints({
@@ -151,15 +161,15 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (input: UpdatePositionRequestInput) => {
         return {
           document: gql`
-            mutation UpdatePositionRequest($id: Int!, $updateData: PositionRequestUpdateInput!) {
-              updatePositionRequest(id: $id, updateData: $updateData) {
+            mutation UpdatePositionRequest($id: Int!, $updateInput: PositionRequestUpdateInput!) {
+              updatePositionRequest(id: $id, updateInput: $updateInput) {
                 id
               }
             }
           `,
           variables: {
             id: input.id,
-            updateData: {
+            updateInput: {
               ...input,
               id: undefined,
             },
@@ -167,7 +177,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    getPositionRequestUserClassifications: build.query<GetPositionRequestResponse, void>({
+    getPositionRequestUserClassifications: build.query<GetPositionRequestUserClassificationsResponse, void>({
       query: () => {
         return {
           document: gql`

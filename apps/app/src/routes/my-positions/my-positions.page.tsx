@@ -3,8 +3,9 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button, Card, Checkbox, Col, Row, Select, Space, Table, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
+import { SortOrder } from 'antd/es/table/interface';
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/app/page-header.component';
 import {
   useGetPositionRequestUserClassificationsQuery,
@@ -13,23 +14,27 @@ import {
 import './my-positions.page.css';
 
 export const MyPositionsPage = () => {
-  const { data: classifications, error, refetch } = useGetPositionRequestUserClassificationsQuery();
+  const { data: classifications, refetch } = useGetPositionRequestUserClassificationsQuery();
 
   const [trigger, { data, isLoading }] = useLazyGetPositionRequestsQuery();
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10); // Default page size, adjust as needed
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
-  const [sortField, setSortField] = useState(null);
-  const [sortOrder, setSortOrder] = useState(null);
+  const [sortField, setSortField] = useState<null | string>(null);
+  const [sortOrder, setSortOrder] = useState<null | string>(null);
 
   // HANDLE SEARCH QUERY
 
-  const [classificationFilterData, setClassificationOptions] = useState([]);
+  interface ClassificationOption {
+    label: string;
+    value: string;
+  }
+
+  const [classificationFilterData, setClassificationOptions] = useState<ClassificationOption[]>([]);
+
   useEffect(() => {
     if (classifications?.positionRequestUserClassifications) {
       const newOptions = classifications.positionRequestUserClassifications.map((classification) => ({
@@ -95,7 +100,6 @@ export const MyPositionsPage = () => {
   }, [updateData]);
 
   useEffect(() => {
-    console.log('data: ', data);
     if (data && data.positionRequestsCount !== undefined) {
       setTotalResults(data.positionRequestsCount);
     }
@@ -103,8 +107,7 @@ export const MyPositionsPage = () => {
 
   // END HANDLE SEARCH QUERY
 
-  const handleTableChange = (pagination, filters, sorter) => {
-    console.log('sorter: ', sorter);
+  const handleTableChange = (pagination: any, _filters: any, sorter: any) => {
     const newPage = pagination.current;
     const newPageSize = pagination.pageSize;
     const newSortField = sorter.field;
@@ -115,8 +118,6 @@ export const MyPositionsPage = () => {
     setSortField(newSortField);
     setSortOrder(newSortOrder);
 
-    console.log('table change setSortOrder: ', newSortOrder);
-
     // Update URL parameters
     const newSearchParams = new URLSearchParams(searchParams);
     if (newPage !== 1) newSearchParams.set('page', newPage.toString());
@@ -125,35 +126,29 @@ export const MyPositionsPage = () => {
     if (newPageSize !== 10) newSearchParams.set('pageSize', newPageSize.toString());
     else newSearchParams.delete('pageSize');
 
+    console.log('sorter: ', sorter);
     if (newSortOrder) {
       newSearchParams.set('sortField', newSortField);
       newSearchParams.set('sortOrder', newSortOrder === 'ascend' ? 'ASC' : 'DESC');
     } else {
-      console.log('unsetting..');
       newSearchParams.delete('sortField');
       newSearchParams.delete('sortOrder');
       setSortField(null);
     }
-    console.log('handleTableChange setSearchParams: ', newSearchParams);
     setSearchParams(newSearchParams);
   };
 
   const handleSearch = (_selectedKeys: any, _confirm: any) => {
-    console.log('handleSearch: ', _selectedKeys);
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('search', _selectedKeys);
     setSearchParams(newSearchParams);
   };
 
-  const getSortOrder = (fieldName) => {
-    // console.log(
-    //   'getSortOrder: ',
-    //   fieldName,
-    //   sortField,
-    //   sortOrder,
-    //   sortField === fieldName ? (sortOrder === 'ASC' ? 'ascend' : 'descend') : null,
-    // );
-    return sortField === fieldName ? (sortOrder === 'ASC' ? 'ascend' : 'descend') : null;
+  const getSortOrder = (fieldName: string): SortOrder | undefined => {
+    if (sortField === fieldName) {
+      return sortOrder === 'ASC' ? 'ascend' : 'descend';
+    }
+    return undefined;
   };
 
   const columns = [
@@ -208,7 +203,6 @@ export const MyPositionsPage = () => {
       dataIndex: 'submission_id',
       key: 'submission_id',
     },
-    // Add more columns as needed
   ];
 
   const statusFilterData = [
@@ -220,16 +214,21 @@ export const MyPositionsPage = () => {
   // tag handling
 
   // Unified state for all selections
-  const [allSelections, setAllSelections] = useState([]);
+  interface Selection {
+    value: string;
+    type: string;
+  }
+
+  const [allSelections, setAllSelections] = useState<Selection[]>([]);
 
   // Add a new selection
-  const addSelection = (value, type) => {
+  const addSelection = (value: any, type: any) => {
     const newSelection = { value, type };
     setAllSelections([...allSelections, newSelection]);
   };
 
   // Remove a selection
-  const removeSelection = (removedValue, type) => {
+  const removeSelection = (removedValue: any, type: any) => {
     setAllSelections(
       allSelections.filter((selection) => !(selection.value === removedValue && selection.type === type)),
     );
@@ -239,11 +238,11 @@ export const MyPositionsPage = () => {
   const selectedStatus = allSelections.filter((s) => s.type === 'status').map((s) => s.value);
   const selectedClassification = allSelections.filter((s) => s.type === 'classification').map((s) => s.value);
 
-  const tagRender = (props) => {
-    return null;
+  const tagRender = () => {
+    return <></>;
   };
 
-  const dropdownRender = (menu, type) => {
+  const dropdownRender = (type: any) => {
     const options = type === 'status' ? statusFilterData : classificationFilterData;
     const selectedValues = type === 'status' ? selectedStatus : selectedClassification;
     return (
@@ -270,7 +269,7 @@ export const MyPositionsPage = () => {
     );
   };
 
-  const findLabel = (value, type) => {
+  const findLabel = (value: any, type: any) => {
     if (type === 'status') {
       return statusFilterData.find((option) => option.value === value)?.label || value;
     }
@@ -292,7 +291,7 @@ export const MyPositionsPage = () => {
       ...classificationParams.map((value) => ({ value, type: 'classification' })),
     ];
     setAllSelections(initialSelections);
-  }, []); // Removed searchParams from dependencies
+  }, [searchParams]); // Removed searchParams from dependencies
 
   useEffect(() => {
     // Sync state with URL parameters for selections and pagination
@@ -310,7 +309,6 @@ export const MyPositionsPage = () => {
 
     // Update URL parameters if needed
     const newSearchParams = new URLSearchParams();
-    console.log('current search params: ', searchParams);
     if (statusValues) newSearchParams.set('status', statusValues);
     if (classificationValues) newSearchParams.set('classification', classificationValues);
 
@@ -335,7 +333,6 @@ export const MyPositionsPage = () => {
       setCurrentPage(1);
       newSearchParams.set('page', (1).toString());
       if (searchParams.toString() !== newSearchParams.toString()) {
-        console.log('setting search params A: ', newSearchParams);
         setSearchParams(newSearchParams);
         return;
       }
@@ -343,7 +340,6 @@ export const MyPositionsPage = () => {
 
     // Only update search params if there's a change
     if (searchParams.toString() !== newSearchParams.toString()) {
-      console.log('setting search params: ', newSearchParams);
       setSearchParams(newSearchParams);
     }
 
@@ -418,7 +414,7 @@ export const MyPositionsPage = () => {
                 <Col>
                   <Select
                     tagRender={tagRender}
-                    dropdownRender={(menu) => dropdownRender(menu, 'status')}
+                    dropdownRender={() => dropdownRender('status')}
                     className="customTagControlled"
                     placeholder="Status"
                     options={statusFilterData}
@@ -426,7 +422,7 @@ export const MyPositionsPage = () => {
                     // onChange={setSelectedStatus}
                     onChange={(newValues) => {
                       // Add new selections and remove deselected ones
-                      newValues.forEach((val) => {
+                      newValues.forEach((val: any) => {
                         if (!selectedStatus.includes(val)) addSelection(val, 'status');
                       });
                       selectedStatus.forEach((val) => {
@@ -438,7 +434,7 @@ export const MyPositionsPage = () => {
                 <Col>
                   <Select
                     tagRender={tagRender}
-                    dropdownRender={(menu) => dropdownRender(menu, 'classification')}
+                    dropdownRender={() => dropdownRender('classification')}
                     className="customTagControlled"
                     placeholder="Classification"
                     options={classificationFilterData}
@@ -446,7 +442,7 @@ export const MyPositionsPage = () => {
                     // onChange={setSelectedClassification}
                     onChange={(newValues) => {
                       // Similar logic as for status
-                      newValues.forEach((val) => {
+                      newValues.forEach((val: any) => {
                         if (!selectedClassification.includes(val)) addSelection(val, 'classification');
                       });
                       selectedClassification.forEach((val) => {

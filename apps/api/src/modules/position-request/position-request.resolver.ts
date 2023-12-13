@@ -59,7 +59,6 @@ export class PositionRequestApiResolver {
     @CurrentUser() { id: userId }: Express.User,
     @Args() args?: FindManyPositionRequestWithSearch,
   ) {
-    console.log('args: ', args);
     return this.positionRequestService.getPositionRequests(args, userId);
   }
 

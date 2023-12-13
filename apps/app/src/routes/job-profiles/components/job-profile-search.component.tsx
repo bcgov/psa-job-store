@@ -43,7 +43,6 @@ export const JobProfileSearch = () => {
   const location = useLocation();
 
   const organizationData = useGetOrganizationsQuery().data?.organizations;
-  console.log('organizationData: ', useGetOrganizationsQuery());
   const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
   const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
   const classificationData = useGetClassificationsQuery().data?.classifications;
