@@ -10,14 +10,18 @@ export interface JobProfileConnect {
   id: number;
 }
 
+interface JobProfileConnectItem {
+  connect: JobProfileConnect;
+}
+
 export interface CreatePositionRequestInput {
   step: number;
   reports_to_position_id: number;
   profile_json: any;
-  user: UserConnect;
-  parent_job_profile: JobProfileConnect;
+  parent_job_profile: JobProfileConnectItem;
   title: string;
-  classification: string;
+  classification_id: string;
+  classification_code: string;
 }
 
 export interface GetPositionRequestResponse {
@@ -74,8 +78,14 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (args: GetPositionRequestsArgs = {}) => {
         return {
           document: gql`
-            query PositionRequests($search: String, $where: PositionRequestWhereInput, $take: Int, $skip: Int) {
-              positionRequests(search: $search, where: $where, take: $take, skip: $skip) {
+            query PositionRequests(
+              $search: String
+              $where: PositionRequestWhereInput
+              $take: Int
+              $skip: Int
+              $orderBy: [PositionRequestOrderByWithRelationAndSearchRelevanceInput!]
+            ) {
+              positionRequests(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
                 id
                 step
                 reports_to_position_id
@@ -95,6 +105,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
             where: args.where,
             skip: args.skip,
             take: args.take,
+            orderBy: args.orderBy,
           },
         };
       },

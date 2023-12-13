@@ -3,7 +3,7 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button, Card, Checkbox, Col, Row, Select, Space, Table, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/app/page-header.component';
 import {
@@ -22,8 +22,10 @@ export const MyPositionsPage = () => {
   const location = useLocation();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(2); // Default page size, adjust as needed
+  const [pageSize, setPageSize] = useState(10); // Default page size, adjust as needed
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
+  const [sortField, setSortField] = useState(null);
+  const [sortOrder, setSortOrder] = useState(null);
 
   // HANDLE SEARCH QUERY
 
@@ -32,16 +34,32 @@ export const MyPositionsPage = () => {
     if (classifications?.positionRequestUserClassifications) {
       const newOptions = classifications.positionRequestUserClassifications.map((classification) => ({
         label: classification.code,
-        value: classification.code,
+        value: classification.id,
       }));
       setClassificationOptions(newOptions);
     }
   }, [classifications]);
 
-  useEffect(() => {
+  const updateData = useCallback(() => {
     const search = searchParams.get('search');
     const statusFilter = searchParams.get('status');
     const classificationFilter = searchParams.get('classification');
+
+    const sortParams = sortField
+      ? {
+          orderBy: [
+            {
+              [sortField]:
+                sortField === 'title'
+                  ? sortOrder === 'ascend'
+                    ? 'asc'
+                    : 'desc'
+                  : { sort: sortOrder === 'ascend' ? 'asc' : 'desc' },
+            },
+          ],
+        }
+      : {};
+
     trigger({
       ...(search != null && { search }),
       where: {
@@ -58,7 +76,7 @@ export const MyPositionsPage = () => {
           ...(classificationFilter != null
             ? [
                 {
-                  classification: {
+                  classification_id: {
                     in: JSON.parse(`[${classificationFilter.split(',').map((v) => `"${v}"`)}]`),
                   },
                 },
@@ -66,21 +84,76 @@ export const MyPositionsPage = () => {
             : []),
         ],
       },
+      ...sortParams,
       skip: (currentPage - 1) * pageSize,
       take: pageSize,
     });
-  }, [searchParams, trigger, currentPage, pageSize]);
+  }, [searchParams, trigger, currentPage, pageSize, sortField, sortOrder]);
 
   useEffect(() => {
-    if (data && data.jobProfilesCount !== undefined) {
-      setTotalResults(data.jobProfilesCount);
+    updateData();
+  }, [updateData]);
+
+  useEffect(() => {
+    console.log('data: ', data);
+    if (data && data.positionRequestsCount !== undefined) {
+      setTotalResults(data.positionRequestsCount);
     }
   }, [data]);
 
   // END HANDLE SEARCH QUERY
 
+  const handleTableChange = (pagination, filters, sorter) => {
+    console.log('sorter: ', sorter);
+    const newPage = pagination.current;
+    const newPageSize = pagination.pageSize;
+    const newSortField = sorter.field;
+    const newSortOrder = sorter.order;
+
+    setCurrentPage(newPage);
+    setPageSize(newPageSize);
+    setSortField(newSortField);
+    setSortOrder(newSortOrder);
+
+    console.log('table change setSortOrder: ', newSortOrder);
+
+    // Update URL parameters
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (newPage !== 1) newSearchParams.set('page', newPage.toString());
+    else newSearchParams.delete('page');
+
+    if (newPageSize !== 10) newSearchParams.set('pageSize', newPageSize.toString());
+    else newSearchParams.delete('pageSize');
+
+    if (newSortOrder) {
+      newSearchParams.set('sortField', newSortField);
+      newSearchParams.set('sortOrder', newSortOrder === 'ascend' ? 'ASC' : 'DESC');
+    } else {
+      console.log('unsetting..');
+      newSearchParams.delete('sortField');
+      newSearchParams.delete('sortOrder');
+      setSortField(null);
+    }
+    console.log('handleTableChange setSearchParams: ', newSearchParams);
+    setSearchParams(newSearchParams);
+  };
+
   const handleSearch = (_selectedKeys: any, _confirm: any) => {
-    // Implement the search logic
+    console.log('handleSearch: ', _selectedKeys);
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('search', _selectedKeys);
+    setSearchParams(newSearchParams);
+  };
+
+  const getSortOrder = (fieldName) => {
+    // console.log(
+    //   'getSortOrder: ',
+    //   fieldName,
+    //   sortField,
+    //   sortOrder,
+    //   sortField === fieldName ? (sortOrder === 'ASC' ? 'ascend' : 'descend') : null,
+    // );
+    return sortField === fieldName ? (sortOrder === 'ASC' ? 'ascend' : 'descend') : null;
   };
 
   const columns = [
@@ -89,6 +162,7 @@ export const MyPositionsPage = () => {
       dataIndex: 'title',
       key: 'title',
       sorter: true,
+      defaultSortOrder: getSortOrder('title'),
       render: (text: any) => <a href="#!">{text}</a>,
     },
     {
@@ -96,6 +170,7 @@ export const MyPositionsPage = () => {
       dataIndex: 'status',
       key: 'status',
       sorter: true,
+      defaultSortOrder: getSortOrder('status'),
       render: (status: any) => {
         const color = status === 'DRAFT' ? 'gray' : status === 'IN_REVIEW' ? 'blue' : 'green';
         return (
@@ -113,16 +188,22 @@ export const MyPositionsPage = () => {
       },
     },
     {
+      sorter: true,
+      defaultSortOrder: getSortOrder('position_number'),
       title: 'Position #',
       dataIndex: 'position_number',
       key: 'position_number',
     },
     {
+      sorter: true,
+      defaultSortOrder: getSortOrder('classification_code'),
       title: 'Classification',
       dataIndex: 'classification_code',
       key: 'classification_code',
     },
     {
+      sorter: true,
+      defaultSortOrder: getSortOrder('submission_id'),
       title: 'Submission ID',
       dataIndex: 'submission_id',
       key: 'submission_id',
@@ -158,26 +239,6 @@ export const MyPositionsPage = () => {
   const selectedStatus = allSelections.filter((s) => s.type === 'status').map((s) => s.value);
   const selectedClassification = allSelections.filter((s) => s.type === 'classification').map((s) => s.value);
 
-  // const [selectedStatus, setSelectedStatus] = useState([]);
-  // const [selectedClassification, setSelectedClassification] = useState([]);
-
-  // const handleStatusChange = (values: any) => {
-  //   setSelectedStatus(values);
-  // };
-
-  // const handleClassificationChange = (values: any) => {
-  //   setSelectedClassification(values);
-  // };
-
-  // const handleCloseTag = (removedTag, type) => {
-  //   const newTags =
-  //     type === 'status'
-  //       ? selectedStatus.filter((tag) => tag !== removedTag)
-  //       : selectedClassification.filter((tag) => tag !== removedTag);
-
-  //   type === 'status' ? setSelectedStatus(newTags) : setSelectedClassification(newTags);
-  // };
-
   const tagRender = (props) => {
     return null;
   };
@@ -209,6 +270,16 @@ export const MyPositionsPage = () => {
     );
   };
 
+  const findLabel = (value, type) => {
+    if (type === 'status') {
+      return statusFilterData.find((option) => option.value === value)?.label || value;
+    }
+    if (type === 'classification') {
+      return classificationFilterData.find((option) => option.value === value)?.label || value;
+    }
+    return value;
+  };
+
   useEffect(() => {
     const statusParams = decodeURIComponent(searchParams.get('status') || '')
       .split(',')
@@ -224,6 +295,7 @@ export const MyPositionsPage = () => {
   }, []); // Removed searchParams from dependencies
 
   useEffect(() => {
+    // Sync state with URL parameters for selections and pagination
     const statusValues = allSelections
       .filter((s) => s.type === 'status')
       .map((s) => s.value)
@@ -233,32 +305,92 @@ export const MyPositionsPage = () => {
       .map((s) => s.value)
       .join(',');
 
-    if (statusValues !== searchParams.get('status') || classificationValues !== searchParams.get('classification')) {
-      const newSearchParams = new URLSearchParams();
-      if (statusValues) {
-        newSearchParams.set('status', statusValues);
+    const pageFromURL = parseInt(searchParams.get('page') || '1', 10);
+    const pageSizeFromURL = parseInt(searchParams.get('pageSize') || '10', 10);
+
+    // Update URL parameters if needed
+    const newSearchParams = new URLSearchParams();
+    console.log('current search params: ', searchParams);
+    if (statusValues) newSearchParams.set('status', statusValues);
+    if (classificationValues) newSearchParams.set('classification', classificationValues);
+
+    const sortFromUrl = searchParams.get('sortField');
+    const sortOrderFromUrl = searchParams.get('sortOrder');
+
+    if (sortFromUrl) newSearchParams.set('sortField', sortFromUrl);
+    if (sortOrderFromUrl) newSearchParams.set('sortOrder', sortOrderFromUrl);
+
+    const statusChanged = newSearchParams.get('status') != searchParams.get('status');
+    const classificationChanged = newSearchParams.get('classification') != searchParams.get('classification');
+
+    if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
+
+    if (pageSize != 10) newSearchParams.set('pageSize', pageSizeFromURL.toString());
+
+    const searchFromURL = searchParams.get('search');
+    if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
+
+    if (statusChanged || classificationChanged) {
+      // filters changed - reset page
+      setCurrentPage(1);
+      newSearchParams.set('page', (1).toString());
+      if (searchParams.toString() !== newSearchParams.toString()) {
+        console.log('setting search params A: ', newSearchParams);
+        setSearchParams(newSearchParams);
+        return;
       }
-      if (classificationValues) {
-        newSearchParams.set('classification', classificationValues);
-      }
+    }
+
+    // Only update search params if there's a change
+    if (searchParams.toString() !== newSearchParams.toString()) {
+      console.log('setting search params: ', newSearchParams);
       setSearchParams(newSearchParams);
     }
-  }, [allSelections, searchParams, setSearchParams]);
 
-  const handleFilters = () => {
-    const basePath = getBasePath(location.pathname);
-    navigate({
-      pathname: basePath,
-      search: searchParams.toString(),
-    });
+    // Update component state for pagination and fetch data
+    if (currentPage !== pageFromURL || pageSize !== pageSizeFromURL) {
+      setCurrentPage(pageFromURL);
+      setPageSize(pageSizeFromURL);
+    }
+
+    if (sortFromUrl) setSortField(sortFromUrl);
+    if (sortOrderFromUrl) {
+      setSortOrder(sortOrderFromUrl == 'ASC' ? 'ascend' : 'descend');
+    }
+  }, [
+    allSelections,
+    searchParams,
+    setSearchParams,
+    currentPage,
+    pageSize,
+    sortField,
+    sortOrder,
+    setSortOrder,
+    setSortField,
+  ]);
+
+  const renderTableFooter = () => {
+    return (
+      <div>
+        Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
+        results
+      </div>
+    );
   };
 
-  const getBasePath = (path) => {
-    const pathParts = path.split('/');
-    if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
-      pathParts.pop();
-    }
-    return pathParts.join('/');
+  const clearFilters = () => {
+    setAllSelections([]);
+    setSearchParams(''); // Clear the search query
+    setCurrentPage(1); // Reset pagination to the first page
+
+    // Update the URL parameters
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set('page', '1');
+    newSearchParams.set('pageSize', pageSize.toString());
+    const searchFromUrl = searchParams.get('search');
+    if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
+
+    setSearchParams(newSearchParams);
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -323,31 +455,37 @@ export const MyPositionsPage = () => {
                     }}
                   />
                 </Col>
-                <Col>
-                  <Button type="primary">Find positions</Button>
-                </Col>
               </Row>
             </Col>
+            {allSelections.length > 0 && (
+              <Col style={{ marginTop: '10px', marginBottom: '10px' }}>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    margin: '8px',
+                    marginLeft: 0,
+                    paddingRight: '8px',
+                    borderRight: '2px solid rgba(0, 0, 0, 0.06)',
+                    marginRight: '10px',
+                  }}
+                >
+                  Applied filters
+                </span>
+                <Button onClick={clearFilters} type="link" style={{ padding: '0', fontWeight: 400 }}>
+                  Clear all filters
+                </Button>
+              </Col>
+            )}
           </Row>
           <Row>
             <Col>
-              {/* {selectedStatus.map((status) => (
-                <Tag closable onClose={() => handleCloseTag(status, 'status')} key={status}>
-                  {status}
-                </Tag>
-              ))}
-              {selectedClassification.map((classification) => (
-                <Tag closable onClose={() => handleCloseTag(classification, 'classification')} key={classification}>
-                  {classification}
-                </Tag>
-              ))} */}
               {allSelections.map((selection) => (
                 <Tag
                   key={`${selection.type}-${selection.value}`}
                   closable
                   onClose={() => removeSelection(selection.value, selection.type)}
                 >
-                  {selection.value}
+                  {findLabel(selection.value, selection.type)}
                 </Tag>
               ))}
             </Col>
@@ -375,9 +513,14 @@ export const MyPositionsPage = () => {
           dataSource={data?.positionRequests}
           rowKey="id"
           pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            total: totalResults,
             pageSizeOptions: ['10', '20', '50'],
             showSizeChanger: true,
           }}
+          onChange={handleTableChange}
+          footer={renderTableFooter}
         />
       </div>
     </>

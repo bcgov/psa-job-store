@@ -34,7 +34,7 @@ export class PositionRequestApiResolver {
     // TODO: AL-146 - replace below with above
     data.user_id = userId;
 
-    const newPositionRequest = await this.positionRequestService.createPositionRequest(data);
+    const newPositionRequest = await this.positionRequestService.createPositionRequest(data, userId);
     return newPositionRequest.id;
   }
 
@@ -59,6 +59,7 @@ export class PositionRequestApiResolver {
     @CurrentUser() { id: userId }: Express.User,
     @Args() args?: FindManyPositionRequestWithSearch,
   ) {
+    console.log('args: ', args);
     return this.positionRequestService.getPositionRequests(args, userId);
   }
 

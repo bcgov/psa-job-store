@@ -6,6 +6,7 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-update-many-without-job-profile-nested.input';
 import { JobProfileReportsToUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-update-many-without-job-profile-nested.input';
+import { PositionRequestUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-update-many-without-parent-job-profile-nested.input';
 import { CareerGroupUpdateOneWithoutProfilesNestedInput } from '../career-group/career-group-update-one-without-profiles-nested.input';
 import { JobProfileUpdateManyWithoutParentNestedInput } from './job-profile-update-many-without-parent-nested.input';
 import { ClassificationUpdateOneRequiredWithoutJob_profilesNestedInput } from '../classification/classification-update-one-required-without-job-profiles-nested.input';
@@ -45,6 +46,9 @@ export class JobProfileUpdateWithoutFamilyInput {
 
   @Field(() => JobProfileReportsToUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   reports_to?: JobProfileReportsToUpdateManyWithoutJob_profileNestedInput;
+
+  @Field(() => PositionRequestUpdateManyWithoutParent_job_profileNestedInput, { nullable: true })
+  position_request?: PositionRequestUpdateManyWithoutParent_job_profileNestedInput;
 
   @Field(() => CareerGroupUpdateOneWithoutProfilesNestedInput, { nullable: true })
   career_group?: CareerGroupUpdateOneWithoutProfilesNestedInput;

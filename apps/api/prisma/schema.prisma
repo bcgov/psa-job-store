@@ -40,7 +40,7 @@ model PositionRequest {
   reports_to_position_id Int
   parent_job_profile_id  Int
   profile_json           Json                   @db.JsonB
-  user_id                String                 @db.Uuid
+  user_id                String?                @db.Uuid
   title                  String
   position_number        Int?
   classification_id      String

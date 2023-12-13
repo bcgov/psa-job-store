@@ -29,7 +29,7 @@ export class PositionRequestApiService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async createPositionRequest(data: PositionRequestCreateInput) {
+  async createPositionRequest(data: PositionRequestCreateInput, userId: string) {
     return this.prisma.positionRequest.create({
       data: {
         step: data.step,
@@ -37,7 +37,7 @@ export class PositionRequestApiService {
         profile_json: data.profile_json,
         // TODO: AL-146
         // user: data.user,
-        user_id: data.user_id,
+        user_id: userId,
         parent_job_profile: data.parent_job_profile,
         submission_id: 'SUBM_ID',
         status: 'DRAFT',
@@ -55,11 +55,33 @@ export class PositionRequestApiService {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequests({ search, where, ...args }: FindManyPositionRequestWithSearch, userId: string) {
+    let searchConditions = {};
+    if (search) {
+      searchConditions = {
+        OR: [
+          {
+            title: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            submission_id: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
+
     const positionRequests = await this.prisma.positionRequest.findMany({
       where: {
+        ...searchConditions,
         ...where,
         user_id: userId,
       },
+      ...args,
       select: {
         id: true,
         parent_job_profile_id: true,
@@ -74,7 +96,7 @@ export class PositionRequestApiService {
       },
     });
 
-    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
+    // todo: AL-146 this should not be needed if the foreign key relationship is working properly in schema.prisma
 
     // Collect all unique classification IDs from the position requests
     const classificationIds = [...new Set(positionRequests.map((pr) => pr.classification_id))];
@@ -110,11 +132,29 @@ export class PositionRequestApiService {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequestCount({ search, where }: FindManyPositionRequestWithSearch, userId: string) {
-    // const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+    let searchConditions = {};
+    if (search) {
+      searchConditions = {
+        OR: [
+          {
+            title: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            submission_id: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
 
     return await this.prisma.positionRequest.count({
       where: {
-        // ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        ...searchConditions,
         user_id: userId,
         ...where,
       },

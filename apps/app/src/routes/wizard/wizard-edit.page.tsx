@@ -8,6 +8,7 @@ import {
   JobProfileModel,
   TrackedFieldArrayItem,
 } from '../../redux/services/graphql-api/job-profile-types';
+import { useCreatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import WizardEditProfile from './components/wizard-edit-profile';
@@ -25,6 +26,7 @@ export const WizardEditPage = () => {
   const { wizardData, setWizardData, classificationsData, setClassificationsData, errors, setErrors } =
     useWizardContext();
   const { profileId } = useParams();
+  const [createPositionRequest] = useCreatePositionRequestMutation();
 
   function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
     setClassificationsData(data);
@@ -161,7 +163,7 @@ export const WizardEditPage = () => {
   }>(null);
 
   const navigate = useNavigate();
-  const onNext = () => {
+  const onNext = async () => {
     if (errors.length) {
       Modal.error({
         title: 'Errors',
@@ -177,9 +179,38 @@ export const WizardEditPage = () => {
       });
       return;
     }
+    // Create an entry in My Positions
+
     const formData = wizardEditProfileRef.current?.getFormData();
     const transformedData = transformFormData(formData);
     setWizardData(transformedData);
+
+    try {
+      const classification = getClassificationById(formData.classification);
+      const positionRequestInput = {
+        step: 1,
+        reports_to_position_id: 123,
+        profile_json: transformedData,
+        parent_job_profile: { connect: { id: 1 } },
+        title: formData['title.value'],
+        classification_id: formData.classification,
+        classification_code: classification ? classification.code : '',
+      };
+      // console.log('positionRequestInput: ', positionRequestInput);
+      // console.log('formData: ', formData);
+
+      await createPositionRequest(positionRequestInput).unwrap();
+
+      // Handle the response if needed, or navigate to the next page
+      navigate('/wizard/review');
+    } catch (error) {
+      // Handle the error, possibly showing another modal
+      Modal.error({
+        title: 'Error Creating Position',
+        content: 'An unknown error occurred', //error.data?.message ||
+      });
+    }
+
     navigate('/wizard/review');
   };
 
@@ -192,7 +223,12 @@ export const WizardEditPage = () => {
       lg={18}
     >
       <WizardSteps current={1} xl={24}></WizardSteps>
-      <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} showChooseDifferentProfile={true} />
+      <WizardEditControlBar
+        style={{ marginBottom: '1rem' }}
+        onNext={onNext}
+        showChooseDifferentProfile={true}
+        nextText="Save and Next"
+      />
 
       <WizardEditProfile
         ref={wizardEditProfileRef}
