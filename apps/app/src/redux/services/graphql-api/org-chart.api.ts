@@ -36,6 +36,11 @@ export const orgChartApi = graphqlApi.injectEndpoints({
                     code
                     name
                   }
+                  department {
+                    id
+                    organization_id
+                    name
+                  }
                   employees {
                     id
                     name
