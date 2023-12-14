@@ -24,12 +24,11 @@ describe('JobProfiles', () => {
   it('renders JobProfileSearch and JobProfileSearchResults components', () => {
     (useParams as jest.Mock).mockReturnValue({ id: '123' });
     (Grid.useBreakpoint as jest.Mock).mockReturnValue({ xl: true });
-    const { getByTestId, debug } = render(
+    const { getByTestId } = render(
       <MemoryRouter>
         <JobProfiles searchParams={new URLSearchParams()} />
       </MemoryRouter>,
     );
-    debug();
     expect(getByTestId('job-profile-search')).toBeInTheDocument();
     expect(getByTestId('job-profile-search-results')).toBeInTheDocument();
   });

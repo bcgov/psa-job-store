@@ -126,7 +126,6 @@ export const MyPositionsPage = () => {
     if (newPageSize !== 10) newSearchParams.set('pageSize', newPageSize.toString());
     else newSearchParams.delete('pageSize');
 
-    console.log('sorter: ', sorter);
     if (newSortOrder) {
       newSearchParams.set('sortField', newSortField);
       newSearchParams.set('sortOrder', newSortOrder === 'ascend' ? 'ASC' : 'DESC');
