@@ -12,7 +12,7 @@ async function startServer() {
     const currentTime = Math.floor(Date.now() / 1000);
     // Customize your token payload here
     token.payload = {
-      exp: currentTime + 3000, // Token expiry time (e.g., 50 minutes from now)
+      exp: currentTime + 30000, // Token expiry time (e.g., 500 minutes from now)
       iat: currentTime, // Issued at time
       auth_time: currentTime - 100, // Authenticated time (example)
       jti: 'xxxx', // Unique identifier for the token

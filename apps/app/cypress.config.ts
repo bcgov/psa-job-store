@@ -23,6 +23,8 @@ async function setupNodeEvents(
 
 export default defineConfig({
   e2e: {
+    viewportWidth: 1920,
+    viewportHeight: 1080,
     baseUrl: 'http://localhost:5173/',
     specPattern: '**/*.feature',
     setupNodeEvents,
