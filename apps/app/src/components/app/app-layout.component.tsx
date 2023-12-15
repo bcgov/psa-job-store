@@ -9,7 +9,6 @@ import {
 import { Avatar, Button, Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
-import { AppFooter } from './footer.component';
 import { AppHeader } from './header.component';
 import { SiderNav } from './sider-nav/sider-nav.component';
 
@@ -89,7 +88,6 @@ export const AppLayout = () => {
               <Outlet />
             </Content>
           </div>
-          <AppFooter></AppFooter>
         </Layout>
       </Layout>
     </Layout>
