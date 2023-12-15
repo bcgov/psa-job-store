@@ -11,6 +11,7 @@ import { JsonFilter } from '../prisma/json-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
 import { JobProfileBehaviouralCompetencyListRelationFilter } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-list-relation-filter.input';
 import { JobProfileReportsToListRelationFilter } from '../job-profile-reports-to/job-profile-reports-to-list-relation-filter.input';
+import { PositionRequestListRelationFilter } from '../position-request/position-request-list-relation-filter.input';
 import { CareerGroupRelationFilter } from '../career-group/career-group-relation-filter.input';
 import { JobProfileListRelationFilter } from './job-profile-list-relation-filter.input';
 import { ClassificationRelationFilter } from '../classification/classification-relation-filter.input';
@@ -84,6 +85,9 @@ export class JobProfileWhereUniqueInput {
 
   @Field(() => JobProfileReportsToListRelationFilter, { nullable: true })
   reports_to?: JobProfileReportsToListRelationFilter;
+
+  @Field(() => PositionRequestListRelationFilter, { nullable: true })
+  position_request?: PositionRequestListRelationFilter;
 
   @Field(() => CareerGroupRelationFilter, { nullable: true })
   career_group?: CareerGroupRelationFilter;
