@@ -8,8 +8,5 @@ export class UserCount {
   comments?: number;
 
   @Field(() => Int, { nullable: false })
-  identities?: number;
-
-  @Field(() => Int, { nullable: false })
   job_profiles?: number;
 }

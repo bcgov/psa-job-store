@@ -25,8 +25,8 @@ export class PositionRequestOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   profile_json?: keyof typeof SortOrder;
 
-  @Field(() => SortOrder, { nullable: true })
-  user_id?: keyof typeof SortOrder;
+  @Field(() => SortOrderInput, { nullable: true })
+  user_id?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;

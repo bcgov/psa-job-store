@@ -4,6 +4,7 @@ import { SortOrder } from '../prisma/sort-order.enum';
 import { SortOrderInput } from '../prisma/sort-order.input';
 import { JobProfileBehaviouralCompetencyOrderByRelationAggregateInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-order-by-relation-aggregate.input';
 import { JobProfileReportsToOrderByRelationAggregateInput } from '../job-profile-reports-to/job-profile-reports-to-order-by-relation-aggregate.input';
+import { PositionRequestOrderByRelationAggregateInput } from '../position-request/position-request-order-by-relation-aggregate.input';
 import { CareerGroupOrderByWithRelationAndSearchRelevanceInput } from '../career-group/career-group-order-by-with-relation-and-search-relevance.input';
 import { JobProfileOrderByRelationAggregateInput } from './job-profile-order-by-relation-aggregate.input';
 import { ClassificationOrderByWithRelationAndSearchRelevanceInput } from '../classification/classification-order-by-with-relation-and-search-relevance.input';
@@ -68,6 +69,9 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => JobProfileReportsToOrderByRelationAggregateInput, { nullable: true })
   reports_to?: JobProfileReportsToOrderByRelationAggregateInput;
+
+  @Field(() => PositionRequestOrderByRelationAggregateInput, { nullable: true })
+  position_request?: PositionRequestOrderByRelationAggregateInput;
 
   @Field(() => CareerGroupOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   career_group?: CareerGroupOrderByWithRelationAndSearchRelevanceInput;

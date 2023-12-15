@@ -1,6 +1,5 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { IdentityCreateNestedManyWithoutUserInput } from '../identity/identity-create-nested-many-without-user.input';
 import { JobProfileCreateNestedManyWithoutOwnerInput } from '../job-profile/job-profile-create-nested-many-without-owner.input';
 
 @InputType()
@@ -25,9 +24,6 @@ export class UserCreateWithoutCommentsInput {
 
   @Field(() => Date, { nullable: true })
   deleted_at?: Date | string;
-
-  @Field(() => IdentityCreateNestedManyWithoutUserInput, { nullable: true })
-  identities?: IdentityCreateNestedManyWithoutUserInput;
 
   @Field(() => JobProfileCreateNestedManyWithoutOwnerInput, { nullable: true })
   job_profiles?: JobProfileCreateNestedManyWithoutOwnerInput;

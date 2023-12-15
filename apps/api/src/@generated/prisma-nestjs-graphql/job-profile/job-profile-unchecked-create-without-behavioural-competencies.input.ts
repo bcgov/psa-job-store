@@ -5,6 +5,7 @@ import { JobProfileState } from '../prisma/job-profile-state.enum';
 import { JobStream } from '../prisma/job-stream.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileReportsToUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-create-nested-many-without-job-profile.input';
+import { PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput } from '../position-request/position-request-unchecked-create-nested-many-without-parent-job-profile.input';
 import { JobProfileUncheckedCreateNestedManyWithoutParentInput } from './job-profile-unchecked-create-nested-many-without-parent.input';
 
 @InputType()
@@ -59,6 +60,9 @@ export class JobProfileUncheckedCreateWithoutBehavioural_competenciesInput {
 
   @Field(() => JobProfileReportsToUncheckedCreateNestedManyWithoutJob_profileInput, { nullable: true })
   reports_to?: JobProfileReportsToUncheckedCreateNestedManyWithoutJob_profileInput;
+
+  @Field(() => PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput, { nullable: true })
+  position_request?: PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput;
 
   @Field(() => JobProfileUncheckedCreateNestedManyWithoutParentInput, { nullable: true })
   children?: JobProfileUncheckedCreateNestedManyWithoutParentInput;

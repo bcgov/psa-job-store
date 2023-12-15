@@ -6,6 +6,7 @@ import { JobStream } from '../prisma/job-stream.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-unchecked-update-many-without-job-profile-nested.input';
 import { JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-update-many-without-job-profile-nested.input';
+import { PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-unchecked-update-many-without-parent-job-profile-nested.input';
 
 @InputType()
 export class JobProfileUncheckedUpdateWithoutChildrenInput {
@@ -62,4 +63,7 @@ export class JobProfileUncheckedUpdateWithoutChildrenInput {
 
   @Field(() => JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   reports_to?: JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput;
+
+  @Field(() => PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput, { nullable: true })
+  position_request?: PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput;
 }
