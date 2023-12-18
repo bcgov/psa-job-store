@@ -26,14 +26,40 @@ export const MyPositionsPage = () => {
   const [sortField, setSortField] = useState<null | string>(null);
   const [sortOrder, setSortOrder] = useState<null | string>(null);
 
-  // HANDLE SEARCH QUERY
+  // SEARCHING AND FILTERING
+  const [classificationFilterData, setClassificationOptions] = useState<ClassificationOption[]>([]);
+  const [allSelections, setAllSelections] = useState<Selection[]>([]);
+  const [initialSelectionSet, setInitialSelectionSet] = useState(false);
+
+  // Unified state for all selections
+  interface Selection {
+    value: string;
+    type: string;
+  }
+
+  // Add a new selection
+  const addSelection = (value: any, type: any) => {
+    const newSelection = { value, type };
+    setAllSelections([...allSelections, newSelection]);
+  };
+
+  // Remove a selection
+  const removeSelection = (removedValue: any, type: any) => {
+    setAllSelections(
+      allSelections.filter((selection) => !(selection.value === removedValue && selection.type === type)),
+    );
+  };
+
+  const statusFilterData = [
+    { label: 'Draft', value: 'DRAFT' },
+    { label: 'In Review', value: 'IN_REVIEW' },
+    { label: 'Completed', value: 'COMPLETED' },
+  ];
 
   interface ClassificationOption {
     label: string;
     value: string;
   }
-
-  const [classificationFilterData, setClassificationOptions] = useState<ClassificationOption[]>([]);
 
   useEffect(() => {
     if (classifications?.positionRequestUserClassifications) {
@@ -105,133 +131,10 @@ export const MyPositionsPage = () => {
     }
   }, [data]);
 
-  // END HANDLE SEARCH QUERY
-
-  const handleTableChange = (pagination: any, _filters: any, sorter: any) => {
-    const newPage = pagination.current;
-    const newPageSize = pagination.pageSize;
-    const newSortField = sorter.field;
-    const newSortOrder = sorter.order;
-
-    setCurrentPage(newPage);
-    setPageSize(newPageSize);
-    setSortField(newSortField);
-    setSortOrder(newSortOrder);
-
-    // Update URL parameters
-    const newSearchParams = new URLSearchParams(searchParams);
-    if (newPage !== 1) newSearchParams.set('page', newPage.toString());
-    else newSearchParams.delete('page');
-
-    if (newPageSize !== 10) newSearchParams.set('pageSize', newPageSize.toString());
-    else newSearchParams.delete('pageSize');
-
-    console.log('sorter: ', sorter);
-    if (newSortOrder) {
-      newSearchParams.set('sortField', newSortField);
-      newSearchParams.set('sortOrder', newSortOrder === 'ascend' ? 'ASC' : 'DESC');
-    } else {
-      newSearchParams.delete('sortField');
-      newSearchParams.delete('sortOrder');
-      setSortField(null);
-    }
-    setSearchParams(newSearchParams);
-  };
-
   const handleSearch = (_selectedKeys: any, _confirm: any) => {
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('search', _selectedKeys);
     setSearchParams(newSearchParams);
-  };
-
-  const getSortOrder = (fieldName: string): SortOrder | undefined => {
-    if (sortField === fieldName) {
-      return sortOrder === 'ASC' ? 'ascend' : 'descend';
-    }
-    return undefined;
-  };
-
-  const columns = [
-    {
-      title: 'Job Title',
-      dataIndex: 'title',
-      key: 'title',
-      sorter: true,
-      defaultSortOrder: getSortOrder('title'),
-      render: (text: any) => <a href="#!">{text}</a>,
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      sorter: true,
-      defaultSortOrder: getSortOrder('status'),
-      render: (status: any) => {
-        const color = status === 'DRAFT' ? 'gray' : status === 'IN_REVIEW' ? 'blue' : 'green';
-        return (
-          <Space>
-            <span className={`status-dot status-dot-${color}`} />
-            {status === 'DRAFT'
-              ? 'Draft'
-              : status === 'IN_REVIEW'
-                ? 'In review'
-                : status === 'COMPLETED'
-                  ? 'Completed'
-                  : ''}
-          </Space>
-        );
-      },
-    },
-    {
-      sorter: true,
-      defaultSortOrder: getSortOrder('position_number'),
-      title: 'Position #',
-      dataIndex: 'position_number',
-      key: 'position_number',
-    },
-    {
-      sorter: true,
-      defaultSortOrder: getSortOrder('classification_code'),
-      title: 'Classification',
-      dataIndex: 'classification_code',
-      key: 'classification_code',
-    },
-    {
-      sorter: true,
-      defaultSortOrder: getSortOrder('submission_id'),
-      title: 'Submission ID',
-      dataIndex: 'submission_id',
-      key: 'submission_id',
-    },
-  ];
-
-  const statusFilterData = [
-    { label: 'Draft', value: 'DRAFT' },
-    { label: 'In Review', value: 'IN_REVIEW' },
-    { label: 'Completed', value: 'COMPLETED' },
-  ];
-
-  // tag handling
-
-  // Unified state for all selections
-  interface Selection {
-    value: string;
-    type: string;
-  }
-
-  const [allSelections, setAllSelections] = useState<Selection[]>([]);
-
-  // Add a new selection
-  const addSelection = (value: any, type: any) => {
-    const newSelection = { value, type };
-    setAllSelections([...allSelections, newSelection]);
-  };
-
-  // Remove a selection
-  const removeSelection = (removedValue: any, type: any) => {
-    setAllSelections(
-      allSelections.filter((selection) => !(selection.value === removedValue && selection.type === type)),
-    );
   };
 
   // Update the Select components when selections change
@@ -290,8 +193,11 @@ export const MyPositionsPage = () => {
       ...statusParams.map((value) => ({ value, type: 'status' })),
       ...classificationParams.map((value) => ({ value, type: 'classification' })),
     ];
-    setAllSelections(initialSelections);
-  }, [searchParams]); // Removed searchParams from dependencies
+    if (!initialSelectionSet) {
+      setAllSelections(initialSelections);
+      setInitialSelectionSet(true);
+    }
+  }, [initialSelectionSet, setInitialSelectionSet, searchParams]); // Removed searchParams from dependencies
 
   useEffect(() => {
     // Sync state with URL parameters for selections and pagination
@@ -365,15 +271,6 @@ export const MyPositionsPage = () => {
     setSortField,
   ]);
 
-  const renderTableFooter = () => {
-    return (
-      <div>
-        Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
-        results
-      </div>
-    );
-  };
-
   const clearFilters = () => {
     setAllSelections([]);
     setSearchParams(''); // Clear the search query
@@ -388,6 +285,107 @@ export const MyPositionsPage = () => {
 
     setSearchParams(newSearchParams);
   };
+  // END FILTERING
+
+  const handleTableChange = (pagination: any, _filters: any, sorter: any) => {
+    const newPage = pagination.current;
+    const newPageSize = pagination.pageSize;
+    const newSortField = sorter.field;
+    const newSortOrder = sorter.order;
+
+    setCurrentPage(newPage);
+    setPageSize(newPageSize);
+    setSortField(newSortField);
+    setSortOrder(newSortOrder);
+
+    // Update URL parameters
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (newPage !== 1) newSearchParams.set('page', newPage.toString());
+    else newSearchParams.delete('page');
+
+    if (newPageSize !== 10) newSearchParams.set('pageSize', newPageSize.toString());
+    else newSearchParams.delete('pageSize');
+
+    if (newSortOrder) {
+      newSearchParams.set('sortField', newSortField);
+      newSearchParams.set('sortOrder', newSortOrder === 'ascend' ? 'ASC' : 'DESC');
+    } else {
+      newSearchParams.delete('sortField');
+      newSearchParams.delete('sortOrder');
+      setSortField(null);
+    }
+    setSearchParams(newSearchParams);
+  };
+
+  const getSortOrder = (fieldName: string): SortOrder | undefined => {
+    if (sortField === fieldName) {
+      return sortOrder === 'ASC' ? 'ascend' : 'descend';
+    }
+    return undefined;
+  };
+
+  const columns = [
+    {
+      title: 'Job Title',
+      dataIndex: 'title',
+      key: 'title',
+      sorter: true,
+      defaultSortOrder: getSortOrder('title'),
+      render: (text: any) => <a href="#!">{text}</a>,
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      sorter: true,
+      defaultSortOrder: getSortOrder('status'),
+      render: (status: any) => {
+        const color = status === 'DRAFT' ? 'gray' : status === 'IN_REVIEW' ? 'blue' : 'green';
+        return (
+          <Space>
+            <span className={`status-dot status-dot-${color}`} />
+            {status === 'DRAFT'
+              ? 'Draft'
+              : status === 'IN_REVIEW'
+                ? 'In review'
+                : status === 'COMPLETED'
+                  ? 'Completed'
+                  : ''}
+          </Space>
+        );
+      },
+    },
+    {
+      sorter: true,
+      defaultSortOrder: getSortOrder('position_number'),
+      title: 'Position #',
+      dataIndex: 'position_number',
+      key: 'position_number',
+    },
+    {
+      sorter: true,
+      defaultSortOrder: getSortOrder('classification_code'),
+      title: 'Classification',
+      dataIndex: 'classification_code',
+      key: 'classification_code',
+    },
+    {
+      sorter: true,
+      defaultSortOrder: getSortOrder('submission_id'),
+      title: 'Submission ID',
+      dataIndex: 'submission_id',
+      key: 'submission_id',
+    },
+  ];
+
+  const renderTableFooter = () => {
+    return (
+      <div>
+        Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
+        results
+      </div>
+    );
+  };
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -400,6 +398,7 @@ export const MyPositionsPage = () => {
           <Row gutter={24} wrap>
             <Col span={12}>
               <Search
+                defaultValue={searchParams.get('search') ?? undefined}
                 enterButton="Find positions"
                 aria-label="Search by job title or keyword"
                 onPressEnter={(e) => handleSearch(e.currentTarget.value, null)}

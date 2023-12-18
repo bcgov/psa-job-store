@@ -38,6 +38,13 @@
 
 Cypress.Commands.add('login', () => {
   const token = Cypress.env('AUTH_TOKEN');
+
+  if (!token) {
+    throw new Error(
+      'AUTH_TOKEN is not defined in Cypress environment variables. Are you running cypress with "npm run test-e2e"?',
+    );
+  }
+
   Cypress.log({
     name: 'setSessionStorage',
     // shorter name for the Command Log

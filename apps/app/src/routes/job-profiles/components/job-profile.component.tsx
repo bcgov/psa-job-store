@@ -312,7 +312,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: 'Job Context',
       children:
         showDiff && originalData ? compareData(originalData.context, effectiveData?.context) : effectiveData?.context,
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'overview',
@@ -326,7 +327,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           : typeof effectiveData?.overview === 'string'
             ? effectiveData?.overview
             : effectiveData?.overview?.value,
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'required_accountabilities',
@@ -346,7 +348,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               })}
         </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'optional_accountabilities',
@@ -366,7 +369,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               })}
         </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'requirements',
@@ -386,7 +390,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               })}
         </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'behavioural_competencies',
@@ -409,7 +414,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               )}
         </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
   ];
 

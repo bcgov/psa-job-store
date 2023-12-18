@@ -55,9 +55,11 @@ export const JobProfileSearchResults = ({
       </div>
       <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list">
         {isLoading ? (
-          <Skeleton loading={isLoading} />
+          <div data-testid="skeleton-loading">
+            <Skeleton loading={isLoading} />
+          </div>
         ) : data?.jobProfiles.length === 0 ? (
-          <Empty style={{ margin: '1rem' }} />
+          <Empty data-testid="empty-state" style={{ margin: '1rem' }} />
         ) : (
           (data?.jobProfiles ?? []).map((d) => (
             <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d.id.toString())}>

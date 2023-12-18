@@ -329,7 +329,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
           {
             id: 5,
             stream: 'CORPORATE',
-            title: 'File Clerk',
+            title: 'Program Assistant',
             number: 189,
             context: 'Context 1',
             overview: 'Overview 1',
@@ -420,7 +420,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
           {
             id: 6,
             stream: 'CORPORATE',
-            title: 'File Clerk',
+            title: 'Office Manager',
             number: 189,
             context: 'Context 1',
             overview: 'Overview 1',
@@ -511,7 +511,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
           {
             id: 7,
             stream: 'CORPORATE',
-            title: 'File Clerk',
+            title: 'Financial Analyst',
             number: 189,
             context: 'Context 1',
             overview: 'Overview 1',
@@ -602,7 +602,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
           {
             id: 8,
             stream: 'CORPORATE',
-            title: 'File Clerk',
+            title: 'Budget Analyst',
             number: 189,
             context: 'Context 1',
             overview: 'Overview 1',
@@ -693,7 +693,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
           {
             id: 9,
             stream: 'CORPORATE',
-            title: 'File Clerk',
+            title: 'Frontend Developer',
             number: 189,
             context: 'Context 1',
             overview: 'Overview 1',
@@ -784,7 +784,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
           {
             id: 10,
             stream: 'CORPORATE',
-            title: 'File Clerk',
+            title: 'Backend Developer',
             number: 189,
             context: 'Context 1',
             overview: 'Overview 1',

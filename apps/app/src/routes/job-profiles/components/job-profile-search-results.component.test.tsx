@@ -1,5 +1,5 @@
-import { act, fireEvent, render, within } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { MemoryRouter, Route } from 'react-router-dom';
 import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 
@@ -190,7 +190,7 @@ const mockData = {
     {
       id: 6,
       stream: 'CORPORATE',
-      title: 'File Clerk',
+      title: 'Program Assistant',
       number: 189,
       context: 'Context 1',
       overview: 'Overview 1',
@@ -282,46 +282,52 @@ const mockData = {
   jobProfilesCount: 2,
 };
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    pathname: '/mocked/path',
+  }),
+}));
+
 describe('JobProfileSearchResults', () => {
-  // it('renders job profile data correctly', () => {
+  it('renders job profile data correctly', () => {
+    render(
+      <MemoryRouter>
+        <JobProfileSearchResults
+          data={mockData as unknown as GetJobProfilesResponse}
+          isLoading={false}
+          currentPage={1}
+          pageSize={2}
+          totalResults={2}
+          onPageChange={() => {}}
+        />
+      </MemoryRouter>,
+    );
 
-  //   render(
-  //     <MemoryRouter>
-  //       <JobProfileSearchResults
-  //         data={mockData as unknown as GetJobProfilesResponse}
-  //         isLoading={false}
-  //         currentPage={1}
-  //         pageSize={2}
-  //         totalResults={2}
-  //         onPageChange={() => {}}
-  //       />
-  //     </MemoryRouter>,
-  //   );
+    expect(screen.getByText('IT Specialist')).toBeInTheDocument();
+    expect(screen.getByText('File Clerk')).toBeInTheDocument();
+  });
 
-  //   expect(screen.getByText('IT Specialist')).toBeInTheDocument();
-  //   expect(screen.getByText('File Clerk')).toBeInTheDocument();
-  // });
+  it('calls onSelectProfile when a job profile is clicked', () => {
+    const onSelectProfileMock = jest.fn();
 
-  // it('calls onSelectProfile when a job profile is clicked', () => {
-  //   const onSelectProfileMock = jest.fn();
+    render(
+      <MemoryRouter>
+        <JobProfileSearchResults
+          data={mockData as unknown as GetJobProfilesResponse}
+          isLoading={false}
+          onSelectProfile={onSelectProfileMock}
+          currentPage={1}
+          pageSize={1}
+          totalResults={1}
+          onPageChange={() => {}}
+        />
+      </MemoryRouter>,
+    );
 
-  //   render(
-  //     <MemoryRouter>
-  //       <JobProfileSearchResults
-  //         data={mockData as unknown as GetJobProfilesResponse}
-  //         isLoading={false}
-  //         onSelectProfile={onSelectProfileMock}
-  //         currentPage={1}
-  //         pageSize={1}
-  //         totalResults={1}
-  //         onPageChange={() => {}}
-  //       />
-  //     </MemoryRouter>,
-  //   );
-
-  //   fireEvent.click(screen.getByText('IT Specialist'));
-  //   expect(onSelectProfileMock).toHaveBeenCalledWith('4');
-  // });
+    fireEvent.click(screen.getByText('IT Specialist'));
+    expect(onSelectProfileMock).toHaveBeenCalledWith('4');
+  });
 
   it('calls onPageChange when a page gets changed', async () => {
     const onSelectProfileMock = jest.fn();
@@ -341,8 +347,6 @@ describe('JobProfileSearchResults', () => {
       </MemoryRouter>,
     );
 
-    // console.log(container.outerHTML);
-
     const paginationComponent = getByTestId('pagination');
     await act(async () => {
       const pageButton = within(paginationComponent).getByText('2');
@@ -350,5 +354,85 @@ describe('JobProfileSearchResults', () => {
     });
 
     expect(onPageChange).toHaveBeenCalledWith(2, 2);
+  });
+
+  it('displays loading state correctly', () => {
+    render(
+      <MemoryRouter>
+        <JobProfileSearchResults
+          data={undefined}
+          isLoading={true}
+          currentPage={1}
+          pageSize={2}
+          totalResults={0}
+          onPageChange={() => {}}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByTestId('skeleton-loading')).toBeInTheDocument();
+  });
+
+  it('renders empty state when no job profiles are present', () => {
+    render(
+      <MemoryRouter>
+        <JobProfileSearchResults
+          data={{ jobProfiles: [], jobProfilesCount: 0 }}
+          isLoading={false}
+          currentPage={1}
+          pageSize={2}
+          totalResults={0}
+          onPageChange={() => {}}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+  });
+
+  it('renders and updates pagination correctly', () => {
+    const onPageChangeMock = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <JobProfileSearchResults
+          data={mockData as unknown as GetJobProfilesResponse}
+          isLoading={false}
+          currentPage={1}
+          pageSize={2}
+          totalResults={mockData.jobProfiles.length}
+          onPageChange={onPageChangeMock}
+        />
+      </MemoryRouter>,
+    );
+
+    const pagination = screen.getByTestId('pagination');
+    expect(pagination).toBeInTheDocument();
+    const page2Button = within(pagination).getByText('2');
+    fireEvent.click(page2Button);
+    expect(onPageChangeMock).toHaveBeenCalledWith(2, 2);
+  });
+
+  it('generates correct link URL for each job profile', () => {
+    render(
+      <MemoryRouter initialEntries={['/mocked/path']}>
+        <Route path="/mocked/path">
+          <JobProfileSearchResults
+            data={mockData as unknown as GetJobProfilesResponse}
+            isLoading={false}
+            currentPage={1}
+            pageSize={2}
+            totalResults={2}
+            onPageChange={() => {}}
+          />
+        </Route>
+      </MemoryRouter>,
+    );
+
+    const jobProfileLinks = screen.getAllByRole('link');
+    jobProfileLinks.forEach((link, index) => {
+      const expectedPath = `/expectedPath/${mockData.jobProfiles[index].id}`;
+      expect(link.getAttribute('href')).toBe(expectedPath);
+    });
   });
 });

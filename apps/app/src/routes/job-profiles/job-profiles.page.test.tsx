@@ -19,7 +19,6 @@ const store = configureStore({
 
 describe('JobProfilesPage', () => {
   it('renders the page header and job profiles', () => {
-    console.log('rendering with mock store..');
     const router = createMemoryRouter([{ path: '/', element: <JobProfilesPage /> }]);
     const { getByText } = render(
       <Provider store={store}>
