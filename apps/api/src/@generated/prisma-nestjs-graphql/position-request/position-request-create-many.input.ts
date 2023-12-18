@@ -21,8 +21,8 @@ export class PositionRequestCreateManyInput {
   @Field(() => GraphQLJSON, { nullable: false })
   profile_json!: any;
 
-  @Field(() => String, { nullable: false })
-  user_id!: string;
+  @Field(() => String, { nullable: true })
+  user_id?: string;
 
   @Field(() => String, { nullable: false })
   title!: string;

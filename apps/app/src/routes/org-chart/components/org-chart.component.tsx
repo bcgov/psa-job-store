@@ -1,17 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dagre from '@dagrejs/dagre';
-import { useCallback, useMemo, useState } from 'react';
-import ReactFlow, {
-  ConnectionLineType,
-  Controls,
-  Edge,
-  EdgeChange,
-  MiniMap,
-  Node,
-  addEdge,
-  applyEdgeChanges,
-} from 'reactflow';
+import { useMemo, useState } from 'react';
+import ReactFlow, { ConnectionLineType, Controls, Edge, MiniMap, Node } from 'reactflow';
 import { OrgChartCard } from './org-chart-card.component';
 
 interface Props {
@@ -67,15 +58,15 @@ export const OrgChart = ({ edges: initialEdges, nodes: initialNodes }: Props) =>
   //   (changes: NodeChange[]) => setNodes((nodes: any) => applyNodeChanges(changes, nodes)),
   //   [setNodes],
   // );
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) => setEdges((edges: any) => applyEdgeChanges(changes, edges)),
-    [setEdges],
-  );
-  const onConnect = useCallback(
-    (params: any) =>
-      setEdges((eds: any) => addEdge({ ...params, type: ConnectionLineType.SmoothStep, animated: true }, eds)),
-    [],
-  );
+  // const onEdgesChange = useCallback(
+  //   (changes: EdgeChange[]) => setEdges((edges: any) => applyEdgeChanges(changes, edges)),
+  //   [setEdges],
+  // );
+  // const onConnect = useCallback(
+  //   (params: any) =>
+  //     setEdges((eds: any) => addEdge({ ...params, type: ConnectionLineType.SmoothStep, animated: true }, eds)),
+  //   [],
+  // );
   // const onLayout = useCallback(
   //   (direction: any) => {
   //     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, direction);
@@ -94,8 +85,8 @@ export const OrgChart = ({ edges: initialEdges, nodes: initialNodes }: Props) =>
       nodes={nodes}
       edges={edges}
       // onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
+      // onEdgesChange={onEdgesChange}
+      // onConnect={onConnect}
       connectionLineType={ConnectionLineType.SmoothStep}
       fitView
     >

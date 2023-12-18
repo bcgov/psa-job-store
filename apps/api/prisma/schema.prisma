@@ -66,26 +66,12 @@ model User {
   deleted_at DateTime?
 
   comments     Comment[]
-  identities   Identity[]
   job_profiles JobProfile[]
 
   // TODO: AL-146
   // PositionRequest PositionRequest[]
 
   @@map("user")
-}
-
-model Identity {
-  sub               String
-  identity_provider String
-  user_id           String    @db.Uuid
-  user              User      @relation(fields: [user_id], references: [id])
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @default(now()) @updatedAt
-  deleted_at        DateTime?
-
-  @@id([sub, identity_provider])
-  @@map("identity")
 }
 
 enum BehaviouralCompetencyMembership {

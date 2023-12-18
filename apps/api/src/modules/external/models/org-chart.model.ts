@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Classification } from '../../../@generated/prisma-nestjs-graphql';
+import { Classification, Department } from '../../../@generated/prisma-nestjs-graphql';
 import { Employee } from './employee.model';
 
 @ObjectType()
@@ -27,6 +27,9 @@ export class OrgChartNodeData {
 
   @Field(() => Classification, { nullable: true })
   classification?: Classification;
+
+  @Field(() => Department, { nullable: true })
+  department?: Department;
 
   @Field(() => [Employee], { nullable: false })
   employees?: Employee[];

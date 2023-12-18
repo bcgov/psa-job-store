@@ -1,21 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { isEmpty } from 'class-validator';
-import { Classification } from '../../@generated/prisma-nestjs-graphql';
+import { Classification, Department } from '../../@generated/prisma-nestjs-graphql';
 import { BIService } from './bi.service';
 import { ClassificationService } from './classification.service';
+import { DepartmentService } from './department.service';
 import { FindUniqueOrgChartArgs } from './models/find-unique-org-chart.args';
 import { OrgChart, OrgChartEdge, OrgChartNode } from './models/org-chart.model';
 
 @Injectable()
 export class OrgChartService {
   private classifications: Classification[];
+  private departments: Department[];
 
   constructor(
     private readonly biService: BIService,
     private readonly classificationService: ClassificationService,
+    private readonly departmentService: DepartmentService,
   ) {
     (async () => {
       this.classifications = await this.classificationService.getClassifications({});
+      this.departments = await this.departmentService.getDepartments();
     })();
   }
 
@@ -43,6 +47,10 @@ export class OrgChartService {
           ? this.classifications.find((classification) => classification.id === position.pos_jobcode)
           : null;
 
+        const department = !isEmpty(position.pos_deptid)
+          ? this.departments.find((department) => department.id === position.pos_deptid)
+          : null;
+
         // If the node doesn't exist, create it.
         nodeMap.set(position.pos_nbr, {
           id: `${position.pos_nbr}`,
@@ -51,6 +59,7 @@ export class OrgChartService {
             id: `${position.pos_nbr}`,
             title: position.pos_descr,
             classification: classification,
+            department: department,
             employees:
               position.employees > 0
                 ? [

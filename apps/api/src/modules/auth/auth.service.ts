@@ -2,11 +2,9 @@ import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { JwtPayload } from 'jsonwebtoken';
 import { catchError, firstValueFrom, map } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CACHE_USER_PREFIX, KEYCLOAK_PUBLIC_KEY } from './auth.constants';
@@ -57,72 +55,25 @@ export class AuthService {
   }
 
   async getUserFromPayload(data: JwtPayload) {
-    // console.log('getUserFromPayload data:', data);
-    const { sub, identity_provider, name, email, client_roles, exp } = data;
+    const { idir_user_guid, name, email, client_roles, exp } = data;
 
-    // const id = this.getUserIdFromSub(sub);
-
-    const CACHE_KEY = `${CACHE_USER_PREFIX}${sub}-${identity_provider}`;
-    let match = await this.cacheManager.get<Express.User>(CACHE_KEY); // try to get user from cache
+    const CACHE_KEY = `${CACHE_USER_PREFIX}${idir_user_guid}`;
+    let match = await this.cacheManager.get<Express.User>(CACHE_KEY);
 
     if (!match) {
-      // user not in cache
-      // Store User, Identity
-      const identity = await this.prisma.identity.findUnique({
-        // try to get user from db
-        where: { sub_identity_provider: { identity_provider, sub } },
-      });
+      // If user doesn't exist in cache, update the persisted user
+      const user = { id: idir_user_guid, name, email, roles: ((client_roles as string[]) ?? []).sort() };
+      await this.upsertUser(user);
 
-      let id = '';
-      if (identity) {
-        // user was found in db (identity table), get id
-        id = identity.user_id;
-      } else {
-        // user was not found in db (identity table), look up user in the user table by email
-        const existingUser = await this.prisma.user.findUnique({
-          where: { email },
-        });
-        // if found in user table, use that id, otherwise generate new one
-        id = existingUser ? existingUser.id : uuidv4();
-      }
-      // create user object
-      const user: Express.User = { id, name, email, roles: ((client_roles as string[]) ?? []).sort() };
-
-      // upsert user and identity
-      try {
-        // console.log('trying to upsert..');
-        await this.upsertUser(user, sub, identity_provider);
-        // console.log('upsert succeeded');
-      } catch (error) {
-        // console.log('upsert error!, ', error);
-        // failure due to concurrency (upsert )
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-          // Re-fetch the existing user if unique constraint violation occurs
-          const identity = await this.prisma.identity.findUnique({
-            // try to get user from db
-            where: { sub_identity_provider: { identity_provider, sub } },
-          });
-          // console.log('refetched after error: ', identity);
-          if (identity) {
-            user.id = identity.user_id;
-          } else {
-            throw error; // If user still not found, throw the original error
-          }
-        } else {
-          throw error;
-        }
-      }
-
-      // set cache
+      // Add user to cache
       await this.cacheManager.set(CACHE_KEY, user, (exp ?? 0) * 1000 - Date.now());
-      // get user from cache
       match = await this.cacheManager.get<Express.User>(CACHE_KEY);
     }
 
     return match;
   }
 
-  async upsertUser(user: Express.User, sub: string, identity_provider: string) {
+  async upsertUser(user: Express.User) {
     const { id, ...rest } = user;
 
     const queries: any[] = [
@@ -132,17 +83,6 @@ export class AuthService {
         update: { ...rest },
       }),
     ];
-
-    if (identity_provider && sub) {
-      queries.push(
-        this.prisma.identity.upsert({
-          where: { sub_identity_provider: { identity_provider, sub } },
-          create: { sub, identity_provider, user_id: id },
-          update: { sub, identity_provider, user_id: id },
-        }),
-      );
-    }
-
     await this.prisma.$transaction(queries);
   }
 }

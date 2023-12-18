@@ -11,5 +11,8 @@ export class JobProfileCount {
   reports_to?: number;
 
   @Field(() => Int, { nullable: false })
+  position_request?: number;
+
+  @Field(() => Int, { nullable: false })
   children?: number;
 }
