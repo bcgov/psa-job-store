@@ -1,91 +1,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DownOutlined } from '@ant-design/icons';
-import { Col, Flex, Input, Row, Select, Space } from 'antd';
-import { useMemo } from 'react';
+import { Button, Card, Col, Input, Row, Tag } from 'antd';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import Select, { components } from 'react-select';
 import { useGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
-import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-role.api';
-import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
+import './job-profile-search.component.css';
 
 const { Search } = Input;
 
-type Option = { label: string; value: string };
-type FilterData = {
-  [key: string]: Option[];
+const CustomValueContainer = (props: any) => {
+  const children = props.children;
+  return (
+    <components.ValueContainer {...props}>
+      {props.selectProps.inputValue == '' ? (
+        <components.Placeholder {...props} isFocused={props.isFocused}>
+          {props.selectProps.placeholder}
+        </components.Placeholder>
+      ) : (
+        <></>
+      )}
+      {...children}
+    </components.ValueContainer>
+  );
 };
 
-const filters: Record<string, any>[] = [
-  {
-    title: 'Organization',
-    icon: <DownOutlined />,
-  },
-  {
-    title: 'Classification',
-    icon: <DownOutlined />,
-  },
-  {
-    title: 'Job Family',
-    icon: <DownOutlined />,
-  },
-  // {
-  //   title: 'Job Roles',
-  //   icon: <DownOutlined />,
-  // },
-];
-
-const filterOption = (input: string, option?: { label: string; value: string }) =>
-  (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
-
 export const JobProfileSearch = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const organizationData = useGetOrganizationsQuery().data?.organizations;
+  // const organizationData = useGetOrganizationsQuery().data?.organizations;
+  // const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
   const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
-  const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
   const classificationData = useGetClassificationsQuery().data?.classifications;
-
-  const organizationDataOptions = useMemo(() => {
-    return (
-      organizationData?.map((item) => ({
-        label: `${item.name != null && item.name.length > 0 ? item.name : item.id}`,
-        value: `${item.id}`,
-      })) || []
-    );
-  }, [organizationData]);
-  const jobFamilyDataOptions = useMemo(() => {
-    return (
-      jobFamilyData?.map((item) => ({
-        label: `${item.name != null && item.name.length > 0 ? item.name : item.id}`,
-        value: `${item.id}`,
-      })) || []
-    );
-  }, [jobFamilyData]);
-  const classificationDataOptions = useMemo(() => {
-    return (
-      classificationData?.map((item) => ({
-        label: `${item.code != null && item.code.length > 0 ? item.code : item.id}`,
-        value: `${item.id}`,
-      })) || []
-    );
-  }, [classificationData]);
-  const jobRoleDataOptions = useMemo(() => {
-    return (
-      jobRoleData?.map((item) => ({
-        label: `${item.name != null && item.name.length > 0 ? item.name : item.id}`,
-        value: `${item.id}`,
-      })) || []
-    );
-  }, [jobRoleData]);
-
-  const filterData: FilterData = {
-    Organization: organizationDataOptions,
-    'Job Family': jobFamilyDataOptions,
-    'Job Roles': jobRoleDataOptions,
-    Classification: classificationDataOptions,
-  };
 
   const getBasePath = (path: string) => {
     const pathParts = path.split('/');
@@ -112,155 +60,285 @@ export const JobProfileSearch = () => {
     });
   };
 
-  const handleFilters = () => {
-    const basePath = getBasePath(location.pathname);
+  const [allSelections, setAllSelections] = useState<Selection[]>([]);
+  const [classificationFilterData, setClassificationOptions] = useState<ClassificationOption[]>([]);
+  const [jobFamilyFilterData, setJobFamilyOptions] = useState<ClassificationOption[]>([]);
+  const [initialSelectionSet, setInitialSelectionSet] = useState(false);
 
-    navigate({
-      pathname: basePath,
-      search: searchParams.toString(),
-    });
+  // Unified state for all selections
+  interface Selection {
+    value: string;
+    type: string;
+  }
+
+  // Add a new selection
+  const addSelection = (value: any, type: any) => {
+    const newSelection = { value, type };
+    setAllSelections([...allSelections, newSelection]);
+  };
+
+  // Remove a selection
+  const removeSelection = (removedValue: any, type: any) => {
+    setAllSelections(
+      allSelections.filter((selection) => !(selection.value === removedValue && selection.type === type)),
+    );
+  };
+
+  interface ClassificationOption {
+    label: string;
+    value: string;
+  }
+
+  useEffect(() => {
+    if (classificationData) {
+      const newOptions = classificationData.map((classification) => ({
+        label: classification.code,
+        value: classification.id,
+      }));
+      setClassificationOptions(newOptions);
+    }
+  }, [classificationData]);
+
+  useEffect(() => {
+    if (jobFamilyData) {
+      const newOptions = jobFamilyData.map((classification) => ({
+        label: classification.name,
+        value: classification.id.toString(),
+      }));
+      setJobFamilyOptions(newOptions);
+    }
+  }, [jobFamilyData]);
+
+  // Update the Select components when selections change
+  const selectedJobFamily = allSelections.filter((s) => s.type === 'jobFamily').map((s) => s.value);
+  const selectedClassification = allSelections.filter((s) => s.type === 'classification').map((s) => s.value);
+
+  const findLabel = (value: any, type: any) => {
+    if (type === 'jobFamily') {
+      return jobFamilyFilterData.find((option) => option.value === value)?.label || value;
+    }
+    if (type === 'classification') {
+      return classificationFilterData.find((option) => option.value === value)?.label || value;
+    }
+    return value;
+  };
+
+  useEffect(() => {
+    const jobFamilyParams = decodeURIComponent(searchParams.get('job_family_id__in') || '')
+      .split(',')
+      .filter(Boolean);
+    const classificationParams = decodeURIComponent(searchParams.get('classification_id__in') || '')
+      .split(',')
+      .filter(Boolean);
+    const initialSelections = [
+      ...jobFamilyParams.map((value) => ({ value, type: 'jobFamily' })),
+      ...classificationParams.map((value) => ({ value, type: 'classification' })),
+    ];
+    if (!initialSelectionSet) {
+      setAllSelections(initialSelections);
+      setInitialSelectionSet(true);
+    }
+  }, [searchParams, initialSelectionSet, setInitialSelectionSet]); // Removed searchParams from dependencies
+
+  useEffect(() => {
+    // Sync state with URL parameters for selections and pagination
+    const jobFamilyValues = allSelections
+      .filter((s) => s.type === 'jobFamily')
+      .map((s) => s.value)
+      .join(',');
+    const classificationValues = allSelections
+      .filter((s) => s.type === 'classification')
+      .map((s) => s.value)
+      .join(',');
+
+    // Update URL parameters if needed
+    const newSearchParams = new URLSearchParams();
+    if (jobFamilyValues) newSearchParams.set('job_family_id__in', jobFamilyValues);
+    if (classificationValues) newSearchParams.set('classification_id__in', classificationValues);
+
+    // todo: implement when needed
+    // const sortFromUrl = searchParams.get('sortField');
+    // const sortOrderFromUrl = searchParams.get('sortOrder');
+
+    // if (sortFromUrl) newSearchParams.set('sortField', sortFromUrl);
+    // if (sortOrderFromUrl) newSearchParams.set('sortOrder', sortOrderFromUrl);
+
+    const jobFamilyChanged = newSearchParams.get('job_family_id__in') != searchParams.get('job_family_id__in');
+    const classificationChanged =
+      newSearchParams.get('classification_id__in') != searchParams.get('classification_id__in');
+
+    // if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
+
+    // if (pageSize != 10) newSearchParams.set('pageSize', pageSizeFromURL.toString());
+
+    const searchFromURL = searchParams.get('search');
+    if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
+
+    if (jobFamilyChanged || classificationChanged) {
+      // filters changed - reset page
+      // setCurrentPage(1);
+      // newSearchParams.set('page', (1).toString());
+      if (searchParams.toString() !== newSearchParams.toString()) {
+        setSearchParams(newSearchParams);
+        return;
+      }
+    }
+
+    // Only update search params if there's a change
+    if (searchParams.toString() !== newSearchParams.toString()) {
+      setSearchParams(newSearchParams);
+    }
+
+    // if (sortFromUrl) setSortField(sortFromUrl);
+    // if (sortOrderFromUrl) {
+    //   setSortOrder(sortOrderFromUrl == 'ASC' ? 'ascend' : 'descend');
+    // }
+  }, [allSelections, searchParams, setSearchParams]);
+
+  const clearFilters = () => {
+    setAllSelections([]);
+    setSearchParams(''); // Clear the search query
+
+    // Update the URL parameters
+    const newSearchParams = new URLSearchParams();
+
+    const pageFromUrl = searchParams.get('page');
+    if (pageFromUrl) newSearchParams.set('page', pageFromUrl);
+
+    const searchFromUrl = searchParams.get('search');
+    if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
+
+    setSearchParams(newSearchParams);
   };
 
   return (
     <Row justify="center" gutter={8} style={{ margin: '0 1rem' }} role="search" data-testid="job-profile-search">
-      <Col xs={24} sm={18} md={18} lg={18} xl={14} style={{ margin: '1rem' }}>
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
-          <Search
-            aria-label="Search by job title or keyword"
-            onSearch={handleSearch}
-            onPressEnter={(e) => handleSearch(e.currentTarget.value)}
-            allowClear
-            defaultValue={searchParams.get('search') ?? undefined}
-            enterButton="Find job profiles"
-            placeholder="Search by job title or keyword"
-          />
-          <Flex
-            wrap="wrap"
-            flex="1 1 0.5 0"
-            align="flex-start"
-            style={{
-              width: '100%',
-            }}
-          >
-            {filters.map((filter) => {
-              return (
-                <div
-                  key={filter.title}
+      <Col lg={15} xs={24}>
+        <Card style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+          <Row gutter={24} wrap>
+            <Col span={12}>
+              <Search
+                defaultValue={searchParams.get('search') ?? undefined}
+                enterButton="Find job profiles"
+                aria-label="Search by job title or keyword"
+                onPressEnter={(e) => handleSearch(e.currentTarget.value)}
+                allowClear
+                placeholder="Search by job title or submission ID"
+                onSearch={handleSearch}
+                style={{ width: 400 }}
+              />
+            </Col>
+            <Col span={12}>
+              <Row gutter={8} justify="end">
+                <Col>
+                  <Select
+                    closeMenuOnSelect={false}
+                    isClearable={false}
+                    backspaceRemovesValue={false}
+                    hideSelectedOptions={false}
+                    value={jobFamilyFilterData.filter((jf) =>
+                      allSelections
+                        .filter((selection) => selection.type === 'jobFamily')
+                        .map((selection) => selection.value)
+                        .includes(jf.value),
+                    )}
+                    styles={{
+                      container: (css) => ({ ...css, width: '200px' }),
+                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                    }}
+                    components={{
+                      ValueContainer: CustomValueContainer,
+                    }}
+                    classNamePrefix="react-select"
+                    isMulti
+                    placeholder="Job Family"
+                    options={jobFamilyFilterData}
+                    onChange={(selectedItems) => {
+                      const newValues = selectedItems.map((item) => item.value);
+                      if (newValues == null) return;
+
+                      newValues.forEach((val: any) => {
+                        if (!selectedJobFamily.includes(val)) addSelection(val, 'jobFamily');
+                      });
+                      selectedJobFamily.forEach((val) => {
+                        if (!newValues.includes(val)) removeSelection(val, 'jobFamily');
+                      });
+                    }}
+                  ></Select>
+                </Col>
+                <Col>
+                  <Select
+                    closeMenuOnSelect={false}
+                    isClearable={false}
+                    backspaceRemovesValue={false}
+                    hideSelectedOptions={false}
+                    value={classificationFilterData.filter((jf) =>
+                      allSelections
+                        .filter((selection) => selection.type === 'classification')
+                        .map((selection) => selection.value)
+                        .includes(jf.value),
+                    )}
+                    styles={{
+                      container: (css) => ({ ...css, width: '200px' }),
+                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                    }}
+                    components={{
+                      ValueContainer: CustomValueContainer,
+                    }}
+                    classNamePrefix="react-select"
+                    isMulti
+                    placeholder="Classification"
+                    options={classificationFilterData}
+                    onChange={(selectedItems) => {
+                      const newValues = selectedItems.map((item) => item.value);
+                      if (newValues == null) return;
+
+                      newValues.forEach((val: any) => {
+                        if (!selectedClassification.includes(val)) addSelection(val, 'classification');
+                      });
+                      selectedClassification.forEach((val) => {
+                        if (!newValues.includes(val)) removeSelection(val, 'classification');
+                      });
+                    }}
+                  ></Select>
+                </Col>
+              </Row>
+            </Col>
+            {allSelections.length > 0 && (
+              <Col style={{ marginTop: '10px' }}>
+                <span
                   style={{
-                    position: 'relative',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    border: '1px solid #d9d9d9',
-                    borderRadius: '4px',
-                    padding: '20px 10px 10px',
-                    marginRight: '8px',
-                    marginTop: '10px',
-                    flexShrink: 1,
-                    minWidth: '20%',
+                    fontWeight: 500,
+                    margin: '8px',
+                    marginLeft: 0,
+                    paddingRight: '8px',
+                    borderRight: '2px solid rgba(0, 0, 0, 0.06)',
+                    marginRight: '10px',
                   }}
                 >
-                  <label
-                    data-testid={`label-${filter.title}`}
-                    style={{
-                      position: 'absolute',
-                      top: '-12px',
-                      left: '10px',
-                      backgroundColor: 'white',
-                      padding: '0 5px',
-                      fontSize: '14px',
-                    }}
-                    htmlFor={filter.title}
-                  >
-                    {filter.title}
-                  </label>
-                  <Select
-                    mode="multiple"
-                    allowClear
-                    // aria-label={filter.title}
-                    data-cy={`${filter.title}-filter`}
-                    data-testid={`${filter.title}-filter`}
-                    id={filter.title}
-                    placeholder={filter.title}
-                    options={filterData[filter.title]}
-                    filterOption={filterOption}
-                    style={{
-                      flexGrow: 1,
-                      flexBasis: 0,
-                      border: '1px dotted #d9d9d9',
-                      borderRadius: '4px',
-                      width: '-webkit-fill-available',
-                    }}
-                    bordered={false}
-                    onClear={() => {
-                      switch (filter.title) {
-                        case 'Job Family':
-                          searchParams.delete('job_family_id__in');
-                          break;
-                        case 'Job Roles':
-                          searchParams.delete('job_role_id__in');
-                          break;
-                        case 'Classification':
-                          searchParams.delete('classification_id__in');
-                          break;
-                        case 'Organization':
-                          searchParams.delete('organization_id__in');
-                          break;
-                        default:
-                          break;
-                      }
-                      handleFilters();
-                    }}
-                    onChange={(value: string) => {
-                      switch (filter.title) {
-                        case 'Job Family':
-                          searchParams.set('job_family_id__in', value);
-                          !searchParams.get('job_family_id__in') && searchParams.delete('job_family_id__in');
-                          break;
-                        case 'Job Roles':
-                          searchParams.set('job_role_id__in', value);
-                          !searchParams.get('job_role_id__in') && searchParams.delete('job_role_id__in');
-                          break;
-                        case 'Classification':
-                          searchParams.set('classification_id__in', value);
-                          !searchParams.get('classification_id__in') && searchParams.delete('classification_id__in');
-
-                          break;
-                        case 'Organization':
-                          searchParams.set('organization_id__in', value);
-                          !searchParams.get('organization_id__in') && searchParams.delete('organization_id__in');
-                          break;
-                        default:
-                          break;
-                      }
-                      handleFilters();
-                    }}
-                    defaultValue={
-                      // Set the value on page load from URL
-                      filter.title === 'Job Family'
-                        ? searchParams.has('job_family_id__in')
-                          ? searchParams.get('job_family_id__in')
-                          : undefined
-                        : filter.title === 'Job Roles'
-                          ? searchParams.has('job_role_id__in')
-                            ? searchParams.get('job_role_id__in')
-                            : undefined
-                          : filter.title === 'Classification'
-                            ? searchParams.has('classification_id__in')
-                              ? searchParams.get('classification_id__in')
-                              : undefined
-                            : filter.title === 'Organization'
-                              ? searchParams.has('organization_id__in')
-                                ? searchParams.get('organization_id__in')
-                                : undefined
-                              : undefined
-                    }
-                  />
-                </div>
-              );
-            })}
-          </Flex>
-        </Space>
+                  Applied filters
+                </span>
+                <Button onClick={clearFilters} type="link" style={{ padding: '0', fontWeight: 400 }}>
+                  Clear all filters
+                </Button>
+              </Col>
+            )}
+          </Row>
+          <Row>
+            <Col>
+              {allSelections.map((selection) => (
+                <Tag
+                  style={{ marginTop: '10px' }}
+                  key={`${selection.type}-${selection.value}`}
+                  closable
+                  onClose={() => removeSelection(selection.value, selection.type)}
+                >
+                  {findLabel(selection.value, selection.type)}
+                </Tag>
+              ))}
+            </Col>
+          </Row>
+        </Card>
       </Col>
     </Row>
   );
