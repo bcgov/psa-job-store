@@ -168,20 +168,28 @@ export const JobProfileSearch = () => {
 
     if (jobFamilyChanged || classificationChanged) {
       if (searchParams.toString() !== newSearchParams.toString()) {
-        setSearchParams(newSearchParams);
+        navigate({
+          pathname: getBasePath(location.pathname),
+          search: newSearchParams.toString(),
+        });
+        // setSearchParams(newSearchParams);
         return;
       }
     }
 
     // Only update search params if there's a change
     if (searchParams.toString() !== newSearchParams.toString()) {
-      setSearchParams(newSearchParams);
+      navigate({
+        pathname: getBasePath(location.pathname),
+        search: newSearchParams.toString(),
+      });
+      // setSearchParams(newSearchParams);
     }
-  }, [allSelections, searchParams, setSearchParams]);
+  }, [allSelections, searchParams, setSearchParams, location.pathname, navigate]);
 
   const clearFilters = () => {
     setAllSelections([]);
-    setSearchParams(''); // Clear the search query
+    // setSearchParams(''); // Clear the search query
 
     // Update the URL parameters
     const newSearchParams = new URLSearchParams();
@@ -192,7 +200,14 @@ export const JobProfileSearch = () => {
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
 
-    setSearchParams(newSearchParams);
+    // setSearchParams(newSearchParams);
+
+    const basePath = getBasePath(location.pathname);
+
+    navigate({
+      pathname: basePath,
+      search: newSearchParams.toString(),
+    });
   };
 
   return (
