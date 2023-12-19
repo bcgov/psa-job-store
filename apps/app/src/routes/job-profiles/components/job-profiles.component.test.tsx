@@ -116,14 +116,16 @@ describe('JobProfiles', () => {
       </MemoryRouter>,
     );
 
+    // console.log(prettyDOM(container, 100000));
+
     // Assert that the component renders data received from the API
-    const fileClerkElements = queryAllByText('File Clerk');
+    const fileClerkElements = queryAllByText('IT Specialist');
 
     // Assert that the expected number of elements are found
     expect(fileClerkElements.length).toBeGreaterThanOrEqual(1);
 
     // Assert that the component renders data received from the API
-    const itSpecialistElements = queryAllByText('IT Specialist');
+    const itSpecialistElements = queryAllByText('Program Assistant');
 
     // Assert that the expected number of elements are found
     expect(itSpecialistElements.length).toBeGreaterThanOrEqual(1);

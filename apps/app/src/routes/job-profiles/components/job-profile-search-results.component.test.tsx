@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 
@@ -416,22 +416,27 @@ describe('JobProfileSearchResults', () => {
   it('generates correct link URL for each job profile', () => {
     render(
       <MemoryRouter initialEntries={['/mocked/path']}>
-        <Route path="/mocked/path">
-          <JobProfileSearchResults
-            data={mockData as unknown as GetJobProfilesResponse}
-            isLoading={false}
-            currentPage={1}
-            pageSize={2}
-            totalResults={2}
-            onPageChange={() => {}}
+        <Routes>
+          <Route
+            path="/mocked/path"
+            element={
+              <JobProfileSearchResults
+                data={mockData as unknown as GetJobProfilesResponse}
+                isLoading={false}
+                currentPage={1}
+                pageSize={2}
+                totalResults={2}
+                onPageChange={() => {}}
+              />
+            }
           />
-        </Route>
+        </Routes>
       </MemoryRouter>,
     );
 
     const jobProfileLinks = screen.getAllByRole('link');
     jobProfileLinks.forEach((link, index) => {
-      const expectedPath = `/expectedPath/${mockData.jobProfiles[index].id}`;
+      const expectedPath = `/mocked/path/${mockData.jobProfiles[index].id}`;
       expect(link.getAttribute('href')).toBe(expectedPath);
     });
   });

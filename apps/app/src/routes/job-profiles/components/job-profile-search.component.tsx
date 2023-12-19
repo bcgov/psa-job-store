@@ -151,53 +151,45 @@ export const JobProfileSearch = () => {
       .map((s) => s.value)
       .join(',');
 
+    const pageFromURL = parseInt(searchParams.get('page') || '1', 10);
+    const searchFromURL = searchParams.get('search');
+
     // Update URL parameters if needed
     const newSearchParams = new URLSearchParams();
+    if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
+    if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
+
     if (jobFamilyValues) newSearchParams.set('job_family_id__in', jobFamilyValues);
     if (classificationValues) newSearchParams.set('classification_id__in', classificationValues);
-
-    // todo: implement when needed
-    // const sortFromUrl = searchParams.get('sortField');
-    // const sortOrderFromUrl = searchParams.get('sortOrder');
-
-    // if (sortFromUrl) newSearchParams.set('sortField', sortFromUrl);
-    // if (sortOrderFromUrl) newSearchParams.set('sortOrder', sortOrderFromUrl);
 
     const jobFamilyChanged = newSearchParams.get('job_family_id__in') != searchParams.get('job_family_id__in');
     const classificationChanged =
       newSearchParams.get('classification_id__in') != searchParams.get('classification_id__in');
 
-    // if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
-
-    // if (pageSize != 10) newSearchParams.set('pageSize', pageSizeFromURL.toString());
-
-    const searchFromURL = searchParams.get('search');
-    if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
-
     if (jobFamilyChanged || classificationChanged) {
-      // filters changed - reset page
-      // setCurrentPage(1);
-      // newSearchParams.set('page', (1).toString());
       if (searchParams.toString() !== newSearchParams.toString()) {
-        setSearchParams(newSearchParams);
+        navigate({
+          pathname: getBasePath(location.pathname),
+          search: newSearchParams.toString(),
+        });
+        // setSearchParams(newSearchParams);
         return;
       }
     }
 
     // Only update search params if there's a change
     if (searchParams.toString() !== newSearchParams.toString()) {
-      setSearchParams(newSearchParams);
+      navigate({
+        pathname: getBasePath(location.pathname),
+        search: newSearchParams.toString(),
+      });
+      // setSearchParams(newSearchParams);
     }
-
-    // if (sortFromUrl) setSortField(sortFromUrl);
-    // if (sortOrderFromUrl) {
-    //   setSortOrder(sortOrderFromUrl == 'ASC' ? 'ascend' : 'descend');
-    // }
-  }, [allSelections, searchParams, setSearchParams]);
+  }, [allSelections, searchParams, setSearchParams, location.pathname, navigate]);
 
   const clearFilters = () => {
     setAllSelections([]);
-    setSearchParams(''); // Clear the search query
+    // setSearchParams(''); // Clear the search query
 
     // Update the URL parameters
     const newSearchParams = new URLSearchParams();
@@ -208,7 +200,14 @@ export const JobProfileSearch = () => {
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
 
-    setSearchParams(newSearchParams);
+    // setSearchParams(newSearchParams);
+
+    const basePath = getBasePath(location.pathname);
+
+    navigate({
+      pathname: basePath,
+      search: newSearchParams.toString(),
+    });
   };
 
   return (
@@ -223,14 +222,14 @@ export const JobProfileSearch = () => {
                 aria-label="Search by job title or keyword"
                 onPressEnter={(e) => handleSearch(e.currentTarget.value)}
                 allowClear
-                placeholder="Search by job title or submission ID"
+                placeholder="Search by job title or keyword"
                 onSearch={handleSearch}
                 style={{ width: 400 }}
               />
             </Col>
             <Col span={12}>
               <Row gutter={8} justify="end">
-                <Col>
+                <Col data-testid="Job Family-filter">
                   <Select
                     closeMenuOnSelect={false}
                     isClearable={false}
@@ -266,7 +265,7 @@ export const JobProfileSearch = () => {
                     }}
                   ></Select>
                 </Col>
-                <Col>
+                <Col data-testid="Classification-filter" data-cy="Classification-filter">
                   <Select
                     closeMenuOnSelect={false}
                     isClearable={false}
