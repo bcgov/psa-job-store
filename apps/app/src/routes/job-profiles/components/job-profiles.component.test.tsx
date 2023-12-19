@@ -1,6 +1,7 @@
-import { render } from '@testing-library/react';
+import { act, fireEvent, render, within } from '@testing-library/react';
 import { Grid } from 'antd';
 import { MemoryRouter, useParams } from 'react-router-dom';
+import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import JobProfiles from './job-profiles.component';
 
 jest.mock('react-router-dom', () => ({

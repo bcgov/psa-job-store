@@ -151,33 +151,22 @@ export const JobProfileSearch = () => {
       .map((s) => s.value)
       .join(',');
 
+    const pageFromURL = parseInt(searchParams.get('page') || '1', 10);
+    const searchFromURL = searchParams.get('search');
+
     // Update URL parameters if needed
     const newSearchParams = new URLSearchParams();
+    if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
+    if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
+
     if (jobFamilyValues) newSearchParams.set('job_family_id__in', jobFamilyValues);
     if (classificationValues) newSearchParams.set('classification_id__in', classificationValues);
-
-    // todo: implement when needed
-    // const sortFromUrl = searchParams.get('sortField');
-    // const sortOrderFromUrl = searchParams.get('sortOrder');
-
-    // if (sortFromUrl) newSearchParams.set('sortField', sortFromUrl);
-    // if (sortOrderFromUrl) newSearchParams.set('sortOrder', sortOrderFromUrl);
 
     const jobFamilyChanged = newSearchParams.get('job_family_id__in') != searchParams.get('job_family_id__in');
     const classificationChanged =
       newSearchParams.get('classification_id__in') != searchParams.get('classification_id__in');
 
-    // if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
-
-    // if (pageSize != 10) newSearchParams.set('pageSize', pageSizeFromURL.toString());
-
-    const searchFromURL = searchParams.get('search');
-    if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
-
     if (jobFamilyChanged || classificationChanged) {
-      // filters changed - reset page
-      // setCurrentPage(1);
-      // newSearchParams.set('page', (1).toString());
       if (searchParams.toString() !== newSearchParams.toString()) {
         setSearchParams(newSearchParams);
         return;
@@ -188,11 +177,6 @@ export const JobProfileSearch = () => {
     if (searchParams.toString() !== newSearchParams.toString()) {
       setSearchParams(newSearchParams);
     }
-
-    // if (sortFromUrl) setSortField(sortFromUrl);
-    // if (sortOrderFromUrl) {
-    //   setSortOrder(sortOrderFromUrl == 'ASC' ? 'ascend' : 'descend');
-    // }
   }, [allSelections, searchParams, setSearchParams]);
 
   const clearFilters = () => {
@@ -266,7 +250,7 @@ export const JobProfileSearch = () => {
                     }}
                   ></Select>
                 </Col>
-                <Col data-testid="Classification-filter">
+                <Col data-testid="Classification-filter" data-cy="Classification-filter">
                   <Select
                     closeMenuOnSelect={false}
                     isClearable={false}

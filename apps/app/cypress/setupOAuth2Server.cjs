@@ -24,7 +24,7 @@ async function startServer() {
       session_state: 'xxx', // Session state
       scope: 'xxx', // Scopes
       sid: 'xxxx', // Session ID
-      idir_user_guid: 'xxx', // User GUID
+      idir_user_guid: '6405580ec713411db9c66bfab4f512cd', // User GUID
       identity_provider: 'xxx', // Identity provider
       idir_username: 'test', // Username
       email_verified: false, // Email verification flag

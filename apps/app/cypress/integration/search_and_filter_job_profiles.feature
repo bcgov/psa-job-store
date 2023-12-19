@@ -8,27 +8,29 @@ Feature: Search and Filter Job Profiles
     Given the user is logged in
     And the user navigates to the job search page
 
-  # Scenario: Display job profile data correctly
-  #   When the user views the job profiles list
-  #   Then they see a list of job profiles
+  Scenario: Display job profile data correctly
+    When the user views the job profiles list
+    Then they see a list of job profiles
 
-  # Scenario: Filter job profiles by classification
-  #   When the user selects a classification from the classification filter dropdown
-  #   Then only job profiles classified under that selected classification should be displayed
+  Scenario: Filter job profiles by classification
+    When the user selects a classification from the classification filter dropdown
+    Then only job profiles classified under that selected classification should be displayed
 
-  # Scenario: Job profile selection
-  #   When the user clicks on a job profile from the list
-  #   Then the details of the selected job profile are displayed
+  Scenario: Job profile selection
+    When the user clicks on a job profile from the list
+    Then the details of the selected job profile are displayed
 
-  # Scenario: Page navigation in job profiles
-  #   Given there are multiple pages of job profiles
-  #   When the user navigates to a specific page
-  #   Then the job profiles for that page are displayed
+  Scenario: Page navigation in job profiles
+    Given there are multiple pages of job profiles
+    When the user navigates to a specific page
+    Then the job profiles for that page are displayed
 
   Scenario: Search for a job profile by various fields
     When the user enters a keyword into the search field
     And the user clicks the "Search" button
     Then job profiles containing that keyword in any of the searchable fields should be displayed
+
+
 
 
 # Scenario: Filter job profiles by ministry

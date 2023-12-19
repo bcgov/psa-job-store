@@ -138,7 +138,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
         jobProfile: {
           id: 4,
           stream: 'CORPORATE',
-          title: 'File Clerk',
+          title: 'IT Specialist',
           number: 189,
           context: 'Context 1',
           overview: 'Overview 1',
