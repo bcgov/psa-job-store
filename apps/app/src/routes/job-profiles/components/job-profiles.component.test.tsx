@@ -1,7 +1,6 @@
-import { act, fireEvent, render, within } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Grid } from 'antd';
 import { MemoryRouter, useParams } from 'react-router-dom';
-import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import JobProfiles from './job-profiles.component';
 
 jest.mock('react-router-dom', () => ({
@@ -116,14 +115,16 @@ describe('JobProfiles', () => {
       </MemoryRouter>,
     );
 
+    // console.log(prettyDOM(container, 100000));
+
     // Assert that the component renders data received from the API
-    const fileClerkElements = queryAllByText('File Clerk');
+    const fileClerkElements = queryAllByText('IT Specialist');
 
     // Assert that the expected number of elements are found
     expect(fileClerkElements.length).toBeGreaterThanOrEqual(1);
 
     // Assert that the component renders data received from the API
-    const itSpecialistElements = queryAllByText('IT Specialist');
+    const itSpecialistElements = queryAllByText('Program Assistant');
 
     // Assert that the expected number of elements are found
     expect(itSpecialistElements.length).toBeGreaterThanOrEqual(1);

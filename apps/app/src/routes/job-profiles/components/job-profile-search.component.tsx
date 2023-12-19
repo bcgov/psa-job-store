@@ -223,14 +223,14 @@ export const JobProfileSearch = () => {
                 aria-label="Search by job title or keyword"
                 onPressEnter={(e) => handleSearch(e.currentTarget.value)}
                 allowClear
-                placeholder="Search by job title or submission ID"
+                placeholder="Search by job title or keyword"
                 onSearch={handleSearch}
                 style={{ width: 400 }}
               />
             </Col>
             <Col span={12}>
               <Row gutter={8} justify="end">
-                <Col>
+                <Col data-testid="Job Family-filter">
                   <Select
                     closeMenuOnSelect={false}
                     isClearable={false}
@@ -266,7 +266,7 @@ export const JobProfileSearch = () => {
                     }}
                   ></Select>
                 </Col>
-                <Col>
+                <Col data-testid="Classification-filter">
                   <Select
                     closeMenuOnSelect={false}
                     isClearable={false}
