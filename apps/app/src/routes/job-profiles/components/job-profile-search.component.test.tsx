@@ -299,4 +299,24 @@ describe('JobProfileSearch', () => {
       );
     });
   });
+
+  it('preserves search query after filters are cleared', () => {
+    expect('').toBe('implemented');
+  });
+
+  it('resets page after filters are cleared', () => {
+    expect('').toBe('implemented');
+  });
+
+  it('resets page after search is cleared', () => {
+    expect('').toBe('implemented');
+  });
+
+  it('resets page after filters are applied', () => {
+    expect('').toBe('implemented');
+  });
+
+  it('resets page after search is applied', () => {
+    expect('').toBe('implemented');
+  });
 });

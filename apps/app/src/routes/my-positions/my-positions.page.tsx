@@ -466,7 +466,12 @@ export const MyPositionsPage = () => {
                 >
                   Applied filters
                 </span>
-                <Button onClick={clearFilters} type="link" style={{ padding: '0', fontWeight: 400 }}>
+                <Button
+                  onClick={clearFilters}
+                  type="link"
+                  style={{ padding: '0', fontWeight: 400 }}
+                  data-cy="clear-filters-button"
+                >
                   Clear all filters
                 </Button>
               </Col>
