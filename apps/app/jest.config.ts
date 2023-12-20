@@ -11,6 +11,16 @@ const config: Config = {
       '<rootDir>/__mocks__/fileMock.js',
     '\\.(css|less)$': 'identity-obj-proxy',
   },
+  reporters: [
+    'default',
+    [
+      'jest-html-reporter',
+      {
+        pageTitle: 'Test Report',
+        outputPath: './test-report.html',
+      },
+    ],
+  ],
 };
 
 export default config;

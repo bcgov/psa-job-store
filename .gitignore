@@ -439,3 +439,6 @@ apps/api/prisma/seed.ts
 
 # Ignore temporary DrawIO artifacts
 *.drawio.bkp
+
+# Ignore jest reports
+apps/app/test-report.html

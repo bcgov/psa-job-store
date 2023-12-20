@@ -229,7 +229,7 @@ export const JobProfileSearch = () => {
             </Col>
             <Col span={12}>
               <Row gutter={8} justify="end">
-                <Col data-testid="Job Family-filter">
+                <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
                   <Select
                     closeMenuOnSelect={false}
                     isClearable={false}
@@ -317,7 +317,12 @@ export const JobProfileSearch = () => {
                 >
                   Applied filters
                 </span>
-                <Button onClick={clearFilters} type="link" style={{ padding: '0', fontWeight: 400 }}>
+                <Button
+                  onClick={clearFilters}
+                  type="link"
+                  style={{ padding: '0', fontWeight: 400 }}
+                  data-cy="clear-filters-button"
+                >
                   Clear all filters
                 </Button>
               </Col>
