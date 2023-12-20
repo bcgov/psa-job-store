@@ -3,13 +3,13 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "builder": {
-      "type": "swc",
-      "options": {
-        "swcrcPath": ".swcrc"
+    "assets": [
+      {
+        "include": "assets",
+        "outDir": "dist/src"
       }
-    },
+    ],
     "deleteOutDir": true,
-    "typeCheck": true
+    "watchAssets": true
   }
 }

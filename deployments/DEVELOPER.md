@@ -20,6 +20,20 @@ oc process -f templates/secrets/secrets.yml
 | oc create -f -
 ```
 
+Additionally, if you would like to seed the database, create a secret using a seed.ts file
+
+```
+oc create secret generic seed-secret --from-file=seed.ts=./seed.ts
+```
+
+You can then remote into the nestjs pod and run
+
+```
+npx -w api prisma db seed
+```
+
+to apply the seeds to the database.
+
 To deploy the project (or patch the exiting infrastructure), simply run
 
 ```

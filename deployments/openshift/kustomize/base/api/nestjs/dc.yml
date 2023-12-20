@@ -24,6 +24,7 @@ spec:
       labels:
         name: nestjs-app
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: nestjs-app
         image: api:develop-latest
@@ -35,4 +36,9 @@ spec:
         #     name: api-configmap
         - secretRef:
             name: secrets
-
+        resources:
+          requests:
+            cpu: 100m 
+            memory: 500Mi 
+          limits:
+            cpu: 200m 

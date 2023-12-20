@@ -7,6 +7,7 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
+import 'reflect-metadata';
 import { store } from './redux/redux.store';
 import { router } from './router/index';
 
