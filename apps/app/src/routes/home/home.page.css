@@ -6,6 +6,7 @@
     z-index: 999;
     position: relative;
     background: white;
+    font-size: inherit;
 }
 
 .react-flow__controls{

@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
-import { PositionRequestCreateInput, PositionRequestUpdateInput } from '../../@generated/prisma-nestjs-graphql';
+import {
+  PositionRequestCreateInput,
+  PositionRequestStatus,
+  PositionRequestUpdateInput,
+} from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../prisma/prisma.service';
 import { FindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 
@@ -21,6 +25,21 @@ export class PositionRequestResponse {
 
   @Field(() => GraphQLJSON)
   profile_json: any;
+}
+
+@ObjectType()
+export class PositionRequestStatusCounts {
+  @Field(() => Int)
+  draft: number;
+
+  @Field(() => Int)
+  completed: number;
+
+  @Field(() => Int)
+  inReview: number;
+
+  @Field(() => Int)
+  total: number;
 }
 
 @Injectable()
@@ -132,7 +151,10 @@ export class PositionRequestApiService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getPositionRequestCount({ search, where }: FindManyPositionRequestWithSearch, userId: string) {
+  async getPositionRequestCount(
+    { search, where }: FindManyPositionRequestWithSearch,
+    userId: string,
+  ): Promise<PositionRequestStatusCounts> {
     let searchConditions = {};
     if (search) {
       searchConditions = {
@@ -153,13 +175,30 @@ export class PositionRequestApiService {
       };
     }
 
-    return await this.prisma.positionRequest.count({
-      where: {
-        ...searchConditions,
-        user_id: userId,
-        ...where,
-      },
-    });
+    // Function to get count for a specific status
+    const getCountForStatus = async (status: PositionRequestStatus) => {
+      return await this.prisma.positionRequest.count({
+        where: {
+          ...searchConditions,
+          user_id: userId,
+          status: status, // Now status is of the correct type
+          ...where,
+        },
+      });
+    };
+
+    // Get counts for each status
+    const draftCount = await getCountForStatus(PositionRequestStatus.DRAFT);
+    const completedCount = await getCountForStatus(PositionRequestStatus.COMPLETED);
+    const inReviewCount = await getCountForStatus(PositionRequestStatus.IN_REVIEW);
+
+    // Return the counts
+    return {
+      draft: draftCount,
+      completed: completedCount,
+      inReview: inReviewCount,
+      total: draftCount + completedCount + inReviewCount,
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
