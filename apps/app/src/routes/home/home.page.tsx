@@ -2,6 +2,7 @@ import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Divider, Row, Space, Typography } from 'antd';
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
+import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
 import MyPositionsTable from '../my-positions/components/my-positions-table.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import ContentWrapper from './components/content-wrapper.component';
@@ -12,6 +13,8 @@ const { Title, Text } = Typography;
 
 export const HomePage = () => {
   const auth = useAuth();
+  const { data: positionsCountData } = useGetPositionRequestsCountQuery();
+  const { total = 0, completed = 0, inReview = 0 } = positionsCountData?.positionRequestsCount || {};
 
   return (
     <>
@@ -35,21 +38,21 @@ export const HomePage = () => {
                 <Text>My Positions</Text>
                 <br></br>
                 <Text strong style={{ fontSize: '140%', float: 'right' }}>
-                  12
+                  {total}
                 </Text>
               </div>
               <div>
                 <Text>In Review</Text>
                 <br></br>
                 <Text strong style={{ fontSize: '140%', float: 'right' }}>
-                  6
+                  {inReview}
                 </Text>
               </div>
               <div>
                 <Text>Completed</Text>
                 <br></br>
                 <Text strong style={{ fontSize: '140%', float: 'right' }}>
-                  4
+                  {completed}
                 </Text>
               </div>
             </Space>
@@ -63,6 +66,7 @@ export const HomePage = () => {
           showPagination={false}
           showFooter={false}
           itemsPerPage={5}
+          tableTitle="My recent positions"
           topRightComponent={
             <Link to="/my-positions">
               <Button type="link" style={{ padding: '0' }}>
@@ -82,7 +86,7 @@ export const HomePage = () => {
             border: '1px solid #D9D9D9',
             marginTop: '1rem',
           }}
-          title="My Recent Positions"
+          title={<h2 style={{ marginBottom: 0 }}>My organization</h2>}
           extra={
             <Link to="/org-chart">
               <Button type="link" style={{ padding: '0' }}>

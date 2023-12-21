@@ -6,7 +6,11 @@ import {
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { FindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
-import { PositionRequestApiService, PositionRequestResponse } from './position-request.service';
+import {
+  PositionRequestApiService,
+  PositionRequestResponse,
+  PositionRequestStatusCounts,
+} from './position-request.service';
 
 @ObjectType()
 export class PositionRequestUserClassification {
@@ -46,8 +50,8 @@ export class PositionRequestApiResolver {
     return this.positionRequestService.updatePositionRequest(id, updateInput);
   }
 
-  @Query(() => Int, { name: 'positionRequestsCount' })
-  async jobProfilesCount(
+  @Query(() => PositionRequestStatusCounts, { name: 'positionRequestsCount' })
+  async positionRequestsCount(
     @CurrentUser() { id: userId }: Express.User,
     @Args() args?: FindManyPositionRequestWithSearch,
   ) {

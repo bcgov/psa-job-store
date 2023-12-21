@@ -38,9 +38,20 @@ export interface GetPositionRequestResponse {
   status?: string;
 }
 
+export interface PositionRequestStatusCounts {
+  draft: number;
+  completed: number;
+  inReview: number;
+  total: number;
+}
+
+export interface PositionRequestStatusCountsResponse {
+  positionRequestsCount: PositionRequestStatusCounts;
+}
+
 export interface GetPositionsRequestResponse {
   positionRequests: GetPositionRequestResponse[];
-  positionRequestsCount: number;
+  positionRequestsCount: PositionRequestStatusCounts;
 }
 
 export interface GetPositionRequestArgs {
@@ -107,7 +118,12 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 submission_id
                 status
               }
-              positionRequestsCount(search: $search, where: $where)
+              positionRequestsCount(search: $search, where: $where) {
+                draft
+                completed
+                inReview
+                total
+              }
             }
           `,
           variables: {
@@ -191,6 +207,26 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getPositionRequestsCount: build.query<PositionRequestStatusCountsResponse, GetPositionRequestsArgs | void>({
+      query: (args: GetPositionRequestsArgs = {}) => {
+        return {
+          document: gql`
+            query PositionRequestsCount($search: String, $where: PositionRequestWhereInput) {
+              positionRequestsCount(search: $search, where: $where) {
+                draft
+                completed
+                inReview
+                total
+              }
+            }
+          `,
+          variables: {
+            search: args.search,
+            where: args.where,
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -202,4 +238,5 @@ export const {
   useLazyGetPositionRequestQuery,
   useCreatePositionRequestMutation,
   useUpdatePositionRequestMutation,
+  useGetPositionRequestsCountQuery,
 } = positionRequestApi;

@@ -5,6 +5,7 @@ import { SortOrder } from 'antd/es/table/interface';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLazyGetPositionRequestsQuery } from '../../../redux/services/graphql-api/position-request.api';
+import EmptyJobPositionGraphic from '../images/empty_jobPosition.svg';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -15,6 +16,7 @@ interface MyPositionsTableProps {
   style?: CSSProperties;
   itemsPerPage?: number;
   topRightComponent?: ReactNode;
+  tableTitle?: string;
 }
 
 // Declare the MyPositionsTable component with TypeScript
@@ -26,6 +28,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   style,
   itemsPerPage = 10,
   topRightComponent,
+  tableTitle = 'My Positions',
 }) => {
   const [trigger, { data, isLoading }] = useLazyGetPositionRequestsQuery();
   const [searchParams] = useSearchParams();
@@ -46,7 +49,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
   useEffect(() => {
     if (data && data.positionRequestsCount !== undefined) {
-      setTotalResults(data.positionRequestsCount);
+      setTotalResults(data.positionRequestsCount.total);
     }
   }, [data]);
 
@@ -183,6 +186,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     if (handleTableChangeCallback) handleTableChangeCallback(pagination, _filters, sorter);
   };
 
+  const hasPositionRequests = data?.positionRequests && data.positionRequests.length > 0;
+
   if (isLoading) return <div>Loading...</div>;
 
   return (
@@ -190,7 +195,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       <Card className="tableHeader">
         <Row gutter={24} wrap>
           <Col span={12}>
-            <h2 style={{ marginBottom: 0 }}>My Positions</h2>
+            <h2 style={{ marginBottom: 0 }}>{tableTitle}</h2>
           </Col>
           <Col span={12}>
             <Row justify="end">
@@ -206,25 +211,35 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
         </Row>
       </Card>
 
-      <Table
-        className="tableWithHeader"
-        columns={columns}
-        dataSource={data?.positionRequests}
-        rowKey="id"
-        pagination={
-          showPagination
-            ? {
-                current: currentPage,
-                pageSize: pageSize,
-                total: totalResults,
-                pageSizeOptions: ['10', '20', '50'],
-                showSizeChanger: true,
-              }
-            : false
-        }
-        onChange={handleTableChange}
-        footer={showFooter ? renderTableFooter : undefined}
-      />
+      {hasPositionRequests ? (
+        <Table
+          className="tableWithHeader"
+          columns={columns}
+          dataSource={data?.positionRequests}
+          rowKey="id"
+          pagination={
+            showPagination
+              ? {
+                  current: currentPage,
+                  pageSize: pageSize,
+                  total: totalResults,
+                  pageSizeOptions: ['10', '20', '50'],
+                  showSizeChanger: true,
+                }
+              : false
+          }
+          onChange={handleTableChange}
+          footer={showFooter ? renderTableFooter : undefined}
+        />
+      ) : (
+        <div style={{ textAlign: 'center', padding: '2rem', background: 'white', flex: 1, overflowY: 'auto' }}>
+          <img src={EmptyJobPositionGraphic} alt="No positions" />
+          <div>New to the JobStore?</div>
+          <Button type="primary" style={{ marginTop: '1rem' }}>
+            Create new position
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
