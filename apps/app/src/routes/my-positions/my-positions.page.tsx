@@ -1,30 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ReloadOutlined } from '@ant-design/icons';
-import { Button, Card, Checkbox, Col, Row, Select, Space, Table, Tag } from 'antd';
+import { Button, Card, Checkbox, Col, Row, Select, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
-import { SortOrder } from 'antd/es/table/interface';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/app/page-header.component';
-import {
-  useGetPositionRequestUserClassificationsQuery,
-  useLazyGetPositionRequestsQuery,
-} from '../../redux/services/graphql-api/position-request.api';
+import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
+import ContentWrapper from '../home/components/content-wrapper.component';
+import MyPositionsTable from './components/my-positions-table.component';
 import './my-positions.page.css';
 
 export const MyPositionsPage = () => {
-  const { data: classifications, refetch } = useGetPositionRequestUserClassificationsQuery();
-
-  const [trigger, { data, isLoading }] = useLazyGetPositionRequestsQuery();
-
-  const [searchParams, setSearchParams] = useSearchParams();
-
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // Default page size, adjust as needed
-  const [totalResults, setTotalResults] = useState(0); // Total results count from API
+  const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<null | string>(null);
   const [sortOrder, setSortOrder] = useState<null | string>(null);
+
+  const { data: classifications } = useGetPositionRequestUserClassificationsQuery();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // SEARCHING AND FILTERING
   const [classificationFilterData, setClassificationOptions] = useState<ClassificationOption[]>([]);
@@ -70,66 +63,6 @@ export const MyPositionsPage = () => {
       setClassificationOptions(newOptions);
     }
   }, [classifications]);
-
-  const updateData = useCallback(() => {
-    const search = searchParams.get('search');
-    const statusFilter = searchParams.get('status');
-    const classificationFilter = searchParams.get('classification');
-
-    const sortParams = sortField
-      ? {
-          orderBy: [
-            {
-              [sortField]:
-                sortField === 'title'
-                  ? sortOrder === 'ascend'
-                    ? 'asc'
-                    : 'desc'
-                  : { sort: sortOrder === 'ascend' ? 'asc' : 'desc' },
-            },
-          ],
-        }
-      : {};
-
-    trigger({
-      ...(search != null && { search }),
-      where: {
-        AND: [
-          ...(statusFilter != null
-            ? [
-                {
-                  status: {
-                    in: JSON.parse(`[${statusFilter.split(',').map((v) => `"${v}"`)}]`),
-                  },
-                },
-              ]
-            : []),
-          ...(classificationFilter != null
-            ? [
-                {
-                  classification_id: {
-                    in: JSON.parse(`[${classificationFilter.split(',').map((v) => `"${v}"`)}]`),
-                  },
-                },
-              ]
-            : []),
-        ],
-      },
-      ...sortParams,
-      skip: (currentPage - 1) * pageSize,
-      take: pageSize,
-    });
-  }, [searchParams, trigger, currentPage, pageSize, sortField, sortOrder]);
-
-  useEffect(() => {
-    updateData();
-  }, [updateData]);
-
-  useEffect(() => {
-    if (data && data.positionRequestsCount !== undefined) {
-      setTotalResults(data.positionRequestsCount);
-    }
-  }, [data]);
 
   const handleSearch = (_selectedKeys: any, _confirm: any) => {
     const newSearchParams = new URLSearchParams(searchParams);
@@ -183,6 +116,7 @@ export const MyPositionsPage = () => {
   };
 
   useEffect(() => {
+    // set initial filter selections from search params
     const statusParams = decodeURIComponent(searchParams.get('status') || '')
       .split(',')
       .filter(Boolean);
@@ -197,7 +131,7 @@ export const MyPositionsPage = () => {
       setAllSelections(initialSelections);
       setInitialSelectionSet(true);
     }
-  }, [initialSelectionSet, setInitialSelectionSet, searchParams]); // Removed searchParams from dependencies
+  }, [initialSelectionSet, setInitialSelectionSet, searchParams]);
 
   useEffect(() => {
     // Sync state with URL parameters for selections and pagination
@@ -287,7 +221,7 @@ export const MyPositionsPage = () => {
   };
   // END FILTERING
 
-  const handleTableChange = (pagination: any, _filters: any, sorter: any) => {
+  const handleTableChangeCallback = (pagination: any, _filters: any, sorter: any) => {
     const newPage = pagination.current;
     const newPageSize = pagination.pageSize;
     const newSortField = sorter.field;
@@ -317,83 +251,11 @@ export const MyPositionsPage = () => {
     setSearchParams(newSearchParams);
   };
 
-  const getSortOrder = (fieldName: string): SortOrder | undefined => {
-    if (sortField === fieldName) {
-      return sortOrder === 'ASC' ? 'ascend' : 'descend';
-    }
-    return undefined;
-  };
-
-  const columns = [
-    {
-      title: 'Job Title',
-      dataIndex: 'title',
-      key: 'title',
-      sorter: true,
-      defaultSortOrder: getSortOrder('title'),
-      render: (text: any) => <a href="#!">{text}</a>,
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      sorter: true,
-      defaultSortOrder: getSortOrder('status'),
-      render: (status: any) => {
-        const color = status === 'DRAFT' ? 'gray' : status === 'IN_REVIEW' ? 'blue' : 'green';
-        return (
-          <Space>
-            <span className={`status-dot status-dot-${color}`} />
-            {status === 'DRAFT'
-              ? 'Draft'
-              : status === 'IN_REVIEW'
-                ? 'In review'
-                : status === 'COMPLETED'
-                  ? 'Completed'
-                  : ''}
-          </Space>
-        );
-      },
-    },
-    {
-      sorter: true,
-      defaultSortOrder: getSortOrder('position_number'),
-      title: 'Position #',
-      dataIndex: 'position_number',
-      key: 'position_number',
-    },
-    {
-      sorter: true,
-      defaultSortOrder: getSortOrder('classification_code'),
-      title: 'Classification',
-      dataIndex: 'classification_code',
-      key: 'classification_code',
-    },
-    {
-      sorter: true,
-      defaultSortOrder: getSortOrder('submission_id'),
-      title: 'Submission ID',
-      dataIndex: 'submission_id',
-      key: 'submission_id',
-    },
-  ];
-
-  const renderTableFooter = () => {
-    return (
-      <div>
-        Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
-        results
-      </div>
-    );
-  };
-
-  if (isLoading) return <div>Loading...</div>;
-
   return (
     <>
       <PageHeader title="My Positions" subTitle="Review the profile before creating a new position" />
 
-      <div style={{ padding: '0 1rem', backgroundColor: '#F0F2F5' }}>
+      <ContentWrapper>
         <Card style={{ marginTop: '1rem' }}>
           <Row gutter={24} wrap>
             <Col span={12}>
@@ -492,37 +354,11 @@ export const MyPositionsPage = () => {
           </Row>
         </Card>
 
-        <Card style={{ marginTop: '1rem' }} className="tableHeader">
-          <Row gutter={24} wrap>
-            <Col span={12}>
-              <h2 style={{ marginBottom: 0 }}>My Positions</h2>
-            </Col>
-            <Col span={12}>
-              <Row justify="end">
-                <Col>
-                  <Button icon={<ReloadOutlined />} onClick={() => refetch()} />
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </Card>
-
-        <Table
-          className="tableWithHeader"
-          columns={columns}
-          dataSource={data?.positionRequests}
-          rowKey="id"
-          pagination={{
-            current: currentPage,
-            pageSize: pageSize,
-            total: totalResults,
-            pageSizeOptions: ['10', '20', '50'],
-            showSizeChanger: true,
-          }}
-          onChange={handleTableChange}
-          footer={renderTableFooter}
-        />
-      </div>
+        <MyPositionsTable
+          style={{ marginTop: '1rem' }}
+          handleTableChangeCallback={handleTableChangeCallback}
+        ></MyPositionsTable>
+      </ContentWrapper>
     </>
   );
 };
