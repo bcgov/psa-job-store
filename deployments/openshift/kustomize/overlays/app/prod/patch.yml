@@ -4,15 +4,20 @@ metadata:
   name: app
 spec:
   triggers:
+      - type: ConfigChange
       - imageChangeParams:
+          automatic: true
+          containerNames:
+            - app
           from:
             kind: ImageStreamTag
             name: app:latest
             namespace: f3c07a-tools
+        type: ImageChange
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
     name: app
 spec:
-  host: pjs.digital.gov.bc.ca
+  host: jobstore.apps.silver.devops.gov.bc.ca
