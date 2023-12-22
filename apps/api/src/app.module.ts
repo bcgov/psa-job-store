@@ -4,6 +4,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
+import { ScheduleModule } from '@nestjs/schedule';
 import { Request } from 'express';
 import { LoggerModule } from 'nestjs-pino';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,11 +14,15 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
+import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
+import { ExternalModule } from './modules/external/external.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
-import { MinistryModule } from './modules/ministry/ministry.module';
+import { PositionRequestModule } from './modules/position-request/position-request.module';
+import { SearchModule } from './modules/search/search.module';
+import { SiteMinderGuidTestApiModule } from './modules/site-minder-guid-test/siteminder-guid-test.module';
 import { validateAppConfig } from './utils/validate-app-config.util';
 
 @Module({
@@ -50,12 +55,17 @@ import { validateAppConfig } from './utils/validate-app-config.util';
         };
       },
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
+    PositionRequestModule,
     JobProfileModule,
-    MinistryModule,
     ClassificationModule,
     JobFamilyModule,
     JobRoleModule,
+    BehaviouralComptencyModule,
+    ExternalModule,
+    SearchModule,
+    SiteMinderGuidTestApiModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],

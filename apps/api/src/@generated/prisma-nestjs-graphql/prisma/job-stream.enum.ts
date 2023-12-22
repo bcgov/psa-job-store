@@ -2,7 +2,7 @@ import { registerEnumType } from '@nestjs/graphql';
 
 export enum JobStream {
   CORPORATE = 'CORPORATE',
-  MINISTRY = 'MINISTRY',
+  ORGANIZATION = 'ORGANIZATION',
   USER = 'USER',
 }
 

@@ -7,8 +7,6 @@ import { ClassificationScalarFieldEnum } from './classification-scalar-field.enu
 import { ClassificationScalarWhereWithAggregatesInput } from './classification-scalar-where-with-aggregates.input';
 import { Int } from '@nestjs/graphql';
 import { ClassificationCountAggregateInput } from './classification-count-aggregate.input';
-import { ClassificationAvgAggregateInput } from './classification-avg-aggregate.input';
-import { ClassificationSumAggregateInput } from './classification-sum-aggregate.input';
 import { ClassificationMinAggregateInput } from './classification-min-aggregate.input';
 import { ClassificationMaxAggregateInput } from './classification-max-aggregate.input';
 
@@ -35,12 +33,6 @@ export class ClassificationGroupByArgs {
 
   @Field(() => ClassificationCountAggregateInput, { nullable: true })
   _count?: ClassificationCountAggregateInput;
-
-  @Field(() => ClassificationAvgAggregateInput, { nullable: true })
-  _avg?: ClassificationAvgAggregateInput;
-
-  @Field(() => ClassificationSumAggregateInput, { nullable: true })
-  _sum?: ClassificationSumAggregateInput;
 
   @Field(() => ClassificationMinAggregateInput, { nullable: true })
   _min?: ClassificationMinAggregateInput;

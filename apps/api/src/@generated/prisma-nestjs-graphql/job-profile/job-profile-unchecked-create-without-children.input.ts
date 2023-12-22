@@ -6,6 +6,7 @@ import { JobStream } from '../prisma/job-stream.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-unchecked-create-nested-many-without-job-profile.input';
 import { JobProfileReportsToUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-create-nested-many-without-job-profile.input';
+import { PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput } from '../position-request/position-request-unchecked-create-nested-many-without-parent-job-profile.input';
 
 @InputType()
 export class JobProfileUncheckedCreateWithoutChildrenInput {
@@ -15,14 +16,14 @@ export class JobProfileUncheckedCreateWithoutChildrenInput {
   @Field(() => Int, { nullable: true })
   career_group_id?: number;
 
-  @Field(() => Int, { nullable: false })
-  classification_id!: number;
+  @Field(() => String, { nullable: false })
+  classification_id!: string;
 
   @Field(() => Int, { nullable: true })
   family_id?: number;
 
-  @Field(() => Int, { nullable: true })
-  ministry_id?: number;
+  @Field(() => String, { nullable: true })
+  organization_id?: string;
 
   @Field(() => String, { nullable: true })
   owner_id?: string;
@@ -62,4 +63,7 @@ export class JobProfileUncheckedCreateWithoutChildrenInput {
 
   @Field(() => JobProfileReportsToUncheckedCreateNestedManyWithoutJob_profileInput, { nullable: true })
   reports_to?: JobProfileReportsToUncheckedCreateNestedManyWithoutJob_profileInput;
+
+  @Field(() => PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput, { nullable: true })
+  position_request?: PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput;
 }

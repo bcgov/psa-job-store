@@ -1,0 +1,14 @@
+.react-flow{
+    position:static !important;
+}
+
+.orgChartCart .ant-card-head{
+    z-index: 999;
+    position: relative;
+    background: white;
+    font-size: inherit;
+}
+
+.react-flow__controls{
+    top: 55px !important;
+}

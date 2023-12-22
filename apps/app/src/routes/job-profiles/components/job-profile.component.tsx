@@ -1,38 +1,35 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Button, Descriptions, DescriptionsProps, Form, Grid, Input, List, Select, Typography } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import { Descriptions, DescriptionsProps, Grid, Typography } from 'antd';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, Length, ValidateNested } from 'class-validator';
-import { useEffect, useState } from 'react';
-import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { Link, useParams } from 'react-router-dom';
 import {
-  ClassificationModel,
-  GetClassificationsResponse,
-  useLazyGetClassificationsQuery,
-} from '../../../redux/services/graphql-api/classification.api';
-import { JobProfileModel, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import { FormItem } from '../../../utils/FormItem';
-import WizardControls from '../../wizard/components/wizard-controls.component';
+  IsNotEmpty,
+  Length,
+  ValidateNested,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  registerDecorator,
+} from 'class-validator';
+import { diff_match_patch } from 'diff-match-patch';
+import { CSSProperties, useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { JobProfileModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
+import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import WizardEditControlBar from '../../wizard/components/wizard-edit-control-bar';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
-interface ConfigProps {
-  isEditable?: boolean;
-}
-
 interface JobProfileProps {
   profileData?: any;
   id?: string; // The id is optional, as it can also be retrieved from the params
-  config?: ConfigProps;
-  submitHandler?: SubmitHandler<Record<string, any>>;
-  submitText?: string;
-  showBackButton?: boolean;
-  receivedClassificationsDataCallback?: (data: GetClassificationsResponse) => void;
+  onProfileLoad?: (profileData: JobProfileModel) => void;
+  showBackToResults?: boolean;
+  showDiff?: boolean;
+  style?: CSSProperties;
+  onUseProfile?: () => void;
 }
 
 class BehaviouralCompetency {
@@ -46,44 +43,82 @@ class BehaviouralCompetency {
   description: string;
 }
 
-class JobProfileValidationModel {
+export interface ValueString {
+  value: string;
+}
+
+export class TitleField extends TrackedFieldArrayItem {
+  @Length(5, 500, { message: 'Title must be between 5 and 500 characters.' })
+  declare value: string;
+}
+
+export class OverviewField extends TrackedFieldArrayItem {
+  @Length(5, 500, { message: 'Overview must be between 5 and 500 characters.' })
+  declare value: string;
+}
+
+@ValidatorConstraint({ async: false })
+class AllDisabledConstraint implements ValidatorConstraintInterface {
+  validate(array: (TrackedFieldArrayItem | string)[]) {
+    return !array?.every((item) => {
+      // Check if the item is disabled or empty
+      return typeof item === 'object' && (item.disabled === true || item.value.length == 0);
+    });
+  }
+
+  defaultMessage() {
+    return 'All items must be disabled.';
+  }
+}
+
+function AllDisabled(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: AllDisabledConstraint,
+    });
+  };
+}
+
+export class JobProfileValidationModel {
   id: number;
 
-  @Length(2, 500)
-  title: string;
+  number: number;
 
-  // @IsNotEmpty({ message: 'Classification is required.' })
-  // @ValidateNested()
-  // @Type(() => Classification)
-  classification: number | null;
+  @ValidateNested()
+  @Type(() => TitleField)
+  title: TitleField | string;
 
-  @Length(2, 500)
+  classification: string | null;
+
   context: string;
 
-  @Length(2, 500)
-  overview: string;
+  @ValidateNested()
+  @Type(() => OverviewField)
+  overview: OverviewField | string;
 
-  required_accountabilities: Array<{ value: string }>;
+  @AllDisabled({ message: 'There must be at least one required accountability.' })
+  required_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
-  optional_accountabilities: Array<{ value: string }>;
+  optional_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
-  requirements: Array<{ value: string }>;
+  @AllDisabled({ message: 'There must be at least one job requirement.' })
+  requirements: (TrackedFieldArrayItem | ValueString)[];
 
-  @ValidateNested({ each: true })
-  @Type(() => BehaviouralCompetency)
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
-
-  test?: Array<{ value: string }>;
 }
 
 export const JobProfile: React.FC<JobProfileProps> = ({
   id,
   profileData,
-  config,
-  submitHandler,
-  submitText,
-  showBackButton,
-  receivedClassificationsDataCallback,
+  onProfileLoad,
+  showBackToResults = true,
+  showDiff = false,
+  style,
+  onUseProfile,
 }) => {
   const params = useParams();
   const resolvedId = id ?? params.id; // Using prop ID or param ID
@@ -92,11 +127,11 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   // If neither resolvedId nor profileData is present, throw an error
   if (!resolvedId && !profileData) throw new Error('No ID');
 
+  const [originalData, setOriginalData] = useState<JobProfileModel | null>(null); // for diff
+
   // Using the lazy query to have control over when the fetch action is dispatched
   // (not dispatching if profileData was already provided)
   const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
-  const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
-    useLazyGetClassificationsQuery();
 
   // State to hold the effectiveData which can be from profileData prop or fetched from API
   const initialData = profileData ?? null;
@@ -104,134 +139,160 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
   useEffect(() => {
     // If profileData exists, use it to set the form state
-    if (profileData) {
+    if (profileData && !showDiff) {
       setEffectiveData(profileData);
-    } else if (!profileData && resolvedId) {
+    } else if ((!profileData && resolvedId) || (profileData && showDiff && resolvedId)) {
       // If no profileData is provided and an id exists, fetch the data
+      // OR profileData was provided, but we also want to run a diff
       triggerGetJobProfile({ id: +resolvedId });
     }
-    triggerGetClassificationData(); // get data to populate classification dropdown. Todo: cache this?
-  }, [resolvedId, profileData, triggerGetJobProfile, triggerGetClassificationData]);
+  }, [resolvedId, profileData, triggerGetJobProfile, showDiff]);
 
   // useEffect to set effectiveData when data is fetched from the API
   useEffect(() => {
     if (!profileData && data && !isLoading) {
       // Only set effectiveData from fetched data if profileData is not provided
+      if (onProfileLoad) onProfileLoad(data.jobProfile);
       setEffectiveData(data.jobProfile);
+    } else if (profileData && showDiff && data && !isLoading) {
+      if (onProfileLoad) onProfileLoad(data.jobProfile);
+      setOriginalData(data.jobProfile); // for diff
     }
-  }, [data, isLoading, profileData]);
+  }, [data, isLoading, profileData, onProfileLoad, showDiff]);
 
-  useEffect(() => {
-    if (classificationsData && !classificationsDataIsLoading && receivedClassificationsDataCallback) {
-      receivedClassificationsDataCallback(classificationsData);
+  const compareData = (original: string | undefined, modified: string | undefined): JSX.Element[] => {
+    const blank: JSX.Element[] = [];
+    if (!original || !modified) return blank;
+
+    const dmp = new diff_match_patch();
+    const diff = dmp.diff_main(original, modified);
+    dmp.diff_cleanupSemantic(diff);
+
+    return diff.map(([operation, text], index) => {
+      const style: React.CSSProperties = {};
+      if (operation === 1) {
+        // Insertion
+        style.backgroundColor = 'yellow';
+      } else if (operation === -1) {
+        // Deletion
+        style.textDecoration = 'line-through';
+      }
+
+      return (
+        <span key={index} style={style}>
+          {text}
+        </span>
+      );
+    });
+  };
+
+  const compareLists = (
+    original: (string | TrackedFieldArrayItem)[],
+    modified: (string | TrackedFieldArrayItem)[] | undefined,
+  ): JSX.Element[] => {
+    const comparisonResult: JSX.Element[] = [];
+
+    if (!modified) return comparisonResult;
+
+    const maxLength = Math.max(original.length, modified.length);
+    const dmp = new diff_match_patch();
+
+    for (let i = 0; i < maxLength; i++) {
+      const originalVal = original[i] ?? '';
+      const originalItemValue =
+        typeof originalVal === 'string'
+          ? (originalVal as string)
+          : 'value' in (originalVal as TrackedFieldArrayItem)
+          ? (originalVal as TrackedFieldArrayItem).value
+          : '';
+      const modifiedItem = modified[i];
+      const modifiedItemValue =
+        typeof modifiedItem === 'string' ? modifiedItem : modifiedItem?.disabled ? '' : modifiedItem?.value || '';
+
+      if (originalItemValue || modifiedItemValue) {
+        const diff = dmp.diff_main(originalItemValue, modifiedItemValue);
+        dmp.diff_cleanupSemantic(diff);
+
+        comparisonResult.push(
+          <li key={i}>
+            {diff.map(([operation, text], index) => {
+              const style: React.CSSProperties = {};
+              if (operation === 1) {
+                // Insertion
+                style.backgroundColor = 'yellow';
+              } else if (operation === -1) {
+                // Deletion
+                style.textDecoration = 'line-through';
+              }
+
+              return (
+                <span key={index} style={style}>
+                  {text}
+                </span>
+              );
+            })}
+          </li>,
+        );
+      }
     }
-  }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
-  const { register, control, reset } = useForm<JobProfileValidationModel>({
-    resolver: classValidatorResolver(JobProfileValidationModel),
-    mode: 'onChange',
-  });
+    return comparisonResult;
+  };
 
-  // todo: usage of this approach is undesirable, however it fixes various render issues
-  // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
-  // of this state
-  const [renderKey, setRenderKey] = useState(0);
+  const compareCompetencies = (original: BehaviouralCompetency[], modified: BehaviouralCompetency[]): JSX.Element[] => {
+    const allNames = new Set([...original.map((item) => item.name), ...modified.map((item) => item.name)]);
+    const comparisonResult: JSX.Element[] = [];
 
-  useEffect(() => {
-    if (effectiveData && !isLoading && classificationsData) {
-      const classificationId = effectiveData?.classification
-        ? classificationsData.classifications.find(
-            (c) =>
-              c.occupation_group.id === effectiveData.classification?.occupation_group.id &&
-              c.grid.id === effectiveData.classification.grid.id,
-          )?.id
-        : null;
+    allNames.forEach((name) => {
+      const originalItem = original.find((item) => item.name === name);
+      const modifiedItem = modified.find((item) => item.name === name);
 
-      reset({
-        id: effectiveData?.id,
-        title: effectiveData?.title,
-        context: effectiveData?.context,
-        overview: effectiveData?.overview,
-        classification: classificationId,
-        // array fileds are required to be nested in objects, so wrap string values in {value: item}
-        required_accountabilities: effectiveData?.accountabilities.required
-          ? effectiveData.accountabilities.required.map((item) => ({ value: item }))
-          : [],
-        optional_accountabilities: effectiveData?.accountabilities.optional
-          ? effectiveData.accountabilities.optional.map((item) => ({ value: item }))
-          : [],
-        requirements: effectiveData?.requirements ? effectiveData.requirements.map((item) => ({ value: item })) : [],
-        behavioural_competencies: effectiveData?.behavioural_competencies || [],
-      });
-    }
-    setRenderKey((prevKey) => prevKey + 1);
-  }, [effectiveData, isLoading, classificationsData, reset]);
+      if (originalItem && modifiedItem) {
+        comparisonResult.push(
+          <li key={name}>
+            <Text strong>{originalItem.name}</Text> {originalItem.description}
+          </li>,
+        );
+      } else if (originalItem && !modifiedItem) {
+        comparisonResult.push(
+          <li key={name} style={{ textDecoration: 'line-through' }}>
+            <Text strong>{originalItem.name}</Text> {originalItem.description}
+          </li>,
+        );
+      } else if (!originalItem && modifiedItem) {
+        comparisonResult.push(
+          <li key={name} style={{ backgroundColor: 'yellow' }}>
+            <Text strong>{modifiedItem.name}</Text> {modifiedItem.description}
+          </li>,
+        );
+      }
+    });
 
-  const renderField = (displayValue: any, editableComponent: JSX.Element) =>
-    config?.isEditable ?? false ? editableComponent : displayValue;
+    return comparisonResult;
+  };
 
-  // Required Accountability Fields
-
-  const {
-    fields: acc_req_fields,
-    append: acc_req_append,
-    remove: acc_req_remove,
-  } = useFieldArray<any>({
-    control,
-    name: 'required_accountabilities' as any,
-  });
-
-  // Optional Accountability Fields
-  const {
-    fields: acc_opt_fields,
-    append: acc_opt_append,
-    remove: acc_opt_remove,
-  } = useFieldArray<any>({
-    control,
-    name: 'optional_accountabilities' as any,
-  });
-
-  const {
-    fields: requirement_fields,
-    append: requirement_append,
-    remove: requirement_remove,
-  } = useFieldArray<any>({
-    control,
-    name: 'requirements' as any,
-  });
-
-  if (isLoading || renderKey === 0) {
-    return <p>Loading...</p>; // or render a spinner/loader
+  if (isLoading) {
+    return <p aria-live="polite">Loading job profile...</p>;
   }
-
   const items: DescriptionsProps['items'] = [
     {
       key: 'title',
       label: 'Title',
-      children: renderField(
-        effectiveData?.title,
-        // <input type="text" {...register('title')}></input>,
-        <FormItem name="title" control={control}>
-          <Input />
-        </FormItem>,
-      ),
+      children:
+        showDiff && originalData
+          ? compareData(
+              typeof originalData.title === 'string' ? originalData.title : originalData.title.value,
+              typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value,
+            )
+          : typeof effectiveData?.title === 'string'
+          ? effectiveData?.title
+          : effectiveData?.title?.value,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'classification',
       label: 'Classification',
-      children: renderField(
-        `${effectiveData?.classification?.occupation_group.name} ${effectiveData?.classification?.grid.name}`,
-        <FormItem name="classification" control={control}>
-          <Select {...register('classification')}>
-            {classificationsData?.classifications.map((classification: ClassificationModel) => (
-              <Select.Option value={classification.id} key={classification.id}>
-                {`${classification.occupation_group.name} ${classification.grid.name}`}
-              </Select.Option>
-            ))}
-          </Select>
-        </FormItem>,
-      ),
+      children: <div>{`${effectiveData?.classification?.code}`}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -244,247 +305,139 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'updated_at',
       label: 'Last Updated',
       children: <div />,
-      // children: dayjs(effectiveData?.updated_at).format('MMMM D, YYYY @ h:mm:ss A'),
-
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'context',
       label: 'Job Context',
-      children: renderField(
-        effectiveData?.context,
-        // <input type="text" {...register('context')}></input>,
-        <FormItem name="context" control={control}>
-          <TextArea />
-        </FormItem>,
-      ),
-      span: 24,
+      children:
+        showDiff && originalData ? compareData(originalData.context, effectiveData?.context) : effectiveData?.context,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'overview',
       label: 'Job Overview',
-      children: renderField(
-        effectiveData?.overview,
-        // <input type="text" {...register('overview')}></input>,
-        <FormItem name="overview" control={control}>
-          <TextArea />
-        </FormItem>,
-      ),
-      span: 24,
+      children:
+        showDiff && originalData
+          ? compareData(
+              typeof originalData.overview === 'string' ? originalData.overview : originalData?.overview?.value,
+              typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value,
+            )
+          : typeof effectiveData?.overview === 'string'
+          ? effectiveData?.overview
+          : effectiveData?.overview?.value,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'required_accountabilities',
-      label: config?.isEditable ? (
-        <div>
-          Required Accountabilities
-          <p style={{ fontWeight: 'initial', marginTop: '1rem' }}>
-            ⚠️ Removing required accountabilities <strong>may</strong> trigger a classification review
-          </p>
-        </div>
-      ) : (
-        'Required Accountabilities'
+      label: 'Required Accountabilities',
+      children: (
+        <ul>
+          {showDiff && originalData
+            ? compareLists(originalData.accountabilities.required, effectiveData?.accountabilities.required)
+            : effectiveData?.accountabilities.required.map((accountability, index) => {
+                if (typeof accountability === 'string') {
+                  return <li key={index}>{accountability}</li>;
+                }
+                if (accountability.disabled) {
+                  return null;
+                }
+                return <li key={accountability.value}>{accountability.value}</li>;
+              })}
+        </ul>
       ),
-      children: renderField(
-        <ul>{effectiveData?.accountabilities.required.map((accountability) => <li>{accountability}</li>)}</ul>,
-        <>
-          <List
-            dataSource={acc_req_fields}
-            renderItem={(_field, index) => (
-              <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <FormItem
-                  name={`required_accountabilities.${index}.value`}
-                  control={control}
-                  style={{ flex: 1, marginRight: '10px' }}
-                >
-                  <TextArea style={{ width: '100%' }} />
-                </FormItem>
-
-                <Button
-                  type="primary"
-                  danger
-                  onClick={() => {
-                    acc_req_remove(index);
-                    setRenderKey((prevKey) => prevKey + 1); // fixes issue where deleting item doesn't render properly
-                  }}
-                >
-                  Delete
-                </Button>
-              </List.Item>
-            )}
-          />
-
-          <Button
-            type="dashed"
-            onClick={() => {
-              acc_req_append({ value: '' });
-            }}
-            style={{ marginTop: '20px' }}
-          >
-            Add Accountability
-          </Button>
-        </>,
-      ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'optional_accountabilities',
       label: 'Optional Accountabilities',
-      children: renderField(
-        <ul>{effectiveData?.accountabilities.optional.map((accountability) => <li>{accountability}</li>)}</ul>,
-        <>
-          <List
-            dataSource={acc_opt_fields}
-            renderItem={(_field, index) => (
-              <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <FormItem
-                  name={`optional_accountabilities.${index}.value`}
-                  control={control}
-                  style={{ flex: 1, marginRight: '10px' }}
-                >
-                  <TextArea style={{ width: '100%' }} />
-                </FormItem>
-
-                <Button
-                  type="primary"
-                  danger
-                  onClick={() => {
-                    acc_opt_remove(index);
-                    setRenderKey((prevKey) => prevKey + 1); // fixes issue where deleting item doesn't render properly
-                  }}
-                >
-                  Delete
-                </Button>
-              </List.Item>
-            )}
-          />
-
-          <Button
-            type="dashed"
-            onClick={() => {
-              acc_opt_append({ value: '' });
-            }}
-            style={{ marginTop: '20px' }}
-          >
-            Add Optional Accountability
-          </Button>
-        </>,
+      children: (
+        <ul>
+          {showDiff && originalData
+            ? compareLists(originalData.accountabilities.optional, effectiveData?.accountabilities.optional)
+            : effectiveData?.accountabilities.optional.map((accountability, index) => {
+                if (typeof accountability === 'string') {
+                  return <li key={index}>{accountability}</li>;
+                }
+                if (accountability.disabled) {
+                  return null;
+                }
+                return <li key={accountability.value}>{accountability.value}</li>;
+              })}
+        </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'requirements',
-      label: config?.isEditable ? (
-        <div>
-          Minimum Job Requirements
-          <p style={{ fontWeight: 'initial', marginTop: '1rem' }}>
-            ⚠️ Significant changes to this area <strong>may</strong> trigger a classification review
-          </p>
-        </div>
-      ) : (
-        'Minimum Job Requirements'
+      label: 'Minimum Job Requirements',
+      children: (
+        <ul>
+          {showDiff && originalData
+            ? compareLists(originalData.requirements, effectiveData?.requirements)
+            : effectiveData?.requirements.map((requirement, index) => {
+                if (typeof requirement === 'string') {
+                  return <li key={index}>{requirement}</li>;
+                }
+                if (requirement.disabled) {
+                  return null;
+                }
+                return <li key={requirement.value}>{requirement.value}</li>;
+              })}
+        </ul>
       ),
-      children: renderField(
-        <ul>{effectiveData?.requirements.map((requirement) => <li>{requirement}</li>)}</ul>,
-        <>
-          <List
-            dataSource={requirement_fields}
-            renderItem={(_field, index) => (
-              <List.Item style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <FormItem
-                  name={`requirements.${index}.value`}
-                  control={control}
-                  style={{ flex: 1, marginRight: '10px' }}
-                >
-                  <TextArea style={{ width: '100%' }} />
-                </FormItem>
-
-                <Button
-                  type="primary"
-                  danger
-                  onClick={() => {
-                    requirement_remove(index);
-                    setRenderKey((prevKey) => prevKey + 1); // fixes issue where deleting item doesn't render properly
-                  }}
-                >
-                  Delete
-                </Button>
-              </List.Item>
-            )}
-          />
-
-          <Button
-            type="dashed"
-            onClick={() => {
-              requirement_append({ value: '' });
-            }}
-            style={{ marginTop: '20px' }}
-          >
-            Add Requirement
-          </Button>
-        </>,
-      ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'behavioural_competencies',
       label: 'Behavioural Competencies',
       children: (
         <ul>
-          {(effectiveData?.behavioural_competencies ?? []).map(
-            ({ behavioural_competency: { name, description } }, index) => {
-              return (
-                <li key={index}>
-                  {/* Displaying the competency name and description */}
-                  <Text strong>{name}</Text> {description}
-                  {config?.isEditable && (
-                    <>
-                      {/* Hidden field to store the id */}
-                      <FormItem
-                        name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                        control={control}
-                        hidden
-                      >
-                        <Input />
-                      </FormItem>
-                      {/* Hidden fields for editing */}
-                      <FormItem
-                        hidden
-                        name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                        control={control}
-                        style={{ flex: 1, marginRight: '10px' }}
-                      >
-                        <Input placeholder="Name" style={{ width: '100%' }} />
-                      </FormItem>
-                      <FormItem
-                        hidden
-                        name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                        control={control}
-                        style={{ flex: 2, marginRight: '10px' }}
-                      >
-                        <TextArea placeholder="Description" style={{ width: '100%' }} />
-                      </FormItem>
-                    </>
-                  )}
-                </li>
-              );
-            },
-          )}
+          {showDiff && originalData
+            ? compareCompetencies(
+                originalData.behavioural_competencies.map((item) => item.behavioural_competency),
+                effectiveData?.behavioural_competencies.map((item) => item.behavioural_competency) ?? [],
+              )
+            : (effectiveData?.behavioural_competencies ?? []).map(
+                ({ behavioural_competency: { name, description } }, index) => {
+                  return (
+                    <li key={index}>
+                      <Text strong>{name}</Text> {description}
+                    </li>
+                  );
+                },
+              )}
         </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
   ];
 
-  const renderContent = () => (
-    <>
-      {screens.xl === false ? (
-        <Link to="/job-profiles">
-          <ArrowLeftOutlined /> Back to Search Results
-        </Link>
+  return (
+    <div data-testid="job-profile" style={{ ...style }}>
+      {screens.xl === false && showBackToResults ? (
+        <nav aria-label="Breadcrumb">
+          <Link to="/job-profiles">
+            <ArrowLeftOutlined aria-hidden="true" /> Back to Search Results
+          </Link>
+        </nav>
       ) : (
         <div />
       )}
+      {onUseProfile ? (
+        <WizardEditControlBar onNext={onUseProfile} nextText="Use Profile" style={{ marginBottom: '1rem' }} />
+      ) : // <Button onClick={() => onUseProfile()} type="primary">
+      //   Use Profile
+      // </Button>
+      null}
       <Descriptions
+        aria-hidden="true"
         bordered
         column={24}
         items={items}
@@ -493,31 +446,102 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           width: '100px',
           verticalAlign: 'top',
         }}
+        contentStyle={{
+          verticalAlign: 'top',
+        }}
       />
-    </>
-  );
-
-  // function rerender() {
-  //   setRenderKey((prevKey) => prevKey + 1);
-  // }
-
-  return config?.isEditable ? (
-    <>
-      {/* <button onClick={rerender}>Re-render</button> */}
-      <Form
-        key={renderKey}
-        onFinish={(data) => {
-          if (submitHandler) submitHandler(data);
+      <div
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: 0,
         }}
       >
-        <FormItem name="id" control={control} hidden>
-          <Input />
-        </FormItem>
-        {renderContent()}
-        <WizardControls submitText={submitText} showBackButton={showBackButton} />
-      </Form>
-    </>
-  ) : (
-    renderContent()
+        <section>
+          <h3>Title</h3>
+          <p>{typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value}</p>
+          <h3>Classification</h3>
+          <p>{`${effectiveData?.classification?.code}`}</p>
+
+          <h3>Job Store #</h3>
+          <p>{effectiveData?.number}</p>
+
+          <h3>Last Updated</h3>
+          <p>{/* last updated info */}</p>
+
+          <h3>Job Context</h3>
+          <p>{effectiveData?.context}</p>
+
+          <h3>Job Overview</h3>
+          <p>
+            {typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value}
+          </p>
+          <h3>Required Accountabilities</h3>
+          <ul>
+            {effectiveData?.accountabilities.required.map((accountability, index) => {
+              // Check if the accountability is a string
+              if (typeof accountability === 'string') {
+                return <li key={index}>{accountability}</li>;
+              }
+
+              // Check if the accountability is an object and not disabled
+              if (accountability.disabled) {
+                return null;
+              }
+
+              return <li key={accountability.value}>{accountability.value}</li>;
+            })}
+          </ul>
+
+          <h3>Optional Accountabilities</h3>
+          <ul>
+            {effectiveData?.accountabilities.optional.map((accountability, index) => {
+              // Check if the accountability is a string
+              if (typeof accountability === 'string') {
+                return <li key={index}>{accountability}</li>;
+              }
+
+              // Check if the accountability is an object and not disabled
+              if (accountability.disabled) {
+                return null;
+              }
+
+              return <li key={accountability.value}>{accountability.value}</li>;
+            })}
+          </ul>
+
+          <h3>Minimum Job Requirements</h3>
+          <ul>
+            {effectiveData?.requirements.map((requirement, index) => {
+              if (typeof requirement === 'string') {
+                return <li key={index}>{requirement}</li>;
+              }
+
+              if (requirement.disabled) {
+                return null;
+              }
+
+              return <li key={requirement.value}>{requirement.value}</li>;
+            })}
+          </ul>
+
+          <h3>Behavioural Competencies</h3>
+          <ul>
+            {(effectiveData?.behavioural_competencies ?? []).map(
+              ({ behavioural_competency: { name, description } }, index) => (
+                <li key={index}>
+                  <Text strong>{name}</Text> {description}
+                </li>
+              ),
+            )}
+          </ul>
+        </section>
+      </div>
+    </div>
   );
 };

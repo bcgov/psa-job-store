@@ -6,10 +6,11 @@ import { JobStream } from '../prisma/job-stream.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
+import { PositionRequest } from '../position-request/position-request.model';
 import { CareerGroup } from '../career-group/career-group.model';
 import { Classification } from '../classification/classification.model';
 import { JobFamily } from '../job-family/job-family.model';
-import { Ministry } from '../ministry/ministry.model';
+import { Organization } from '../organization/organization.model';
 import { User } from '../user/user.model';
 import { JobRole } from '../job-role/job-role.model';
 
@@ -21,14 +22,14 @@ export class JobProfile {
   @Field(() => Int, { nullable: true })
   career_group_id!: number | null;
 
-  @Field(() => Int, { nullable: false })
-  classification_id!: number;
+  @Field(() => String, { nullable: false })
+  classification_id!: string;
 
   @Field(() => Int, { nullable: true })
   family_id!: number | null;
 
-  @Field(() => Int, { nullable: true })
-  ministry_id!: number | null;
+  @Field(() => String, { nullable: true })
+  organization_id!: string | null;
 
   @Field(() => String, { nullable: true })
   owner_id!: string | null;
@@ -69,6 +70,9 @@ export class JobProfile {
   @Field(() => [JobProfileReportsTo], { nullable: true })
   reports_to?: Array<JobProfileReportsTo>;
 
+  @Field(() => [PositionRequest], { nullable: true })
+  position_request?: Array<PositionRequest>;
+
   @Field(() => CareerGroup, { nullable: true })
   career_group?: CareerGroup | null;
 
@@ -81,8 +85,8 @@ export class JobProfile {
   @Field(() => JobFamily, { nullable: true })
   family?: JobFamily | null;
 
-  @Field(() => Ministry, { nullable: true })
-  ministry?: Ministry | null;
+  @Field(() => Organization, { nullable: true })
+  organization?: Organization | null;
 
   @Field(() => User, { nullable: true })
   owner?: User | null;

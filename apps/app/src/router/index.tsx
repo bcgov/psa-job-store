@@ -1,4 +1,4 @@
-import { FileTextOutlined, HomeOutlined, StarOutlined } from '@ant-design/icons';
+import { FileTextOutlined, HomeOutlined, PartitionOutlined, StarOutlined, UserAddOutlined } from '@ant-design/icons';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
 import { RouteGuard } from '../components/guards/route.guard';
@@ -8,7 +8,12 @@ import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/home.page';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
+import { MyPositionsRoute } from '../routes/my-positions';
+import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
+import { OrgChartRoute } from '../routes/org-chart';
+import { OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { WizardRoute } from '../routes/wizard';
+import { WizardConfirmDetailsPage } from '../routes/wizard/wizard-confirm-details.page';
 import { WizardEditPage } from '../routes/wizard/wizard-edit.page';
 import { WizardResultPage } from '../routes/wizard/wizard-result.page';
 import { WizardReviewPage } from '../routes/wizard/wizard-review.page';
@@ -42,6 +47,34 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 element: <HomePage />,
+              },
+            ],
+          },
+          {
+            path: '/my-positions',
+            element: <MyPositionsRoute />,
+            handle: {
+              breadcrumb: () => 'My Positions',
+              icon: <UserAddOutlined />,
+            },
+            children: [
+              {
+                index: true,
+                element: <MyPositionsPage />,
+              },
+            ],
+          },
+          {
+            path: '/org-chart',
+            element: <OrgChartRoute />,
+            handle: {
+              breadcrumb: () => 'Org Chart',
+              icon: <PartitionOutlined />,
+            },
+            children: [
+              {
+                index: true,
+                element: <OrgChartPage />,
               },
             ],
           },
@@ -107,6 +140,13 @@ export const router = createBrowserRouter([
                 element: <WizardReviewPage />,
                 handle: {
                   breadcrumb: () => 'Review profile',
+                },
+              },
+              {
+                path: 'confirm',
+                element: <WizardConfirmDetailsPage />,
+                handle: {
+                  breadcrumb: () => 'Confirm details',
                 },
               },
               {

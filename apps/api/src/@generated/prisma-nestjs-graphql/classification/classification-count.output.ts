@@ -8,5 +8,5 @@ export class ClassificationCount {
   job_profiles?: number;
 
   @Field(() => Int, { nullable: false })
-  dependent_job_profiles?: number;
+  reportees?: number;
 }

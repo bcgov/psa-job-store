@@ -8,8 +8,8 @@ export class ClassificationCountOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  grid_id?: keyof typeof SortOrder;
+  code?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  occupation_group_id?: keyof typeof SortOrder;
+  name?: keyof typeof SortOrder;
 }

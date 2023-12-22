@@ -1,5 +1,5 @@
 {
   "extends": "tsconfig/vite.json",
-  "include": ["src", "vite.config.ts"],
+  "include": ["src", "vite.config.ts", "envConfig.ts", "jest.setup.ts", "jest.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

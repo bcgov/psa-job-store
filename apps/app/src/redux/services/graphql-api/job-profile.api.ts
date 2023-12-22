@@ -1,94 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
-import { ClassificationModel } from './classification.api';
-
-export interface JobProfileModel {
-  id: number;
-  accountabilities: Accountabilities;
-  behavioural_competencies: BehaviouralCompetencies[];
-  classification: ClassificationModel | null;
-  requirements: string[];
-  ministry_id: number;
-  family_id: number;
-  stream: string;
-  title: string;
-  number: number;
-  context: string;
-  overview: string;
-}
-
-export interface BehaviouralCompetencies {
-  behavioural_competency: BehaviouralCompetency;
-}
-
-export interface BehaviouralCompetency {
-  id: number;
-  name: string;
-  description: string;
-}
-
-interface Accountabilities {
-  optional: string[];
-  required: string[];
-}
-
-interface BehaviouralCompetencyConnect {
-  id: number;
-}
-
-interface BehaviouralCompetencyItem {
-  behavioural_competency: {
-    connect: BehaviouralCompetencyConnect;
-  };
-}
-
-interface BehaviouralCompetenciesInput {
-  create: BehaviouralCompetencyItem[];
-}
-
-interface ClassificationConnectInput {
-  connect: {
-    id: number;
-  };
-}
-
-export interface CreateJobProfileInput {
-  stream: string;
-  title: string;
-  number: number;
-  context: string;
-  overview: string;
-  accountabilities: Accountabilities;
-  requirements: string[];
-  behavioural_competencies?: BehaviouralCompetenciesInput;
-  classification: ClassificationConnectInput;
-  state: string;
-  parent: ClassificationConnectInput;
-}
-
-export interface CreateJobProfileResponse {
-  id: number;
-}
-
-export interface GetJobProfilesArgs {
-  where?: Record<string, any>;
-  orderBy?: Record<string, any>;
-  take?: number;
-  skip?: number;
-}
-
-export interface GetJobProfilesResponse {
-  jobProfiles: JobProfileModel[];
-}
-
-export interface GetJobProfileArgs {
-  id: number;
-}
-
-export interface GetJobProfileResponse {
-  jobProfile: JobProfileModel;
-}
+import {
+  CreateJobProfileInput,
+  CreateJobProfileResponse,
+  GetJobProfileArgs,
+  GetJobProfileResponse,
+  GetJobProfilesArgs,
+  GetJobProfilesResponse,
+} from './job-profile-types';
 
 export const jobProfileApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
@@ -96,8 +16,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       query: (args: GetJobProfilesArgs = {}) => {
         return {
           document: gql`
-            query JobProfiles($where: JobProfileWhereInput) {
-              jobProfiles(where: $where) {
+            query JobProfiles($search: String, $where: JobProfileWhereInput, $take: Int, $skip: Int) {
+              jobProfiles(search: $search, where: $where, take: $take, skip: $skip) {
                 id
                 stream
                 title
@@ -115,15 +35,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 classification {
                   id
-                  occupation_group {
-                    id
-                    code
-                    name
-                  }
-                  grid {
-                    id
-                    name
-                  }
+                  code
                 }
                 family {
                   id
@@ -137,28 +49,25 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                ministry {
+                organization {
                   id
-                  code
                   name
                 }
                 reports_to {
                   classification {
                     id
-                    grid {
-                      name
-                    }
-                    occupation_group {
-                      code
-                      name
-                    }
+                    code
                   }
                 }
               }
+              jobProfilesCount(search: $search, where: $where)
             }
           `,
           variables: {
+            search: args.search,
             where: args.where,
+            skip: args.skip,
+            take: args.take,
           },
         };
       },
@@ -186,15 +95,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 classification {
                   id
-                  occupation_group {
-                    id
-                    code
-                    name
-                  }
-                  grid {
-                    id
-                    name
-                  }
+                  code
                 }
                 family {
                   id
@@ -208,16 +109,14 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                ministry {
+                organization {
                   id
-                  code
                   name
                 }
                 reports_to {
                   classification {
                     id
-                    grid_id
-                    occupation_group_id
+                    code
                   }
                 }
               }

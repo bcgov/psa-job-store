@@ -5,12 +5,13 @@ import { JobStream } from '../prisma/job-stream.enum';
 import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-update-many-without-job-profile-nested.input';
+import { PositionRequestUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-update-many-without-parent-job-profile-nested.input';
 import { CareerGroupUpdateOneWithoutProfilesNestedInput } from '../career-group/career-group-update-one-without-profiles-nested.input';
 import { JobProfileUpdateManyWithoutParentNestedInput } from './job-profile-update-many-without-parent-nested.input';
 import { ClassificationUpdateOneRequiredWithoutJob_profilesNestedInput } from '../classification/classification-update-one-required-without-job-profiles-nested.input';
 import { JobFamilyUpdateOneWithoutProfilesNestedInput } from '../job-family/job-family-update-one-without-profiles-nested.input';
-import { MinistryUpdateOneWithoutJob_profilesNestedInput } from '../ministry/ministry-update-one-without-job-profiles-nested.input';
-import { UserUpdateOneWithoutJobProfileNestedInput } from '../user/user-update-one-without-job-profile-nested.input';
+import { OrganizationUpdateOneWithoutJob_profilesNestedInput } from '../organization/organization-update-one-without-job-profiles-nested.input';
+import { UserUpdateOneWithoutJob_profilesNestedInput } from '../user/user-update-one-without-job-profiles-nested.input';
 import { JobProfileUpdateOneWithoutChildrenNestedInput } from './job-profile-update-one-without-children-nested.input';
 import { JobRoleUpdateOneWithoutProfilesNestedInput } from '../job-role/job-role-update-one-without-profiles-nested.input';
 
@@ -43,6 +44,9 @@ export class JobProfileUpdateWithoutReports_toInput {
   @Field(() => JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput;
 
+  @Field(() => PositionRequestUpdateManyWithoutParent_job_profileNestedInput, { nullable: true })
+  position_request?: PositionRequestUpdateManyWithoutParent_job_profileNestedInput;
+
   @Field(() => CareerGroupUpdateOneWithoutProfilesNestedInput, { nullable: true })
   career_group?: CareerGroupUpdateOneWithoutProfilesNestedInput;
 
@@ -55,11 +59,11 @@ export class JobProfileUpdateWithoutReports_toInput {
   @Field(() => JobFamilyUpdateOneWithoutProfilesNestedInput, { nullable: true })
   family?: JobFamilyUpdateOneWithoutProfilesNestedInput;
 
-  @Field(() => MinistryUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
-  ministry?: MinistryUpdateOneWithoutJob_profilesNestedInput;
+  @Field(() => OrganizationUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  organization?: OrganizationUpdateOneWithoutJob_profilesNestedInput;
 
-  @Field(() => UserUpdateOneWithoutJobProfileNestedInput, { nullable: true })
-  owner?: UserUpdateOneWithoutJobProfileNestedInput;
+  @Field(() => UserUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  owner?: UserUpdateOneWithoutJob_profilesNestedInput;
 
   @Field(() => JobProfileUpdateOneWithoutChildrenNestedInput, { nullable: true })
   parent?: JobProfileUpdateOneWithoutChildrenNestedInput;

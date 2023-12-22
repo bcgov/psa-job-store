@@ -8,10 +8,10 @@ export class ClassificationCountAggregate {
   id!: number;
 
   @Field(() => Int, { nullable: false })
-  grid_id!: number;
+  code!: number;
 
   @Field(() => Int, { nullable: false })
-  occupation_group_id!: number;
+  name!: number;
 
   @Field(() => Int, { nullable: false })
   _all!: number;

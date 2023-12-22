@@ -6,11 +6,12 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyCreateNestedManyWithoutJob_profileInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-create-nested-many-without-job-profile.input';
 import { JobProfileReportsToCreateNestedManyWithoutJob_profileInput } from '../job-profile-reports-to/job-profile-reports-to-create-nested-many-without-job-profile.input';
+import { PositionRequestCreateNestedManyWithoutParent_job_profileInput } from '../position-request/position-request-create-nested-many-without-parent-job-profile.input';
 import { CareerGroupCreateNestedOneWithoutProfilesInput } from '../career-group/career-group-create-nested-one-without-profiles.input';
 import { ClassificationCreateNestedOneWithoutJob_profilesInput } from '../classification/classification-create-nested-one-without-job-profiles.input';
 import { JobFamilyCreateNestedOneWithoutProfilesInput } from '../job-family/job-family-create-nested-one-without-profiles.input';
-import { MinistryCreateNestedOneWithoutJob_profilesInput } from '../ministry/ministry-create-nested-one-without-job-profiles.input';
-import { UserCreateNestedOneWithoutJobProfileInput } from '../user/user-create-nested-one-without-job-profile.input';
+import { OrganizationCreateNestedOneWithoutJob_profilesInput } from '../organization/organization-create-nested-one-without-job-profiles.input';
+import { UserCreateNestedOneWithoutJob_profilesInput } from '../user/user-create-nested-one-without-job-profiles.input';
 import { JobProfileCreateNestedOneWithoutChildrenInput } from './job-profile-create-nested-one-without-children.input';
 import { JobRoleCreateNestedOneWithoutProfilesInput } from '../job-role/job-role-create-nested-one-without-profiles.input';
 
@@ -46,6 +47,9 @@ export class JobProfileCreateWithoutChildrenInput {
   @Field(() => JobProfileReportsToCreateNestedManyWithoutJob_profileInput, { nullable: true })
   reports_to?: JobProfileReportsToCreateNestedManyWithoutJob_profileInput;
 
+  @Field(() => PositionRequestCreateNestedManyWithoutParent_job_profileInput, { nullable: true })
+  position_request?: PositionRequestCreateNestedManyWithoutParent_job_profileInput;
+
   @Field(() => CareerGroupCreateNestedOneWithoutProfilesInput, { nullable: true })
   career_group?: CareerGroupCreateNestedOneWithoutProfilesInput;
 
@@ -55,11 +59,11 @@ export class JobProfileCreateWithoutChildrenInput {
   @Field(() => JobFamilyCreateNestedOneWithoutProfilesInput, { nullable: true })
   family?: JobFamilyCreateNestedOneWithoutProfilesInput;
 
-  @Field(() => MinistryCreateNestedOneWithoutJob_profilesInput, { nullable: true })
-  ministry?: MinistryCreateNestedOneWithoutJob_profilesInput;
+  @Field(() => OrganizationCreateNestedOneWithoutJob_profilesInput, { nullable: true })
+  organization?: OrganizationCreateNestedOneWithoutJob_profilesInput;
 
-  @Field(() => UserCreateNestedOneWithoutJobProfileInput, { nullable: true })
-  owner?: UserCreateNestedOneWithoutJobProfileInput;
+  @Field(() => UserCreateNestedOneWithoutJob_profilesInput, { nullable: true })
+  owner?: UserCreateNestedOneWithoutJob_profilesInput;
 
   @Field(() => JobProfileCreateNestedOneWithoutChildrenInput, { nullable: true })
   parent?: JobProfileCreateNestedOneWithoutChildrenInput;

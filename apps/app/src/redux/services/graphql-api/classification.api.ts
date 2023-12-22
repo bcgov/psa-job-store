@@ -1,22 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
-
-export interface ClassificationModel {
-  id: number;
-  grid: {
-    id: number;
-    name: string;
-  };
-  occupation_group: {
-    id: number;
-    name: string;
-  };
-}
-
-export interface GetClassificationsResponse {
-  classifications: ClassificationModel[];
-}
+import { GetClassificationsResponse } from './job-profile-types';
 
 export const classificationApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
@@ -25,16 +10,9 @@ export const classificationApi = graphqlApi.injectEndpoints({
         return {
           document: gql`
             query Classifications {
-              classifications {
+              classifications(orderBy: [{ code: asc }, { id: asc }]) {
                 id
-                grid {
-                  id
-                  name
-                }
-                occupation_group {
-                  id
-                  name
-                }
+                code
               }
             }
           `,

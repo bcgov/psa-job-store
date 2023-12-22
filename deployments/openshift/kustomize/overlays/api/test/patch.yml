@@ -3,8 +3,21 @@ kind: DeploymentConfig
 metadata:
   name: nestjs-app
 spec:
-  strategy:
-    type: Rolling
+  template:
+    spec:
+      containers:
+        - name: nestjs-app
+          volumeMounts:
+            - name: seed-volume
+              mountPath: /usr/src/apps/api/prisma/seed.ts
+              subPath: seed.ts
+          envFrom:
+            - secretRef:
+                name: secrets
+      volumes:
+      - name: seed-volume
+        secret:
+          secretName: seed-secret
   triggers:
       - type: ConfigChange
       - imageChangeParams:
@@ -16,7 +29,7 @@ spec:
             name: api:stage-latest
             namespace: f3c07a-tools
         type: ImageChange
----          
+---         
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:

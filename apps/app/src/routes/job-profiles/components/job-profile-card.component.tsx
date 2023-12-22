@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Space, Typography } from 'antd';
+import { Button, Space, Typography } from 'antd';
 import { useParams } from 'react-router-dom';
-import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile.api';
+import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 
 const { Title, Text, Paragraph } = Typography;
 
 export interface JobProfileCardProps {
   data: JobProfileModel;
+  link: string;
 }
 
 export const JobProfileCard = ({ data }: JobProfileCardProps) => {
@@ -22,12 +23,12 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
         padding: '1rem',
       }}
     >
-      <Title level={1} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }}>
-        {data.title}
+      <Title level={2} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
+        {typeof data?.title === 'string' ? data?.title : data?.title?.value}
       </Title>
       <div>
-        <Text type="secondary">
-          {data.classification?.occupation_group.name} {data.classification?.grid.name} | Job Store # {data.number}
+        <Text type="secondary" data-cy="card-classification">
+          {data.classification?.code} | Job Store # {data.number}
         </Text>
         <br />
         <Text type="secondary">Reports to excluded manager</Text>
@@ -38,8 +39,13 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       </div>
       <div>
         <Text strong>Overview:</Text>
-        <Paragraph ellipsis={{ rows: 3 }}>{data.overview}</Paragraph>
+        <Paragraph ellipsis={{ rows: 3 }}>
+          {typeof data?.overview === 'string' ? data?.overview : data?.overview?.value}
+        </Paragraph>
       </div>
+      <Button type="link" aria-label={`click to see details for ${data.title}`} style={{ padding: '0' }}>
+        See details
+      </Button>
     </Space>
   );
 };
