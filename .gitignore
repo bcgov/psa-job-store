@@ -437,4 +437,5 @@ $RECYCLE.BIN/
 apps/api/prisma/seed.ts
 
 # Ignore temporary DrawIO artifacts
-*.drawio.bkp
+docs/architecture/*.drawio.bkp
+docs/architecture/.*.drawio.dtmp
