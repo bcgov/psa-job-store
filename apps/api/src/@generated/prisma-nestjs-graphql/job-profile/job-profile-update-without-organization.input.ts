@@ -1,36 +1,32 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { JobProfileState } from '../prisma/job-profile-state.enum';
-import { JobStream } from '../prisma/job-stream.enum';
+import { JobProfileType } from '../prisma/job-profile-type.enum';
 import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-update-many-without-job-profile-nested.input';
+import { JobProfileClassificationUpdateManyWithoutJob_profileNestedInput } from '../job-profile-classification/job-profile-classification-update-many-without-job-profile-nested.input';
+import { JobProfileCareerGroupUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-career-group/job-profile-career-group-update-one-without-job-profiles-nested.input';
+import { JobProfileContextUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-update-one-without-job-profile-nested.input';
+import { JobProfileJobFamilyUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-job-family/job-profile-job-family-update-one-without-job-profiles-nested.input';
+import { JobProfileRoleUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-role/job-profile-role-update-one-without-job-profiles-nested.input';
+import { JobProfileStreamUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-stream/job-profile-stream-update-one-without-job-profiles-nested.input';
 import { JobProfileReportsToUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-update-many-without-job-profile-nested.input';
 import { PositionRequestUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-update-many-without-parent-job-profile-nested.input';
-import { CareerGroupUpdateOneWithoutProfilesNestedInput } from '../career-group/career-group-update-one-without-profiles-nested.input';
-import { JobProfileUpdateManyWithoutParentNestedInput } from './job-profile-update-many-without-parent-nested.input';
-import { ClassificationUpdateOneRequiredWithoutJob_profilesNestedInput } from '../classification/classification-update-one-required-without-job-profiles-nested.input';
-import { JobFamilyUpdateOneWithoutProfilesNestedInput } from '../job-family/job-family-update-one-without-profiles-nested.input';
-import { UserUpdateOneWithoutJob_profilesNestedInput } from '../user/user-update-one-without-job-profiles-nested.input';
-import { JobProfileUpdateOneWithoutChildrenNestedInput } from './job-profile-update-one-without-children-nested.input';
-import { JobRoleUpdateOneWithoutProfilesNestedInput } from '../job-role/job-role-update-one-without-profiles-nested.input';
 
 @InputType()
 export class JobProfileUpdateWithoutOrganizationInput {
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 
-  @Field(() => JobStream, { nullable: true })
-  stream?: keyof typeof JobStream;
+  @Field(() => JobProfileType, { nullable: true })
+  type?: keyof typeof JobProfileType;
 
   @Field(() => String, { nullable: true })
   title?: string;
 
   @Field(() => Int, { nullable: true })
   number?: number;
-
-  @Field(() => String, { nullable: true })
-  context?: string;
 
   @Field(() => String, { nullable: true })
   overview?: string;
@@ -44,30 +40,27 @@ export class JobProfileUpdateWithoutOrganizationInput {
   @Field(() => JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput;
 
+  @Field(() => JobProfileClassificationUpdateManyWithoutJob_profileNestedInput, { nullable: true })
+  classifications?: JobProfileClassificationUpdateManyWithoutJob_profileNestedInput;
+
+  @Field(() => JobProfileCareerGroupUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  career_group?: JobProfileCareerGroupUpdateOneWithoutJob_profilesNestedInput;
+
+  @Field(() => JobProfileContextUpdateOneWithoutJob_profileNestedInput, { nullable: true })
+  context?: JobProfileContextUpdateOneWithoutJob_profileNestedInput;
+
+  @Field(() => JobProfileJobFamilyUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  job_family?: JobProfileJobFamilyUpdateOneWithoutJob_profilesNestedInput;
+
+  @Field(() => JobProfileRoleUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  role?: JobProfileRoleUpdateOneWithoutJob_profilesNestedInput;
+
+  @Field(() => JobProfileStreamUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  stream?: JobProfileStreamUpdateOneWithoutJob_profilesNestedInput;
+
   @Field(() => JobProfileReportsToUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   reports_to?: JobProfileReportsToUpdateManyWithoutJob_profileNestedInput;
 
   @Field(() => PositionRequestUpdateManyWithoutParent_job_profileNestedInput, { nullable: true })
   position_request?: PositionRequestUpdateManyWithoutParent_job_profileNestedInput;
-
-  @Field(() => CareerGroupUpdateOneWithoutProfilesNestedInput, { nullable: true })
-  career_group?: CareerGroupUpdateOneWithoutProfilesNestedInput;
-
-  @Field(() => JobProfileUpdateManyWithoutParentNestedInput, { nullable: true })
-  children?: JobProfileUpdateManyWithoutParentNestedInput;
-
-  @Field(() => ClassificationUpdateOneRequiredWithoutJob_profilesNestedInput, { nullable: true })
-  classification?: ClassificationUpdateOneRequiredWithoutJob_profilesNestedInput;
-
-  @Field(() => JobFamilyUpdateOneWithoutProfilesNestedInput, { nullable: true })
-  family?: JobFamilyUpdateOneWithoutProfilesNestedInput;
-
-  @Field(() => UserUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
-  owner?: UserUpdateOneWithoutJob_profilesNestedInput;
-
-  @Field(() => JobProfileUpdateOneWithoutChildrenNestedInput, { nullable: true })
-  parent?: JobProfileUpdateOneWithoutChildrenNestedInput;
-
-  @Field(() => JobRoleUpdateOneWithoutProfilesNestedInput, { nullable: true })
-  role?: JobRoleUpdateOneWithoutProfilesNestedInput;
 }

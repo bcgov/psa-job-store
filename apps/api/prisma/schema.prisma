@@ -65,8 +65,7 @@ model User {
   updated_at DateTime  @default(now()) @updatedAt
   deleted_at DateTime?
 
-  comments     Comment[]
-  job_profiles JobProfile[]
+  comments Comment[]
 
   // TODO: AL-146
   // PositionRequest PositionRequest[]
@@ -74,124 +73,158 @@ model User {
   @@map("user")
 }
 
-enum BehaviouralCompetencyMembership {
+// **************************
+// Behavioural Competencies
+// **************************
+
+enum BehaviouralCompetencyType {
   EXCLUDED
   INCLUDED
   INDIGENOUS
+
+  @@map("behavioural_competency_type")
 }
 
-enum BehaviouralCompetencyGroup {
+enum BehaviouralCompetencyCategory {
   ACHIEVING_BUSINESS_RESULTS
   INTERPERSONAL_RELATIONSHIPS
   LEADING_PEOPLE
   PERSONAL_EFFECTIVENESS
+
+  @@map("behavioural_competency_category")
 }
 
 model BehaviouralCompetency {
-  id          Int                             @id @default(autoincrement())
-  membership  BehaviouralCompetencyMembership
-  group       BehaviouralCompetencyGroup
-  name        String
-  description String
-
+  id           Int                               @id @default(autoincrement())
+  type         BehaviouralCompetencyType
+  category     BehaviouralCompetencyCategory
+  name         String
+  description  String
   job_profiles JobProfileBehaviouralCompetency[]
 
   @@map("behavioural_competency")
 }
 
-model CareerGroup {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  profiles JobProfile[]
-
-  @@map("career_group")
-}
-
-model JobFamily {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  profiles JobProfile[]
-
-  @@map("job_family")
-}
-
-model JobRole {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  profiles JobProfile[]
-
-  @@map("job_role")
-}
-
 enum JobProfileState {
-  SUBMITTED
-  APPROVED
-  REJECTED
+  DRAFT
+  PUBLISHED
 }
 
-enum JobStream {
+enum JobProfileType {
   CORPORATE
-  ORGANIZATION
+  MINISTRY
   USER
+
+  @@map("job_profile_type")
 }
 
 model JobProfile {
-  id                Int     @id @default(autoincrement())
-  career_group_id   Int?
-  classification_id String
-  family_id         Int?
-  organization_id   String?
-  owner_id          String? @db.Uuid
-  parent_id         Int?
-  role_id           Int?
-
-  state                    JobProfileState
-  stream                   JobStream
-  title                    String
-  number                   Int?
-  context                  String
-  overview                 String
-  accountabilities         Json                              @default("{\"optional\": [], \"required\": []}") @db.JsonB
-  requirements             String[]
+  id                       Int                               @id @default(autoincrement())
   behavioural_competencies JobProfileBehaviouralCompetency[]
-  reports_to               JobProfileReportsTo[]
-  position_request         PositionRequest[]
+  classifications          JobProfileClassification[]
+  career_group             JobProfileCareerGroup?            @relation(fields: [career_group_id], references: [id])
+  career_group_id          Int
+  context                  JobProfileContext?
+  job_family               JobProfileJobFamily?              @relation(fields: [job_family_id], references: [id])
+  job_family_id            Int
+  organization             Organization?                     @relation(fields: [organization_id], references: [id])
+  organization_id          String?
+  role                     JobProfileRole?                   @relation(fields: [role_id], references: [id])
+  role_id                  Int
+  state                    JobProfileState                   @default(DRAFT)
+  stream                   JobProfileStream?                 @relation(fields: [stream_id], references: [id])
+  stream_id                Int
+  type                     JobProfileType
 
-  career_group   CareerGroup?   @relation(fields: [career_group_id], references: [id])
-  children       JobProfile[]   @relation("JobProfileParentChild")
-  classification Classification @relation(fields: [classification_id], references: [id])
-  family         JobFamily?     @relation(fields: [family_id], references: [id])
-  organization   Organization?  @relation(fields: [organization_id], references: [id])
-  owner          User?          @relation(fields: [owner_id], references: [id]) // Who created the job profile
-  parent         JobProfile?    @relation("JobProfileParentChild", fields: [parent_id], references: [id])
-  role           JobRole?       @relation(fields: [role_id], references: [id])
+  title            String
+  number           Int
+  overview         String
+  accountabilities Json                  @default("{\"optional\": [], \"required\": []}") @db.JsonB
+  requirements     String[]
+  reports_to       JobProfileReportsTo[]
+  position_request PositionRequest[]
 
   @@map("job_profile")
 }
 
 model JobProfileBehaviouralCompetency {
+  behavioural_competency    BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
   behavioural_competency_id Int
+  job_profile               JobProfile            @relation(fields: [job_profile_id], references: [id])
   job_profile_id            Int
-
-  behavioural_competency BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
-  job_profile            JobProfile            @relation(fields: [job_profile_id], references: [id])
 
   @@id([behavioural_competency_id, job_profile_id])
   @@map("job_profile_behavioural_competency")
 }
 
-model JobProfileReportsTo {
+model JobProfileCareerGroup {
+  id           Int          @id @default(autoincrement())
+  name         String
+  job_profiles JobProfile[]
+
+  @@map("job_profile_career_group")
+}
+
+model JobProfileClassification {
+  classification    Classification @relation(fields: [classification_id], references: [id])
   classification_id String
+  job_profile       JobProfile     @relation(fields: [job_profile_id], references: [id])
   job_profile_id    Int
 
-  classification Classification @relation(fields: [classification_id], references: [id])
-  job_profile    JobProfile     @relation(fields: [job_profile_id], references: [id])
+  @@id([classification_id, job_profile_id])
+  @@map("job_profile_classification")
+}
+
+model JobProfileContext {
+  id             Int        @id @default(autoincrement())
+  job_profile    JobProfile @relation(fields: [job_profile_id], references: [id])
+  job_profile_id Int        @unique
+
+  description String
+
+  @@map("job_profile_context")
+}
+
+model JobProfileJobFamily {
+  id           Int          @id @default(autoincrement())
+  name         String
+  job_profiles JobProfile[]
+
+  @@map("job_profile_job_family")
+}
+
+enum JobProfileRoleType {
+  SUPERVISORY
+  NON_SUPERVISORY
+
+  @@map("job_profile_role_type")
+}
+
+model JobProfileReportsTo {
+  classification    Classification @relation(fields: [classification_id], references: [id])
+  classification_id String
+  job_profile       JobProfile     @relation(fields: [job_profile_id], references: [id])
+  job_profile_id    Int
 
   @@id([classification_id, job_profile_id])
   @@map("job_profile_reports_to")
+}
+
+model JobProfileRole {
+  id           Int                @id @default(autoincrement())
+  type         JobProfileRoleType
+  name         String
+  job_profiles JobProfile[]
+
+  @@map("job_profile_role")
+}
+
+model JobProfileStream {
+  id           Int          @id @default(autoincrement())
+  name         String
+  job_profiles JobProfile[]
+
+  @@map("job_profile_stream")
 }
 
 model JobProfileHistory {
@@ -226,9 +259,8 @@ model Comment {
 
 // PeopleSoft Tables
 model Organization {
-  id   String @id
-  name String
-
+  id           String       @id
+  name         String
   departments  Department[]
   job_profiles JobProfile[]
 
@@ -236,20 +268,19 @@ model Organization {
 }
 
 model Department {
-  id              String @id
+  id              String       @id
+  organization    Organization @relation(fields: [organization_id], references: [id])
   organization_id String
   name            String
-
-  organization Organization @relation(fields: [organization_id], references: [id])
 
   @@map("department")
 }
 
 model Classification {
-  id           String                @id
+  id           String                     @id
   code         String
   name         String
-  job_profiles JobProfile[]
+  job_profiles JobProfileClassification[]
   reportees    JobProfileReportsTo[]
 
   @@map("classification")

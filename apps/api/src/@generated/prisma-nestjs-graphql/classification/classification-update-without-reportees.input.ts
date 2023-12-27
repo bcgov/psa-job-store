@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { JobProfileUpdateManyWithoutClassificationNestedInput } from '../job-profile/job-profile-update-many-without-classification-nested.input';
+import { JobProfileClassificationUpdateManyWithoutClassificationNestedInput } from '../job-profile-classification/job-profile-classification-update-many-without-classification-nested.input';
 
 @InputType()
 export class ClassificationUpdateWithoutReporteesInput {
@@ -13,6 +13,6 @@ export class ClassificationUpdateWithoutReporteesInput {
   @Field(() => String, { nullable: true })
   name?: string;
 
-  @Field(() => JobProfileUpdateManyWithoutClassificationNestedInput, { nullable: true })
-  job_profiles?: JobProfileUpdateManyWithoutClassificationNestedInput;
+  @Field(() => JobProfileClassificationUpdateManyWithoutClassificationNestedInput, { nullable: true })
+  job_profiles?: JobProfileClassificationUpdateManyWithoutClassificationNestedInput;
 }
