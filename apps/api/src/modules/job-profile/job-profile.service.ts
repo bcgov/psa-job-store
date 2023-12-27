@@ -119,8 +119,8 @@ export class JobProfileService {
       include: {
         behavioural_competencies: true,
         career_group: true,
-        classification: true,
-        family: true,
+        classifications: true,
+        job_family: true,
         organization: true,
         reports_to: true,
         role: true,
@@ -133,8 +133,8 @@ export class JobProfileService {
       where: { id },
       include: {
         career_group: true,
-        classification: true,
-        family: true,
+        classifications: true,
+        job_family: true,
         organization: true,
         role: true,
       },
