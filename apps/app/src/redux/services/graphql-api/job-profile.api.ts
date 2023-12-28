@@ -19,10 +19,16 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfiles($search: String, $where: JobProfileWhereInput, $take: Int, $skip: Int) {
               jobProfiles(search: $search, where: $where, take: $take, skip: $skip) {
                 id
-                stream
+                stream {
+                  id
+                  name
+                }
                 title
                 number
-                context
+                context {
+                  id
+                  description
+                }
                 overview
                 accountabilities
                 requirements
@@ -33,11 +39,14 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     description
                   }
                 }
-                classification {
-                  id
-                  code
+                classifications {
+                  classification {
+                    id
+                    code
+                    name
+                  }
                 }
-                family {
+                job_family {
                   id
                   name
                 }
@@ -79,10 +88,16 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfile {
               jobProfile(id: "${args.id}") {
                 id
-                stream
+                stream {
+                  id,
+                  name
+                }
                 title
                 number
-                context
+                context {
+                  id,
+                  description
+                }
                 overview
                 accountabilities
                 requirements
@@ -93,11 +108,14 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     description
                   }
                 }
-                classification {
-                  id
-                  code
+                classifications {
+                  classification {
+                    id
+                    code
+                    name
+                  }
                 }
-                family {
+                job_family {
                   id
                   name
                 }

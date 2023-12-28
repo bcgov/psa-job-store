@@ -10,10 +10,10 @@ export class BehaviouralCompetencyOrderByWithRelationAndSearchRelevanceInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  membership?: keyof typeof SortOrder;
+  type?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  group?: keyof typeof SortOrder;
+  category?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   name?: keyof typeof SortOrder;

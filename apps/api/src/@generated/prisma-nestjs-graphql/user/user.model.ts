@@ -1,7 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Comment } from '../comment/comment.model';
-import { JobProfile } from '../job-profile/job-profile.model';
 
 @ObjectType()
 export class User {
@@ -28,7 +27,4 @@ export class User {
 
   @Field(() => [Comment], { nullable: true })
   comments?: Array<Comment>;
-
-  @Field(() => [JobProfile], { nullable: true })
-  job_profiles?: Array<JobProfile>;
 }

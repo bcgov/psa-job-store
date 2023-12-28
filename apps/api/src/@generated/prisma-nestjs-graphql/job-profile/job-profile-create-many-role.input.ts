@@ -2,7 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobProfileState } from '../prisma/job-profile-state.enum';
-import { JobStream } from '../prisma/job-stream.enum';
+import { JobProfileType } from '../prisma/job-profile-type.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 
 @InputType()
@@ -10,38 +10,29 @@ export class JobProfileCreateManyRoleInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
-  @Field(() => Int, { nullable: true })
-  career_group_id?: number;
+  @Field(() => Int, { nullable: false })
+  career_group_id!: number;
 
-  @Field(() => String, { nullable: false })
-  classification_id!: string;
-
-  @Field(() => Int, { nullable: true })
-  family_id?: number;
+  @Field(() => Int, { nullable: false })
+  job_family_id!: number;
 
   @Field(() => String, { nullable: true })
   organization_id?: string;
 
-  @Field(() => String, { nullable: true })
-  owner_id?: string;
+  @Field(() => JobProfileState, { nullable: true })
+  state?: keyof typeof JobProfileState;
 
-  @Field(() => Int, { nullable: true })
-  parent_id?: number;
+  @Field(() => Int, { nullable: false })
+  stream_id!: number;
 
-  @Field(() => JobProfileState, { nullable: false })
-  state!: keyof typeof JobProfileState;
-
-  @Field(() => JobStream, { nullable: false })
-  stream!: keyof typeof JobStream;
+  @Field(() => JobProfileType, { nullable: false })
+  type!: keyof typeof JobProfileType;
 
   @Field(() => String, { nullable: false })
   title!: string;
 
-  @Field(() => Int, { nullable: true })
-  number?: number;
-
-  @Field(() => String, { nullable: false })
-  context!: string;
+  @Field(() => Int, { nullable: false })
+  number!: number;
 
   @Field(() => String, { nullable: false })
   overview!: string;

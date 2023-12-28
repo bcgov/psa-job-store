@@ -1,6 +1,5 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { JobProfileUncheckedCreateNestedManyWithoutOwnerInput } from '../job-profile/job-profile-unchecked-create-nested-many-without-owner.input';
 
 @InputType()
 export class UserUncheckedCreateWithoutCommentsInput {
@@ -24,7 +23,4 @@ export class UserUncheckedCreateWithoutCommentsInput {
 
   @Field(() => Date, { nullable: true })
   deleted_at?: Date | string;
-
-  @Field(() => JobProfileUncheckedCreateNestedManyWithoutOwnerInput, { nullable: true })
-  job_profiles?: JobProfileUncheckedCreateNestedManyWithoutOwnerInput;
 }

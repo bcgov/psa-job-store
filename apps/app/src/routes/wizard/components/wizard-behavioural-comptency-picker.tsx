@@ -48,19 +48,19 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
 
   const handleNameChange = (value: string) => {
     setSelectedName(value);
-    const competency = data?.behaviouralComptencies.find((c) => c.group === selectedGroup && c.name === value);
+    const competency = data?.behaviouralComptencies.find((c) => c.category === selectedGroup && c.name === value);
     setDescription(competency?.description || '');
   };
 
   // Generate unique group options for the dropdown
-  const groupOptions = Array.from(new Set(data?.behaviouralComptencies.map((c) => c.group))).map((group) => (
+  const groupOptions = Array.from(new Set(data?.behaviouralComptencies.map((c) => c.category))).map((group) => (
     <Option key={group} value={group}>
       {formatEnumString(group)}
     </Option>
   ));
   // Generate name options based on the selected group
   const nameOptions = data?.behaviouralComptencies
-    .filter((c) => c.group === selectedGroup && !filterIds.includes(c.id))
+    .filter((c) => c.category === selectedGroup && !filterIds.includes(c.id))
     .map((competency) => {
       return (
         <Option key={competency.id} value={competency.name}>

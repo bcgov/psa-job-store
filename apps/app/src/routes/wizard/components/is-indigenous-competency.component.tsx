@@ -10,7 +10,7 @@ export const IsIndigenousCompetency = ({ competency }: Props) => {
 
   const isIndigenousCompetency = () => {
     const match = data?.behaviouralComptencies.find((d) => d.id === competency.id);
-    return match && match.membership === 'INDIGENOUS' ? true : false;
+    return match && match.type === 'INDIGENOUS' ? true : false;
   };
 
   return isIndigenousCompetency() === true ? '*' : '';

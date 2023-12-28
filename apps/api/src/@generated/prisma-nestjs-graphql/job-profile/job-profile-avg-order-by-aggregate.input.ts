@@ -11,13 +11,13 @@ export class JobProfileAvgOrderByAggregateInput {
   career_group_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  family_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  parent_id?: keyof typeof SortOrder;
+  job_family_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  stream_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   number?: keyof typeof SortOrder;

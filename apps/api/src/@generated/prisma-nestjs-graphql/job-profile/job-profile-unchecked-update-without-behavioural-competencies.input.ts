@@ -2,11 +2,12 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobProfileState } from '../prisma/job-profile-state.enum';
-import { JobStream } from '../prisma/job-stream.enum';
+import { JobProfileType } from '../prisma/job-profile-type.enum';
 import { GraphQLJSON } from 'graphql-type-json';
+import { JobProfileClassificationUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-classification/job-profile-classification-unchecked-update-many-without-job-profile-nested.input';
+import { JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-unchecked-update-one-without-job-profile-nested.input';
 import { JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-update-many-without-job-profile-nested.input';
 import { PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-unchecked-update-many-without-parent-job-profile-nested.input';
-import { JobProfileUncheckedUpdateManyWithoutParentNestedInput } from './job-profile-unchecked-update-many-without-parent-nested.input';
 
 @InputType()
 export class JobProfileUncheckedUpdateWithoutBehavioural_competenciesInput {
@@ -16,20 +17,11 @@ export class JobProfileUncheckedUpdateWithoutBehavioural_competenciesInput {
   @Field(() => Int, { nullable: true })
   career_group_id?: number;
 
-  @Field(() => String, { nullable: true })
-  classification_id?: string;
-
   @Field(() => Int, { nullable: true })
-  family_id?: number;
+  job_family_id?: number;
 
   @Field(() => String, { nullable: true })
   organization_id?: string;
-
-  @Field(() => String, { nullable: true })
-  owner_id?: string;
-
-  @Field(() => Int, { nullable: true })
-  parent_id?: number;
 
   @Field(() => Int, { nullable: true })
   role_id?: number;
@@ -37,17 +29,17 @@ export class JobProfileUncheckedUpdateWithoutBehavioural_competenciesInput {
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 
-  @Field(() => JobStream, { nullable: true })
-  stream?: keyof typeof JobStream;
+  @Field(() => Int, { nullable: true })
+  stream_id?: number;
+
+  @Field(() => JobProfileType, { nullable: true })
+  type?: keyof typeof JobProfileType;
 
   @Field(() => String, { nullable: true })
   title?: string;
 
   @Field(() => Int, { nullable: true })
   number?: number;
-
-  @Field(() => String, { nullable: true })
-  context?: string;
 
   @Field(() => String, { nullable: true })
   overview?: string;
@@ -58,12 +50,15 @@ export class JobProfileUncheckedUpdateWithoutBehavioural_competenciesInput {
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;
 
+  @Field(() => JobProfileClassificationUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
+  classifications?: JobProfileClassificationUncheckedUpdateManyWithoutJob_profileNestedInput;
+
+  @Field(() => JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput, { nullable: true })
+  context?: JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput;
+
   @Field(() => JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   reports_to?: JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput;
 
   @Field(() => PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput, { nullable: true })
   position_request?: PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput;
-
-  @Field(() => JobProfileUncheckedUpdateManyWithoutParentNestedInput, { nullable: true })
-  children?: JobProfileUncheckedUpdateManyWithoutParentNestedInput;
 }

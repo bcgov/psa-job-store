@@ -30,8 +30,8 @@ export class PositionRequestUncheckedCreateInput {
   @Field(() => Int, { nullable: true })
   position_number?: number;
 
-  @Field(() => String, { nullable: false })
-  classification_id!: string;
+  @Field(() => String, { nullable: true })
+  classification_id?: string;
 
   @Field(() => String, { nullable: true })
   classification_code?: string;

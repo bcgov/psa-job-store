@@ -13,6 +13,7 @@ export interface JobProfileCardProps {
 export const JobProfileCard = ({ data }: JobProfileCardProps) => {
   const params = useParams();
 
+  // console.log('card data: ', data.classifications);
   return (
     <Space
       direction="vertical"
@@ -28,14 +29,14 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       </Title>
       <div>
         <Text type="secondary" data-cy="card-classification">
-          {data.classification?.code} | Job Store # {data.number}
+          {data.classifications?.map((c) => c.classification.code).join(', ')} | Job Store # {data.number}
         </Text>
         <br />
         <Text type="secondary">Reports to excluded manager</Text>
       </div>
       <div>
         <Text strong>Context: </Text>
-        <Paragraph ellipsis={{ rows: 3 }}>{data.context}</Paragraph>
+        <Paragraph ellipsis={{ rows: 3 }}>{data.context.description}</Paragraph>
       </div>
       <div>
         <Text strong>Overview:</Text>

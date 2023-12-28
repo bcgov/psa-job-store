@@ -9,8 +9,8 @@ expect.extend(toHaveNoViolations);
 const mockProfileData = {
   id: '1',
   title: 'Software Developer',
-  classification: { code: 'Level 2' },
-  context: 'Development',
+  classifications: [{ classification: { code: 'Level 2' } }],
+  context: { description: 'Development' },
   overview: 'Software Development',
   accountabilities: {
     required: ['Coding', 'Testing'],

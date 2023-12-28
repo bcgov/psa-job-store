@@ -11,13 +11,13 @@ export class JobProfileAvgAggregate {
   career_group_id?: number;
 
   @Field(() => Float, { nullable: true })
-  family_id?: number;
-
-  @Field(() => Float, { nullable: true })
-  parent_id?: number;
+  job_family_id?: number;
 
   @Field(() => Float, { nullable: true })
   role_id?: number;
+
+  @Field(() => Float, { nullable: true })
+  stream_id?: number;
 
   @Field(() => Float, { nullable: true })
   number?: number;

@@ -39,7 +39,11 @@ export class SearchModule {
           index: 'job-profile',
         });
 
-        const jobProfiles = await prisma.jobProfile.findMany();
+        const jobProfiles = await prisma.jobProfile.findMany({
+          include: {
+            context: true,
+          },
+        });
 
         for await (const profile of jobProfiles) {
           await elasticService.index({
@@ -47,7 +51,7 @@ export class SearchModule {
             id: `${profile.id}`,
             document: {
               title: profile.title,
-              context: profile.context,
+              context: profile.context?.description,
               overview: profile.overview,
               requirements: profile.requirements,
               accountabilities: profile.accountabilities,

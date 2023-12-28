@@ -46,7 +46,7 @@ export const WizardReviewPage = () => {
       <p>
         <b>Changes legend:</b>
       </p>
-      <p style={{ marginBottom: '-12px;' }}>
+      <p style={{ marginBottom: '-12px' }}>
         <span style={{ textDecoration: 'line-through' }}>Strikethrough</span> means removed text.<br></br>
         <span style={{ backgroundColor: 'yellow' }}>Highlighted text</span> means added text.
       </p>

@@ -1,4 +1,4 @@
-import { Empty, Skeleton, Space } from 'antd';
+import { Empty, Space, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { Edge, Node } from 'reactflow';
 
@@ -28,11 +28,10 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({ selectedDepartment }
     setOrgChart(objData);
   }, [data]);
 
-  console.log('isFetching: ', isFetching);
   return isFetching ? (
-    <Space style={{ height: '100%', width: '100%', justifyContent: 'center' }} align="center">
-      <Skeleton style={{ display: 'block', height: '100%', width: '100%' }} loading={isFetching} />
-    </Space>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      <Spin size="large" />
+    </div>
   ) : orgChart.edges.length > 0 ? (
     <OrgChart edges={orgChart.edges} nodes={orgChart.nodes} />
   ) : (

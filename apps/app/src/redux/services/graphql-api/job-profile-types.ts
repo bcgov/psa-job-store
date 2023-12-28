@@ -5,6 +5,18 @@ export interface ClassificationModel {
   code: string;
 }
 
+export interface ClassificationModelWrapped {
+  classification: {
+    id: string;
+    code: string;
+  };
+}
+
+export interface ContextModel {
+  id: number;
+  description: string;
+}
+
 export interface GetClassificationsResponse {
   classifications: ClassificationModel[];
 }
@@ -13,14 +25,14 @@ export interface JobProfileModel {
   id: number;
   accountabilities: Accountabilities;
   behavioural_competencies: BehaviouralCompetencies[];
-  classification: ClassificationModel | null;
+  classifications: ClassificationModelWrapped[] | null;
   requirements: (string | TrackedFieldArrayItem)[];
   organization_id: string;
   family_id: number;
   stream: string;
   title: string | TrackedFieldArrayItem;
   number: number;
-  context: string;
+  context: ContextModel;
   overview: string | TrackedFieldArrayItem;
 }
 

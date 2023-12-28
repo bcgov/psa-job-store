@@ -112,18 +112,25 @@ export class JobProfileService {
     return this.prisma.jobProfile.findMany({
       where: {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
-        stream: { notIn: ['USER'] },
+        // stream: { notIn: ['USER'] },
+        state: 'PUBLISHED',
         ...where,
       },
       ...args,
       include: {
         behavioural_competencies: true,
         career_group: true,
-        classification: true,
-        family: true,
+        classifications: {
+          include: {
+            classification: true,
+          },
+        },
+        job_family: true,
         organization: true,
         reports_to: true,
         role: true,
+        stream: true,
+        context: true,
       },
     });
   }
@@ -133,10 +140,16 @@ export class JobProfileService {
       where: { id },
       include: {
         career_group: true,
-        classification: true,
-        family: true,
+        classifications: {
+          include: {
+            classification: true,
+          },
+        },
+        job_family: true,
         organization: true,
         role: true,
+        stream: true,
+        context: true,
       },
     });
   }
@@ -147,7 +160,8 @@ export class JobProfileService {
     return await this.prisma.jobProfile.count({
       where: {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
-        stream: { notIn: ['USER'] },
+        // stream: { notIn: ['USER'] },
+        state: 'PUBLISHED',
         ...where,
       },
     });
@@ -173,16 +187,13 @@ export class JobProfileService {
         number: data.number,
         accountabilities: data.accountabilities,
         requirements: data.requirements,
-        classification: data.classification,
+        classifications: data.classifications,
         behavioural_competencies: data.behavioural_competencies,
         reports_to: data.reports_to,
-        children: data.children,
-        family: data.family,
+        job_family: data.job_family,
         organization: data.organization,
-        owner: data.owner,
         role: data.role,
-
-        parent: data.parent,
+        type: data.type,
       },
     });
   }

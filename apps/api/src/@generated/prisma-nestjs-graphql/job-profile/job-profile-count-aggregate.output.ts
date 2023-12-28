@@ -11,19 +11,10 @@ export class JobProfileCountAggregate {
   career_group_id!: number;
 
   @Field(() => Int, { nullable: false })
-  classification_id!: number;
-
-  @Field(() => Int, { nullable: false })
-  family_id!: number;
+  job_family_id!: number;
 
   @Field(() => Int, { nullable: false })
   organization_id!: number;
-
-  @Field(() => Int, { nullable: false })
-  owner_id!: number;
-
-  @Field(() => Int, { nullable: false })
-  parent_id!: number;
 
   @Field(() => Int, { nullable: false })
   role_id!: number;
@@ -32,16 +23,16 @@ export class JobProfileCountAggregate {
   state!: number;
 
   @Field(() => Int, { nullable: false })
-  stream!: number;
+  stream_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  type!: number;
 
   @Field(() => Int, { nullable: false })
   title!: number;
 
   @Field(() => Int, { nullable: false })
   number!: number;
-
-  @Field(() => Int, { nullable: false })
-  context!: number;
 
   @Field(() => Int, { nullable: false })
   overview!: number;
