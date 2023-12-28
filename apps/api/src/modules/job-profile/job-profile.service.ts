@@ -109,8 +109,6 @@ export class JobProfileService {
   async getJobProfiles({ search, where, ...args }: FindManyJobProfileWithSearch) {
     const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
-    console.log('searchResultIds: ', searchResultIds);
-
     return this.prisma.jobProfile.findMany({
       where: {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
