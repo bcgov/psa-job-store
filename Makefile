@@ -29,10 +29,18 @@ build:
 		docker-compose build --no-cache
 
 run: 
-		@printf "open ${RED}http://localhost:5173${NOCOLOUR}\n"
-		docker compose up -d
+		@printf "open ${RED} http://localhost:5173 \n${NOCOLOUR}"
+		docker compose up -d db nestjs-app vite_docker
 		docker compose logs -f		
 
+# [9:02 AM] Struk, Alex CITZ:EX
+# Yes, if there are database changes I run:
+# 
+# npx -w api prisma db push --force-reset
+#
+# npx -w api prisma db seed
+#
+# - copy new file into /apps/api/prisma/seed.ts
 db.reset: 
 		docker-compose exec -u root -w /usr/src/apps/api nestjs-app /usr/bin/bash -c \
 			'npx prisma db push --force-reset'

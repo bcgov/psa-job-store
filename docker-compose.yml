@@ -1,12 +1,31 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16
+    user: postgres
+    container_name: db
+    hostname: db    
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - postgres:/var/lib/postgresql/data:delegated      
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5      
+    networks:
+      - psj-app
+
   nestjs-app:
     env_file:
         - .env
     build:
       context: .
-      image: pjs-frontend:18-alpine
+      # image: pjs-frontend:18-alpine
       dockerfile: apps/api/Dockerfile.dev
       args:
         - POSTGRES_DB=${POSTGRES_DB}
@@ -27,26 +46,7 @@ services:
       - ./apps/api/prisma:/usr/src/app/prisma
       - api-nodemodules:/node_modules
     networks:
-      - psa-job-store
-
-  db:
-    image: postgres:16
-    user: postgres
-    container_name: db
-    hostname: db    
-    ports:
-      - 5432:5432
-    env_file:
-      - .env
-    volumes:
-      - postgres:/var/lib/postgresql/data:delegated      
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5      
-    networks:
-      - psa-job-store
+      - psj-app
 
   # http://localhost:5173/
   vite_docker:
@@ -63,11 +63,74 @@ services:
     volumes:
       - ./src:/usr/src/app/src:cached
     networks:
-      - psa-job-store
+      - psj-app
+
+  cypress:
+    image: cypress/included:13.4.0
+    container_name: cypress
+    hostname: cypress    
+    # ports:
+    #   - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - ./apps/app/cypress:/e2e:cached
+      - ./apps/app/nodemodules:/node_modules:cached
+    networks:
+      - psj-app
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    # 8.x
+    environment:
+      [
+        'ELASTIC_PASSWORD=${ELASTIC_PASSWORD}',
+        'CLI_JAVA_OPTS=-Xms2g -Xmx2g',
+        'bootstrap.memory_lock=true',
+        'discovery.type=single-node',
+        'xpack.security.enabled=false',
+        'xpack.security.enrollment.enabled=false',
+      ]
+    ports:
+      - 9200:9200
+    networks:
+      - pjs-elastic
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+        reservations:
+          cpus: '1.0'
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    container_name: kibana
+    environment:
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: d1a66dfd-c4d3-4a0a-8290-2abcb83ab3aa
+    ports:
+      - 5601:5601
+    networks:
+      - pjs-elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+        reservations:
+          cpus: '1.0'
 
 networks:
-  psa-job-store:
-    name: psa-job-store
+  psj-app:
+    name: psj-app
+  pjs-elastic:
+    name: pjs-elastic
 
 volumes:
   postgres:
