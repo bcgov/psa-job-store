@@ -6,10 +6,10 @@ export class JobFamilyService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getJobFamilies() {
-    return this.prisma.jobFamily.findMany();
+    return this.prisma.jobProfileJobFamily.findMany();
   }
 
   async getJobFamily(id: number) {
-    return this.prisma.jobFamily.findUnique({ where: { id } });
+    return this.prisma.jobProfileJobFamily.findUnique({ where: { id } });
   }
 }

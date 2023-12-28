@@ -13,41 +13,32 @@ export class JobProfileOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   id?: keyof typeof SortOrder;
 
-  @Field(() => SortOrderInput, { nullable: true })
-  career_group_id?: SortOrderInput;
+  @Field(() => SortOrder, { nullable: true })
+  career_group_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  classification_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrderInput, { nullable: true })
-  family_id?: SortOrderInput;
+  job_family_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrderInput, { nullable: true })
   organization_id?: SortOrderInput;
 
-  @Field(() => SortOrderInput, { nullable: true })
-  owner_id?: SortOrderInput;
-
-  @Field(() => SortOrderInput, { nullable: true })
-  parent_id?: SortOrderInput;
-
-  @Field(() => SortOrderInput, { nullable: true })
-  role_id?: SortOrderInput;
+  @Field(() => SortOrder, { nullable: true })
+  role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   state?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  stream?: keyof typeof SortOrder;
+  stream_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  type?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;
 
-  @Field(() => SortOrderInput, { nullable: true })
-  number?: SortOrderInput;
-
   @Field(() => SortOrder, { nullable: true })
-  context?: keyof typeof SortOrder;
+  number?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   overview?: keyof typeof SortOrder;

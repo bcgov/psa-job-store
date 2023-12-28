@@ -34,8 +34,8 @@ export class PositionRequestOrderByWithAggregationInput {
   @Field(() => SortOrderInput, { nullable: true })
   position_number?: SortOrderInput;
 
-  @Field(() => SortOrder, { nullable: true })
-  classification_id?: keyof typeof SortOrder;
+  @Field(() => SortOrderInput, { nullable: true })
+  classification_id?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   classification_code?: SortOrderInput;

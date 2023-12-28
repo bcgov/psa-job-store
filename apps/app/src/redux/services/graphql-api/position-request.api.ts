@@ -20,7 +20,7 @@ export interface CreatePositionRequestInput {
   profile_json: any;
   parent_job_profile: JobProfileConnectItem;
   title: string;
-  classification_id: string;
+  classification_id?: string;
   classification_code: string;
 }
 

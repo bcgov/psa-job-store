@@ -8,11 +8,11 @@ export class JobProfileCount {
   behavioural_competencies?: number;
 
   @Field(() => Int, { nullable: false })
+  classifications?: number;
+
+  @Field(() => Int, { nullable: false })
   reports_to?: number;
 
   @Field(() => Int, { nullable: false })
   position_request?: number;
-
-  @Field(() => Int, { nullable: false })
-  children?: number;
 }

@@ -5,7 +5,6 @@ import {
   JobProfileCreateInput,
   JobProfileReportsTo,
 } from '../../@generated/prisma-nestjs-graphql';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JobFamilyService } from '../job-family/job-family.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 import { JobProfileService } from './job-profile.service';
@@ -39,11 +38,10 @@ export class JobProfileResolver {
 
   @Mutation(() => Int)
   async createJobProfile(
-    @CurrentUser() { id: userId }: Express.User,
+    // @CurrentUser() { id: userId }: Express.User,
     @Args({ name: 'data', type: () => JobProfileCreateInput }) data: JobProfileCreateInput,
   ) {
     // console.log('create DATA: ', data);
-    data.owner = { connect: { id: userId } };
     const newJobProfile = await this.jobProfileService.createJobProfile(data);
     return newJobProfile.id;
   }

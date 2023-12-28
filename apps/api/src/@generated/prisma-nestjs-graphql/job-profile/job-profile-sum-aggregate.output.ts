@@ -11,13 +11,13 @@ export class JobProfileSumAggregate {
   career_group_id?: number;
 
   @Field(() => Int, { nullable: true })
-  family_id?: number;
-
-  @Field(() => Int, { nullable: true })
-  parent_id?: number;
+  job_family_id?: number;
 
   @Field(() => Int, { nullable: true })
   role_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  stream_id?: number;
 
   @Field(() => Int, { nullable: true })
   number?: number;

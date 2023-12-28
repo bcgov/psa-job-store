@@ -2,58 +2,50 @@ import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobProfileState } from '../prisma/job-profile-state.enum';
-import { JobStream } from '../prisma/job-stream.enum';
+import { JobProfileType } from '../prisma/job-profile-type.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
+import { JobProfileClassification } from '../job-profile-classification/job-profile-classification.model';
+import { JobProfileCareerGroup } from '../job-profile-career-group/job-profile-career-group.model';
+import { JobProfileContext } from '../job-profile-context/job-profile-context.model';
+import { JobProfileJobFamily } from '../job-profile-job-family/job-profile-job-family.model';
+import { Organization } from '../organization/organization.model';
+import { JobProfileRole } from '../job-profile-role/job-profile-role.model';
+import { JobProfileStream } from '../job-profile-stream/job-profile-stream.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
 import { PositionRequest } from '../position-request/position-request.model';
-import { CareerGroup } from '../career-group/career-group.model';
-import { Classification } from '../classification/classification.model';
-import { JobFamily } from '../job-family/job-family.model';
-import { Organization } from '../organization/organization.model';
-import { User } from '../user/user.model';
-import { JobRole } from '../job-role/job-role.model';
 
 @ObjectType()
 export class JobProfile {
   @Field(() => Int, { nullable: false })
   id!: number;
 
-  @Field(() => Int, { nullable: true })
-  career_group_id!: number | null;
+  @Field(() => Int, { nullable: false })
+  career_group_id!: number;
 
-  @Field(() => String, { nullable: false })
-  classification_id!: string;
-
-  @Field(() => Int, { nullable: true })
-  family_id!: number | null;
+  @Field(() => Int, { nullable: false })
+  job_family_id!: number;
 
   @Field(() => String, { nullable: true })
   organization_id!: string | null;
 
-  @Field(() => String, { nullable: true })
-  owner_id!: string | null;
+  @Field(() => Int, { nullable: false })
+  role_id!: number;
 
-  @Field(() => Int, { nullable: true })
-  parent_id!: number | null;
-
-  @Field(() => Int, { nullable: true })
-  role_id!: number | null;
-
-  @Field(() => JobProfileState, { nullable: false })
+  @Field(() => JobProfileState, { nullable: false, defaultValue: 'DRAFT' })
   state!: keyof typeof JobProfileState;
 
-  @Field(() => JobStream, { nullable: false })
-  stream!: keyof typeof JobStream;
+  @Field(() => Int, { nullable: false })
+  stream_id!: number;
+
+  @Field(() => JobProfileType, { nullable: false })
+  type!: keyof typeof JobProfileType;
 
   @Field(() => String, { nullable: false })
   title!: string;
 
-  @Field(() => Int, { nullable: true })
-  number!: number | null;
-
-  @Field(() => String, { nullable: false })
-  context!: string;
+  @Field(() => Int, { nullable: false })
+  number!: number;
 
   @Field(() => String, { nullable: false })
   overview!: string;
@@ -67,33 +59,30 @@ export class JobProfile {
   @Field(() => [JobProfileBehaviouralCompetency], { nullable: true })
   behavioural_competencies?: Array<JobProfileBehaviouralCompetency>;
 
+  @Field(() => [JobProfileClassification], { nullable: true })
+  classifications?: Array<JobProfileClassification>;
+
+  @Field(() => JobProfileCareerGroup, { nullable: true })
+  career_group?: JobProfileCareerGroup | null;
+
+  @Field(() => JobProfileContext, { nullable: true })
+  context?: JobProfileContext | null;
+
+  @Field(() => JobProfileJobFamily, { nullable: true })
+  job_family?: JobProfileJobFamily | null;
+
+  @Field(() => Organization, { nullable: true })
+  organization?: Organization | null;
+
+  @Field(() => JobProfileRole, { nullable: true })
+  role?: JobProfileRole | null;
+
+  @Field(() => JobProfileStream, { nullable: true })
+  stream?: JobProfileStream | null;
+
   @Field(() => [JobProfileReportsTo], { nullable: true })
   reports_to?: Array<JobProfileReportsTo>;
 
   @Field(() => [PositionRequest], { nullable: true })
   position_request?: Array<PositionRequest>;
-
-  @Field(() => CareerGroup, { nullable: true })
-  career_group?: CareerGroup | null;
-
-  @Field(() => [JobProfile], { nullable: true })
-  children?: Array<JobProfile>;
-
-  @Field(() => Classification, { nullable: false })
-  classification?: Classification;
-
-  @Field(() => JobFamily, { nullable: true })
-  family?: JobFamily | null;
-
-  @Field(() => Organization, { nullable: true })
-  organization?: Organization | null;
-
-  @Field(() => User, { nullable: true })
-  owner?: User | null;
-
-  @Field(() => JobProfile, { nullable: true })
-  parent?: JobProfile | null;
-
-  @Field(() => JobRole, { nullable: true })
-  role?: JobRole | null;
 }

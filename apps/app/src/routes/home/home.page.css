@@ -9,6 +9,10 @@
     font-size: inherit;
 }
 
+.orgChartCart .ant-card-body{
+    height:100%;
+}
+
 .react-flow__controls{
     top: 55px !important;
 }

@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   BehaviouralCompetencies,
   ClassificationModel,
+  ClassificationModelWrapped,
   GetClassificationsResponse,
   JobProfileModel,
   TrackedFieldArrayItem,
@@ -84,24 +85,27 @@ export const WizardEditPage = () => {
       },
       requirements: [] as string[],
       behavioural_competencies: [] as BehaviouralCompetencies[],
-      classification: {
-        id: input.classification,
-      } as ClassificationModel,
+      classifications: [] as ClassificationModelWrapped[],
     };
 
     Object.keys(input).forEach((key) => {
       const keys = key.split('.');
       const value = input[key];
 
-      if (keys.length === 1) {
-        if (key === 'classification') {
+      if (keys.length !== 1) {
+        if (key.startsWith('classification')) {
+          // console.log('starts with classification');
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+          // console.log('index: ', index, ' value: ', value);
           const classificationData = getClassificationById(value);
 
+          // console.log('classificationData: ', classificationData);
           if (classificationData) {
-            output.classification = classificationData;
+            if (output.classifications) output.classifications[index] = { classification: classificationData };
           }
         }
-      } else {
+
         if (key.startsWith('required_accountabilities')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
@@ -200,7 +204,7 @@ export const WizardEditPage = () => {
         profile_json: transformedData,
         parent_job_profile: { connect: { id: 1 } },
         title: formData['title.value'],
-        classification_id: formData.classification,
+        classification_id: undefined, //todo: there might be multiple classifications on the profile, what should it be here?
         classification_code: classification ? classification.code : '',
       };
       // console.log('positionRequestInput: ', positionRequestInput);

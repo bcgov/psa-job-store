@@ -140,7 +140,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
           stream: 'CORPORATE',
           title: 'IT Specialist',
           number: 189,
-          context: 'Context 1',
+          context: { description: 'Context 1' },
           overview: 'Overview 1',
           accountabilities: {
             optional: ['Opt 1', 'Opt 2', 'Opt 3', 'Opt 4', 'Opt 5'],
@@ -240,7 +240,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
             stream: 'CORPORATE',
             title: 'IT Specialist',
             number: 189,
-            context: 'Context 1',
+            context: { description: 'Context 1' },
             overview: 'Overview 1',
             accountabilities: {
               optional: ['Opt 1', 'Opt 2', 'Opt 3', 'Opt 4', 'Opt 5'],
@@ -273,10 +273,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
                 },
               },
             ],
-            classification: {
-              id: '551052',
-              code: 'A 1',
-            },
+            classifications: [{ classification: { id: '551052', code: 'A 1' } }],
             family: {
               id: 3,
               name: 'Budgeting',
@@ -331,7 +328,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
             stream: 'CORPORATE',
             title: 'Program Assistant',
             number: 189,
-            context: 'Context 1',
+            context: { description: 'Context 1' },
             overview: 'Overview 1',
             accountabilities: {
               optional: ['Opt 1', 'Opt 2', 'Opt 3', 'Opt 4', 'Opt 5'],
@@ -364,10 +361,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
                 },
               },
             ],
-            classification: {
-              id: '551052',
-              code: 'A 1',
-            },
+            classifications: [{ classification: { id: '551052', code: 'A 1' } }],
             family: {
               id: 3,
               name: 'Budgeting',
@@ -422,7 +416,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
             stream: 'CORPORATE',
             title: 'Office Manager',
             number: 189,
-            context: 'Context 1',
+            context: { description: 'Context 1' },
             overview: 'Overview 1',
             accountabilities: {
               optional: ['Opt 1', 'Opt 2', 'Opt 3', 'Opt 4', 'Opt 5'],
@@ -455,10 +449,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
                 },
               },
             ],
-            classification: {
-              id: '551052',
-              code: 'A 1',
-            },
+            classifications: [{ classification: { id: '551052', code: 'A 1' } }],
             family: {
               id: 3,
               name: 'Budgeting',
@@ -513,7 +504,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
             stream: 'CORPORATE',
             title: 'Financial Analyst',
             number: 189,
-            context: 'Context 1',
+            context: { description: 'Context 1' },
             overview: 'Overview 1',
             accountabilities: {
               optional: ['Opt 1', 'Opt 2', 'Opt 3', 'Opt 4', 'Opt 5'],
@@ -546,10 +537,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
                 },
               },
             ],
-            classification: {
-              id: '551052',
-              code: 'A 1',
-            },
+            classifications: [{ classification: { id: '551052', code: 'A 1' } }],
             family: {
               id: 3,
               name: 'Budgeting',
@@ -604,7 +592,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
             stream: 'CORPORATE',
             title: 'Budget Analyst',
             number: 189,
-            context: 'Context 1',
+            context: { description: 'Context 1' },
             overview: 'Overview 1',
             accountabilities: {
               optional: ['Opt 1', 'Opt 2', 'Opt 3', 'Opt 4', 'Opt 5'],
@@ -637,10 +625,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
                 },
               },
             ],
-            classification: {
-              id: '551052',
-              code: 'A 1',
-            },
+            classifications: [{ classification: { id: '551052', code: 'A 1' } }],
             family: {
               id: 3,
               name: 'Budgeting',
@@ -695,7 +680,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
             stream: 'CORPORATE',
             title: 'Frontend Developer',
             number: 189,
-            context: 'Context 1',
+            context: { description: 'Context 1' },
             overview: 'Overview 1',
             accountabilities: {
               optional: ['Opt 1', 'Opt 2', 'Opt 3', 'Opt 4', 'Opt 5'],
@@ -728,10 +713,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
                 },
               },
             ],
-            classification: {
-              id: '551052',
-              code: 'A 1',
-            },
+            classifications: [{ classification: { id: '551052', code: 'A 1' } }],
             family: {
               id: 3,
               name: 'Budgeting',
@@ -786,7 +768,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
             stream: 'CORPORATE',
             title: 'Backend Developer',
             number: 189,
-            context: 'Context 1',
+            context: { description: 'Context 1' },
             overview: 'Overview 1',
             accountabilities: {
               optional: ['Opt 1', 'Opt 2', 'Opt 3', 'Opt 4', 'Opt 5'],
@@ -819,10 +801,7 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
                 },
               },
             ],
-            classification: {
-              id: '551052',
-              code: 'A 1',
-            },
+            classifications: [{ classification: { id: '551052', code: 'A 1' } }],
             family: {
               id: 3,
               name: 'Budgeting',

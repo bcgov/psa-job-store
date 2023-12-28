@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Alert, Button, Col, Form, Input, List, Modal, Row, Select } from 'antd';
+import { Alert, Button, Col, Form, Input, List, Modal, Row } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/typography/Title';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
@@ -9,7 +9,6 @@ import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
-  ClassificationModel,
   GetClassificationsResponse,
   JobProfileModel,
   TrackedFieldArrayItem,
@@ -67,11 +66,10 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
-    const { register, control, reset, handleSubmit, getValues, formState, trigger } =
-      useForm<JobProfileValidationModel>({
-        resolver: classValidatorResolver(JobProfileValidationModel),
-        mode: 'onChange',
-      });
+    const { control, reset, handleSubmit, getValues, formState, trigger } = useForm<JobProfileValidationModel>({
+      resolver: classValidatorResolver(JobProfileValidationModel),
+      mode: 'onChange',
+    });
 
     useEffect(() => {
       if (!profileData && data && !isLoading) {
@@ -125,7 +123,8 @@ const WizardEditProfile = forwardRef(
 
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData) {
-        const classificationId = effectiveData?.classification?.id ?? null;
+        const classificationIds =
+          effectiveData?.classifications?.map((c) => ({ classification: c.classification.id })) ?? [];
 
         const originalAccReqFieldsValue = effectiveData.accountabilities.required.map((item) => {
           if (typeof item === 'string') {
@@ -252,9 +251,9 @@ const WizardEditProfile = forwardRef(
           id: effectiveData?.id,
           number: effectiveData?.number,
           title: originalTitleValue,
-          context: effectiveData?.context,
+          context: effectiveData?.context?.description,
           overview: originalOverviewValue,
-          classification: classificationId,
+          classifications: classificationIds,
           // array fileds are required to be nested in objects, so wrap string values in {value: item}
           required_accountabilities: originalAccReqFieldsValue,
           optional_accountabilities: originalOptReqFieldsValue,
@@ -322,6 +321,11 @@ const WizardEditProfile = forwardRef(
     } = useFieldArray({
       control,
       name: 'behavioural_competencies',
+    });
+
+    const { fields: classifications_fields } = useFieldArray({
+      control,
+      name: 'classifications',
     });
 
     // useImperativeHandle to expose the submitForm function
@@ -842,9 +846,37 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem name="classification" control={control} hidden>
-            <Input />
-          </FormItem>
+          {/* {effectiveData?.classifications?.map((c, index) => {
+            console.log('hidden classifications field: ', c.classification.id);
+            return (
+              <FormItem key={index} name={`classifications[${index}].classification.id`} control={control} hidden>
+                <Input />
+              </FormItem>
+            );
+          })} */}
+
+          <List
+            style={{ display: 'none' }}
+            dataSource={classifications_fields}
+            renderItem={(field, index) => (
+              <List.Item
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start', // Align items to the top
+                  marginBottom: '0px',
+                  borderBottom: 'none',
+
+                  padding: '5px 0',
+                }}
+                key={field.id} // Ensure this is a unique value
+              >
+                {/* Hidden fields to submit actual data */}
+                <FormItem name={`classifications.${index}.classification`} control={control} hidden>
+                  <Input />
+                </FormItem>
+              </List.Item>
+            )}
+          />
 
           <FormItem name="context" control={control} hidden>
             <Input />
@@ -858,7 +890,7 @@ const WizardEditProfile = forwardRef(
               description={
                 <>
                   <div></div>
-                  <b style={{ marginTop: '10px', display: 'block' }}>{effectiveData?.context}</b>
+                  <b style={{ marginTop: '10px', display: 'block' }}>{effectiveData?.context?.description}</b>
                 </>
               }
               type="warning"
@@ -870,7 +902,7 @@ const WizardEditProfile = forwardRef(
           {!config?.classificationEditable ? (
             <div style={{ marginBottom: '24px' }}>
               <Title level={4} style={titleStyle}>
-                Classification - {`${effectiveData?.classification?.code}`}
+                Classification - {effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}
               </Title>
             </div>
           ) : (
@@ -882,16 +914,18 @@ const WizardEditProfile = forwardRef(
               {renderTitle(getValues('title'))}
 
               {config?.classificationEditable ? (
-                <FormItem name="classification" control={control} label="Classification">
-                  <Select {...register('classification')}>
-                    {classificationsData?.classifications.map((classification: ClassificationModel) => (
-                      <Select.Option value={classification.id} key={classification.id}>
-                        {`${classification.code}`}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </FormItem>
+                <></>
               ) : (
+                // todo: allow multiple classificaton editing
+                // <FormItem name="classification" control={control} label="Classification">
+                //   <Select {...register('classification')}>
+                //     {classificationsData?.classifications.map((classification: ClassificationModel) => (
+                //       <Select.Option value={classification.id} key={classification.id}>
+                //         {`${classification.code}`}
+                //       </Select.Option>
+                //     ))}
+                //   </Select>
+                // </FormItem>
                 <></>
               )}
 

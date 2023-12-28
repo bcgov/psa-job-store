@@ -22,6 +22,7 @@ export const jobRoleApi = graphqlApi.injectEndpoints({
               jobRoles {
                 id
                 name
+                type
               }
             }
           `,
