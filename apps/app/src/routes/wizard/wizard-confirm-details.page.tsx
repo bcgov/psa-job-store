@@ -2,12 +2,6 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Button, Card, Modal, Typography } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CreateJobProfileInput,
-  JobProfileModel,
-  TrackedFieldArrayItem,
-} from '../../redux/services/graphql-api/job-profile-types';
-import { useCreateJobProfileMutation } from '../../redux/services/graphql-api/job-profile.api';
 import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
@@ -15,62 +9,62 @@ import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
 const { Text } = Typography;
 
-function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJobProfileInput {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { behavioural_competencies, classification, id, organization_id, family_id, ...rest } = inputData;
+// function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJobProfileInput {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+//   const { behavioural_competencies, classification, id, organization_id, family_id, ...rest } = inputData;
 
-  const title = typeof inputData.title === 'string' ? inputData.title : inputData.title.value;
-  const overview = typeof inputData.overview === 'string' ? inputData.overview : inputData.overview.value;
+//   const title = typeof inputData.title === 'string' ? inputData.title : inputData.title.value;
+//   const overview = typeof inputData.overview === 'string' ? inputData.overview : inputData.overview.value;
 
-  const requiredAccountabilities = inputData.accountabilities.required
-    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
-    .map((item) => item.value);
+//   const requiredAccountabilities = inputData.accountabilities.required
+//     .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+//     .map((item) => item.value);
 
-  const optionalAccountabilities = inputData.accountabilities.optional
-    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
-    .map((item) => item.value);
+//   const optionalAccountabilities = inputData.accountabilities.optional
+//     .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+//     .map((item) => item.value);
 
-  const requirements = inputData.requirements
-    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
-    .map((item) => item.value);
+//   const requirements = inputData.requirements
+//     .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+//     .map((item) => item.value);
 
-  // Map behavioural competencies if they exist
-  const behaviouralCompetenciesInput = behavioural_competencies?.length
-    ? {
-        create: behavioural_competencies.map(({ behavioural_competency: { id } }) => ({
-          behavioural_competency: { connect: { id } },
-        })),
-      }
-    : undefined;
+//   // Map behavioural competencies if they exist
+//   const behaviouralCompetenciesInput = behavioural_competencies?.length
+//     ? {
+//         create: behavioural_competencies.map(({ behavioural_competency: { id } }) => ({
+//           behavioural_competency: { connect: { id } },
+//         })),
+//       }
+//     : undefined;
 
-  // Connect classification if it exists
-  const classificationConnectInput = classification?.id
-    ? { connect: { id: classification.id } }
-    : { connect: { id: '-1' } };
+//   // Connect classification if it exists
+//   const classificationConnectInput = classification?.id
+//     ? { connect: { id: classification.id } }
+//     : { connect: { id: '-1' } };
 
-  // Construct the result with the correct type and provide default values or handle them as required by the API
-  const result: CreateJobProfileInput = {
-    ...rest,
-    overview: overview,
-    title: title,
-    requirements: requirements,
-    accountabilities: {
-      optional: optionalAccountabilities,
-      required: requiredAccountabilities,
-    },
-    behavioural_competencies: behaviouralCompetenciesInput,
-    classification: classificationConnectInput,
-    state: 'DRAFT',
-    parent: { connect: { id: id } },
-  };
+//   // Construct the result with the correct type and provide default values or handle them as required by the API
+//   const result: CreateJobProfileInput = {
+//     ...rest,
+//     overview: overview,
+//     title: title,
+//     requirements: requirements,
+//     accountabilities: {
+//       optional: optionalAccountabilities,
+//       required: requiredAccountabilities,
+//     },
+//     behavioural_competencies: behaviouralCompetenciesInput,
+//     classification: classificationConnectInput,
+//     state: 'DRAFT',
+//     parent: { connect: { id: id } },
+//   };
 
-  return result;
-}
+//   return result;
+// }
 
 export const WizardConfirmDetailsPage = () => {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [createJobProfile] = useCreateJobProfileMutation();
+  // const [createJobProfile] = useCreateJobProfileMutation();
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { positionRequestId } = useWizardContext();
 
@@ -87,17 +81,17 @@ export const WizardConfirmDetailsPage = () => {
     // Hide the modal
     setIsModalVisible(false);
 
-    if (wizardData != null) {
-      // console.log('review wizard data: ', wizardData);
+    // if (wizardData != null) {
+    //   // console.log('review wizard data: ', wizardData);
 
-      // Convert form data into API data format
-      // e.g. remove references such as "required_accountabilities.0"
-      // const transformedData = transformFormData(wizardData);
-      const createInput = wizardData; // as unknown as CreateJobProfileInputPreTransform;
-      const inpt = transformJobProfileDataForCreation(createInput);
-      // console.log('createInput: ', inpt);
-      await createJobProfile(inpt);
-    }
+    //   // Convert form data into API data format
+    //   // e.g. remove references such as "required_accountabilities.0"
+    //   // const transformedData = transformFormData(wizardData);
+    //   const createInput = wizardData; // as unknown as CreateJobProfileInputPreTransform;
+    //   const inpt = transformJobProfileDataForCreation(createInput);
+    //   // console.log('createInput: ', inpt);
+    //   await createJobProfile(inpt);
+    // }
 
     try {
       if (positionRequestId) {
@@ -124,7 +118,7 @@ export const WizardConfirmDetailsPage = () => {
     setIsModalVisible(false);
   };
 
-  const { wizardData } = useWizardContext();
+  // const { wizardData } = useWizardContext();
   const onBack = () => {
     navigate(-1);
   };

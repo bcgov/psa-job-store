@@ -83,6 +83,10 @@ function AllDisabled(validationOptions?: ValidationOptions) {
   };
 }
 
+class ClassificationField {
+  classification: string;
+}
+
 export class JobProfileValidationModel {
   id: number;
 
@@ -92,7 +96,7 @@ export class JobProfileValidationModel {
   @Type(() => TitleField)
   title: TitleField | string;
 
-  classification: string | null;
+  classifications: ClassificationField[];
 
   context: string;
 
@@ -274,6 +278,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   if (isLoading) {
     return <p aria-live="polite">Loading job profile...</p>;
   }
+
+  // console.log('effectiveData: ', effectiveData);
+
   const items: DescriptionsProps['items'] = [
     {
       key: 'title',
@@ -292,7 +299,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'classification',
       label: 'Classification',
-      children: <div>{`${effectiveData?.classification?.code}`}</div>,
+      children: <div>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -311,7 +318,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'context',
       label: 'Job Context',
       children:
-        showDiff && originalData ? compareData(originalData.context, effectiveData?.context) : effectiveData?.context,
+        showDiff && originalData
+          ? compareData(originalData.context.description, effectiveData?.context?.description)
+          : effectiveData?.context?.description,
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
@@ -466,7 +475,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <h3>Title</h3>
           <p>{typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value}</p>
           <h3>Classification</h3>
-          <p>{`${effectiveData?.classification?.code}`}</p>
+          <p>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</p>
 
           <h3>Job Store #</h3>
           <p>{effectiveData?.number}</p>
@@ -475,7 +484,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <p>{/* last updated info */}</p>
 
           <h3>Job Context</h3>
-          <p>{effectiveData?.context}</p>
+          <p>{effectiveData?.context?.description}</p>
 
           <h3>Job Overview</h3>
           <p>

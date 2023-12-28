@@ -31,8 +31,8 @@ export class PositionRequest {
   @Field(() => Int, { nullable: true })
   position_number!: number | null;
 
-  @Field(() => String, { nullable: false })
-  classification_id!: string;
+  @Field(() => String, { nullable: true })
+  classification_id!: string | null;
 
   @Field(() => String, { nullable: true })
   classification_code!: string | null;

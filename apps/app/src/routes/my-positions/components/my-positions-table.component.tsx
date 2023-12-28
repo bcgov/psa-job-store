@@ -3,7 +3,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Row, Space, Table } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useLazyGetPositionRequestsQuery } from '../../../redux/services/graphql-api/position-request.api';
 import EmptyJobPositionGraphic from '../images/empty_jobPosition.svg';
 
@@ -117,6 +117,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const updateData = useCallback(() => {
+    console.log('updateData');
     const search = searchParams.get('search');
     const statusFilter = searchParams.get('status');
     const classificationFilter = searchParams.get('classification');
@@ -187,7 +188,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const hasPositionRequests = data?.positionRequests && data.positionRequests.length > 0;
-
   if (isLoading) return <div>Loading...</div>;
 
   return (
@@ -235,9 +235,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
         <div style={{ textAlign: 'center', padding: '2rem', background: 'white', flex: 1, overflowY: 'auto' }}>
           <img src={EmptyJobPositionGraphic} alt="No positions" />
           <div>New to the JobStore?</div>
-          <Button type="primary" style={{ marginTop: '1rem' }}>
-            Create new position
-          </Button>
+          {/* Link button to the orgchart page */}
+          <Link to="/wizard">
+            <Button type="primary" style={{ marginTop: '1rem' }}>
+              Create new position
+            </Button>
+          </Link>
         </div>
       )}
     </div>

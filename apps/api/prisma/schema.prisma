@@ -43,7 +43,7 @@ model PositionRequest {
   user_id                String?                @db.Uuid
   title                  String
   position_number        Int?
-  classification_id      String
+  classification_id      String?
   classification_code    String? // this is just to satisfy type definition, no data is stored here AL-146
   submission_id          String?
   status                 PositionRequestStatus?

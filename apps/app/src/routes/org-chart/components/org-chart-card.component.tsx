@@ -79,7 +79,7 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
             </Text>
           )}
           <br />
-          Dept. ID: {data.department.id}
+          Dept. ID: {data.department?.id}
           <br />
           Position: {data.id}
         </Card>

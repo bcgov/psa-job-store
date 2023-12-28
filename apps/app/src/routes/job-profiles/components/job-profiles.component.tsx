@@ -51,8 +51,12 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
           ...(classificationFilter != null
             ? [
                 {
-                  classification_id: {
-                    in: JSON.parse(`[${classificationFilter.split(',').map((v) => `"${v}"`)}]`),
+                  classifications: {
+                    some: {
+                      classification_id: {
+                        in: classificationFilter.split(',').map((v) => v.trim()),
+                      },
+                    },
                   },
                 },
               ]
@@ -60,7 +64,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
           ...(jobFamilyFilter !== null
             ? [
                 {
-                  family_id: {
+                  job_family_id: {
                     in: JSON.parse(`[${jobFamilyFilter}]`),
                   },
                 },
