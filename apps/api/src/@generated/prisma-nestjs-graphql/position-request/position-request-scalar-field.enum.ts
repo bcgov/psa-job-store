@@ -13,6 +13,7 @@ export enum PositionRequestScalarFieldEnum {
   classification_code = 'classification_code',
   submission_id = 'submission_id',
   status = 'status',
+  updated_at = 'updated_at',
 }
 
 registerEnumType(PositionRequestScalarFieldEnum, { name: 'PositionRequestScalarFieldEnum', description: undefined });

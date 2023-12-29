@@ -5,6 +5,7 @@ import { JsonWithAggregatesFilter } from '../prisma/json-with-aggregates-filter.
 import { UuidWithAggregatesFilter } from '../prisma/uuid-with-aggregates-filter.input';
 import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
 import { EnumPositionRequestStatusWithAggregatesFilter } from '../prisma/enum-position-request-status-with-aggregates-filter.input';
+import { DateTimeWithAggregatesFilter } from '../prisma/date-time-with-aggregates-filter.input';
 
 @InputType()
 export class PositionRequestScalarWhereWithAggregatesInput {
@@ -52,4 +53,7 @@ export class PositionRequestScalarWhereWithAggregatesInput {
 
   @Field(() => EnumPositionRequestStatusWithAggregatesFilter, { nullable: true })
   status?: EnumPositionRequestStatusWithAggregatesFilter;
+
+  @Field(() => DateTimeWithAggregatesFilter, { nullable: true })
+  updated_at?: DateTimeWithAggregatesFilter;
 }

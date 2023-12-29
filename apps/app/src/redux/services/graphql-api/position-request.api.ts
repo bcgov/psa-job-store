@@ -117,6 +117,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 classification_code
                 submission_id
                 status
+                updated_at
               }
               positionRequestsCount(search: $search, where: $where) {
                 draft
@@ -153,6 +154,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   classification
                   submission_id
                   status
+                  updated_at
               }
           }
           `,

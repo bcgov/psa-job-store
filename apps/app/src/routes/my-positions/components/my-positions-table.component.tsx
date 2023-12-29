@@ -1,11 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReloadOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Row, Space, Table } from 'antd';
+import {
+  CopyOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EllipsisOutlined,
+  EyeOutlined,
+  FilePdfOutlined,
+  LinkOutlined,
+  ReloadOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
+import { Button, Card, Col, Menu, Popover, Row, Space, Table, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
+import copy from 'copy-to-clipboard';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useLazyGetPositionRequestsQuery } from '../../../redux/services/graphql-api/position-request.api';
 import EmptyJobPositionGraphic from '../images/empty_jobPosition.svg';
+import './my-positions-table.component.css';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -53,6 +65,78 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     }
   }, [data]);
 
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns 0-11
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
+  const getMenuContent = (record: any) => {
+    return (
+      <Menu>
+        {record.status === 'DRAFT' && (
+          <>
+            <Menu.Item key="edit" icon={<EditOutlined />}>
+              Edit
+            </Menu.Item>
+            <Menu.Item key="copy" icon={<LinkOutlined />}>
+              Copy link
+            </Menu.Item>
+            <Menu.Item key="delete" icon={<DeleteOutlined />}>
+              Delete
+            </Menu.Item>
+          </>
+        )}
+
+        {record.status === 'COMPLETED' && (
+          <>
+            <Menu.Item key="edit" icon={<EyeOutlined />}>
+              View
+            </Menu.Item>
+            <Menu.Item key="download" icon={<FilePdfOutlined />}>
+              Download profile
+            </Menu.Item>
+            <Menu.Item key="copy" icon={<LinkOutlined />}>
+              Copy link
+            </Menu.Item>
+            <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
+              Delete
+            </Menu.Item>
+          </>
+        )}
+
+        {record.status === 'IN_REVIEW' && (
+          <>
+            <Menu.Item key="edit" icon={<EyeOutlined />}>
+              View
+            </Menu.Item>
+            <Menu.Item key="copy" icon={<LinkOutlined />}>
+              Copy link
+            </Menu.Item>
+            <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
+              Delete
+            </Menu.Item>
+          </>
+        )}
+      </Menu>
+    );
+  };
+
+  // State to track the hovered row's key
+  const [hoveredRowKey, setHoveredRowKey] = useState(null);
+
+  // Handler to be called when a row is hovered
+  const handleMouseEnter = (key: any) => setHoveredRowKey(key);
+
+  // Handler to be called when the mouse leaves a row
+  const handleMouseLeave = () => setHoveredRowKey(null);
+
   const columns = [
     {
       title: 'Job Title',
@@ -90,6 +174,29 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       title: 'Position #',
       dataIndex: 'position_number',
       key: 'position_number',
+      render: (text: any, record: any) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {text}
+          {record.status === 'COMPLETED' && hoveredRowKey === record.id && (
+            <Button
+              icon={<CopyOutlined />}
+              size="small"
+              style={{
+                marginLeft: 8,
+                padding: '0px', // Reduce padding
+                lineHeight: '1', // Match the line height to the row content
+                border: 'none', // Remove the border if not needed
+                background: 'transparent', // Remove background
+                height: 'fit-content', // Ensure the button only takes up the necessary height
+              }}
+              onClick={() => {
+                copy(text.toString());
+                message.success('Position number copied!');
+              }}
+            />
+          )}
+        </div>
+      ),
     },
     {
       sorter: allowSorting,
@@ -104,6 +211,24 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       title: 'Submission ID',
       dataIndex: 'submission_id',
       key: 'submission_id',
+    },
+    {
+      sorter: allowSorting,
+      defaultSortOrder: getSortOrder('updated_at'),
+      title: 'Modified at',
+      dataIndex: 'updated_at',
+      key: 'updated_at',
+      render: (text: string) => formatDateTime(text),
+    },
+    {
+      title: <SettingOutlined />,
+      align: 'center',
+      key: 'action',
+      render: (_text: any, record: any) => (
+        <Popover content={getMenuContent(record)} trigger="click" placement="bottomRight">
+          <EllipsisOutlined />
+        </Popover>
+      ),
     },
   ];
 
@@ -127,7 +252,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           orderBy: [
             {
               [sortField]:
-                sortField === 'title'
+                sortField === 'title' || sortField === 'updated_at'
                   ? sortOrder === 'ascend'
                     ? 'asc'
                     : 'desc'
@@ -213,6 +338,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
       {hasPositionRequests ? (
         <Table
+          onRow={(record) => {
+            return {
+              onMouseEnter: () => handleMouseEnter(record.id),
+              onMouseLeave: handleMouseLeave,
+            };
+          }}
           className="tableWithHeader"
           columns={columns}
           dataSource={data?.positionRequests}

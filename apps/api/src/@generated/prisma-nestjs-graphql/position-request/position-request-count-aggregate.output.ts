@@ -41,5 +41,8 @@ export class PositionRequestCountAggregate {
   status!: number;
 
   @Field(() => Int, { nullable: false })
+  updated_at!: number;
+
+  @Field(() => Int, { nullable: false })
   _all!: number;
 }

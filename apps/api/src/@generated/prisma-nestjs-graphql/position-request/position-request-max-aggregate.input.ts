@@ -35,4 +35,7 @@ export class PositionRequestMaxAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   status?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  updated_at?: true;
 }

@@ -47,6 +47,9 @@ export class PositionRequestGroupBy {
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;
 
+  @Field(() => Date, { nullable: false })
+  updated_at!: Date | string;
+
   @Field(() => PositionRequestCountAggregate, { nullable: true })
   _count?: PositionRequestCountAggregate;
 

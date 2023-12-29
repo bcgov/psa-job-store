@@ -37,6 +37,9 @@ export class PositionRequestUpdateInput {
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;
 
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
   @Field(() => JobProfileUpdateOneRequiredWithoutPosition_requestNestedInput, { nullable: true })
   parent_job_profile?: JobProfileUpdateOneRequiredWithoutPosition_requestNestedInput;
 }

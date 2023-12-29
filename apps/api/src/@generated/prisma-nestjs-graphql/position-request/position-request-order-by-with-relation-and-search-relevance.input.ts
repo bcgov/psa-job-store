@@ -43,6 +43,9 @@ export class PositionRequestOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrderInput, { nullable: true })
   status?: SortOrderInput;
 
+  @Field(() => SortOrder, { nullable: true })
+  updated_at?: keyof typeof SortOrder;
+
   @Field(() => JobProfileOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   parent_job_profile?: JobProfileOrderByWithRelationAndSearchRelevanceInput;
 

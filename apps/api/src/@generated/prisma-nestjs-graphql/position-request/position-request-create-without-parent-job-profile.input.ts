@@ -35,4 +35,7 @@ export class PositionRequestCreateWithoutParent_job_profileInput {
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
 }

@@ -5,6 +5,7 @@ import { JsonFilter } from '../prisma/json-filter.input';
 import { UuidFilter } from '../prisma/uuid-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { EnumPositionRequestStatusFilter } from '../prisma/enum-position-request-status-filter.input';
+import { DateTimeFilter } from '../prisma/date-time-filter.input';
 
 @InputType()
 export class PositionRequestScalarWhereInput {
@@ -52,4 +53,7 @@ export class PositionRequestScalarWhereInput {
 
   @Field(() => EnumPositionRequestStatusFilter, { nullable: true })
   status?: EnumPositionRequestStatusFilter;
+
+  @Field(() => DateTimeFilter, { nullable: true })
+  updated_at?: DateTimeFilter;
 }

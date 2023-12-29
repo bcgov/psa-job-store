@@ -42,13 +42,38 @@ export class PositionRequestStatusCounts {
   total: number;
 }
 
+function generateShortId(length: number): string {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
 @Injectable()
 export class PositionRequestApiService {
   // ...(searchResultIds != null && { id: { in: searchResultIds } }),
 
   constructor(private readonly prisma: PrismaService) {}
 
+  async generateUniqueShortId(length: number, retries: number = 5): Promise<string> {
+    for (let attempt = 0; attempt < retries; attempt++) {
+      const id = generateShortId(length);
+      const existingEntry = await this.prisma.positionRequest.findFirst({
+        where: { submission_id: id },
+      });
+
+      if (!existingEntry) {
+        return id; // Unique ID found
+      }
+    }
+    throw new Error('Failed to generate a unique ID');
+  }
+
   async createPositionRequest(data: PositionRequestCreateInput, userId: string) {
+    const uniqueSubmissionId = await this.generateUniqueShortId(10);
+
     return this.prisma.positionRequest.create({
       data: {
         step: data.step,
@@ -58,7 +83,7 @@ export class PositionRequestApiService {
         // user: data.user,
         user_id: userId,
         parent_job_profile: data.parent_job_profile,
-        submission_id: 'SUBM_ID',
+        submission_id: uniqueSubmissionId,
         status: 'DRAFT',
         title: data.title,
         // TODO: AL-146
@@ -113,6 +138,7 @@ export class PositionRequestApiService {
         classification_id: true,
         submission_id: true,
         status: true,
+        updated_at: true,
       },
     });
 

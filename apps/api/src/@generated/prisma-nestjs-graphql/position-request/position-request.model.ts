@@ -43,6 +43,9 @@ export class PositionRequest {
   @Field(() => PositionRequestStatus, { nullable: true })
   status!: keyof typeof PositionRequestStatus | null;
 
+  @Field(() => Date, { nullable: false })
+  updated_at!: Date;
+
   @Field(() => JobProfile, { nullable: false })
   parent_job_profile?: JobProfile;
 }

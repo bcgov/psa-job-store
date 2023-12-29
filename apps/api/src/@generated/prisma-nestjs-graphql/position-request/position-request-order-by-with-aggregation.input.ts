@@ -46,6 +46,9 @@ export class PositionRequestOrderByWithAggregationInput {
   @Field(() => SortOrderInput, { nullable: true })
   status?: SortOrderInput;
 
+  @Field(() => SortOrder, { nullable: true })
+  updated_at?: keyof typeof SortOrder;
+
   @Field(() => PositionRequestCountOrderByAggregateInput, { nullable: true })
   _count?: PositionRequestCountOrderByAggregateInput;
 

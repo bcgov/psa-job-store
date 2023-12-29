@@ -47,6 +47,7 @@ model PositionRequest {
   classification_code    String? // this is just to satisfy type definition, no data is stored here AL-146
   submission_id          String?
   status                 PositionRequestStatus?
+  updated_at             DateTime               @default(now()) @updatedAt
 
   // TODO: AL-146
   // user        User       @relation(fields: [user_id], references: [id])
