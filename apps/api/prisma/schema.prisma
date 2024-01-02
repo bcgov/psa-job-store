@@ -261,84 +261,58 @@ model Comment {
 }
 
 // PeopleSoft Tables
-model Organization {
-  id           String       @id
-  name         String
-  departments  Department[]
-  job_profiles JobProfile[]
-
-  @@map("organization")
-}
-
-model Department {
-  id              String            @id
-  organization    Organization      @relation(fields: [organization_id], references: [id])
-  organization_id String
-  name            String
-  PositionRequest PositionRequest[]
-
-  @@map("department")
-}
-
 model Classification {
-  id           String                     @id
-  code         String
-  name         String
+  id               String   @id // JOBCODE
+  peoplesoft_id    String // SETID
+  code             String // DESCRSHORT
+  name             String // DESCR
+  effective_status String // EFF_STATUS
+  effective_date   DateTime @db.Date // EFFDT
+
   job_profiles JobProfileClassification[]
   reportees    JobProfileReportsTo[]
 
   @@map("classification")
 }
 
-// enum EmployeeStatus {
-//   ACTIVE
-//   LEAVE
-//   LEAVE_WO_PAY
-// }
+model Department {
+  id               String            @id // DEPTID
+  location         Location          @relation(fields: [location_id], references: [id])
+  location_id      String
+  organization     Organization      @relation(fields: [organization_id], references: [id])
+  organization_id  String
+  peoplesoft_id    String // SETID
+  code             String // DESCRSHORT
+  name             String // DESCR
+  effective_status String // EFF_STATUS
+  effective_date   DateTime          @db.Date // EFFDT
+  PositionRequest  PositionRequest[]
 
-// model Position {
-//   id                 String  @id
-//   classification_id  String
-//   department_id      String
-//   organization_id    String
-//   supervisor_id      String
-//   title              String
-//   job_profile_number String?
-//   is_empty           Boolean
-//   is_vacant          Boolean
+  @@map("department")
+}
 
-//   classification Classification     @relation(fields: [classification_id], references: [id])
-//   department     Department         @relation(fields: [department_id], references: [id])
-//   organization   Organization       @relation(fields: [organization_id], references: [id])
-//   employees      PositionEmployee[]
+model Location {
+  id               String       @id // LOCATION
+  peoplesoft_id    String // SETID
+  code             String // DESCRSHORT
+  name             String // DESCR
+  effective_status String // EFF_STATUS
+  effective_date   DateTime     @db.Date // EFFDT
+  Department       Department[]
 
-//   @@map("position")
-// }
+  @@map("location")
+}
 
-// model PositionEmployee {
-//   employee_id String
-//   position_id String
+model Organization {
+  id               String   @id // BUSINESS_UNIT
+  peoplesoft_id    String // SETID
+  code             String // DESCRSHORT
+  name             String // DESCR
+  effective_status String // EFF_STATUS
+  effective_date   DateTime @db.Date // EFFDT
 
-//   employee Employee @relation(fields: [employee_id], references: [id])
-//   position Position @relation(fields: [position_id], references: [id])
+  departments  Department[]
+  job_profiles JobProfile[]
 
-//   @@id([employee_id, position_id])
-//   @@map("position_employee")
-// }
-
-// model Employee {
-//   id                String @id
-//   classification_id String
-//   department_id     String
-//   organization_id   String
-
-//   name   String
-//   status EmployeeStatus?
-
-//   classification Classification     @relation(fields: [classification_id], references: [id])
-//   department     Department         @relation(fields: [department_id], references: [id])
-//   organization   Organization       @relation(fields: [organization_id], references: [id])
-//   positions      PositionEmployee[]
-
-//   @@map("employee")
-// }
+  @@map("organization")
+}
