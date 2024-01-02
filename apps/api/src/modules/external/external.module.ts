@@ -13,6 +13,7 @@ import { PositionResolver } from './position.resolver';
 import { PositionService } from './position.service';
 import { OrgChartResolver } from './org-chart.resolver';
 import { OrgChartService } from './org-chart.service';
+import { PeoplesoftService } from './peoplesoft.service';
 
 @Module({
   imports: [HttpModule, PrismaModule],
@@ -29,6 +30,7 @@ import { OrgChartService } from './org-chart.service';
     PrismaService,
     OrgChartResolver,
     OrgChartService,
+    PeoplesoftService,
   ],
 })
 export class ExternalModule {}

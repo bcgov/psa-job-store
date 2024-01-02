@@ -292,20 +292,21 @@ model Department {
 }
 
 model Location {
-  id               String       @id // LOCATION
+  id               String   @id // LOCATION
   peoplesoft_id    String // SETID
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS
-  effective_date   DateTime     @db.Date // EFFDT
-  Department       Department[]
+  effective_date   DateTime @db.Date // EFFDT
+
+  departments Department[]
 
   @@map("location")
 }
 
 model Organization {
   id               String   @id // BUSINESS_UNIT
-  peoplesoft_id    String // SETID
+  peoplesoft_id    String   @unique // SETID
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS
