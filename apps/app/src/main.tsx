@@ -11,6 +11,7 @@ import 'reflect-metadata';
 import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL, VITE_KEYCLOAK_REDIRECT_URL } from '../envConfig';
 import { store } from './redux/redux.store';
 import { router } from './router/index';
+import { WizardProvider } from './routes/wizard/components/wizard.provider';
 
 export const oidcConfig: AuthProviderProps = {
   userStore: new WebStorageStateStore({
@@ -37,7 +38,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <HelmetProvider>
             <App>
               <Helmet defaultTitle="Job Store" titleTemplate="%s | Job Store" />
-              <RouterProvider router={router} />
+              <WizardProvider>
+                <RouterProvider router={router} />
+              </WizardProvider>
             </App>
           </HelmetProvider>
         </ConfigProvider>

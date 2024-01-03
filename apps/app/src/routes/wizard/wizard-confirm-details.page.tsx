@@ -1,7 +1,6 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Button, Card, Modal, Typography } from 'antd';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
@@ -61,8 +60,13 @@ const { Text } = Typography;
 //   return result;
 // }
 
-export const WizardConfirmDetailsPage = () => {
-  const navigate = useNavigate();
+interface WizardConfirmPageProps {
+  onNext?: () => void;
+  onBack?: () => void;
+}
+
+// export const WizardReviewPage = () => {
+export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onNext, onBack }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   // const [createJobProfile] = useCreateJobProfileMutation();
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
@@ -97,11 +101,11 @@ export const WizardConfirmDetailsPage = () => {
       if (positionRequestId) {
         await updatePositionRequest({
           id: positionRequestId,
-          step: 3,
+          step: 5,
           status: 'COMPLETED',
           position_number: 123456,
         }).unwrap();
-        navigate('/wizard/result');
+        if (onNext) onNext();
       } else {
         throw Error('Position request not found');
       }
@@ -119,8 +123,16 @@ export const WizardConfirmDetailsPage = () => {
   };
 
   // const { wizardData } = useWizardContext();
-  const onBack = () => {
-    navigate(-1);
+  const onBackCallback = async () => {
+    if (positionRequestId) {
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: 3,
+      }).unwrap();
+      if (onBack) onBack();
+    } else {
+      throw Error('Position request not found');
+    }
   };
 
   return (
@@ -130,11 +142,11 @@ export const WizardConfirmDetailsPage = () => {
       xxl={14}
       xl={18}
     >
-      <WizardSteps current={3} xl={24}></WizardSteps>
+      <WizardSteps current={4} xl={24}></WizardSteps>
       <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
         onNext={showModal}
-        onBack={onBack}
+        onBack={onBackCallback}
         nextText="Submit for a new position #"
       />
 

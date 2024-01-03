@@ -14,6 +14,9 @@ export class PositionRequestCountAggregate {
   reports_to_position_id!: number;
 
   @Field(() => Int, { nullable: false })
+  department_id!: number;
+
+  @Field(() => Int, { nullable: false })
   parent_job_profile_id!: number;
 
   @Field(() => Int, { nullable: false })
@@ -39,6 +42,9 @@ export class PositionRequestCountAggregate {
 
   @Field(() => Int, { nullable: false })
   status!: number;
+
+  @Field(() => Int, { nullable: false })
+  updated_at!: number;
 
   @Field(() => Int, { nullable: false })
   _all!: number;

@@ -14,6 +14,9 @@ export class PositionRequestMinOrderByAggregateInput {
   reports_to_position_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  department_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   parent_job_profile_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
@@ -36,4 +39,7 @@ export class PositionRequestMinOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   status?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  updated_at?: keyof typeof SortOrder;
 }

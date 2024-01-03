@@ -42,15 +42,41 @@ export class PositionRequestStatusCounts {
   total: number;
 }
 
+function generateShortId(length: number): string {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
 @Injectable()
 export class PositionRequestApiService {
   // ...(searchResultIds != null && { id: { in: searchResultIds } }),
 
   constructor(private readonly prisma: PrismaService) {}
 
+  async generateUniqueShortId(length: number, retries: number = 5): Promise<string> {
+    for (let attempt = 0; attempt < retries; attempt++) {
+      const id = generateShortId(length);
+      const existingEntry = await this.prisma.positionRequest.findFirst({
+        where: { submission_id: id },
+      });
+
+      if (!existingEntry) {
+        return id; // Unique ID found
+      }
+    }
+    throw new Error('Failed to generate a unique ID');
+  }
+
   async createPositionRequest(data: PositionRequestCreateInput, userId: string) {
+    const uniqueSubmissionId = await this.generateUniqueShortId(10);
+
     return this.prisma.positionRequest.create({
       data: {
+        department: data.department,
         step: data.step,
         reports_to_position_id: data.reports_to_position_id,
         profile_json: data.profile_json,
@@ -58,7 +84,7 @@ export class PositionRequestApiService {
         // user: data.user,
         user_id: userId,
         parent_job_profile: data.parent_job_profile,
-        submission_id: 'SUBM_ID',
+        submission_id: uniqueSubmissionId,
         status: 'DRAFT',
         title: data.title,
         // TODO: AL-146
@@ -113,6 +139,7 @@ export class PositionRequestApiService {
         classification_id: true,
         submission_id: true,
         status: true,
+        updated_at: true,
       },
     });
 
@@ -278,6 +305,10 @@ export class PositionRequestApiService {
 
     if (updateData.parent_job_profile !== undefined) {
       updatePayload.parent_job_profile = updateData.parent_job_profile;
+    }
+
+    if (updateData.department !== undefined) {
+      updatePayload.department = updateData.department;
     }
 
     // ...add similar checks for other fields...

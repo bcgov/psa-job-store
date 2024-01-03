@@ -1,6 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Organization } from '../organization/organization.model';
+import { PositionRequest } from '../position-request/position-request.model';
 
 @ObjectType()
 export class Department {
@@ -15,4 +16,7 @@ export class Department {
 
   @Field(() => Organization, { nullable: false })
   organization?: Organization;
+
+  @Field(() => [PositionRequest], { nullable: true })
+  PositionRequest?: Array<PositionRequest>;
 }

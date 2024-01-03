@@ -10,11 +10,14 @@ const DEFAULT_ORG_CHART: OrgChartData = { edges: [], nodes: [] };
 
 interface OrgChartRendererProps {
   selectedDepartment: string | null;
+  onCreateNewPosition?: () => void | null;
 }
 
-const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({ selectedDepartment }) => {
+const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({ selectedDepartment, onCreateNewPosition }) => {
   const [orgChart, setOrgChart] = useState<OrgChartData>(DEFAULT_ORG_CHART);
   const [trigger, { data, isFetching }] = useLazyGetOrgChartQuery();
+
+  // console.log('selectedDepartment: ', selectedDepartment);
 
   useEffect(() => {
     setOrgChart(DEFAULT_ORG_CHART);
@@ -24,6 +27,7 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({ selectedDepartment }
   }, [selectedDepartment, trigger]);
 
   useEffect(() => {
+    // console.log('org chart data: ', data);
     const objData: OrgChartData = data != null ? JSON.parse(JSON.stringify(data.orgChart)) : DEFAULT_ORG_CHART;
     setOrgChart(objData);
   }, [data]);
@@ -33,7 +37,12 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({ selectedDepartment }
       <Spin size="large" />
     </div>
   ) : orgChart.edges.length > 0 ? (
-    <OrgChart edges={orgChart.edges} nodes={orgChart.nodes} />
+    <OrgChart
+      edges={orgChart.edges}
+      nodes={orgChart.nodes}
+      selectedDepartment={selectedDepartment}
+      onCreateNewPosition={onCreateNewPosition}
+    />
   ) : (
     <Space style={{ height: '100%', width: '100%', justifyContent: 'center' }} align="center">
       <Empty

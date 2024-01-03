@@ -1,10 +1,11 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { IntFilter } from '../prisma/int-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
 import { JsonFilter } from '../prisma/json-filter.input';
 import { UuidFilter } from '../prisma/uuid-filter.input';
-import { StringFilter } from '../prisma/string-filter.input';
 import { EnumPositionRequestStatusFilter } from '../prisma/enum-position-request-status-filter.input';
+import { DateTimeFilter } from '../prisma/date-time-filter.input';
 
 @InputType()
 export class PositionRequestScalarWhereInput {
@@ -23,8 +24,11 @@ export class PositionRequestScalarWhereInput {
   @Field(() => IntFilter, { nullable: true })
   step?: IntFilter;
 
-  @Field(() => IntFilter, { nullable: true })
-  reports_to_position_id?: IntFilter;
+  @Field(() => StringFilter, { nullable: true })
+  reports_to_position_id?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  department_id?: StringFilter;
 
   @Field(() => IntFilter, { nullable: true })
   parent_job_profile_id?: IntFilter;
@@ -52,4 +56,7 @@ export class PositionRequestScalarWhereInput {
 
   @Field(() => EnumPositionRequestStatusFilter, { nullable: true })
   status?: EnumPositionRequestStatusFilter;
+
+  @Field(() => DateTimeFilter, { nullable: true })
+  updated_at?: DateTimeFilter;
 }

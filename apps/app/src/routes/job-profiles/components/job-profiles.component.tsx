@@ -91,25 +91,31 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
       setTotalResults(data.jobProfilesCount);
     }
   }, [data]);
-  const getBasePath = (path: string) => {
-    const pathParts = path.split('/');
-    // Check if the last part is a number (ID), if so, remove it
-    if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
-      pathParts.pop(); // Remove the last part (job profile ID)
-    }
-    return pathParts.join('/');
-  };
+
+  // const getBasePath = (path: string) => {
+  //   const pathParts = path.split('/');
+  //   // Check if the last part is a number (ID), if so, remove it
+  //   if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
+  //     pathParts.pop(); // Remove the last part (job profile ID)
+  //   }
+  //   return pathParts.join('/');
+  // };
+
   const navigate = useNavigate();
+  const { positionRequestId } = useParams();
+
   const handlePageChange = (page: number, pageSize: number) => {
     setCurrentPage(page);
     searchParams.set('page', page.toString());
+    searchParams.delete('selectedProfile');
+
     // Optionally, update the page size as well
     setPageSize(pageSize);
 
-    const basePath = getBasePath(location.pathname);
+    // const basePath = getBasePath(location.pathname);
 
     navigate({
-      pathname: basePath,
+      pathname: `/position-request/${positionRequestId}`,
       search: searchParams.toString(),
     });
   };
@@ -117,8 +123,9 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
   const params = useParams();
   const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
 
+  // console.log('params: ', params, 'searchParams: ', searchParams.toString());
   const renderJobProfile = () => {
-    return params.id ? (
+    return params.id || searchParams.get('selectedProfile') ? (
       <JobProfile onUseProfile={onUseProfile} />
     ) : (
       <div style={{ marginTop: '16rem' }} data-testid="job-profile-empty">

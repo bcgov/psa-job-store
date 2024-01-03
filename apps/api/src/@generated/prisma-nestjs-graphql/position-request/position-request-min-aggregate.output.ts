@@ -11,8 +11,11 @@ export class PositionRequestMinAggregate {
   @Field(() => Int, { nullable: true })
   step?: number;
 
-  @Field(() => Int, { nullable: true })
-  reports_to_position_id?: number;
+  @Field(() => String, { nullable: true })
+  reports_to_position_id?: string;
+
+  @Field(() => String, { nullable: true })
+  department_id?: string;
 
   @Field(() => Int, { nullable: true })
   parent_job_profile_id?: number;
@@ -37,4 +40,7 @@ export class PositionRequestMinAggregate {
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
 }

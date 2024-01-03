@@ -1,6 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { OrganizationCreateNestedOneWithoutDepartmentsInput } from '../organization/organization-create-nested-one-without-departments.input';
+import { PositionRequestCreateNestedManyWithoutDepartmentInput } from '../position-request/position-request-create-nested-many-without-department.input';
 
 @InputType()
 export class DepartmentCreateInput {
@@ -12,4 +13,7 @@ export class DepartmentCreateInput {
 
   @Field(() => OrganizationCreateNestedOneWithoutDepartmentsInput, { nullable: false })
   organization!: OrganizationCreateNestedOneWithoutDepartmentsInput;
+
+  @Field(() => PositionRequestCreateNestedManyWithoutDepartmentInput, { nullable: true })
+  PositionRequest?: PositionRequestCreateNestedManyWithoutDepartmentInput;
 }

@@ -4,6 +4,7 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 import { JobProfile } from '../job-profile/job-profile.model';
+import { Department } from '../department/department.model';
 
 @ObjectType()
 export class PositionRequest {
@@ -13,20 +14,23 @@ export class PositionRequest {
   @Field(() => Int, { nullable: false })
   step!: number;
 
-  @Field(() => Int, { nullable: false })
-  reports_to_position_id!: number;
+  @Field(() => String, { nullable: false })
+  reports_to_position_id!: string;
 
-  @Field(() => Int, { nullable: false })
-  parent_job_profile_id!: number;
+  @Field(() => String, { nullable: false })
+  department_id!: string;
 
-  @Field(() => GraphQLJSON, { nullable: false })
-  profile_json!: any;
+  @Field(() => Int, { nullable: true })
+  parent_job_profile_id!: number | null;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  profile_json!: any | null;
 
   @Field(() => String, { nullable: true })
   user_id!: string | null;
 
-  @Field(() => String, { nullable: false })
-  title!: string;
+  @Field(() => String, { nullable: true })
+  title!: string | null;
 
   @Field(() => Int, { nullable: true })
   position_number!: number | null;
@@ -43,6 +47,12 @@ export class PositionRequest {
   @Field(() => PositionRequestStatus, { nullable: true })
   status!: keyof typeof PositionRequestStatus | null;
 
-  @Field(() => JobProfile, { nullable: false })
-  parent_job_profile?: JobProfile;
+  @Field(() => Date, { nullable: false })
+  updated_at!: Date;
+
+  @Field(() => JobProfile, { nullable: true })
+  parent_job_profile?: JobProfile | null;
+
+  @Field(() => Department, { nullable: false })
+  department?: Department;
 }

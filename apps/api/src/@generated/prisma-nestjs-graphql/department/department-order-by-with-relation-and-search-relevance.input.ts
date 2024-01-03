@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
 import { OrganizationOrderByWithRelationAndSearchRelevanceInput } from '../organization/organization-order-by-with-relation-and-search-relevance.input';
+import { PositionRequestOrderByRelationAggregateInput } from '../position-request/position-request-order-by-relation-aggregate.input';
 import { DepartmentOrderByRelevanceInput } from './department-order-by-relevance.input';
 
 @InputType()
@@ -17,6 +18,9 @@ export class DepartmentOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => OrganizationOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   organization?: OrganizationOrderByWithRelationAndSearchRelevanceInput;
+
+  @Field(() => PositionRequestOrderByRelationAggregateInput, { nullable: true })
+  PositionRequest?: PositionRequestOrderByRelationAggregateInput;
 
   @Field(() => DepartmentOrderByRelevanceInput, { nullable: true })
   _relevance?: DepartmentOrderByRelevanceInput;

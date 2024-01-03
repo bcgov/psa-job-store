@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { StringFilter } from '../prisma/string-filter.input';
 import { OrganizationRelationFilter } from '../organization/organization-relation-filter.input';
+import { PositionRequestListRelationFilter } from '../position-request/position-request-list-relation-filter.input';
 
 @InputType()
 export class DepartmentWhereInput {
@@ -25,4 +26,7 @@ export class DepartmentWhereInput {
 
   @Field(() => OrganizationRelationFilter, { nullable: true })
   organization?: OrganizationRelationFilter;
+
+  @Field(() => PositionRequestListRelationFilter, { nullable: true })
+  PositionRequest?: PositionRequestListRelationFilter;
 }

@@ -1,6 +1,5 @@
 import { FormInstance, List, Modal } from 'antd';
 import { useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import {
   BehaviouralCompetencies,
   ClassificationModel,
@@ -9,7 +8,7 @@ import {
   JobProfileModel,
   TrackedFieldArrayItem,
 } from '../../redux/services/graphql-api/job-profile-types';
-import { useCreatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
+import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import WizardEditProfile from './components/wizard-edit-profile';
@@ -21,7 +20,12 @@ export interface InputData {
   [key: string]: any;
 }
 
-export const WizardEditPage = () => {
+interface WizardEditPageProps {
+  onBack?: () => void;
+  onNext?: () => void;
+}
+
+export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }) => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
   const {
@@ -31,10 +35,14 @@ export const WizardEditPage = () => {
     setClassificationsData,
     errors,
     setErrors,
-    setPositionRequestId,
+    positionRequestProfileId,
+    positionRequestId,
   } = useWizardContext();
-  const { profileId } = useParams();
-  const [createPositionRequest] = useCreatePositionRequestMutation();
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
+
+  const profileId = positionRequestProfileId;
+
+  // const [createPositionRequest] = useCreatePositionRequestMutation();
 
   function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
     setClassificationsData(data);
@@ -173,8 +181,9 @@ export const WizardEditPage = () => {
     getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
   }>(null);
 
-  const navigate = useNavigate();
-  const onNext = async () => {
+  // const navigate = useNavigate();
+
+  const onNextCallback = async () => {
     if (errors.length) {
       Modal.error({
         title: 'Errors',
@@ -197,31 +206,40 @@ export const WizardEditPage = () => {
     setWizardData(transformedData);
 
     try {
-      const classification = getClassificationById(formData.classification);
-      const positionRequestInput = {
-        step: 1,
-        reports_to_position_id: 123,
-        profile_json: transformedData,
-        parent_job_profile: { connect: { id: 1 } },
-        title: formData['title.value'],
-        classification_id: undefined, //todo: there might be multiple classifications on the profile, what should it be here?
-        classification_code: classification ? classification.code : '',
-      };
-      // console.log('positionRequestInput: ', positionRequestInput);
-      // console.log('formData: ', formData);
-
-      const resp = await createPositionRequest(positionRequestInput).unwrap();
-      setPositionRequestId(resp.createPositionRequest);
-
+      // const classification = getClassificationById(formData.classification);
+      // const positionRequestInput = {
+      //   step: 1,
+      //   reports_to_position_id: 123,
+      //   profile_json: transformedData,
+      //   parent_job_profile: { connect: { id: 1 } },
+      //   title: formData['title.value'],
+      //   classification_id: undefined, //todo: there might be multiple classifications on the profile, what should it be here?
+      //   classification_code: classification ? classification.code : '',
+      // };
+      // // console.log('positionRequestInput: ', positionRequestInput);
+      // // console.log('formData: ', formData);
+      // const resp = await createPositionRequest(positionRequestInput).unwrap();
+      // setPositionRequestId(resp.createPositionRequest);
       // Handle the response if needed, or navigate to the next page
-      navigate('/wizard/review');
+      // navigate('/wizard/review');
+      // navigate(`/position-request/${resp.createPositionRequest}`);
+
+      if (positionRequestId)
+        await updatePositionRequest({
+          id: positionRequestId,
+          step: 3,
+          profile_json: transformedData,
+          title: formData['title.value'],
+          // classification_code: classification ? classification.code : '',
+        }).unwrap();
     } catch (error) {
       // Handle the error, possibly showing another modal
       Modal.error({
-        title: 'Error Creating Position',
+        title: 'Error updating position',
         content: 'An unknown error occurred', //error.data?.message ||
       });
     }
+    if (onNext) onNext();
   };
 
   return (
@@ -232,10 +250,11 @@ export const WizardEditPage = () => {
       xl={18}
       lg={18}
     >
-      <WizardSteps current={1} xl={24}></WizardSteps>
+      <WizardSteps current={2} xl={24}></WizardSteps>
       <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
-        onNext={onNext}
+        onNext={onNextCallback}
+        onChooseDifferentProfile={onBack}
         showChooseDifferentProfile={true}
         nextText="Save and Next"
       />
@@ -243,7 +262,7 @@ export const WizardEditPage = () => {
       <WizardEditProfile
         ref={wizardEditProfileRef}
         profileData={wizardData}
-        id={profileId}
+        id={profileId?.toString()}
         submitText="Review Profile"
         // submitHandler={onSubmit}
         showBackButton={true}

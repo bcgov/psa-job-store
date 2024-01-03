@@ -6,8 +6,8 @@ import {
   PartitionOutlined,
   UserAddOutlined,
 } from '@ant-design/icons';
-import { Avatar, Button, Layout } from 'antd';
-import { Outlet } from 'react-router-dom';
+import { Button, Layout } from 'antd';
+import { Link, Outlet } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 import { AppHeader } from './header.component';
 import { SiderNav } from './sider-nav/sider-nav.component';
@@ -32,10 +32,13 @@ export const AppLayout = () => {
             zIndex: 1000,
           }}
         >
+          <div style={{ padding: '10px' }}>
+            <Link to="/my-positions/create">
+              <Button type="primary">Create new position</Button>
+            </Link>
+          </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Avatar shape="square" style={{ margin: '0.5rem 0 0.5rem 0.75rem', flexShrink: 0 }}>
-              PSA
-            </Avatar>
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', flex: 'auto' }}>
               <SiderNav
                 collapsed={collapsed}

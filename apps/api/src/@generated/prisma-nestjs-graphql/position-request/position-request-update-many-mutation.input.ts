@@ -9,8 +9,8 @@ export class PositionRequestUpdateManyMutationInput {
   @Field(() => Int, { nullable: true })
   step?: number;
 
-  @Field(() => Int, { nullable: true })
-  reports_to_position_id?: number;
+  @Field(() => String, { nullable: true })
+  reports_to_position_id?: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
@@ -35,4 +35,7 @@ export class PositionRequestUpdateManyMutationInput {
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
 }

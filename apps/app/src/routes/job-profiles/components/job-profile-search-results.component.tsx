@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Empty, Pagination, Skeleton, Typography } from 'antd';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileCard } from './job-profile-card.component';
 import styles from './job-profile-search-results.module.css';
@@ -29,7 +29,12 @@ export const JobProfileSearchResults = ({
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
+  const isPositionRequestRoute = location.pathname.includes('/position-request/');
+  const { positionRequestId } = useParams<{ positionRequestId?: string }>();
+
   const getBasePath = (path: string) => {
+    if (isPositionRequestRoute) return location.pathname.split('/').slice(0, 3).join('/');
+
     const pathParts = path.split('/');
     // Check if the last part is a number (ID), if so, remove it
     if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
@@ -38,6 +43,36 @@ export const JobProfileSearchResults = ({
     return pathParts.join('/');
   };
 
+  const getLinkPath = (profileId: number) => {
+    // `${getBasePath(location.pathname)}/${d.id}${
+    //   searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
+    // }`
+
+    // Check if we're on the position-request route
+    if (positionRequestId) {
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      newSearchParams.set('selectedProfile', profileId.toString());
+      return `/position-request/${positionRequestId}?${newSearchParams.toString()}`;
+    } else {
+      // If not on the position-request route, use the standard job-profiles path
+      return `/job-profiles/${profileId}`;
+    }
+  };
+
+  const ReplaceLink = ({ to, children, tabIndex }: any) => {
+    const navigate = useNavigate();
+
+    const handleClick = (event: any) => {
+      event.preventDefault(); // Prevent default link behavior
+      navigate(to, { replace: true }); // Use replace navigation
+    };
+
+    return (
+      <a href={to} onClick={handleClick} tabIndex={tabIndex}>
+        {children}
+      </a>
+    );
+  };
   return (
     <div
       style={{ border: '1px solid #CCC' }}
@@ -63,19 +98,14 @@ export const JobProfileSearchResults = ({
         ) : (
           (data?.jobProfiles ?? []).map((d) => (
             <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d.id.toString())}>
-              <Link
-                tabIndex={-1}
-                to={`${getBasePath(location.pathname)}/${d.id}${
-                  searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
-                }`}
-              >
+              <ReplaceLink tabIndex={-1} to={getLinkPath(d.id)}>
                 <JobProfileCard
                   data={d}
                   link={`${getBasePath(location.pathname)}/${d.id}${
                     searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
                   }`}
                 />
-              </Link>
+              </ReplaceLink>
             </li>
           ))
         )}

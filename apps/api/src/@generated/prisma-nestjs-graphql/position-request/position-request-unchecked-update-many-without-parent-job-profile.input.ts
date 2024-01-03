@@ -12,8 +12,11 @@ export class PositionRequestUncheckedUpdateManyWithoutParent_job_profileInput {
   @Field(() => Int, { nullable: true })
   step?: number;
 
-  @Field(() => Int, { nullable: true })
-  reports_to_position_id?: number;
+  @Field(() => String, { nullable: true })
+  reports_to_position_id?: string;
+
+  @Field(() => String, { nullable: true })
+  department_id?: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
@@ -38,4 +41,7 @@ export class PositionRequestUncheckedUpdateManyWithoutParent_job_profileInput {
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
 }

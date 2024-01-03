@@ -37,21 +37,24 @@ enum PositionRequestStatus {
 model PositionRequest {
   id                     Int                    @id @default(autoincrement())
   step                   Int
-  reports_to_position_id Int
-  parent_job_profile_id  Int
-  profile_json           Json                   @db.JsonB
+  reports_to_position_id String
+  department_id          String
+  parent_job_profile_id  Int?
+  profile_json           Json?                  @db.JsonB
   user_id                String?                @db.Uuid
-  title                  String
+  title                  String?
   position_number        Int?
   classification_id      String?
   classification_code    String? // this is just to satisfy type definition, no data is stored here AL-146
   submission_id          String?
   status                 PositionRequestStatus?
+  updated_at             DateTime               @default(now()) @updatedAt
 
   // TODO: AL-146
   // user        User       @relation(fields: [user_id], references: [id])
   // classification     Classification @relation(fields: [classification_id], references: [id])
-  parent_job_profile JobProfile @relation(fields: [parent_job_profile_id], references: [id])
+  parent_job_profile JobProfile? @relation(fields: [parent_job_profile_id], references: [id])
+  department         Department  @relation(fields: [department_id], references: [id])
 
   @@map("position_request")
 }
@@ -268,10 +271,11 @@ model Organization {
 }
 
 model Department {
-  id              String       @id
-  organization    Organization @relation(fields: [organization_id], references: [id])
+  id              String            @id
+  organization    Organization      @relation(fields: [organization_id], references: [id])
   organization_id String
   name            String
+  PositionRequest PositionRequest[]
 
   @@map("department")
 }

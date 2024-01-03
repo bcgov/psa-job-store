@@ -3,14 +3,15 @@ import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
+import { DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput } from '../department/department-update-one-required-without-position-request-nested.input';
 
 @InputType()
 export class PositionRequestUpdateWithoutParent_job_profileInput {
   @Field(() => Int, { nullable: true })
   step?: number;
 
-  @Field(() => Int, { nullable: true })
-  reports_to_position_id?: number;
+  @Field(() => String, { nullable: true })
+  reports_to_position_id?: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
@@ -35,4 +36,10 @@ export class PositionRequestUpdateWithoutParent_job_profileInput {
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
+  @Field(() => DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput, { nullable: true })
+  department?: DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput;
 }
