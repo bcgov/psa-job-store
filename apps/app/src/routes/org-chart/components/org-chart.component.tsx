@@ -8,6 +8,8 @@ import { OrgChartCard } from './org-chart-card.component';
 interface Props {
   edges: Edge[];
   nodes: Node[];
+  selectedDepartment: string | null;
+  onCreateNewPosition?: () => void | null;
 }
 
 const dagreGraph = new dagre.graphlib.Graph();
@@ -48,7 +50,12 @@ const getLayoutedElements = (nodes: any, edges: any, direction = 'TB') => {
   return { nodes, edges };
 };
 
-export const OrgChart = ({ edges: initialEdges, nodes: initialNodes }: Props) => {
+export const OrgChart = ({
+  edges: initialEdges,
+  nodes: initialNodes,
+  selectedDepartment,
+  onCreateNewPosition,
+}: Props) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
 
   const [nodes] = useState(layoutedNodes);
@@ -77,7 +84,18 @@ export const OrgChart = ({ edges: initialEdges, nodes: initialNodes }: Props) =>
   //   [nodes, edges],
   // );
 
-  const nodeTypes = useMemo(() => ({ 'org-chart-card': OrgChartCard }), []);
+  const nodeTypes = useMemo(
+    () => ({
+      'org-chart-card': (nodeProps: any) => (
+        <OrgChartCard
+          {...nodeProps}
+          selectedDepartment={selectedDepartment}
+          onCreateNewPosition={onCreateNewPosition}
+        />
+      ),
+    }),
+    [selectedDepartment, onCreateNewPosition],
+  );
 
   return (
     <ReactFlow

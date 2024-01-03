@@ -4,6 +4,7 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 import { JobProfileUpdateOneWithoutPosition_requestNestedInput } from '../job-profile/job-profile-update-one-without-position-request-nested.input';
+import { DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput } from '../department/department-update-one-required-without-position-request-nested.input';
 
 @InputType()
 export class PositionRequestUpdateInput {
@@ -42,4 +43,7 @@ export class PositionRequestUpdateInput {
 
   @Field(() => JobProfileUpdateOneWithoutPosition_requestNestedInput, { nullable: true })
   parent_job_profile?: JobProfileUpdateOneWithoutPosition_requestNestedInput;
+
+  @Field(() => DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput, { nullable: true })
+  department?: DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput;
 }

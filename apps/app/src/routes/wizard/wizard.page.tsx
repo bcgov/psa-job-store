@@ -1,6 +1,7 @@
+import { Button } from 'antd';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import JobProfiles from '../job-profiles/components/job-profiles.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -17,8 +18,8 @@ interface WizardPageProps {
   onNext?: () => void;
 }
 
-export const WizardPage: React.FC<WizardPageProps> = ({ onNext }) => {
-  const { id } = useParams();
+export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack }) => {
+  // const { id } = useParams();
   const { handleSubmit } = useForm<IFormInput>();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
@@ -38,7 +39,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext }) => {
         }).unwrap();
       setPositionRequestProfileId(parseInt(selectedProfileId));
       if (onNext) onNext();
-      setSearchParams({});
+      setSearchParams({}, { replace: true });
       // navigate(`/org-chart/${reportingPosition}/profiles/edit/${selectedProfileId}`);
     } else {
       // Here you can display an error message.
@@ -46,18 +47,20 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext }) => {
     }
   };
 
-  useEffect(() => {
-    if (id) {
-      setSelectedProfileId(id);
-    }
-  }, [id]);
+  // useEffect(() => {
+  //   if (id) {
+  //     setSelectedProfileId(id);
+  //   }
+  // }, [id]); // picks up profile id from params
 
   useEffect(() => {
     const selectedProfile = searchParams.get('selectedProfile');
     if (selectedProfile) {
       setSelectedProfileId(selectedProfile);
+    } else {
+      setSelectedProfileId(null);
     }
-  }, [searchParams]);
+  }, [searchParams]); // picks up profile id from search params
 
   // Ensure form alerts get displayed again
   const { setReqAlertShown, setOriginalValuesSet, setMinReqAlertShown, setWizardData } = useWizardContext();
@@ -68,11 +71,26 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext }) => {
   setOriginalValuesSet(false); // ensures original values get re-set once user navigates to edit page
   setWizardData(null); // this ensures that any previous edits are cleared
 
+  const back = async () => {
+    if (positionRequestId)
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: 0,
+      }).unwrap();
+    if (onBack) onBack();
+  };
+
   return (
     <WizardPageWrapper
       title="Choose a job profile"
       subTitle="Choose a job profile to modify for the new positions"
       hpad={false}
+      pageHeaderExtra={[
+        <Button onClick={back}>Back</Button>,
+        <Button type="primary" disabled={selectedProfileId == null} onClick={handleSubmit(onSubmit)}>
+          Select and next
+        </Button>,
+      ]}
     >
       <WizardSteps current={1}></WizardSteps>
       <JobProfiles

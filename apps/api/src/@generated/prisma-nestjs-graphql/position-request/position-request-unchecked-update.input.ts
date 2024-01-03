@@ -15,6 +15,9 @@ export class PositionRequestUncheckedUpdateInput {
   @Field(() => String, { nullable: true })
   reports_to_position_id?: string;
 
+  @Field(() => String, { nullable: true })
+  department_id?: string;
+
   @Field(() => Int, { nullable: true })
   parent_job_profile_id?: number;
 

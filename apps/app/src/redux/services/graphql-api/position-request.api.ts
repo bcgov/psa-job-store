@@ -22,6 +22,11 @@ export interface CreatePositionRequestInput {
   title?: string;
   classification_id?: string;
   classification_code?: string;
+  department?: {
+    connect: {
+      id: string;
+    };
+  };
 }
 
 export interface GetPositionRequestResponseContent {
@@ -36,6 +41,7 @@ export interface GetPositionRequestResponseContent {
   classification?: string;
   submission_id?: string;
   status?: string;
+  department_id?: string;
 }
 
 export interface GetPositionRequestResponse {
@@ -80,6 +86,11 @@ export interface UpdatePositionRequestInput {
   parent_job_profile?: {
     connect: {
       id: number;
+    };
+  };
+  department?: {
+    connect: {
+      id: string;
     };
   };
 }
@@ -147,6 +158,10 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     getPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
+      providesTags: () => ['positionRequest'],
+      // result
+      //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
+      //   : [{ type: 'PositionRequest' as const, id: 'id' }],
       query: (args: GetPositionRequestArgs) => {
         return {
           document: gql`
@@ -164,6 +179,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   submission_id
                   status
                   updated_at
+                  department_id
               }
           }
           `,
@@ -185,6 +201,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     updatePositionRequest: build.mutation<GetPositionRequestResponse, UpdatePositionRequestInput>({
+      invalidatesTags: ['positionRequest'],
       query: (input: UpdatePositionRequestInput) => {
         return {
           document: gql`

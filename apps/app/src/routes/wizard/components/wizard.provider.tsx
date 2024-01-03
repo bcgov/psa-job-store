@@ -39,6 +39,9 @@ interface WizardContextProps {
   positionRequestProfileId: number | null;
   setPositionRequestProfileId: React.Dispatch<React.SetStateAction<number | null>>;
 
+  positionRequestDepartmentId: string | null;
+  setPositionRequestDepartmentId: React.Dispatch<React.SetStateAction<string | null>>;
+
   setOriginalValuesSet: React.Dispatch<React.SetStateAction<boolean>>;
   setOriginalAccReqFields: React.Dispatch<React.SetStateAction<any[]>>;
   setOriginalOptReqFields: React.Dispatch<React.SetStateAction<any[]>>;
@@ -75,6 +78,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalOverview, setOriginalOverview] = useState<any>({});
   const [positionRequestId, setPositionRequestId] = useState<number | null>(null);
   const [positionRequestProfileId, setPositionRequestProfileId] = useState<number | null>(null);
+  const [positionRequestDepartmentId, setPositionRequestDepartmentId] = useState<string | null>(null);
 
   const value = {
     wizardData,
@@ -103,6 +107,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setPositionRequestId,
     positionRequestProfileId,
     setPositionRequestProfileId,
+    positionRequestDepartmentId,
+    setPositionRequestDepartmentId,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

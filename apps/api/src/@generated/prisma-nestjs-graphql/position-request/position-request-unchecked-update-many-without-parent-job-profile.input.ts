@@ -15,6 +15,9 @@ export class PositionRequestUncheckedUpdateManyWithoutParent_job_profileInput {
   @Field(() => String, { nullable: true })
   reports_to_position_id?: string;
 
+  @Field(() => String, { nullable: true })
+  department_id?: string;
+
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
 

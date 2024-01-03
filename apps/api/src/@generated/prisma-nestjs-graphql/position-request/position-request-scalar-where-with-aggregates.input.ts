@@ -27,6 +27,9 @@ export class PositionRequestScalarWhereWithAggregatesInput {
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   reports_to_position_id?: StringWithAggregatesFilter;
 
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  department_id?: StringWithAggregatesFilter;
+
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   parent_job_profile_id?: IntWithAggregatesFilter;
 

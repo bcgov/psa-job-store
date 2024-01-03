@@ -13,6 +13,9 @@ export class PositionRequestMinAggregateInput {
   reports_to_position_id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  department_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   parent_job_profile_id?: true;
 
   @Field(() => Boolean, { nullable: true })

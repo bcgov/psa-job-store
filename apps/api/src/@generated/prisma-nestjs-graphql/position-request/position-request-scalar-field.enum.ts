@@ -4,6 +4,7 @@ export enum PositionRequestScalarFieldEnum {
   id = 'id',
   step = 'step',
   reports_to_position_id = 'reports_to_position_id',
+  department_id = 'department_id',
   parent_job_profile_id = 'parent_job_profile_id',
   profile_json = 'profile_json',
   user_id = 'user_id',

@@ -15,6 +15,9 @@ export class PositionRequestCreateManyInput {
   @Field(() => String, { nullable: false })
   reports_to_position_id!: string;
 
+  @Field(() => String, { nullable: false })
+  department_id!: string;
+
   @Field(() => Int, { nullable: true })
   parent_job_profile_id?: number;
 

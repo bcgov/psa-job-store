@@ -15,6 +15,9 @@ export class PositionRequestCreateManyParent_job_profileInput {
   @Field(() => String, { nullable: false })
   reports_to_position_id!: string;
 
+  @Field(() => String, { nullable: false })
+  department_id!: string;
+
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
 

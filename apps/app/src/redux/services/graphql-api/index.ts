@@ -53,6 +53,6 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
 
 export const graphqlApi = createApi({
   baseQuery,
-  tagTypes: [],
+  tagTypes: ['positionRequest'],
   endpoints: () => ({}),
 });

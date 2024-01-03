@@ -76,6 +76,7 @@ export class PositionRequestApiService {
 
     return this.prisma.positionRequest.create({
       data: {
+        department: data.department,
         step: data.step,
         reports_to_position_id: data.reports_to_position_id,
         profile_json: data.profile_json,
@@ -304,6 +305,10 @@ export class PositionRequestApiService {
 
     if (updateData.parent_job_profile !== undefined) {
       updatePayload.parent_job_profile = updateData.parent_job_profile;
+    }
+
+    if (updateData.department !== undefined) {
+      updatePayload.department = updateData.department;
     }
 
     // ...add similar checks for other fields...

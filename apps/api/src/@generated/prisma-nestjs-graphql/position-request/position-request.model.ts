@@ -4,6 +4,7 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 import { JobProfile } from '../job-profile/job-profile.model';
+import { Department } from '../department/department.model';
 
 @ObjectType()
 export class PositionRequest {
@@ -15,6 +16,9 @@ export class PositionRequest {
 
   @Field(() => String, { nullable: false })
   reports_to_position_id!: string;
+
+  @Field(() => String, { nullable: false })
+  department_id!: string;
 
   @Field(() => Int, { nullable: true })
   parent_job_profile_id!: number | null;
@@ -48,4 +52,7 @@ export class PositionRequest {
 
   @Field(() => JobProfile, { nullable: true })
   parent_job_profile?: JobProfile | null;
+
+  @Field(() => Department, { nullable: false })
+  department?: Department;
 }

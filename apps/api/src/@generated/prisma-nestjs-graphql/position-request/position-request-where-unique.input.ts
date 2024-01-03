@@ -9,6 +9,7 @@ import { UuidFilter } from '../prisma/uuid-filter.input';
 import { EnumPositionRequestStatusFilter } from '../prisma/enum-position-request-status-filter.input';
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { JobProfileRelationFilter } from '../job-profile/job-profile-relation-filter.input';
+import { DepartmentRelationFilter } from '../department/department-relation-filter.input';
 
 @InputType()
 export class PositionRequestWhereUniqueInput {
@@ -29,6 +30,9 @@ export class PositionRequestWhereUniqueInput {
 
   @Field(() => StringFilter, { nullable: true })
   reports_to_position_id?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  department_id?: StringFilter;
 
   @Field(() => IntFilter, { nullable: true })
   parent_job_profile_id?: IntFilter;
@@ -62,4 +66,7 @@ export class PositionRequestWhereUniqueInput {
 
   @Field(() => JobProfileRelationFilter, { nullable: true })
   parent_job_profile?: JobProfileRelationFilter;
+
+  @Field(() => DepartmentRelationFilter, { nullable: true })
+  department?: DepartmentRelationFilter;
 }

@@ -27,6 +27,9 @@ export class PositionRequestScalarWhereInput {
   @Field(() => StringFilter, { nullable: true })
   reports_to_position_id?: StringFilter;
 
+  @Field(() => StringFilter, { nullable: true })
+  department_id?: StringFilter;
+
   @Field(() => IntFilter, { nullable: true })
   parent_job_profile_id?: IntFilter;
 

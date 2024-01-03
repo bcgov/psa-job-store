@@ -3,6 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
+import { DepartmentCreateNestedOneWithoutPositionRequestInput } from '../department/department-create-nested-one-without-position-request.input';
 
 @InputType()
 export class PositionRequestCreateWithoutParent_job_profileInput {
@@ -38,4 +39,7 @@ export class PositionRequestCreateWithoutParent_job_profileInput {
 
   @Field(() => Date, { nullable: true })
   updated_at?: Date | string;
+
+  @Field(() => DepartmentCreateNestedOneWithoutPositionRequestInput, { nullable: false })
+  department!: DepartmentCreateNestedOneWithoutPositionRequestInput;
 }

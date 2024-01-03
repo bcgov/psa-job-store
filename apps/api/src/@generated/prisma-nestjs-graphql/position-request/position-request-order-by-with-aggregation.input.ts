@@ -19,6 +19,9 @@ export class PositionRequestOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   reports_to_position_id?: keyof typeof SortOrder;
 
+  @Field(() => SortOrder, { nullable: true })
+  department_id?: keyof typeof SortOrder;
+
   @Field(() => SortOrderInput, { nullable: true })
   parent_job_profile_id?: SortOrderInput;
 
