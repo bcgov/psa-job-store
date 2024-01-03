@@ -1,15 +1,19 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cron } from '@nestjs/schedule';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { Environment } from '../../enums/environment.enum';
 import { PrismaService } from '../prisma/prisma.service';
+import { Employee } from './models/employee.model';
 
 enum Endpoint {
   Classifications = 'PJS_TGB_REST_JOB_CODE',
   Departments = 'PJS_TGB_REST_DEPT',
+  Employees = 'PJS_TGB_REST_EMPLOYEE',
+  HrScope = 'PJS_TGB_REST_HRSCOPE',
   Locations = 'PJS_TGB_REST_LOCATION',
   Organizations = 'PJS_TGB_REST_BUS_UNIT',
 }
@@ -17,11 +21,11 @@ enum Endpoint {
 @Injectable()
 export class PeoplesoftService {
   private readonly headers: AxiosHeaders;
-  private request = (endpoint: Endpoint, pageSize: number = 10) =>
+  private request = (endpoint: Endpoint, pageSize: number = 10, extra?: string) =>
     this.httpService.get(
-      `${this.configService.get(
-        'PEOPLESOFT_URL',
-      )}/${endpoint}/JSON/NONFILE?isconnectedquery=n&maxrows=${pageSize}&json_resp=true`,
+      `${this.configService.get('PEOPLESOFT_URL')}/${endpoint}/JSON/NONFILE?isconnectedquery=n&maxrows=${pageSize}${
+        extra != null ? `&${extra}` : ''
+      }&json_resp=true`,
       { headers: this.headers },
     );
 
@@ -53,23 +57,19 @@ export class PeoplesoftService {
         }
 
         const organizationCount = await this.prisma.organization.count();
-        if (organizationCount < 100) {
-          await this.syncOrganizations();
-        }
-
         const departmentCount = await this.prisma.department.count();
-        if (departmentCount < 100) {
-          await this.syncDepartments();
+        if (organizationCount < 100 || departmentCount < 100) {
+          await this.syncOrganizationsAndDepartments();
         }
       } else {
         await this.syncClassifications();
         await this.syncLocations();
-        await this.syncOrganizations();
-        await this.syncDepartments();
+        await this.syncOrganizationsAndDepartments();
       }
     })();
   }
 
+  @Cron('0 0 * * * *')
   async syncClassifications() {
     const response = await firstValueFrom(
       this.request(Endpoint.Classifications, 4000)
@@ -85,7 +85,7 @@ export class PeoplesoftService {
       await this.prisma.classification.upsert({
         where: { id: row.JOBCODE },
         create: {
-          id: row.JOBeCODE,
+          id: row.JOBCODE,
           peoplesoft_id: row.SETID,
           name: row.DESCR,
           code: row.DESCRSHORT,
@@ -96,6 +96,81 @@ export class PeoplesoftService {
           peoplesoft_id: row.SETID,
           name: row.DESCR,
           code: row.DESCRSHORT,
+          effective_status: row.EFF_STATUS,
+          effective_date: new Date(row.EFFDT),
+        },
+      });
+    }
+  }
+
+  @Cron('0 0 * * * *')
+  async syncLocations() {
+    const response = await firstValueFrom(
+      this.request(Endpoint.Locations, 5000)
+        .pipe(map((r) => r.data))
+        .pipe(
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    for await (const row of response?.data?.query?.rows ?? []) {
+      await this.prisma.location.upsert({
+        where: { id: row.LOCATION },
+        create: {
+          id: row.LOCATION,
+          peoplesoft_id: row.SETID,
+          code: row.DESCRSHORT,
+          name: row.DESCR,
+          effective_status: row.EFF_STATUS,
+          effective_date: new Date(row.EFFDT),
+        },
+        update: {
+          peoplesoft_id: row.SETID,
+          code: row.DESCRSHORT,
+          name: row.DESCR,
+          effective_status: row.EFF_STATUS,
+          effective_date: new Date(row.EFFDT),
+        },
+      });
+    }
+  }
+
+  @Cron('0 0 * * * *')
+  async syncOrganizationsAndDepartments() {
+    // Use this function instead of calling syncOrganizations, syncDepartments independently
+    // Departments rely on organizations which must exist prior to syncing departments
+    await this.syncOrganizations();
+    await this.syncDepartments();
+  }
+
+  async syncOrganizations() {
+    const response = await firstValueFrom(
+      this.request(Endpoint.Organizations, 500)
+        .pipe(map((r) => r.data))
+        .pipe(
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    for await (const row of response?.data?.query?.rows ?? []) {
+      await this.prisma.organization.upsert({
+        where: { id: row.BUSINESS_UNIT },
+        create: {
+          id: row.BUSINESS_UNIT,
+          peoplesoft_id: row.SETID,
+          code: row.DESCRSHORT,
+          name: row.DESCR,
+          effective_status: row.EFF_STATUS,
+          effective_date: new Date(row.EFFDT),
+        },
+        update: {
+          peoplesoft_id: row.SETID,
+          code: row.DESCRSHORT,
+          name: row.DESCR,
           effective_status: row.EFF_STATUS,
           effective_date: new Date(row.EFFDT),
         },
@@ -174,49 +249,13 @@ export class PeoplesoftService {
             },
           },
         });
-      } catch (error) {
-        console.error('ERROR: ', error);
-        console.log('row: ', row);
-      }
-    }
-  } //
-
-  async syncLocations() {
-    const response = await firstValueFrom(
-      this.request(Endpoint.Locations, 5000)
-        .pipe(map((r) => r.data))
-        .pipe(
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
-
-    for await (const row of response?.data?.query?.rows ?? []) {
-      await this.prisma.location.upsert({
-        where: { id: row.LOCATION },
-        create: {
-          id: row.LOCATION,
-          peoplesoft_id: row.SETID,
-          code: row.DESCRSHORT,
-          name: row.DESCR,
-          effective_status: row.EFF_STATUS,
-          effective_date: new Date(row.EFFDT),
-        },
-        update: {
-          peoplesoft_id: row.SETID,
-          code: row.DESCRSHORT,
-          name: row.DESCR,
-          effective_status: row.EFF_STATUS,
-          effective_date: new Date(row.EFFDT),
-        },
-      });
+      } catch (error) {}
     }
   }
 
-  async syncOrganizations() {
+  async getPositionsForDepartment(department_id: string) {
     const response = await firstValueFrom(
-      this.request(Endpoint.Organizations, 500)
+      this.request(Endpoint.HrScope, 0, `prompt_uniquepromptname=DEPTID&prompt_fieldvalue=${department_id}`)
         .pipe(map((r) => r.data))
         .pipe(
           catchError((err) => {
@@ -225,25 +264,51 @@ export class PeoplesoftService {
         ),
     );
 
-    for await (const row of response?.data?.query?.rows ?? []) {
-      await this.prisma.organization.upsert({
-        where: { id: row.BUSINESS_UNIT },
-        create: {
-          id: row.BUSINESS_UNIT,
-          peoplesoft_id: row.SETID,
-          code: row.DESCRSHORT,
-          name: row.DESCR,
-          effective_status: row.EFF_STATUS,
-          effective_date: new Date(row.EFFDT),
-        },
-        update: {
-          peoplesoft_id: row.SETID,
-          code: row.DESCRSHORT,
-          name: row.DESCR,
-          effective_status: row.EFF_STATUS,
-          effective_date: new Date(row.EFFDT),
-        },
-      });
-    }
+    return response;
+  }
+
+  async getEmployeesForPositions(positions: string[]) {
+    const requests: any[] = [];
+
+    positions.map((position) =>
+      requests.push(
+        firstValueFrom(
+          this.request(
+            Endpoint.Employees,
+            0,
+            `prompt_uniquepromptname=POSITION_NBR,REPORTS_TO&prompt_fieldvalue=${position},`,
+          )
+            .pipe(map((r) => r.data))
+            .pipe(
+              catchError((err) => {
+                throw new Error(err);
+              }),
+            ),
+        ),
+      ),
+    );
+
+    const results = await Promise.allSettled(requests);
+    const positionEmployeesMap: Map<string, Employee[]> = new Map();
+
+    // Remove all unfulfilled results
+    const processed = results
+      .filter((r) => r.status === 'fulfilled')
+      .map((r) => (r as Record<string, any>).value.data.query.rows);
+
+    processed.forEach((row) => {
+      if (row.length > 0) {
+        positionEmployeesMap.set(
+          row[0]['POSITION_NBR'],
+          row.map((r) => ({
+            id: r.EMPLID,
+            name: r.NAME_DISPLAY,
+            status: r.EMPL_STATUS,
+          })),
+        );
+      }
+    });
+
+    return positionEmployeesMap;
   }
 }
