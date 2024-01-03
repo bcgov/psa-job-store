@@ -375,8 +375,8 @@ export { JobProfileUpdateManyWithoutStreamNestedInput } from './job-profile/job-
 export { JobProfileUpdateOneRequiredWithoutBehavioural_competenciesNestedInput } from './job-profile/job-profile-update-one-required-without-behavioural-competencies-nested.input';
 export { JobProfileUpdateOneRequiredWithoutClassificationsNestedInput } from './job-profile/job-profile-update-one-required-without-classifications-nested.input';
 export { JobProfileUpdateOneRequiredWithoutContextNestedInput } from './job-profile/job-profile-update-one-required-without-context-nested.input';
-export { JobProfileUpdateOneRequiredWithoutPosition_requestNestedInput } from './job-profile/job-profile-update-one-required-without-position-request-nested.input';
 export { JobProfileUpdateOneRequiredWithoutReports_toNestedInput } from './job-profile/job-profile-update-one-required-without-reports-to-nested.input';
+export { JobProfileUpdateOneWithoutPosition_requestNestedInput } from './job-profile/job-profile-update-one-without-position-request-nested.input';
 export { JobProfileUpdateToOneWithWhereWithoutBehavioural_competenciesInput } from './job-profile/job-profile-update-to-one-with-where-without-behavioural-competencies.input';
 export { JobProfileUpdateToOneWithWhereWithoutClassificationsInput } from './job-profile/job-profile-update-to-one-with-where-without-classifications.input';
 export { JobProfileUpdateToOneWithWhereWithoutContextInput } from './job-profile/job-profile-update-to-one-with-where-without-context.input';
@@ -1142,6 +1142,7 @@ export { JsonFilter } from './prisma/json-filter.input';
 export { JsonNullValueFilter } from './prisma/json-null-value-filter.enum';
 export { JsonNullValueInput } from './prisma/json-null-value-input.enum';
 export { JsonWithAggregatesFilter } from './prisma/json-with-aggregates-filter.input';
+export { NullableJsonNullValueInput } from './prisma/nullable-json-null-value-input.enum';
 export { NullsOrder } from './prisma/nulls-order.enum';
 export { PositionRequestStatus } from './prisma/position-request-status.enum';
 export { QueryMode } from './prisma/query-mode.enum';

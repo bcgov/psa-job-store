@@ -11,9 +11,6 @@ export class PositionRequestSumAggregate {
   step?: number;
 
   @Field(() => Int, { nullable: true })
-  reports_to_position_id?: number;
-
-  @Field(() => Int, { nullable: true })
   parent_job_profile_id?: number;
 
   @Field(() => Int, { nullable: true })

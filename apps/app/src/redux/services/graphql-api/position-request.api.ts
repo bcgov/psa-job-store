@@ -17,14 +17,14 @@ interface JobProfileConnectItem {
 export interface CreatePositionRequestInput {
   step: number;
   reports_to_position_id: number;
-  profile_json: any;
-  parent_job_profile: JobProfileConnectItem;
-  title: string;
+  profile_json?: any;
+  parent_job_profile?: JobProfileConnectItem;
+  title?: string;
   classification_id?: string;
-  classification_code: string;
+  classification_code?: string;
 }
 
-export interface GetPositionRequestResponse {
+export interface GetPositionRequestResponseContent {
   id: number;
   step?: number;
   reports_to_position_id?: number;
@@ -36,6 +36,10 @@ export interface GetPositionRequestResponse {
   classification?: string;
   submission_id?: string;
   status?: string;
+}
+
+export interface GetPositionRequestResponse {
+  positionRequest: GetPositionRequestResponseContent;
 }
 
 export interface PositionRequestStatusCounts {
@@ -50,7 +54,7 @@ export interface PositionRequestStatusCountsResponse {
 }
 
 export interface GetPositionsRequestResponse {
-  positionRequests: GetPositionRequestResponse[];
+  positionRequests: GetPositionRequestResponseContent[];
   positionRequestsCount: PositionRequestStatusCounts;
 }
 
@@ -73,6 +77,11 @@ export interface UpdatePositionRequestInput {
   classification?: string;
   submission_id?: string;
   status?: string;
+  parent_job_profile?: {
+    connect: {
+      id: number;
+    };
+  };
 }
 
 export interface GetPositionRequestsArgs {
@@ -151,7 +160,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   user_id
                   title
                   position_number
-                  classification
+                  classification_code
                   submission_id
                   status
                   updated_at

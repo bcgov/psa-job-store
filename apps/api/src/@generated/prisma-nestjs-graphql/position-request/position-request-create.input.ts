@@ -10,17 +10,17 @@ export class PositionRequestCreateInput {
   @Field(() => Int, { nullable: false })
   step!: number;
 
-  @Field(() => Int, { nullable: false })
-  reports_to_position_id!: number;
+  @Field(() => String, { nullable: false })
+  reports_to_position_id!: string;
 
-  @Field(() => GraphQLJSON, { nullable: false })
-  profile_json!: any;
+  @Field(() => GraphQLJSON, { nullable: true })
+  profile_json?: any;
 
   @Field(() => String, { nullable: true })
   user_id?: string;
 
-  @Field(() => String, { nullable: false })
-  title!: string;
+  @Field(() => String, { nullable: true })
+  title?: string;
 
   @Field(() => Int, { nullable: true })
   position_number?: number;
@@ -40,6 +40,6 @@ export class PositionRequestCreateInput {
   @Field(() => Date, { nullable: true })
   updated_at?: Date | string;
 
-  @Field(() => JobProfileCreateNestedOneWithoutPosition_requestInput, { nullable: false })
-  parent_job_profile!: JobProfileCreateNestedOneWithoutPosition_requestInput;
+  @Field(() => JobProfileCreateNestedOneWithoutPosition_requestInput, { nullable: true })
+  parent_job_profile?: JobProfileCreateNestedOneWithoutPosition_requestInput;
 }

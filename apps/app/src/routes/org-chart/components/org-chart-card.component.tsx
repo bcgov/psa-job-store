@@ -2,8 +2,10 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Popover, Row, Typography } from 'antd';
 import { memo } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Connection, Edge, Handle, NodeProps, Position } from 'reactflow';
+import { useCreatePositionRequestMutation } from '../../../redux/services/graphql-api/position-request.api';
+import { useWizardContext } from '../../wizard/components/wizard.provider';
 
 const { Text } = Typography;
 
@@ -27,6 +29,23 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
   //   onChange,
   //   onEnd,
   // });
+  const { setPositionRequestId } = useWizardContext();
+  const reportingPositionId = data.id;
+  const [createPositionRequest] = useCreatePositionRequestMutation();
+
+  const navigate = useNavigate();
+
+  const createNewPosition = async () => {
+    const positionRequestInput = {
+      step: 1,
+      title: 'Untitled',
+      reports_to_position_id: reportingPositionId,
+    };
+    // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
+    const resp = await createPositionRequest(positionRequestInput).unwrap();
+    setPositionRequestId(resp.createPositionRequest);
+    navigate(`/position-request/${resp.createPositionRequest}`);
+  };
 
   return (
     <>
@@ -35,14 +54,12 @@ export const OrgChartCard = memo(({ data, isConnectable }: NodeProps) => {
         placement="bottom"
         trigger="click"
         content={() => {
-          console.log(data.employees);
+          // console.log(data.employees);
 
           return (
-            <Link to="/wizard">
-              <Button type="default" icon={<PlusOutlined />}>
-                Create a New Position
-              </Button>
-            </Link>
+            <Button type="default" onClick={createNewPosition} icon={<PlusOutlined />}>
+              Create a New Position
+            </Button>
           );
         }}
       >

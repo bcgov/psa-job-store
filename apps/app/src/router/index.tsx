@@ -1,4 +1,4 @@
-import { FileTextOutlined, HomeOutlined, PartitionOutlined, StarOutlined, UserAddOutlined } from '@ant-design/icons';
+import { FileTextOutlined, HomeOutlined, PartitionOutlined, UserAddOutlined } from '@ant-design/icons';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
 import { RouteGuard } from '../components/guards/route.guard';
@@ -13,11 +13,8 @@ import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { WizardRoute } from '../routes/wizard';
-import { WizardConfirmDetailsPage } from '../routes/wizard/wizard-confirm-details.page';
-import { WizardEditPage } from '../routes/wizard/wizard-edit.page';
-import { WizardResultPage } from '../routes/wizard/wizard-result.page';
-import { WizardReviewPage } from '../routes/wizard/wizard-review.page';
-import { WizardPage } from '../routes/wizard/wizard.page';
+import { PositionRequestPage } from '../routes/wizard/position-request.page';
+import { WizardOrgChartPage } from '../routes/wizard/wizard-org-chart.page';
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +47,7 @@ export const router = createBrowserRouter([
               },
             ],
           },
+
           {
             path: '/my-positions',
             element: <MyPositionsRoute />,
@@ -62,8 +60,13 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <MyPositionsPage />,
               },
+              {
+                path: 'create',
+                element: <WizardOrgChartPage />,
+              },
             ],
           },
+
           {
             path: '/org-chart',
             element: <OrgChartRoute />,
@@ -100,62 +103,19 @@ export const router = createBrowserRouter([
               },
             ],
           },
+
           {
-            path: '/wizard',
+            path: '/position-request/:positionRequestId',
             element: <WizardRoute />,
-            handle: {
-              breadcrumb: () => 'Wizard',
-              icon: <StarOutlined />,
-            },
             children: [
               {
                 index: true,
-                element: <WizardPage />,
+                element: <PositionRequestPage />,
               },
-              {
-                path: ':id',
-                element: <WizardPage />,
-              },
-              {
-                path: 'edit',
-                children: [
-                  {
-                    index: true,
-                    element: <WizardEditPage />,
-                    handle: {
-                      breadcrumb: () => 'Edit profile',
-                    },
-                  },
-                  {
-                    path: ':profileId', // matches "/wizard/edit/3"
-                    element: <WizardEditPage />,
-                    handle: {
-                      breadcrumb: () => 'Edit profile',
-                    },
-                  },
-                ],
-              },
-              {
-                path: 'review',
-                element: <WizardReviewPage />,
-                handle: {
-                  breadcrumb: () => 'Review profile',
-                },
-              },
-              {
-                path: 'confirm',
-                element: <WizardConfirmDetailsPage />,
-                handle: {
-                  breadcrumb: () => 'Confirm details',
-                },
-              },
-              {
-                path: 'result',
-                element: <WizardResultPage />,
-                handle: {
-                  breadcrumb: () => 'Profile',
-                },
-              },
+              // {
+              //   path: '?step=2',
+              //   element: <PositionRequestPage />,
+              // },
             ],
           },
         ],

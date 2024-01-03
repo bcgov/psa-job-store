@@ -11,8 +11,8 @@ export class PositionRequestMaxAggregate {
   @Field(() => Int, { nullable: true })
   step?: number;
 
-  @Field(() => Int, { nullable: true })
-  reports_to_position_id?: number;
+  @Field(() => String, { nullable: true })
+  reports_to_position_id?: string;
 
   @Field(() => Int, { nullable: true })
   parent_job_profile_id?: number;

@@ -13,20 +13,20 @@ export class PositionRequest {
   @Field(() => Int, { nullable: false })
   step!: number;
 
-  @Field(() => Int, { nullable: false })
-  reports_to_position_id!: number;
+  @Field(() => String, { nullable: false })
+  reports_to_position_id!: string;
 
-  @Field(() => Int, { nullable: false })
-  parent_job_profile_id!: number;
+  @Field(() => Int, { nullable: true })
+  parent_job_profile_id!: number | null;
 
-  @Field(() => GraphQLJSON, { nullable: false })
-  profile_json!: any;
+  @Field(() => GraphQLJSON, { nullable: true })
+  profile_json!: any | null;
 
   @Field(() => String, { nullable: true })
   user_id!: string | null;
 
-  @Field(() => String, { nullable: false })
-  title!: string;
+  @Field(() => String, { nullable: true })
+  title!: string | null;
 
   @Field(() => Int, { nullable: true })
   position_number!: number | null;
@@ -46,6 +46,6 @@ export class PositionRequest {
   @Field(() => Date, { nullable: false })
   updated_at!: Date;
 
-  @Field(() => JobProfile, { nullable: false })
-  parent_job_profile?: JobProfile;
+  @Field(() => JobProfile, { nullable: true })
+  parent_job_profile?: JobProfile | null;
 }

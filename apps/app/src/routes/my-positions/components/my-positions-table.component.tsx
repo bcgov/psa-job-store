@@ -31,6 +31,16 @@ interface MyPositionsTableProps {
   tableTitle?: string;
 }
 
+type ColumnTypes = {
+  title: string | JSX.Element;
+  dataIndex?: string;
+  key: string;
+  sorter?: boolean;
+  defaultSortOrder?: SortOrder;
+  render?: (text: any, record: any) => React.ReactNode;
+  align?: 'left' | 'center' | 'right'; // AlignType is typically one of these string literals
+};
+
 // Declare the MyPositionsTable component with TypeScript
 const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   handleTableChangeCallback,
@@ -137,14 +147,14 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   // Handler to be called when the mouse leaves a row
   const handleMouseLeave = () => setHoveredRowKey(null);
 
-  const columns = [
+  const columns: ColumnTypes[] = [
     {
       title: 'Job Title',
       dataIndex: 'title',
       key: 'title',
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
-      render: (text: any) => <a href="#!">{text}</a>,
+      render: (text: any, record: any) => <Link to={`/position-request/${record.id}`}>{text}</Link>,
     },
     {
       title: 'Status',
@@ -242,7 +252,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const updateData = useCallback(() => {
-    console.log('updateData');
+    // console.log('updateData');
     const search = searchParams.get('search');
     const statusFilter = searchParams.get('status');
     const classificationFilter = searchParams.get('classification');
@@ -367,7 +377,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           <img src={EmptyJobPositionGraphic} alt="No positions" />
           <div>New to the JobStore?</div>
           {/* Link button to the orgchart page */}
-          <Link to="/wizard">
+          <Link to="/my-positions/create">
             <Button type="primary" style={{ marginTop: '1rem' }}>
               Create new position
             </Button>

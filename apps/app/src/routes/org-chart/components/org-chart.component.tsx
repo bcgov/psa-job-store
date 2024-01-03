@@ -52,7 +52,7 @@ export const OrgChart = ({ edges: initialEdges, nodes: initialNodes }: Props) =>
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
 
   const [nodes] = useState(layoutedNodes);
-  const [edges, setEdges] = useState(layoutedEdges);
+  const [edges] = useState(layoutedEdges);
 
   // const onNodesChange = useCallback(
   //   (changes: NodeChange[]) => setNodes((nodes: any) => applyNodeChanges(changes, nodes)),

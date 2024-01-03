@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Card, Col, Input, Row, Tag } from 'antd';
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
 import { useGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
@@ -34,19 +34,28 @@ export const JobProfileSearch = () => {
   // const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
   const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
   const classificationData = useGetClassificationsQuery().data?.classifications;
+  const isPositionRequestRoute = location.pathname.includes('/position-request/');
 
-  const getBasePath = (path: string) => {
-    const pathParts = path.split('/');
-    // Check if the last part is a number (ID), if so, remove it
-    if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
-      pathParts.pop(); // Remove the last part (job profile ID)
-    }
-    return pathParts.join('/');
-  };
+  const getBasePath = useCallback(
+    (path: string) => {
+      if (isPositionRequestRoute) return location.pathname.split('/').slice(0, 3).join('/');
+
+      const pathParts = path.split('/');
+      // Check if the last part is a number (ID), if so, remove it
+      if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
+        pathParts.pop(); // Remove the last part (job profile ID)
+      }
+      return pathParts.join('/');
+    },
+    [isPositionRequestRoute, location.pathname],
+  );
+
+  const { positionRequestId } = useParams();
 
   const handleSearch = (value: string) => {
     const trimmedValue = value.trim();
-    const basePath = getBasePath(location.pathname);
+    // const basePath = getBasePath(location.pathname);
+    searchParams.delete('selectedProfile');
 
     if (trimmedValue.length === 0) {
       searchParams.delete('search');
@@ -54,10 +63,14 @@ export const JobProfileSearch = () => {
       searchParams.set('search', trimmedValue);
     }
 
-    navigate({
-      pathname: basePath,
-      search: searchParams.toString(),
-    });
+    navigate(
+      {
+        // pathname: basePath,
+        pathname: `/position-request/${positionRequestId}`,
+        search: searchParams.toString(),
+      },
+      { replace: true },
+    );
   };
 
   const [allSelections, setAllSelections] = useState<Selection[]>([]);
@@ -138,7 +151,7 @@ export const JobProfileSearch = () => {
       setAllSelections(initialSelections);
       setInitialSelectionSet(true);
     }
-  }, [searchParams, initialSelectionSet, setInitialSelectionSet]); // Removed searchParams from dependencies
+  }, [searchParams, initialSelectionSet, setInitialSelectionSet]);
 
   useEffect(() => {
     // Sync state with URL parameters for selections and pagination
@@ -153,9 +166,13 @@ export const JobProfileSearch = () => {
 
     const pageFromURL = parseInt(searchParams.get('page') || '1', 10);
     const searchFromURL = searchParams.get('search');
+    const selectedProfileFromUrl = searchParams.get('selectedProfile');
+
+    // console.log('selectedProfileFromUrl: ', selectedProfileFromUrl);
 
     // Update URL parameters if needed
     const newSearchParams = new URLSearchParams();
+    if (selectedProfileFromUrl) newSearchParams.set('selectedProfile', selectedProfileFromUrl);
     if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
     if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
 
@@ -167,11 +184,16 @@ export const JobProfileSearch = () => {
       newSearchParams.get('classification_id__in') != searchParams.get('classification_id__in');
 
     if (jobFamilyChanged || classificationChanged) {
+      // console.log('searchparams changed 1: ', newSearchParams);
       if (searchParams.toString() !== newSearchParams.toString()) {
-        navigate({
-          pathname: getBasePath(location.pathname),
-          search: newSearchParams.toString(),
-        });
+        newSearchParams.delete('selectedProfile');
+        navigate(
+          {
+            pathname: getBasePath(location.pathname),
+            search: newSearchParams.toString(),
+          },
+          { replace: true },
+        );
         // setSearchParams(newSearchParams);
         return;
       }
@@ -179,13 +201,17 @@ export const JobProfileSearch = () => {
 
     // Only update search params if there's a change
     if (searchParams.toString() !== newSearchParams.toString()) {
-      navigate({
-        pathname: getBasePath(location.pathname),
-        search: newSearchParams.toString(),
-      });
+      // console.log('searchParams changed 2: ', newSearchParams.toString());
+      navigate(
+        {
+          pathname: getBasePath(location.pathname),
+          search: newSearchParams.toString(),
+        },
+        { replace: true },
+      );
       // setSearchParams(newSearchParams);
     }
-  }, [allSelections, searchParams, setSearchParams, location.pathname, navigate]);
+  }, [allSelections, searchParams, setSearchParams, location.pathname, navigate, getBasePath]);
 
   const clearFilters = () => {
     setAllSelections([]);
@@ -204,14 +230,23 @@ export const JobProfileSearch = () => {
 
     const basePath = getBasePath(location.pathname);
 
-    navigate({
-      pathname: basePath,
-      search: newSearchParams.toString(),
-    });
+    navigate(
+      {
+        pathname: basePath,
+        search: newSearchParams.toString(),
+      },
+      { replace: true },
+    );
   };
 
   return (
-    <Row justify="center" gutter={8} style={{ margin: '0 1rem' }} role="search" data-testid="job-profile-search">
+    <Row
+      justify="center"
+      gutter={8}
+      style={{ margin: '0 1rem', zIndex: '2', position: 'relative' }}
+      role="search"
+      data-testid="job-profile-search"
+    >
       <Col lg={15} xs={24}>
         <Card style={{ marginTop: '1rem', marginBottom: '1rem' }}>
           <Row gutter={24} wrap>

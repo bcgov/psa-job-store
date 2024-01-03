@@ -3,9 +3,9 @@ import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { PositionRequestWhereInput } from './position-request-where.input';
 import { IntFilter } from '../prisma/int-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
 import { JsonFilter } from '../prisma/json-filter.input';
 import { UuidFilter } from '../prisma/uuid-filter.input';
-import { StringFilter } from '../prisma/string-filter.input';
 import { EnumPositionRequestStatusFilter } from '../prisma/enum-position-request-status-filter.input';
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { JobProfileRelationFilter } from '../job-profile/job-profile-relation-filter.input';
@@ -27,8 +27,8 @@ export class PositionRequestWhereUniqueInput {
   @Field(() => IntFilter, { nullable: true })
   step?: IntFilter;
 
-  @Field(() => IntFilter, { nullable: true })
-  reports_to_position_id?: IntFilter;
+  @Field(() => StringFilter, { nullable: true })
+  reports_to_position_id?: StringFilter;
 
   @Field(() => IntFilter, { nullable: true })
   parent_job_profile_id?: IntFilter;

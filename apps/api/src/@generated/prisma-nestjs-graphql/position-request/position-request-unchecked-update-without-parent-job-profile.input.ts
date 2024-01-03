@@ -12,8 +12,8 @@ export class PositionRequestUncheckedUpdateWithoutParent_job_profileInput {
   @Field(() => Int, { nullable: true })
   step?: number;
 
-  @Field(() => Int, { nullable: true })
-  reports_to_position_id?: number;
+  @Field(() => String, { nullable: true })
+  reports_to_position_id?: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;

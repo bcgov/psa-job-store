@@ -11,9 +11,6 @@ export class PositionRequestAvgOrderByAggregateInput {
   step?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  reports_to_position_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   parent_job_profile_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

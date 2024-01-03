@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { diff_match_patch } from 'diff-match-patch';
 import { CSSProperties, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { JobProfileModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import WizardEditControlBar from '../../wizard/components/wizard-edit-control-bar';
@@ -124,8 +124,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   style,
   onUseProfile,
 }) => {
+  const [searchParams] = useSearchParams();
   const params = useParams();
-  const resolvedId = id ?? params.id; // Using prop ID or param ID
+  const resolvedId = id ?? params.id ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
+  // console.log('resolvedId: ', resolvedId);
   const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
