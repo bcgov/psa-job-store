@@ -4,11 +4,12 @@ import { useGetDepartmentsQuery } from '../../../redux/services/graphql-api/depa
 interface OrgChartFilterProps {
   setSelectedDepartment: React.Dispatch<React.SetStateAction<string | null>>;
   selectedDepartment: string | null;
+  defaultValue: string | null;
 }
 
 // const { Text } = Typography;
 
-export const OrgChartFilter = ({ setSelectedDepartment, selectedDepartment }: OrgChartFilterProps) => {
+export const OrgChartFilter = ({ setSelectedDepartment, selectedDepartment, defaultValue }: OrgChartFilterProps) => {
   const { data, isLoading } = useGetDepartmentsQuery();
 
   return (
@@ -40,6 +41,7 @@ export const OrgChartFilter = ({ setSelectedDepartment, selectedDepartment }: Or
               label: department.name,
             }))}
             value={selectedDepartment}
+            defaultValue={defaultValue}
           />
         </Space>
       </Col>
