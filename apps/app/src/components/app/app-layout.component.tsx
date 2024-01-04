@@ -4,12 +4,14 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   PartitionOutlined,
+  PlusCircleFilled,
   UserAddOutlined,
 } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 import { AppHeader } from './header.component';
+import { SiderNavItem } from './sider-nav/sider-nav-item.component';
 import { SiderNav } from './sider-nav/sider-nav.component';
 
 const { Content, Sider } = Layout;
@@ -32,14 +34,24 @@ export const AppLayout = () => {
             zIndex: 1000,
           }}
         >
-          <div style={{ padding: '10px' }}>
-            <Link to="/my-positions/create">
-              <Button type="primary">Create new position</Button>
-            </Link>
-          </div>
-
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', flex: 'auto' }}>
+              {collapsed ? (
+                <SiderNavItem
+                  collapsed={collapsed}
+                  icon={<PlusCircleFilled style={{ fontSize: '1.25rem' }} />}
+                  key={'Create new position'}
+                  title={'Create new position'}
+                  to={'/my-positions/create'}
+                  hideTitle={true}
+                />
+              ) : (
+                <div style={{ padding: '10px 10px 2px 10px' }}>
+                  <Link to="/my-positions/create">
+                    <Button type="primary">Create new position</Button>
+                  </Link>
+                </div>
+              )}
               <SiderNav
                 collapsed={collapsed}
                 items={[
