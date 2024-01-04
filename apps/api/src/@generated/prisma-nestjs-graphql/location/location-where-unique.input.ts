@@ -35,5 +35,5 @@ export class LocationWhereUniqueInput {
   effective_date?: DateTimeFilter;
 
   @Field(() => DepartmentListRelationFilter, { nullable: true })
-  Department?: DepartmentListRelationFilter;
+  departments?: DepartmentListRelationFilter;
 }

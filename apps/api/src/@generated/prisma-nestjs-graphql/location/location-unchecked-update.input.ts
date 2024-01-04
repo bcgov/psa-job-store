@@ -23,5 +23,5 @@ export class LocationUncheckedUpdateInput {
   effective_date?: Date | string;
 
   @Field(() => DepartmentUncheckedUpdateManyWithoutLocationNestedInput, { nullable: true })
-  Department?: DepartmentUncheckedUpdateManyWithoutLocationNestedInput;
+  departments?: DepartmentUncheckedUpdateManyWithoutLocationNestedInput;
 }

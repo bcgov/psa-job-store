@@ -19,7 +19,7 @@ export class FindManyOrganizationArgs {
   orderBy?: Array<OrganizationOrderByWithRelationAndSearchRelevanceInput>;
 
   @HideField()
-  cursor?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id'>;
+  cursor?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id' | 'peoplesoft_id'>;
 
   @Field(() => Int, { nullable: true })
   take?: number;

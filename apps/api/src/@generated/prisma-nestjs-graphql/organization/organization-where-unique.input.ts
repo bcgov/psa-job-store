@@ -11,6 +11,9 @@ export class OrganizationWhereUniqueInput {
   @Field(() => String, { nullable: true })
   id?: string;
 
+  @Field(() => String, { nullable: true })
+  peoplesoft_id?: string;
+
   @Field(() => [OrganizationWhereInput], { nullable: true })
   AND?: Array<OrganizationWhereInput>;
 
@@ -19,9 +22,6 @@ export class OrganizationWhereUniqueInput {
 
   @Field(() => [OrganizationWhereInput], { nullable: true })
   NOT?: Array<OrganizationWhereInput>;
-
-  @Field(() => StringFilter, { nullable: true })
-  peoplesoft_id?: StringFilter;
 
   @Field(() => StringFilter, { nullable: true })
   code?: StringFilter;

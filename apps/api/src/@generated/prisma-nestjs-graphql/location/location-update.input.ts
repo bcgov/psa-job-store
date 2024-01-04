@@ -23,5 +23,5 @@ export class LocationUpdateInput {
   effective_date?: Date | string;
 
   @Field(() => DepartmentUpdateManyWithoutLocationNestedInput, { nullable: true })
-  Department?: DepartmentUpdateManyWithoutLocationNestedInput;
+  departments?: DepartmentUpdateManyWithoutLocationNestedInput;
 }

@@ -12,6 +12,9 @@ export class UserUncheckedCreateWithoutCommentsInput {
   @Field(() => String, { nullable: true })
   email?: string;
 
+  @Field(() => String, { nullable: true })
+  username?: string;
+
   @Field(() => [String], { nullable: true })
   roles?: Array<string>;
 

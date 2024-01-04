@@ -23,5 +23,5 @@ export class Location {
   effective_date!: Date;
 
   @Field(() => [Department], { nullable: true })
-  Department?: Array<Department>;
+  departments?: Array<Department>;
 }

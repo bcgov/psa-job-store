@@ -2,7 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 
 @InputType()
-export class LocationCreateWithoutDepartmentInput {
+export class LocationUncheckedCreateWithoutDepartmentsInput {
   @Field(() => String, { nullable: false })
   id!: string;
 

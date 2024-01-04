@@ -25,7 +25,7 @@ export class LocationOrderByWithRelationAndSearchRelevanceInput {
   effective_date?: keyof typeof SortOrder;
 
   @Field(() => DepartmentOrderByRelationAggregateInput, { nullable: true })
-  Department?: DepartmentOrderByRelationAggregateInput;
+  departments?: DepartmentOrderByRelationAggregateInput;
 
   @Field(() => LocationOrderByRelevanceInput, { nullable: true })
   _relevance?: LocationOrderByRelevanceInput;

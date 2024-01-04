@@ -9,7 +9,7 @@ import { OrganizationCreateWithoutJob_profilesInput } from './organization-creat
 export class OrganizationCreateOrConnectWithoutJob_profilesInput {
   @Field(() => OrganizationWhereUniqueInput, { nullable: false })
   @Type(() => OrganizationWhereUniqueInput)
-  where!: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id' | 'peoplesoft_id'>;
 
   @Field(() => OrganizationCreateWithoutJob_profilesInput, { nullable: false })
   @Type(() => OrganizationCreateWithoutJob_profilesInput)

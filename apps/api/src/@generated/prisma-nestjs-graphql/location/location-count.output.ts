@@ -5,5 +5,5 @@ import { Int } from '@nestjs/graphql';
 @ObjectType()
 export class LocationCount {
   @Field(() => Int, { nullable: false })
-  Department?: number;
+  departments?: number;
 }

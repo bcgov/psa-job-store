@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { LocationCreateNestedOneWithoutDepartmentInput } from '../location/location-create-nested-one-without-department.input';
+import { LocationCreateNestedOneWithoutDepartmentsInput } from '../location/location-create-nested-one-without-departments.input';
 
 @InputType()
 export class DepartmentCreateWithoutOrganizationInput {
@@ -22,6 +22,6 @@ export class DepartmentCreateWithoutOrganizationInput {
   @Field(() => Date, { nullable: false })
   effective_date!: Date | string;
 
-  @Field(() => LocationCreateNestedOneWithoutDepartmentInput, { nullable: false })
-  location!: LocationCreateNestedOneWithoutDepartmentInput;
+  @Field(() => LocationCreateNestedOneWithoutDepartmentsInput, { nullable: false })
+  location!: LocationCreateNestedOneWithoutDepartmentsInput;
 }

@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { LocationUpdateOneRequiredWithoutDepartmentNestedInput } from '../location/location-update-one-required-without-department-nested.input';
+import { LocationUpdateOneRequiredWithoutDepartmentsNestedInput } from '../location/location-update-one-required-without-departments-nested.input';
 import { OrganizationUpdateOneRequiredWithoutDepartmentsNestedInput } from '../organization/organization-update-one-required-without-departments-nested.input';
 import { PositionRequestUpdateManyWithoutDepartmentNestedInput } from '../position-request/position-request-update-many-without-department-nested.input';
 
@@ -24,8 +24,8 @@ export class DepartmentUpdateInput {
   @Field(() => Date, { nullable: true })
   effective_date?: Date | string;
 
-  @Field(() => LocationUpdateOneRequiredWithoutDepartmentNestedInput, { nullable: true })
-  location?: LocationUpdateOneRequiredWithoutDepartmentNestedInput;
+  @Field(() => LocationUpdateOneRequiredWithoutDepartmentsNestedInput, { nullable: true })
+  location?: LocationUpdateOneRequiredWithoutDepartmentsNestedInput;
 
   @Field(() => OrganizationUpdateOneRequiredWithoutDepartmentsNestedInput, { nullable: true })
   organization?: OrganizationUpdateOneRequiredWithoutDepartmentsNestedInput;

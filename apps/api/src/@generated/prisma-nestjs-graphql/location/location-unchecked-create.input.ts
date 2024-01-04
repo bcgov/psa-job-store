@@ -23,5 +23,5 @@ export class LocationUncheckedCreateInput {
   effective_date!: Date | string;
 
   @Field(() => DepartmentUncheckedCreateNestedManyWithoutLocationInput, { nullable: true })
-  Department?: DepartmentUncheckedCreateNestedManyWithoutLocationInput;
+  departments?: DepartmentUncheckedCreateNestedManyWithoutLocationInput;
 }

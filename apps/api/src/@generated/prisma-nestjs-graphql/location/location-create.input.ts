@@ -23,5 +23,5 @@ export class LocationCreateInput {
   effective_date!: Date | string;
 
   @Field(() => DepartmentCreateNestedManyWithoutLocationInput, { nullable: true })
-  Department?: DepartmentCreateNestedManyWithoutLocationInput;
+  departments?: DepartmentCreateNestedManyWithoutLocationInput;
 }

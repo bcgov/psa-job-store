@@ -34,5 +34,5 @@ export class LocationWhereInput {
   effective_date?: DateTimeFilter;
 
   @Field(() => DepartmentListRelationFilter, { nullable: true })
-  Department?: DepartmentListRelationFilter;
+  departments?: DepartmentListRelationFilter;
 }
