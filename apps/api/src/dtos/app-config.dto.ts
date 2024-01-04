@@ -19,6 +19,18 @@ export class AppConfigDto {
 
   @IsNotEmpty()
   @IsString()
+  CRM_URL: string;
+
+  @IsNotEmpty()
+  @IsString()
+  CRM_USERNAME: string;
+
+  @IsNotEmpty()
+  @IsString()
+  CRM_PASSWORD: string;
+
+  @IsNotEmpty()
+  @IsString()
   DATABASE_URL: string;
 
   @IsNotEmpty()
