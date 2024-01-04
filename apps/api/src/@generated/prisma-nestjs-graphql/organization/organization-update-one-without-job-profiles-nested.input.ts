@@ -33,7 +33,7 @@ export class OrganizationUpdateOneWithoutJob_profilesNestedInput {
 
   @Field(() => OrganizationWhereUniqueInput, { nullable: true })
   @Type(() => OrganizationWhereUniqueInput)
-  connect?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id'>;
+  connect?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id' | 'peoplesoft_id'>;
 
   @Field(() => OrganizationUpdateToOneWithWhereWithoutJob_profilesInput, { nullable: true })
   @Type(() => OrganizationUpdateToOneWithWhereWithoutJob_profilesInput)

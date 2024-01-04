@@ -18,5 +18,5 @@ export class OrganizationCreateNestedOneWithoutJob_profilesInput {
 
   @Field(() => OrganizationWhereUniqueInput, { nullable: true })
   @Type(() => OrganizationWhereUniqueInput)
-  connect?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id'>;
+  connect?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id' | 'peoplesoft_id'>;
 }

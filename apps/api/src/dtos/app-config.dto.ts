@@ -44,4 +44,16 @@ export class AppConfigDto {
   @IsNotEmpty()
   @IsString()
   KEYCLOAK_CLIENT_ID_PUBLIC: string;
+
+  @IsNotEmpty()
+  @IsString()
+  PEOPLESOFT_URL: string;
+
+  @IsNotEmpty()
+  @IsString()
+  PEOPLESOFT_USERNAME: string;
+
+  @IsNotEmpty()
+  @IsString()
+  PEOPLESOFT_PASSWORD: string;
 }

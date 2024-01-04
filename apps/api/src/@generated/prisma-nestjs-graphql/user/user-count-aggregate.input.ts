@@ -13,6 +13,9 @@ export class UserCountAggregateInput {
   email?: true;
 
   @Field(() => Boolean, { nullable: true })
+  username?: true;
+
+  @Field(() => Boolean, { nullable: true })
   roles?: true;
 
   @Field(() => Boolean, { nullable: true })
