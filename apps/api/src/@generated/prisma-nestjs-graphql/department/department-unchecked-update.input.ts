@@ -27,4 +27,7 @@ export class DepartmentUncheckedUpdateInput {
 
   @Field(() => Date, { nullable: true })
   effective_date?: Date | string;
+
+  @Field(() => PositionRequestUncheckedUpdateManyWithoutDepartmentNestedInput, { nullable: true })
+  PositionRequest?: PositionRequestUncheckedUpdateManyWithoutDepartmentNestedInput;
 }

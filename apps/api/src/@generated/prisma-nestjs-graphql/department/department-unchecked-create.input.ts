@@ -27,4 +27,7 @@ export class DepartmentUncheckedCreateInput {
 
   @Field(() => Date, { nullable: false })
   effective_date!: Date | string;
+
+  @Field(() => PositionRequestUncheckedCreateNestedManyWithoutDepartmentInput, { nullable: true })
+  PositionRequest?: PositionRequestUncheckedCreateNestedManyWithoutDepartmentInput;
 }
