@@ -3,7 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { AxiosHeaders } from 'axios';
-import { catchError, firstValueFrom, map } from 'rxjs';
+import { randomInt } from 'crypto';
+import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { Environment } from '../../enums/environment.enum';
 import { PrismaService } from '../prisma/prisma.service';
@@ -16,6 +17,7 @@ enum Endpoint {
   HrScope = 'PJS_TGB_REST_HRSCOPE',
   Locations = 'PJS_TGB_REST_LOCATION',
   Organizations = 'PJS_TGB_REST_BUS_UNIT',
+  Profile = 'PJS_TGB_REST_USER_PROFILE',
 }
 
 @Injectable()
@@ -253,20 +255,6 @@ export class PeoplesoftService {
     }
   }
 
-  async getPositionsForDepartment(department_id: string) {
-    const response = await firstValueFrom(
-      this.request(Endpoint.HrScope, 0, `prompt_uniquepromptname=DEPTID&prompt_fieldvalue=${department_id}`)
-        .pipe(map((r) => r.data))
-        .pipe(
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
-
-    return response;
-  }
-
   async getEmployeesForPositions(positions: string[]) {
     const requests: any[] = [];
 
@@ -276,7 +264,7 @@ export class PeoplesoftService {
           this.request(
             Endpoint.Employees,
             0,
-            `prompt_uniquepromptname=POSITION_NBR,REPORTS_TO&prompt_fieldvalue=${position},`,
+            `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=${position},`,
           )
             .pipe(map((r) => r.data))
             .pipe(
@@ -310,5 +298,55 @@ export class PeoplesoftService {
     });
 
     return positionEmployeesMap;
+  }
+
+  async getEmployee(id: string) {
+    const response = await firstValueFrom(
+      this.request(Endpoint.Employees, 1, `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=,${id}`).pipe(
+        map((r) => r.data),
+        retry(2),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
+    );
+
+    return response;
+  }
+
+  async getProfile(idir: string) {
+    const response = await firstValueFrom(
+      this.request(Endpoint.Profile, 1, `prompt_uniquepromptname=USERID&prompt_fieldvalue=${idir}`).pipe(
+        map((r) => {
+          console.log('getProfile');
+          console.log('*********');
+
+          const x = randomInt(0, 2);
+          if (x === 1) throw new Error('count is 1');
+
+          return r.data;
+        }),
+        retry(2),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
+    );
+
+    return response;
+  }
+
+  async getPositionsForDepartment(department_id: string) {
+    const response = await firstValueFrom(
+      this.request(Endpoint.HrScope, 0, `prompt_uniquepromptname=DEPTID&prompt_fieldvalue=${department_id}`)
+        .pipe(map((r) => r.data))
+        .pipe(
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
   }
 }
