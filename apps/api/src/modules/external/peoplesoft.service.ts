@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { AxiosHeaders } from 'axios';
-import { randomInt } from 'crypto';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { Environment } from '../../enums/environment.enum';
@@ -74,13 +73,13 @@ export class PeoplesoftService {
   @Cron('0 0 * * * *')
   async syncClassifications() {
     const response = await firstValueFrom(
-      this.request(Endpoint.Classifications, 4000)
-        .pipe(map((r) => r.data))
-        .pipe(
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
+      this.request(Endpoint.Classifications, 4000).pipe(
+        map((r) => r.data),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
     );
 
     for await (const row of response?.data?.query?.rows ?? []) {
@@ -108,13 +107,13 @@ export class PeoplesoftService {
   @Cron('0 0 * * * *')
   async syncLocations() {
     const response = await firstValueFrom(
-      this.request(Endpoint.Locations, 5000)
-        .pipe(map((r) => r.data))
-        .pipe(
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
+      this.request(Endpoint.Locations, 5000).pipe(
+        map((r) => r.data),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
     );
 
     for await (const row of response?.data?.query?.rows ?? []) {
@@ -149,13 +148,13 @@ export class PeoplesoftService {
 
   async syncOrganizations() {
     const response = await firstValueFrom(
-      this.request(Endpoint.Organizations, 500)
-        .pipe(map((r) => r.data))
-        .pipe(
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
+      this.request(Endpoint.Organizations, 500).pipe(
+        map((r) => r.data),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
     );
 
     for await (const row of response?.data?.query?.rows ?? []) {
@@ -186,13 +185,13 @@ export class PeoplesoftService {
     });
 
     const response = await firstValueFrom(
-      this.request(Endpoint.Departments, 25000)
-        .pipe(map((r) => r.data))
-        .pipe(
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
+      this.request(Endpoint.Departments, 25000).pipe(
+        map((r) => r.data),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
     );
 
     for await (const row of response?.data?.query?.rows ?? []) {
@@ -265,13 +264,13 @@ export class PeoplesoftService {
             Endpoint.Employees,
             0,
             `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=${position},`,
-          )
-            .pipe(map((r) => r.data))
-            .pipe(
-              catchError((err) => {
-                throw new Error(err);
-              }),
-            ),
+          ).pipe(
+            map((r) => r.data),
+            retry(3),
+            catchError((err) => {
+              throw new Error(err);
+            }),
+          ),
         ),
       ),
     );
@@ -304,7 +303,7 @@ export class PeoplesoftService {
     const response = await firstValueFrom(
       this.request(Endpoint.Employees, 1, `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=,${id}`).pipe(
         map((r) => r.data),
-        retry(2),
+        retry(3),
         catchError((err) => {
           throw new Error(err);
         }),
@@ -318,15 +317,9 @@ export class PeoplesoftService {
     const response = await firstValueFrom(
       this.request(Endpoint.Profile, 1, `prompt_uniquepromptname=USERID&prompt_fieldvalue=${idir}`).pipe(
         map((r) => {
-          console.log('getProfile');
-          console.log('*********');
-
-          const x = randomInt(0, 2);
-          if (x === 1) throw new Error('count is 1');
-
           return r.data;
         }),
-        retry(2),
+        retry(3),
         catchError((err) => {
           throw new Error(err);
         }),
@@ -338,13 +331,13 @@ export class PeoplesoftService {
 
   async getPositionsForDepartment(department_id: string) {
     const response = await firstValueFrom(
-      this.request(Endpoint.HrScope, 0, `prompt_uniquepromptname=DEPTID&prompt_fieldvalue=${department_id}`)
-        .pipe(map((r) => r.data))
-        .pipe(
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
+      this.request(Endpoint.HrScope, 0, `prompt_uniquepromptname=DEPTID&prompt_fieldvalue=${department_id}`).pipe(
+        map((r) => r.data),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
     );
 
     return response;
