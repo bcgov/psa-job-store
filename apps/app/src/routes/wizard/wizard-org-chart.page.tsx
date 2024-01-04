@@ -7,7 +7,7 @@ import { WizardSteps } from './components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';
 
 interface WizardOrgChartPageProps {
-  onCreateNewPosition: () => void;
+  onCreateNewPosition?: () => void;
 }
 
 export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPageProps) => {
