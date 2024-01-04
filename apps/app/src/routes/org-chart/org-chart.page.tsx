@@ -18,7 +18,11 @@ export const OrgChartPage = () => {
   return (
     <div style={{ height: '100%' }}>
       <PageHeader title="Org Chart" />
-      <OrgChartFilter setSelectedDepartment={setSelectedDepartment} selectedDepartment={selectedDepartment} />
+      <OrgChartFilter
+        setSelectedDepartment={setSelectedDepartment}
+        selectedDepartment={selectedDepartment}
+        defaultValue={null}
+      />
       <OrgChartWrapped selectedDepartment={selectedDepartment} />
     </div>
   );
