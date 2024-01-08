@@ -4,6 +4,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClassificationResolver } from './classification.resolver';
 import { ClassificationService } from './classification.service';
+import { CrmService } from './crm.service';
 import { DepartmentResolver } from './department.resolver';
 import { DepartmentService } from './department.service';
 import { OrgChartResolver } from './org-chart.resolver';
@@ -27,6 +28,7 @@ import { PositionResolver } from './position.resolver';
     OrgChartResolver,
     OrgChartService,
     PeoplesoftService,
+    CrmService,
   ],
 })
 export class ExternalModule {}
