@@ -11,6 +11,7 @@ import { OrgChartService } from './org-chart.service';
 import { OrganizationResolver } from './organization.resolver';
 import { OrganizationService } from './organization.service';
 import { PeoplesoftService } from './peoplesoft.service';
+import { PositionClassificationResolver } from './position-classification.resolver';
 import { PositionResolver } from './position.resolver';
 import { PositionService } from './position.service';
 
@@ -29,6 +30,7 @@ import { PositionService } from './position.service';
     OrgChartResolver,
     OrgChartService,
     PeoplesoftService,
+    PositionClassificationResolver,
   ],
 })
 export class ExternalModule {}

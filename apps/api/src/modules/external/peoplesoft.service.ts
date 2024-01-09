@@ -342,4 +342,32 @@ export class PeoplesoftService {
 
     return response;
   }
+
+  async getClassificationForPosition(id: string) {
+    const response = await firstValueFrom(
+      this.request(Endpoint.Employees, 1, `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=${id},`).pipe(
+        map((r) => r.data),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
+    );
+
+    return response;
+  }
+
+  // async getEmployee(id: string) {
+  //   const response = await firstValueFrom(
+  //     this.request(Endpoint.Employees, 1, `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=,${id}`).pipe(
+  //       map((r) => r.data),
+  //       retry(3),
+  //       catchError((err) => {
+  //         throw new Error(err);
+  //       }),
+  //     ),
+  //   );
+
+  //   return response;
+  // }
 }
