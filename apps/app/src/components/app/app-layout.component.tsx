@@ -1,4 +1,5 @@
 import {
+  CheckCircleOutlined,
   FileAddFilled,
   FileAddOutlined,
   FileOutlined,
@@ -63,12 +64,12 @@ export const AppLayout = () => {
   const items: MenuProps['items'] = [
     getItem('Job Profiles', 'sub1', <FileSearchOutlined style={{ fontSize: '1.25rem' }} />, [
       getItem(
-        <Link to="/total-compoensation/profiles/drafts">Drafts</Link>,
+        <Link to="/total-compensation/profiles/drafts">Drafts</Link>,
         '1',
         <FileOutlined style={{ fontSize: '1.25rem' }} />,
       ),
       getItem(
-        <Link to="/total-compoensation/profiles/published">Published</Link>,
+        <Link to="/total-compensation/profiles/published">Published</Link>,
         '2',
         <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
       ),
@@ -162,6 +163,12 @@ export const AppLayout = () => {
                           to: '/total-compensation/profiles/published',
                           hideTitle: true,
                         },
+                        {
+                          icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
+                          title: 'Approved requests',
+                          to: '/total-compensation/requests/approved',
+                          hideTitle: true,
+                        },
                       ]}
                     />
                   ) : (
@@ -183,6 +190,17 @@ export const AppLayout = () => {
                         defaultOpenKeys={['sub1']}
                         mode="inline"
                         items={items}
+                      />
+
+                      <SiderNav
+                        collapsed={collapsed}
+                        items={[
+                          {
+                            icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'Approved Reqs',
+                            to: '/total-compensation/requests/approved',
+                          },
+                        ]}
                       />
                     </>
                   )}

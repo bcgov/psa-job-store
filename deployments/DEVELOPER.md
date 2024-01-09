@@ -26,7 +26,9 @@ Additionally, if you would like to seed the database, create a secret using a se
 oc create secret generic seed-secret --from-file=seed.ts=./seed.ts
 ```
 
-If you are running the seed on a fresh database, uou can then remote into the nestjs pod and run
+To update the secret, delete the original secret and re-create it
+
+If you are running the seed on a fresh database, you can then remote into the nestjs pod and run
 
 ```
 npx -w api prisma db seed
@@ -35,12 +37,14 @@ npx -w api prisma db seed
 to apply the seeds to the database. If the database has been previously seeded, you should instead run
 
 ```
-npx -w api prism db push --force-reset
+npx -w api prisma db push --force-reset
 
 npx -w api prisma db seed
 ```
 
-and then restart the nestjs container. The elasticsearch cluster may also need to be restarted.
+IMPORTANT: restart the nestjs container as this will trigger data population from PeopleSoft, such as departments info.
+
+The elasticsearch cluster may also need to be restarted.
 
 To deploy the project (or patch the exiting infrastructure), simply run
 

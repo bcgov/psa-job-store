@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 
-export const TotalCompPublishedProfilesRoute = () => {
+export const UnauthorizedRoute = () => {
   return (
     <div>
       <Outlet />

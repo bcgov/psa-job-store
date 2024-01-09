@@ -5,7 +5,19 @@ interface ContentWrapperProps {
 }
 
 const ContentWrapper: React.FC<ContentWrapperProps> = ({ children }) => {
-  return <div style={{ padding: '0 1rem', backgroundColor: '#F0F2F5', flex: 1, overflowY: 'auto' }}>{children}</div>;
+  return (
+    <div
+      style={{
+        padding: '0 1rem',
+        backgroundColor: '#F0F2F5',
+        display: 'flex', // Set the display to flex
+        flexDirection: 'column', // Stack children vertically
+        height: '100%', // Take full height of the parent
+      }}
+    >
+      {children}
+    </div>
+  );
 };
 
 export default ContentWrapper;

@@ -21,6 +21,10 @@ Project is also configured to generate reports with `jest-html-reporter`, which 
 
 To update the seed file, run `oc set data secret/seed-secret --from-file=seed.ts`
 
+## @generated files
+
+To avoid slow commits when auto-generation takes place, run `git add .` and then `npx lint-staged`
+
 ## DB Troubleshooting
 
 ### Log location
