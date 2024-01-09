@@ -2,6 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { OrganizationWhereInput } from './organization-where.input';
 import { StringFilter } from '../prisma/string-filter.input';
+import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { DepartmentListRelationFilter } from '../department/department-list-relation-filter.input';
 import { JobProfileOrganizationListRelationFilter } from '../job-profile-organization/job-profile-organization-list-relation-filter.input';
 
@@ -9,6 +10,9 @@ import { JobProfileOrganizationListRelationFilter } from '../job-profile-organiz
 export class OrganizationWhereUniqueInput {
   @Field(() => String, { nullable: true })
   id?: string;
+
+  @Field(() => String, { nullable: true })
+  peoplesoft_id?: string;
 
   @Field(() => [OrganizationWhereInput], { nullable: true })
   AND?: Array<OrganizationWhereInput>;
@@ -20,7 +24,16 @@ export class OrganizationWhereUniqueInput {
   NOT?: Array<OrganizationWhereInput>;
 
   @Field(() => StringFilter, { nullable: true })
+  code?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
   name?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  effective_status?: StringFilter;
+
+  @Field(() => DateTimeFilter, { nullable: true })
+  effective_date?: DateTimeFilter;
 
   @Field(() => DepartmentListRelationFilter, { nullable: true })
   departments?: DepartmentListRelationFilter;

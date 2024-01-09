@@ -14,6 +14,9 @@ export class UserMaxOrderByAggregateInput {
   email?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  username?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   created_at?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

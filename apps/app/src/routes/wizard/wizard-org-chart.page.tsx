@@ -18,7 +18,11 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
   return (
     <WizardPageWrapper title="New position" subTitle="Select a supervisor">
       <WizardSteps current={0}></WizardSteps>
-      <OrgChartFilter setSelectedDepartment={setSelectedDepartment} defaultValue={positionRequestDepartmentId} />
+      <OrgChartFilter
+        setSelectedDepartment={setSelectedDepartment}
+        selectedDepartment={selectedDepartment}
+        defaultValue={positionRequestDepartmentId}
+      />
       <div style={{ overflow: 'hidden', position: 'relative', height: '500px' }}>
         <OrgChartWrapped selectedDepartment={selectedDepartment} onCreateNewPosition={onCreateNewPosition} />
       </div>

@@ -27,6 +27,9 @@ export class UserWhereInput {
   @Field(() => StringFilter, { nullable: true })
   email?: StringFilter;
 
+  @Field(() => StringFilter, { nullable: true })
+  username?: StringFilter;
+
   @Field(() => StringListFilter, { nullable: true })
   roles?: StringListFilter;
 

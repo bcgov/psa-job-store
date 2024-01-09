@@ -13,6 +13,9 @@ export class UserMaxAggregateInput {
   email?: true;
 
   @Field(() => Boolean, { nullable: true })
+  username?: true;
+
+  @Field(() => Boolean, { nullable: true })
   created_at?: true;
 
   @Field(() => Boolean, { nullable: true })

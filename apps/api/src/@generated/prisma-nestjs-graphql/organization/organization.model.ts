@@ -9,7 +9,19 @@ export class Organization {
   id!: string;
 
   @Field(() => String, { nullable: false })
+  peoplesoft_id!: string;
+
+  @Field(() => String, { nullable: false })
+  code!: string;
+
+  @Field(() => String, { nullable: false })
   name!: string;
+
+  @Field(() => String, { nullable: false })
+  effective_status!: string;
+
+  @Field(() => Date, { nullable: false })
+  effective_date!: Date;
 
   @Field(() => [Department], { nullable: true })
   departments?: Array<Department>;

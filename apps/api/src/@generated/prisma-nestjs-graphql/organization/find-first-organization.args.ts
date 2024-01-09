@@ -18,7 +18,7 @@ export class FindFirstOrganizationArgs {
   orderBy?: Array<OrganizationOrderByWithRelationAndSearchRelevanceInput>;
 
   @Field(() => OrganizationWhereUniqueInput, { nullable: true })
-  cursor?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id'>;
+  cursor?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id' | 'peoplesoft_id'>;
 
   @Field(() => Int, { nullable: true })
   take?: number;
