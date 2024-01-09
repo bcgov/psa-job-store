@@ -1,7 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { DepartmentUncheckedUpdateManyWithoutOrganizationNestedInput } from '../department/department-unchecked-update-many-without-organization-nested.input';
-import { JobProfileUncheckedUpdateManyWithoutOrganizationNestedInput } from '../job-profile/job-profile-unchecked-update-many-without-organization-nested.input';
+import { JobProfileOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput } from '../job-profile-organization/job-profile-organization-unchecked-update-many-without-organization-nested.input';
 
 @InputType()
 export class OrganizationUncheckedUpdateInput {
@@ -26,6 +26,6 @@ export class OrganizationUncheckedUpdateInput {
   @Field(() => DepartmentUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
   departments?: DepartmentUncheckedUpdateManyWithoutOrganizationNestedInput;
 
-  @Field(() => JobProfileUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
-  job_profiles?: JobProfileUncheckedUpdateManyWithoutOrganizationNestedInput;
+  @Field(() => JobProfileOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
+  JobProfileOrganization?: JobProfileOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput;
 }

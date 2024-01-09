@@ -13,6 +13,9 @@ export class JobProfileUpdateManyMutationInput {
   @Field(() => JobProfileType, { nullable: true })
   type?: keyof typeof JobProfileType;
 
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
   @Field(() => String, { nullable: true })
   title?: string;
 

@@ -14,9 +14,6 @@ export class JobProfileMinOrderByAggregateInput {
   job_family_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  organization_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
@@ -27,6 +24,12 @@ export class JobProfileMinOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   type?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  updated_at?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  owner_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;

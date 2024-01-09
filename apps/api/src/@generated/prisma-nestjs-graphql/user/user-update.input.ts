@@ -1,6 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { CommentUpdateManyWithoutAuthorNestedInput } from '../comment/comment-update-many-without-author-nested.input';
+import { JobProfileUpdateManyWithoutOwnerNestedInput } from '../job-profile/job-profile-update-many-without-owner-nested.input';
 
 @InputType()
 export class UserUpdateInput {
@@ -30,4 +31,7 @@ export class UserUpdateInput {
 
   @Field(() => CommentUpdateManyWithoutAuthorNestedInput, { nullable: true })
   comments?: CommentUpdateManyWithoutAuthorNestedInput;
+
+  @Field(() => JobProfileUpdateManyWithoutOwnerNestedInput, { nullable: true })
+  JobProfile?: JobProfileUpdateManyWithoutOwnerNestedInput;
 }

@@ -16,9 +16,6 @@ export class JobProfileCreateManyRoleInput {
   @Field(() => Int, { nullable: false })
   job_family_id!: number;
 
-  @Field(() => String, { nullable: true })
-  organization_id?: string;
-
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 
@@ -27,6 +24,12 @@ export class JobProfileCreateManyRoleInput {
 
   @Field(() => JobProfileType, { nullable: false })
   type!: keyof typeof JobProfileType;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  owner_id?: string;
 
   @Field(() => String, { nullable: false })
   title!: string;

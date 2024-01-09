@@ -11,6 +11,9 @@ export class JobProfileCount {
   classifications?: number;
 
   @Field(() => Int, { nullable: false })
+  organizations?: number;
+
+  @Field(() => Int, { nullable: false })
   reports_to?: number;
 
   @Field(() => Int, { nullable: false })

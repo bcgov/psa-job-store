@@ -1,7 +1,7 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum JobProfileOrderByRelevanceFieldEnum {
-  organization_id = 'organization_id',
+  owner_id = 'owner_id',
   title = 'title',
   overview = 'overview',
   requirements = 'requirements',

@@ -14,9 +14,6 @@ export class JobProfileCountAggregate {
   job_family_id!: number;
 
   @Field(() => Int, { nullable: false })
-  organization_id!: number;
-
-  @Field(() => Int, { nullable: false })
   role_id!: number;
 
   @Field(() => Int, { nullable: false })
@@ -27,6 +24,12 @@ export class JobProfileCountAggregate {
 
   @Field(() => Int, { nullable: false })
   type!: number;
+
+  @Field(() => Int, { nullable: false })
+  updated_at!: number;
+
+  @Field(() => Int, { nullable: false })
+  owner_id!: number;
 
   @Field(() => Int, { nullable: false })
   title!: number;

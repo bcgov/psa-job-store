@@ -5,6 +5,7 @@ import { JobProfileState } from '../prisma/job-profile-state.enum';
 import { JobProfileType } from '../prisma/job-profile-type.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-unchecked-create-nested-many-without-job-profile.input';
+import { JobProfileOrganizationUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-organization/job-profile-organization-unchecked-create-nested-many-without-job-profile.input';
 import { JobProfileContextUncheckedCreateNestedOneWithoutJob_profileInput } from '../job-profile-context/job-profile-context-unchecked-create-nested-one-without-job-profile.input';
 import { JobProfileReportsToUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-create-nested-many-without-job-profile.input';
 import { PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput } from '../position-request/position-request-unchecked-create-nested-many-without-parent-job-profile.input';
@@ -20,9 +21,6 @@ export class JobProfileUncheckedCreateWithoutClassificationsInput {
   @Field(() => Int, { nullable: false })
   job_family_id!: number;
 
-  @Field(() => String, { nullable: true })
-  organization_id?: string;
-
   @Field(() => Int, { nullable: false })
   role_id!: number;
 
@@ -34,6 +32,12 @@ export class JobProfileUncheckedCreateWithoutClassificationsInput {
 
   @Field(() => JobProfileType, { nullable: false })
   type!: keyof typeof JobProfileType;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  owner_id?: string;
 
   @Field(() => String, { nullable: false })
   title!: string;
@@ -52,6 +56,9 @@ export class JobProfileUncheckedCreateWithoutClassificationsInput {
 
   @Field(() => JobProfileBehaviouralCompetencyUncheckedCreateNestedManyWithoutJob_profileInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUncheckedCreateNestedManyWithoutJob_profileInput;
+
+  @Field(() => JobProfileOrganizationUncheckedCreateNestedManyWithoutJob_profileInput, { nullable: true })
+  organizations?: JobProfileOrganizationUncheckedCreateNestedManyWithoutJob_profileInput;
 
   @Field(() => JobProfileContextUncheckedCreateNestedOneWithoutJob_profileInput, { nullable: true })
   context?: JobProfileContextUncheckedCreateNestedOneWithoutJob_profileInput;

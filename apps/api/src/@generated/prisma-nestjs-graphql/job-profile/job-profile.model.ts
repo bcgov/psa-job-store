@@ -6,12 +6,13 @@ import { JobProfileType } from '../prisma/job-profile-type.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
 import { JobProfileClassification } from '../job-profile-classification/job-profile-classification.model';
+import { JobProfileOrganization } from '../job-profile-organization/job-profile-organization.model';
 import { JobProfileCareerGroup } from '../job-profile-career-group/job-profile-career-group.model';
 import { JobProfileContext } from '../job-profile-context/job-profile-context.model';
 import { JobProfileJobFamily } from '../job-profile-job-family/job-profile-job-family.model';
-import { Organization } from '../organization/organization.model';
 import { JobProfileRole } from '../job-profile-role/job-profile-role.model';
 import { JobProfileStream } from '../job-profile-stream/job-profile-stream.model';
+import { User } from '../user/user.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
 import { PositionRequest } from '../position-request/position-request.model';
 
@@ -26,9 +27,6 @@ export class JobProfile {
   @Field(() => Int, { nullable: false })
   job_family_id!: number;
 
-  @Field(() => String, { nullable: true })
-  organization_id!: string | null;
-
   @Field(() => Int, { nullable: false })
   role_id!: number;
 
@@ -40,6 +38,12 @@ export class JobProfile {
 
   @Field(() => JobProfileType, { nullable: false })
   type!: keyof typeof JobProfileType;
+
+  @Field(() => Date, { nullable: true })
+  updated_at!: Date | null;
+
+  @Field(() => String, { nullable: true })
+  owner_id!: string | null;
 
   @Field(() => String, { nullable: false })
   title!: string;
@@ -62,6 +66,9 @@ export class JobProfile {
   @Field(() => [JobProfileClassification], { nullable: true })
   classifications?: Array<JobProfileClassification>;
 
+  @Field(() => [JobProfileOrganization], { nullable: true })
+  organizations?: Array<JobProfileOrganization>;
+
   @Field(() => JobProfileCareerGroup, { nullable: true })
   career_group?: JobProfileCareerGroup | null;
 
@@ -71,14 +78,14 @@ export class JobProfile {
   @Field(() => JobProfileJobFamily, { nullable: true })
   job_family?: JobProfileJobFamily | null;
 
-  @Field(() => Organization, { nullable: true })
-  organization?: Organization | null;
-
   @Field(() => JobProfileRole, { nullable: true })
   role?: JobProfileRole | null;
 
   @Field(() => JobProfileStream, { nullable: true })
   stream?: JobProfileStream | null;
+
+  @Field(() => User, { nullable: true })
+  owner?: User | null;
 
   @Field(() => [JobProfileReportsTo], { nullable: true })
   reports_to?: Array<JobProfileReportsTo>;

@@ -13,9 +13,6 @@ export class JobProfileMaxAggregateInput {
   job_family_id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  organization_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
   role_id?: true;
 
   @Field(() => Boolean, { nullable: true })
@@ -26,6 +23,12 @@ export class JobProfileMaxAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   type?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  updated_at?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  owner_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   title?: true;
