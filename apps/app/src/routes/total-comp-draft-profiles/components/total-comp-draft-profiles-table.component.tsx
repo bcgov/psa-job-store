@@ -20,7 +20,7 @@ import { useLazyGetJobProfilesDraftsQuery } from '../../../redux/services/graphq
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
-  handleTableChangeCallback?: (...args: any[]) => void; // assuming the handleTableChange is of Ant Design's Table onChange type
+  // handleTableChangeCallback?: (...args: any[]) => void; // assuming the handleTableChange is of Ant Design's Table onChange type
   allowSorting?: boolean;
   showPagination?: boolean;
   showFooter?: boolean;
@@ -42,7 +42,6 @@ type ColumnTypes = {
 
 // Declare the MyPositionsTable component with TypeScript
 const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
-  handleTableChangeCallback,
   allowSorting = true,
   showPagination = true,
   showFooter = true,
@@ -51,12 +50,47 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
   topRightComponent,
   tableTitle = 'My Positions',
 }) => {
-  const [searchParams] = useSearchParams();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(itemsPerPage);
-  const [sortField, setSortField] = useState<null | string>(null);
-  const [sortOrder, setSortOrder] = useState<null | string>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Get initial values from URL parameters for table properties
+  const initialPage = parseInt(searchParams.get('page') || '1');
+  const initialPageSize = parseInt(searchParams.get('pageSize') || itemsPerPage.toString());
+  const initialSortField = searchParams.get('sortField');
+  const initialSortOrder = searchParams.get('sortOrder');
+
+  // Set initial state for table properties
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [pageSize, setPageSize] = useState(initialPageSize);
+  const [sortField, setSortField] = useState(initialSortField);
+  const [sortOrder, setSortOrder] = useState(initialSortOrder);
+
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
+
+  // Callback function to be called when table properties change
+  const handleTableChangeCallback = (pagination: any, _filters: any, sorter: any) => {
+    const newPage = pagination.current;
+    const newPageSize = pagination.pageSize;
+    const newSortField = sorter.field;
+    const newSortOrder = sorter.order;
+
+    // Update URL parameters
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (newPage !== 1) newSearchParams.set('page', newPage.toString());
+    else newSearchParams.delete('page');
+
+    if (newPageSize !== 10) newSearchParams.set('pageSize', newPageSize.toString());
+    else newSearchParams.delete('pageSize');
+
+    if (newSortOrder) {
+      newSearchParams.set('sortField', newSortField);
+      newSearchParams.set('sortOrder', newSortOrder === 'ascend' ? 'ASC' : 'DESC');
+    } else {
+      newSearchParams.delete('sortField');
+      newSearchParams.delete('sortOrder');
+      // setSortField(null);
+    }
+    setSearchParams(newSearchParams);
+  };
 
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesDraftsQuery();
 
@@ -181,8 +215,7 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
           ],
         }
       : {};
-    console.log('sortParams: ', sortParams);
-    //   console.log('TRIGGER: ', searchParams.toString());
+
     //   // todo: this code is duplicated in job-profiles.component.tsx
     trigger({
       ...(search != null && { search }),

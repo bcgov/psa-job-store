@@ -93,8 +93,14 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       query: (args: GetJobProfilesArgs = {}) => {
         return {
           document: gql`
-            query JobProfilesDrafts($search: String, $where: JobProfileWhereInput, $take: Int, $skip: Int) {
-              jobProfilesDrafts(search: $search, where: $where, take: $take, skip: $skip) {
+            query JobProfilesDrafts(
+              $search: String
+              $where: JobProfileWhereInput
+              $take: Int
+              $skip: Int
+              $orderBy: [JobProfileOrderByWithRelationAndSearchRelevanceInput!]
+            ) {
+              jobProfilesDrafts(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
                 id
                 stream {
                   id
@@ -157,6 +163,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             where: args.where,
             skip: args.skip,
             take: args.take,
+            orderBy: args.orderBy,
           },
         };
       },

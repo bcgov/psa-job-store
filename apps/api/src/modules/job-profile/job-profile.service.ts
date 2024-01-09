@@ -127,6 +127,7 @@ export class JobProfileService {
         ...where,
       },
       ...args,
+      orderBy: [...(args.orderBy || []), { id: 'desc' }],
       include: {
         behavioural_competencies: true,
         career_group: true,
