@@ -49,13 +49,13 @@ export const JobProfileSearchResults = ({
     // }`
 
     // Check if we're on the position-request route
+    const newSearchParams = new URLSearchParams(searchParams.toString());
     if (positionRequestId) {
-      const newSearchParams = new URLSearchParams(searchParams.toString());
       newSearchParams.set('selectedProfile', profileId.toString());
       return `/position-request/${positionRequestId}?${newSearchParams.toString()}`;
     } else {
       // If not on the position-request route, use the standard job-profiles path
-      return `/job-profiles/${profileId}`;
+      return `/job-profiles/${profileId}?${newSearchParams.toString()}`;
     }
   };
 

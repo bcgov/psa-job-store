@@ -118,12 +118,23 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     // Optionally, update the page size as well
     setPageSize(pageSize);
 
-    // const basePath = getBasePath(location.pathname);
+    const basePath = getBasePath(location.pathname);
 
     navigate({
-      pathname: `/position-request/${positionRequestId}`,
+      pathname: basePath,
       search: searchParams.toString(),
     });
+  };
+
+  const getBasePath = (path: string) => {
+    if (positionRequestId) return `/position-request/${positionRequestId}`;
+
+    const pathParts = path.split('/');
+    // Check if the last part is a number (ID), if so, remove it
+    if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
+      pathParts.pop(); // Remove the last part (job profile ID)
+    }
+    return pathParts.join('/');
   };
 
   const params = useParams();

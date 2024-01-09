@@ -250,6 +250,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     // If the job family or classification filters have changed, de-select the selected profile
     if (jobFamilyChanged || classificationChanged || careerGroupChanged || ministryChanged) {
       newSearchParams.delete('selectedProfile');
+      // console.log('navigating.. B', getBasePath(location.pathname));
       navigate(
         {
           pathname: getBasePath(location.pathname),
@@ -259,15 +260,16 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
       );
     } else {
       // Only update search params if there's a change
-      // if (searchParams.toString() !== newSearchParams.toString()) {
-      navigate(
-        {
-          pathname: getBasePath(location.pathname),
-          search: newSearchParams.toString(),
-        },
-        { replace: true },
-      );
-      // }
+      if (searchParams.toString() !== newSearchParams.toString()) {
+        // console.log('navigating.. A', getBasePath(location.pathname));
+        navigate(
+          {
+            pathname: getBasePath(location.pathname),
+            search: newSearchParams.toString(),
+          },
+          { replace: true },
+        );
+      }
     }
   }, [allSelections, searchParams, setSearchParams, location.pathname, navigate, getBasePath]);
 
