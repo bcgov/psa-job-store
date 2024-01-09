@@ -15,9 +15,9 @@ import { SortOrder } from 'antd/es/table/interface';
 import copy from 'copy-to-clipboard';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import '../../../components/app/common/css/filtered-table.component.css';
 import { useLazyGetPositionRequestsQuery } from '../../../redux/services/graphql-api/position-request.api';
-import EmptyJobPositionGraphic from '../images/empty_jobPosition.svg';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {

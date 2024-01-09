@@ -1,22 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  ArrowDownOutlined,
   CopyOutlined,
   DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
   EllipsisOutlined,
+  EyeOutlined,
   InfoCircleOutlined,
   LinkOutlined,
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
+import { SerializedError } from '@reduxjs/toolkit';
 import { Button, Card, Col, Menu, Popover, Row, Table, Tooltip } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { ErrorResponse, Link, useSearchParams } from 'react-router-dom';
+import ErrorGraphic from '../../../assets/empty_error.svg';
+import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import '../../../components/app/common/css/filtered-table.component.css';
-import { useLazyGetJobProfilesDraftsQuery } from '../../../redux/services/graphql-api/job-profile.api';
-// import EmptyJobPositionGraphic from '../images/empty_jobPosition.svg';
+import {
+  GetJobProfilesDraftsResponse,
+  GetJobProfilesResponse,
+} from '../../../redux/services/graphql-api/job-profile-types';
+import {
+  useLazyGetJobProfilesDraftsQuery,
+  useLazyGetJobProfilesQuery,
+} from '../../../redux/services/graphql-api/job-profile.api';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -28,6 +39,8 @@ interface MyPositionsTableProps {
   itemsPerPage?: number;
   topRightComponent?: ReactNode;
   tableTitle?: string;
+  state?: string;
+  onDataAvailable?: (isDataAvailable: boolean) => void;
 }
 
 type ColumnTypes = {
@@ -41,7 +54,7 @@ type ColumnTypes = {
 };
 
 // Declare the MyPositionsTable component with TypeScript
-const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
+const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   allowSorting = true,
   showPagination = true,
   showFooter = true,
@@ -49,6 +62,8 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
   itemsPerPage = 10,
   topRightComponent,
   tableTitle = 'My Positions',
+  state = 'DRAFT',
+  onDataAvailable,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -65,6 +80,7 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
   const [sortOrder, setSortOrder] = useState(initialSortOrder);
 
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
+  const [error, setError] = useState<string | null>(null);
 
   // Callback function to be called when table properties change
   const handleTableChangeCallback = (pagination: any, _filters: any, sorter: any) => {
@@ -92,7 +108,38 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
     setSearchParams(newSearchParams);
   };
 
-  const [trigger, { data, isLoading }] = useLazyGetJobProfilesDraftsQuery();
+  let trigger: any;
+  let data: GetJobProfilesDraftsResponse | GetJobProfilesResponse | undefined;
+  let isLoading: boolean;
+  let fetchError: ErrorResponse | SerializedError | null | undefined;
+
+  if (state === 'DRAFT') {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesDraftsQuery();
+  } else {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesQuery();
+  }
+
+  // Check if data is available and call the callback function to notify the parent component
+  useEffect(() => {
+    if (isLoading) return;
+    const hasData =
+      (data && 'jobProfilesDrafts' in data && data.jobProfilesDrafts.length > 0) ||
+      (data && 'jobProfiles' in data && data.jobProfiles.length > 0);
+    if (onDataAvailable) {
+      onDataAvailable(hasData || false);
+    }
+  }, [data, onDataAvailable, isLoading]);
+
+  // Check if there was an error fetching data and set the error message
+  useEffect(() => {
+    if (fetchError) {
+      setError('An error occurred while fetching data.');
+    } else {
+      setError(null);
+    }
+  }, [fetchError]);
 
   const getSortOrder = (fieldName: string): SortOrder | undefined => {
     if (sortField === fieldName) {
@@ -102,8 +149,11 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
   };
 
   useEffect(() => {
-    if (data && data.jobProfilesDrafts !== undefined) {
+    if (data && 'jobProfilesDrafts' in data) {
       setTotalResults(data.jobProfilesDraftsCount);
+    }
+    if (data && 'jobProfilesCount' in data) {
+      setTotalResults(data.jobProfilesCount);
     }
   }, [data]);
 
@@ -117,7 +167,7 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
       render: (text: any, record: any) => <Link to={`/position-request/${record.id}`}>{text}</Link>,
     },
     {
-      sorter: allowSorting,
+      sorter: false,
       defaultSortOrder: getSortOrder('classifications'),
       title: 'Class',
       dataIndex: 'classifications',
@@ -148,7 +198,7 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
       render: (jobFamily: any) => jobFamily?.name,
     },
     {
-      sorter: allowSorting,
+      sorter: false,
       defaultSortOrder: getSortOrder('organizations'),
       title: 'Ministries',
       dataIndex: 'organizations',
@@ -201,16 +251,29 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
     const jobFamilyFilter = searchParams.get('job_family_id__in');
     //   setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
 
+    // if sortOrder is "ASC" or "DESC" convert to 'ascend' or 'descend' respectively into useSortField variable
+
+    let useSortOrder = sortOrder;
+    if (sortOrder === 'ASC') {
+      useSortOrder = 'ascend';
+    } else if (sortOrder === 'DESC') {
+      useSortOrder = 'descend';
+    }
+
     const sortParams = sortField
       ? {
           orderBy: [
             {
               [sortField]:
-                sortField === 'title' || sortField === 'updated_at'
-                  ? sortOrder === 'ascend'
-                    ? 'asc'
-                    : 'desc'
-                  : { sort: sortOrder === 'ascend' ? 'asc' : 'desc' },
+                sortField === 'career_group' || sortField === 'job_family'
+                  ? {
+                      name: useSortOrder === 'ascend' ? 'asc' : 'desc',
+                    }
+                  : sortField === 'updated_at'
+                    ? { sort: useSortOrder === 'ascend' ? 'asc' : 'desc' }
+                    : useSortOrder === 'ascend'
+                      ? 'asc'
+                      : 'desc',
             },
           ],
         }
@@ -282,7 +345,14 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
     });
   }, [searchParams, trigger, currentPage, pageSize, sortField, sortOrder]);
 
-  const hasPositionRequests = data?.jobProfilesDrafts && data.jobProfilesDrafts.length > 0;
+  let hasPositionRequests: boolean | undefined;
+
+  // Check if the type is GetJobProfilesResponse
+  if (data && 'jobProfiles' in data) {
+    hasPositionRequests = data.jobProfiles && data.jobProfiles.length > 0;
+  } else {
+    hasPositionRequests = data?.jobProfilesDrafts && data.jobProfilesDrafts.length > 0;
+  }
 
   const renderTableFooter = () => {
     return (
@@ -330,21 +400,40 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
     return (
       <Menu>
         <>
-          <Menu.Item key="edit" icon={<EditOutlined />}>
-            Edit
-          </Menu.Item>
-          <Menu.Item key="publish" icon={<DownloadOutlined />}>
-            Publish
-          </Menu.Item>
-          <Menu.Item key="publish" icon={<CopyOutlined />}>
-            Duplicate
-          </Menu.Item>
-          <Menu.Item key="copy" icon={<LinkOutlined />}>
-            Copy link
-          </Menu.Item>
-          <Menu.Item key="delete" icon={<DeleteOutlined />}>
-            Delete
-          </Menu.Item>
+          {state === 'PUBLISHED' ? (
+            <>
+              <Menu.Item key="view" icon={<EyeOutlined />}>
+                View
+              </Menu.Item>
+              <Menu.Item key="unpublish" icon={<ArrowDownOutlined />}>
+                Unpublish
+              </Menu.Item>
+              <Menu.Item key="duplicate" icon={<CopyOutlined />}>
+                Duplicate
+              </Menu.Item>
+              <Menu.Item key="copy" icon={<LinkOutlined />}>
+                Copy link
+              </Menu.Item>
+            </>
+          ) : (
+            <>
+              <Menu.Item key="edit" icon={<EditOutlined />}>
+                Edit
+              </Menu.Item>
+              <Menu.Item key="publish" icon={<DownloadOutlined />}>
+                Publish
+              </Menu.Item>
+              <Menu.Item key="duplicate" icon={<CopyOutlined />}>
+                Duplicate
+              </Menu.Item>
+              <Menu.Item key="copy" icon={<LinkOutlined />}>
+                Copy link
+              </Menu.Item>
+              <Menu.Item key="delete" icon={<DeleteOutlined />}>
+                Delete
+              </Menu.Item>
+            </>
+          )}
         </>
       </Menu>
     );
@@ -363,7 +452,7 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <div style={style}>
+    <div className="profilesTable" style={style}>
       <Card className="tableHeader">
         <Row gutter={24} wrap>
           <Col span={12}>
@@ -383,7 +472,7 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
         </Row>
       </Card>
 
-      {hasPositionRequests ? (
+      {!isLoading && hasPositionRequests && !error && (
         <Table
           // onRow={(record) => {
           //   return {
@@ -393,7 +482,7 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
           // }}
           className="tableWithHeader"
           columns={columns}
-          dataSource={data?.jobProfilesDrafts}
+          dataSource={data ? ('jobProfilesDrafts' in data ? data.jobProfilesDrafts : data.jobProfiles) : undefined}
           rowKey="id"
           pagination={
             showPagination
@@ -409,20 +498,54 @@ const TotalCompDraftProfilesTable: React.FC<MyPositionsTableProps> = ({
           onChange={handleTableChange}
           footer={showFooter ? renderTableFooter : undefined}
         />
-      ) : (
-        <div style={{ textAlign: 'center', padding: '2rem', background: 'white', flex: 1, overflowY: 'auto' }}>
-          {/* <img src={EmptyJobPositionGraphic} alt="No positions" /> */}
-          <div>New to the JobStore?</div>
+      )}
+      {!isLoading && !hasPositionRequests && !error && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '2rem',
+            flexGrow: 1, // Expand to take available space
+            background: 'white',
+            marginBottom: '1rem',
+          }}
+        >
+          <img src={EmptyJobPositionGraphic} alt="No positions" />
+          <div>Looks like you’re not working on anything right now.</div>
           {/* Link button to the orgchart page */}
-          <Link to="/my-positions/create">
+          <Link to="/total-compensation/profiles/create">
             <Button type="primary" style={{ marginTop: '1rem' }}>
-              Create new position
+              Create new profile
             </Button>
           </Link>
+        </div>
+      )}
+      {error && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '2rem',
+            flexGrow: 1, // Expand to take available space
+            background: 'white',
+            marginBottom: '1rem',
+          }}
+        >
+          <img src={ErrorGraphic} alt="Error" />
+          <div>Oops! We were unable to fetch the details.</div>
+          <Button type="link" style={{ marginTop: '1rem' }} icon={<ReloadOutlined />} onClick={updateData}>
+            Refresh
+          </Button>
         </div>
       )}
     </div>
   );
 };
 
-export default TotalCompDraftProfilesTable;
+export default TotalCompProfilesTable;

@@ -21,8 +21,14 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       query: (args: GetJobProfilesArgs = {}) => {
         return {
           document: gql`
-            query JobProfiles($search: String, $where: JobProfileWhereInput, $take: Int, $skip: Int) {
-              jobProfiles(search: $search, where: $where, take: $take, skip: $skip) {
+            query JobProfiles(
+              $search: String
+              $where: JobProfileWhereInput
+              $take: Int
+              $skip: Int
+              $orderBy: [JobProfileOrderByWithRelationAndSearchRelevanceInput!]
+            ) {
+              jobProfiles(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
                 id
                 stream {
                   id
@@ -75,6 +81,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     code
                   }
                 }
+                updated_at
               }
               jobProfilesCount(search: $search, where: $where)
             }

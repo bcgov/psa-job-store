@@ -13,8 +13,11 @@ import { MyPositionsRoute } from '../routes/my-positions';
 import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { TotalCompDraftProfilesRoute } from '../routes/total-comp-draft-profiles';
 import { TotalCompDraftProfilesPage } from '../routes/total-comp-draft-profiles/total-comp-draft-profies.page';
-import { TotalCompPublishedProfilesRoute } from '../routes/total-comp-published-profiles';
+import { TotalCompPublishedProfilesPage } from '../routes/total-comp-published-profiles/total-comp-published-profies.page';
+import { UnauthorizedRoute } from '../routes/unauthorized';
+import UnauthorizedPage from '../routes/unauthorized/unauthorized.page';
 import { WizardRoute } from '../routes/wizard';
 import { PositionRequestPage } from '../routes/wizard/position-request.page';
 import { WizardOrgChartPage } from '../routes/wizard/wizard-org-chart.page';
@@ -122,21 +125,40 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <PositionRequestPage />,
               },
-              // {
-              //   path: '?step=2',
-              //   element: <PositionRequestPage />,
-              // },
+            ],
+          },
+          {
+            path: '/total-compensation/profiles',
+            element: (
+              <RoleGuard requiredRole="total-compensation">
+                <TotalCompDraftProfilesRoute />
+              </RoleGuard>
+            ),
+            handle: {
+              breadcrumb: () => 'Job profiles',
+            },
+            children: [
+              {
+                path: 'drafts',
+                element: <TotalCompDraftProfilesPage />,
+              },
+              {
+                path: 'published',
+                element: <TotalCompPublishedProfilesPage />,
+              },
+            ],
+          },
+          {
+            path: '/unauthorized',
+            element: <UnauthorizedRoute />,
+            children: [
+              {
+                index: true,
+                element: <UnauthorizedPage />,
+              },
             ],
           },
         ],
-      },
-      {
-        path: '/total-compensation/profiles/published',
-        element: (
-          <RoleGuard requiredRole="total-compensation">
-            <TotalCompPublishedProfilesRoute />
-          </RoleGuard>
-        ),
       },
     ],
   },
