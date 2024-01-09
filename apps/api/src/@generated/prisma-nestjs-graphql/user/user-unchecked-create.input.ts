@@ -1,6 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { CommentUncheckedCreateNestedManyWithoutAuthorInput } from '../comment/comment-unchecked-create-nested-many-without-author.input';
+import { JobProfileUncheckedCreateNestedManyWithoutOwnerInput } from '../job-profile/job-profile-unchecked-create-nested-many-without-owner.input';
 
 @InputType()
 export class UserUncheckedCreateInput {
@@ -27,4 +28,7 @@ export class UserUncheckedCreateInput {
 
   @Field(() => CommentUncheckedCreateNestedManyWithoutAuthorInput, { nullable: true })
   comments?: CommentUncheckedCreateNestedManyWithoutAuthorInput;
+
+  @Field(() => JobProfileUncheckedCreateNestedManyWithoutOwnerInput, { nullable: true })
+  JobProfile?: JobProfileUncheckedCreateNestedManyWithoutOwnerInput;
 }

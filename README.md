@@ -20,3 +20,13 @@ Project is also configured to generate reports with `jest-html-reporter`, which 
 ## Updating seed file secret
 
 To update the seed file, run `oc set data secret/seed-secret --from-file=seed.ts`
+
+## DB Troubleshooting
+
+### Log location
+
+Logs are located at `/pgdata/pg15/log`
+
+### Reliability and the Write-Ahead Log location
+
+These are stored at `/pgdata/pg15_wal`

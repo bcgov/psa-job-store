@@ -4,11 +4,11 @@ import { Button, Card, Checkbox, Col, Row, Select, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import MyPositionsTable from './components/my-positions-table.component';
-import './my-positions.page.css';
 
 export const MyPositionsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);

@@ -13,9 +13,6 @@ export class JobProfileCreateManyCareer_groupInput {
   @Field(() => Int, { nullable: false })
   job_family_id!: number;
 
-  @Field(() => String, { nullable: true })
-  organization_id?: string;
-
   @Field(() => Int, { nullable: false })
   role_id!: number;
 
@@ -27,6 +24,12 @@ export class JobProfileCreateManyCareer_groupInput {
 
   @Field(() => JobProfileType, { nullable: false })
   type!: keyof typeof JobProfileType;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  owner_id?: string;
 
   @Field(() => String, { nullable: false })
   title!: string;

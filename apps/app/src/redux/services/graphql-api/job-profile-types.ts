@@ -12,6 +12,34 @@ export interface ClassificationModelWrapped {
   };
 }
 
+export interface JobProfilesMinistriesResponse {
+  jobProfilesMinistries: {
+    id: string;
+    name: string;
+  }[];
+}
+
+export interface JobProfilesDraftsMinistriesResponse {
+  jobProfilesDraftsMinistries: {
+    id: string;
+    name: string;
+  }[];
+}
+
+export interface JobProfilesCareerGroupsResponse {
+  jobProfilesCareerGroups: {
+    id: number;
+    name: string;
+  }[];
+}
+
+export interface JobProfilesDraftsCareerGroupsResponse {
+  jobProfilesDraftsCareerGroups: {
+    id: number;
+    name: string;
+  }[];
+}
+
 export interface ContextModel {
   id: number;
   description: string;
@@ -112,6 +140,11 @@ export interface GetJobProfilesArgs {
 export interface GetJobProfilesResponse {
   jobProfiles: JobProfileModel[];
   jobProfilesCount: number;
+}
+
+export interface GetJobProfilesDraftsResponse {
+  jobProfilesDrafts: JobProfileModel[];
+  jobProfilesDraftsCount: number;
 }
 
 export interface GetJobProfileArgs {

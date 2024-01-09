@@ -29,7 +29,8 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     // Search terms need to be joined with specific syntax, <-> in this case
     // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
     const search = searchParams.get('search');
-    const organizationFilter = searchParams.get('organization_id__in');
+    const organizationFilter = searchParams.get('ministry_id__in');
+    const careerGroupFilter = searchParams.get('career_group_id__in');
     const jobRoleFilter = searchParams.get('job_role_id__in');
     const classificationFilter = searchParams.get('classification_id__in');
     const jobFamilyFilter = searchParams.get('job_family_id__in');
@@ -42,8 +43,21 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
           ...(organizationFilter != null
             ? [
                 {
-                  organization_id: {
-                    in: JSON.parse(`[${organizationFilter.split(',').map((v) => `"${v}"`)}]`),
+                  organizations: {
+                    some: {
+                      organization_id: {
+                        in: organizationFilter.split(',').map((v) => v.trim()),
+                      },
+                    },
+                  },
+                },
+              ]
+            : []),
+          ...(careerGroupFilter !== null
+            ? [
+                {
+                  career_group_id: {
+                    in: JSON.parse(`[${careerGroupFilter}]`),
                   },
                 },
               ]
@@ -85,21 +99,13 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
       take: pageSize,
     });
   }, [searchParams, trigger, currentPage, pageSize]);
+
   // Update totalResults based on the response (if applicable)
   useEffect(() => {
     if (data && data.jobProfilesCount !== undefined) {
       setTotalResults(data.jobProfilesCount);
     }
   }, [data]);
-
-  // const getBasePath = (path: string) => {
-  //   const pathParts = path.split('/');
-  //   // Check if the last part is a number (ID), if so, remove it
-  //   if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
-  //     pathParts.pop(); // Remove the last part (job profile ID)
-  //   }
-  //   return pathParts.join('/');
-  // };
 
   const navigate = useNavigate();
   const { positionRequestId } = useParams();

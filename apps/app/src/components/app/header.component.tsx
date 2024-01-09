@@ -1,6 +1,7 @@
 import { QuestionCircleOutlined, UserOutlined } from '@ant-design/icons';
 import { Col, Layout, Row, Typography } from 'antd';
 import { useAuth } from 'react-oidc-context';
+import { Link } from 'react-router-dom';
 import styles from './header.module.css';
 
 const { Header } = Layout;
@@ -13,11 +14,13 @@ export const AppHeader = () => {
     <Header className={styles.appHeader}>
       <Row align="middle" justify="space-between" style={{ width: '100%' }}>
         <Col className={styles.left}>
-          <img className={styles.bcLogo} src="/BC_logo.png" alt="BC Logo" />
-          <div className={styles.titleContainer}>
-            <Text className={styles.titleContent}>Job Store</Text>
-            <Text className={styles.titleContentBeta}>βeta</Text>
-          </div>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+            <img className={styles.bcLogo} src="/BC_logo.png" alt="BC Logo" />
+            <div className={styles.titleContainer}>
+              <Text className={styles.titleContent}>Job Store</Text>
+              <Text className={styles.titleContentBeta}>βeta</Text>
+            </div>
+          </Link>
         </Col>
 
         <Col className={styles.right}>

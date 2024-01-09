@@ -15,9 +15,6 @@ export class JobProfileMaxAggregate {
   @Field(() => Int, { nullable: true })
   job_family_id?: number;
 
-  @Field(() => String, { nullable: true })
-  organization_id?: string;
-
   @Field(() => Int, { nullable: true })
   role_id?: number;
 
@@ -29,6 +26,12 @@ export class JobProfileMaxAggregate {
 
   @Field(() => JobProfileType, { nullable: true })
   type?: keyof typeof JobProfileType;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  owner_id?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;

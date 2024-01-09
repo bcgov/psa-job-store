@@ -1,9 +1,11 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.input';
-import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
 import { EnumJobProfileStateWithAggregatesFilter } from '../prisma/enum-job-profile-state-with-aggregates-filter.input';
 import { EnumJobProfileTypeWithAggregatesFilter } from '../prisma/enum-job-profile-type-with-aggregates-filter.input';
+import { DateTimeWithAggregatesFilter } from '../prisma/date-time-with-aggregates-filter.input';
+import { UuidWithAggregatesFilter } from '../prisma/uuid-with-aggregates-filter.input';
+import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
 import { JsonWithAggregatesFilter } from '../prisma/json-with-aggregates-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
 
@@ -27,9 +29,6 @@ export class JobProfileScalarWhereWithAggregatesInput {
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   job_family_id?: IntWithAggregatesFilter;
 
-  @Field(() => StringWithAggregatesFilter, { nullable: true })
-  organization_id?: StringWithAggregatesFilter;
-
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   role_id?: IntWithAggregatesFilter;
 
@@ -41,6 +40,12 @@ export class JobProfileScalarWhereWithAggregatesInput {
 
   @Field(() => EnumJobProfileTypeWithAggregatesFilter, { nullable: true })
   type?: EnumJobProfileTypeWithAggregatesFilter;
+
+  @Field(() => DateTimeWithAggregatesFilter, { nullable: true })
+  updated_at?: DateTimeWithAggregatesFilter;
+
+  @Field(() => UuidWithAggregatesFilter, { nullable: true })
+  owner_id?: UuidWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   title?: StringWithAggregatesFilter;

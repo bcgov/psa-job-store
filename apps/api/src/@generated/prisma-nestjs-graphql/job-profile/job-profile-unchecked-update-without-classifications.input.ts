@@ -5,6 +5,7 @@ import { JobProfileState } from '../prisma/job-profile-state.enum';
 import { JobProfileType } from '../prisma/job-profile-type.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-unchecked-update-many-without-job-profile-nested.input';
+import { JobProfileOrganizationUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-organization/job-profile-organization-unchecked-update-many-without-job-profile-nested.input';
 import { JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-unchecked-update-one-without-job-profile-nested.input';
 import { JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-update-many-without-job-profile-nested.input';
 import { PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-unchecked-update-many-without-parent-job-profile-nested.input';
@@ -20,9 +21,6 @@ export class JobProfileUncheckedUpdateWithoutClassificationsInput {
   @Field(() => Int, { nullable: true })
   job_family_id?: number;
 
-  @Field(() => String, { nullable: true })
-  organization_id?: string;
-
   @Field(() => Int, { nullable: true })
   role_id?: number;
 
@@ -34,6 +32,12 @@ export class JobProfileUncheckedUpdateWithoutClassificationsInput {
 
   @Field(() => JobProfileType, { nullable: true })
   type?: keyof typeof JobProfileType;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  owner_id?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;
@@ -52,6 +56,9 @@ export class JobProfileUncheckedUpdateWithoutClassificationsInput {
 
   @Field(() => JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput;
+
+  @Field(() => JobProfileOrganizationUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
+  organizations?: JobProfileOrganizationUncheckedUpdateManyWithoutJob_profileNestedInput;
 
   @Field(() => JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput, { nullable: true })
   context?: JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput;

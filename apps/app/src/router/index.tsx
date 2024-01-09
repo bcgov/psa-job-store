@@ -1,6 +1,7 @@
 import { FileTextOutlined, HomeOutlined, PartitionOutlined, UserAddOutlined } from '@ant-design/icons';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
+import RoleGuard from '../components/guards/role.guard';
 import { RouteGuard } from '../components/guards/route.guard';
 import { AuthRoute } from '../routes/auth';
 import { LoginPage } from '../routes/auth/login.page';
@@ -12,9 +13,12 @@ import { MyPositionsRoute } from '../routes/my-positions';
 import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { TotalCompDraftProfilesPage } from '../routes/total-comp-draft-profiles/total-comp-draft-profies.page';
+import { TotalCompPublishedProfilesRoute } from '../routes/total-comp-published-profiles';
 import { WizardRoute } from '../routes/wizard';
 import { PositionRequestPage } from '../routes/wizard/position-request.page';
 import { WizardOrgChartPage } from '../routes/wizard/wizard-org-chart.page';
+import { RoleBasedComponent } from './role-based-component';
 
 export const router = createBrowserRouter([
   {
@@ -43,7 +47,13 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <HomePage />,
+                element: (
+                  <RoleBasedComponent
+                    requiredRole="total-compensation"
+                    Component={TotalCompDraftProfilesPage}
+                    FallbackComponent={HomePage}
+                  />
+                ),
               },
             ],
           },
@@ -119,6 +129,14 @@ export const router = createBrowserRouter([
             ],
           },
         ],
+      },
+      {
+        path: '/total-compensation/profiles/published',
+        element: (
+          <RoleGuard requiredRole="total-compensation">
+            <TotalCompPublishedProfilesRoute />
+          </RoleGuard>
+        ),
       },
     ],
   },
