@@ -18,5 +18,5 @@ export class UserCreateNestedOneWithoutJobProfileInput {
 
   @Field(() => UserWhereUniqueInput, { nullable: true })
   @Type(() => UserWhereUniqueInput)
-  connect?: Prisma.AtLeast<UserWhereUniqueInput, 'id' | 'email'>;
+  connect?: Prisma.AtLeast<UserWhereUniqueInput, 'id' | 'email' | 'username'>;
 }

@@ -9,7 +9,7 @@ import { UserCreateWithoutJobProfileInput } from './user-create-without-job-prof
 export class UserCreateOrConnectWithoutJobProfileInput {
   @Field(() => UserWhereUniqueInput, { nullable: false })
   @Type(() => UserWhereUniqueInput)
-  where!: Prisma.AtLeast<UserWhereUniqueInput, 'id' | 'email'>;
+  where!: Prisma.AtLeast<UserWhereUniqueInput, 'id' | 'email' | 'username'>;
 
   @Field(() => UserCreateWithoutJobProfileInput, { nullable: false })
   @Type(() => UserCreateWithoutJobProfileInput)

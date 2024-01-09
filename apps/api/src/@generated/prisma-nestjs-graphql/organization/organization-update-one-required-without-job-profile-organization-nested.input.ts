@@ -24,7 +24,7 @@ export class OrganizationUpdateOneRequiredWithoutJobProfileOrganizationNestedInp
 
   @Field(() => OrganizationWhereUniqueInput, { nullable: true })
   @Type(() => OrganizationWhereUniqueInput)
-  connect?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id'>;
+  connect?: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id' | 'peoplesoft_id'>;
 
   @Field(() => OrganizationUpdateToOneWithWhereWithoutJobProfileOrganizationInput, { nullable: true })
   @Type(() => OrganizationUpdateToOneWithWhereWithoutJobProfileOrganizationInput)
