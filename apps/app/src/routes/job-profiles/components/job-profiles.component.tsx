@@ -3,6 +3,8 @@ import { FileTextFilled } from '@ant-design/icons';
 import { Breakpoint, Col, Empty, Grid, Row, Space, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAppDispatch } from '../../../redux/redux.store';
+import { graphqlApi } from '../../../redux/services/graphql-api';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { useLazyGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
@@ -22,6 +24,7 @@ interface JobProfilesContentProps {
 }
 
 const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile, onUseProfile }) => {
+  const dispatch = useAppDispatch();
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
   const [classificationIdFilter, setClassificationIdFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,6 +57,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     const reportsToPositionId = prData?.positionRequest?.reports_to_position_id;
     if (reportsToPositionId != null && pData == null) {
       setJobProfilesLoading(true);
+      dispatch(graphqlApi.util.invalidateTags(['jobProfiles']));
       pTrigger({ where: { id: `${reportsToPositionId}` } });
     }
 

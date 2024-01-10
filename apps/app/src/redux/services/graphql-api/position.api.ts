@@ -30,6 +30,7 @@ export interface GetPositionArgs {
 export const positionApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
     getPosition: build.query<GetPositionResponse, GetPositionArgs>({
+      providesTags: () => ['jobProfiles'],
       query: (args: GetPositionArgs) => {
         return {
           document: gql`
