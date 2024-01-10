@@ -3,7 +3,12 @@ import { FileTextFilled } from '@ant-design/icons';
 import { Breakpoint, Col, Empty, Grid, Row, Space, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAppDispatch } from '../../../redux/redux.store';
+import { graphqlApi } from '../../../redux/services/graphql-api';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import { useLazyGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
+import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
+import { WizardProvider } from '../../wizard/components/wizard.provider';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 import { JobProfileSearch } from './job-profile-search.component';
 import { JobProfile } from './job-profile.component';
@@ -19,96 +24,145 @@ interface JobProfilesContentProps {
 }
 
 const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile, onUseProfile }) => {
+  const dispatch = useAppDispatch();
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
+  const [classificationIdFilter, setClassificationIdFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(2); // Default page size, adjust as needed
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
+  const navigate = useNavigate();
+  const { positionRequestId } = useParams();
+  const params = useParams();
+  const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
+  const [jobProfilesLoading, setJobProfilesLoading] = useState<boolean>(false);
+
+  /*
+    AL-85 Code
+    // Get Position Request
+    //  - Get Reporting To Position ID
+    // Get Classification for Position
+    //  - Use classification_id and filter jobProfilesQuery
+  */
+
+  const [prTrigger, { data: prData }] = useLazyGetPositionRequestQuery();
+  const [pTrigger, { data: pData }] = useLazyGetPositionQuery();
+  // TODO: Add useLazyGetPositionQuery(<id>)
 
   useEffect(() => {
-    // Use the following for the `search` property.
-    // Search terms need to be joined with specific syntax, <-> in this case
-    // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
-    const search = searchParams.get('search');
-    const organizationFilter = searchParams.get('ministry_id__in');
-    const careerGroupFilter = searchParams.get('career_group_id__in');
-    const jobRoleFilter = searchParams.get('job_role_id__in');
-    const classificationFilter = searchParams.get('classification_id__in');
-    const jobFamilyFilter = searchParams.get('job_family_id__in');
-    setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
+    if (positionRequestId != null && prData == null) {
+      setJobProfilesLoading(true);
+      prTrigger({ id: +positionRequestId });
+    }
 
-    trigger({
-      ...(search != null && { search }),
-      where: {
-        AND: [
-          ...(organizationFilter != null
-            ? [
-                {
-                  organizations: {
-                    some: {
-                      organization_id: {
-                        in: organizationFilter.split(',').map((v) => v.trim()),
+    const reportsToPositionId = prData?.positionRequest?.reports_to_position_id;
+    if (reportsToPositionId != null && pData == null) {
+      setJobProfilesLoading(true);
+      dispatch(graphqlApi.util.invalidateTags(['jobProfiles']));
+      pTrigger({ where: { id: `${reportsToPositionId}` } });
+    }
+
+    const classificationId = pData?.position?.classification_id;
+    if (classificationId != null && classificationIdFilter == null) {
+      setJobProfilesLoading(true);
+      setClassificationIdFilter(classificationId);
+    }
+  }, [positionRequestId, prData, pData]);
+
+  useEffect(() => {
+    if (classificationIdFilter != null) {
+      // Use the following for the `search` property.
+      // Search terms need to be joined with specific syntax, <-> in this case
+      // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
+      const search = searchParams.get('search');
+      const organizationFilter = searchParams.get('organization_id__in');
+      const jobRoleFilter = searchParams.get('job_role_id__in');
+      const classificationFilter = searchParams.get('classification_id__in');
+      const jobFamilyFilter = searchParams.get('job_family_id__in');
+      setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
+
+      trigger({
+        ...(search != null && { search }),
+        where: {
+          AND: [
+            ...(classificationIdFilter != null
+              ? [
+                  {
+                    reports_to: {
+                      some: {
+                        classification_id: {
+                          in: [classificationIdFilter],
+                        },
                       },
                     },
                   },
-                },
-              ]
-            : []),
-          ...(careerGroupFilter !== null
-            ? [
-                {
-                  career_group_id: {
-                    in: JSON.parse(`[${careerGroupFilter}]`),
+                ]
+              : []),
+            ...(organizationFilter != null
+              ? [
+                  {
+                    organization_id: {
+                      in: JSON.parse(`[${organizationFilter.split(',').map((v) => `"${v}"`)}]`),
+                    },
                   },
-                },
-              ]
-            : []),
-          ...(classificationFilter != null
-            ? [
-                {
-                  classifications: {
-                    some: {
-                      classification_id: {
-                        in: classificationFilter.split(',').map((v) => v.trim()),
+                ]
+              : []),
+            ...(classificationFilter != null
+              ? [
+                  {
+                    classifications: {
+                      some: {
+                        classification_id: {
+                          in: classificationFilter.split(',').map((v) => v.trim()),
+                        },
                       },
                     },
                   },
-                },
-              ]
-            : []),
-          ...(jobFamilyFilter !== null
-            ? [
-                {
-                  job_family_id: {
-                    in: JSON.parse(`[${jobFamilyFilter}]`),
+                ]
+              : []),
+            ...(jobFamilyFilter !== null
+              ? [
+                  {
+                    job_family_id: {
+                      in: JSON.parse(`[${jobFamilyFilter}]`),
+                    },
                   },
-                },
-              ]
-            : []),
-          ...(jobRoleFilter !== null
-            ? [
-                {
-                  role_id: {
-                    in: JSON.parse(`[${jobRoleFilter}]`),
+                ]
+              : []),
+            ...(jobRoleFilter !== null
+              ? [
+                  {
+                    role_id: {
+                      in: JSON.parse(`[${jobRoleFilter}]`),
+                    },
                   },
-                },
-              ]
-            : []),
-        ],
-      },
-      skip: (currentPage - 1) * pageSize,
-      take: pageSize,
-    });
-  }, [searchParams, trigger, currentPage, pageSize]);
-
+                ]
+              : []),
+          ],
+        },
+        skip: (currentPage - 1) * pageSize,
+        take: pageSize,
+      });
+    }
+  }, [searchParams, trigger, currentPage, pageSize, classificationIdFilter]);
   // Update totalResults based on the response (if applicable)
   useEffect(() => {
+    if (data) {
+      setJobProfilesLoading(false);
+    }
+
     if (data && data.jobProfilesCount !== undefined) {
       setTotalResults(data.jobProfilesCount);
     }
   }, [data]);
 
-  const navigate = useNavigate();
-  const { positionRequestId } = useParams();
+  // const getBasePath = (path: string) => {
+  //   const pathParts = path.split('/');
+  //   // Check if the last part is a number (ID), if so, remove it
+  //   if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
+  //     pathParts.pop(); // Remove the last part (job profile ID)
+  //   }
+  //   return pathParts.join('/');
+  // };
 
   const handlePageChange = (page: number, pageSize: number) => {
     setCurrentPage(page);
@@ -137,9 +191,6 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     return pathParts.join('/');
   };
 
-  const params = useParams();
-  const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
-
   // console.log('params: ', params, 'searchParams: ', searchParams.toString());
   const renderJobProfile = () => {
     return params.id || searchParams.get('selectedProfile') ? (
@@ -161,37 +212,39 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
 
   return (
     <>
-      <JobProfileSearch />
-      <Row justify="center" gutter={16}>
-        {screens['xl'] === true ? (
-          <>
-            <Col span={8}>
-              <JobProfileSearchResults
-                data={data}
-                isLoading={isLoading}
-                onSelectProfile={onSelectProfile}
-                currentPage={currentPage}
-                pageSize={pageSize}
-                totalResults={totalResults}
-                onPageChange={handlePageChange}
-              />{' '}
-            </Col>
-            <Col span={16}>{renderJobProfile()}</Col>
-          </>
-        ) : params.id ? (
-          <Col span={24}>{renderJobProfile()}</Col>
-        ) : (
-          <JobProfileSearchResults
-            data={data}
-            isLoading={isLoading}
-            onSelectProfile={onSelectProfile}
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalResults={totalResults}
-            onPageChange={handlePageChange}
-          />
-        )}
-      </Row>
+      <WizardProvider>
+        <JobProfileSearch />
+        <Row justify="center" gutter={16}>
+          {screens['xl'] === true ? (
+            <>
+              <Col span={8}>
+                <JobProfileSearchResults
+                  data={data}
+                  isLoading={jobProfilesLoading || isLoading}
+                  onSelectProfile={onSelectProfile}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  totalResults={totalResults}
+                  onPageChange={handlePageChange}
+                />{' '}
+              </Col>
+              <Col span={16}>{renderJobProfile()}</Col>
+            </>
+          ) : params.id ? (
+            <Col span={24}>{renderJobProfile()}</Col>
+          ) : (
+            <JobProfileSearchResults
+              data={data}
+              isLoading={isLoading}
+              onSelectProfile={onSelectProfile}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalResults={totalResults}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </Row>
+      </WizardProvider>
     </>
   );
 };

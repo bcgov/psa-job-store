@@ -331,7 +331,11 @@ export class PeoplesoftService {
 
   async getPositionsForDepartment(department_id: string) {
     const response = await firstValueFrom(
-      this.request(Endpoint.HrScope, 0, `prompt_uniquepromptname=DEPTID&prompt_fieldvalue=${department_id}`).pipe(
+      this.request(
+        Endpoint.HrScope,
+        0,
+        `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=${department_id},`,
+      ).pipe(
         map((r) => r.data),
         retry(3),
         catchError((err) => {
@@ -342,4 +346,36 @@ export class PeoplesoftService {
 
     return response;
   }
+
+  async getPosition(position_id: string) {
+    const response = await firstValueFrom(
+      this.request(
+        Endpoint.HrScope,
+        0,
+        `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=,${position_id}`,
+      ).pipe(
+        map((r) => r.data),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
+    );
+
+    return response;
+  }
+
+  // async getEmployee(id: string) {
+  //   const response = await firstValueFrom(
+  //     this.request(Endpoint.Employees, 1, `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=,${id}`).pipe(
+  //       map((r) => r.data),
+  //       retry(3),
+  //       catchError((err) => {
+  //         throw new Error(err);
+  //       }),
+  //     ),
+  //   );
+
+  //   return response;
+  // }
 }
