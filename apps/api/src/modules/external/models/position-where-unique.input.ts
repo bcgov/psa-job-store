@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class PositionClassificationWhereUniqueInput {
+export class PositionWhereUniqueInput {
   @Field(() => String, { nullable: true })
-  position_id?: string;
+  id?: string;
 }

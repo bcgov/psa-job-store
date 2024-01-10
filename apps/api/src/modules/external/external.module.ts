@@ -11,9 +11,7 @@ import { OrgChartService } from './org-chart.service';
 import { OrganizationResolver } from './organization.resolver';
 import { OrganizationService } from './organization.service';
 import { PeoplesoftService } from './peoplesoft.service';
-import { PositionClassificationResolver } from './position-classification.resolver';
 import { PositionResolver } from './position.resolver';
-import { PositionService } from './position.service';
 
 @Module({
   imports: [HttpModule, PrismaModule],
@@ -25,12 +23,10 @@ import { PositionService } from './position.service';
     OrganizationResolver,
     OrganizationService,
     PositionResolver,
-    PositionService,
     PrismaService,
     OrgChartResolver,
     OrgChartService,
     PeoplesoftService,
-    PositionClassificationResolver,
   ],
 })
 export class ExternalModule {}
