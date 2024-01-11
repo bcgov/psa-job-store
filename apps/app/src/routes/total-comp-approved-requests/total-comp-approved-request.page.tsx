@@ -2,7 +2,6 @@ import { CopyOutlined, DownloadOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Collapse, Descriptions, Divider, Result, Row, Space, Tabs, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useBreadcrumb } from '../../breadcrumb-context';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
@@ -19,15 +18,12 @@ const { Text } = Typography;
 
 export const TotalCompApprovedRequestPage = () => {
   const { positionRequestId } = useParams();
-  const { setBreadcrumb } = useBreadcrumb();
 
   if (!positionRequestId) throw 'No position request provided';
 
   const { data } = useGetPositionRequestQuery({
     id: parseInt(positionRequestId),
   });
-
-  setBreadcrumb(data?.positionRequest?.title);
 
   const submissionDetailsItems = [
     {
@@ -391,7 +387,11 @@ export const TotalCompApprovedRequestPage = () => {
 
   return (
     <>
-      <PageHeader title="Approved" subTitle={`reporting to Sr. Director, Digital Portfolio, Band 4 in CITZ:EX.`} />
+      <PageHeader
+        title="Approved"
+        subTitle={`reporting to Sr. Director, Digital Portfolio, Band 4 in CITZ:EX.`}
+        additionalBreadcrumb={{ title: data?.positionRequest?.title }}
+      />
       <ContentWrapper>
         <Tabs
           defaultActiveKey="1"

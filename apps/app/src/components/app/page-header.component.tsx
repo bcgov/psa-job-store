@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader as AntdProPageHeader, PageHeaderProps } from '@ant-design/pro-layout';
 import { useMatches } from 'react-router-dom';
-import { useBreadcrumb } from '../../breadcrumb-context';
 
-export const PageHeader = (props: Omit<PageHeaderProps, 'breadcrumb'>) => {
+interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
+  additionalBreadcrumb?: { title: string | undefined; path?: string; icon?: React.ReactNode };
+}
+
+export const PageHeader = ({ additionalBreadcrumb, ...props }: ExtendedPageHeaderProps) => {
   const matches = useMatches();
-  const { breadcrumb: contextBreadcrumb } = useBreadcrumb(); // Get the breadcrumb from context
-
-  // Generate breadcrumbs from router's matches
-  const routerBreadcrumbs = matches
+  const breadcrumbs = matches
     .filter((match) => Boolean((match.handle as Record<string, any>)?.breadcrumb))
     .map((match: Record<string, any>) => ({
       key: match.path,
@@ -17,18 +17,20 @@ export const PageHeader = (props: Omit<PageHeaderProps, 'breadcrumb'>) => {
       path: match.path,
     }));
 
-  // Append the context breadcrumb if it exists
-  if (contextBreadcrumb) {
-    routerBreadcrumbs.push({
-      key: 'current',
-      title: contextBreadcrumb,
+  // If additionalBreadcrumb is provided, append it to the breadcrumbs array
+  if (additionalBreadcrumb) {
+    breadcrumbs.push({
+      key: additionalBreadcrumb.path,
+      icon: additionalBreadcrumb.icon,
+      title: additionalBreadcrumb.title,
+      path: additionalBreadcrumb.path,
     });
   }
 
   return (
     <AntdProPageHeader
       breadcrumb={{
-        items: routerBreadcrumbs,
+        items: breadcrumbs,
       }}
       {...props}
       style={{ backgroundColor: '#FFF' }}
