@@ -42,7 +42,16 @@ export class PositionRequest {
   classification_code!: string | null;
 
   @Field(() => String, { nullable: true })
+  user_name!: string | null;
+
+  @Field(() => String, { nullable: true })
+  email!: string | null;
+
+  @Field(() => String, { nullable: true })
   submission_id!: string | null;
+
+  @Field(() => Date, { nullable: true })
+  approved_at!: Date | null;
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status!: keyof typeof PositionRequestStatus | null;

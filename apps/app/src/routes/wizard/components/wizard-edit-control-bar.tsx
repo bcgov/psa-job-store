@@ -14,6 +14,7 @@ interface WizardEditControlBarProps {
   onToggleShowDiff?: (checked: boolean) => void;
   showDiffToggle?: boolean;
   showDiff?: boolean;
+  showNext?: boolean;
   onChooseDifferentProfile?: () => void;
 }
 
@@ -27,6 +28,7 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
   onToggleShowDiff,
   showDiffToggle,
   showDiff,
+  showNext = true,
   onChooseDifferentProfile,
 }) => {
   const buttonPlaceholder = <div style={{ display: 'inline-block', width: '68px' }} />;
@@ -43,7 +45,7 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
       <Space>
         {showDiffToggle && onToggleShowDiff ? (
           <Space direction="horizontal">
-            <span>See Changes:</span>
+            <span>Show changes:</span>
             <Switch checked={showDiff} checkedChildren="On" unCheckedChildren="Off" onChange={onToggleShowDiff} />
           </Space>
         ) : null}
@@ -64,9 +66,11 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
               </Button>
             ) : null}
             {onBack ? <Button onClick={onBack}>Back</Button> : null}
-            <Button type="primary" onClick={onNext}>
-              {nextText ? nextText : 'Next'}
-            </Button>
+            {showNext && (
+              <Button type="primary" onClick={onNext}>
+                {nextText ? nextText : 'Next'}
+              </Button>
+            )}
           </>
         )}
       </Space>

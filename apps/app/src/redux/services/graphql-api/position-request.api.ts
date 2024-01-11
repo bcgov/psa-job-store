@@ -35,13 +35,20 @@ export interface GetPositionRequestResponseContent {
   reports_to_position_id?: number;
   profile_json?: any;
   user_id?: string;
+  user_name?: string;
   parent_job_profile_id?: number;
   title?: string;
   position_number?: number;
   classification?: string;
+  classification_code?: string;
   submission_id?: string;
   status?: string;
   department_id?: string;
+  approved_at?: string;
+  email?: string;
+  parent_job_profile?: {
+    number: number;
+  };
 }
 
 export interface GetPositionRequestResponse {
@@ -101,10 +108,19 @@ export interface GetPositionRequestsArgs {
   orderBy?: Record<string, any>;
   take?: number;
   skip?: number;
+  onlyCompletedForAll?: boolean;
 }
 
 export interface GetPositionRequestUserClassificationsResponse {
   positionRequestUserClassifications: PositionRequestUserClassification[];
+}
+
+export interface GetPositionRequestClassificationsResponse {
+  positionRequestClassifications: PositionRequestUserClassification[];
+}
+
+export interface GetPositionRequestJobStoreNumbersResponse {
+  positionRequestJobStoreNumbers: number[];
 }
 
 export interface PositionRequestUserClassification {
@@ -125,21 +141,35 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               $take: Int
               $skip: Int
               $orderBy: [PositionRequestOrderByWithRelationAndSearchRelevanceInput!]
+              $onlyCompletedForAll: Boolean
             ) {
-              positionRequests(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
+              positionRequests(
+                search: $search
+                where: $where
+                take: $take
+                skip: $skip
+                orderBy: $orderBy
+                onlyCompletedForAll: $onlyCompletedForAll
+              ) {
                 id
                 step
                 reports_to_position_id
                 parent_job_profile_id
                 user_id
+                user_name
+                email
                 title
+                approved_at
                 position_number
                 classification_code
                 submission_id
                 status
                 updated_at
+                parent_job_profile {
+                  number
+                }
               }
-              positionRequestsCount(search: $search, where: $where) {
+              positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
                 draft
                 completed
                 inReview
@@ -153,6 +183,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
             skip: args.skip,
             take: args.take,
             orderBy: args.orderBy,
+            onlyCompletedForAll: args.onlyCompletedForAll,
           },
         };
       },
@@ -173,6 +204,8 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   parent_job_profile_id
                   profile_json
                   user_id
+                  user_name
+                  email
                   title
                   position_number
                   classification_code
@@ -180,6 +213,10 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   status
                   updated_at
                   department_id
+                  approved_at
+                  parent_job_profile {
+                    number
+                  }
               }
           }
           `,
@@ -235,6 +272,31 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getPositionRequestClassifications: build.query<GetPositionRequestClassificationsResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query PositionRequestClassifications {
+              positionRequestClassifications {
+                id
+                code
+              }
+            }
+          `,
+        };
+      },
+    }),
+    getPositionRequestJobStoreNumbers: build.query<GetPositionRequestJobStoreNumbersResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query PositionRequestJobStoreNumbers {
+              positionRequestJobStoreNumbers
+            }
+          `,
+        };
+      },
+    }),
     getPositionRequestsCount: build.query<PositionRequestStatusCountsResponse, GetPositionRequestsArgs | void>({
       query: (args: GetPositionRequestsArgs = {}) => {
         return {
@@ -267,4 +329,6 @@ export const {
   useCreatePositionRequestMutation,
   useUpdatePositionRequestMutation,
   useGetPositionRequestsCountQuery,
+  useGetPositionRequestClassificationsQuery,
+  useGetPositionRequestJobStoreNumbersQuery,
 } = positionRequestApi;

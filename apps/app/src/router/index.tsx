@@ -13,6 +13,9 @@ import { MyPositionsRoute } from '../routes/my-positions';
 import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
+import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
+import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
 import { TotalCompDraftProfilesRoute } from '../routes/total-comp-draft-profiles';
 import { TotalCompDraftProfilesPage } from '../routes/total-comp-draft-profiles/total-comp-draft-profies.page';
 import { TotalCompPublishedProfilesPage } from '../routes/total-comp-published-profiles/total-comp-published-profies.page';
@@ -148,6 +151,28 @@ export const router = createBrowserRouter([
               },
             ],
           },
+          {
+            path: '/total-compensation/approved-requests',
+            element: (
+              <RoleGuard requiredRole="total-compensation">
+                <TotalCompApprovedRequestsRoute />
+              </RoleGuard>
+            ),
+            handle: {
+              breadcrumb: () => 'Approved requests',
+            },
+            children: [
+              {
+                index: true,
+                element: <TotalCompApprovedRequestsPage />,
+              },
+              {
+                path: ':positionRequestId',
+                element: <TotalCompApprovedRequestPage />,
+              },
+            ],
+          },
+
           {
             path: '/unauthorized',
             element: <UnauthorizedRoute />,

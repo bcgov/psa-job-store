@@ -4,8 +4,8 @@ import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.in
 import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
 import { JsonWithAggregatesFilter } from '../prisma/json-with-aggregates-filter.input';
 import { UuidWithAggregatesFilter } from '../prisma/uuid-with-aggregates-filter.input';
-import { EnumPositionRequestStatusWithAggregatesFilter } from '../prisma/enum-position-request-status-with-aggregates-filter.input';
 import { DateTimeWithAggregatesFilter } from '../prisma/date-time-with-aggregates-filter.input';
+import { EnumPositionRequestStatusWithAggregatesFilter } from '../prisma/enum-position-request-status-with-aggregates-filter.input';
 
 @InputType()
 export class PositionRequestScalarWhereWithAggregatesInput {
@@ -52,7 +52,16 @@ export class PositionRequestScalarWhereWithAggregatesInput {
   classification_code?: StringWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
+  user_name?: StringWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  email?: StringWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
   submission_id?: StringWithAggregatesFilter;
+
+  @Field(() => DateTimeWithAggregatesFilter, { nullable: true })
+  approved_at?: DateTimeWithAggregatesFilter;
 
   @Field(() => EnumPositionRequestStatusWithAggregatesFilter, { nullable: true })
   status?: EnumPositionRequestStatusWithAggregatesFilter;

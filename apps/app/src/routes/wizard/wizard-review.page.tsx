@@ -13,6 +13,18 @@ interface WizardReviewPageProps {
   onBack?: () => void;
 }
 
+export const diffLegendContent = (
+  <>
+    <p>
+      <b>Changes legend:</b>
+    </p>
+    <p style={{ marginBottom: '-12px' }}>
+      <span style={{ textDecoration: 'line-through' }}>Strikethrough</span> means removed text.<br></br>
+      <span style={{ backgroundColor: 'yellow' }}>Highlighted text</span> means added text.
+    </p>
+  </>
+);
+
 // export const WizardReviewPage = () => {
 export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({ onNext, onBack }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
@@ -47,18 +59,6 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({ onNext, onBa
   const handleToggleShowDiff = (checked: boolean) => {
     setShowDiff(checked);
   };
-
-  const diffLegendContent = (
-    <>
-      <p>
-        <b>Changes legend:</b>
-      </p>
-      <p style={{ marginBottom: '-12px' }}>
-        <span style={{ textDecoration: 'line-through' }}>Strikethrough</span> means removed text.<br></br>
-        <span style={{ backgroundColor: 'yellow' }}>Highlighted text</span> means added text.
-      </p>
-    </>
-  );
 
   const [hasScrolledPast, setHasScrolledPast] = useState(false);
 
