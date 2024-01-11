@@ -2,6 +2,7 @@
 import {
   CopyOutlined,
   DeleteOutlined,
+  DownloadOutlined,
   EditOutlined,
   EllipsisOutlined,
   EyeOutlined,
@@ -10,7 +11,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Popover, Row, Space, Table, message } from 'antd';
+import { Button, Card, Col, Menu, Popover, Row, Space, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import copy from 'copy-to-clipboard';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
@@ -29,6 +30,7 @@ interface MyPositionsTableProps {
   itemsPerPage?: number;
   topRightComponent?: ReactNode;
   tableTitle?: string;
+  mode?: string | null;
 }
 
 type ColumnTypes = {
@@ -51,9 +53,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   itemsPerPage = 10,
   topRightComponent,
   tableTitle = 'My Positions',
+  mode = null,
 }) => {
   const [trigger, { data, isLoading }] = useLazyGetPositionRequestsQuery();
   const [searchParams] = useSearchParams();
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(itemsPerPage);
@@ -71,9 +76,11 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
   useEffect(() => {
     if (data && data.positionRequestsCount !== undefined) {
-      setTotalResults(data.positionRequestsCount.total);
+      setTotalResults(
+        mode == 'total-compensation' ? data.positionRequestsCount.completed : data.positionRequestsCount.total,
+      );
     }
-  }, [data]);
+  }, [data, mode]);
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -90,47 +97,63 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const getMenuContent = (record: any) => {
     return (
       <Menu>
-        {record.status === 'DRAFT' && (
+        {mode == null ? (
           <>
-            <Menu.Item key="edit" icon={<EditOutlined />}>
-              Edit
-            </Menu.Item>
-            <Menu.Item key="copy" icon={<LinkOutlined />}>
-              Copy link
-            </Menu.Item>
-            <Menu.Item key="delete" icon={<DeleteOutlined />}>
-              Delete
-            </Menu.Item>
-          </>
-        )}
+            {record.status === 'DRAFT' && (
+              <>
+                <Menu.Item key="edit" icon={<EditOutlined />}>
+                  Edit
+                </Menu.Item>
+                <Menu.Item key="copy" icon={<LinkOutlined />}>
+                  Copy link
+                </Menu.Item>
+                <Menu.Item key="delete" icon={<DeleteOutlined />}>
+                  Delete
+                </Menu.Item>
+              </>
+            )}
 
-        {record.status === 'COMPLETED' && (
+            {record.status === 'COMPLETED' && (
+              <>
+                <Menu.Item key="view" icon={<EyeOutlined />}>
+                  View
+                </Menu.Item>
+                <Menu.Item key="download" icon={<FilePdfOutlined />}>
+                  Download profile
+                </Menu.Item>
+                <Menu.Item key="copy" icon={<LinkOutlined />}>
+                  Copy link
+                </Menu.Item>
+                <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
+                  Delete
+                </Menu.Item>
+              </>
+            )}
+
+            {record.status === 'IN_REVIEW' && (
+              <>
+                <Menu.Item key="view" icon={<EyeOutlined />}>
+                  View
+                </Menu.Item>
+                <Menu.Item key="copy" icon={<LinkOutlined />}>
+                  Copy link
+                </Menu.Item>
+                <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
+                  Delete
+                </Menu.Item>
+              </>
+            )}
+          </>
+        ) : (
           <>
-            <Menu.Item key="edit" icon={<EyeOutlined />}>
+            <Menu.Item key="view" icon={<EyeOutlined />}>
               View
             </Menu.Item>
-            <Menu.Item key="download" icon={<FilePdfOutlined />}>
-              Download profile
+            <Menu.Item key="download" icon={<DownloadOutlined />}>
+              Download attachements
             </Menu.Item>
             <Menu.Item key="copy" icon={<LinkOutlined />}>
               Copy link
-            </Menu.Item>
-            <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
-              Delete
-            </Menu.Item>
-          </>
-        )}
-
-        {record.status === 'IN_REVIEW' && (
-          <>
-            <Menu.Item key="edit" icon={<EyeOutlined />}>
-              View
-            </Menu.Item>
-            <Menu.Item key="copy" icon={<LinkOutlined />}>
-              Copy link
-            </Menu.Item>
-            <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
-              Delete
             </Menu.Item>
           </>
         )}
@@ -154,67 +177,103 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       key: 'title',
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
-      render: (text: any, record: any) => <Link to={`/position-request/${record.id}`}>{text}</Link>,
+      render: (text: any, record: any) =>
+        mode == null ? (
+          <Link to={`/position-request/${record.id}`}>{text}</Link>
+        ) : (
+          <Link to={`/total-compensation/approved-requests/${record.id}`}>{text}</Link>
+        ),
     },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      sorter: allowSorting,
-      defaultSortOrder: getSortOrder('status'),
-      render: (status: any) => {
-        const color = status === 'DRAFT' ? 'gray' : status === 'IN_REVIEW' ? 'blue' : 'green';
-        return (
-          <Space>
-            <span className={`status-dot status-dot-${color}`} />
-            {status === 'DRAFT'
-              ? 'Draft'
-              : status === 'IN_REVIEW'
-                ? 'In review'
-                : status === 'COMPLETED'
-                  ? 'Completed'
-                  : ''}
-          </Space>
-        );
-      },
-    },
-    {
-      sorter: allowSorting,
-      defaultSortOrder: getSortOrder('position_number'),
-      title: 'Position #',
-      dataIndex: 'position_number',
-      key: 'position_number',
-      render: (text: any, record: any) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {text}
-          {record.status === 'COMPLETED' && hoveredRowKey === record.id && (
-            <Button
-              icon={<CopyOutlined />}
-              size="small"
-              style={{
-                marginLeft: 8,
-                padding: '0px', // Reduce padding
-                lineHeight: '1', // Match the line height to the row content
-                border: 'none', // Remove the border if not needed
-                background: 'transparent', // Remove background
-                height: 'fit-content', // Ensure the button only takes up the necessary height
-              }}
-              onClick={() => {
-                copy(text.toString());
-                message.success('Position number copied!');
-              }}
-            />
-          )}
-        </div>
-      ),
-    },
-    {
-      sorter: allowSorting,
-      defaultSortOrder: getSortOrder('classification_code'),
-      title: 'Classification',
-      dataIndex: 'classification_code',
-      key: 'classification_code',
-    },
+    ...(mode == null
+      ? [
+          {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('status'),
+            render: (status: any) => {
+              const color = status === 'DRAFT' ? 'gray' : status === 'IN_REVIEW' ? 'blue' : 'green';
+              return (
+                <Space>
+                  <span className={`status-dot status-dot-${color}`} />
+                  {status === 'DRAFT'
+                    ? 'Draft'
+                    : status === 'IN_REVIEW'
+                      ? 'In review'
+                      : status === 'COMPLETED'
+                        ? 'Completed'
+                        : ''}
+                </Space>
+              );
+            },
+          },
+        ]
+      : [
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('classification_code'),
+            title: 'Classification',
+            dataIndex: 'classification_code',
+            key: 'classification_code',
+          },
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('jobStoreId'),
+            title: 'JobStore number',
+            dataIndex: 'parent_job_profile',
+            key: 'parent_job_profile_number',
+            render: (parentJobProfile: any) => (parentJobProfile ? parentJobProfile.number : 'N/A'),
+          },
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('user_name'),
+            title: 'Submitted by',
+            dataIndex: 'user_name',
+            key: 'user_name',
+          },
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('approved_at'),
+            title: 'Approved at',
+            dataIndex: 'approved_at',
+            key: 'approved_at',
+          },
+        ]),
+    ...(mode == null
+      ? [
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('position_number'),
+            title: 'Position #',
+            dataIndex: 'position_number',
+            key: 'position_number',
+            render: (text: any, record: any) => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {text}
+                {record.status === 'COMPLETED' && hoveredRowKey === record.id && (
+                  <Button
+                    icon={<CopyOutlined />}
+                    size="small"
+                    style={{
+                      marginLeft: 8,
+                      padding: '0px', // Reduce padding
+                      lineHeight: '1', // Match the line height to the row content
+                      border: 'none', // Remove the border if not needed
+                      background: 'transparent', // Remove background
+                      height: 'fit-content', // Ensure the button only takes up the necessary height
+                    }}
+                    onClick={() => {
+                      copy(text.toString());
+                      message.success('Position number copied!');
+                    }}
+                  />
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
     {
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('submission_id'),
@@ -222,14 +281,18 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       dataIndex: 'submission_id',
       key: 'submission_id',
     },
-    {
-      sorter: allowSorting,
-      defaultSortOrder: getSortOrder('updated_at'),
-      title: 'Modified at',
-      dataIndex: 'updated_at',
-      key: 'updated_at',
-      render: (text: string) => formatDateTime(text),
-    },
+    ...(mode == null
+      ? [
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('updated_at'),
+            title: 'Modified at',
+            dataIndex: 'updated_at',
+            key: 'updated_at',
+            render: (text: string) => formatDateTime(text),
+          },
+        ]
+      : []),
     {
       title: <SettingOutlined />,
       align: 'center',
@@ -299,8 +362,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       ...sortParams,
       skip: (currentPage - 1) * pageSize,
       take: pageSize,
+      onlyCompletedForAll: mode === 'total-compensation',
     });
-  }, [searchParams, trigger, currentPage, pageSize, sortField, sortOrder]);
+  }, [searchParams, trigger, currentPage, pageSize, sortField, sortOrder, mode]);
 
   useEffect(() => {
     updateData();
@@ -323,6 +387,14 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const hasPositionRequests = data?.positionRequests && data.positionRequests.length > 0;
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (selectedKeys: any) => {
+      setSelectedRowKeys(selectedKeys);
+    },
+  };
+
   if (isLoading) return <div>Loading...</div>;
 
   return (
@@ -335,10 +407,15 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           <Col span={12}>
             <Row justify="end">
               <Col>
-                {topRightComponent ? (
-                  topRightComponent
+                {selectedRowKeys.length > 0 ? (
+                  <Tooltip title="Download attachments">
+                    <Button
+                      icon={<DownloadOutlined />}
+                      onClick={() => console.log('Download selected rows:', selectedRowKeys)}
+                    />
+                  </Tooltip>
                 ) : (
-                  <Button icon={<ReloadOutlined />} onClick={() => updateData()} />
+                  topRightComponent || <Button icon={<ReloadOutlined />} onClick={() => updateData()} />
                 )}
               </Col>
             </Row>
@@ -348,6 +425,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
       {hasPositionRequests ? (
         <Table
+          rowSelection={rowSelection}
           onRow={(record) => {
             return {
               onMouseEnter: () => handleMouseEnter(record.id),

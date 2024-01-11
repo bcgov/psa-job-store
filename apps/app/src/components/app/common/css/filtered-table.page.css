@@ -25,9 +25,11 @@
     padding: 12px 24px;
 }
 
-.tableWithHeader .ant-table, .tableWithHeader table, .tableWithHeader th{
+.tableWithHeader .ant-table, .tableWithHeader table, .tableWithHeader th, .descriptionsWithHeader .ant-descriptions-view{
     border-radius: 0 !important;
 }
+
+
 
 /* .customTagControlled .ant-select-selection-item {
     display: none;

@@ -7,6 +7,8 @@ export enum PositionRequestOrderByRelevanceFieldEnum {
   title = 'title',
   classification_id = 'classification_id',
   classification_code = 'classification_code',
+  user_name = 'user_name',
+  email = 'email',
   submission_id = 'submission_id',
 }
 

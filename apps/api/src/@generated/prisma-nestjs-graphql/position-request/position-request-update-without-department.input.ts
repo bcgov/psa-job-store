@@ -32,7 +32,16 @@ export class PositionRequestUpdateWithoutDepartmentInput {
   classification_code?: string;
 
   @Field(() => String, { nullable: true })
+  user_name?: string;
+
+  @Field(() => String, { nullable: true })
+  email?: string;
+
+  @Field(() => String, { nullable: true })
   submission_id?: string;
+
+  @Field(() => Date, { nullable: true })
+  approved_at?: Date | string;
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;

@@ -46,7 +46,10 @@ model PositionRequest {
   position_number        Int?
   classification_id      String?
   classification_code    String? // this is just to satisfy type definition, no data is stored here AL-146
+  user_name              String? // this is just to satisfy type definition, no data is stored here AL-146
+  email                  String? // this is just to satisfy type definition, no data is stored here AL-146
   submission_id          String?
+  approved_at            DateTime?
   status                 PositionRequestStatus?
   updated_at             DateTime               @default(now()) @updatedAt
 

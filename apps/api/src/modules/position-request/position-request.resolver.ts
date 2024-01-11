@@ -1,3 +1,4 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Field, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import {
   PositionRequest,
@@ -5,7 +6,9 @@ import {
   PositionRequestUpdateInput,
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { FindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RoleGuard } from '../auth/guards/role.guard';
+import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
   PositionRequestApiService,
   PositionRequestResponse,
@@ -52,18 +55,18 @@ export class PositionRequestApiResolver {
 
   @Query(() => PositionRequestStatusCounts, { name: 'positionRequestsCount' })
   async positionRequestsCount(
-    @CurrentUser() { id: userId }: Express.User,
-    @Args() args?: FindManyPositionRequestWithSearch,
+    @CurrentUser() user: Express.User,
+    @Args() args?: ExtendedFindManyPositionRequestWithSearch,
   ) {
-    return await this.positionRequestService.getPositionRequestCount(args, userId);
+    return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles);
   }
 
   @Query(() => [PositionRequest], { name: 'positionRequests' })
   async getPositionRequests(
-    @CurrentUser() { id: userId }: Express.User,
-    @Args() args?: FindManyPositionRequestWithSearch,
+    @CurrentUser() user: Express.User,
+    @Args() args?: ExtendedFindManyPositionRequestWithSearch,
   ) {
-    return this.positionRequestService.getPositionRequests(args, userId);
+    return this.positionRequestService.getPositionRequests(args, user.id, user.roles);
   }
 
   @Query(() => PositionRequest, { name: 'positionRequest' })
@@ -74,5 +77,19 @@ export class PositionRequestApiResolver {
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestUserClassifications' })
   async getPositionRequestUserClassifications(@CurrentUser() { id: userId }: Express.User) {
     return this.positionRequestService.getPositionRequestUserClassifications(userId);
+  }
+
+  @Roles('total-compensation')
+  @UseGuards(RoleGuard)
+  @Query(() => [PositionRequestUserClassification], { name: 'positionRequestClassifications' })
+  async getPositionRequestClassifications() {
+    return this.positionRequestService.getPositionRequestClassifications();
+  }
+
+  @Roles('total-compensation')
+  @UseGuards(RoleGuard)
+  @Query(() => [Int], { name: 'positionRequestJobStoreNumbers' })
+  async getPositionRequestJobStoreNumbers() {
+    return this.positionRequestService.getPositionRequestJobStoreNumbers();
   }
 }

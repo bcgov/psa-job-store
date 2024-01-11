@@ -7,7 +7,7 @@ import {
   PositionRequestUpdateInput,
 } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../prisma/prisma.service';
-import { FindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
+import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -99,7 +99,11 @@ export class PositionRequestApiService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getPositionRequests({ search, where, ...args }: FindManyPositionRequestWithSearch, userId: string) {
+  async getPositionRequests(
+    { search, where, onlyCompletedForAll, ...args }: ExtendedFindManyPositionRequestWithSearch,
+    userId: string,
+    userRoles: string[] = [],
+  ) {
     let searchConditions = {};
     if (search) {
       searchConditions = {
@@ -120,12 +124,32 @@ export class PositionRequestApiService {
       };
     }
 
+    let whereConditions = {
+      ...searchConditions,
+      ...where,
+    };
+
+    // If the user has the "total-compensation" role and wants only completed requests for all users
+    if (userRoles.includes('total-compensation') && onlyCompletedForAll) {
+      whereConditions = {
+        ...whereConditions,
+        status: { equals: 'COMPLETED' },
+      };
+    } else {
+      // Default behavior for other users
+      whereConditions = {
+        ...whereConditions,
+        user_id: { equals: userId },
+      };
+    }
+
     const positionRequests = await this.prisma.positionRequest.findMany({
-      where: {
-        ...searchConditions,
-        ...where,
-        user_id: userId,
-      },
+      where: whereConditions,
+      // where: {
+      //   ...searchConditions,
+      //   ...where,
+      //   user_id: userId,
+      // },
       ...args,
       orderBy: [...(args.orderBy || []), { id: 'desc' }],
       select: {
@@ -140,6 +164,8 @@ export class PositionRequestApiService {
         submission_id: true,
         status: true,
         updated_at: true,
+        parent_job_profile: true,
+        approved_at: true,
       },
     });
 
@@ -164,24 +190,82 @@ export class PositionRequestApiService {
     // Create a map for easy lookup
     const classificationMap = new Map(classifications.map((c) => [c.id, c.code]));
 
+    // Collect all unique user IDs from the position requests
+    const userIds = [...new Set(positionRequests.map((pr) => pr.user_id).filter((id) => id != null))];
+
+    // Fetch users based on the collected IDs
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: { in: userIds },
+      },
+      select: {
+        id: true,
+        name: true, // Assuming 'name' is the field in your User model
+      },
+    });
+
+    // Create a map for easy user lookup
+    const userMap = new Map(users.map((u) => [u.id, u.name]));
+
     // Merge position requests with classification codes
     const mergedResults = positionRequests.map((pr) => ({
       ...pr,
       classification_code: classificationMap.get(pr.classification_id),
+      user_name: userMap.get(pr.user_id),
     }));
     return mergedResults; //.reverse();
   }
 
-  async getPositionRequest(id: number, userId: string) {
-    return this.prisma.positionRequest.findUnique({
-      where: { id: id, user_id: userId },
+  async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
+    let whereCondition: { id: number; user_id?: string } = { id };
+
+    // If the user does not have the "total-compensation" role, include the user_id in the where condition
+    if (!userRoles.includes('total-compensation')) {
+      whereCondition = { ...whereCondition, user_id: userId };
+    }
+
+    const positionRequest = await this.prisma.positionRequest.findUnique({
+      where: whereCondition,
+      include: {
+        parent_job_profile: true,
+      },
     });
+
+    if (!positionRequest) {
+      return null;
+    }
+
+    // TODO: AL-146 - this should not be needed if the foreign key relationship is working properly in schema.prisma
+    // Fetch classification
+    const classification = await this.prisma.classification.findUnique({
+      where: { id: positionRequest.classification_id },
+      select: {
+        code: true, // Assuming 'code' is the field you want from the classification
+      },
+    });
+
+    // Fetch user
+    const user = await this.prisma.user.findUnique({
+      where: { id: positionRequest.user_id },
+      select: {
+        name: true, // Assuming 'name' is the field you want from the user
+        email: true,
+      },
+    });
+
+    return {
+      ...positionRequest,
+      classification_code: classification?.code,
+      user_name: user?.name,
+      email: user?.email,
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequestCount(
-    { search, where }: FindManyPositionRequestWithSearch,
+    { search, where, onlyCompletedForAll }: ExtendedFindManyPositionRequestWithSearch,
     userId: string,
+    userRoles: string[] = [],
   ): Promise<PositionRequestStatusCounts> {
     let searchConditions = {};
     if (search) {
@@ -203,14 +287,30 @@ export class PositionRequestApiService {
       };
     }
 
+    let whereConditions = {
+      ...searchConditions,
+      ...where,
+    };
+
+    // Update where conditions based on the "total-compensation" role and onlyCompletedForAll flag
+    if (userRoles.includes('total-compensation') && onlyCompletedForAll) {
+      whereConditions = {
+        ...whereConditions,
+        status: { equals: 'COMPLETED' },
+      };
+    } else {
+      whereConditions = {
+        ...whereConditions,
+        user_id: { equals: userId },
+      };
+    }
+
     // Function to get count for a specific status
     const getCountForStatus = async (status: PositionRequestStatus) => {
       return await this.prisma.positionRequest.count({
         where: {
-          ...searchConditions,
-          user_id: userId,
-          status: status, // Now status is of the correct type
-          ...where,
+          ...whereConditions,
+          status: status,
         },
       });
     };
@@ -229,7 +329,6 @@ export class PositionRequestApiService {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequestUserClassifications(userId: string) {
     const positionRequests = await this.prisma.positionRequest.findMany({
       where: {
@@ -266,6 +365,59 @@ export class PositionRequestApiService {
     });
 
     return classifications;
+  }
+
+  async getPositionRequestClassifications() {
+    const positionRequests = await this.prisma.positionRequest.findMany({
+      where: {
+        status: 'COMPLETED',
+      },
+      select: {
+        classification_id: true,
+      },
+    });
+
+    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
+
+    // Collect all unique classification IDs from the position requests
+    const classificationIds = [
+      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id !== null)),
+    ];
+
+    // Fetch classifications based on the collected IDs
+    const classifications = await this.prisma.classification.findMany({
+      where: {
+        id: { in: classificationIds },
+      },
+      select: {
+        id: true,
+        code: true,
+      },
+    });
+
+    return classifications;
+  }
+
+  async getPositionRequestJobStoreNumbers() {
+    const uniqueNumbers = await this.prisma.jobProfile.findMany({
+      where: {
+        position_request: {
+          some: {
+            status: 'COMPLETED',
+            parent_job_profile_id: {
+              not: null,
+            },
+          },
+        },
+      },
+      select: {
+        number: true,
+      },
+      distinct: ['number'],
+    });
+
+    const ret = uniqueNumbers.map((profile) => profile.number);
+    return ret;
   }
 
   async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {

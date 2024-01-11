@@ -9,6 +9,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
 import 'reflect-metadata';
 import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL, VITE_KEYCLOAK_REDIRECT_URL } from '../envConfig';
+import { BreadcrumbProvider } from './breadcrumb-context';
 import { store } from './redux/redux.store';
 import { router } from './router/index';
 import { WizardProvider } from './routes/wizard/components/wizard.provider';
@@ -36,12 +37,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           }}
         >
           <HelmetProvider>
-            <App>
-              <Helmet defaultTitle="Job Store" titleTemplate="%s | Job Store" />
-              <WizardProvider>
-                <RouterProvider router={router} />
-              </WizardProvider>
-            </App>
+            <BreadcrumbProvider>
+              <App>
+                <Helmet defaultTitle="Job Store" titleTemplate="%s | Job Store" />
+                <WizardProvider>
+                  <RouterProvider router={router} />
+                </WizardProvider>
+              </App>
+            </BreadcrumbProvider>
           </HelmetProvider>
         </ConfigProvider>
       </ReduxProvider>

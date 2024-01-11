@@ -166,7 +166,7 @@ export const AppLayout = () => {
                         {
                           icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
                           title: 'Approved requests',
-                          to: '/total-compensation/requests/approved',
+                          to: '/total-compensation/approved-requests',
                           hideTitle: true,
                         },
                       ]}
@@ -198,7 +198,7 @@ export const AppLayout = () => {
                           {
                             icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
                             title: 'Approved Reqs',
-                            to: '/total-compensation/requests/approved',
+                            to: '/total-compensation/approved-requests',
                           },
                         ]}
                       />

@@ -34,7 +34,16 @@ export class PositionRequestMaxAggregateInput {
   classification_code?: true;
 
   @Field(() => Boolean, { nullable: true })
+  user_name?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  email?: true;
+
+  @Field(() => Boolean, { nullable: true })
   submission_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  approved_at?: true;
 
   @Field(() => Boolean, { nullable: true })
   status?: true;

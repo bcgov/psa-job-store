@@ -12,7 +12,10 @@ export enum PositionRequestScalarFieldEnum {
   position_number = 'position_number',
   classification_id = 'classification_id',
   classification_code = 'classification_code',
+  user_name = 'user_name',
+  email = 'email',
   submission_id = 'submission_id',
+  approved_at = 'approved_at',
   status = 'status',
   updated_at = 'updated_at',
 }

@@ -42,7 +42,16 @@ export class PositionRequestOrderByWithRelationAndSearchRelevanceInput {
   classification_code?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
+  user_name?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  email?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
   submission_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  approved_at?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   status?: SortOrderInput;

@@ -268,7 +268,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-
     getJobProfilesMinistries: build.query<JobProfilesMinistriesResponse, void>({
       query: () => {
         return {
