@@ -123,6 +123,19 @@ export interface GetPositionRequestJobStoreNumbersResponse {
   positionRequestJobStoreNumbers: number[];
 }
 
+export interface GetPositionRequestSubmittedByResponseItem {
+  id: string;
+  name: string;
+}
+
+export interface GetPositionRequestSubmittedByResponse {
+  positionRequestSubmittedBy: GetPositionRequestSubmittedByResponseItem[];
+}
+
+export interface GetPositionRequestStatusesResponse {
+  positionRequestStatuses: string[];
+}
+
 export interface PositionRequestUserClassification {
   id: string;
   code: string;
@@ -297,6 +310,31 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getPositionRequestStatuses: build.query<GetPositionRequestStatusesResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query PositionRequestStatuses {
+              positionRequestStatuses
+            }
+          `,
+        };
+      },
+    }),
+    getPositionRequestSubmittedBy: build.query<GetPositionRequestSubmittedByResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query PositionRequestSubmittedBy {
+              positionRequestSubmittedBy {
+                id
+                name
+              }
+            }
+          `,
+        };
+      },
+    }),
     getPositionRequestsCount: build.query<PositionRequestStatusCountsResponse, GetPositionRequestsArgs | void>({
       query: (args: GetPositionRequestsArgs = {}) => {
         return {
@@ -331,4 +369,6 @@ export const {
   useGetPositionRequestsCountQuery,
   useGetPositionRequestClassificationsQuery,
   useGetPositionRequestJobStoreNumbersQuery,
+  useGetPositionRequestStatusesQuery,
+  useGetPositionRequestSubmittedByQuery,
 } = positionRequestApi;

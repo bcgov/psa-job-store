@@ -5,8 +5,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
 import {
+  GetPositionRequestSubmittedByResponseItem,
   useGetPositionRequestClassificationsQuery,
   useGetPositionRequestJobStoreNumbersQuery,
+  useGetPositionRequestStatusesQuery,
+  useGetPositionRequestSubmittedByQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
 // import './job-profile-search.component.css'; // todo: add as necessary
 
@@ -33,6 +36,7 @@ interface JobProfileSearchProps {
   searchPlaceHolderText?: string;
   searchButtonText?: string;
   fullWidth?: boolean;
+  mode?: string | null;
 }
 
 // Unified state for all selections
@@ -50,6 +54,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   searchButtonText = 'Find requests',
   searchPlaceHolderText = 'Search by job title or keyword',
   fullWidth = false,
+  mode = null,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -63,9 +68,21 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   // get unique job store numbers for approved position requests
   const jobStoreNumbersData = useGetPositionRequestJobStoreNumbersQuery().data?.positionRequestJobStoreNumbers;
 
+  // if mode is classification, get unique statuses and approved by data
+  // todo: load conditionally
+  // if (mode=="classification") {
+  // get unique statuses for approved position requests
+  const statusData = useGetPositionRequestStatusesQuery().data?.positionRequestStatuses;
+
+  // get unique approved by for approved position requests
+  const submittedByData = useGetPositionRequestSubmittedByQuery().data?.positionRequestSubmittedBy;
+  // }
+
   const [allSelections, setAllSelections] = useState<Selection[]>([]); // holds tags from all filters
   const [classificationFilterData, setClassificationOptions] = useState<SelectionOption[]>([]);
   const [jobStoreNumberFilterData, setJobStoreNumberOptions] = useState<SelectionOption[]>([]);
+  const [statusFilterData, setStatusOptions] = useState<SelectionOption[]>([]);
+  const [submittedByFilterData, setSubmittedByOptions] = useState<SelectionOption[]>([]);
 
   const [initialSelectionSet, setInitialSelectionSet] = useState(false); // used to prevent initial selections from being overwritten
 
@@ -100,9 +117,31 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
     }
   }, [jobStoreNumbersData]);
 
+  useEffect(() => {
+    if (statusData) {
+      const newOptions = statusData.map((statusDataItem: string) => ({
+        label: statusDataItem,
+        value: statusDataItem,
+      }));
+      setStatusOptions(newOptions);
+    }
+  }, [statusData]);
+
+  useEffect(() => {
+    if (submittedByData) {
+      const newOptions = submittedByData.map((submittedByDataItem: GetPositionRequestSubmittedByResponseItem) => ({
+        label: submittedByDataItem.name,
+        value: submittedByDataItem.id,
+      }));
+      setSubmittedByOptions(newOptions);
+    }
+  }, [submittedByData]);
+
   // Update the Select components when selections change
   const selectedClassification = allSelections.filter((s) => s.type === 'classification').map((s) => s.value);
   const selectedJobStoreNumber = allSelections.filter((s) => s.type === 'jobStoreNumber').map((s) => s.value);
+  const selectedStatus = allSelections.filter((s) => s.type === 'status').map((s) => s.value);
+  const selectedSubmittedBy = allSelections.filter((s) => s.type === 'submittedBy').map((s) => s.value);
 
   // Find the label for a given value
   const findLabel = (value: any, type: any) => {
@@ -111,6 +150,12 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
     }
     if (type === 'classification') {
       return classificationFilterData.find((option) => option.value === value)?.label || value;
+    }
+    if (type === 'status') {
+      return statusFilterData.find((option) => option.value === value)?.label || value;
+    }
+    if (type === 'submittedBy') {
+      return submittedByFilterData.find((option) => option.value === value)?.label || value;
     }
     return value;
   };
@@ -123,10 +168,18 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
     const jobStoreNumberParams = decodeURIComponent(searchParams.get('job_store_number__in') || '')
       .split(',')
       .filter(Boolean);
+    const statusParams = decodeURIComponent(searchParams.get('status__in') || '')
+      .split(',')
+      .filter(Boolean);
+    const submittedByParams = decodeURIComponent(searchParams.get('submitted_by__in') || '')
+      .split(',')
+      .filter(Boolean);
 
     const initialSelections = [
       ...jobStoreNumberParams.map((value) => ({ value, type: 'jobStoreNumber' })),
       ...classificationParams.map((value) => ({ value, type: 'classification' })),
+      ...statusParams.map((value) => ({ value, type: 'status' })),
+      ...submittedByParams.map((value) => ({ value, type: 'submittedBy' })),
     ];
     if (!initialSelectionSet) {
       setAllSelections(initialSelections);
@@ -141,6 +194,14 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
       .join(',');
     const jobStoreNumberValues = allSelections
       .filter((s) => s.type === 'jobStoreNumber')
+      .map((s) => s.value)
+      .join(',');
+    const statusValues = allSelections
+      .filter((s) => s.type === 'status')
+      .map((s) => s.value)
+      .join(',');
+    const submittedByValues = allSelections
+      .filter((s) => s.type === 'submittedBy')
       .map((s) => s.value)
       .join(',');
 
@@ -163,6 +224,8 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
 
     if (classificationValues) newSearchParams.set('classification_id__in', classificationValues);
     if (jobStoreNumberValues) newSearchParams.set('job_store_number__in', jobStoreNumberValues);
+    if (statusValues) newSearchParams.set('status__in', statusValues);
+    if (submittedByValues) newSearchParams.set('submitted_by__in', submittedByValues);
 
     if (dateRange.length === 2) {
       newSearchParams.set('startDate', dateRange[0].format('YYYY-MM-DD'));
@@ -294,6 +357,44 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
             </Col>
             <Col span={fullWidth ? 14 : 12}>
               <Row gutter={8} justify="end">
+                {mode === 'classification' && (
+                  <Col data-testid="Status-filter" data-cy="Status-filter">
+                    <Select
+                      closeMenuOnSelect={false}
+                      isClearable={false}
+                      backspaceRemovesValue={false}
+                      hideSelectedOptions={false}
+                      value={statusFilterData.filter((jf) =>
+                        allSelections
+                          .filter((selection) => selection.type === 'status')
+                          .map((selection) => selection.value)
+                          .includes(jf.value),
+                      )}
+                      styles={{
+                        container: (css) => ({ ...css, width: '200px' }),
+                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                      }}
+                      components={{
+                        ValueContainer: CustomValueContainer,
+                      }}
+                      classNamePrefix="react-select"
+                      isMulti
+                      placeholder="Status"
+                      options={statusFilterData}
+                      onChange={(selectedItems) => {
+                        const newValues = selectedItems.map((item) => item.value);
+                        if (newValues == null) return;
+
+                        newValues.forEach((val: any) => {
+                          if (!selectedStatus.includes(val)) addSelection(val, 'status');
+                        });
+                        selectedStatus.forEach((val) => {
+                          if (!newValues.includes(val)) removeSelection(val, 'status');
+                        });
+                      }}
+                    ></Select>
+                  </Col>
+                )}
                 <Col data-testid="Classification-filter" data-cy="Classification-filter">
                   <Select
                     closeMenuOnSelect={false}
@@ -330,56 +431,99 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                     }}
                   ></Select>
                 </Col>
-                <Col data-testid="JobStoreNumber-filter" data-cy="JobStoreNumber-filter">
-                  <Select
-                    closeMenuOnSelect={false}
-                    isClearable={false}
-                    backspaceRemovesValue={false}
-                    hideSelectedOptions={false}
-                    value={jobStoreNumberFilterData.filter((jf) =>
-                      allSelections
-                        .filter((selection) => selection.type === 'jobStoreNumber')
-                        .map((selection) => selection.value)
-                        .includes(jf.value),
-                    )}
-                    styles={{
-                      container: (css) => ({ ...css, width: '200px' }),
-                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                    }}
-                    components={{
-                      ValueContainer: CustomValueContainer,
-                    }}
-                    classNamePrefix="react-select"
-                    isMulti
-                    placeholder="JobStore number"
-                    options={jobStoreNumberFilterData}
-                    onChange={(selectedItems) => {
-                      const newValues = selectedItems.map((item) => item.value);
-                      if (newValues == null) return;
 
-                      newValues.forEach((val: any) => {
-                        if (!selectedJobStoreNumber.includes(val)) addSelection(val, 'jobStoreNumber');
-                      });
-                      selectedJobStoreNumber.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'jobStoreNumber');
-                      });
-                    }}
-                  ></Select>
-                </Col>
+                {mode != 'classification' && (
+                  <>
+                    <Col data-testid="JobStoreNumber-filter" data-cy="JobStoreNumber-filter">
+                      <Select
+                        closeMenuOnSelect={false}
+                        isClearable={false}
+                        backspaceRemovesValue={false}
+                        hideSelectedOptions={false}
+                        value={jobStoreNumberFilterData.filter((jf) =>
+                          allSelections
+                            .filter((selection) => selection.type === 'jobStoreNumber')
+                            .map((selection) => selection.value)
+                            .includes(jf.value),
+                        )}
+                        styles={{
+                          container: (css) => ({ ...css, width: '200px' }),
+                          menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                        }}
+                        components={{
+                          ValueContainer: CustomValueContainer,
+                        }}
+                        classNamePrefix="react-select"
+                        isMulti
+                        placeholder="JobStore number"
+                        options={jobStoreNumberFilterData}
+                        onChange={(selectedItems) => {
+                          const newValues = selectedItems.map((item) => item.value);
+                          if (newValues == null) return;
 
-                <Col>
-                  {/* <Dropdown overlay={menu} trigger={['click']}>
+                          newValues.forEach((val: any) => {
+                            if (!selectedJobStoreNumber.includes(val)) addSelection(val, 'jobStoreNumber');
+                          });
+                          selectedJobStoreNumber.forEach((val) => {
+                            if (!newValues.includes(val)) removeSelection(val, 'jobStoreNumber');
+                          });
+                        }}
+                      ></Select>
+                    </Col>
+                    <Col data-testid="Daterange-filter" data-cy="Daterange-filter">
+                      {/* <Dropdown overlay={menu} trigger={['click']}>
                     <Button>
                       Select Date Range <DownOutlined />
                     </Button>
                   </Dropdown> */}
-                  <RangePicker
-                    value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : undefined}
-                    onChange={(dates) => {
-                      setDateRange(dates || []);
-                    }}
-                  />
-                </Col>
+                      <RangePicker
+                        value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : undefined}
+                        onChange={(dates) => {
+                          setDateRange(dates || []);
+                        }}
+                      />
+                    </Col>
+                  </>
+                )}
+
+                {mode === 'classification' && (
+                  <Col data-testid="Created-by-filter" data-cy="Created-by-filter">
+                    <Select
+                      closeMenuOnSelect={false}
+                      isClearable={false}
+                      backspaceRemovesValue={false}
+                      hideSelectedOptions={false}
+                      value={submittedByFilterData.filter((jf) =>
+                        allSelections
+                          .filter((selection) => selection.type === 'submittedBy')
+                          .map((selection) => selection.value)
+                          .includes(jf.value),
+                      )}
+                      styles={{
+                        container: (css) => ({ ...css, width: '200px' }),
+                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                      }}
+                      components={{
+                        ValueContainer: CustomValueContainer,
+                      }}
+                      classNamePrefix="react-select"
+                      isMulti
+                      placeholder="Submitted by"
+                      options={submittedByFilterData}
+                      onChange={(selectedItems) => {
+                        const newValues = selectedItems.map((item) => item.value);
+                        if (newValues == null) return;
+
+                        newValues.forEach((val: any) => {
+                          if (!selectedSubmittedBy.includes(val)) addSelection(val, 'submittedBy');
+                        });
+                        selectedSubmittedBy.forEach((val) => {
+                          if (!newValues.includes(val)) removeSelection(val, 'submittedBy');
+                        });
+                      }}
+                    ></Select>
+                  </Col>
+                )}
               </Row>
             </Col>
             {allSelections.length > 0 && (

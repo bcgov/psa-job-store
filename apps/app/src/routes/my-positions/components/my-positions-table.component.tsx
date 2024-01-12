@@ -16,7 +16,9 @@ import { SortOrder } from 'antd/es/table/interface';
 import copy from 'copy-to-clipboard';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
+import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import '../../../components/app/common/css/filtered-table.component.css';
 import { useLazyGetPositionRequestsQuery } from '../../../redux/services/graphql-api/position-request.api';
 
@@ -31,6 +33,7 @@ interface MyPositionsTableProps {
   topRightComponent?: ReactNode;
   tableTitle?: string;
   mode?: string | null;
+  onDataAvailable?: (isDataAvailable: boolean) => void;
 }
 
 type ColumnTypes = {
@@ -54,8 +57,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   topRightComponent,
   tableTitle = 'My Positions',
   mode = null,
+  onDataAvailable,
 }) => {
-  const [trigger, { data, isLoading }] = useLazyGetPositionRequestsQuery();
+  const [trigger, { data, isLoading, error: fetchError }] = useLazyGetPositionRequestsQuery();
   const [searchParams] = useSearchParams();
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -64,6 +68,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const [pageSize, setPageSize] = useState(itemsPerPage);
   const [sortField, setSortField] = useState<null | string>(null);
   const [sortOrder, setSortOrder] = useState<null | string>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
 
@@ -73,6 +78,15 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     }
     return undefined;
   };
+
+  // Check if data is available and call the callback function to notify the parent component
+  useEffect(() => {
+    if (isLoading) return;
+    const hasData = data && 'positionRequests' in data && data.positionRequests.length > 0;
+    if (onDataAvailable) {
+      onDataAvailable(hasData || false);
+    }
+  }, [data, onDataAvailable, isLoading]);
 
   useEffect(() => {
     if (data && data.positionRequestsCount !== undefined) {
@@ -97,7 +111,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const getMenuContent = (record: any) => {
     return (
       <Menu>
-        {mode == null ? (
+        {mode == null && (
           <>
             {record.status === 'DRAFT' && (
               <>
@@ -144,7 +158,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               </>
             )}
           </>
-        ) : (
+        )}
+
+        {mode == 'total-compensation' && (
           <>
             <Menu.Item key="view" icon={<EyeOutlined />}>
               View
@@ -154,6 +170,17 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             </Menu.Item>
             <Menu.Item key="copy" icon={<LinkOutlined />}>
               Copy link
+            </Menu.Item>
+          </>
+        )}
+
+        {mode == 'classification' && (
+          <>
+            <Menu.Item key="view" icon={<EyeOutlined />}>
+              View
+            </Menu.Item>
+            <Menu.Item key="download" icon={<DownloadOutlined />}>
+              Download attachements
             </Menu.Item>
           </>
         )}
@@ -177,14 +204,16 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       key: 'title',
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
-      render: (text: any, record: any) =>
-        mode == null ? (
-          <Link to={`/position-request/${record.id}`}>{text}</Link>
-        ) : (
-          <Link to={`/total-compensation/approved-requests/${record.id}`}>{text}</Link>
-        ),
+      render: (text: any, record: any) => {
+        if (mode == null) return <Link to={`/position-request/${record.id}`}>{text}</Link>;
+        else if (mode == 'total-compensation') {
+          return <Link to={`/total-compensation/approved-requests/${record.id}`}>{text}</Link>;
+        } else if (mode == 'classification') {
+          return <Link to={`/classification-tasks/${record.id}`}>{text}</Link>;
+        }
+      },
     },
-    ...(mode == null
+    ...(mode == null || mode == 'classification'
       ? [
           {
             title: 'Status',
@@ -193,14 +222,14 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('status'),
             render: (status: any) => {
-              const color = status === 'DRAFT' ? 'gray' : status === 'IN_REVIEW' ? 'blue' : 'green';
+              const color = status === 'DRAFT' ? 'gray' : status === 'IN_REVIEW' ? '#722ED1' : '#13C2C2';
               return (
                 <Space>
-                  <span className={`status-dot status-dot-${color}`} />
+                  <span className={`status-dot`} style={{ backgroundColor: color }} />
                   {status === 'DRAFT'
                     ? 'Draft'
                     : status === 'IN_REVIEW'
-                      ? 'In review'
+                      ? 'Review'
                       : status === 'COMPLETED'
                         ? 'Completed'
                         : ''}
@@ -209,7 +238,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             },
           },
         ]
-      : [
+      : []),
+
+    ...(mode == 'total-compensation' || mode == 'classification'
+      ? [
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('classification_code'),
@@ -217,6 +249,23 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             dataIndex: 'classification_code',
             key: 'classification_code',
           },
+        ]
+      : []),
+
+    ...(mode == 'classification'
+      ? [
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('crm_ticket'),
+            title: 'CRM service request',
+            dataIndex: 'crm_ticket',
+            key: 'crm_ticket',
+          },
+        ]
+      : []),
+
+    ...(mode == 'total-compensation'
+      ? [
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('jobStoreId'),
@@ -225,6 +274,11 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             key: 'parent_job_profile_number',
             render: (parentJobProfile: any) => (parentJobProfile ? parentJobProfile.number : 'N/A'),
           },
+        ]
+      : []),
+
+    ...(mode == 'classification' || mode == 'total-compensation'
+      ? [
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('user_name'),
@@ -232,6 +286,23 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             dataIndex: 'user_name',
             key: 'user_name',
           },
+        ]
+      : []),
+
+    ...(mode == 'classification'
+      ? [
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('submitted_at'),
+            title: 'Submitted at',
+            dataIndex: 'submitted_at',
+            key: 'submitted_at',
+          },
+        ]
+      : []),
+
+    ...(mode == 'total-compensation'
+      ? [
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('approved_at'),
@@ -239,7 +310,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             dataIndex: 'approved_at',
             key: 'approved_at',
           },
-        ]),
+        ]
+      : []),
+
     ...(mode == null
       ? [
           {
@@ -317,8 +390,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const updateData = useCallback(() => {
     // console.log('updateData');
     const search = searchParams.get('search');
-    const statusFilter = searchParams.get('status');
-    const classificationFilter = searchParams.get('classification');
+    const statusFilter = searchParams.get('status') || searchParams.get('status__in');
+    const classificationFilter = searchParams.get('classification') || searchParams.get('classification_id__in');
+    const submittedByFilter = searchParams.get('submitted_by__in');
 
     const sortParams = sortField
       ? {
@@ -353,6 +427,15 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                 {
                   classification_id: {
                     in: JSON.parse(`[${classificationFilter.split(',').map((v) => `"${v}"`)}]`),
+                  },
+                },
+              ]
+            : []),
+          ...(submittedByFilter != null
+            ? [
+                {
+                  user_id: {
+                    in: JSON.parse(`[${submittedByFilter.split(',').map((v) => `"${v}"`)}]`),
                   },
                 },
               ]
@@ -395,71 +478,143 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     },
   };
 
+  useEffect(() => {
+    if (fetchError) {
+      setError('An error occurred while fetching data.');
+    } else {
+      setError(null);
+    }
+  }, [fetchError]);
+
   if (isLoading) return <div>Loading...</div>;
 
   return (
     <div style={style}>
-      <Card className="tableHeader">
-        <Row gutter={24} wrap>
-          <Col span={12}>
-            <h2 style={{ marginBottom: 0 }}>{tableTitle}</h2>
-          </Col>
-          <Col span={12}>
-            <Row justify="end">
-              <Col>
-                {selectedRowKeys.length > 0 ? (
-                  <Tooltip title="Download attachments">
-                    <Button
-                      icon={<DownloadOutlined />}
-                      onClick={() => console.log('Download selected rows:', selectedRowKeys)}
-                    />
-                  </Tooltip>
-                ) : (
-                  topRightComponent || <Button icon={<ReloadOutlined />} onClick={() => updateData()} />
-                )}
+      {error === null ? (
+        <>
+          <Card className="tableHeader">
+            <Row gutter={24} wrap>
+              <Col span={12}>
+                <h2 style={{ marginBottom: 0 }}>{tableTitle}</h2>
+              </Col>
+              <Col span={12}>
+                <Row justify="end">
+                  <Col>
+                    {selectedRowKeys.length > 0 ? (
+                      <Tooltip title="Download attachments">
+                        <Button
+                          icon={<DownloadOutlined />}
+                          onClick={() => console.log('Download selected rows:', selectedRowKeys)}
+                        />
+                      </Tooltip>
+                    ) : (
+                      topRightComponent || <Button icon={<ReloadOutlined />} onClick={() => updateData()} />
+                    )}
+                  </Col>
+                </Row>
               </Col>
             </Row>
-          </Col>
-        </Row>
-      </Card>
+          </Card>
 
-      {hasPositionRequests ? (
-        <Table
-          rowSelection={rowSelection}
-          onRow={(record) => {
-            return {
-              onMouseEnter: () => handleMouseEnter(record.id),
-              onMouseLeave: handleMouseLeave,
-            };
-          }}
-          className="tableWithHeader"
-          columns={columns}
-          dataSource={data?.positionRequests}
-          rowKey="id"
-          pagination={
-            showPagination
-              ? {
-                  current: currentPage,
-                  pageSize: pageSize,
-                  total: totalResults,
-                  pageSizeOptions: ['10', '20', '50'],
-                  showSizeChanger: true,
-                }
-              : false
-          }
-          onChange={handleTableChange}
-          footer={showFooter ? renderTableFooter : undefined}
-        />
+          {hasPositionRequests ? (
+            <Table
+              rowSelection={rowSelection}
+              onRow={(record) => {
+                return {
+                  onMouseEnter: () => handleMouseEnter(record.id),
+                  onMouseLeave: handleMouseLeave,
+                };
+              }}
+              className="tableWithHeader"
+              columns={columns}
+              dataSource={data?.positionRequests}
+              rowKey="id"
+              pagination={
+                showPagination
+                  ? {
+                      current: currentPage,
+                      pageSize: pageSize,
+                      total: totalResults,
+                      pageSizeOptions: ['10', '20', '50'],
+                      showSizeChanger: true,
+                    }
+                  : false
+              }
+              onChange={handleTableChange}
+              footer={showFooter ? renderTableFooter : undefined}
+            />
+          ) : (
+            <>
+              {mode == 'classification' ? (
+                <>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      padding: '2rem',
+                      flexGrow: 1, // Expand to take available space
+                      background: 'white',
+                      marginBottom: '1rem',
+                    }}
+                  >
+                    <img src={TasksCompleteGraphic} alt="No positions" />
+                    <div>All good! It looks like you don't have any assigned tasks.</div>
+                    <Button type="link" style={{ marginTop: '1rem' }} icon={<ReloadOutlined />} onClick={updateData}>
+                      Refresh
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      padding: '2rem',
+                      flexGrow: 1, // Expand to take available space
+                      background: 'white',
+                      marginBottom: '1rem',
+                    }}
+                  >
+                    <img src={EmptyJobPositionGraphic} alt="No positions" />
+                    <div>New to the JobStore?</div>
+                    {/* Link button to the orgchart page */}
+                    <Link to="/my-positions/create">
+                      <Button type="primary" style={{ marginTop: '1rem' }}>
+                        Create new position
+                      </Button>
+                    </Link>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </>
       ) : (
-        <div style={{ textAlign: 'center', padding: '2rem', background: 'white', flex: 1, overflowY: 'auto' }}>
-          <img src={EmptyJobPositionGraphic} alt="No positions" />
-          <div>New to the JobStore?</div>
-          {/* Link button to the orgchart page */}
-          <Link to="/my-positions/create">
-            <Button type="primary" style={{ marginTop: '1rem' }}>
-              Create new position
-            </Button>
-          </Link>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '2rem',
+            flexGrow: 1, // Expand to take available space
+            background: 'white',
+            marginBottom: '1rem',
+          }}
+        >
+          <img src={ErrorGraphic} alt="Error" />
+          <div>Oops! We were unable to fetch the details.</div>
+          <Button type="link" style={{ marginTop: '1rem' }} icon={<ReloadOutlined />} onClick={updateData}>
+            Refresh
+          </Button>
         </div>
       )}
     </div>
