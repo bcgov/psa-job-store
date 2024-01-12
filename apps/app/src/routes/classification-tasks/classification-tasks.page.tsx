@@ -5,19 +5,23 @@ import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import MyPositionsTable from '../my-positions/components/my-positions-table.component';
-import { PositionRequestsSearch } from './components/position-requests-search.component';
+import { PositionRequestsSearch } from '../total-comp-approved-requests/components/position-requests-search.component';
 
-export const TotalCompApprovedRequestsPage = () => {
+export const ClassificationTasksPage = () => {
   // const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
   // const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
-
-  const [hasData] = useState(true); // todo: set back to false
 
   // const handleDataAvailability = (isDataAvailable: boolean) => {
   //   setHasData(isDataAvailable);
   // };
 
   // if (!ministriesData || !careerGroupData) return <>Loading..</>;
+
+  const [hasData, setHasData] = useState(false);
+
+  const handleDataAvailability = (isDataAvailable: boolean) => {
+    setHasData(isDataAvailable);
+  };
 
   return (
     <>
@@ -28,6 +32,7 @@ export const TotalCompApprovedRequestsPage = () => {
           <PositionRequestsSearch
             searchPlaceHolderText={'Search by job title or submission ID'}
             // additionalFilters={true}
+            mode="classification"
             fullWidth={true}
             // ministriesData={ministriesData}
             // careerGroupData={careerGroupData}
@@ -43,9 +48,10 @@ export const TotalCompApprovedRequestsPage = () => {
         ></TotalCompProfilesTable> */}
 
         <MyPositionsTable
+          onDataAvailable={handleDataAvailability}
           tableTitle={'Requests'}
-          mode="total-compensation"
-          style={{ marginTop: '1rem' }}
+          mode="classification"
+          style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', flexGrow: 1 }}
           // handleTableChangeCallback={handleTableChangeCallback}
         ></MyPositionsTable>
       </ContentWrapper>

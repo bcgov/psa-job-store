@@ -54,6 +54,8 @@ export const AppLayout = () => {
     const roles = auth.user?.profile['client_roles'];
     if (roles && (roles as string[]).includes('total-compensation')) {
       setRole('total-compensation');
+    } else if (roles && (roles as string[]).includes('classification')) {
+      setRole('classification');
     } else {
       setRole('user');
     }
@@ -61,7 +63,7 @@ export const AppLayout = () => {
 
   // collapsible menu
 
-  const items: MenuProps['items'] = [
+  const totalCompensationMenuItems: MenuProps['items'] = [
     getItem('Job Profiles', 'sub1', <FileSearchOutlined style={{ fontSize: '1.25rem' }} />, [
       getItem(
         <Link to="/total-compensation/profiles/drafts">Drafts</Link>,
@@ -174,7 +176,7 @@ export const AppLayout = () => {
                   ) : (
                     <>
                       <div style={{ padding: '10px 10px 2px 10px' }}>
-                        <Link to="/my-positions/create">
+                        <Link to="/total-compensation/profiles/create">
                           <Button
                             type="primary"
                             icon={<FileAddOutlined style={{ fontSize: '1.25rem' }} />}
@@ -189,7 +191,7 @@ export const AppLayout = () => {
                         style={{ transition: 'width 0.2s ease-out', width: '200px' }}
                         defaultOpenKeys={['sub1']}
                         mode="inline"
-                        items={items}
+                        items={totalCompensationMenuItems}
                       />
 
                       <SiderNav
@@ -204,6 +206,20 @@ export const AppLayout = () => {
                       />
                     </>
                   )}
+                </>
+              )}
+              {role === 'classification' && (
+                <>
+                  <SiderNav
+                    collapsed={collapsed}
+                    items={[
+                      {
+                        icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
+                        title: 'My tasks',
+                        to: '/',
+                      },
+                    ]}
+                  />
                 </>
               )}
             </div>

@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Field, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
+import { UUID } from 'crypto';
 import {
   PositionRequest,
   PositionRequestCreateInput,
@@ -22,6 +23,27 @@ export class PositionRequestUserClassification {
 
   @Field(() => String, { nullable: false })
   code!: string;
+}
+
+@ObjectType()
+class UserBasicInfo {
+  @Field()
+  id: UUID;
+
+  @Field()
+  name: string;
+}
+
+@ObjectType()
+export class JobProfileStateType {
+  @Field(() => String)
+  state: string;
+}
+
+@ObjectType()
+export class PositionRequestSubmittedBy {
+  @Field()
+  name: string;
 }
 
 @Resolver()
@@ -79,7 +101,7 @@ export class PositionRequestApiResolver {
     return this.positionRequestService.getPositionRequestUserClassifications(userId);
   }
 
-  @Roles('total-compensation')
+  @Roles('total-compensation', 'classification')
   @UseGuards(RoleGuard)
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestClassifications' })
   async getPositionRequestClassifications() {
@@ -91,5 +113,19 @@ export class PositionRequestApiResolver {
   @Query(() => [Int], { name: 'positionRequestJobStoreNumbers' })
   async getPositionRequestJobStoreNumbers() {
     return this.positionRequestService.getPositionRequestJobStoreNumbers();
+  }
+
+  @Roles('classification')
+  @UseGuards(RoleGuard)
+  @Query(() => [String], { name: 'positionRequestStatuses' })
+  async getPositionRequestStatuses() {
+    return this.positionRequestService.getPositionRequestStatuses();
+  }
+
+  @Roles('classification')
+  @UseGuards(RoleGuard)
+  @Query(() => [UserBasicInfo], { name: 'positionRequestSubmittedBy' })
+  async getpositionRequestSubmittedBy() {
+    return this.positionRequestService.getPositionRequestSubmittedBy();
   }
 }

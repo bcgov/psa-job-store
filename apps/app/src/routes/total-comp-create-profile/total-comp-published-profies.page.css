@@ -1,0 +1,7 @@
+.custom-card .ant-card-head {
+    border-bottom: none;
+}
+  
+.custom-card .ant-card-body {
+    padding-top: 8px;
+}

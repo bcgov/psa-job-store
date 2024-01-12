@@ -1,10 +1,12 @@
-import { FileTextOutlined, HomeOutlined, PartitionOutlined, UserAddOutlined } from '@ant-design/icons';
+import { FileTextOutlined, PartitionOutlined, UserAddOutlined } from '@ant-design/icons';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
 import RoleGuard from '../components/guards/role.guard';
 import { RouteGuard } from '../components/guards/route.guard';
 import { AuthRoute } from '../routes/auth';
 import { LoginPage } from '../routes/auth/login.page';
+import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
+import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
 import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/home.page';
 import { JobProfilesRoute } from '../routes/job-profiles';
@@ -16,6 +18,7 @@ import { OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
+import { TotalCompCreateProfilePage } from '../routes/total-comp-create-profile/total-comp-published-profies.page';
 import { TotalCompDraftProfilesRoute } from '../routes/total-comp-draft-profiles';
 import { TotalCompDraftProfilesPage } from '../routes/total-comp-draft-profiles/total-comp-draft-profies.page';
 import { TotalCompPublishedProfilesPage } from '../routes/total-comp-published-profiles/total-comp-published-profies.page';
@@ -24,7 +27,7 @@ import UnauthorizedPage from '../routes/unauthorized/unauthorized.page';
 import { WizardRoute } from '../routes/wizard';
 import { PositionRequestPage } from '../routes/wizard/position-request.page';
 import { WizardOrgChartPage } from '../routes/wizard/wizard-org-chart.page';
-import { RoleBasedComponent } from './role-based-component';
+import { RoleBasedRouting } from './role-based-component';
 
 export const router = createBrowserRouter([
   {
@@ -46,18 +49,17 @@ export const router = createBrowserRouter([
           {
             path: '/',
             element: <HomeRoute />,
-            handle: {
-              breadcrumb: () => 'Home',
-              icon: <HomeOutlined />,
-            },
             children: [
               {
                 index: true,
                 element: (
-                  <RoleBasedComponent
-                    requiredRole="total-compensation"
-                    Component={TotalCompDraftProfilesPage}
-                    FallbackComponent={HomePage}
+                  <RoleBasedRouting
+                    roleComponentMapping={{
+                      classification: ClassificationTasksPage,
+                      'total-compensation': TotalCompDraftProfilesPage,
+                      user: HomePage,
+                      default: HomePage, // Default component when no roles match
+                    }}
                   />
                 ),
               },
@@ -149,6 +151,13 @@ export const router = createBrowserRouter([
                 path: 'published',
                 element: <TotalCompPublishedProfilesPage />,
               },
+              {
+                handle: {
+                  breadcrumb: () => 'Create profile',
+                },
+                path: 'create',
+                element: <TotalCompCreateProfilePage />,
+              },
             ],
           },
           {
@@ -169,6 +178,24 @@ export const router = createBrowserRouter([
               {
                 path: ':positionRequestId',
                 element: <TotalCompApprovedRequestPage />,
+              },
+            ],
+          },
+
+          {
+            path: '/classification-tasks/:positionRequestId',
+            element: (
+              <RoleGuard requiredRole="classification">
+                <TotalCompApprovedRequestsRoute />
+              </RoleGuard>
+            ),
+            handle: {
+              breadcrumb: () => 'My tasks',
+            },
+            children: [
+              {
+                index: true,
+                element: <ClassificationTaskPage />,
               },
             ],
           },

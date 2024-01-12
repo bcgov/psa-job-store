@@ -367,6 +367,37 @@ export class PositionRequestApiService {
     return classifications;
   }
 
+  async getPositionRequestStatuses() {
+    // return enum values as array of strings
+    const states = Object.values(PositionRequestStatus).filter((value) => typeof value === 'string');
+    return states.map((state) => state);
+  }
+
+  async getPositionRequestSubmittedBy() {
+    const positionRequests = await this.prisma.positionRequest.findMany({
+      select: {
+        user_id: true,
+      },
+    });
+
+    // todo: AL-146 this should not be needed if the foreign key relationship is working properly in schema.prisma
+    // Collect all unique user IDs from the position requests
+    const userIds = [...new Set(positionRequests.map((pr) => pr.user_id).filter((id) => id != null))];
+
+    // Fetch users based on the collected IDs
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: { in: userIds },
+      },
+      select: {
+        id: true,
+        name: true, // Assuming 'name' is the field in your User model
+      },
+    });
+
+    return Array.from(new Map(users.map((user) => [user.id, user])).values());
+  }
+
   async getPositionRequestClassifications() {
     const positionRequests = await this.prisma.positionRequest.findMany({
       where: {
