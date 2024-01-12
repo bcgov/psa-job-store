@@ -7,6 +7,7 @@ import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api
 import MyPositionsTable from '../my-positions/components/my-positions-table.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import ContentWrapper from './components/content-wrapper.component';
+import { DocxComponent } from './components/docx.component';
 import HeaderWrapper from './components/header-wrapper.component';
 import './home.page.css';
 
@@ -62,6 +63,7 @@ export const HomePage = () => {
         </Row>
       </HeaderWrapper>
       <ContentWrapper>
+        <DocxComponent />
         <MyPositionsTable
           style={{ paddingTop: '1rem' }}
           allowSorting={false}
