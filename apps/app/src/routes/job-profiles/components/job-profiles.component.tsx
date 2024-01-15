@@ -66,84 +66,83 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
       setJobProfilesLoading(true);
       setClassificationIdFilter(classificationId);
     }
-  }, [positionRequestId, prData, pData]);
+  }, [positionRequestId, prData, pData, classificationIdFilter, dispatch, pTrigger, prTrigger]);
 
   useEffect(() => {
-    if (classificationIdFilter != null) {
-      // Use the following for the `search` property.
-      // Search terms need to be joined with specific syntax, <-> in this case
-      // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
-      const search = searchParams.get('search');
-      const organizationFilter = searchParams.get('organization_id__in');
-      const jobRoleFilter = searchParams.get('job_role_id__in');
-      const classificationFilter = searchParams.get('classification_id__in');
-      const jobFamilyFilter = searchParams.get('job_family_id__in');
-      setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
+    // Use the following for the `search` property.
+    // Search terms need to be joined with specific syntax, <-> in this case
+    // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
+    const search = searchParams.get('search');
+    const organizationFilter = searchParams.get('organization_id__in');
+    const jobRoleFilter = searchParams.get('job_role_id__in');
+    const classificationFilter = searchParams.get('classification_id__in');
+    const jobFamilyFilter = searchParams.get('job_family_id__in');
+    setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
 
-      trigger({
-        ...(search != null && { search }),
-        where: {
-          AND: [
-            ...(classificationIdFilter != null
-              ? [
-                  {
-                    reports_to: {
-                      some: {
-                        classification_id: {
-                          in: [classificationIdFilter],
-                        },
+    trigger({
+      ...(search != null && { search }),
+      where: {
+        AND: [
+          ...(classificationIdFilter != null
+            ? [
+                {
+                  reports_to: {
+                    some: {
+                      classification_id: {
+                        in: [classificationIdFilter],
                       },
                     },
                   },
-                ]
-              : []),
-            ...(organizationFilter != null
-              ? [
-                  {
-                    organization_id: {
-                      in: JSON.parse(`[${organizationFilter.split(',').map((v) => `"${v}"`)}]`),
-                    },
+                },
+              ]
+            : []),
+          ...(organizationFilter != null
+            ? [
+                {
+                  organization_id: {
+                    in: JSON.parse(`[${organizationFilter.split(',').map((v) => `"${v}"`)}]`),
                   },
-                ]
-              : []),
-            ...(classificationFilter != null
-              ? [
-                  {
-                    classifications: {
-                      some: {
-                        classification_id: {
-                          in: classificationFilter.split(',').map((v) => v.trim()),
-                        },
+                },
+              ]
+            : []),
+          ...(classificationFilter != null
+            ? [
+                {
+                  classifications: {
+                    some: {
+                      classification_id: {
+                        in: classificationFilter.split(',').map((v) => v.trim()),
                       },
                     },
                   },
-                ]
-              : []),
-            ...(jobFamilyFilter !== null
-              ? [
-                  {
-                    job_family_id: {
-                      in: JSON.parse(`[${jobFamilyFilter}]`),
-                    },
+                },
+              ]
+            : []),
+          ...(jobFamilyFilter !== null
+            ? [
+                {
+                  job_family_id: {
+                    in: JSON.parse(`[${jobFamilyFilter}]`),
                   },
-                ]
-              : []),
-            ...(jobRoleFilter !== null
-              ? [
-                  {
-                    role_id: {
-                      in: JSON.parse(`[${jobRoleFilter}]`),
-                    },
+                },
+              ]
+            : []),
+          ...(jobRoleFilter !== null
+            ? [
+                {
+                  role_id: {
+                    in: JSON.parse(`[${jobRoleFilter}]`),
                   },
-                ]
-              : []),
-          ],
-        },
-        skip: (currentPage - 1) * pageSize,
-        take: pageSize,
-      });
-    }
+                },
+              ]
+            : []),
+        ],
+      },
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
+    });
   }, [searchParams, trigger, currentPage, pageSize, classificationIdFilter]);
+
   // Update totalResults based on the response (if applicable)
   useEffect(() => {
     if (data) {

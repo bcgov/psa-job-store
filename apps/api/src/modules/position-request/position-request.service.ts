@@ -237,12 +237,16 @@ export class PositionRequestApiService {
 
     // TODO: AL-146 - this should not be needed if the foreign key relationship is working properly in schema.prisma
     // Fetch classification
-    const classification = await this.prisma.classification.findUnique({
-      where: { id: positionRequest.classification_id },
-      select: {
-        code: true, // Assuming 'code' is the field you want from the classification
-      },
-    });
+
+    const classification =
+      positionRequest.classification_id == null
+        ? null
+        : await this.prisma.classification.findUnique({
+            where: { id: positionRequest.classification_id },
+            select: {
+              code: true, // Assuming 'code' is the field you want from the classification
+            },
+          });
 
     // Fetch user
     const user = await this.prisma.user.findUnique({
