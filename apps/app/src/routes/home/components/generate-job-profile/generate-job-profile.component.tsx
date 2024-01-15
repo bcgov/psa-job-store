@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Button } from 'antd';
 import { Buffer } from 'buffer';
+import dayjs from 'dayjs';
 import {
   AlignmentType,
   BorderStyle,
@@ -19,6 +21,8 @@ import {
   VerticalAlign,
 } from 'docx';
 import { saveAs } from 'file-saver';
+import { useEffect, useState } from 'react';
+import { useLazyGetJobProfilesQuery } from '../../../../redux/services/graphql-api/job-profile.api';
 import hrComponent from './hr.component';
 import logoComponent from './logo.component';
 
@@ -27,6 +31,23 @@ export interface GenerateJobProfileComponentProps {
 }
 
 export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileComponentProps) => {
+  const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
+  const [defaultJobProfile, setDefaultJobProfile] = useState<Record<string, any> | null>(null);
+
+  useEffect(() => {
+    console.log('data: ', data);
+
+    if (jobProfile && !data) {
+      trigger({ where: { number: { equals: jobProfile.number } } });
+    }
+
+    if (data && data.jobProfilesCount > 0) {
+      setDefaultJobProfile(data.jobProfiles[0]);
+    }
+  }, [jobProfile, data]);
+
+  console.log('jobProfile: ', jobProfile);
+
   const paragraphSpacing: ISpacingProperties = { before: 140 };
 
   const doc = new Document({
@@ -506,7 +527,7 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: 'Administrative Services',
+                                text: `${defaultJobProfile?.career_group?.name}`,
                               }),
                             ],
                           }),
@@ -534,7 +555,7 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: 'Secretarial',
+                                text: `${defaultJobProfile?.job_family?.name}`,
                               }),
                             ],
                           }),
@@ -562,7 +583,7 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: '',
+                                text: `${defaultJobProfile?.stream?.name}`,
                               }),
                             ],
                           }),
@@ -590,7 +611,7 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: 'Admin/Operational',
+                                text: `${defaultJobProfile?.role?.name}`,
                               }),
                             ],
                           }),
@@ -618,7 +639,7 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: 'November 2023',
+                                text: `${dayjs(defaultJobProfile?.updated_at).format('MMM d, YYYY')}`,
                               }),
                             ],
                           }),
@@ -635,8 +656,6 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
     ],
   });
 
-  console.log('doc: ', doc);
-
   const generate = () => {
     Packer.toBlob(doc).then((blob) => {
       saveAs(blob, 'job-profile.docx');
@@ -645,8 +664,9 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
 
   return (
     <div>
-      <h1>Docx Component</h1>
-      <button onClick={generate}>Generate Job Profile</button>
+      <Button loading={isLoading} disabled={defaultJobProfile == null} onClick={generate}>
+        Generate Job Profile
+      </Button>
     </div>
   );
 };
