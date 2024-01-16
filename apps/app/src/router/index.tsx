@@ -18,7 +18,7 @@ import { OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
-import { TotalCompCreateProfilePage } from '../routes/total-comp-create-profile/total-comp-published-profies.page';
+import { TotalCompCreateProfilePage } from '../routes/total-comp-create-profile/total-comp-create-profile.page';
 import { TotalCompDraftProfilesRoute } from '../routes/total-comp-draft-profiles';
 import { TotalCompDraftProfilesPage } from '../routes/total-comp-draft-profiles/total-comp-draft-profies.page';
 import { TotalCompPublishedProfilesPage } from '../routes/total-comp-published-profiles/total-comp-published-profies.page';
