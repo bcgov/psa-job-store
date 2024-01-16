@@ -23,7 +23,7 @@ import {
 } from 'docx';
 import { saveAs } from 'file-saver';
 import { useEffect, useState } from 'react';
-import { useLazyGetJobProfilesQuery } from '../../../../redux/services/graphql-api/job-profile.api';
+import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import hrComponent from './hr.component';
 import logoComponent from './logo.component';
 
