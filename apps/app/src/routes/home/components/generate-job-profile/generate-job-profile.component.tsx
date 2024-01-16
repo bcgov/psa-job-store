@@ -19,6 +19,7 @@ import {
   TableRow,
   TextRun,
   VerticalAlign,
+  WidthType,
 } from 'docx';
 import { saveAs } from 'file-saver';
 import { useEffect, useState } from 'react';
@@ -87,100 +88,87 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
               right: '0.35in',
               bottom: '0.35in',
               left: '0.35in',
+              footer: '0.35in',
             },
           },
         },
         children: [
           /**
-           * This table acts as a container, controlling margin between PageBorder and content
+           * Logo, Job Store #
            */
           new Table({
             borders: TableBorders.NONE,
             margins: {
-              top: 160,
+              top: 40,
               right: 160,
-              bottom: 160,
+              bottom: 20,
               left: 160,
+            },
+            width: {
+              size: 100,
+              type: WidthType.PERCENTAGE,
             },
             rows: [
               new TableRow({
                 children: [
                   new TableCell({
+                    verticalAlign: VerticalAlign.BOTTOM,
+                    margins: {
+                      top: 160,
+                    },
+                    width: {
+                      size: 50,
+                      type: WidthType.PERCENTAGE,
+                    },
                     children: [
-                      /**
-                       * Logo, Job Store #
-                       */
-                      new Table({
-                        borders: TableBorders.NONE,
-                        margins: {
-                          top: 40,
-                          bottom: 20,
-                        },
-                        rows: [
-                          new TableRow({
-                            children: [
-                              new TableCell({
-                                verticalAlign: VerticalAlign.BOTTOM,
-                                margins: {
-                                  top: 160,
-                                },
-                                width: {
-                                  size: '4.25in',
-                                },
-                                children: [
-                                  new Paragraph({
-                                    children: [
-                                      new ImageRun({
-                                        data: Buffer.from(logoComponent, 'base64'),
-                                        transformation: {
-                                          width: 215,
-                                          height: 45,
-                                        },
-                                      }),
-                                    ],
-                                  }),
-                                ],
-                              }),
-                              new TableCell({
-                                verticalAlign: VerticalAlign.BOTTOM,
-                                width: {
-                                  size: '4.25in',
-                                },
-                                children: [
-                                  new Paragraph({
-                                    alignment: 'right',
-                                    children: [
-                                      new TextRun({
-                                        text: 'Job Profile',
-                                        bold: true,
-                                        font: 'Calibri',
-                                        size: '12pt',
-                                        allCaps: true,
-                                      }),
-                                    ],
-                                  }),
-                                  new Paragraph({
-                                    alignment: 'right',
-                                    children: [
-                                      new TextRun({
-                                        text: 'Job Store #',
-                                        bold: true,
-                                        font: 'Calibri',
-                                        size: '12pt',
-                                        smallCaps: true,
-                                      }),
-                                      new TextRun({
-                                        text: `${jobProfile?.number}`,
-                                        bold: true,
-                                        font: 'Calibri',
-                                        size: '12pt',
-                                        smallCaps: true,
-                                      }),
-                                    ],
-                                  }),
-                                ],
-                              }),
-                            ],
+                      new Paragraph({
+                        children: [
+                          new ImageRun({
+                            data: Buffer.from(logoComponent, 'base64'),
+                            transformation: {
+                              width: 215,
+                              height: 45,
+                            },
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                  new TableCell({
+                    verticalAlign: VerticalAlign.BOTTOM,
+                    width: {
+                      size: 50,
+                      type: WidthType.PERCENTAGE,
+                    },
+                    children: [
+                      new Paragraph({
+                        alignment: 'right',
+                        children: [
+                          new TextRun({
+                            text: 'Job Profile',
+                            bold: true,
+                            font: 'Calibri',
+                            size: '12pt',
+                            allCaps: true,
+                          }),
+                        ],
+                      }),
+                      new Paragraph({
+                        alignment: 'right',
+                        children: [
+                          new TextRun({
+                            text: 'Job Store #',
+                            bold: true,
+                            font: 'Calibri',
+                            size: '12pt',
+                            smallCaps: true,
+                          }),
+                          new TextRun({
+                            text: `${jobProfile?.number}`,
+                            bold: true,
+                            font: 'Calibri',
+                            size: '12pt',
+                            smallCaps: true,
                           }),
                         ],
                       }),
@@ -205,272 +193,299 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
             ],
           }),
           /**
-           * This table acts as a container, controlling margin between PageBorder and content
+           * Title, Classification
            */
           new Table({
             borders: TableBorders.NONE,
             margins: {
-              top: 160,
+              top: 40,
               right: 160,
-              bottom: 160,
+              bottom: 20,
               left: 160,
+            },
+            width: {
+              size: 100,
+              type: WidthType.PERCENTAGE,
             },
             rows: [
               new TableRow({
                 children: [
                   new TableCell({
+                    width: {
+                      size: 50,
+                      type: WidthType.PERCENTAGE,
+                    },
                     children: [
-                      /**
-                       * Title, Classification
-                       */
-                      new Table({
-                        borders: TableBorders.NONE,
-                        rows: [
-                          new TableRow({
-                            children: [
-                              new TableCell({
-                                width: {
-                                  size: '4.25in',
-                                },
-                                children: [
-                                  new Paragraph({
-                                    children: [
-                                      new TextRun({
-                                        text: 'Title:   ',
-                                        bold: true,
-                                        font: 'Calibri',
-                                        size: '14pt',
-                                        smallCaps: true,
-                                      }),
-                                      new TextRun({
-                                        text: jobProfile?.title?.value,
-                                        bold: true,
-                                        font: 'Calibri',
-                                        size: '12pt',
-                                        smallCaps: true,
-                                      }),
-                                    ],
-                                  }),
-                                ],
-                              }),
-                              new TableCell({
-                                width: {
-                                  size: '4.25in',
-                                },
-                                children: [
-                                  new Paragraph({
-                                    alignment: AlignmentType.CENTER,
-                                    children: [
-                                      new TextRun({
-                                        text: 'Classification:   ',
-                                        bold: true,
-                                        font: 'Calibri',
-                                        size: '14pt',
-                                        smallCaps: true,
-                                      }),
-                                      new TextRun({
-                                        characterSpacing: 5.76,
-                                        text:
-                                          (jobProfile?.classifications ?? []).length > 0
-                                            ? jobProfile?.classifications[0].classification.code
-                                            : '',
-                                        bold: true,
-                                        font: 'Calibri',
-                                        size: '12pt',
-                                        smallCaps: true,
-                                      }),
-                                    ],
-                                  }),
-                                ],
-                              }),
-                            ],
-                          }),
-                        ],
-                      }),
-                      /**
-                       * Job Overview Heading
-                       */
                       new Paragraph({
-                        spacing: paragraphSpacing,
                         children: [
                           new TextRun({
-                            allCaps: true,
+                            text: 'Title:   ',
+                            bold: true,
+                            font: 'Calibri',
+                            size: '14pt',
+                            smallCaps: true,
+                          }),
+                          new TextRun({
+                            text: jobProfile?.title?.value,
                             bold: true,
                             font: 'Calibri',
                             size: '12pt',
-                            text: 'Job Overview',
+                            smallCaps: true,
                           }),
                         ],
                       }),
-                      /**
-                       * Job Overview Content
-                       */
+                    ],
+                  }),
+                  new TableCell({
+                    width: {
+                      size: 50,
+                      type: WidthType.PERCENTAGE,
+                    },
+                    children: [
                       new Paragraph({
-                        spacing: paragraphSpacing,
+                        alignment: AlignmentType.CENTER,
                         children: [
                           new TextRun({
+                            text: 'Classification:   ',
+                            bold: true,
                             font: 'Calibri',
-                            italics: true,
-                            text: jobProfile?.overview.value,
+                            size: '14pt',
+                            smallCaps: true,
                           }),
-                        ],
-                      }),
-                      /**
-                       * Accountabilities Heading
-                       */
-                      new Paragraph({
-                        spacing: paragraphSpacing,
-                        children: [
                           new TextRun({
-                            allCaps: true,
+                            characterSpacing: 5.76,
+                            text:
+                              (jobProfile?.classifications ?? []).length > 0
+                                ? jobProfile?.classifications[0].classification.code
+                                : '',
                             bold: true,
                             font: 'Calibri',
                             size: '12pt',
-                            text: 'Accountabilities',
+                            smallCaps: true,
                           }),
                         ],
                       }),
-                      /**
-                       * Accountabilities Content
-                       */
-                      ...(jobProfile != null && jobProfile.accountabilities.required.length > 0
-                        ? [
-                            new Paragraph({
-                              spacing: paragraphSpacing,
-                              children: [
-                                new TextRun({
-                                  font: 'Calibri',
-                                  size: '12pt',
-                                  text: 'Required:',
-                                }),
-                              ],
-                            }),
-                            ...jobProfile.accountabilities.required.map((accountability: Record<string, any>) => {
-                              return new Paragraph({
-                                spacing: paragraphSpacing,
-                                bullet: {
-                                  level: 0,
-                                },
-                                children: [
-                                  new TextRun({
-                                    font: 'Calibri',
-                                    size: '12pt',
-                                    text: accountability.value,
-                                  }),
-                                ],
-                              });
-                            }),
-                          ]
-                        : []),
-                      ...(jobProfile != null && jobProfile.accountabilities.optional.length > 0
-                        ? [
-                            new Paragraph({
-                              spacing: paragraphSpacing,
-                              children: [
-                                new TextRun({
-                                  font: 'Calibri',
-                                  size: '12pt',
-                                  text: 'Optional:',
-                                }),
-                              ],
-                            }),
-                            ...jobProfile.accountabilities.optional.map((accountability: Record<string, any>) => {
-                              return new Paragraph({
-                                spacing: paragraphSpacing,
-                                bullet: {
-                                  level: 0,
-                                },
-                                children: [
-                                  new TextRun({
-                                    font: 'Calibri',
-                                    size: '12pt',
-                                    text: accountability.value,
-                                  }),
-                                ],
-                              });
-                            }),
-                          ]
-                        : []),
-                      /**
-                       * Job Requirements Heading
-                       */
-                      new Paragraph({
-                        spacing: paragraphSpacing,
-                        children: [
-                          new TextRun({
-                            allCaps: true,
-                            bold: true,
-                            font: 'Calibri',
-                            size: '12pt',
-                            text: 'Job Requirements',
-                          }),
-                        ],
-                      }),
-                      /**
-                       * Job Requirements Content
-                       */
-                      ...(jobProfile != null &&
-                        jobProfile.requirements.map((requirement: Record<string, any>) => {
-                          return new Paragraph({
-                            spacing: paragraphSpacing,
-                            bullet: {
-                              level: 0,
-                            },
-                            children: [
-                              new TextRun({
-                                text: `${requirement.value} `,
-                                font: 'Calibri',
-                                size: '12pt',
-                              }),
-                            ],
-                          });
-                        })),
-                      /**
-                       * Behavioural Competencies Heading
-                       */
-                      new Paragraph({
-                        spacing: paragraphSpacing,
-                        children: [
-                          new TextRun({
-                            allCaps: true,
-                            bold: true,
-                            font: 'Calibri',
-                            size: '12pt',
-                            text: 'Behavioural Competencies',
-                          }),
-                        ],
-                      }),
-                      /**
-                       * Behavioural Competencies Content
-                       */
-                      ...(jobProfile != null &&
-                        jobProfile.behavioural_competencies.map((competency: Record<string, any>) => {
-                          return new Paragraph({
-                            spacing: paragraphSpacing,
-                            bullet: {
-                              level: 0,
-                            },
-                            children: [
-                              new TextRun({
-                                bold: true,
-                                font: 'Calibri',
-                                size: '12pt',
-                                text: `${competency.behavioural_competency.name} `,
-                              }),
-                              new TextRun({
-                                font: 'Calibri',
-                                size: '12pt',
-                                text: competency.behavioural_competency.description,
-                              }),
-                            ],
-                          });
-                        })),
                     ],
                   }),
                 ],
               }),
             ],
           }),
+          /**
+           * Job Overview Heading
+           */
+          new Paragraph({
+            indent: {
+              left: 160,
+              right: 160,
+            },
+            spacing: paragraphSpacing,
+            children: [
+              new TextRun({
+                allCaps: true,
+                bold: true,
+                font: 'Calibri',
+                size: '12pt',
+                text: 'Job Overview',
+              }),
+            ],
+          }),
+          /**
+           * Job Overview Content
+           */
+          new Paragraph({
+            indent: {
+              left: 160,
+              right: 160,
+            },
+            spacing: paragraphSpacing,
+            children: [
+              new TextRun({
+                font: 'Calibri',
+                italics: true,
+                text: jobProfile?.overview.value,
+              }),
+            ],
+          }),
+          /**
+           * Accountabilities Heading
+           */
+          new Paragraph({
+            indent: {
+              left: 160,
+              right: 160,
+            },
+            spacing: paragraphSpacing,
+            children: [
+              new TextRun({
+                allCaps: true,
+                bold: true,
+                font: 'Calibri',
+                size: '12pt',
+                text: 'Accountabilities',
+              }),
+            ],
+          }),
+          /**
+           * Accountabilities Content
+           */
+          ...(jobProfile != null && jobProfile.accountabilities.required.length > 0
+            ? [
+                new Paragraph({
+                  indent: {
+                    left: 160,
+                    right: 160,
+                  },
+                  spacing: paragraphSpacing,
+                  children: [
+                    new TextRun({
+                      font: 'Calibri',
+                      size: '12pt',
+                      text: 'Required:',
+                    }),
+                  ],
+                }),
+                ...jobProfile.accountabilities.required.map((accountability: Record<string, any>) => {
+                  return new Paragraph({
+                    indent: {
+                      right: 160,
+                    },
+                    spacing: paragraphSpacing,
+                    bullet: {
+                      level: 0,
+                    },
+                    children: [
+                      new TextRun({
+                        font: 'Calibri',
+                        size: '12pt',
+                        text: accountability.value,
+                      }),
+                    ],
+                  });
+                }),
+              ]
+            : []),
+          ...(jobProfile != null && jobProfile.accountabilities.optional.length > 0
+            ? [
+                new Paragraph({
+                  indent: {
+                    left: 160,
+                    right: 160,
+                  },
+                  spacing: paragraphSpacing,
+                  children: [
+                    new TextRun({
+                      font: 'Calibri',
+                      size: '12pt',
+                      text: 'Optional:',
+                    }),
+                  ],
+                }),
+                ...jobProfile.accountabilities.optional.map((accountability: Record<string, any>) => {
+                  return new Paragraph({
+                    indent: {
+                      right: 160,
+                    },
+                    spacing: paragraphSpacing,
+                    bullet: {
+                      level: 0,
+                    },
+                    children: [
+                      new TextRun({
+                        font: 'Calibri',
+                        size: '12pt',
+                        text: accountability.value,
+                      }),
+                    ],
+                  });
+                }),
+              ]
+            : []),
+          /**
+           * Job Requirements Heading
+           */
+          new Paragraph({
+            indent: {
+              left: 160,
+              right: 160,
+            },
+            spacing: paragraphSpacing,
+            children: [
+              new TextRun({
+                allCaps: true,
+                bold: true,
+                font: 'Calibri',
+                size: '12pt',
+                text: 'Job Requirements',
+              }),
+            ],
+          }),
+          /**
+           * Job Requirements Content
+           */
+          ...(jobProfile != null &&
+            jobProfile.requirements.map((requirement: Record<string, any>) => {
+              return new Paragraph({
+                indent: {
+                  right: 160,
+                },
+                spacing: paragraphSpacing,
+                bullet: {
+                  level: 0,
+                },
+                children: [
+                  new TextRun({
+                    text: `${requirement.value} `,
+                    font: 'Calibri',
+                    size: '12pt',
+                  }),
+                ],
+              });
+            })),
+          /**
+           * Behavioural Competencies Heading
+           */
+          new Paragraph({
+            indent: {
+              left: 160,
+              right: 160,
+            },
+            spacing: paragraphSpacing,
+            children: [
+              new TextRun({
+                allCaps: true,
+                bold: true,
+                font: 'Calibri',
+                size: '12pt',
+                text: 'Behavioural Competencies',
+              }),
+            ],
+          }),
+          /**
+           * Behavioural Competencies Content
+           */
+          ...(jobProfile != null &&
+            jobProfile.behavioural_competencies.map((competency: Record<string, any>) => {
+              return new Paragraph({
+                spacing: paragraphSpacing,
+                bullet: {
+                  level: 0,
+                },
+                children: [
+                  new TextRun({
+                    bold: true,
+                    font: 'Calibri',
+                    size: '12pt',
+                    text: `${competency.behavioural_competency.name} `,
+                  }),
+                  new TextRun({
+                    font: 'Calibri',
+                    size: '12pt',
+                    text: competency.behavioural_competency.description,
+                  }),
+                ],
+              });
+            })),
         ],
         footers: {
           default: new Footer({
@@ -502,12 +517,20 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                   right: 20,
                   left: 20,
                 },
+                width: {
+                  size: 96,
+                  type: WidthType.PERCENTAGE,
+                },
                 rows: [
                   new TableRow({
                     children: [
                       new TableCell({
+                        margins: {
+                          bottom: 20,
+                        },
                         width: {
-                          size: '1.45in',
+                          size: 20,
+                          type: WidthType.PERCENTAGE,
                         },
                         children: [
                           new Paragraph({
@@ -535,7 +558,8 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                       }),
                       new TableCell({
                         width: {
-                          size: '1.45in',
+                          size: 20,
+                          type: WidthType.PERCENTAGE,
                         },
                         children: [
                           new Paragraph({
@@ -563,7 +587,8 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                       }),
                       new TableCell({
                         width: {
-                          size: '1.45in',
+                          size: 20,
+                          type: WidthType.PERCENTAGE,
                         },
                         children: [
                           new Paragraph({
@@ -591,7 +616,8 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                       }),
                       new TableCell({
                         width: {
-                          size: '1.45in',
+                          size: 20,
+                          type: WidthType.PERCENTAGE,
                         },
                         children: [
                           new Paragraph({
@@ -619,7 +645,8 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
                       }),
                       new TableCell({
                         width: {
-                          size: '1.45in',
+                          size: 20,
+                          type: WidthType.PERCENTAGE,
                         },
                         children: [
                           new Paragraph({
