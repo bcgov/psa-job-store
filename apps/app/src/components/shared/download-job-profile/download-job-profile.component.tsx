@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
+import { Button, Spin } from 'antd';
 import { Buffer } from 'buffer';
 import dayjs from 'dayjs';
 import {
@@ -22,22 +23,23 @@ import {
   WidthType,
 } from 'docx';
 import { saveAs } from 'file-saver';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import hrComponent from './hr.component';
 import logoComponent from './logo.component';
 
-export interface GenerateJobProfileComponentProps {
+export interface DownloadJobProfileComponentProps {
   jobProfile: Record<string, any> | null;
 }
 
-export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileComponentProps) => {
+export const DownloadJobProfileComponent = ({
+  children,
+  jobProfile,
+}: DownloadJobProfileComponentProps & React.PropsWithChildren) => {
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
   const [defaultJobProfile, setDefaultJobProfile] = useState<Record<string, any> | null>(null);
 
   useEffect(() => {
-    console.log('data: ', data);
-
     if (jobProfile && !data) {
       trigger({ where: { number: { equals: jobProfile.number } } });
     }
@@ -46,8 +48,6 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
       setDefaultJobProfile(data.jobProfiles[0]);
     }
   }, [jobProfile, data]);
-
-  console.log('jobProfile: ', jobProfile);
 
   const paragraphSpacing: ISpacingProperties = { before: 140 };
 
@@ -689,11 +689,17 @@ export const GenerateJobProfileComponent = ({ jobProfile }: GenerateJobProfileCo
     });
   };
 
-  return (
-    <div>
-      <Button loading={isLoading} disabled={defaultJobProfile == null} onClick={generate}>
-        Generate Job Profile
-      </Button>
-    </div>
+  return children != null ? (
+    isLoading ? (
+      <Spin spinning={isLoading} />
+    ) : defaultJobProfile == null ? (
+      <span>disabled</span>
+    ) : (
+      <span onClick={generate}>{children}</span>
+    )
+  ) : (
+    <Button icon={<DownloadOutlined />} loading={isLoading} disabled={defaultJobProfile == null} onClick={generate}>
+      Download Job Profile
+    </Button>
   );
 };
