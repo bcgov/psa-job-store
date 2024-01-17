@@ -11,26 +11,34 @@ const DEFAULT_ORG_CHART: OrgChartData = { edges: [], nodes: [] };
 interface OrgChartRendererProps {
   selectedDepartment: string | null;
   onCreateNewPosition?: () => void | null;
+  orgChartSnapshot?: OrgChartData;
 }
 
-const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({ selectedDepartment, onCreateNewPosition }) => {
-  const [orgChart, setOrgChart] = useState<OrgChartData>(DEFAULT_ORG_CHART);
+const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
+  selectedDepartment,
+  onCreateNewPosition,
+  orgChartSnapshot,
+}) => {
+  const [orgChart, setOrgChart] = useState<OrgChartData>(orgChartSnapshot ?? DEFAULT_ORG_CHART);
   const [trigger, { data, isFetching }] = useLazyGetOrgChartQuery();
 
   // console.log('selectedDepartment: ', selectedDepartment);
 
   useEffect(() => {
-    setOrgChart(DEFAULT_ORG_CHART);
-    if (selectedDepartment != null) {
+    if (selectedDepartment != null && !orgChartSnapshot) {
+      // Fetch org chart data based on department if no snapshot
+      setOrgChart(DEFAULT_ORG_CHART);
       trigger(selectedDepartment);
     }
-  }, [selectedDepartment, trigger]);
+  }, [selectedDepartment, trigger, orgChartSnapshot]);
 
   useEffect(() => {
     // console.log('org chart data: ', data);
-    const objData: OrgChartData = data != null ? JSON.parse(JSON.stringify(data.orgChart)) : DEFAULT_ORG_CHART;
-    setOrgChart(objData);
-  }, [data]);
+    if (!orgChartSnapshot) {
+      const objData: OrgChartData = data != null ? JSON.parse(JSON.stringify(data.orgChart)) : DEFAULT_ORG_CHART;
+      setOrgChart(objData);
+    }
+  }, [data, orgChartSnapshot]);
 
   return isFetching ? (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>

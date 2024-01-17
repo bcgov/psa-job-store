@@ -28,7 +28,12 @@ export const OrgChartCard = memo(
     isConnectable,
     selectedDepartment,
     onCreateNewPosition,
-  }: NodeProps & { selectedDepartment: string | null; onCreateNewPosition: () => void | null }) => {
+    orgChartData,
+  }: NodeProps & {
+    selectedDepartment: string | null;
+    onCreateNewPosition: () => void | null;
+    orgChartData: { nodes: Node[]; edges: Edge[] };
+  }) => {
     // const onStart = useCallback((viewport: Viewport) => console.log('onStart', viewport), []);
     // const onChange = useCallback((viewport: Viewport) => console.log('onChange', viewport), []);
     // const onEnd = useCallback((viewport: Viewport) => console.log('onEnd', viewport), []);
@@ -47,19 +52,21 @@ export const OrgChartCard = memo(
 
     const createNewPosition = async () => {
       // we are not editing a draft position request (creatign position from dashboard or from org chart page)
+      console.log('orgChartData: ', orgChartData);
+
       if (!location.pathname.startsWith('/position-request/')) {
         const positionRequestInput = {
           step: 1,
           title: 'Untitled',
           reports_to_position_id: reportingPositionId,
           department: { connect: { id: selectedDepartment ?? '' } },
+          orgchart_json: orgChartData,
         };
         // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
         const resp = await createPositionRequest(positionRequestInput).unwrap();
         setPositionRequestId(resp.createPositionRequest);
         navigate(`/position-request/${resp.createPositionRequest}`, { replace: true });
       } else {
-        console.log('updating position request.. ', positionRequestId, selectedDepartment);
         // we are editing a draft position request - update existing position request
         if (positionRequestId != null && selectedDepartment != null) {
           await updatePositionRequest({
@@ -67,6 +74,7 @@ export const OrgChartCard = memo(
             step: 1,
             reports_to_position_id: reportingPositionId,
             department: { connect: { id: selectedDepartment } },
+            orgchart_json: orgChartData,
           }).unwrap();
         }
       }

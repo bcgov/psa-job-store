@@ -36,8 +36,14 @@ export class PositionRequestScalarWhereWithAggregatesInput {
   @Field(() => JsonWithAggregatesFilter, { nullable: true })
   profile_json?: JsonWithAggregatesFilter;
 
+  @Field(() => JsonWithAggregatesFilter, { nullable: true })
+  orgchart_json?: JsonWithAggregatesFilter;
+
   @Field(() => UuidWithAggregatesFilter, { nullable: true })
   user_id?: UuidWithAggregatesFilter;
+
+  @Field(() => UuidWithAggregatesFilter, { nullable: true })
+  classificationAssignedTo?: UuidWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   title?: StringWithAggregatesFilter;
@@ -59,6 +65,9 @@ export class PositionRequestScalarWhereWithAggregatesInput {
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   submission_id?: StringWithAggregatesFilter;
+
+  @Field(() => DateTimeWithAggregatesFilter, { nullable: true })
+  submitted_at?: DateTimeWithAggregatesFilter;
 
   @Field(() => DateTimeWithAggregatesFilter, { nullable: true })
   approved_at?: DateTimeWithAggregatesFilter;

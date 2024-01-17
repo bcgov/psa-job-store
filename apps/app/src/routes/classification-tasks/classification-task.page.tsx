@@ -1,5 +1,14 @@
-import { CopyOutlined, EllipsisOutlined, LinkOutlined, ThunderboltFilled } from '@ant-design/icons';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  CheckCircleFilled,
+  CloseSquareFilled,
+  CopyOutlined,
+  EllipsisOutlined,
+  ExclamationCircleFilled,
+  LinkOutlined,
+} from '@ant-design/icons';
+import {
+  Alert,
   Button,
   Card,
   Checkbox,
@@ -16,7 +25,7 @@ import {
 } from 'antd';
 import { MenuProps } from 'antd/es/menu';
 import TabPane from 'antd/es/tabs/TabPane';
-import { useEffect, useRef, useState } from 'react';
+import { cloneElement, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
@@ -26,6 +35,7 @@ import { JobProfile } from '../job-profiles/components/job-profile.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import WizardEditControlBar from '../wizard/components/wizard-edit-control-bar';
 import { diffLegendContent } from '../wizard/wizard-review.page';
+import './classification-tasks.page.css';
 // import '../wizard/wizard-review.page.css';
 // import './total-comp-approved-request.page.css';
 const { Text, Paragraph } = Typography;
@@ -216,17 +226,102 @@ export const ClassificationTaskPage = () => {
   const taskList = [
     {
       key: '1',
-      title: 'CRM: Send feedback email to client',
-      subtitle:
-        'Describe the changes that need to be made which will ensure that the profile clears the review process.',
+      title: 'CRM: If needed, contact an analyst for guidance',
+      subtitle: 'Analysts can help answer any questions and concerns you may have regarding this request.',
     },
     {
       key: '2',
-      title: 'CRM: Update status to "Waiting - Client"',
-      subtitle: 'This will update the status of this ticket in the JobStore to "Action required".',
+      title: 'CRM: Send feedback email to client',
+      subtitle:
+        'Describe the changes that need to me made which will ensure that the profile clears the review process.',
     },
-    // Add more tasks as needed
+    {
+      key: '3',
+      title: 'CRM: Update state to ‘Waiting - Client’',
+      subtitle:
+        'This will change the ticket status here to ‘Action required’, and once the client responds, this will revert to ‘Review’.',
+    },
   ];
+
+  const highTouchTasks = [
+    {
+      key: '1',
+      title: 'CRM: Contact a specialist for guidance',
+      subtitle: 'Specialists can help answer any questions and concerns you may have regarding this request.',
+    },
+    {
+      key: '2',
+      title: 'CRM: Reach out to client to obtain a review approval',
+      subtitle:
+        'Describe the need for a full review process and get confirmation that they would submit a new webform for classification review.',
+    },
+    {
+      key: '3',
+      title: 'CRM: Update state to ‘Unresolved’',
+      subtitle: 'This will change the ticket status here to ‘Escalated’, and then closed.',
+    },
+    {
+      key: '4',
+      title: 'CRM: Update category to ‘Classification’',
+      subtitle: 'This will help with reporting and documentation.',
+    },
+    {
+      key: '5',
+      title: 'CRM: Update case to ‘ECLASS’',
+      subtitle: 'This will help with reporting and documentation.',
+    },
+    {
+      key: '6',
+      title: 'CRM: Assign ticket to the specialist',
+      subtitle: 'Reassign the CRM ticket to the same specialist that will be taking over the classification review.',
+    },
+  ];
+
+  const solvedTasks = [
+    {
+      key: '1',
+      title: 'Generate position',
+      subtitle: 'In PeopleSoft, approve the ‘proposed’ position number.',
+    },
+    {
+      key: '2',
+      title: 'Contact client',
+      subtitle: 'Inform the client that the review was successful and share the position number.',
+    },
+    {
+      key: '3',
+      title: 'Generate position',
+      subtitle: 'Change state to ‘Solved’: This will mark the service request as ‘Complete’ and then closed.',
+    },
+  ];
+
+  const statusIconColorMap: any = {
+    ESCALATED: { icon: <ExclamationCircleFilled />, color: '#FA8C16', text: 'Escalated' },
+    ACTION_REQUIRED: { icon: <CloseSquareFilled />, color: '#FF4D4F', text: 'Action Required' },
+    COMPLETED: { icon: <CheckCircleFilled />, color: '#237804', text: 'Completed' },
+    IN_REVIEW: { icon: <CheckCircleFilled />, color: '#722ED1', text: 'Review' },
+  };
+
+  const StatusIcon = ({ status }: any) => {
+    const statusInfo = statusIconColorMap[status];
+    return statusInfo?.icon ? (
+      <span style={{ color: statusInfo.color }}>
+        <Space>
+          {statusInfo.icon}
+          {statusInfo.text}
+        </Space>
+      </span>
+    ) : null;
+  };
+
+  const currentStatus = data?.positionRequest?.status;
+  const statusDetails = statusIconColorMap[currentStatus as keyof typeof statusIconColorMap];
+
+  if (!data) {
+    return <div>Loading...</div>;
+  }
+
+  console.log('orghcart data json: ', data?.positionRequest?.orgchart_json);
   // END ACTIONS TAB DATA
   const tabItems = [
     {
@@ -304,7 +399,10 @@ export const ClassificationTaskPage = () => {
       children: (
         <>
           <div style={{ overflow: 'hidden', position: 'relative', height: '500px' }}>
-            <OrgChartWrapped selectedDepartment={data?.positionRequest?.department_id ?? null} />
+            <OrgChartWrapped
+              selectedDepartment={data?.positionRequest?.department_id ?? null}
+              orgChartSnapshot={JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json))}
+            />
           </div>
         </>
       ),
@@ -352,31 +450,97 @@ export const ClassificationTaskPage = () => {
         <>
           <Result
             status="success"
-            title="Review"
-            icon={<ThunderboltFilled style={{ color: '#722ED1' }} />}
+            title={statusDetails?.text}
+            icon={cloneElement(statusDetails?.icon, { style: { color: statusDetails?.color } })}
             extra={[
               <div className="result-extra-content">
                 <Row justify="center">
                   <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-                    <Card title="Next steps" bordered={false} style={{ marginBottom: '1rem' }}>
-                      <Tabs defaultActiveKey="1">
-                        <TabPane tab="Medium touch" key="1">
-                          {taskList.map((task) => (
-                            <div key={task.key}>
-                              <Checkbox>{task.title}</Checkbox>
-                              <Paragraph>{task.subtitle}</Paragraph>
-                            </div>
-                          ))}
-                        </TabPane>
-                        <TabPane tab="High touch" key="2">
-                          {/* High touch content */}
-                        </TabPane>
-                        <TabPane tab="Solved" key="3">
-                          {/* Solved content */}
-                        </TabPane>
-                      </Tabs>
-                    </Card>
+                    {currentStatus == 'ESCALATED' && (
+                      <Alert
+                        style={{ marginBottom: '1rem' }}
+                        message={
+                          <div className="alert-with-link">
+                            To re-open this service request, go to the corresponding CRM ticket and change the state to
+                            'Unresolved'
+                            <Link to="#" className="alert-extra-link">
+                              Learn More
+                            </Link>
+                          </div>
+                        }
+                        type="warning"
+                        showIcon
+                      />
+                    )}
 
+                    {currentStatus == 'COMPLETED' && (
+                      <Alert
+                        style={{ marginBottom: '1rem' }}
+                        message={
+                          <div className="alert-with-link">
+                            This service request was processed successfully, go to the corresponding CRM ticket to view
+                            more details.
+                            <Link to="#" className="alert-extra-link">
+                              Learn More
+                            </Link>
+                          </div>
+                        }
+                        type="success"
+                        showIcon
+                      />
+                    )}
+
+                    {(currentStatus == 'IN_REVIEW' || currentStatus == 'ACTION_REQUIRED') && (
+                      <Card title="Next steps" bordered={false} style={{ marginBottom: '1rem' }}>
+                        <Tabs defaultActiveKey="1">
+                          <TabPane tab="Medium touch" key="1">
+                            <Paragraph>
+                              If you consider this ticket as medium touch, then perform the following tasks:
+                            </Paragraph>
+                            {taskList.map((task) => (
+                              <div key={task.key} className="task-item">
+                                <Checkbox className="custom-checkbox">
+                                  <div className="checkbox-contents">
+                                    {task.title}
+                                    <Paragraph type="secondary">{task.subtitle}</Paragraph>
+                                  </div>
+                                </Checkbox>
+                              </div>
+                            ))}
+                          </TabPane>
+                          <TabPane tab="High touch" key="2">
+                            <Paragraph>
+                              If you consider this ticket as high touch, then perform the following tasks:
+                            </Paragraph>
+                            {highTouchTasks.map((task) => (
+                              <div key={task.key} className="task-item">
+                                <Checkbox className="custom-checkbox">
+                                  <div className="checkbox-contents">
+                                    {task.title}
+                                    <Paragraph type="secondary">{task.subtitle}</Paragraph>
+                                  </div>
+                                </Checkbox>
+                              </div>
+                            ))}
+                          </TabPane>
+                          <TabPane tab="Solved" key="3">
+                            <Paragraph>
+                              If you consider this ticket as solved, then perform the following tasks:
+                            </Paragraph>
+                            {solvedTasks.map((task) => (
+                              <div key={task.key} className="task-item">
+                                <Checkbox className="custom-checkbox">
+                                  <div className="checkbox-contents">
+                                    {task.title}
+                                    <Paragraph type="secondary">{task.subtitle}</Paragraph>
+                                  </div>
+                                </Checkbox>
+                              </div>
+                            ))}
+                          </TabPane>
+                        </Tabs>
+                      </Card>
+                    )}
                     <Card title="Other Actions" style={{ marginBottom: '1rem' }}>
                       <Space direction="vertical" size="small" style={{ width: '100%' }}>
                         <div>
@@ -426,10 +590,6 @@ export const ClassificationTaskPage = () => {
     },
   ];
 
-  if (!data) {
-    return <div>Loading...</div>;
-  }
-
   const items: MenuProps['items'] = [
     {
       label: (
@@ -468,7 +628,7 @@ export const ClassificationTaskPage = () => {
 
   return (
     <>
-      <Row justify="space-between" align="middle">
+      <Row align="middle" justify="space-between">
         <Col xs={24} lg={21}>
           <PageHeader
             title="Approved"
@@ -477,20 +637,16 @@ export const ClassificationTaskPage = () => {
           />
         </Col>
         <Col xs={24} lg={3}>
-          {/* <Button style={{ color: '#722ED1' }} type="link" icon={<ThunderboltOutlined />}>
-            Review
-          </Button> */}
-          <span style={{ color: '#722ED1' }}>
-            <Space>
-              <ThunderboltFilled />
-              Review
-            </Space>
-          </span>
+          <Row justify="start">
+            <Col>
+              {data?.positionRequest?.status && <StatusIcon status={data.positionRequest.status} />}
 
-          <Divider type="vertical" />
-          <Dropdown menu={{ items }} placement="bottom" trigger={['click']}>
-            <Button icon={<EllipsisOutlined />}></Button>
-          </Dropdown>
+              <Divider type="vertical" />
+              <Dropdown menu={{ items }} placement="bottom" trigger={['click']}>
+                <Button icon={<EllipsisOutlined />}></Button>
+              </Dropdown>
+            </Col>
+          </Row>
         </Col>
       </Row>
 

@@ -23,7 +23,13 @@ export class PositionRequestCountAggregate {
   profile_json!: number;
 
   @Field(() => Int, { nullable: false })
+  orgchart_json!: number;
+
+  @Field(() => Int, { nullable: false })
   user_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  classificationAssignedTo!: number;
 
   @Field(() => Int, { nullable: false })
   title!: number;
@@ -45,6 +51,9 @@ export class PositionRequestCountAggregate {
 
   @Field(() => Int, { nullable: false })
   submission_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  submitted_at!: number;
 
   @Field(() => Int, { nullable: false })
   approved_at!: number;

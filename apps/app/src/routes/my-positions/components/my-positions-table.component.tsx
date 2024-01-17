@@ -11,7 +11,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Popover, Row, Space, Table, Tooltip, message } from 'antd';
+import { Button, Card, Col, Menu, Popover, Result, Row, Space, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import copy from 'copy-to-clipboard';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
@@ -72,6 +72,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
 
+  const [hasSearched, setHasSearched] = useState(false);
+
   const getSortOrder = (fieldName: string): SortOrder | undefined => {
     if (sortField === fieldName) {
       return sortOrder === 'ASC' ? 'ascend' : 'descend';
@@ -84,9 +86,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     if (isLoading) return;
     const hasData = data && 'positionRequests' in data && data.positionRequests.length > 0;
     if (onDataAvailable) {
-      onDataAvailable(hasData || false);
+      onDataAvailable(hasData || hasSearched || false);
     }
-  }, [data, onDataAvailable, isLoading]);
+  }, [data, onDataAvailable, isLoading, hasSearched]);
 
   useEffect(() => {
     if (data && data.positionRequestsCount !== undefined) {
@@ -222,17 +224,45 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('status'),
             render: (status: any) => {
-              const color = status === 'DRAFT' ? 'gray' : status === 'IN_REVIEW' ? '#722ED1' : '#13C2C2';
+              const getColorForStatus = (status: string) => {
+                switch (status) {
+                  case 'DRAFT':
+                    return 'gray';
+                  case 'IN_REVIEW':
+                    return '#722ED1';
+                  case 'COMPLETED':
+                    return '#13C2C2';
+                  case 'ESCALATED':
+                    return '#FAAD14';
+                  case 'ACTION_REQUIRED':
+                    return '#F5222D';
+                  default:
+                    return 'black';
+                }
+              };
+
+              const getStatusLabel = (status: string) => {
+                switch (status) {
+                  case 'DRAFT':
+                    return 'Draft';
+                  case 'IN_REVIEW':
+                    return 'In Review';
+                  case 'COMPLETED':
+                    return 'Completed';
+                  case 'ESCALATED':
+                    return 'Escalated';
+                  case 'ACTION_REQUIRED':
+                    return 'Action Required';
+                  default:
+                    return 'Unknown'; // or any default status label you prefer
+                }
+              };
+
+              const color = getColorForStatus(status);
               return (
                 <Space>
                   <span className={`status-dot`} style={{ backgroundColor: color }} />
-                  {status === 'DRAFT'
-                    ? 'Draft'
-                    : status === 'IN_REVIEW'
-                      ? 'Review'
-                      : status === 'COMPLETED'
-                        ? 'Completed'
-                        : ''}
+                  {getStatusLabel(status)}
                 </Space>
               );
             },
@@ -394,6 +424,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const classificationFilter = searchParams.get('classification') || searchParams.get('classification_id__in');
     const submittedByFilter = searchParams.get('submitted_by__in');
 
+    if (search || statusFilter || classificationFilter || submittedByFilter) {
+      setHasSearched(true);
+    }
+
     const sortParams = sortField
       ? {
           orderBy: [
@@ -543,6 +577,27 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               onChange={handleTableChange}
               footer={showFooter ? renderTableFooter : undefined}
             />
+          ) : hasSearched ? (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                padding: '2rem',
+                flexGrow: 1, // Expand to take available space
+                background: 'white',
+                marginBottom: '1rem',
+              }}
+            >
+              <Result
+                status="404"
+                title="No search results"
+                subTitle="Sorry, no results returned for your query."
+                // extra={<Button type="primary">Back Home</Button>}
+              />
+            </div>
           ) : (
             <>
               {mode == 'classification' ? (

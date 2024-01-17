@@ -24,6 +24,9 @@ export class PositionRequestMinAggregate {
   user_id?: string;
 
   @Field(() => String, { nullable: true })
+  classificationAssignedTo?: string;
+
+  @Field(() => String, { nullable: true })
   title?: string;
 
   @Field(() => Int, { nullable: true })
@@ -43,6 +46,9 @@ export class PositionRequestMinAggregate {
 
   @Field(() => String, { nullable: true })
   submission_id?: string;
+
+  @Field(() => Date, { nullable: true })
+  submitted_at?: Date | string;
 
   @Field(() => Date, { nullable: true })
   approved_at?: Date | string;

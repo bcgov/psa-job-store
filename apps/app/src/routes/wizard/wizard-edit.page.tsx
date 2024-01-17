@@ -42,8 +42,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
 
   const profileId = positionRequestProfileId;
 
-  // const [createPositionRequest] = useCreatePositionRequestMutation();
-
   function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
     setClassificationsData(data);
   }
@@ -206,24 +204,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
     setWizardData(transformedData);
 
     try {
-      // const classification = getClassificationById(formData.classification);
-      // const positionRequestInput = {
-      //   step: 1,
-      //   reports_to_position_id: 123,
-      //   profile_json: transformedData,
-      //   parent_job_profile: { connect: { id: 1 } },
-      //   title: formData['title.value'],
-      //   classification_id: undefined, //todo: there might be multiple classifications on the profile, what should it be here?
-      //   classification_code: classification ? classification.code : '',
-      // };
-      // // console.log('positionRequestInput: ', positionRequestInput);
-      // // console.log('formData: ', formData);
-      // const resp = await createPositionRequest(positionRequestInput).unwrap();
-      // setPositionRequestId(resp.createPositionRequest);
-      // Handle the response if needed, or navigate to the next page
-      // navigate('/wizard/review');
-      // navigate(`/position-request/${resp.createPositionRequest}`);
-
       if (positionRequestId)
         await updatePositionRequest({
           id: positionRequestId,

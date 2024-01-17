@@ -52,6 +52,9 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
+                handle: {
+                  // breadcrumb: () => 'My tasks',
+                },
                 element: (
                   <RoleBasedRouting
                     roleComponentMapping={{

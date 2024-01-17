@@ -91,10 +91,11 @@ export const OrgChart = ({
           {...nodeProps}
           selectedDepartment={selectedDepartment}
           onCreateNewPosition={onCreateNewPosition}
+          orgChartData={{ nodes, edges }}
         />
       ),
     }),
-    [selectedDepartment, onCreateNewPosition],
+    [selectedDepartment, onCreateNewPosition, nodes, edges],
   );
 
   return (

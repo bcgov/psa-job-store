@@ -11,6 +11,7 @@ import {
   useGetPositionRequestStatusesQuery,
   useGetPositionRequestSubmittedByQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
+import { statusFilterDataMap } from '../../my-positions/my-positions.page';
 // import './job-profile-search.component.css'; // todo: add as necessary
 
 const { RangePicker } = DatePicker;
@@ -119,10 +120,13 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
 
   useEffect(() => {
     if (statusData) {
-      const newOptions = statusData.map((statusDataItem: string) => ({
-        label: statusDataItem,
-        value: statusDataItem,
-      }));
+      const newOptions = statusData.map((statusDataItem) => {
+        const foundItem = statusFilterDataMap.find((item) => item.value === statusDataItem);
+        return {
+          label: foundItem ? foundItem.label : statusDataItem,
+          value: statusDataItem,
+        };
+      });
       setStatusOptions(newOptions);
     }
   }, [statusData]);

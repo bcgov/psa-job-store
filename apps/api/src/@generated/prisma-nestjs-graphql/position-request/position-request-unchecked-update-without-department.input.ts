@@ -21,8 +21,14 @@ export class PositionRequestUncheckedUpdateWithoutDepartmentInput {
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
 
+  @Field(() => GraphQLJSON, { nullable: true })
+  orgchart_json?: any;
+
   @Field(() => String, { nullable: true })
   user_id?: string;
+
+  @Field(() => String, { nullable: true })
+  classificationAssignedTo?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;
@@ -44,6 +50,9 @@ export class PositionRequestUncheckedUpdateWithoutDepartmentInput {
 
   @Field(() => String, { nullable: true })
   submission_id?: string;
+
+  @Field(() => Date, { nullable: true })
+  submitted_at?: Date | string;
 
   @Field(() => Date, { nullable: true })
   approved_at?: Date | string;
