@@ -322,7 +322,8 @@ export const ClassificationTaskPage = () => {
     return <div>Loading...</div>;
   }
 
-  console.log('orghcart data json: ', data?.positionRequest?.orgchart_json);
+  // console.log('positionRequest data: ', data?.positionRequest);
+
   // END ACTIONS TAB DATA
   const tabItems = [
     {
@@ -403,6 +404,7 @@ export const ClassificationTaskPage = () => {
             <OrgChartWrapped
               selectedDepartment={data?.positionRequest?.department_id ?? null}
               orgChartSnapshot={JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json))}
+              highlightPositionId={data?.positionRequest?.reports_to_position_id?.toString()}
             />
           </div>
         </>

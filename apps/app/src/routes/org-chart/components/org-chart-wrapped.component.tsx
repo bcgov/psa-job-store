@@ -12,12 +12,14 @@ interface OrgChartRendererProps {
   selectedDepartment: string | null;
   onCreateNewPosition?: () => void | null;
   orgChartSnapshot?: OrgChartData;
+  highlightPositionId?: string;
 }
 
 const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   selectedDepartment,
   onCreateNewPosition,
-  orgChartSnapshot,
+  highlightPositionId,
+  orgChartSnapshot = null,
 }) => {
   const [orgChart, setOrgChart] = useState<OrgChartData>(orgChartSnapshot ?? DEFAULT_ORG_CHART);
   const [trigger, { data, isFetching }] = useLazyGetOrgChartQuery();
@@ -46,10 +48,12 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
     </div>
   ) : orgChart.edges.length > 0 ? (
     <OrgChart
+      disableCreateNewPosition={orgChartSnapshot != null}
       edges={orgChart.edges}
       nodes={orgChart.nodes}
       selectedDepartment={selectedDepartment}
       onCreateNewPosition={onCreateNewPosition}
+      highlightPositionId={highlightPositionId}
     />
   ) : (
     <Space style={{ height: '100%', width: '100%', justifyContent: 'center' }} align="center">
