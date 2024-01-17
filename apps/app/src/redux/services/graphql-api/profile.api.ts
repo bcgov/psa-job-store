@@ -13,6 +13,12 @@ export interface GetProfileResponse {
   profile: ProfileModel;
 }
 
+export interface LogoutResponse {
+  logout: {
+    success: boolean;
+  };
+}
+
 export const profileApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
     getProfile: build.query<GetProfileResponse, void>({
@@ -32,7 +38,20 @@ export const profileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    logout: build.query<LogoutResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query Logout {
+              logout {
+                success
+              }
+            }
+          `,
+        };
+      },
+    }),
   }),
 });
 
-export const { useGetProfileQuery } = profileApi;
+export const { useGetProfileQuery, useLazyLogoutQuery } = profileApi;
