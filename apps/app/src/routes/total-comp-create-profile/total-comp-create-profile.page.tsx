@@ -57,7 +57,7 @@ export const TotalCompCreateProfilePage = () => {
     border: '0',
   };
 
-  const { control, handleSubmit, watch, setValue, register } = useForm({
+  const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       jobTitle: '',
       jobStoreNumber: '',
@@ -124,8 +124,6 @@ export const TotalCompCreateProfilePage = () => {
     handleSubmit: profileControlSubmit,
     watch: profileWatch,
     setValue: profileSetValue,
-    register: profileRegister,
-    getValues: profileGetValues,
   } = useForm({
     defaultValues: {
       overview: '',
@@ -384,7 +382,7 @@ export const TotalCompCreateProfilePage = () => {
                       <Controller
                         name="employeeGroup"
                         control={control}
-                        render={({ field: { onChange, onBlur, value, ref } }) => (
+                        render={({ field: { onChange, onBlur } }) => (
                           <Select
                             placeholder="Choose an employee group"
                             onChange={onChange} // send value to hook form
@@ -411,7 +409,7 @@ export const TotalCompCreateProfilePage = () => {
                       <Controller
                         name="classification"
                         control={control}
-                        render={({ field: { onChange, onBlur, value, ref } }) => (
+                        render={({ field: { onChange, onBlur } }) => (
                           <Select
                             placeholder="Choose a classification"
                             onChange={onChange} // send value to hook form
@@ -436,7 +434,7 @@ export const TotalCompCreateProfilePage = () => {
                       <Controller
                         name="jobRole"
                         control={control}
-                        render={({ field: { onChange, onBlur, value, ref } }) => (
+                        render={({ field: { onChange, onBlur } }) => (
                           <Select
                             placeholder="Choose a job role"
                             onChange={onChange} // send value to hook form
@@ -470,7 +468,7 @@ export const TotalCompCreateProfilePage = () => {
                             // ref={register()}
                             control={control}
                             name={`professions.${index}.jobFamily`}
-                            render={({ field: { onChange, onBlur, value, ref } }) => (
+                            render={({ field: { onChange, onBlur } }) => (
                               <Row gutter={8} wrap={false}>
                                 <Col flex="auto">
                                   <Select
@@ -607,7 +605,7 @@ export const TotalCompCreateProfilePage = () => {
                       <Controller
                         name="scopeOfResponsibility"
                         control={control}
-                        render={({ field }) => (
+                        render={() => (
                           <Select placeholder="Choose the scope of responsibility">{/* Options here */}</Select>
                         )}
                       />
@@ -664,7 +662,7 @@ export const TotalCompCreateProfilePage = () => {
                       <Controller
                         name="otherFunctions"
                         control={control}
-                        render={({ field: { onChange, value, name, ref } }) => (
+                        render={({ field: { onChange, value, ref } }) => (
                           <Switch checked={value} onChange={onChange} ref={ref} />
                         )}
                       />
@@ -718,7 +716,7 @@ export const TotalCompCreateProfilePage = () => {
                         <Controller
                           name="overview"
                           control={profileControl}
-                          render={({ field: { onChange, onBlur, value, ref } }) => (
+                          render={({ field: { onChange, onBlur } }) => (
                             <TextArea
                               autoSize
                               placeholder="Provide an overview of the job profile"
@@ -785,7 +783,7 @@ export const TotalCompCreateProfilePage = () => {
                                   <Controller
                                     name={`accountabilities.${index}.nonEditable`}
                                     control={profileControl}
-                                    render={({ field: { onChange, onBlur, value, ref } }) => {
+                                    render={({ field: { onChange, value } }) => {
                                       return (
                                         <Checkbox
                                           onChange={onChange} // send value to hook form

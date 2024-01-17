@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Popover, Row, Typography } from 'antd';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Connection, Edge, Handle, NodeProps, Position } from 'reactflow';
+import { Connection, Edge, Handle, Node, NodeProps, Position, useOnSelectionChange } from 'reactflow';
 import {
   useCreatePositionRequestMutation,
   useUpdatePositionRequestMutation,
@@ -20,7 +20,10 @@ const { Text } = Typography;
 //   top: 'auto',
 // };
 
-const onConnect = (params: Connection | Edge) => console.log('handle onConnect', params);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const onConnect = (_params: Connection | Edge) => {
+  // console.log('handle onConnect', params)
+};
 
 export const OrgChartCard = memo(
   ({
@@ -29,10 +32,20 @@ export const OrgChartCard = memo(
     selectedDepartment,
     onCreateNewPosition,
     orgChartData,
+    selectChangeCallback,
+    selectedNode,
+    incomerIds,
+    outgoerIds,
+    disableCreateNewPosition = false,
   }: NodeProps & {
     selectedDepartment: string | null;
     onCreateNewPosition: () => void | null;
     orgChartData: { nodes: Node[]; edges: Edge[] };
+    selectChangeCallback?: (nodes: Node[]) => void;
+    selectedNode?: Node | null;
+    incomerIds?: string[];
+    outgoerIds?: string[];
+    disableCreateNewPosition?: boolean;
   }) => {
     // const onStart = useCallback((viewport: Viewport) => console.log('onStart', viewport), []);
     // const onChange = useCallback((viewport: Viewport) => console.log('onChange', viewport), []);
@@ -49,10 +62,34 @@ export const OrgChartCard = memo(
     const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
     const navigate = useNavigate();
+    const [isPopoverVisible] = useState(selectedNode?.id == data.id && !disableCreateNewPosition);
+
+    useOnSelectionChange({
+      onChange: ({ nodes }) => {
+        // console.log(
+        //   'onSelectionChange',
+        //   nodes,
+        //   'selectedNode: ',
+        //   selectedNode,
+        //   'disableCreateNewPosition: ',
+        //   disableCreateNewPosition,
+        // );
+        // if (!disableCreateNewPosition) {
+        //   if (selectedNode != null && selectedNode.id === data.id) {
+        //     console.log('SET VISIBLE true 2');
+        //     setIsPopoverVisible(true); // Show the Popover when a node is selected
+        //   } else {
+        //     console.log('SET VISIBLE false', data);
+        //     setIsPopoverVisible(false); // Hide the Popover otherwise
+        //   }
+        // }
+        if (selectChangeCallback) selectChangeCallback(nodes);
+      },
+    });
 
     const createNewPosition = async () => {
       // we are not editing a draft position request (creatign position from dashboard or from org chart page)
-      console.log('orgChartData: ', orgChartData);
+      // console.log('orgChartData: ', orgChartData);
 
       if (!location.pathname.startsWith('/position-request/')) {
         const positionRequestInput = {
@@ -81,10 +118,31 @@ export const OrgChartCard = memo(
       if (onCreateNewPosition) onCreateNewPosition();
     };
 
+    const isNodeSelected = selectedNode?.id === data.id;
+    const isNodeIncomer = incomerIds?.includes(data.id);
+    const isNodeOutgoer = outgoerIds?.includes(data.id);
+
+    // Define header styling based on node status
+    let headerStyle = {};
+    if (isNodeSelected) {
+      headerStyle = {
+        backgroundColor: 'purple',
+        color: 'white',
+      };
+    } else if (isNodeIncomer || isNodeOutgoer) {
+      headerStyle = {
+        backgroundColor: '#036', // Example color for incomers and outgoers
+        color: 'white',
+      };
+    }
+
+    // if (data.id == 'xxxxx') console.log('isPopoverVisible: ', isPopoverVisible, 'selectedNode: ', selectedNode);
+
     return (
       <>
         <Handle type="target" position={Position.Top} onConnect={onConnect} />
         <Popover
+          open={isPopoverVisible}
           placement="bottom"
           trigger="click"
           content={() => {
@@ -100,13 +158,18 @@ export const OrgChartCard = memo(
           <Card
             size="small"
             style={{ border: '1px solid #A1A1A1', cursor: 'pointer' }}
+            headStyle={{ ...headerStyle }}
             title={
               <Row style={{ width: '100%' }} gutter={8}>
                 <Col span={18}>
-                  <Text ellipsis>{data.title}</Text>
+                  <Text ellipsis style={{ ...headerStyle }}>
+                    {data.title}
+                  </Text>
                 </Col>
                 <Col span={6}>
-                  <Text ellipsis>{data.classification?.code}</Text>
+                  <Text ellipsis style={{ ...headerStyle }}>
+                    {data.classification?.code}
+                  </Text>
                 </Col>
               </Row>
             }
