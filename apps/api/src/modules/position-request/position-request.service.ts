@@ -143,7 +143,8 @@ export class PositionRequestApiService {
     } else if (userRoles.includes('classification')) {
       whereConditions = {
         ...whereConditions,
-        classificationAssignedTo: { equals: userId },
+        // classificationAssignedTo: { equals: userId }, // todo: enable this after testing session
+        status: { equals: 'IN_REVIEW' }, // todo: comment this out after testing session
       };
     } else {
       // Default behavior for other users - get position requests for the current user only
