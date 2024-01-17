@@ -5,6 +5,8 @@ export enum ClassificationScalarFieldEnum {
   peoplesoft_id = 'peoplesoft_id',
   code = 'code',
   name = 'name',
+  employee_group = 'employee_group',
+  grade = 'grade',
   effective_status = 'effective_status',
   effective_date = 'effective_date',
 }

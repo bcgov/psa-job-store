@@ -282,17 +282,29 @@ model Comment {
   @@map("comment")
 }
 
+model EmployeeGroup {
+  id   String @id
+  name String
+
+  classifications Classification[]
+
+  @@map("employee_group")
+}
+
 // PeopleSoft Tables
 model Classification {
-  id               String   @id // JOBCODE
-  peoplesoft_id    String // SETID
-  code             String // DESCRSHORT
-  name             String // DESCR
-  effective_status String // EFF_STATUS
-  effective_date   DateTime @db.Date // EFFDT
+  id                String   @id // JOBCODE
+  peoplesoft_id     String // SETID
+  code              String // DESCRSHORT
+  name              String // DESCR
+  employee_group_id String // SAL_ADMIN_PLAN
+  grade             String // GRADE
+  effective_status  String // EFF_STATUS
+  effective_date    DateTime @db.Date // EFFDT
 
-  job_profiles JobProfileClassification[]
-  reportees    JobProfileReportsTo[]
+  employee_group EmployeeGroup              @relation(fields: [employee_group_id], references: [id])
+  job_profiles   JobProfileClassification[]
+  reportees      JobProfileReportsTo[]
 
   @@map("classification")
 }

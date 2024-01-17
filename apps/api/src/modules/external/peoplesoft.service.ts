@@ -82,7 +82,21 @@ export class PeoplesoftService {
       ),
     );
 
-    for await (const row of response?.data?.query?.rows ?? []) {
+    // Filter by applicable employee groups
+    // Sort rows by effective date ASC
+    const sortedRows = (response?.data?.query?.rows ?? [])
+      .filter((row) => ['GEU', 'LGL', 'MGT', 'NEX', 'NUR', 'OEX', 'PEA', 'QP'].includes(row.SAL_ADMIN_PLAN))
+      .sort((a, b) => {
+        if (a.EFFDT > b.EFFDT) {
+          return -1;
+        } else if (b.EFFDT > a.EFFDT) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+
+    for await (const row of sortedRows) {
       await this.prisma.classification.upsert({
         where: { id: row.JOBCODE },
         create: {
@@ -90,6 +104,8 @@ export class PeoplesoftService {
           peoplesoft_id: row.SETID,
           name: row.DESCR,
           code: row.DESCRSHORT,
+          employee_group: row.SAL_ADMIN_PLAN,
+          grade: row.GRADE,
           effective_status: row.EFF_STATUS,
           effective_date: new Date(row.EFFDT),
         },
@@ -97,6 +113,8 @@ export class PeoplesoftService {
           peoplesoft_id: row.SETID,
           name: row.DESCR,
           code: row.DESCRSHORT,
+          employee_group: row.SAL_ADMIN_PLAN,
+          grade: row.GRADE,
           effective_status: row.EFF_STATUS,
           effective_date: new Date(row.EFFDT),
         },

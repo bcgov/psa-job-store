@@ -17,6 +17,12 @@ export class ClassificationUncheckedCreateWithoutReporteesInput {
   name!: string;
 
   @Field(() => String, { nullable: false })
+  employee_group!: string;
+
+  @Field(() => String, { nullable: false })
+  grade!: string;
+
+  @Field(() => String, { nullable: false })
   effective_status!: string;
 
   @Field(() => Date, { nullable: false })

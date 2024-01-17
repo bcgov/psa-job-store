@@ -20,6 +20,12 @@ export class ClassificationOrderByWithAggregationInput {
   name?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  employee_group?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  grade?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   effective_status?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

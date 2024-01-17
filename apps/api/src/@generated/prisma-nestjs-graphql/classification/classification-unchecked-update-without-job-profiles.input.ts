@@ -17,6 +17,12 @@ export class ClassificationUncheckedUpdateWithoutJob_profilesInput {
   name?: string;
 
   @Field(() => String, { nullable: true })
+  employee_group?: string;
+
+  @Field(() => String, { nullable: true })
+  grade?: string;
+
+  @Field(() => String, { nullable: true })
   effective_status?: string;
 
   @Field(() => Date, { nullable: true })

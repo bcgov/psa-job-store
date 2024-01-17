@@ -27,6 +27,12 @@ export class ClassificationScalarWhereWithAggregatesInput {
   name?: StringWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
+  employee_group?: StringWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  grade?: StringWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
   effective_status?: StringWithAggregatesFilter;
 
   @Field(() => DateTimeWithAggregatesFilter, { nullable: true })

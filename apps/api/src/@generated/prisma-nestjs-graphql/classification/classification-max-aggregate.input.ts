@@ -16,6 +16,12 @@ export class ClassificationMaxAggregateInput {
   name?: true;
 
   @Field(() => Boolean, { nullable: true })
+  employee_group?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  grade?: true;
+
+  @Field(() => Boolean, { nullable: true })
   effective_status?: true;
 
   @Field(() => Boolean, { nullable: true })
