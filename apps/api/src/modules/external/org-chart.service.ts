@@ -32,6 +32,8 @@ export class OrgChartService {
     const positionIds = (result?.data?.query?.rows ?? []).map((row) => row['A.POSITION_NBR']);
     const employees: Map<string, Employee[]> = await this.peoplesoftService.getEmployeesForPositions(positionIds);
 
+    console.log('result: ', result);
+
     // Loop through response and generate the tree for everyone in the _current department_
     (result?.data?.query?.rows ?? []).forEach((position) => {
       const existingEdge = edgeMap.get(`${position['A.REPORTS_TO']}-${position['A.POSITION_NBR']}`);

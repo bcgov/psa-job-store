@@ -59,8 +59,8 @@
       "editor.tabSize": 2
     },
     "editor.codeActionsOnSave": {
-      "source.fixAll": true,
-      "source.organizeImports": true
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
     },
     "editor.formatOnSave": true,
     "editor.rulers": [120],

@@ -148,7 +148,8 @@ export interface GetJobProfilesDraftsResponse {
 }
 
 export interface GetJobProfileArgs {
-  id: number;
+  id?: number;
+  number?: number;
 }
 
 export interface GetJobProfileResponse {

@@ -29,6 +29,7 @@ import { cloneElement, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
@@ -546,7 +547,8 @@ export const ClassificationTaskPage = () => {
                         <div>
                           <strong>Download job profile</strong>
                           <p>Attached copy of the job profile that needs review.</p>
-                          <Button onClick={handleDownload}>Download job profile</Button>
+                          {/* <Button onClick={handleDownload}>Download job profile</Button> */}
+                          <DownloadJobProfileComponent jobProfile={data?.positionRequest.profile_json} />
                           <Button type="link">View job profile</Button>
                         </div>
                         <Divider />
@@ -605,10 +607,14 @@ export const ClassificationTaskPage = () => {
     {
       label: (
         <div>
-          Download job profile
-          <Text type="secondary" style={{ display: 'block' }}>
-            Download the attached copy of the job profile.
-          </Text>
+          <DownloadJobProfileComponent jobProfile={data.positionRequest.profile_json}>
+            <>
+              Download job profile
+              <Text type="secondary" style={{ display: 'block' }}>
+                Download the attached copy of the job profile.
+              </Text>
+            </>
+          </DownloadJobProfileComponent>
         </div>
       ),
       key: '2',
