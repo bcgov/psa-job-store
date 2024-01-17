@@ -23,6 +23,9 @@ export class PositionRequestMinOrderByAggregateInput {
   user_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  classificationAssignedTo?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
@@ -42,6 +45,9 @@ export class PositionRequestMinOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   submission_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  submitted_at?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   approved_at?: keyof typeof SortOrder;

@@ -23,7 +23,7 @@ To update the seed file, run `oc set data secret/seed-secret --from-file=seed.ts
 
 ## @generated files
 
-To avoid slow commits when auto-generation takes place, run `git add .` and then `npx lint-staged`
+To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)
 
 ## DB Troubleshooting
 

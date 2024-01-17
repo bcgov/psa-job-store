@@ -25,7 +25,7 @@ export const ClassificationTasksPage = () => {
 
   return (
     <>
-      <PageHeader title="Approved" subTitle="Job profiles available in the job store." />
+      <PageHeader title="My tasks" subTitle="List of job profiles that need review." />
 
       <ContentWrapper>
         {hasData && (

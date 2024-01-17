@@ -26,8 +26,14 @@ export class PositionRequest {
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json!: any | null;
 
+  @Field(() => GraphQLJSON, { nullable: true })
+  orgchart_json!: any | null;
+
   @Field(() => String, { nullable: true })
   user_id!: string | null;
+
+  @Field(() => String, { nullable: true })
+  classificationAssignedTo!: string | null;
 
   @Field(() => String, { nullable: true })
   title!: string | null;
@@ -49,6 +55,9 @@ export class PositionRequest {
 
   @Field(() => String, { nullable: true })
   submission_id!: string | null;
+
+  @Field(() => Date, { nullable: true })
+  submitted_at!: Date | null;
 
   @Field(() => Date, { nullable: true })
   approved_at!: Date | null;

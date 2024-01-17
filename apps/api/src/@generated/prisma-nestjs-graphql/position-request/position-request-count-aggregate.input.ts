@@ -22,7 +22,13 @@ export class PositionRequestCountAggregateInput {
   profile_json?: true;
 
   @Field(() => Boolean, { nullable: true })
+  orgchart_json?: true;
+
+  @Field(() => Boolean, { nullable: true })
   user_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  classificationAssignedTo?: true;
 
   @Field(() => Boolean, { nullable: true })
   title?: true;
@@ -44,6 +50,9 @@ export class PositionRequestCountAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   submission_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  submitted_at?: true;
 
   @Field(() => Boolean, { nullable: true })
   approved_at?: true;

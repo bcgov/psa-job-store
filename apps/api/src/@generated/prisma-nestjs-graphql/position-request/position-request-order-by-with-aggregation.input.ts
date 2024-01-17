@@ -29,7 +29,13 @@ export class PositionRequestOrderByWithAggregationInput {
   profile_json?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
+  orgchart_json?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
   user_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  classificationAssignedTo?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   title?: SortOrderInput;
@@ -51,6 +57,9 @@ export class PositionRequestOrderByWithAggregationInput {
 
   @Field(() => SortOrderInput, { nullable: true })
   submission_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  submitted_at?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   approved_at?: SortOrderInput;

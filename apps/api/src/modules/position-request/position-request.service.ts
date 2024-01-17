@@ -25,6 +25,9 @@ export class PositionRequestResponse {
 
   @Field(() => GraphQLJSON)
   profile_json: any;
+
+  @Field(() => GraphQLJSON)
+  orgchart_json: any;
 }
 
 @ObjectType()
@@ -80,6 +83,7 @@ export class PositionRequestApiService {
         step: data.step,
         reports_to_position_id: data.reports_to_position_id,
         profile_json: data.profile_json,
+        orgchart_json: data.orgchart_json,
         // TODO: AL-146
         // user: data.user,
         user_id: userId,
@@ -135,8 +139,14 @@ export class PositionRequestApiService {
         ...whereConditions,
         status: { equals: 'COMPLETED' },
       };
+      // If the user is in "classification" role, then return only requests assigned to this user using classificationAssignedTo property
+    } else if (userRoles.includes('classification')) {
+      whereConditions = {
+        ...whereConditions,
+        classificationAssignedTo: { equals: userId },
+      };
     } else {
-      // Default behavior for other users
+      // Default behavior for other users - get position requests for the current user only
       whereConditions = {
         ...whereConditions,
         user_id: { equals: userId },
@@ -373,8 +383,10 @@ export class PositionRequestApiService {
 
   async getPositionRequestStatuses() {
     // return enum values as array of strings
-    const states = Object.values(PositionRequestStatus).filter((value) => typeof value === 'string');
-    return states.map((state) => state);
+    const states = Object.values(PositionRequestStatus).filter(
+      (value) => typeof value === 'string' && value !== 'DRAFT',
+    );
+    return states;
   }
 
   async getPositionRequestSubmittedBy() {
@@ -473,6 +485,10 @@ export class PositionRequestApiService {
 
     if (updateData.profile_json !== undefined) {
       updatePayload.profile_json = updateData.profile_json;
+    }
+
+    if (updateData.orgchart_json !== undefined) {
+      updatePayload.orgchart_json = updateData.orgchart_json;
     }
 
     if (updateData.title !== undefined) {

@@ -18,6 +18,7 @@ export interface CreatePositionRequestInput {
   step: number;
   reports_to_position_id: number;
   profile_json?: any;
+  orgchart_json?: any;
   parent_job_profile?: JobProfileConnectItem;
   title?: string;
   classification_id?: string;
@@ -33,6 +34,7 @@ export interface GetPositionRequestResponseContent {
   id: number;
   step?: number;
   reports_to_position_id?: number;
+  orgchart_json?: any;
   profile_json?: any;
   user_id?: string;
   user_name?: string;
@@ -83,6 +85,7 @@ export interface UpdatePositionRequestInput {
   id: number;
   step?: number;
   reports_to_position_id?: number;
+  orgchart_json?: any;
   profile_json?: any;
   user_id?: string;
   title?: string;
@@ -216,6 +219,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   reports_to_position_id
                   parent_job_profile_id
                   profile_json
+                  orgchart_json
                   user_id
                   user_name
                   email

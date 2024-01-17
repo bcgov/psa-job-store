@@ -36,8 +36,14 @@ export class PositionRequestScalarWhereInput {
   @Field(() => JsonFilter, { nullable: true })
   profile_json?: JsonFilter;
 
+  @Field(() => JsonFilter, { nullable: true })
+  orgchart_json?: JsonFilter;
+
   @Field(() => UuidFilter, { nullable: true })
   user_id?: UuidFilter;
+
+  @Field(() => UuidFilter, { nullable: true })
+  classificationAssignedTo?: UuidFilter;
 
   @Field(() => StringFilter, { nullable: true })
   title?: StringFilter;
@@ -59,6 +65,9 @@ export class PositionRequestScalarWhereInput {
 
   @Field(() => StringFilter, { nullable: true })
   submission_id?: StringFilter;
+
+  @Field(() => DateTimeFilter, { nullable: true })
+  submitted_at?: DateTimeFilter;
 
   @Field(() => DateTimeFilter, { nullable: true })
   approved_at?: DateTimeFilter;

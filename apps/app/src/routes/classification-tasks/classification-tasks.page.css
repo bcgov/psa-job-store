@@ -1,0 +1,24 @@
+.custom-checkbox{
+    position:relative;
+}
+
+.custom-checkbox .ant-checkbox {
+    position: absolute;
+    top: 4px;
+  }
+  
+  .custom-checkbox .checkbox-contents {
+    margin-left: 15px;
+  }
+  
+  .alert-with-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Ensures the div takes up the full width of its container */
+  }
+  
+  .alert-extra-link {
+    margin-left: auto; /* Pushes the link to the right */
+    white-space: nowrap; /* Prevents the link from wrapping */
+  }

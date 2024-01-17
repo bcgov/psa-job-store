@@ -28,6 +28,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack }) => {
   const { setPositionRequestProfileId } = useWizardContext();
 
   const onSubmit: SubmitHandler<IFormInput> = async () => {
+    // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     if (selectedProfileId) {
       // navigate(`/wizard/edit/${selectedProfileId}`);
       if (positionRequestId)
