@@ -91,4 +91,20 @@ export class AuthService {
     ];
     await this.prisma.$transaction(queries);
   }
+
+  async logoutUser(idir_user_guid: string): Promise<void> {
+    const CACHE_KEY = `${CACHE_USER_PREFIX}${idir_user_guid}`;
+
+    // Check if the user is in the cache
+    const userInCache = await this.cacheManager.get<Express.User>(CACHE_KEY);
+
+    if (!userInCache) {
+      // it's possible that the user is not in the cache because it's expired
+      return;
+      // throw new HttpException('User not found in cache', HttpStatus.NOT_FOUND);
+    }
+
+    // Remove the user from the cache
+    await this.cacheManager.del(CACHE_KEY);
+  }
 }
