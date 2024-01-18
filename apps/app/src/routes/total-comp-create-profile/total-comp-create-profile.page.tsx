@@ -23,6 +23,7 @@ import { CSSProperties, useCallback, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import MinistriesSelect from '../../components/app/common/components/ministries-select.component';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import {
@@ -631,10 +632,8 @@ export const TotalCompCreateProfilePage = () => {
                       <Controller
                         name="ministries"
                         control={control}
-                        render={({ field }) => (
-                          <Select {...field} mode="multiple" placeholder="Choose a ministry">
-                            {/* Dynamically render Options here based on fetched data */}
-                          </Select>
+                        render={({ field: { onChange } }) => (
+                          <MinistriesSelect isMultiSelect={true} onChange={onChange} />
                         )}
                       />
                       <Text type="secondary">

@@ -92,8 +92,8 @@ export class PositionRequestApiResolver {
   }
 
   @Query(() => PositionRequest, { name: 'positionRequest' })
-  async getPositionRequest(@CurrentUser() { id: userId }: Express.User, @Args('id') id: number) {
-    return this.positionRequestService.getPositionRequest(+id, userId);
+  async getPositionRequest(@CurrentUser() user: Express.User, @Args('id') id: number) {
+    return this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
   }
 
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestUserClassifications' })
