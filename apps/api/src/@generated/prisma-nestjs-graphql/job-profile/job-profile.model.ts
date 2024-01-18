@@ -11,12 +11,12 @@ import { JobProfileCareerGroup } from '../job-profile-career-group/job-profile-c
 import { JobProfileContext } from '../job-profile-context/job-profile-context.model';
 import { JobProfileJobFamily } from '../job-profile-job-family/job-profile-job-family.model';
 import { JobProfileRole } from '../job-profile-role/job-profile-role.model';
+import { JobProfileRoleType } from '../job-profile-role-type/job-profile-role-type.model';
 import { JobProfileScope } from '../job-profile-scope/job-profile-scope.model';
 import { JobProfileStream } from '../job-profile-stream/job-profile-stream.model';
 import { User } from '../user/user.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
 import { PositionRequest } from '../position-request/position-request.model';
-import { JobProfileProfessionalDesignation } from '../job-profile-professional-designation/job-profile-professional-designation.model';
 
 @ObjectType()
 export class JobProfile {
@@ -31,6 +31,9 @@ export class JobProfile {
 
   @Field(() => Int, { nullable: false })
   role_id!: number;
+
+  @Field(() => Int, { nullable: true })
+  role_type_id!: number | null;
 
   @Field(() => Int, { nullable: true })
   scope_id!: number | null;
@@ -86,6 +89,9 @@ export class JobProfile {
   @Field(() => JobProfileRole, { nullable: true })
   role?: JobProfileRole | null;
 
+  @Field(() => JobProfileRoleType, { nullable: true })
+  role_type?: JobProfileRoleType | null;
+
   @Field(() => JobProfileScope, { nullable: true })
   scope?: JobProfileScope | null;
 
@@ -100,7 +106,4 @@ export class JobProfile {
 
   @Field(() => [PositionRequest], { nullable: true })
   position_request?: Array<PositionRequest>;
-
-  @Field(() => [JobProfileProfessionalDesignation], { nullable: true })
-  designations?: Array<JobProfileProfessionalDesignation>;
 }

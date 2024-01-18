@@ -5,6 +5,7 @@ export enum JobProfileScalarFieldEnum {
   career_group_id = 'career_group_id',
   job_family_id = 'job_family_id',
   role_id = 'role_id',
+  role_type_id = 'role_type_id',
   scope_id = 'scope_id',
   state = 'state',
   stream_id = 'stream_id',

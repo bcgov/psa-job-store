@@ -11,11 +11,11 @@ import { JobProfileCareerGroupCreateNestedOneWithoutJob_profilesInput } from '..
 import { JobProfileContextCreateNestedOneWithoutJob_profileInput } from '../job-profile-context/job-profile-context-create-nested-one-without-job-profile.input';
 import { JobProfileJobFamilyCreateNestedOneWithoutJob_profilesInput } from '../job-profile-job-family/job-profile-job-family-create-nested-one-without-job-profiles.input';
 import { JobProfileRoleCreateNestedOneWithoutJob_profilesInput } from '../job-profile-role/job-profile-role-create-nested-one-without-job-profiles.input';
+import { JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput } from '../job-profile-role-type/job-profile-role-type-create-nested-one-without-job-profiles.input';
 import { JobProfileScopeCreateNestedOneWithoutJob_profilesInput } from '../job-profile-scope/job-profile-scope-create-nested-one-without-job-profiles.input';
 import { JobProfileStreamCreateNestedOneWithoutJob_profilesInput } from '../job-profile-stream/job-profile-stream-create-nested-one-without-job-profiles.input';
 import { UserCreateNestedOneWithoutJobProfileInput } from '../user/user-create-nested-one-without-job-profile.input';
 import { JobProfileReportsToCreateNestedManyWithoutJob_profileInput } from '../job-profile-reports-to/job-profile-reports-to-create-nested-many-without-job-profile.input';
-import { JobProfileProfessionalDesignationCreateNestedManyWithoutJob_profileInput } from '../job-profile-professional-designation/job-profile-professional-designation-create-nested-many-without-job-profile.input';
 
 @InputType()
 export class JobProfileCreateWithoutPosition_requestInput {
@@ -64,6 +64,9 @@ export class JobProfileCreateWithoutPosition_requestInput {
   @Field(() => JobProfileRoleCreateNestedOneWithoutJob_profilesInput, { nullable: true })
   role?: JobProfileRoleCreateNestedOneWithoutJob_profilesInput;
 
+  @Field(() => JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput, { nullable: true })
+  role_type?: JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput;
+
   @Field(() => JobProfileScopeCreateNestedOneWithoutJob_profilesInput, { nullable: true })
   scope?: JobProfileScopeCreateNestedOneWithoutJob_profilesInput;
 
@@ -75,7 +78,4 @@ export class JobProfileCreateWithoutPosition_requestInput {
 
   @Field(() => JobProfileReportsToCreateNestedManyWithoutJob_profileInput, { nullable: true })
   reports_to?: JobProfileReportsToCreateNestedManyWithoutJob_profileInput;
-
-  @Field(() => JobProfileProfessionalDesignationCreateNestedManyWithoutJob_profileInput, { nullable: true })
-  designations?: JobProfileProfessionalDesignationCreateNestedManyWithoutJob_profileInput;
 }

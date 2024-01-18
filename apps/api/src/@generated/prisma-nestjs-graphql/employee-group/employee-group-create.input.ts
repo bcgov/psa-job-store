@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { ProfessionalDesignationCreateNestedManyWithoutEmployee_groupInput } from '../professional-designation/professional-designation-create-nested-many-without-employee-group.input';
+import { ClassificationCreateNestedManyWithoutEmployee_groupInput } from '../classification/classification-create-nested-many-without-employee-group.input';
 
 @InputType()
 export class EmployeeGroupCreateInput {
@@ -10,6 +10,6 @@ export class EmployeeGroupCreateInput {
   @Field(() => String, { nullable: false })
   name!: string;
 
-  @Field(() => ProfessionalDesignationCreateNestedManyWithoutEmployee_groupInput, { nullable: true })
-  professional_designations?: ProfessionalDesignationCreateNestedManyWithoutEmployee_groupInput;
+  @Field(() => ClassificationCreateNestedManyWithoutEmployee_groupInput, { nullable: true })
+  classifications?: ClassificationCreateNestedManyWithoutEmployee_groupInput;
 }

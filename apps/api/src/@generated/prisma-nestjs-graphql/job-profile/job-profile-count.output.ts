@@ -18,7 +18,4 @@ export class JobProfileCount {
 
   @Field(() => Int, { nullable: false })
   position_request?: number;
-
-  @Field(() => Int, { nullable: false })
-  designations?: number;
 }

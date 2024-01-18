@@ -16,9 +16,6 @@ export class ClassificationUpdateManyMutationInput {
   name?: string;
 
   @Field(() => String, { nullable: true })
-  employee_group_id?: string;
-
-  @Field(() => String, { nullable: true })
   grade?: string;
 
   @Field(() => String, { nullable: true })

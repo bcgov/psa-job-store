@@ -15,12 +15,12 @@ import { JobProfileCareerGroupRelationFilter } from '../job-profile-career-group
 import { JobProfileContextRelationFilter } from '../job-profile-context/job-profile-context-relation-filter.input';
 import { JobProfileJobFamilyRelationFilter } from '../job-profile-job-family/job-profile-job-family-relation-filter.input';
 import { JobProfileRoleRelationFilter } from '../job-profile-role/job-profile-role-relation-filter.input';
+import { JobProfileRoleTypeRelationFilter } from '../job-profile-role-type/job-profile-role-type-relation-filter.input';
 import { JobProfileScopeRelationFilter } from '../job-profile-scope/job-profile-scope-relation-filter.input';
 import { JobProfileStreamRelationFilter } from '../job-profile-stream/job-profile-stream-relation-filter.input';
 import { UserRelationFilter } from '../user/user-relation-filter.input';
 import { JobProfileReportsToListRelationFilter } from '../job-profile-reports-to/job-profile-reports-to-list-relation-filter.input';
 import { PositionRequestListRelationFilter } from '../position-request/position-request-list-relation-filter.input';
-import { JobProfileProfessionalDesignationListRelationFilter } from '../job-profile-professional-designation/job-profile-professional-designation-list-relation-filter.input';
 
 @InputType()
 export class JobProfileWhereInput {
@@ -44,6 +44,9 @@ export class JobProfileWhereInput {
 
   @Field(() => IntFilter, { nullable: true })
   role_id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
+  role_type_id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
   scope_id?: IntFilter;
@@ -99,6 +102,9 @@ export class JobProfileWhereInput {
   @Field(() => JobProfileRoleRelationFilter, { nullable: true })
   role?: JobProfileRoleRelationFilter;
 
+  @Field(() => JobProfileRoleTypeRelationFilter, { nullable: true })
+  role_type?: JobProfileRoleTypeRelationFilter;
+
   @Field(() => JobProfileScopeRelationFilter, { nullable: true })
   scope?: JobProfileScopeRelationFilter;
 
@@ -113,7 +119,4 @@ export class JobProfileWhereInput {
 
   @Field(() => PositionRequestListRelationFilter, { nullable: true })
   position_request?: PositionRequestListRelationFilter;
-
-  @Field(() => JobProfileProfessionalDesignationListRelationFilter, { nullable: true })
-  designations?: JobProfileProfessionalDesignationListRelationFilter;
 }

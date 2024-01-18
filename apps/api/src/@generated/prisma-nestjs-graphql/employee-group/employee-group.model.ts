@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
-import { ProfessionalDesignation } from '../professional-designation/professional-designation.model';
+import { Classification } from '../classification/classification.model';
 
 @ObjectType()
 export class EmployeeGroup {
@@ -10,6 +10,6 @@ export class EmployeeGroup {
   @Field(() => String, { nullable: false })
   name!: string;
 
-  @Field(() => [ProfessionalDesignation], { nullable: true })
-  professional_designations?: Array<ProfessionalDesignation>;
+  @Field(() => [Classification], { nullable: true })
+  classifications?: Array<Classification>;
 }

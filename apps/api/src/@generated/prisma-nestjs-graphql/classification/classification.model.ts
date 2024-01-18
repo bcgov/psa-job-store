@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
+import { EmployeeGroup } from '../employee-group/employee-group.model';
 import { JobProfileClassification } from '../job-profile-classification/job-profile-classification.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
 
@@ -28,6 +29,9 @@ export class Classification {
 
   @Field(() => Date, { nullable: false })
   effective_date!: Date;
+
+  @Field(() => EmployeeGroup, { nullable: false })
+  employee_group?: EmployeeGroup;
 
   @Field(() => [JobProfileClassification], { nullable: true })
   job_profiles?: Array<JobProfileClassification>;

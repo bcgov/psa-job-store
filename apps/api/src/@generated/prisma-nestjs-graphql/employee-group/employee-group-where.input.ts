@@ -1,7 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { StringFilter } from '../prisma/string-filter.input';
-import { ProfessionalDesignationListRelationFilter } from '../professional-designation/professional-designation-list-relation-filter.input';
+import { ClassificationListRelationFilter } from '../classification/classification-list-relation-filter.input';
 
 @InputType()
 export class EmployeeGroupWhereInput {
@@ -20,6 +20,6 @@ export class EmployeeGroupWhereInput {
   @Field(() => StringFilter, { nullable: true })
   name?: StringFilter;
 
-  @Field(() => ProfessionalDesignationListRelationFilter, { nullable: true })
-  professional_designations?: ProfessionalDesignationListRelationFilter;
+  @Field(() => ClassificationListRelationFilter, { nullable: true })
+  classifications?: ClassificationListRelationFilter;
 }

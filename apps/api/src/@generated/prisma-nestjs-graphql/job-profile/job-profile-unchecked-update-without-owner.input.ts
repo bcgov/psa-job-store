@@ -10,7 +10,6 @@ import { JobProfileOrganizationUncheckedUpdateManyWithoutJob_profileNestedInput 
 import { JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-unchecked-update-one-without-job-profile-nested.input';
 import { JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-update-many-without-job-profile-nested.input';
 import { PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-unchecked-update-many-without-parent-job-profile-nested.input';
-import { JobProfileProfessionalDesignationUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-professional-designation/job-profile-professional-designation-unchecked-update-many-without-job-profile-nested.input';
 
 @InputType()
 export class JobProfileUncheckedUpdateWithoutOwnerInput {
@@ -25,6 +24,9 @@ export class JobProfileUncheckedUpdateWithoutOwnerInput {
 
   @Field(() => Int, { nullable: true })
   role_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  role_type_id?: number;
 
   @Field(() => Int, { nullable: true })
   scope_id?: number;
@@ -73,7 +75,4 @@ export class JobProfileUncheckedUpdateWithoutOwnerInput {
 
   @Field(() => PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput, { nullable: true })
   position_request?: PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput;
-
-  @Field(() => JobProfileProfessionalDesignationUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
-  designations?: JobProfileProfessionalDesignationUncheckedUpdateManyWithoutJob_profileNestedInput;
 }

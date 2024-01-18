@@ -17,6 +17,9 @@ export class JobProfileCreateManyCareer_groupInput {
   role_id!: number;
 
   @Field(() => Int, { nullable: true })
+  role_type_id?: number;
+
+  @Field(() => Int, { nullable: true })
   scope_id?: number;
 
   @Field(() => JobProfileState, { nullable: true })
