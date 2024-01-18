@@ -15,7 +15,13 @@ export const AppHeader = () => {
   const handleLogout = async () => {
     try {
       // Sign out from the API
-      await triggerLogout().unwrap();
+      try {
+        await triggerLogout().unwrap();
+      } catch (e) {
+        // may fail because user is already logged out, just reload the page then
+        // console.log(e);
+      }
+
       // Also, sign out from OIDC if necessary
       auth.signoutSilent(); // can also do signoutPopup to show popup. signoutRedirect() is inconvinient as it stays on "you have been logged out" page
 

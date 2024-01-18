@@ -5,6 +5,8 @@ import {
   PositionRequestCreateInput,
   PositionRequestStatus,
   PositionRequestUpdateInput,
+  PositionRequestWhereInput,
+  UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
@@ -228,11 +230,16 @@ export class PositionRequestApiService {
   }
 
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
-    let whereCondition: { id: number; user_id?: string } = { id };
+    let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
-    // If the user does not have the "total-compensation" role, include the user_id in the where condition
-    if (!userRoles.includes('total-compensation')) {
-      whereCondition = { ...whereCondition, user_id: userId };
+    // If the user does not have the "total-compensation" role or "classification" role, include the user_id in the where condition
+    // otherwise let the user access by id any position request except those in draft status
+    if (!userRoles.includes('total-compensation') && !userRoles.includes('classification')) {
+      whereCondition = {
+        ...whereCondition,
+        user_id: { equals: userId },
+        NOT: [{ status: { not: { equals: 'DRAFT' } } }],
+      };
     }
 
     const positionRequest = await this.prisma.positionRequest.findUnique({
