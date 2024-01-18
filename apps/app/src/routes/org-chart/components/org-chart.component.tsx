@@ -22,6 +22,7 @@ interface Props {
   onCreateNewPosition?: () => void | null;
   disableCreateNewPosition?: boolean;
   highlightPositionId?: string;
+  extraNodeInfo?: any;
 }
 
 const dagreGraph = new dagre.graphlib.Graph();
@@ -69,13 +70,14 @@ export const OrgChart = ({
   onCreateNewPosition,
   highlightPositionId,
   disableCreateNewPosition = false,
+  extraNodeInfo,
 }: Props) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
 
   // const [nodes] = useState(layoutedNodes);
   // const [edges] = useState(layoutedEdges);
   const [nodes, setNodes] = useNodesState(layoutedNodes);
-  const [edges] = useEdgesState(layoutedEdges);
+  const [edges, setEdges] = useEdgesState(layoutedEdges);
   const [selectedNode, setSelectedNode] = useState<any>();
 
   const getIncomers = useCallback((node: Node | Connection | Edge, nodes: any[], edges: any[]) => {
@@ -168,8 +170,6 @@ export const OrgChart = ({
     },
     [getOutgoers],
   );
-
-  // for custom nodes
 
   const [incomerIds, setIncomerIds] = useState([]);
   const [outgoerIds, setOutgoerIds] = useState([]);
@@ -325,6 +325,55 @@ export const OrgChart = ({
     });
   };
   // END HIGHILGHT PATH
+
+  const addNodeAttachedToSpecificId = useCallback(
+    (extraNodeInfo: any) => {
+      if (!extraNodeInfo) return;
+
+      const newNodeId = extraNodeInfo.nodeId;
+      const newNode = {
+        id: newNodeId, // Unique ID
+        data: {
+          id: newNodeId,
+
+          employees: [],
+          extra: true,
+          ...extraNodeInfo,
+        },
+        type: 'org-chart-card',
+        // position will be set by Dagre
+      };
+
+      const newEdge = {
+        id: newNode.id + '-' + extraNodeInfo.targetNodeId,
+        type: 'smoothstep',
+        source: extraNodeInfo.targetNodeId,
+        target: newNode.id,
+      };
+
+      const resetNodes = nodes.map(({ position, ...rest }) => ({ ...rest }));
+
+      const updatedNodes = [...resetNodes, newNode];
+      const updatedEdges = [...edges, newEdge];
+
+      // console.log('updatedNodes: ', updatedNodes, 'updatedEdges: ', updatedEdges);
+      // Apply Dagre layout with the new node and edge
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(updatedNodes, updatedEdges);
+
+      // Update state
+      setNodes(layoutedNodes);
+      setEdges(layoutedEdges);
+    },
+    [nodes, edges, setNodes, setEdges],
+  );
+
+  const [nodeAdded, setNodeAdded] = useState(false);
+  useEffect(() => {
+    if (!nodeAdded) {
+      addNodeAttachedToSpecificId(extraNodeInfo);
+    }
+    setNodeAdded(true);
+  }, [nodeAdded, addNodeAttachedToSpecificId, extraNodeInfo]);
 
   return (
     <ReactFlow

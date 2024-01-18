@@ -325,6 +325,7 @@ export const ClassificationTaskPage = () => {
   // console.log('positionRequest data: ', data?.positionRequest);
 
   // END ACTIONS TAB DATA
+  const snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
   const tabItems = [
     {
       key: '1',
@@ -403,8 +404,16 @@ export const ClassificationTaskPage = () => {
           <div style={{ overflow: 'hidden', position: 'relative', height: '500px' }}>
             <OrgChartWrapped
               selectedDepartment={data?.positionRequest?.department_id ?? null}
-              orgChartSnapshot={JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json))}
-              highlightPositionId={data?.positionRequest?.reports_to_position_id?.toString()}
+              orgChartSnapshot={snapshotCopy}
+              highlightPositionId={'extraNode'}
+              extraNodeInfo={{
+                nodeId: 'extraNode',
+                title: data?.positionRequest?.title,
+                classification: { code: '', name: '' },
+                status: data?.positionRequest?.status,
+                targetNodeId: data?.positionRequest?.reports_to_position_id?.toString(),
+                submittedBy: data?.positionRequest?.user_name,
+              }}
             />
           </div>
         </>

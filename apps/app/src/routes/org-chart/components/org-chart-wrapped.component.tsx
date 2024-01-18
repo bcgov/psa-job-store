@@ -13,6 +13,8 @@ interface OrgChartRendererProps {
   onCreateNewPosition?: () => void | null;
   orgChartSnapshot?: OrgChartData;
   highlightPositionId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  extraNodeInfo?: any;
 }
 
 const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
@@ -20,6 +22,7 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   onCreateNewPosition,
   highlightPositionId,
   orgChartSnapshot = null,
+  extraNodeInfo,
 }) => {
   const [orgChart, setOrgChart] = useState<OrgChartData>(orgChartSnapshot ?? DEFAULT_ORG_CHART);
   const [trigger, { data, isFetching }] = useLazyGetOrgChartQuery();
@@ -54,6 +57,7 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
       selectedDepartment={selectedDepartment}
       onCreateNewPosition={onCreateNewPosition}
       highlightPositionId={highlightPositionId}
+      extraNodeInfo={extraNodeInfo}
     />
   ) : (
     <Space style={{ height: '100%', width: '100%', justifyContent: 'center' }} align="center">

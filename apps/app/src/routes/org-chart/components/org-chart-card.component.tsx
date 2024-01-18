@@ -138,6 +138,9 @@ export const OrgChartCard = memo(
 
     // if (data.id == 'xxxxx') console.log('isPopoverVisible: ', isPopoverVisible, 'selectedNode: ', selectedNode);
 
+    if (data.extra) {
+      console.log('data.extra: ', data);
+    }
     return (
       <>
         <Handle type="target" position={Position.Top} onConnect={onConnect} />
@@ -182,20 +185,40 @@ export const OrgChartCard = memo(
               </>
             ))}
           </ul> */}
-            {data.employees.length > 0 ? (
-              <Text strong title={`Employees:\n${data.employees.map((e: any) => `${e.name}\n`)}`}>
-                {data.employees[0].name}
-                {data.employees.length > 1 ? <Text type="secondary"> +{data.employees.length - 1}</Text> : <></>}
-              </Text>
+            {!data.extra ? (
+              <>
+                {data.employees.length > 0 ? (
+                  <Text strong title={`Employees:\n${data.employees.map((e: any) => `${e.name}\n`)}`}>
+                    {data.employees[0].name}
+                    {data.employees.length > 1 ? <Text type="secondary"> +{data.employees.length - 1}</Text> : <></>}
+                  </Text>
+                ) : (
+                  <Text type="secondary" strong italic>
+                    Vacant
+                  </Text>
+                )}
+                <br />
+                Dept. ID: {data.department?.id}
+                <br />
+                Position: {data.id}
+              </>
             ) : (
-              <Text type="secondary" strong italic>
-                Vacant
-              </Text>
+              <>
+                <div>
+                  <span
+                    style={{
+                      height: '8px',
+                      width: '8px',
+                      borderRadius: '50%',
+                      display: 'inline-block',
+                      backgroundColor: '#722ED1',
+                    }}
+                  />{' '}
+                  In review
+                </div>
+                <div>Submitted by: {data.submittedBy}</div>
+              </>
             )}
-            <br />
-            Dept. ID: {data.department?.id}
-            <br />
-            Position: {data.id}
           </Card>
         </Popover>
 

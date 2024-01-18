@@ -617,8 +617,9 @@ export const TotalCompCreateProfilePage = () => {
                 <Divider className="hr-reduced-margin" />
 
                 <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                  <Col xs={24} sm={24} md={14} lg={14} xl={14}>
                     {/* Ministries Select */}
+
                     <Form.Item
                       label={
                         <>
@@ -633,12 +634,15 @@ export const TotalCompCreateProfilePage = () => {
                         name="ministries"
                         control={control}
                         render={({ field: { onChange } }) => (
-                          <MinistriesSelect isMultiSelect={true} onChange={onChange} />
+                          <>
+                            <Text type="secondary" style={{ marginBottom: '5px', display: 'block' }}>
+                              If selected, this role would be available only for those specific ministries.
+                            </Text>
+                            <br></br>
+                            <MinistriesSelect isMultiSelect={true} onChange={onChange} />
+                          </>
                         )}
                       />
-                      <Text type="secondary">
-                        If selected, this role would be available only for those specific ministries.
-                      </Text>
                     </Form.Item>
                   </Col>
                 </Row>
