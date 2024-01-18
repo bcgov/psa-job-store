@@ -17,7 +17,7 @@ export class ClassificationCreateWithoutReporteesInput {
   name!: string;
 
   @Field(() => String, { nullable: false })
-  employee_group!: string;
+  employee_group_id!: string;
 
   @Field(() => String, { nullable: false })
   grade!: string;

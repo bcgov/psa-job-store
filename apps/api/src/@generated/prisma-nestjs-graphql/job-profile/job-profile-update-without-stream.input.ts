@@ -11,9 +11,11 @@ import { JobProfileCareerGroupUpdateOneWithoutJob_profilesNestedInput } from '..
 import { JobProfileContextUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-update-one-without-job-profile-nested.input';
 import { JobProfileJobFamilyUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-job-family/job-profile-job-family-update-one-without-job-profiles-nested.input';
 import { JobProfileRoleUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-role/job-profile-role-update-one-without-job-profiles-nested.input';
+import { JobProfileScopeUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-scope/job-profile-scope-update-one-without-job-profiles-nested.input';
 import { UserUpdateOneWithoutJobProfileNestedInput } from '../user/user-update-one-without-job-profile-nested.input';
 import { JobProfileReportsToUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-update-many-without-job-profile-nested.input';
 import { PositionRequestUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-update-many-without-parent-job-profile-nested.input';
+import { JobProfileProfessionalDesignationUpdateManyWithoutJob_profileNestedInput } from '../job-profile-professional-designation/job-profile-professional-designation-update-many-without-job-profile-nested.input';
 
 @InputType()
 export class JobProfileUpdateWithoutStreamInput {
@@ -62,6 +64,9 @@ export class JobProfileUpdateWithoutStreamInput {
   @Field(() => JobProfileRoleUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
   role?: JobProfileRoleUpdateOneWithoutJob_profilesNestedInput;
 
+  @Field(() => JobProfileScopeUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  scope?: JobProfileScopeUpdateOneWithoutJob_profilesNestedInput;
+
   @Field(() => UserUpdateOneWithoutJobProfileNestedInput, { nullable: true })
   owner?: UserUpdateOneWithoutJobProfileNestedInput;
 
@@ -70,4 +75,7 @@ export class JobProfileUpdateWithoutStreamInput {
 
   @Field(() => PositionRequestUpdateManyWithoutParent_job_profileNestedInput, { nullable: true })
   position_request?: PositionRequestUpdateManyWithoutParent_job_profileNestedInput;
+
+  @Field(() => JobProfileProfessionalDesignationUpdateManyWithoutJob_profileNestedInput, { nullable: true })
+  designations?: JobProfileProfessionalDesignationUpdateManyWithoutJob_profileNestedInput;
 }

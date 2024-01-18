@@ -30,7 +30,7 @@ export class ClassificationWhereUniqueInput {
   name?: StringFilter;
 
   @Field(() => StringFilter, { nullable: true })
-  employee_group?: StringFilter;
+  employee_group_id?: StringFilter;
 
   @Field(() => StringFilter, { nullable: true })
   grade?: StringFilter;

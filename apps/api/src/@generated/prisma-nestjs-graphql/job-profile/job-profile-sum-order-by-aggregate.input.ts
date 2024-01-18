@@ -17,6 +17,9 @@ export class JobProfileSumOrderByAggregateInput {
   role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  scope_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   stream_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

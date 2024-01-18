@@ -32,6 +32,9 @@ export class JobProfileScalarWhereInput {
   @Field(() => IntFilter, { nullable: true })
   role_id?: IntFilter;
 
+  @Field(() => IntFilter, { nullable: true })
+  scope_id?: IntFilter;
+
   @Field(() => EnumJobProfileStateFilter, { nullable: true })
   state?: EnumJobProfileStateFilter;
 

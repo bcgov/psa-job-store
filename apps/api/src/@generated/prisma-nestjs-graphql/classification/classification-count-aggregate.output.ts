@@ -17,7 +17,7 @@ export class ClassificationCountAggregate {
   name!: number;
 
   @Field(() => Int, { nullable: false })
-  employee_group!: number;
+  employee_group_id!: number;
 
   @Field(() => Int, { nullable: false })
   grade!: number;

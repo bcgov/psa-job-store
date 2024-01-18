@@ -9,6 +9,7 @@ import { JobProfileOrganizationUncheckedCreateNestedManyWithoutJob_profileInput 
 import { JobProfileContextUncheckedCreateNestedOneWithoutJob_profileInput } from '../job-profile-context/job-profile-context-unchecked-create-nested-one-without-job-profile.input';
 import { JobProfileReportsToUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-create-nested-many-without-job-profile.input';
 import { PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput } from '../position-request/position-request-unchecked-create-nested-many-without-parent-job-profile.input';
+import { JobProfileProfessionalDesignationUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-professional-designation/job-profile-professional-designation-unchecked-create-nested-many-without-job-profile.input';
 
 @InputType()
 export class JobProfileUncheckedCreateWithoutClassificationsInput {
@@ -23,6 +24,9 @@ export class JobProfileUncheckedCreateWithoutClassificationsInput {
 
   @Field(() => Int, { nullable: false })
   role_id!: number;
+
+  @Field(() => Int, { nullable: true })
+  scope_id?: number;
 
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
@@ -68,4 +72,7 @@ export class JobProfileUncheckedCreateWithoutClassificationsInput {
 
   @Field(() => PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput, { nullable: true })
   position_request?: PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput;
+
+  @Field(() => JobProfileProfessionalDesignationUncheckedCreateNestedManyWithoutJob_profileInput, { nullable: true })
+  designations?: JobProfileProfessionalDesignationUncheckedCreateNestedManyWithoutJob_profileInput;
 }

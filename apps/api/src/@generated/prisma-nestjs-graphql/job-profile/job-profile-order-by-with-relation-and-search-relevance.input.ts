@@ -9,10 +9,12 @@ import { JobProfileCareerGroupOrderByWithRelationAndSearchRelevanceInput } from 
 import { JobProfileContextOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-context/job-profile-context-order-by-with-relation-and-search-relevance.input';
 import { JobProfileJobFamilyOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-job-family/job-profile-job-family-order-by-with-relation-and-search-relevance.input';
 import { JobProfileRoleOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-role/job-profile-role-order-by-with-relation-and-search-relevance.input';
+import { JobProfileScopeOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-scope/job-profile-scope-order-by-with-relation-and-search-relevance.input';
 import { JobProfileStreamOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-stream/job-profile-stream-order-by-with-relation-and-search-relevance.input';
 import { UserOrderByWithRelationAndSearchRelevanceInput } from '../user/user-order-by-with-relation-and-search-relevance.input';
 import { JobProfileReportsToOrderByRelationAggregateInput } from '../job-profile-reports-to/job-profile-reports-to-order-by-relation-aggregate.input';
 import { PositionRequestOrderByRelationAggregateInput } from '../position-request/position-request-order-by-relation-aggregate.input';
+import { JobProfileProfessionalDesignationOrderByRelationAggregateInput } from '../job-profile-professional-designation/job-profile-professional-designation-order-by-relation-aggregate.input';
 import { JobProfileOrderByRelevanceInput } from './job-profile-order-by-relevance.input';
 
 @InputType()
@@ -28,6 +30,9 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  scope_id?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   state?: keyof typeof SortOrder;
@@ -80,6 +85,9 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => JobProfileRoleOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   role?: JobProfileRoleOrderByWithRelationAndSearchRelevanceInput;
 
+  @Field(() => JobProfileScopeOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
+  scope?: JobProfileScopeOrderByWithRelationAndSearchRelevanceInput;
+
   @Field(() => JobProfileStreamOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   stream?: JobProfileStreamOrderByWithRelationAndSearchRelevanceInput;
 
@@ -91,6 +99,9 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => PositionRequestOrderByRelationAggregateInput, { nullable: true })
   position_request?: PositionRequestOrderByRelationAggregateInput;
+
+  @Field(() => JobProfileProfessionalDesignationOrderByRelationAggregateInput, { nullable: true })
+  designations?: JobProfileProfessionalDesignationOrderByRelationAggregateInput;
 
   @Field(() => JobProfileOrderByRelevanceInput, { nullable: true })
   _relevance?: JobProfileOrderByRelevanceInput;

@@ -17,6 +17,9 @@ export class JobProfileAvgAggregate {
   role_id?: number;
 
   @Field(() => Float, { nullable: true })
+  scope_id?: number;
+
+  @Field(() => Float, { nullable: true })
   stream_id?: number;
 
   @Field(() => Float, { nullable: true })

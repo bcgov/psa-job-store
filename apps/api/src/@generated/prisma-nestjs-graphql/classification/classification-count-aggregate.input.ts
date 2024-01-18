@@ -16,7 +16,7 @@ export class ClassificationCountAggregateInput {
   name?: true;
 
   @Field(() => Boolean, { nullable: true })
-  employee_group?: true;
+  employee_group_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   grade?: true;

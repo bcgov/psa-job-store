@@ -32,6 +32,9 @@ export class JobProfileScalarWhereWithAggregatesInput {
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   role_id?: IntWithAggregatesFilter;
 
+  @Field(() => IntWithAggregatesFilter, { nullable: true })
+  scope_id?: IntWithAggregatesFilter;
+
   @Field(() => EnumJobProfileStateWithAggregatesFilter, { nullable: true })
   state?: EnumJobProfileStateWithAggregatesFilter;
 

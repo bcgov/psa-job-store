@@ -85,7 +85,11 @@ export class PeoplesoftService {
     // Filter by applicable employee groups
     // Sort rows by effective date ASC
     const sortedRows = (response?.data?.query?.rows ?? [])
-      .filter((row) => ['GEU', 'LGL', 'MGT', 'NEX', 'NUR', 'OEX', 'PEA', 'QP'].includes(row.SAL_ADMIN_PLAN))
+      .filter(
+        (row) =>
+          ['BCSET'].includes(row.SETID) &&
+          ['GEU', 'LGL', 'MGT', 'NEX', 'NUR', 'OEX', 'PEA', 'QP'].includes(row.SAL_ADMIN_PLAN),
+      )
       .sort((a, b) => {
         if (a.EFFDT > b.EFFDT) {
           return -1;
@@ -104,7 +108,7 @@ export class PeoplesoftService {
           peoplesoft_id: row.SETID,
           name: row.DESCR,
           code: row.DESCRSHORT,
-          employee_group: row.SAL_ADMIN_PLAN,
+          employee_group_id: row.SAL_ADMIN_PLAN,
           grade: row.GRADE,
           effective_status: row.EFF_STATUS,
           effective_date: new Date(row.EFFDT),
@@ -113,7 +117,7 @@ export class PeoplesoftService {
           peoplesoft_id: row.SETID,
           name: row.DESCR,
           code: row.DESCRSHORT,
-          employee_group: row.SAL_ADMIN_PLAN,
+          employee_group_id: row.SAL_ADMIN_PLAN,
           grade: row.GRADE,
           effective_status: row.EFF_STATUS,
           effective_date: new Date(row.EFFDT),

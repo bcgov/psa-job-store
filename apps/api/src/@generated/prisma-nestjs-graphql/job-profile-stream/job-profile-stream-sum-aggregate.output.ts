@@ -6,4 +6,7 @@ import { Int } from '@nestjs/graphql';
 export class JobProfileStreamSumAggregate {
   @Field(() => Int, { nullable: true })
   id?: number;
+
+  @Field(() => Int, { nullable: true })
+  job_family_id?: number;
 }

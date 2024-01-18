@@ -16,7 +16,7 @@ export class ClassificationMaxAggregate {
   name?: string;
 
   @Field(() => String, { nullable: true })
-  employee_group?: string;
+  employee_group_id?: string;
 
   @Field(() => String, { nullable: true })
   grade?: string;

@@ -27,7 +27,7 @@ export class ClassificationScalarWhereWithAggregatesInput {
   name?: StringWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
-  employee_group?: StringWithAggregatesFilter;
+  employee_group_id?: StringWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   grade?: StringWithAggregatesFilter;

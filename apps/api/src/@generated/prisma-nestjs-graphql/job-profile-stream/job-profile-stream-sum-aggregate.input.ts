@@ -5,4 +5,7 @@ import { InputType } from '@nestjs/graphql';
 export class JobProfileStreamSumAggregateInput {
   @Field(() => Boolean, { nullable: true })
   id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  job_family_id?: true;
 }

@@ -20,7 +20,7 @@ export class ClassificationOrderByWithAggregationInput {
   name?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  employee_group?: keyof typeof SortOrder;
+  employee_group_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   grade?: keyof typeof SortOrder;

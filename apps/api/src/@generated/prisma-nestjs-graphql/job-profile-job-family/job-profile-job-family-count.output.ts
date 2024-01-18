@@ -6,4 +6,7 @@ import { Int } from '@nestjs/graphql';
 export class JobProfileJobFamilyCount {
   @Field(() => Int, { nullable: false })
   job_profiles?: number;
+
+  @Field(() => Int, { nullable: false })
+  JobProfileStream?: number;
 }

@@ -22,6 +22,9 @@ export class JobProfileOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
 
+  @Field(() => SortOrderInput, { nullable: true })
+  scope_id?: SortOrderInput;
+
   @Field(() => SortOrder, { nullable: true })
   state?: keyof typeof SortOrder;
 
