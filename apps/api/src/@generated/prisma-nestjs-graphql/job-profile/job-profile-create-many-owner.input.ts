@@ -19,6 +19,12 @@ export class JobProfileCreateManyOwnerInput {
   @Field(() => Int, { nullable: false })
   role_id!: number;
 
+  @Field(() => Int, { nullable: true })
+  role_type_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  scope_id?: number;
+
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 

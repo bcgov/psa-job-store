@@ -17,6 +17,8 @@ import { JobProfileCareerGroupRelationFilter } from '../job-profile-career-group
 import { JobProfileContextRelationFilter } from '../job-profile-context/job-profile-context-relation-filter.input';
 import { JobProfileJobFamilyRelationFilter } from '../job-profile-job-family/job-profile-job-family-relation-filter.input';
 import { JobProfileRoleRelationFilter } from '../job-profile-role/job-profile-role-relation-filter.input';
+import { JobProfileRoleTypeRelationFilter } from '../job-profile-role-type/job-profile-role-type-relation-filter.input';
+import { JobProfileScopeRelationFilter } from '../job-profile-scope/job-profile-scope-relation-filter.input';
 import { JobProfileStreamRelationFilter } from '../job-profile-stream/job-profile-stream-relation-filter.input';
 import { UserRelationFilter } from '../user/user-relation-filter.input';
 import { JobProfileReportsToListRelationFilter } from '../job-profile-reports-to/job-profile-reports-to-list-relation-filter.input';
@@ -44,6 +46,12 @@ export class JobProfileWhereUniqueInput {
 
   @Field(() => IntFilter, { nullable: true })
   role_id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
+  role_type_id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
+  scope_id?: IntFilter;
 
   @Field(() => EnumJobProfileStateFilter, { nullable: true })
   state?: EnumJobProfileStateFilter;
@@ -95,6 +103,12 @@ export class JobProfileWhereUniqueInput {
 
   @Field(() => JobProfileRoleRelationFilter, { nullable: true })
   role?: JobProfileRoleRelationFilter;
+
+  @Field(() => JobProfileRoleTypeRelationFilter, { nullable: true })
+  role_type?: JobProfileRoleTypeRelationFilter;
+
+  @Field(() => JobProfileScopeRelationFilter, { nullable: true })
+  scope?: JobProfileScopeRelationFilter;
 
   @Field(() => JobProfileStreamRelationFilter, { nullable: true })
   stream?: JobProfileStreamRelationFilter;

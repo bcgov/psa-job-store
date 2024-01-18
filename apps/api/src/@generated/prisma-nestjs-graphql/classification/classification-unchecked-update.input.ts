@@ -18,6 +18,12 @@ export class ClassificationUncheckedUpdateInput {
   name?: string;
 
   @Field(() => String, { nullable: true })
+  employee_group_id?: string;
+
+  @Field(() => String, { nullable: true })
+  grade?: string;
+
+  @Field(() => String, { nullable: true })
   effective_status?: string;
 
   @Field(() => Date, { nullable: true })

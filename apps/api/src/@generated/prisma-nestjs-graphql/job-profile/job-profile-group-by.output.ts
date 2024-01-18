@@ -24,6 +24,12 @@ export class JobProfileGroupBy {
   @Field(() => Int, { nullable: false })
   role_id!: number;
 
+  @Field(() => Int, { nullable: true })
+  role_type_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  scope_id?: number;
+
   @Field(() => JobProfileState, { nullable: false })
   state!: keyof typeof JobProfileState;
 

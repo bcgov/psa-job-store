@@ -17,6 +17,12 @@ export class ClassificationMaxOrderByAggregateInput {
   name?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  employee_group_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  grade?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   effective_status?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

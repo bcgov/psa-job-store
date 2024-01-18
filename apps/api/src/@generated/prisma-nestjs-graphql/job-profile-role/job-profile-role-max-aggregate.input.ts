@@ -7,8 +7,5 @@ export class JobProfileRoleMaxAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  type?: true;
-
-  @Field(() => Boolean, { nullable: true })
   name?: true;
 }

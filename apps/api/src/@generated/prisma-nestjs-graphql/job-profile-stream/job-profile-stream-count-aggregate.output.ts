@@ -8,6 +8,9 @@ export class JobProfileStreamCountAggregate {
   id!: number;
 
   @Field(() => Int, { nullable: false })
+  job_family_id!: number;
+
+  @Field(() => Int, { nullable: false })
   name!: number;
 
   @Field(() => Int, { nullable: false })

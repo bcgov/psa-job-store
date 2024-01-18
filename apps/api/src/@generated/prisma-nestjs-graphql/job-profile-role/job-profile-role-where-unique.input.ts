@@ -2,7 +2,6 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobProfileRoleWhereInput } from './job-profile-role-where.input';
-import { EnumJobProfileRoleTypeFilter } from '../prisma/enum-job-profile-role-type-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
 
@@ -19,9 +18,6 @@ export class JobProfileRoleWhereUniqueInput {
 
   @Field(() => [JobProfileRoleWhereInput], { nullable: true })
   NOT?: Array<JobProfileRoleWhereInput>;
-
-  @Field(() => EnumJobProfileRoleTypeFilter, { nullable: true })
-  type?: EnumJobProfileRoleTypeFilter;
 
   @Field(() => StringFilter, { nullable: true })
   name?: StringFilter;

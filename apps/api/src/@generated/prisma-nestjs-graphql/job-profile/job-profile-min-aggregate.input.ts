@@ -16,6 +16,12 @@ export class JobProfileMinAggregateInput {
   role_id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  role_type_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  scope_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   state?: true;
 
   @Field(() => Boolean, { nullable: true })

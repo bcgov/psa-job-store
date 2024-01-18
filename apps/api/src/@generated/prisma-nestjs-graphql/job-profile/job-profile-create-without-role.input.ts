@@ -10,6 +10,8 @@ import { JobProfileOrganizationCreateNestedManyWithoutJob_profileInput } from '.
 import { JobProfileCareerGroupCreateNestedOneWithoutJob_profilesInput } from '../job-profile-career-group/job-profile-career-group-create-nested-one-without-job-profiles.input';
 import { JobProfileContextCreateNestedOneWithoutJob_profileInput } from '../job-profile-context/job-profile-context-create-nested-one-without-job-profile.input';
 import { JobProfileJobFamilyCreateNestedOneWithoutJob_profilesInput } from '../job-profile-job-family/job-profile-job-family-create-nested-one-without-job-profiles.input';
+import { JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput } from '../job-profile-role-type/job-profile-role-type-create-nested-one-without-job-profiles.input';
+import { JobProfileScopeCreateNestedOneWithoutJob_profilesInput } from '../job-profile-scope/job-profile-scope-create-nested-one-without-job-profiles.input';
 import { JobProfileStreamCreateNestedOneWithoutJob_profilesInput } from '../job-profile-stream/job-profile-stream-create-nested-one-without-job-profiles.input';
 import { UserCreateNestedOneWithoutJobProfileInput } from '../user/user-create-nested-one-without-job-profile.input';
 import { JobProfileReportsToCreateNestedManyWithoutJob_profileInput } from '../job-profile-reports-to/job-profile-reports-to-create-nested-many-without-job-profile.input';
@@ -58,6 +60,12 @@ export class JobProfileCreateWithoutRoleInput {
 
   @Field(() => JobProfileJobFamilyCreateNestedOneWithoutJob_profilesInput, { nullable: true })
   job_family?: JobProfileJobFamilyCreateNestedOneWithoutJob_profilesInput;
+
+  @Field(() => JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput, { nullable: true })
+  role_type?: JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput;
+
+  @Field(() => JobProfileScopeCreateNestedOneWithoutJob_profilesInput, { nullable: true })
+  scope?: JobProfileScopeCreateNestedOneWithoutJob_profilesInput;
 
   @Field(() => JobProfileStreamCreateNestedOneWithoutJob_profilesInput, { nullable: true })
   stream?: JobProfileStreamCreateNestedOneWithoutJob_profilesInput;

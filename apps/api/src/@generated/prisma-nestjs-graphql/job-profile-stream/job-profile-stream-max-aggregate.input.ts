@@ -7,5 +7,8 @@ export class JobProfileStreamMaxAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  job_family_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   name?: true;
 }

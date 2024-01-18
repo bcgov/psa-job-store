@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import GraphQLJSON from 'graphql-type-json';
 import {
   PositionRequestCreateInput,
@@ -96,7 +97,7 @@ export class PositionRequestApiService {
         // TODO: AL-146
         // classification: data.classification,
         classification_id: data.classification_id,
-      },
+      } as any as Prisma.PositionRequestCreateInput, // To prevent Excessive Stack Depth error,
       // include: {
       //   user: true,
       //   parent_job_profile: true,

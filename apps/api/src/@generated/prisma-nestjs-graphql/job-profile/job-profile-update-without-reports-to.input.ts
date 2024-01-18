@@ -11,6 +11,8 @@ import { JobProfileCareerGroupUpdateOneWithoutJob_profilesNestedInput } from '..
 import { JobProfileContextUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-update-one-without-job-profile-nested.input';
 import { JobProfileJobFamilyUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-job-family/job-profile-job-family-update-one-without-job-profiles-nested.input';
 import { JobProfileRoleUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-role/job-profile-role-update-one-without-job-profiles-nested.input';
+import { JobProfileRoleTypeUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-role-type/job-profile-role-type-update-one-without-job-profiles-nested.input';
+import { JobProfileScopeUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-scope/job-profile-scope-update-one-without-job-profiles-nested.input';
 import { JobProfileStreamUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-stream/job-profile-stream-update-one-without-job-profiles-nested.input';
 import { UserUpdateOneWithoutJobProfileNestedInput } from '../user/user-update-one-without-job-profile-nested.input';
 import { PositionRequestUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-update-many-without-parent-job-profile-nested.input';
@@ -61,6 +63,12 @@ export class JobProfileUpdateWithoutReports_toInput {
 
   @Field(() => JobProfileRoleUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
   role?: JobProfileRoleUpdateOneWithoutJob_profilesNestedInput;
+
+  @Field(() => JobProfileRoleTypeUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  role_type?: JobProfileRoleTypeUpdateOneWithoutJob_profilesNestedInput;
+
+  @Field(() => JobProfileScopeUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
+  scope?: JobProfileScopeUpdateOneWithoutJob_profilesNestedInput;
 
   @Field(() => JobProfileStreamUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
   stream?: JobProfileStreamUpdateOneWithoutJob_profilesNestedInput;

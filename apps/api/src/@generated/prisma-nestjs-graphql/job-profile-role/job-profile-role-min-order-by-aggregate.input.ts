@@ -8,8 +8,5 @@ export class JobProfileRoleMinOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  type?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   name?: keyof typeof SortOrder;
 }

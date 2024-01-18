@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { ClassificationService } from '../classification/classification.service';
@@ -294,7 +295,7 @@ export class JobProfileService {
         organizations: data.organizations,
         role: data.role,
         type: data.type,
-      },
+      } as any as Prisma.JobProfileCreateInput, // To prevent Excessive Stack Depth error,
     });
   }
 

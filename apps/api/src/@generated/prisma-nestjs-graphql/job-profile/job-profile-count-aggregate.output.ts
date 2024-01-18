@@ -17,6 +17,12 @@ export class JobProfileCountAggregate {
   role_id!: number;
 
   @Field(() => Int, { nullable: false })
+  role_type_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  scope_id!: number;
+
+  @Field(() => Int, { nullable: false })
   state!: number;
 
   @Field(() => Int, { nullable: false })

@@ -17,6 +17,9 @@ export class JobProfileStreamScalarWhereWithAggregatesInput {
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   id?: IntWithAggregatesFilter;
 
+  @Field(() => IntWithAggregatesFilter, { nullable: true })
+  job_family_id?: IntWithAggregatesFilter;
+
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   name?: StringWithAggregatesFilter;
 }

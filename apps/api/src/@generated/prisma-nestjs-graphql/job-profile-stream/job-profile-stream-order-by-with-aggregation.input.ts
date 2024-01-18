@@ -13,6 +13,9 @@ export class JobProfileStreamOrderByWithAggregationInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  job_family_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   name?: keyof typeof SortOrder;
 
   @Field(() => JobProfileStreamCountOrderByAggregateInput, { nullable: true })

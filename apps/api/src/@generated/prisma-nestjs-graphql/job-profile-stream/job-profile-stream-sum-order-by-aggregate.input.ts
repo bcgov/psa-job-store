@@ -6,4 +6,7 @@ import { SortOrder } from '../prisma/sort-order.enum';
 export class JobProfileStreamSumOrderByAggregateInput {
   @Field(() => SortOrder, { nullable: true })
   id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  job_family_id?: keyof typeof SortOrder;
 }
