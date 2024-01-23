@@ -16,6 +16,7 @@ import {
   Select,
   Switch,
   Tabs,
+  TreeSelect,
   Typography,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
@@ -27,9 +28,18 @@ import MinistriesSelect from '../../components/app/common/components/ministries-
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import {
+  useGetClassificationsQuery,
+  useGetGroupedClassificationsQuery,
+} from '../../redux/services/graphql-api/classification.api';
+import { useGetEmployeeGroupsQuery } from '../../redux/services/graphql-api/employee-group.api';
+import { useGetJobFamiliesQuery } from '../../redux/services/graphql-api/job-family.api';
+import { useGetJobProfileScopesQuery } from '../../redux/services/graphql-api/job-profile-scope';
+import { useGetJobProfileStreamsQuery } from '../../redux/services/graphql-api/job-profile-stream';
+import {
   useGetJobProfilesDraftsCareerGroupsQuery,
   useGetJobProfilesDraftsMinistriesQuery,
 } from '../../redux/services/graphql-api/job-profile.api';
+import { useGetJobRolesQuery } from '../../redux/services/graphql-api/job-role.api';
 import { FormItem } from '../../utils/FormItem';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { IsIndigenousCompetency } from '../wizard/components/is-indigenous-competency.component';
@@ -61,14 +71,14 @@ export const TotalCompCreateProfilePage = () => {
   const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       jobTitle: '',
-      jobStoreNumber: '',
-      employeeGroup: '',
-      classification: '',
-      jobRole: '',
-      professions: [{ jobFamily: '', jobStreams: [] }],
+      jobStoreNumber: null,
+      employeeGroup: null,
+      classification: null,
+      jobRole: null,
+      professions: [{ jobFamily: -1, jobStreams: [] }],
       role: 'individualContributor',
       reportToRelationship: [],
-      scopeOfResponsibility: '',
+      scopeOfResponsibility: null,
       ministries: [],
       otherFunctions: false,
       jobContext: '',
@@ -89,27 +99,38 @@ export const TotalCompCreateProfilePage = () => {
 
   // user deleted last item - re-add a blank one
   if (selectedProfession.length == 0) {
-    append({ jobFamily: '', jobStreams: [] });
+    append({ jobFamily: -1, jobStreams: [] });
     // setValue('professions', [{ jobFamily: '', jobStreams: [] }]);
   }
 
   // Dummy data for professions and job streams
-  const professions = ['Administration', 'Finance'];
-  const jobStreams: any = useMemo(
-    () => ({
-      Administration: ['Administrative Support', 'Clerical', 'Office Management'],
-      Finance: ['Financial Analysis', 'Accounting', 'Auditing'],
-    }),
-    [],
+  // const professions = ['Administration', 'Finance'];
+  // const jobStreams: any = useMemo(
+  //   () => ({
+  //     Administration: ['Administrative Support', 'Clerical', 'Office Management'],
+  //     Finance: ['Financial Analysis', 'Accounting', 'Auditing'],
+  //   }),
+  //   [],
+  // );
+
+  const { data: jobFamiliesData } = useGetJobFamiliesQuery();
+  const { data: jobProfileStreamsData } = useGetJobProfileStreamsQuery();
+
+  // Function to filter job streams based on selected job family
+  const getJobStreamsForFamily = useCallback(
+    (jobFamilyId: number) => {
+      return jobProfileStreamsData?.jobProfileStreams.filter((stream) => stream.job_family_id === jobFamilyId) || [];
+    },
+    [jobProfileStreamsData],
   );
 
   // This function would filter available job streams based on the selected profession
-  const getAvailableJobStreams = useCallback(
-    (profession: any) => {
-      return jobStreams[profession] || [];
-    },
-    [jobStreams],
-  );
+  // const getAvailableJobStreams = useCallback(
+  //   (profession: any) => {
+  //     return jobStreams[profession] || [];
+  //   },
+  //   [jobStreams],
+  // );
 
   //quill modules for rich text editing
   const quill_modules = {
@@ -334,6 +355,44 @@ export const TotalCompCreateProfilePage = () => {
   // State to control visibility of the picker
   const [isPickerVisible, setPickerVisible] = useState(false);
 
+  // Tree-select for report-to relationship
+  const { SHOW_CHILD } = TreeSelect;
+  const { data: treeData } = useGetGroupedClassificationsQuery({
+    employee_group_ids: ['MGT', 'GEU', 'OEX'],
+    effective_status: 'Active',
+  });
+
+  const transformToTreeData = (groupedClassifications: any) => {
+    const transformItem = (item: any) => ({
+      title: (item.groupName || item.name) + (item.employee_group_id ? ' (' + item.employee_group_id + ')' : ''),
+      value: item.id || item.groupName,
+      key: item.id || item.groupName,
+      children: item.items?.map(transformItem),
+    });
+
+    return groupedClassifications.map(transformItem);
+  };
+
+  const treeDataConverted = treeData ? transformToTreeData(treeData.groupedClassifications) : [];
+
+  //employee group selector
+  const { data: employeeGroupData } = useGetEmployeeGroupsQuery();
+
+  // classifications selector data
+  const { data: classificationsData } = useGetClassificationsQuery();
+
+  // job role selector data
+  const { data: jobRolesData } = useGetJobRolesQuery();
+
+  // job profile scopes
+  const { data: jobProfileScopes } = useGetJobProfileScopesQuery();
+
+  const selectedScopeId = watch('scopeOfResponsibility');
+
+  const selectedScopeDescription = useMemo(() => {
+    return jobProfileScopes?.jobProfileScopes.find((scope) => scope.id === selectedScopeId)?.description || null;
+  }, [selectedScopeId, jobProfileScopes]);
+
   // END PROFILE FORM
 
   const tabItems = [
@@ -379,22 +438,22 @@ export const TotalCompCreateProfilePage = () => {
                 <Row justify="start">
                   <Col xs={24} sm={12} md={10} lg={8} xl={8}>
                     <Form.Item label="Employee group" labelCol={{ className: 'card-label' }}>
-                      {/* Form.Item for cosmetic purposes */}
                       <Controller
                         name="employeeGroup"
                         control={control}
-                        render={({ field: { onChange, onBlur } }) => (
+                        render={({ field: { onChange, onBlur, value } }) => (
                           <Select
                             placeholder="Choose an employee group"
-                            onChange={onChange} // send value to hook form
-                            onBlur={onBlur} // notify when input is touched/blur
+                            onChange={onChange}
+                            onBlur={onBlur}
+                            defaultValue={value}
                             style={{ width: '100%' }}
-                          >
-                            {/* Options should be rendered dynamically based on your data */}
-                            <Option value="group1">Group 1</Option>
-                            <Option value="group2">Group 2</Option>
-                            {/* ...other options */}
-                          </Select>
+                            // Transforming data to required format for the Select options prop
+                            options={employeeGroupData?.employeeGroups.map((group) => ({
+                              label: group.id,
+                              value: group.id,
+                            }))}
+                          />
                         )}
                       />
                     </Form.Item>
@@ -410,17 +469,24 @@ export const TotalCompCreateProfilePage = () => {
                       <Controller
                         name="classification"
                         control={control}
-                        render={({ field: { onChange, onBlur } }) => (
+                        render={({ field: { onChange, onBlur, value } }) => (
                           <Select
                             placeholder="Choose a classification"
                             onChange={onChange} // send value to hook form
                             onBlur={onBlur} // notify when input is touched/blur
-                          >
-                            {/* Options should be rendered dynamically based on your data */}
-                            <Option value="classification1">Classification 1</Option>
-                            <Option value="classification2">Classification 2</Option>
-                            {/* ...other options */}
-                          </Select>
+                            defaultValue={value}
+                            style={{ width: '100%' }}
+                            showSearch={true}
+                            filterOption={(input, option) => {
+                              if (!option) return false;
+                              return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                            }}
+                            // Transforming data to required format for the Select options prop
+                            options={classificationsData?.classifications.map((classification) => ({
+                              label: classification.name,
+                              value: classification.id,
+                            }))}
+                          ></Select>
                         )}
                       />
                     </Form.Item>
@@ -435,17 +501,17 @@ export const TotalCompCreateProfilePage = () => {
                       <Controller
                         name="jobRole"
                         control={control}
-                        render={({ field: { onChange, onBlur } }) => (
+                        render={({ field: { onChange, onBlur, value } }) => (
                           <Select
                             placeholder="Choose a job role"
-                            onChange={onChange} // send value to hook form
-                            onBlur={onBlur} // notify when input is touched/blur
-                          >
-                            {/* Options should be rendered dynamically based on your data */}
-                            <Option value="jobRole1">Job role 1</Option>
-                            <Option value="jobRole2">Job role 2</Option>
-                            {/* ...other options */}
-                          </Select>
+                            onChange={onChange}
+                            onBlur={onBlur}
+                            defaultValue={value}
+                            options={jobRolesData?.jobRoles.map((jobRole) => ({
+                              label: jobRole.name,
+                              value: jobRole.id,
+                            }))}
+                          ></Select>
                         )}
                       />
                     </Form.Item>
@@ -482,21 +548,21 @@ export const TotalCompCreateProfilePage = () => {
                                     }}
                                   >
                                     {/* Dynamically render profession options based on your data */}
-                                    {professions.map((profession) => (
-                                      <Option key={profession} value={profession}>
-                                        {profession}
+                                    {jobFamiliesData?.jobFamilies.map((family) => (
+                                      <Option key={family.id} value={family.id}>
+                                        {family.name}
                                       </Option>
                                     ))}
                                   </Select>
                                 </Col>
                                 <Col>
                                   <Button
-                                    disabled={index == 0 && selectedProfession[index]?.jobFamily == ''}
+                                    disabled={index == 0 && selectedProfession[index]?.jobFamily == -1}
                                     onClick={() => {
                                       remove(index);
                                       // removing last one - append blank
                                       if (selectedProfession.length == 1) {
-                                        append({ jobFamily: '', jobStreams: [] });
+                                        append({ jobFamily: -1, jobStreams: [] });
                                       }
                                     }}
                                     icon={<DeleteOutlined />}
@@ -508,7 +574,7 @@ export const TotalCompCreateProfilePage = () => {
                         </Form.Item>
 
                         {/* Second level for job family/profession selector (select job stream/discipline) */}
-                        {selectedProfession[index]?.jobFamily != '' && (
+                        {selectedProfession[index]?.jobFamily != -1 && (
                           <Form.Item
                             label="Job Streams / Disciplines"
                             labelCol={{ className: 'card-label' }}
@@ -527,15 +593,10 @@ export const TotalCompCreateProfilePage = () => {
                                     onChange={(selectedStreams) => {
                                       field2.onChange(selectedStreams);
                                     }}
-                                  >
-                                    {getAvailableJobStreams(selectedProfession[index]?.jobFamily)?.map(
-                                      (stream: any) => (
-                                        <Option key={stream} value={stream}>
-                                          {stream}
-                                        </Option>
-                                      ),
+                                    options={getJobStreamsForFamily(selectedProfession[index]?.jobFamily).map(
+                                      (stream) => ({ label: stream.name, value: stream.id }),
                                     )}
-                                  </Select>
+                                  ></Select>
                                 );
                               }}
                             />
@@ -547,11 +608,11 @@ export const TotalCompCreateProfilePage = () => {
                       <Button
                         type="dashed"
                         onClick={() => {
-                          append({ jobFamily: '', jobStreams: [] });
+                          append({ jobFamily: -1, jobStreams: [] });
                         }}
                         block
                         icon={<PlusOutlined />}
-                        disabled={selectedProfession[0]?.jobFamily == ''}
+                        disabled={selectedProfession[0]?.jobFamily == -1}
                       >
                         Add another job family
                       </Button>
@@ -588,9 +649,16 @@ export const TotalCompCreateProfilePage = () => {
                         name="reportToRelationship"
                         control={control}
                         render={({ field }) => (
-                          <Select {...field} placeholder="Choose all the positions this role should report to">
-                            {/* Options here */}
-                          </Select>
+                          <TreeSelect
+                            {...field}
+                            treeData={treeDataConverted} // Replace with your data
+                            // onChange={(value) => setReportToRelationship(value)}
+                            treeCheckable={true}
+                            showCheckedStrategy={SHOW_CHILD}
+                            placeholder="Choose all the positions this role should report to"
+                            style={{ width: '100%' }}
+                            maxTagCount={10}
+                          />
                         )}
                       />
                     </Form.Item>
@@ -606,10 +674,20 @@ export const TotalCompCreateProfilePage = () => {
                       <Controller
                         name="scopeOfResponsibility"
                         control={control}
-                        render={() => (
-                          <Select placeholder="Choose the scope of responsibility">{/* Options here */}</Select>
+                        render={({ field: { onChange, onBlur, value } }) => (
+                          <Select
+                            placeholder="Choose the scope of responsibility"
+                            onChange={onChange}
+                            onBlur={onBlur}
+                            defaultValue={value}
+                            options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
+                              label: scope.name,
+                              value: scope.id,
+                            }))}
+                          ></Select>
                         )}
                       />
+                      <Typography.Text type="secondary">{selectedScopeDescription}</Typography.Text>
                     </Form.Item>
                   </Col>
                 </Row>

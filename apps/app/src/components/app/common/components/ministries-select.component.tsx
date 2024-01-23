@@ -47,6 +47,7 @@ const MinistriesSelect = ({ onChange, isMultiSelect }: any) => {
         value={selectedItems}
         onChange={handleSelectionChange}
         style={{ width: '100%' }}
+        maxTagCount={10}
       >
         {ministriesData.map((ministry) => (
           <Option key={ministry.id} value={ministry.id}>

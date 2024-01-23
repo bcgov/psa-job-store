@@ -5,7 +5,6 @@ import { graphqlApi } from '.';
 export interface JobRoleModel {
   id: number;
   name: string;
-  code: string;
 }
 
 export interface GetJobRolesResponse {
@@ -22,7 +21,6 @@ export const jobRoleApi = graphqlApi.injectEndpoints({
               jobRoles {
                 id
                 name
-                type
               }
             }
           `,

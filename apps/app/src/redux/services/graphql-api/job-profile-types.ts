@@ -3,6 +3,7 @@
 export interface ClassificationModel {
   id: string;
   code: string;
+  name: string;
 }
 
 export interface ClassificationModelWrapped {

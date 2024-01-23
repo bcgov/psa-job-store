@@ -16,8 +16,11 @@ import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
+import { EmployeeGroupModule } from './modules/employee-group/employee-group.module';
 import { ExternalModule } from './modules/external/external.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
+import { JobProfileScopeModule } from './modules/job-profile-scope/job-profile-scope.module';
+import { JobProfileStreamModule } from './modules/job-profile-stream/job-profile-stream.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
 import { PositionRequestModule } from './modules/position-request/position-request.module';
@@ -65,6 +68,9 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     BehaviouralComptencyModule,
     ExternalModule,
     SearchModule,
+    EmployeeGroupModule,
+    JobProfileStreamModule,
+    JobProfileScopeModule,
     SiteMinderGuidTestApiModule,
   ],
   controllers: [],

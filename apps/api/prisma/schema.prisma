@@ -194,6 +194,14 @@ model JobProfileClassification {
   @@map("job_profile_classification")
 }
 
+model JobProfileMinimumRequirements {
+  id          Int    @id @default(autoincrement())
+  requirement String
+  grade       String
+
+  @@map("job_profile_minimum_requirements")
+}
+
 model JobProfileOrganization {
   organization    Organization @relation(fields: [organization_id], references: [id])
   organization_id String
