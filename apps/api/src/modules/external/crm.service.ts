@@ -6,6 +6,7 @@ import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 
 enum Endpoint {
+  Accounts = 'accounts',
   Contacts = 'contacts',
 }
 
@@ -29,6 +30,21 @@ export class CrmService {
       ).toString('base64')}`,
     );
     this.headers.set('OSvC-CREST-Application-Context', this.configService.get('CRM_APPLICATION_CONTEXT'));
+  }
+
+  async getAccountId(idir: string): Promise<number | null> {
+    const response = await firstValueFrom(
+      this.request(Endpoint.Accounts, `q=login='${idir.toLowerCase()}'`).pipe(
+        map((r) => r.data),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
+    );
+
+    const accountId = response?.items.length > 0 ? (response.items[0].id as number) : null;
+    return accountId;
   }
 
   async getContactId(idir: string): Promise<number | null> {
