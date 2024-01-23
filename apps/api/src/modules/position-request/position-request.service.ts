@@ -240,13 +240,17 @@ export class PositionRequestApiService {
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
     let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
-    // If the user does not have the "total-compensation" role or "classification" role, include the user_id in the where condition
-    // otherwise let the user access by id any position request except those in draft status
-    if (!userRoles.includes('total-compensation') && !userRoles.includes('classification')) {
+    // If the user does not have the "total-compesation" or "classification" role, the filter will include the requesting user id
+    // otherwise, allow user to access any position by id, except those in "DRAFT" status
+    if (['classification', 'total-compensation'].some((value) => userRoles.includes(value))) {
+      whereCondition = {
+        ...whereCondition,
+        NOT: [{ status: { equals: 'DRAFT' } }],
+      };
+    } else {
       whereCondition = {
         ...whereCondition,
         user_id: { equals: userId },
-        NOT: [{ status: { not: { equals: 'DRAFT' } } }],
       };
     }
 
