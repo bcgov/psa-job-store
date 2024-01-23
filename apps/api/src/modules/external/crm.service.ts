@@ -4,10 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
+import { IncidentCreateInput } from './models/incident-create.input';
+import { IncidentUpdateInput } from './models/incident-update.input';
 
 enum Endpoint {
   Accounts = 'accounts',
   Contacts = 'contacts',
+  Incidents = 'incidents',
 }
 
 @Injectable()
@@ -60,5 +63,28 @@ export class CrmService {
 
     const contactId = response?.items.length > 0 ? (response.items[0].id as number) : null;
     return contactId;
+  }
+
+  async createIncident(data: IncidentCreateInput) {
+    const response = await firstValueFrom(
+      this.httpService
+        .post(`${this.configService.get('CRM_URL')}/${Endpoint.Incidents}`, data, {
+          headers: this.headers,
+        })
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
+  async updateIncident(id: number, data: IncidentUpdateInput) {
+    console.log(id);
+    console.log(data);
   }
 }

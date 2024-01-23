@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { diff_match_patch } from 'diff-match-patch';
 import GraphQLJSON from 'graphql-type-json';
 import {
   PositionRequestCreateInput,
@@ -498,21 +499,39 @@ export class PositionRequestApiService {
     return ret;
   }
 
+  dataHasChanges(original: string, modified: string): boolean {
+    let isDifferent = false;
+
+    const dmp = new diff_match_patch();
+    const accDiff = dmp.diff_main(original, modified);
+    dmp.diff_cleanupSemantic(accDiff);
+
+    for (const d of accDiff) {
+      if (d[0] === 1) {
+        isDifferent = true;
+        break;
+      }
+    }
+
+    return isDifferent;
+  }
+
   async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
     // todo: AL-146 - tried to do this with a spread operator, but getting an error
     const updatePayload: any = {};
 
     if (updateData.step !== undefined) {
-      updatePayload.step = updateData.step;
+      updatePayload.step = updateData.step === 5 ? 4 : updateData.step;
     }
 
     if (updateData.reports_to_position_id !== undefined) {
       updatePayload.reports_to_position_id = updateData.reports_to_position_id;
     }
 
-    if (updateData.position_number !== undefined) {
-      updatePayload.position_number = updateData.position_number;
-    }
+    // Position # is _never_ set by client
+    // if (updateData.position_number !== undefined) {
+    //   updatePayload.position_number = updateData.position_number;
+    // }
 
     if (updateData.profile_json !== undefined) {
       updatePayload.profile_json = updateData.profile_json;
@@ -529,6 +548,7 @@ export class PositionRequestApiService {
     // if (updateData.classification !== undefined) {
     //   updatePayload.classification = updateData.classification;
     // }
+
     if (updateData.classification_id !== undefined) {
       updatePayload.classification_id = updateData.classification_id;
     }
@@ -547,9 +567,44 @@ export class PositionRequestApiService {
 
     // ...add similar checks for other fields...
 
-    return this.prisma.positionRequest.update({
+    // First pass update
+    const positionRequest = await this.prisma.positionRequest.update({
       where: { id: id },
       data: updatePayload,
     });
+
+    // If step 5, compare accountabilities, requirements
+    // If no changes, create APPROVED posn in PS, auto-completed incident in CRM
+    // If changes, create PENDING posn in PS, workable incident in CRM
+
+    if (updateData.step === 5) {
+      const { accountabilities, requirements } = await this.prisma.jobProfile.findUnique({
+        where: { id: positionRequest.parent_job_profile_id },
+      });
+
+      const accountabilitiesModified = this.dataHasChanges(
+        JSON.stringify(accountabilities['required']),
+        JSON.stringify((positionRequest.profile_json['accountabilities']['required'] ?? []).map((obj) => obj.value)),
+      );
+
+      const requirementsModified = this.dataHasChanges(
+        JSON.stringify(requirements),
+        JSON.stringify((positionRequest.profile_json['requirements'] ?? []).map((obj) => obj.value)),
+      );
+
+      console.log(accountabilitiesModified);
+      console.log(requirementsModified);
+
+      // console.log('*****************');
+      // console.log('updateData: ', updateData);
+      // console.log('----------------');
+      // console.log('positionRequest: ', positionRequest);
+      // console.log('*****************');
+      // if (positionRequest.crm_id == null) {
+      //   const result =
+      // }
+    }
+
+    return positionRequest;
   }
 }
