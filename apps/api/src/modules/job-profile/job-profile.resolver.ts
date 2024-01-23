@@ -97,4 +97,14 @@ export class JobProfileResolver {
   async reports_to(@Parent() { id }: JobProfile) {
     return this.jobProfileService.getReportsTo(id);
   }
+
+  @Query(() => Int, { name: 'nextAvailableJobProfileNumber' })
+  async getNextAvailableJobProfileNumber() {
+    return this.jobProfileService.getNextAvailableNumber();
+  }
+
+  @Query(() => Boolean, { name: 'isJobProfileNumberAvailable' })
+  async checkJobProfileNumberAvailability(@Args('number', { type: () => Int }) number: number) {
+    return this.jobProfileService.isNumberAvailable(number);
+  }
 }

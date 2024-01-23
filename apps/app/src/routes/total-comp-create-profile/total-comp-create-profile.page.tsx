@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  DeleteOutlined,
+  LoadingOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+} from '@ant-design/icons';
 import {
   Alert,
   Button,
@@ -11,16 +18,18 @@ import {
   Form,
   Input,
   List,
+  Modal,
   Radio,
   Row,
   Select,
   Switch,
   Tabs,
+  Tooltip,
   TreeSelect,
   Typography,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { CSSProperties, useCallback, useMemo, useState } from 'react';
+import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -33,11 +42,14 @@ import {
 } from '../../redux/services/graphql-api/classification.api';
 import { useGetEmployeeGroupsQuery } from '../../redux/services/graphql-api/employee-group.api';
 import { useGetJobFamiliesQuery } from '../../redux/services/graphql-api/job-family.api';
+import { useGetJobProfileMinimumRequirementsQuery } from '../../redux/services/graphql-api/job-profile-minimum-requirements.api';
 import { useGetJobProfileScopesQuery } from '../../redux/services/graphql-api/job-profile-scope';
 import { useGetJobProfileStreamsQuery } from '../../redux/services/graphql-api/job-profile-stream';
 import {
   useGetJobProfilesDraftsCareerGroupsQuery,
   useGetJobProfilesDraftsMinistriesQuery,
+  useLazyGetNextAvailableJobProfileNumberQuery,
+  useLazyIsJobProfileNumberAvailableQuery,
 } from '../../redux/services/graphql-api/job-profile.api';
 import { useGetJobRolesQuery } from '../../redux/services/graphql-api/job-role.api';
 import { FormItem } from '../../utils/FormItem';
@@ -68,10 +80,16 @@ export const TotalCompCreateProfilePage = () => {
     border: '0',
   };
 
-  const { control, handleSubmit, watch, setValue } = useForm({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues: getBasicDetailsValues,
+  } = useForm({
     defaultValues: {
       jobTitle: '',
-      jobStoreNumber: null,
+      jobStoreNumber: '',
       employeeGroup: null,
       classification: null,
       jobRole: null,
@@ -86,6 +104,63 @@ export const TotalCompCreateProfilePage = () => {
     // resolver: zodResolver(schema)
   });
 
+  // job store number validation
+  const jobStoreNumber = watch('jobStoreNumber');
+  const [validationStatus, setValidationStatus] = useState<string | null>(null);
+
+  const [fetchingNextNumber, setFetchingNextNumber] = useState(false);
+  const [checkNumberAvailability] = useLazyIsJobProfileNumberAvailableQuery();
+  const [getNextAvailableNumber, { data: nextNumberData }] = useLazyGetNextAvailableJobProfileNumberQuery();
+
+  // Fetch the next available number initially
+  useEffect(() => {
+    getNextAvailableNumber();
+  }, [getNextAvailableNumber]);
+
+  // Set the fetched number as the default value
+  useEffect(() => {
+    if (nextNumberData?.nextAvailableJobProfileNumber !== undefined) {
+      setValue('jobStoreNumber', nextNumberData.nextAvailableJobProfileNumber.toString());
+    }
+  }, [nextNumberData, setValue]);
+
+  // Function to fetch the next available number
+  const fetchNextNumber = async () => {
+    // Trigger the query to get the next available number
+    setFetchingNextNumber(true);
+    await getNextAvailableNumber()
+      .unwrap()
+      .then((fetchedData) => {
+        if (fetchedData?.nextAvailableJobProfileNumber !== undefined) {
+          setValue('jobStoreNumber', fetchedData.nextAvailableJobProfileNumber.toString());
+        }
+      })
+      .catch((error) => {
+        // Handle error (e.g., show notification)
+        console.error('Error fetching next available number:', error);
+      })
+      .finally(() => {
+        setFetchingNextNumber(false);
+      });
+  };
+
+  useEffect(() => {
+    console.log('useEffect jobStoreNumber: ', jobStoreNumber);
+    const numberValue = parseInt(jobStoreNumber, 10);
+    if (isNaN(numberValue)) {
+      setValidationStatus('invalid');
+    } else {
+      checkNumberAvailability(numberValue)
+        .then(({ data }) => {
+          setValidationStatus(data?.isJobProfileNumberAvailable ? 'valid' : 'invalid');
+        })
+        .catch(() => {
+          setValidationStatus('invalid'); // handle error case
+        });
+    }
+  }, [jobStoreNumber, nextNumberData, checkNumberAvailability]);
+
+  // professions field array config
   const {
     fields: professionsFields,
     append,
@@ -146,6 +221,7 @@ export const TotalCompCreateProfilePage = () => {
     handleSubmit: profileControlSubmit,
     watch: profileWatch,
     setValue: profileSetValue,
+    getValues: getProfileValues,
   } = useForm({
     defaultValues: {
       overview: '',
@@ -393,6 +469,43 @@ export const TotalCompCreateProfilePage = () => {
     return jobProfileScopes?.jobProfileScopes.find((scope) => scope.id === selectedScopeId)?.description || null;
   }, [selectedScopeId, jobProfileScopes]);
 
+  // minimum requirements that change in reponse to classification changes
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const selectedClassificationId = watch('classification');
+
+  const { data: jobProfileMinimumRequirements } = useGetJobProfileMinimumRequirementsQuery();
+
+  // Handler for classification change
+  const handleClassificationChange = (newValue: string | null) => {
+    if (selectedClassificationId) {
+      setIsModalVisible(true);
+    } else {
+      updateMinimumRequirementsFromClassification(newValue);
+    }
+  };
+
+  const updateMinimumRequirementsFromClassification = (classId: string | null) => {
+    if (classId) {
+      const selectedClassification = classificationsData?.classifications.find(
+        (classification) => classification.id === classId,
+      );
+      console.log('selectedClassification: ', selectedClassification);
+      if (jobProfileMinimumRequirements && selectedClassification) {
+        const filteredRequirements = jobProfileMinimumRequirements.jobProfileMinimumRequirements
+          .filter((req) => req.grade === selectedClassification.grade)
+          .map((req) => ({ text: req.requirement }));
+
+        console.log('filteredRequirements: ', filteredRequirements);
+        // Update the educationAndWorkExperiences field array
+        profileSetValue('educationAndWorkExperiences', filteredRequirements);
+      }
+    }
+  };
+  // Handler for confirming classification change
+  const handleConfirmChange = async () => {
+    setIsModalVisible(false);
+    updateMinimumRequirementsFromClassification(selectedClassificationId);
+  };
   // END PROFILE FORM
 
   const tabItems = [
@@ -400,380 +513,420 @@ export const TotalCompCreateProfilePage = () => {
       key: '1',
       label: 'Basic details',
       children: (
-        <Row justify="center" style={{ margin: '1rem 0' }}>
-          <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-            <Form
-              layout="vertical"
-              onFinish={handleSubmit((data) => {
-                console.log(data);
-              })}
-            >
-              <Card title="Job Title" bordered={false} className="custom-card">
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
-                    <FormItem control={control} name="jobTitle">
-                      <label style={srOnlyStyle} htmlFor="jobTitle">
-                        Job Title
-                      </label>
-                      <Input placeholder="Ex.: Program Assistant" aria-label="Job Title" />
-                    </FormItem>
-                  </Col>
-                </Row>
-              </Card>
+        <>
+          <Modal
+            title="Confirm change"
+            open={isModalVisible}
+            onOk={handleConfirmChange}
+            onCancel={() => setIsModalVisible(false)}
+            okText="Confirm change"
+            cancelText="Cancel"
+          >
+            <p>
+              Changing ‘Classification’ would result in updates to some of the system generated fields in the ‘Job
+              Profile’ page. Are you sure you want to continue?
+            </p>
+          </Modal>
+          <Row justify="center" style={{ margin: '1rem 0' }}>
+            <Col xs={24} sm={24} md={24} lg={20} xl={16}>
+              <Form
+                layout="vertical"
+                onFinish={handleSubmit((data) => {
+                  console.log(data);
+                })}
+              >
+                <Card title="Job Title" bordered={false} className="custom-card">
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                      <FormItem control={control} name="jobTitle">
+                        <label style={srOnlyStyle} htmlFor="jobTitle">
+                          Job Title
+                        </label>
+                        <Input placeholder="Ex.: Program Assistant" aria-label="Job Title" />
+                      </FormItem>
+                    </Col>
+                  </Row>
+                </Card>
 
-              <Card title="JobStore Number" style={{ marginTop: 16 }} bordered={false} className="custom-card">
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
-                    <FormItem control={control} name="jobStoreNumber">
-                      <label style={srOnlyStyle} htmlFor="jobStoreNumber">
-                        JobStore Number
-                      </label>
-                      <Input placeholder="Ex.: 1001" aria-label="JobStore Number" />
-                    </FormItem>
-                  </Col>
-                </Row>
-              </Card>
+                <Card title="JobStore Number" style={{ marginTop: 16 }} bordered={false} className="custom-card">
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                      <FormItem control={control} name="jobStoreNumber">
+                        <label style={srOnlyStyle} htmlFor="jobStoreNumber">
+                          JobStore Number
+                        </label>
+                        <Input
+                          placeholder="Ex.: 1001"
+                          aria-label="JobStore Number"
+                          addonBefore={
+                            <Tooltip title="Fetch Next Available Number">
+                              {fetchingNextNumber ? <LoadingOutlined /> : <ReloadOutlined onClick={fetchNextNumber} />}
+                            </Tooltip>
+                          }
+                          addonAfter={
+                            <>
+                              {validationStatus === 'valid' && (
+                                <Tooltip title="Number is Valid">
+                                  <CheckCircleOutlined style={{ color: 'green' }} />
+                                </Tooltip>
+                              )}
+                              {validationStatus === 'invalid' && (
+                                <Tooltip title="Number is Invalid">
+                                  <CloseCircleOutlined style={{ color: 'red' }} />
+                                </Tooltip>
+                              )}
+                            </>
+                          }
+                        />
+                      </FormItem>
+                    </Col>
+                  </Row>
+                </Card>
 
-              <Card title="Classification" style={{ marginTop: 16 }} bordered={false}>
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
-                    <Form.Item label="Employee group" labelCol={{ className: 'card-label' }}>
-                      <Controller
-                        name="employeeGroup"
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                          <Select
-                            placeholder="Choose an employee group"
-                            onChange={onChange}
-                            onBlur={onBlur}
-                            defaultValue={value}
-                            style={{ width: '100%' }}
-                            // Transforming data to required format for the Select options prop
-                            options={employeeGroupData?.employeeGroups.map((group) => ({
-                              label: group.id,
-                              value: group.id,
-                            }))}
-                          />
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
+                <Card title="Classification" style={{ marginTop: 16 }} bordered={false}>
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                      <Form.Item label="Employee group" labelCol={{ className: 'card-label' }}>
+                        <Controller
+                          name="employeeGroup"
+                          control={control}
+                          render={({ field: { onChange, onBlur, value } }) => (
+                            <Select
+                              placeholder="Choose an employee group"
+                              onChange={onChange}
+                              onBlur={onBlur}
+                              defaultValue={value}
+                              style={{ width: '100%' }}
+                              // Transforming data to required format for the Select options prop
+                              options={employeeGroupData?.employeeGroups.map((group) => ({
+                                label: group.id,
+                                value: group.id,
+                              }))}
+                            />
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-                <Divider className="hr-reduced-margin" />
+                  <Divider className="hr-reduced-margin" />
 
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
-                    <Form.Item label="Classification" labelCol={{ className: 'card-label' }}>
-                      {/* Form.Item for cosmetic purposes */}
-                      <Controller
-                        name="classification"
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                          <Select
-                            placeholder="Choose a classification"
-                            onChange={onChange} // send value to hook form
-                            onBlur={onBlur} // notify when input is touched/blur
-                            defaultValue={value}
-                            style={{ width: '100%' }}
-                            showSearch={true}
-                            filterOption={(input, option) => {
-                              if (!option) return false;
-                              return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                            }}
-                            // Transforming data to required format for the Select options prop
-                            options={classificationsData?.classifications.map((classification) => ({
-                              label: classification.name,
-                              value: classification.id,
-                            }))}
-                          ></Select>
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Card>
-
-              <Card title="Type" style={{ marginTop: 16 }} bordered={false}>
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
-                    <Form.Item label="Job role" labelCol={{ className: 'card-label' }}>
-                      <Controller
-                        name="jobRole"
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                          <Select
-                            placeholder="Choose a job role"
-                            onChange={onChange}
-                            onBlur={onBlur}
-                            defaultValue={value}
-                            options={jobRolesData?.jobRoles.map((jobRole) => ({
-                              label: jobRole.name,
-                              value: jobRole.id,
-                            }))}
-                          ></Select>
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-
-                <Divider className="hr-reduced-margin" />
-
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
-                    <Form.Item
-                      label="Job Family / Profession"
-                      labelCol={{ className: 'card-label' }}
-                      className="label-only"
-                    ></Form.Item>
-                    {professionsFields.map((field, index: number) => (
-                      <div key={field.id}>
-                        <Form.Item style={{ marginBottom: '0.5rem' }}>
-                          {/* First level of selection for job family /profession */}
-                          <Controller
-                            // ref={register()}
-                            control={control}
-                            name={`professions.${index}.jobFamily`}
-                            render={({ field: { onChange, onBlur } }) => (
-                              <Row gutter={8} wrap={false}>
-                                <Col flex="auto">
-                                  <Select
-                                    onBlur={onBlur} // notify when input is touched/blur
-                                    placeholder="Choose a profession"
-                                    onChange={(value) => {
-                                      // When profession changes, clear the jobStreams for this profession
-                                      setValue(`professions.${index}.jobStreams`, []);
-                                      onChange(value);
-                                    }}
-                                  >
-                                    {/* Dynamically render profession options based on your data */}
-                                    {jobFamiliesData?.jobFamilies.map((family) => (
-                                      <Option key={family.id} value={family.id}>
-                                        {family.name}
-                                      </Option>
-                                    ))}
-                                  </Select>
-                                </Col>
-                                <Col>
-                                  <Button
-                                    disabled={index == 0 && selectedProfession[index]?.jobFamily == -1}
-                                    onClick={() => {
-                                      remove(index);
-                                      // removing last one - append blank
-                                      if (selectedProfession.length == 1) {
-                                        append({ jobFamily: -1, jobStreams: [] });
-                                      }
-                                    }}
-                                    icon={<DeleteOutlined />}
-                                  ></Button>
-                                </Col>
-                              </Row>
-                            )}
-                          />
-                        </Form.Item>
-
-                        {/* Second level for job family/profession selector (select job stream/discipline) */}
-                        {selectedProfession[index]?.jobFamily != -1 && (
-                          <Form.Item
-                            label="Job Streams / Disciplines"
-                            labelCol={{ className: 'card-label' }}
-                            style={{ borderLeft: '2px solid rgba(5, 5, 5, 0.06)', paddingLeft: '1rem' }}
-                          >
-                            <Controller
-                              control={control}
-                              name={`professions.${index}.jobStreams`}
-                              render={({ field: field2 }) => {
-                                return (
-                                  <Select
-                                    {...field2}
-                                    mode="multiple"
-                                    placeholder="Select the job streams this role is part of"
-                                    style={{ width: '100%' }}
-                                    onChange={(selectedStreams) => {
-                                      field2.onChange(selectedStreams);
-                                    }}
-                                    options={getJobStreamsForFamily(selectedProfession[index]?.jobFamily).map(
-                                      (stream) => ({ label: stream.name, value: stream.id }),
-                                    )}
-                                  ></Select>
-                                );
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                      <Form.Item label="Classification" labelCol={{ className: 'card-label' }}>
+                        {/* Form.Item for cosmetic purposes */}
+                        <Controller
+                          name="classification"
+                          control={control}
+                          render={({ field: { onChange, onBlur, value } }) => (
+                            <Select
+                              placeholder="Choose a classification"
+                              onChange={(newValue) => {
+                                onChange(newValue);
+                                handleClassificationChange(newValue);
                               }}
+                              onBlur={onBlur} // notify when input is touched/blur
+                              defaultValue={value}
+                              style={{ width: '100%' }}
+                              showSearch={true}
+                              filterOption={(input, option) => {
+                                if (!option) return false;
+                                return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                              }}
+                              // Transforming data to required format for the Select options prop
+                              options={classificationsData?.classifications.map((classification) => ({
+                                label: classification.name,
+                                value: classification.id,
+                              }))}
+                            ></Select>
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
+
+                <Card title="Type" style={{ marginTop: 16 }} bordered={false}>
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                      <Form.Item label="Job role" labelCol={{ className: 'card-label' }}>
+                        <Controller
+                          name="jobRole"
+                          control={control}
+                          render={({ field: { onChange, onBlur, value } }) => (
+                            <Select
+                              placeholder="Choose a job role"
+                              onChange={onChange}
+                              onBlur={onBlur}
+                              defaultValue={value}
+                              options={jobRolesData?.jobRoles.map((jobRole) => ({
+                                label: jobRole.name,
+                                value: jobRole.id,
+                              }))}
+                            ></Select>
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Divider className="hr-reduced-margin" />
+
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                      <Form.Item
+                        label="Job Family / Profession"
+                        labelCol={{ className: 'card-label' }}
+                        className="label-only"
+                      ></Form.Item>
+                      {professionsFields.map((field, index: number) => (
+                        <div key={field.id}>
+                          <Form.Item style={{ marginBottom: '0.5rem' }}>
+                            {/* First level of selection for job family /profession */}
+                            <Controller
+                              // ref={register()}
+                              control={control}
+                              name={`professions.${index}.jobFamily`}
+                              render={({ field: { onChange, onBlur } }) => (
+                                <Row gutter={8} wrap={false}>
+                                  <Col flex="auto">
+                                    <Select
+                                      onBlur={onBlur} // notify when input is touched/blur
+                                      placeholder="Choose a profession"
+                                      onChange={(value) => {
+                                        // When profession changes, clear the jobStreams for this profession
+                                        setValue(`professions.${index}.jobStreams`, []);
+                                        onChange(value);
+                                      }}
+                                    >
+                                      {/* Dynamically render profession options based on your data */}
+                                      {jobFamiliesData?.jobFamilies.map((family) => (
+                                        <Option key={family.id} value={family.id}>
+                                          {family.name}
+                                        </Option>
+                                      ))}
+                                    </Select>
+                                  </Col>
+                                  <Col>
+                                    <Button
+                                      disabled={index == 0 && selectedProfession[index]?.jobFamily == -1}
+                                      onClick={() => {
+                                        remove(index);
+                                        // removing last one - append blank
+                                        if (selectedProfession.length == 1) {
+                                          append({ jobFamily: -1, jobStreams: [] });
+                                        }
+                                      }}
+                                      icon={<DeleteOutlined />}
+                                    ></Button>
+                                  </Col>
+                                </Row>
+                              )}
                             />
                           </Form.Item>
-                        )}
-                      </div>
-                    ))}
-                    <Form.Item>
-                      <Button
-                        type="dashed"
-                        onClick={() => {
-                          append({ jobFamily: -1, jobStreams: [] });
-                        }}
-                        block
-                        icon={<PlusOutlined />}
-                        disabled={selectedProfession[0]?.jobFamily == -1}
-                      >
-                        Add another job family
-                      </Button>
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Card>
 
-              <Card title="Additional information" style={{ marginTop: 16 }} bordered={false}>
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={10} xl={10}>
-                    {/* Role Radio Buttons */}
-                    <Form.Item label="Role" labelCol={{ className: 'card-label' }}>
-                      <Controller
-                        name="role"
-                        control={control}
-                        render={({ field }) => (
-                          <Radio.Group {...field}>
-                            <Radio value="individualContributor">Individual Contributor</Radio>
-                            <Radio value="peopleLeader">People Leader</Radio>
-                          </Radio.Group>
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Divider className="hr-reduced-margin" />
+                          {/* Second level for job family/profession selector (select job stream/discipline) */}
+                          {selectedProfession[index]?.jobFamily != -1 && (
+                            <Form.Item
+                              label="Job Streams / Disciplines"
+                              labelCol={{ className: 'card-label' }}
+                              style={{ borderLeft: '2px solid rgba(5, 5, 5, 0.06)', paddingLeft: '1rem' }}
+                            >
+                              <Controller
+                                control={control}
+                                name={`professions.${index}.jobStreams`}
+                                render={({ field: field2 }) => {
+                                  return (
+                                    <Select
+                                      {...field2}
+                                      mode="multiple"
+                                      placeholder="Select the job streams this role is part of"
+                                      style={{ width: '100%' }}
+                                      onChange={(selectedStreams) => {
+                                        field2.onChange(selectedStreams);
+                                      }}
+                                      options={getJobStreamsForFamily(selectedProfession[index]?.jobFamily).map(
+                                        (stream) => ({ label: stream.name, value: stream.id }),
+                                      )}
+                                    ></Select>
+                                  );
+                                }}
+                              />
+                            </Form.Item>
+                          )}
+                        </div>
+                      ))}
+                      <Form.Item>
+                        <Button
+                          type="dashed"
+                          onClick={() => {
+                            append({ jobFamily: -1, jobStreams: [] });
+                          }}
+                          block
+                          icon={<PlusOutlined />}
+                          disabled={selectedProfession[0]?.jobFamily == -1}
+                        >
+                          Add another job family
+                        </Button>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
 
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
-                    {/* Report-to relationship Select */}
-                    <Form.Item label="Report-to relationship" labelCol={{ className: 'card-label' }}>
-                      <Controller
-                        name="reportToRelationship"
-                        control={control}
-                        render={({ field }) => (
-                          <TreeSelect
-                            {...field}
-                            treeData={treeDataConverted} // Replace with your data
-                            // onChange={(value) => setReportToRelationship(value)}
-                            treeCheckable={true}
-                            showCheckedStrategy={SHOW_CHILD}
-                            placeholder="Choose all the positions this role should report to"
-                            style={{ width: '100%' }}
-                            maxTagCount={10}
-                          />
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
+                <Card title="Additional information" style={{ marginTop: 16 }} bordered={false}>
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={10} xl={10}>
+                      {/* Role Radio Buttons */}
+                      <Form.Item label="Role" labelCol={{ className: 'card-label' }}>
+                        <Controller
+                          name="role"
+                          control={control}
+                          render={({ field }) => (
+                            <Radio.Group {...field}>
+                              <Radio value="individualContributor">Individual Contributor</Radio>
+                              <Radio value="peopleLeader">People Leader</Radio>
+                            </Radio.Group>
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Divider className="hr-reduced-margin" />
 
-                <Divider className="hr-reduced-margin" />
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                      {/* Report-to relationship Select */}
+                      <Form.Item label="Report-to relationship" labelCol={{ className: 'card-label' }}>
+                        <Controller
+                          name="reportToRelationship"
+                          control={control}
+                          render={({ field }) => (
+                            <TreeSelect
+                              {...field}
+                              treeData={treeDataConverted} // Replace with your data
+                              // onChange={(value) => setReportToRelationship(value)}
+                              treeCheckable={true}
+                              showCheckedStrategy={SHOW_CHILD}
+                              placeholder="Choose all the positions this role should report to"
+                              style={{ width: '100%' }}
+                              maxTagCount={10}
+                            />
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
-                    {/* Scope of Responsibility Select */}
-                    <Form.Item label="Scope of Responsibility" labelCol={{ className: 'card-label' }}>
-                      <Controller
-                        name="scopeOfResponsibility"
-                        control={control}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                          <Select
-                            placeholder="Choose the scope of responsibility"
-                            onChange={onChange}
-                            onBlur={onBlur}
-                            defaultValue={value}
-                            options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
-                              label: scope.name,
-                              value: scope.id,
-                            }))}
-                          ></Select>
-                        )}
-                      />
-                      <Typography.Text type="secondary">{selectedScopeDescription}</Typography.Text>
-                    </Form.Item>
-                  </Col>
-                </Row>
+                  <Divider className="hr-reduced-margin" />
 
-                <Divider className="hr-reduced-margin" />
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                      {/* Scope of Responsibility Select */}
+                      <Form.Item label="Scope of Responsibility" labelCol={{ className: 'card-label' }}>
+                        <Controller
+                          name="scopeOfResponsibility"
+                          control={control}
+                          render={({ field: { onChange, onBlur, value } }) => (
+                            <Select
+                              placeholder="Choose the scope of responsibility"
+                              onChange={onChange}
+                              onBlur={onBlur}
+                              defaultValue={value}
+                              options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
+                                label: scope.name,
+                                value: scope.id,
+                              }))}
+                            ></Select>
+                          )}
+                        />
+                        <Typography.Text type="secondary">{selectedScopeDescription}</Typography.Text>
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-                <Row justify="start">
-                  <Col xs={24} sm={24} md={14} lg={14} xl={14}>
-                    {/* Ministries Select */}
+                  <Divider className="hr-reduced-margin" />
 
-                    <Form.Item
-                      label={
-                        <>
-                          <Text>Ministries</Text>
-                          <>&nbsp;</>
-                          <Text type="secondary">(optional)</Text>
-                        </>
-                      }
-                      labelCol={{ className: 'card-label' }}
-                    >
-                      <Controller
-                        name="ministries"
-                        control={control}
-                        render={({ field: { onChange } }) => (
+                  <Row justify="start">
+                    <Col xs={24} sm={24} md={14} lg={14} xl={14}>
+                      {/* Ministries Select */}
+
+                      <Form.Item
+                        label={
                           <>
-                            <Text type="secondary" style={{ marginBottom: '5px', display: 'block' }}>
-                              If selected, this role would be available only for those specific ministries.
-                            </Text>
-                            <br></br>
-                            <MinistriesSelect isMultiSelect={true} onChange={onChange} />
+                            <Text>Ministries</Text>
+                            <>&nbsp;</>
+                            <Text type="secondary">(optional)</Text>
                           </>
-                        )}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
+                        }
+                        labelCol={{ className: 'card-label' }}
+                      >
+                        <Controller
+                          name="ministries"
+                          control={control}
+                          render={({ field: { onChange } }) => (
+                            <>
+                              <Text type="secondary" style={{ marginBottom: '5px', display: 'block' }}>
+                                If selected, this role would be available only for those specific ministries.
+                              </Text>
+                              <br></br>
+                              <MinistriesSelect isMultiSelect={true} onChange={onChange} />
+                            </>
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-                <Divider className="hr-reduced-margin" />
+                  <Divider className="hr-reduced-margin" />
 
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={8} xl={8}>
-                    {/* Other Functions Checkbox */}
-                    <Form.Item
-                      label={
-                        <>
-                          <Text>Other functions</Text>
-                          <>&nbsp;</>
-                          <Text type="secondary">(optional)</Text>
-                        </>
-                      }
-                      labelCol={{ className: 'card-label' }}
-                    >
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                      {/* Other Functions Checkbox */}
+                      <Form.Item
+                        label={
+                          <>
+                            <Text>Other functions</Text>
+                            <>&nbsp;</>
+                            <Text type="secondary">(optional)</Text>
+                          </>
+                        }
+                        labelCol={{ className: 'card-label' }}
+                      >
+                        <Controller
+                          name="otherFunctions"
+                          control={control}
+                          render={({ field: { onChange, value, ref } }) => (
+                            <Switch checked={value} onChange={onChange} ref={ref} />
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
+
+                <Card title="Job Context" style={{ marginTop: 16 }} bordered={false}>
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={10} lg={10} xl={10}>
                       <Controller
-                        name="otherFunctions"
                         control={control}
-                        render={({ field: { onChange, value, ref } }) => (
-                          <Switch checked={value} onChange={onChange} ref={ref} />
+                        name="jobContext"
+                        render={({ field }) => (
+                          <ReactQuill {...field} modules={quill_modules} theme="snow" placeholder="Add job context" />
                         )}
                       />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Card>
+                    </Col>
+                  </Row>
+                </Card>
 
-              <Card title="Job Context" style={{ marginTop: 16 }} bordered={false}>
-                <Row justify="start">
-                  <Col xs={24} sm={12} md={10} lg={10} xl={10}>
-                    <Controller
-                      control={control}
-                      name="jobContext"
-                      render={({ field }) => (
-                        <ReactQuill {...field} modules={quill_modules} theme="snow" placeholder="Add job context" />
-                      )}
-                    />
-                  </Col>
-                </Row>
-              </Card>
-
-              <Form.Item>
-                <Button type="primary" htmlType="submit">
-                  Submit
-                </Button>
-              </Form.Item>
-            </Form>
-          </Col>
-        </Row>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    Submit
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Col>
+          </Row>
+        </>
       ),
     },
     {
@@ -1524,11 +1677,31 @@ export const TotalCompCreateProfilePage = () => {
     },
   ];
 
+  const save = () => {
+    console.log('save');
+    const basicDetails = getBasicDetailsValues();
+    const profileDetails = getProfileValues();
+
+    const combinedData = {
+      ...basicDetails,
+      ...profileDetails,
+    };
+
+    console.log('Combined form data:', combinedData);
+  };
+
   if (!ministriesData || !careerGroupData) return <>Loading..</>;
 
   return (
     <>
-      <PageHeader title="New profile" subTitle="New profile" />
+      <PageHeader
+        title="New profile"
+        subTitle="New profile"
+        showButton1
+        showButton2
+        button2Text="Save as draft"
+        button2Callback={save}
+      />
 
       <ContentWrapper>
         <Tabs

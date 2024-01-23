@@ -36,6 +36,7 @@ export const classificationApi = graphqlApi.injectEndpoints({
                 id
                 name
                 code
+                grade
               }
             }
           `,

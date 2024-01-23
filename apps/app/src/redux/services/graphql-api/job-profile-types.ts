@@ -1,9 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export interface NextAvailableJobProfileNumberResponse {
+  nextAvailableJobProfileNumber: number;
+}
+
+export interface IsJobProfileNumberAvailableResponse {
+  isJobProfileNumberAvailable: boolean;
+}
+
 export interface ClassificationModel {
   id: string;
   code: string;
   name: string;
+  grade: string;
 }
 
 export interface ClassificationModelWrapped {

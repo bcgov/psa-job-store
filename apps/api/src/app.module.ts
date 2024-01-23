@@ -19,6 +19,7 @@ import { ClassificationModule } from './modules/classification/classification.mo
 import { EmployeeGroupModule } from './modules/employee-group/employee-group.module';
 import { ExternalModule } from './modules/external/external.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
+import { JobProfileMinimumRequirementsModule } from './modules/job-profile-minimum-requirements/job-profile-minimum-requirements.module';
 import { JobProfileScopeModule } from './modules/job-profile-scope/job-profile-scope.module';
 import { JobProfileStreamModule } from './modules/job-profile-stream/job-profile-stream.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
@@ -71,6 +72,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     EmployeeGroupModule,
     JobProfileStreamModule,
     JobProfileScopeModule,
+    JobProfileMinimumRequirementsModule,
     SiteMinderGuidTestApiModule,
   ],
   controllers: [],

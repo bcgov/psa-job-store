@@ -156,7 +156,7 @@ model JobProfile {
   owner                    User?                             @relation(fields: [owner_id], references: [id])
 
   title            String
-  number           Int
+  number           Int                   @unique
   overview         String
   accountabilities Json                  @default("{\"optional\": [], \"required\": []}") @db.JsonB
   requirements     String[]
