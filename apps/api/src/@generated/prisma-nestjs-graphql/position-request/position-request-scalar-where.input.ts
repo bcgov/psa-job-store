@@ -22,6 +22,9 @@ export class PositionRequestScalarWhereInput {
   id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
+  crm_id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
   step?: IntFilter;
 
   @Field(() => StringFilter, { nullable: true })
@@ -32,6 +35,9 @@ export class PositionRequestScalarWhereInput {
 
   @Field(() => IntFilter, { nullable: true })
   parent_job_profile_id?: IntFilter;
+
+  @Field(() => JsonFilter, { nullable: true })
+  crm_json?: JsonFilter;
 
   @Field(() => JsonFilter, { nullable: true })
   profile_json?: JsonFilter;

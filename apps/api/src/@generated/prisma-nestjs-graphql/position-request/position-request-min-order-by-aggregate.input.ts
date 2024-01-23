@@ -8,6 +8,9 @@ export class PositionRequestMinOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  crm_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   step?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

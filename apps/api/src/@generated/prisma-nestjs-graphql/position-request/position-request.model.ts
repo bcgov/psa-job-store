@@ -11,6 +11,9 @@ export class PositionRequest {
   @Field(() => Int, { nullable: false })
   id!: number;
 
+  @Field(() => Int, { nullable: true })
+  crm_id!: number | null;
+
   @Field(() => Int, { nullable: false })
   step!: number;
 
@@ -22,6 +25,9 @@ export class PositionRequest {
 
   @Field(() => Int, { nullable: true })
   parent_job_profile_id!: number | null;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  crm_json!: any | null;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json!: any | null;

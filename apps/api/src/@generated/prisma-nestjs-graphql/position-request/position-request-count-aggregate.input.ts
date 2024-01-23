@@ -7,6 +7,9 @@ export class PositionRequestCountAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  crm_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   step?: true;
 
   @Field(() => Boolean, { nullable: true })
@@ -17,6 +20,9 @@ export class PositionRequestCountAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   parent_job_profile_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  crm_json?: true;
 
   @Field(() => Boolean, { nullable: true })
   profile_json?: true;

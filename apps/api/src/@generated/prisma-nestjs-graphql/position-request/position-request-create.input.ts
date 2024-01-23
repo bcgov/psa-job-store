@@ -8,11 +8,17 @@ import { DepartmentCreateNestedOneWithoutPositionRequestInput } from '../departm
 
 @InputType()
 export class PositionRequestCreateInput {
+  @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
   @Field(() => Int, { nullable: false })
   step!: number;
 
   @Field(() => String, { nullable: false })
   reports_to_position_id!: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  crm_json?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;

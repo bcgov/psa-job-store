@@ -8,6 +8,9 @@ export class PositionRequestCountAggregate {
   id!: number;
 
   @Field(() => Int, { nullable: false })
+  crm_id!: number;
+
+  @Field(() => Int, { nullable: false })
   step!: number;
 
   @Field(() => Int, { nullable: false })
@@ -18,6 +21,9 @@ export class PositionRequestCountAggregate {
 
   @Field(() => Int, { nullable: false })
   parent_job_profile_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  crm_json!: number;
 
   @Field(() => Int, { nullable: false })
   profile_json!: number;

@@ -2,10 +2,12 @@ import { registerEnumType } from '@nestjs/graphql';
 
 export enum PositionRequestScalarFieldEnum {
   id = 'id',
+  crm_id = 'crm_id',
   step = 'step',
   reports_to_position_id = 'reports_to_position_id',
   department_id = 'department_id',
   parent_job_profile_id = 'parent_job_profile_id',
+  crm_json = 'crm_json',
   profile_json = 'profile_json',
   orgchart_json = 'orgchart_json',
   user_id = 'user_id',

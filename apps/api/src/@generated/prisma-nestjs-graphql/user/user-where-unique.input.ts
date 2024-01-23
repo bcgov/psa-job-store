@@ -3,6 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { UserWhereInput } from './user-where.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
+import { JsonFilter } from '../prisma/json-filter.input';
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { CommentListRelationFilter } from '../comment/comment-list-relation-filter.input';
 import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
@@ -32,6 +33,9 @@ export class UserWhereUniqueInput {
 
   @Field(() => StringListFilter, { nullable: true })
   roles?: StringListFilter;
+
+  @Field(() => JsonFilter, { nullable: true })
+  metadata?: JsonFilter;
 
   @Field(() => DateTimeFilter, { nullable: true })
   created_at?: DateTimeFilter;

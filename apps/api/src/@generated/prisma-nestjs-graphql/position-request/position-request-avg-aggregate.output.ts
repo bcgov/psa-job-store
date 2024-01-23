@@ -8,6 +8,9 @@ export class PositionRequestAvgAggregate {
   id?: number;
 
   @Field(() => Float, { nullable: true })
+  crm_id?: number;
+
+  @Field(() => Float, { nullable: true })
   step?: number;
 
   @Field(() => Float, { nullable: true })

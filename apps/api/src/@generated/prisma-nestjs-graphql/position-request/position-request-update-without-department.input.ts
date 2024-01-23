@@ -8,10 +8,16 @@ import { JobProfileUpdateOneWithoutPosition_requestNestedInput } from '../job-pr
 @InputType()
 export class PositionRequestUpdateWithoutDepartmentInput {
   @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
+  @Field(() => Int, { nullable: true })
   step?: number;
 
   @Field(() => String, { nullable: true })
   reports_to_position_id?: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  crm_json?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;

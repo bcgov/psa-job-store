@@ -9,6 +9,9 @@ export class PositionRequestUncheckedCreateWithoutDepartmentInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
+  @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
   @Field(() => Int, { nullable: false })
   step!: number;
 
@@ -17,6 +20,9 @@ export class PositionRequestUncheckedCreateWithoutDepartmentInput {
 
   @Field(() => Int, { nullable: true })
   parent_job_profile_id?: number;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  crm_json?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;

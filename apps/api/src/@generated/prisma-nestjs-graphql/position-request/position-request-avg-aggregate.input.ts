@@ -7,6 +7,9 @@ export class PositionRequestAvgAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  crm_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   step?: true;
 
   @Field(() => Boolean, { nullable: true })

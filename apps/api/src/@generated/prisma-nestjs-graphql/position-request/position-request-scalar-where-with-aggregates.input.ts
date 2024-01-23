@@ -22,6 +22,9 @@ export class PositionRequestScalarWhereWithAggregatesInput {
   id?: IntWithAggregatesFilter;
 
   @Field(() => IntWithAggregatesFilter, { nullable: true })
+  crm_id?: IntWithAggregatesFilter;
+
+  @Field(() => IntWithAggregatesFilter, { nullable: true })
   step?: IntWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
@@ -32,6 +35,9 @@ export class PositionRequestScalarWhereWithAggregatesInput {
 
   @Field(() => IntWithAggregatesFilter, { nullable: true })
   parent_job_profile_id?: IntWithAggregatesFilter;
+
+  @Field(() => JsonWithAggregatesFilter, { nullable: true })
+  crm_json?: JsonWithAggregatesFilter;
 
   @Field(() => JsonWithAggregatesFilter, { nullable: true })
   profile_json?: JsonWithAggregatesFilter;

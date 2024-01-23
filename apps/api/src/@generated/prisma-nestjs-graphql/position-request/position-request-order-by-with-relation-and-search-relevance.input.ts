@@ -11,6 +11,9 @@ export class PositionRequestOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrder, { nullable: true })
   id?: keyof typeof SortOrder;
 
+  @Field(() => SortOrderInput, { nullable: true })
+  crm_id?: SortOrderInput;
+
   @Field(() => SortOrder, { nullable: true })
   step?: keyof typeof SortOrder;
 
@@ -22,6 +25,9 @@ export class PositionRequestOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => SortOrderInput, { nullable: true })
   parent_job_profile_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  crm_json?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   profile_json?: SortOrderInput;
