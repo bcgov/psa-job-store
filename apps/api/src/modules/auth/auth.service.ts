@@ -64,10 +64,16 @@ export class AuthService {
 
     if (!match) {
       // If user doesn't exist in cache, update the persisted user
-      const userFromDb = await this.prisma.user.findUnique({ where: { id: idir_user_guid } });
-      let crmMetadata: Record<string, any> = {};
+      let crmMetadata: Record<string, any> = {
+        account_id: null,
+        contact_id: null,
+      };
 
-      if (userFromDb.metadata?.['crm']['account_id'] == null || userFromDb.metadata?.['crm']['contact_id'] == null) {
+      const userFromDb = await this.prisma.user.findUnique({ where: { id: idir_user_guid } });
+      if (
+        (userFromDb != null && userFromDb?.metadata?.['crm']['account_id'] == null) ||
+        userFromDb?.metadata?.['crm']['contact_id'] == null
+      ) {
         const accountId = await this.crmService.getAccountId(idir_username);
         const contactId = await this.crmService.getContactId(idir_username);
 
@@ -87,6 +93,7 @@ export class AuthService {
           crm: crmMetadata,
         },
       };
+
       await this.upsertUser(user);
 
       // Add user to cache
