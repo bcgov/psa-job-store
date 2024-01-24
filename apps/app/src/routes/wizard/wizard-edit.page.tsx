@@ -1,12 +1,16 @@
 import { FormInstance, List, Modal } from 'antd';
 import { useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ClassificationModel, GetClassificationsResponse } from '../../redux/services/graphql-api/classification.api';
 import {
   BehaviouralCompetencies,
+  ClassificationModel,
+  ClassificationModelWrapped,
+  GetClassificationsResponse,
+  JobFamily,
   JobProfileModel,
+  Stream,
   TrackedFieldArrayItem,
-} from '../../redux/services/graphql-api/job-profile.api';
+} from '../../redux/services/graphql-api/job-profile-types';
+import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import WizardEditProfile from './components/wizard-edit-profile';
@@ -18,12 +22,27 @@ export interface InputData {
   [key: string]: any;
 }
 
-export const WizardEditPage = () => {
+interface WizardEditPageProps {
+  onBack?: () => void;
+  onNext?: () => void;
+}
+
+export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }) => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
-  const { wizardData, setWizardData, classificationsData, setClassificationsData, errors, setErrors } =
-    useWizardContext();
-  const { profileId } = useParams();
+  const {
+    wizardData,
+    setWizardData,
+    classificationsData,
+    setClassificationsData,
+    errors,
+    setErrors,
+    positionRequestProfileId,
+    positionRequestId,
+  } = useWizardContext();
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
+
+  const profileId = positionRequestProfileId;
 
   function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
     setClassificationsData(data);
@@ -57,11 +76,12 @@ export const WizardEditPage = () => {
     // this is so that the edited data can be displayed for review (since this component uses API format data)
     const output: JobProfileModel = {
       id: parseInt(input.id),
-      stream: 'USER',
+      type: 'USER',
       title: { value: input['title.value'], isCustom: input['title.isCustom'], disabled: input['title.disabled'] },
       number: parseInt(input.number),
       organization_id: '-1',
-      family_id: -1,
+      jobFamilies: [] as JobFamily[],
+      streams: [] as Stream[],
       context: input.context,
       overview: {
         value: input['overview.value'],
@@ -74,24 +94,27 @@ export const WizardEditPage = () => {
       },
       requirements: [] as string[],
       behavioural_competencies: [] as BehaviouralCompetencies[],
-      classification: {
-        id: input.classification,
-      } as ClassificationModel,
+      classifications: [] as ClassificationModelWrapped[],
     };
 
     Object.keys(input).forEach((key) => {
       const keys = key.split('.');
       const value = input[key];
 
-      if (keys.length === 1) {
-        if (key === 'classification') {
+      if (keys.length !== 1) {
+        if (key.startsWith('classification')) {
+          // console.log('starts with classification');
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+          // console.log('index: ', index, ' value: ', value);
           const classificationData = getClassificationById(value);
 
+          // console.log('classificationData: ', classificationData);
           if (classificationData) {
-            output.classification = classificationData;
+            if (output.classifications) output.classifications[index] = { classification: classificationData };
           }
         }
-      } else {
+
         if (key.startsWith('required_accountabilities')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
@@ -159,8 +182,9 @@ export const WizardEditPage = () => {
     getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
   }>(null);
 
-  const navigate = useNavigate();
-  const onNext = () => {
+  // const navigate = useNavigate();
+
+  const onNextCallback = async () => {
     if (errors.length) {
       Modal.error({
         title: 'Errors',
@@ -176,10 +200,29 @@ export const WizardEditPage = () => {
       });
       return;
     }
+    // Create an entry in My Positions
+
     const formData = wizardEditProfileRef.current?.getFormData();
     const transformedData = transformFormData(formData);
     setWizardData(transformedData);
-    navigate('/wizard/review');
+
+    try {
+      if (positionRequestId)
+        await updatePositionRequest({
+          id: positionRequestId,
+          step: 3,
+          profile_json: transformedData,
+          title: formData['title.value'],
+          // classification_code: classification ? classification.code : '',
+        }).unwrap();
+    } catch (error) {
+      // Handle the error, possibly showing another modal
+      Modal.error({
+        title: 'Error updating position',
+        content: 'An unknown error occurred', //error.data?.message ||
+      });
+    }
+    if (onNext) onNext();
   };
 
   return (
@@ -190,13 +233,19 @@ export const WizardEditPage = () => {
       xl={18}
       lg={18}
     >
-      <WizardSteps current={1} xl={24}></WizardSteps>
-      <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} showChooseDifferentProfile={true} />
+      <WizardSteps current={2} xl={24}></WizardSteps>
+      <WizardEditControlBar
+        style={{ marginBottom: '1rem' }}
+        onNext={onNextCallback}
+        onChooseDifferentProfile={onBack}
+        showChooseDifferentProfile={true}
+        nextText="Save and Next"
+      />
 
       <WizardEditProfile
         ref={wizardEditProfileRef}
         profileData={wizardData}
-        id={profileId}
+        id={profileId?.toString()}
         submitText="Review Profile"
         // submitHandler={onSubmit}
         showBackButton={true}

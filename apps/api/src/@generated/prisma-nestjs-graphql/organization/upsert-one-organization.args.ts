@@ -10,7 +10,7 @@ import { OrganizationUpdateInput } from './organization-update.input';
 export class UpsertOneOrganizationArgs {
   @Field(() => OrganizationWhereUniqueInput, { nullable: false })
   @Type(() => OrganizationWhereUniqueInput)
-  where!: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id' | 'peoplesoft_id'>;
 
   @Field(() => OrganizationCreateInput, { nullable: false })
   @Type(() => OrganizationCreateInput)

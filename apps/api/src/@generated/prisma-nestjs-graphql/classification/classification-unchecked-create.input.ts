@@ -1,9 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { JobProfileUncheckedCreateNestedManyWithoutClassificationInput } from '../job-profile/job-profile-unchecked-create-nested-many-without-classification.input';
+import { JobProfileClassificationUncheckedCreateNestedManyWithoutClassificationInput } from '../job-profile-classification/job-profile-classification-unchecked-create-nested-many-without-classification.input';
 import { JobProfileReportsToUncheckedCreateNestedManyWithoutClassificationInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-create-nested-many-without-classification.input';
-import { EmployeeUncheckedCreateNestedManyWithoutClassificationInput } from '../employee/employee-unchecked-create-nested-many-without-classification.input';
-import { PositionUncheckedCreateNestedManyWithoutClassificationInput } from '../position/position-unchecked-create-nested-many-without-classification.input';
 
 @InputType()
 export class ClassificationUncheckedCreateInput {
@@ -11,17 +9,29 @@ export class ClassificationUncheckedCreateInput {
   id!: string;
 
   @Field(() => String, { nullable: false })
+  peoplesoft_id!: string;
+
+  @Field(() => String, { nullable: false })
   code!: string;
 
-  @Field(() => JobProfileUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
-  job_profiles?: JobProfileUncheckedCreateNestedManyWithoutClassificationInput;
+  @Field(() => String, { nullable: false })
+  name!: string;
+
+  @Field(() => String, { nullable: false })
+  employee_group_id!: string;
+
+  @Field(() => String, { nullable: false })
+  grade!: string;
+
+  @Field(() => String, { nullable: false })
+  effective_status!: string;
+
+  @Field(() => Date, { nullable: false })
+  effective_date!: Date | string;
+
+  @Field(() => JobProfileClassificationUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
+  job_profiles?: JobProfileClassificationUncheckedCreateNestedManyWithoutClassificationInput;
 
   @Field(() => JobProfileReportsToUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
   reportees?: JobProfileReportsToUncheckedCreateNestedManyWithoutClassificationInput;
-
-  @Field(() => EmployeeUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
-  employees?: EmployeeUncheckedCreateNestedManyWithoutClassificationInput;
-
-  @Field(() => PositionUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
-  positions?: PositionUncheckedCreateNestedManyWithoutClassificationInput;
 }

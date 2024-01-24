@@ -1,0 +1,10 @@
+.wizard-edit-control-bar {
+    position: sticky;
+    top: 0; /* Adjust this value if you have a header above your control bar */
+    z-index: 1; /* Ensure it's above other content */
+    background: inherit; /* Match the background with the parent or set a specific color */
+    padding: 16px;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: space-between;
+  }

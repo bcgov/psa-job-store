@@ -1,0 +1,15 @@
+import { Field } from '@nestjs/graphql';
+import { InputType } from '@nestjs/graphql';
+import { ClassificationWhereInput } from './classification-where.input';
+
+@InputType()
+export class ClassificationListRelationFilter {
+  @Field(() => ClassificationWhereInput, { nullable: true })
+  every?: ClassificationWhereInput;
+
+  @Field(() => ClassificationWhereInput, { nullable: true })
+  some?: ClassificationWhereInput;
+
+  @Field(() => ClassificationWhereInput, { nullable: true })
+  none?: ClassificationWhereInput;
+}

@@ -13,13 +13,11 @@ import {
   registerDecorator,
 } from 'class-validator';
 import { diff_match_patch } from 'diff-match-patch';
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import {
-  JobProfileModel,
-  TrackedFieldArrayItem,
-  useLazyGetJobProfileQuery,
-} from '../../../redux/services/graphql-api/job-profile.api';
+import { CSSProperties, useEffect, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { JobProfileModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
+import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import WizardEditControlBar from '../../wizard/components/wizard-edit-control-bar';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -30,6 +28,8 @@ interface JobProfileProps {
   onProfileLoad?: (profileData: JobProfileModel) => void;
   showBackToResults?: boolean;
   showDiff?: boolean;
+  style?: CSSProperties;
+  onUseProfile?: () => void;
 }
 
 class BehaviouralCompetency {
@@ -60,7 +60,7 @@ export class OverviewField extends TrackedFieldArrayItem {
 @ValidatorConstraint({ async: false })
 class AllDisabledConstraint implements ValidatorConstraintInterface {
   validate(array: (TrackedFieldArrayItem | string)[]) {
-    return !array.every((item) => {
+    return !array?.every((item) => {
       // Check if the item is disabled or empty
       return typeof item === 'object' && (item.disabled === true || item.value.length == 0);
     });
@@ -83,6 +83,10 @@ function AllDisabled(validationOptions?: ValidationOptions) {
   };
 }
 
+class ClassificationField {
+  classification: string;
+}
+
 export class JobProfileValidationModel {
   id: number;
 
@@ -92,7 +96,7 @@ export class JobProfileValidationModel {
   @Type(() => TitleField)
   title: TitleField | string;
 
-  classification: string | null;
+  classifications: ClassificationField[];
 
   context: string;
 
@@ -117,9 +121,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   onProfileLoad,
   showBackToResults = true,
   showDiff = false,
+  style,
+  onUseProfile,
 }) => {
+  const [searchParams] = useSearchParams();
   const params = useParams();
-  const resolvedId = id ?? params.id; // Using prop ID or param ID
+  const resolvedId = id ?? params.id ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
+  // console.log('resolvedId: ', resolvedId);
   const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
@@ -170,10 +178,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       const style: React.CSSProperties = {};
       if (operation === 1) {
         // Insertion
-        style.backgroundColor = 'lightgreen';
+        style.backgroundColor = 'yellow';
       } else if (operation === -1) {
         // Deletion
-        style.backgroundColor = 'salmon';
+        style.textDecoration = 'line-through';
       }
 
       return (
@@ -217,10 +225,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               const style: React.CSSProperties = {};
               if (operation === 1) {
                 // Insertion
-                style.backgroundColor = 'lightgreen';
+                style.backgroundColor = 'yellow';
               } else if (operation === -1) {
                 // Deletion
-                style.backgroundColor = 'salmon';
+                style.textDecoration = 'line-through';
               }
 
               return (
@@ -248,19 +256,19 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       if (originalItem && modifiedItem) {
         comparisonResult.push(
           <li key={name}>
-            <strong>{originalItem.name}</strong> {originalItem.description}
+            <Text strong>{originalItem.name}</Text> {originalItem.description}
           </li>,
         );
       } else if (originalItem && !modifiedItem) {
         comparisonResult.push(
-          <li key={name} style={{ backgroundColor: 'salmon' }}>
-            <strong>{originalItem.name}</strong> {originalItem.description}
+          <li key={name} style={{ textDecoration: 'line-through' }}>
+            <Text strong>{originalItem.name}</Text> {originalItem.description}
           </li>,
         );
       } else if (!originalItem && modifiedItem) {
         comparisonResult.push(
-          <li key={name} style={{ backgroundColor: 'lightgreen' }}>
-            <strong>{modifiedItem.name}</strong> {modifiedItem.description}
+          <li key={name} style={{ backgroundColor: 'yellow' }}>
+            <Text strong>{modifiedItem.name}</Text> {modifiedItem.description}
           </li>,
         );
       }
@@ -272,6 +280,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   if (isLoading) {
     return <p aria-live="polite">Loading job profile...</p>;
   }
+
+  // console.log('effectiveData: ', effectiveData);
+
   const items: DescriptionsProps['items'] = [
     {
       key: 'title',
@@ -290,7 +301,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'classification',
       label: 'Classification',
-      children: <div>{`${effectiveData?.classification?.code}`}</div>,
+      children: <div>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -309,8 +320,11 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'context',
       label: 'Job Context',
       children:
-        showDiff && originalData ? compareData(originalData.context, effectiveData?.context) : effectiveData?.context,
-      span: 24,
+        showDiff && originalData
+          ? compareData(originalData.context.description, effectiveData?.context?.description)
+          : effectiveData?.context?.description,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'overview',
@@ -324,7 +338,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           : typeof effectiveData?.overview === 'string'
             ? effectiveData?.overview
             : effectiveData?.overview?.value,
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'required_accountabilities',
@@ -344,7 +359,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               })}
         </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'optional_accountabilities',
@@ -364,7 +380,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               })}
         </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'requirements',
@@ -384,7 +401,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               })}
         </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'behavioural_competencies',
@@ -407,12 +425,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               )}
         </ul>
       ),
-      span: 24,
+      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
   ];
 
   return (
-    <>
+    <div data-testid="job-profile" style={{ ...style }}>
       {screens.xl === false && showBackToResults ? (
         <nav aria-label="Breadcrumb">
           <Link to="/job-profiles">
@@ -422,6 +441,12 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       ) : (
         <div />
       )}
+      {onUseProfile ? (
+        <WizardEditControlBar onNext={onUseProfile} nextText="Use Profile" style={{ marginBottom: '1rem' }} />
+      ) : // <Button onClick={() => onUseProfile()} type="primary">
+      //   Use Profile
+      // </Button>
+      null}
       <Descriptions
         aria-hidden="true"
         bordered
@@ -452,7 +477,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <h3>Title</h3>
           <p>{typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value}</p>
           <h3>Classification</h3>
-          <p>{`${effectiveData?.classification?.code}`}</p>
+          <p>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</p>
 
           <h3>Job Store #</h3>
           <p>{effectiveData?.number}</p>
@@ -461,7 +486,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <p>{/* last updated info */}</p>
 
           <h3>Job Context</h3>
-          <p>{effectiveData?.context}</p>
+          <p>{effectiveData?.context?.description}</p>
 
           <h3>Job Overview</h3>
           <p>
@@ -528,6 +553,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           </ul>
         </section>
       </div>
-    </>
+    </div>
   );
 };

@@ -1,7 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { PositionUncheckedUpdateManyWithoutDepartmentNestedInput } from '../position/position-unchecked-update-many-without-department-nested.input';
-import { EmployeeUncheckedUpdateManyWithoutDepartmentNestedInput } from '../employee/employee-unchecked-update-many-without-department-nested.input';
+import { PositionRequestUncheckedUpdateManyWithoutDepartmentNestedInput } from '../position-request/position-request-unchecked-update-many-without-department-nested.input';
 
 @InputType()
 export class DepartmentUncheckedUpdateWithoutOrganizationInput {
@@ -9,11 +8,23 @@ export class DepartmentUncheckedUpdateWithoutOrganizationInput {
   id?: string;
 
   @Field(() => String, { nullable: true })
+  location_id?: string;
+
+  @Field(() => String, { nullable: true })
+  peoplesoft_id?: string;
+
+  @Field(() => String, { nullable: true })
+  code?: string;
+
+  @Field(() => String, { nullable: true })
   name?: string;
 
-  @Field(() => PositionUncheckedUpdateManyWithoutDepartmentNestedInput, { nullable: true })
-  positions?: PositionUncheckedUpdateManyWithoutDepartmentNestedInput;
+  @Field(() => String, { nullable: true })
+  effective_status?: string;
 
-  @Field(() => EmployeeUncheckedUpdateManyWithoutDepartmentNestedInput, { nullable: true })
-  employees?: EmployeeUncheckedUpdateManyWithoutDepartmentNestedInput;
+  @Field(() => Date, { nullable: true })
+  effective_date?: Date | string;
+
+  @Field(() => PositionRequestUncheckedUpdateManyWithoutDepartmentNestedInput, { nullable: true })
+  PositionRequest?: PositionRequestUncheckedUpdateManyWithoutDepartmentNestedInput;
 }

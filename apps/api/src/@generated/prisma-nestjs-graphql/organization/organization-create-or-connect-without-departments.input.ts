@@ -9,7 +9,7 @@ import { OrganizationCreateWithoutDepartmentsInput } from './organization-create
 export class OrganizationCreateOrConnectWithoutDepartmentsInput {
   @Field(() => OrganizationWhereUniqueInput, { nullable: false })
   @Type(() => OrganizationWhereUniqueInput)
-  where!: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id' | 'peoplesoft_id'>;
 
   @Field(() => OrganizationCreateWithoutDepartmentsInput, { nullable: false })
   @Type(() => OrganizationCreateWithoutDepartmentsInput)

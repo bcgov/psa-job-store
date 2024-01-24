@@ -1,6 +1,8 @@
 import { Button, Space, Switch } from 'antd';
 import React, { CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
+import { useUpdatePositionRequestMutation } from '../../../redux/services/graphql-api/position-request.api';
+import './wizard-edit-control-bar.css';
+import { useWizardContext } from './wizard.provider';
 
 interface WizardEditControlBarProps {
   onSave?: () => void;
@@ -12,6 +14,8 @@ interface WizardEditControlBarProps {
   onToggleShowDiff?: (checked: boolean) => void;
   showDiffToggle?: boolean;
   showDiff?: boolean;
+  showNext?: boolean;
+  onChooseDifferentProfile?: () => void;
 }
 
 const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
@@ -24,15 +28,24 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
   onToggleShowDiff,
   showDiffToggle,
   showDiff,
+  showNext = true,
+  onChooseDifferentProfile,
 }) => {
   const buttonPlaceholder = <div style={{ display: 'inline-block', width: '68px' }} />;
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  const { positionRequestId } = useWizardContext();
+
+  const chooseDifferentProfile = async () => {
+    if (positionRequestId) await updatePositionRequest({ id: positionRequestId, step: 1 }).unwrap();
+    if (onChooseDifferentProfile) onChooseDifferentProfile();
+  };
 
   return (
-    <div style={{ ...style, padding: '16px', background: '#f0f2f5', display: 'flex', justifyContent: 'space-between' }}>
+    <div className="wizard-edit-control-bar" style={{ ...style }} id="wizardEditControlBar">
       <Space>
         {showDiffToggle && onToggleShowDiff ? (
           <Space direction="horizontal">
-            <span>See Changes:</span>
+            <span>Show changes:</span>
             <Switch checked={showDiff} checkedChildren="On" unCheckedChildren="Off" onChange={onToggleShowDiff} />
           </Space>
         ) : null}
@@ -48,14 +61,16 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
         ) : (
           <>
             {showChooseDifferentProfile ? (
-              <Link to="/wizard">
-                <Button type="primary">Choose different profile</Button>
-              </Link>
+              <Button onClick={chooseDifferentProfile} type="primary">
+                Choose different profile
+              </Button>
             ) : null}
             {onBack ? <Button onClick={onBack}>Back</Button> : null}
-            <Button type="primary" onClick={onNext}>
-              {nextText ? nextText : 'Next'}
-            </Button>
+            {showNext && (
+              <Button type="primary" onClick={onNext}>
+                {nextText ? nextText : 'Next'}
+              </Button>
+            )}
           </>
         )}
       </Space>

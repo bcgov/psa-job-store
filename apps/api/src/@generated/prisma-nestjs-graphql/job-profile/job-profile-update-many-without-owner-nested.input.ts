@@ -31,19 +31,19 @@ export class JobProfileUpdateManyWithoutOwnerNestedInput {
 
   @Field(() => [JobProfileWhereUniqueInput], { nullable: true })
   @Type(() => JobProfileWhereUniqueInput)
-  set?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>>;
+  set?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>>;
 
   @Field(() => [JobProfileWhereUniqueInput], { nullable: true })
   @Type(() => JobProfileWhereUniqueInput)
-  disconnect?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>>;
+  disconnect?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>>;
 
   @Field(() => [JobProfileWhereUniqueInput], { nullable: true })
   @Type(() => JobProfileWhereUniqueInput)
-  delete?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>>;
+  delete?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>>;
 
   @Field(() => [JobProfileWhereUniqueInput], { nullable: true })
   @Type(() => JobProfileWhereUniqueInput)
-  connect?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>>;
+  connect?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>>;
 
   @Field(() => [JobProfileUpdateWithWhereUniqueWithoutOwnerInput], { nullable: true })
   @Type(() => JobProfileUpdateWithWhereUniqueWithoutOwnerInput)

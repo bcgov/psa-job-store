@@ -18,7 +18,7 @@ export class FindFirstUserArgs {
   orderBy?: Array<UserOrderByWithRelationAndSearchRelevanceInput>;
 
   @Field(() => UserWhereUniqueInput, { nullable: true })
-  cursor?: Prisma.AtLeast<UserWhereUniqueInput, 'id' | 'email'>;
+  cursor?: Prisma.AtLeast<UserWhereUniqueInput, 'id' | 'email' | 'username'>;
 
   @Field(() => Int, { nullable: true })
   take?: number;

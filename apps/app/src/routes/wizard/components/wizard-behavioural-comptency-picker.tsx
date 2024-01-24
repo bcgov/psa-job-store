@@ -1,7 +1,7 @@
 import { Button, Card, Col, Row, Select, Space } from 'antd';
 import React, { CSSProperties, useState } from 'react';
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
-import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile.api';
+import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile-types';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
 
 const { Option } = Select;
@@ -22,10 +22,16 @@ export interface BehaviouralCompetencyData {
 interface BehaviouralComptencyPickerProps {
   onAdd: (competencyData: BehaviouralCompetencyData) => void;
   onCancel: () => void;
+  filterIds: number[];
   style?: CSSProperties;
 }
 
-const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({ onAdd, onCancel, style }) => {
+const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
+  onAdd,
+  onCancel,
+  filterIds,
+  style,
+}) => {
   const [selectedGroup, setSelectedGroup] = useState<string>('');
   const [selectedName, setSelectedName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -42,20 +48,19 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
 
   const handleNameChange = (value: string) => {
     setSelectedName(value);
-    const competency = data?.behaviouralComptencies.find((c) => c.group === selectedGroup && c.name === value);
+    const competency = data?.behaviouralComptencies.find((c) => c.category === selectedGroup && c.name === value);
     setDescription(competency?.description || '');
   };
 
   // Generate unique group options for the dropdown
-  const groupOptions = Array.from(new Set(data?.behaviouralComptencies.map((c) => c.group))).map((group) => (
+  const groupOptions = Array.from(new Set(data?.behaviouralComptencies.map((c) => c.category))).map((group) => (
     <Option key={group} value={group}>
       {formatEnumString(group)}
     </Option>
   ));
-
   // Generate name options based on the selected group
   const nameOptions = data?.behaviouralComptencies
-    .filter((c) => c.group === selectedGroup)
+    .filter((c) => c.category === selectedGroup && !filterIds.includes(c.id))
     .map((competency) => {
       return (
         <Option key={competency.id} value={competency.name}>

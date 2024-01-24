@@ -7,6 +7,18 @@ export class AppConfigDto {
 
   @IsNotEmpty()
   @IsString()
+  BI_URL: string;
+
+  @IsNotEmpty()
+  @IsString()
+  BI_USERNAME: string;
+
+  @IsNotEmpty()
+  @IsString()
+  BI_PASSWORD: string;
+
+  @IsNotEmpty()
+  @IsString()
   DATABASE_URL: string;
 
   @IsNotEmpty()
@@ -32,4 +44,16 @@ export class AppConfigDto {
   @IsNotEmpty()
   @IsString()
   KEYCLOAK_CLIENT_ID_PUBLIC: string;
+
+  @IsNotEmpty()
+  @IsString()
+  PEOPLESOFT_URL: string;
+
+  @IsNotEmpty()
+  @IsString()
+  PEOPLESOFT_USERNAME: string;
+
+  @IsNotEmpty()
+  @IsString()
+  PEOPLESOFT_PASSWORD: string;
 }

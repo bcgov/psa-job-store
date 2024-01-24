@@ -1,8 +1,8 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { IntFilter } from '../prisma/int-filter.input';
-import { EnumBehaviouralCompetencyMembershipFilter } from '../prisma/enum-behavioural-competency-membership-filter.input';
-import { EnumBehaviouralCompetencyGroupFilter } from '../prisma/enum-behavioural-competency-group-filter.input';
+import { EnumBehaviouralCompetencyTypeFilter } from '../prisma/enum-behavioural-competency-type-filter.input';
+import { EnumBehaviouralCompetencyCategoryFilter } from '../prisma/enum-behavioural-competency-category-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { JobProfileBehaviouralCompetencyListRelationFilter } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-list-relation-filter.input';
 
@@ -20,11 +20,11 @@ export class BehaviouralCompetencyWhereInput {
   @Field(() => IntFilter, { nullable: true })
   id?: IntFilter;
 
-  @Field(() => EnumBehaviouralCompetencyMembershipFilter, { nullable: true })
-  membership?: EnumBehaviouralCompetencyMembershipFilter;
+  @Field(() => EnumBehaviouralCompetencyTypeFilter, { nullable: true })
+  type?: EnumBehaviouralCompetencyTypeFilter;
 
-  @Field(() => EnumBehaviouralCompetencyGroupFilter, { nullable: true })
-  group?: EnumBehaviouralCompetencyGroupFilter;
+  @Field(() => EnumBehaviouralCompetencyCategoryFilter, { nullable: true })
+  category?: EnumBehaviouralCompetencyCategoryFilter;
 
   @Field(() => StringFilter, { nullable: true })
   name?: StringFilter;

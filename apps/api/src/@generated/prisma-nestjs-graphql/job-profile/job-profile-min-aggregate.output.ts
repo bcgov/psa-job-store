@@ -2,7 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobProfileState } from '../prisma/job-profile-state.enum';
-import { JobStream } from '../prisma/job-stream.enum';
+import { JobProfileType } from '../prisma/job-profile-type.enum';
 
 @ObjectType()
 export class JobProfileMinAggregate {
@@ -10,40 +10,37 @@ export class JobProfileMinAggregate {
   id?: number;
 
   @Field(() => Int, { nullable: true })
-  career_group_id?: number;
-
-  @Field(() => String, { nullable: true })
-  classification_id?: string;
-
-  @Field(() => Int, { nullable: true })
-  family_id?: number;
-
-  @Field(() => String, { nullable: true })
-  organization_id?: string;
-
-  @Field(() => String, { nullable: true })
-  owner_id?: string;
-
-  @Field(() => Int, { nullable: true })
-  parent_id?: number;
-
-  @Field(() => Int, { nullable: true })
   role_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  role_type_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  scope_id?: number;
 
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 
-  @Field(() => JobStream, { nullable: true })
-  stream?: keyof typeof JobStream;
+  @Field(() => JobProfileType, { nullable: true })
+  type?: keyof typeof JobProfileType;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  owner_id?: string;
+
+  @Field(() => String, { nullable: true })
+  program_overview?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  review_required?: boolean;
 
   @Field(() => String, { nullable: true })
   title?: string;
 
   @Field(() => Int, { nullable: true })
   number?: number;
-
-  @Field(() => String, { nullable: true })
-  context?: string;
 
   @Field(() => String, { nullable: true })
   overview?: string;

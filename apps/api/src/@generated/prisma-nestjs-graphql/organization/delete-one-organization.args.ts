@@ -8,5 +8,5 @@ import { Type } from 'class-transformer';
 export class DeleteOneOrganizationArgs {
   @Field(() => OrganizationWhereUniqueInput, { nullable: false })
   @Type(() => OrganizationWhereUniqueInput)
-  where!: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<OrganizationWhereUniqueInput, 'id' | 'peoplesoft_id'>;
 }
