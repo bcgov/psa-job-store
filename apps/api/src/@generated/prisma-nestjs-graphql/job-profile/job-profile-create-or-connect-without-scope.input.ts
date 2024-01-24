@@ -9,7 +9,7 @@ import { JobProfileCreateWithoutScopeInput } from './job-profile-create-without-
 export class JobProfileCreateOrConnectWithoutScopeInput {
   @Field(() => JobProfileWhereUniqueInput, { nullable: false })
   @Type(() => JobProfileWhereUniqueInput)
-  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileCreateWithoutScopeInput, { nullable: false })
   @Type(() => JobProfileCreateWithoutScopeInput)

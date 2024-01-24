@@ -8,12 +8,6 @@ export class JobProfileSumOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  career_group_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  job_family_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
@@ -21,9 +15,6 @@ export class JobProfileSumOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   scope_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  stream_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   number?: keyof typeof SortOrder;

@@ -8,12 +8,6 @@ export class JobProfileCountAggregate {
   id!: number;
 
   @Field(() => Int, { nullable: false })
-  career_group_id!: number;
-
-  @Field(() => Int, { nullable: false })
-  job_family_id!: number;
-
-  @Field(() => Int, { nullable: false })
   role_id!: number;
 
   @Field(() => Int, { nullable: false })
@@ -26,9 +20,6 @@ export class JobProfileCountAggregate {
   state!: number;
 
   @Field(() => Int, { nullable: false })
-  stream_id!: number;
-
-  @Field(() => Int, { nullable: false })
   type!: number;
 
   @Field(() => Int, { nullable: false })
@@ -36,6 +27,12 @@ export class JobProfileCountAggregate {
 
   @Field(() => Int, { nullable: false })
   owner_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  program_overview!: number;
+
+  @Field(() => Int, { nullable: false })
+  review_required!: number;
 
   @Field(() => Int, { nullable: false })
   title!: number;
@@ -51,6 +48,24 @@ export class JobProfileCountAggregate {
 
   @Field(() => Int, { nullable: false })
   requirements!: number;
+
+  @Field(() => Int, { nullable: false })
+  professional_registration_requirements!: number;
+
+  @Field(() => Int, { nullable: false })
+  preferences!: number;
+
+  @Field(() => Int, { nullable: false })
+  knowledge_skills_abilities!: number;
+
+  @Field(() => Int, { nullable: false })
+  willingness_statements!: number;
+
+  @Field(() => Int, { nullable: false })
+  security_screenings!: number;
+
+  @Field(() => Int, { nullable: false })
+  total_comp_create_form_misc!: number;
 
   @Field(() => Int, { nullable: false })
   _all!: number;

@@ -178,9 +178,9 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const classificationParams = decodeURIComponent(searchParams.get('classification_id__in') || '')
       .split(',')
       .filter(Boolean);
-    const careerGroupParams = decodeURIComponent(searchParams.get('career_group_id__in') || '')
-      .split(',')
-      .filter(Boolean);
+    // const careerGroupParams = decodeURIComponent(searchParams.get('career_group_id__in') || '')
+    //   .split(',')
+    //   .filter(Boolean);
     const ministriesParams = decodeURIComponent(searchParams.get('ministry_id__in') || '')
       .split(',')
       .filter(Boolean);
@@ -188,7 +188,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const initialSelections = [
       ...jobFamilyParams.map((value) => ({ value, type: 'jobFamily' })),
       ...classificationParams.map((value) => ({ value, type: 'classification' })),
-      ...careerGroupParams.map((value) => ({ value, type: 'careerGroup' })),
+      // ...careerGroupParams.map((value) => ({ value, type: 'careerGroup' })),
       ...ministriesParams.map((value) => ({ value, type: 'ministry' })),
     ];
     if (!initialSelectionSet) {
@@ -207,10 +207,10 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
       .map((s) => s.value)
       .join(',');
 
-    const careerGroupValues = allSelections
-      .filter((s) => s.type === 'careerGroup')
-      .map((s) => s.value)
-      .join(',');
+    // const careerGroupValues = allSelections
+    //   .filter((s) => s.type === 'careerGroup')
+    //   .map((s) => s.value)
+    //   .join(',');
     const ministryValues = allSelections
       .filter((s) => s.type === 'ministry')
       .map((s) => s.value)
@@ -237,18 +237,18 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
     if (jobFamilyValues) newSearchParams.set('job_family_id__in', jobFamilyValues);
     if (classificationValues) newSearchParams.set('classification_id__in', classificationValues);
-    if (careerGroupValues) newSearchParams.set('career_group_id__in', careerGroupValues);
+    // if (careerGroupValues) newSearchParams.set('career_group_id__in', careerGroupValues);
     if (ministryValues) newSearchParams.set('ministry_id__in', ministryValues);
 
     const jobFamilyChanged = newSearchParams.get('job_family_id__in') != searchParams.get('job_family_id__in');
     const classificationChanged =
       newSearchParams.get('classification_id__in') != searchParams.get('classification_id__in');
 
-    const careerGroupChanged = newSearchParams.get('career_group_id__in') != searchParams.get('career_group_id__in');
+    // const careerGroupChanged = newSearchParams.get('career_group_id__in') != searchParams.get('career_group_id__in');
     const ministryChanged = newSearchParams.get('ministry_id__in') != searchParams.get('ministry_id__in');
 
     // If the job family or classification filters have changed, de-select the selected profile
-    if (jobFamilyChanged || classificationChanged || careerGroupChanged || ministryChanged) {
+    if (jobFamilyChanged || classificationChanged || ministryChanged) {
       newSearchParams.delete('selectedProfile');
       // console.log('navigating.. B', getBasePath(location.pathname));
       navigate(

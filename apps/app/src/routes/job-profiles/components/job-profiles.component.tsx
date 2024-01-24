@@ -121,9 +121,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
           ...(jobFamilyFilter !== null
             ? [
                 {
-                  job_family_id: {
-                    in: JSON.parse(`[${jobFamilyFilter}]`),
-                  },
+                  jobFamilies: { some: { jobFamilyId: { in: JSON.parse(`[${jobFamilyFilter}]`) } } },
                 },
               ]
             : []),

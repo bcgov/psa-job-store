@@ -6,6 +6,7 @@ import { EnumJobProfileTypeWithAggregatesFilter } from '../prisma/enum-job-profi
 import { DateTimeWithAggregatesFilter } from '../prisma/date-time-with-aggregates-filter.input';
 import { UuidWithAggregatesFilter } from '../prisma/uuid-with-aggregates-filter.input';
 import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
+import { BoolWithAggregatesFilter } from '../prisma/bool-with-aggregates-filter.input';
 import { JsonWithAggregatesFilter } from '../prisma/json-with-aggregates-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
 
@@ -24,12 +25,6 @@ export class JobProfileScalarWhereWithAggregatesInput {
   id?: IntWithAggregatesFilter;
 
   @Field(() => IntWithAggregatesFilter, { nullable: true })
-  career_group_id?: IntWithAggregatesFilter;
-
-  @Field(() => IntWithAggregatesFilter, { nullable: true })
-  job_family_id?: IntWithAggregatesFilter;
-
-  @Field(() => IntWithAggregatesFilter, { nullable: true })
   role_id?: IntWithAggregatesFilter;
 
   @Field(() => IntWithAggregatesFilter, { nullable: true })
@@ -41,9 +36,6 @@ export class JobProfileScalarWhereWithAggregatesInput {
   @Field(() => EnumJobProfileStateWithAggregatesFilter, { nullable: true })
   state?: EnumJobProfileStateWithAggregatesFilter;
 
-  @Field(() => IntWithAggregatesFilter, { nullable: true })
-  stream_id?: IntWithAggregatesFilter;
-
   @Field(() => EnumJobProfileTypeWithAggregatesFilter, { nullable: true })
   type?: EnumJobProfileTypeWithAggregatesFilter;
 
@@ -52,6 +44,12 @@ export class JobProfileScalarWhereWithAggregatesInput {
 
   @Field(() => UuidWithAggregatesFilter, { nullable: true })
   owner_id?: UuidWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  program_overview?: StringWithAggregatesFilter;
+
+  @Field(() => BoolWithAggregatesFilter, { nullable: true })
+  review_required?: BoolWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   title?: StringWithAggregatesFilter;
@@ -67,4 +65,22 @@ export class JobProfileScalarWhereWithAggregatesInput {
 
   @Field(() => StringListFilter, { nullable: true })
   requirements?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  professional_registration_requirements?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  preferences?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  knowledge_skills_abilities?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  willingness_statements?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  security_screenings?: StringListFilter;
+
+  @Field(() => JsonWithAggregatesFilter, { nullable: true })
+  total_comp_create_form_misc?: JsonWithAggregatesFilter;
 }

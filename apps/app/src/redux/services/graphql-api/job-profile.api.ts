@@ -9,10 +9,12 @@ import {
   GetJobProfilesArgs,
   GetJobProfilesDraftsResponse,
   GetJobProfilesResponse,
+  IsJobProfileNumberAvailableResponse,
   JobProfilesCareerGroupsResponse,
   JobProfilesDraftsCareerGroupsResponse,
   JobProfilesDraftsMinistriesResponse,
   JobProfilesMinistriesResponse,
+  NextAvailableJobProfileNumberResponse,
 } from './job-profile-types';
 
 export const jobProfileApi = graphqlApi.injectEndpoints({
@@ -30,9 +32,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             ) {
               jobProfiles(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
                 id
-                stream {
-                  id
-                  name
+                streams {
+                  stream {
+                    id
+                    job_family_id
+                    name
+                  }
                 }
                 title
                 number
@@ -57,15 +62,13 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     name
                   }
                 }
-                job_family {
-                  id
-                  name
+                jobFamilies {
+                  jobFamily {
+                    id
+                    name
+                  }
                 }
                 role {
-                  id
-                  name
-                }
-                career_group {
                   id
                   name
                 }
@@ -109,9 +112,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             ) {
               jobProfilesDrafts(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
                 id
-                stream {
-                  id
-                  name
+                streams {
+                  stream {
+                    id
+                    job_family_id
+                    name
+                  }
                 }
                 title
                 number
@@ -136,15 +142,13 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     name
                   }
                 }
-                job_family {
-                  id
-                  name
+                jobFamilies {
+                  jobFamily {
+                    id
+                    name
+                  }
                 }
                 role {
-                  id
-                  name
-                }
-                career_group {
                   id
                   name
                 }
@@ -182,9 +186,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfile {
               jobProfile(id: "${args.id}") {
                 id
-                stream {
-                  id,
-                  name
+                streams {
+                  stream {
+                      id
+                      name
+                  }
                 }
                 title
                 number
@@ -209,15 +215,13 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     name
                   }
                 }
-                job_family {
-                  id
-                  name
+                jobFamilies {
+                  jobFamily {
+                      id
+                      name
+                  }
                 }
                 role {
-                  id
-                  name
-                }
-                career_group {
                   id
                   name
                 }
@@ -310,6 +314,29 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+
+    getNextAvailableJobProfileNumber: build.query<NextAvailableJobProfileNumberResponse, void>({
+      query: () => ({
+        document: gql`
+          query NextAvailableJobProfileNumber {
+            nextAvailableJobProfileNumber
+          }
+        `,
+      }),
+    }),
+
+    isJobProfileNumberAvailable: build.query<IsJobProfileNumberAvailableResponse, number>({
+      query: (number) => ({
+        document: gql`
+          query IsJobProfileNumberAvailable($number: Int!) {
+            isJobProfileNumberAvailable(number: $number)
+          }
+        `,
+        variables: {
+          number,
+        },
+      }),
+    }),
   }),
 });
 
@@ -324,4 +351,9 @@ export const {
   useLazyGetJobProfilesQuery,
   useLazyGetJobProfilesDraftsQuery,
   useCreateJobProfileMutation,
+
+  useGetNextAvailableJobProfileNumberQuery,
+  useIsJobProfileNumberAvailableQuery,
+  useLazyIsJobProfileNumberAvailableQuery,
+  useLazyGetNextAvailableJobProfileNumberQuery,
 } = jobProfileApi;

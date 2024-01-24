@@ -33,7 +33,7 @@ export class JobProfileUpdateOneWithoutPosition_requestNestedInput {
 
   @Field(() => JobProfileWhereUniqueInput, { nullable: true })
   @Type(() => JobProfileWhereUniqueInput)
-  connect?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  connect?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileUpdateToOneWithWhereWithoutPosition_requestInput, { nullable: true })
   @Type(() => JobProfileUpdateToOneWithWhereWithoutPosition_requestInput)

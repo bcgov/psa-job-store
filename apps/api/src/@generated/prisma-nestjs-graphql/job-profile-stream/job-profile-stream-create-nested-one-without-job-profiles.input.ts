@@ -1,20 +1,20 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { JobProfileStreamCreateWithoutJob_profilesInput } from './job-profile-stream-create-without-job-profiles.input';
+import { JobProfileStreamCreateWithoutJobProfilesInput } from './job-profile-stream-create-without-job-profiles.input';
 import { Type } from 'class-transformer';
-import { JobProfileStreamCreateOrConnectWithoutJob_profilesInput } from './job-profile-stream-create-or-connect-without-job-profiles.input';
+import { JobProfileStreamCreateOrConnectWithoutJobProfilesInput } from './job-profile-stream-create-or-connect-without-job-profiles.input';
 import { Prisma } from '@prisma/client';
 import { JobProfileStreamWhereUniqueInput } from './job-profile-stream-where-unique.input';
 
 @InputType()
-export class JobProfileStreamCreateNestedOneWithoutJob_profilesInput {
-  @Field(() => JobProfileStreamCreateWithoutJob_profilesInput, { nullable: true })
-  @Type(() => JobProfileStreamCreateWithoutJob_profilesInput)
-  create?: JobProfileStreamCreateWithoutJob_profilesInput;
+export class JobProfileStreamCreateNestedOneWithoutJobProfilesInput {
+  @Field(() => JobProfileStreamCreateWithoutJobProfilesInput, { nullable: true })
+  @Type(() => JobProfileStreamCreateWithoutJobProfilesInput)
+  create?: JobProfileStreamCreateWithoutJobProfilesInput;
 
-  @Field(() => JobProfileStreamCreateOrConnectWithoutJob_profilesInput, { nullable: true })
-  @Type(() => JobProfileStreamCreateOrConnectWithoutJob_profilesInput)
-  connectOrCreate?: JobProfileStreamCreateOrConnectWithoutJob_profilesInput;
+  @Field(() => JobProfileStreamCreateOrConnectWithoutJobProfilesInput, { nullable: true })
+  @Type(() => JobProfileStreamCreateOrConnectWithoutJobProfilesInput)
+  connectOrCreate?: JobProfileStreamCreateOrConnectWithoutJobProfilesInput;
 
   @Field(() => JobProfileStreamWhereUniqueInput, { nullable: true })
   @Type(() => JobProfileStreamWhereUniqueInput)

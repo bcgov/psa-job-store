@@ -3,7 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 
 @InputType()
-export class JobProfileStreamUncheckedUpdateWithoutJob_profilesInput {
+export class JobProfileStreamUncheckedUpdateWithoutJobProfilesInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 

@@ -8,18 +8,14 @@ import { JobProfileBehaviouralCompetencyUncheckedCreateNestedManyWithoutJob_prof
 import { JobProfileClassificationUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-classification/job-profile-classification-unchecked-create-nested-many-without-job-profile.input';
 import { JobProfileOrganizationUncheckedCreateNestedManyWithoutJob_profileInput } from '../job-profile-organization/job-profile-organization-unchecked-create-nested-many-without-job-profile.input';
 import { JobProfileContextUncheckedCreateNestedOneWithoutJob_profileInput } from '../job-profile-context/job-profile-context-unchecked-create-nested-one-without-job-profile.input';
+import { JobProfileJobFamilyLinkUncheckedCreateNestedManyWithoutJobProfileInput } from '../job-profile-job-family-link/job-profile-job-family-link-unchecked-create-nested-many-without-job-profile.input';
+import { JobProfileStreamLinkUncheckedCreateNestedManyWithoutJobProfileInput } from '../job-profile-stream-link/job-profile-stream-link-unchecked-create-nested-many-without-job-profile.input';
 import { PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput } from '../position-request/position-request-unchecked-create-nested-many-without-parent-job-profile.input';
 
 @InputType()
 export class JobProfileUncheckedCreateWithoutReports_toInput {
   @Field(() => Int, { nullable: true })
   id?: number;
-
-  @Field(() => Int, { nullable: false })
-  career_group_id!: number;
-
-  @Field(() => Int, { nullable: false })
-  job_family_id!: number;
 
   @Field(() => Int, { nullable: false })
   role_id!: number;
@@ -33,9 +29,6 @@ export class JobProfileUncheckedCreateWithoutReports_toInput {
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 
-  @Field(() => Int, { nullable: false })
-  stream_id!: number;
-
   @Field(() => JobProfileType, { nullable: false })
   type!: keyof typeof JobProfileType;
 
@@ -44,6 +37,12 @@ export class JobProfileUncheckedCreateWithoutReports_toInput {
 
   @Field(() => String, { nullable: true })
   owner_id?: string;
+
+  @Field(() => String, { nullable: true })
+  program_overview?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  review_required?: boolean;
 
   @Field(() => String, { nullable: false })
   title!: string;
@@ -60,6 +59,24 @@ export class JobProfileUncheckedCreateWithoutReports_toInput {
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;
 
+  @Field(() => [String], { nullable: true })
+  professional_registration_requirements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  preferences?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  knowledge_skills_abilities?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  willingness_statements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  security_screenings?: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  total_comp_create_form_misc?: any;
+
   @Field(() => JobProfileBehaviouralCompetencyUncheckedCreateNestedManyWithoutJob_profileInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUncheckedCreateNestedManyWithoutJob_profileInput;
 
@@ -71,6 +88,12 @@ export class JobProfileUncheckedCreateWithoutReports_toInput {
 
   @Field(() => JobProfileContextUncheckedCreateNestedOneWithoutJob_profileInput, { nullable: true })
   context?: JobProfileContextUncheckedCreateNestedOneWithoutJob_profileInput;
+
+  @Field(() => JobProfileJobFamilyLinkUncheckedCreateNestedManyWithoutJobProfileInput, { nullable: true })
+  jobFamilies?: JobProfileJobFamilyLinkUncheckedCreateNestedManyWithoutJobProfileInput;
+
+  @Field(() => JobProfileStreamLinkUncheckedCreateNestedManyWithoutJobProfileInput, { nullable: true })
+  streams?: JobProfileStreamLinkUncheckedCreateNestedManyWithoutJobProfileInput;
 
   @Field(() => PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput, { nullable: true })
   position_request?: PositionRequestUncheckedCreateNestedManyWithoutParent_job_profileInput;

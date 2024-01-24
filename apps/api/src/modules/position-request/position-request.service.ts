@@ -147,7 +147,7 @@ export class PositionRequestApiService {
       whereConditions = {
         ...whereConditions,
         // classificationAssignedTo: { equals: userId }, // todo: enable this after testing session
-        status: { equals: 'IN_REVIEW' }, // todo: comment this out after testing session
+        status: { not: { equals: 'DRAFT' } },
       };
     } else {
       // Default behavior for other users - get position requests for the current user only

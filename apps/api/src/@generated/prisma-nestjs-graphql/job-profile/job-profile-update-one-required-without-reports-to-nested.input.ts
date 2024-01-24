@@ -24,7 +24,7 @@ export class JobProfileUpdateOneRequiredWithoutReports_toNestedInput {
 
   @Field(() => JobProfileWhereUniqueInput, { nullable: true })
   @Type(() => JobProfileWhereUniqueInput)
-  connect?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  connect?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileUpdateToOneWithWhereWithoutReports_toInput, { nullable: true })
   @Type(() => JobProfileUpdateToOneWithWhereWithoutReports_toInput)

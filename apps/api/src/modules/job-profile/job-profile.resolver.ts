@@ -3,7 +3,6 @@ import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nes
 import {
   JobProfile,
   JobProfileBehaviouralCompetency,
-  JobProfileCareerGroup,
   JobProfileCreateInput,
   JobProfileReportsTo,
   Organization,
@@ -61,17 +60,17 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfile(+id);
   }
 
-  @Query(() => [JobProfileCareerGroup], { name: 'jobProfilesCareerGroups' })
-  async getJobProfilesCareerGroups() {
-    return this.jobProfileService.getJobProfilesCareerGroups();
-  }
+  // @Query(() => [JobProfileCareerGroup], { name: 'jobProfilesCareerGroups' })
+  // async getJobProfilesCareerGroups() {
+  //   return this.jobProfileService.getJobProfilesCareerGroups();
+  // }
 
-  @Roles('total-compensation')
-  @UseGuards(RoleGuard)
-  @Query(() => [JobProfileCareerGroup], { name: 'jobProfilesDraftsCareerGroups' })
-  async getJobProfilesDraftsCareerGroups(@CurrentUser() { id: userId }: Express.User) {
-    return this.jobProfileService.getJobProfilesDraftsCareerGroups(userId);
-  }
+  // @Roles('total-compensation')
+  // @UseGuards(RoleGuard)
+  // @Query(() => [JobProfileCareerGroup], { name: 'jobProfilesDraftsCareerGroups' })
+  // async getJobProfilesDraftsCareerGroups(@CurrentUser() { id: userId }: Express.User) {
+  //   return this.jobProfileService.getJobProfilesDraftsCareerGroups(userId);
+  // }
 
   @Query(() => [Organization], { name: 'jobProfilesMinistries' })
   async getJobProfilesMinistries() {
@@ -85,16 +84,25 @@ export class JobProfileResolver {
 
   @Mutation(() => Int)
   async createJobProfile(
-    // @CurrentUser() { id: userId }: Express.User,
+    @CurrentUser() { id: userId }: Express.User,
     @Args({ name: 'data', type: () => JobProfileCreateInput }) data: JobProfileCreateInput,
   ) {
-    // console.log('create DATA: ', data);
-    const newJobProfile = await this.jobProfileService.createJobProfile(data);
+    const newJobProfile = await this.jobProfileService.createJobProfile(data, userId);
     return newJobProfile.id;
   }
 
   @ResolveField(() => JobProfileReportsTo)
   async reports_to(@Parent() { id }: JobProfile) {
     return this.jobProfileService.getReportsTo(id);
+  }
+
+  @Query(() => Int, { name: 'nextAvailableJobProfileNumber' })
+  async getNextAvailableJobProfileNumber() {
+    return this.jobProfileService.getNextAvailableNumber();
+  }
+
+  @Query(() => Boolean, { name: 'isJobProfileNumberAvailable' })
+  async checkJobProfileNumberAvailability(@Args('number', { type: () => Int }) number: number) {
+    return this.jobProfileService.isNumberAvailable(number);
   }
 }

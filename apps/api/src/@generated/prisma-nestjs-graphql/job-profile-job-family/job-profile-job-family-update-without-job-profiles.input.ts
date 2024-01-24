@@ -3,7 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { JobProfileStreamUpdateManyWithoutJob_familyNestedInput } from '../job-profile-stream/job-profile-stream-update-many-without-job-family-nested.input';
 
 @InputType()
-export class JobProfileJobFamilyUpdateWithoutJob_profilesInput {
+export class JobProfileJobFamilyUpdateWithoutJobProfilesInput {
   @Field(() => String, { nullable: true })
   name?: string;
 

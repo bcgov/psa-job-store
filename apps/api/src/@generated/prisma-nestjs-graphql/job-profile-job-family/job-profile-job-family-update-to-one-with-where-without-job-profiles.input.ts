@@ -2,15 +2,15 @@ import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { JobProfileJobFamilyWhereInput } from './job-profile-job-family-where.input';
 import { Type } from 'class-transformer';
-import { JobProfileJobFamilyUpdateWithoutJob_profilesInput } from './job-profile-job-family-update-without-job-profiles.input';
+import { JobProfileJobFamilyUpdateWithoutJobProfilesInput } from './job-profile-job-family-update-without-job-profiles.input';
 
 @InputType()
-export class JobProfileJobFamilyUpdateToOneWithWhereWithoutJob_profilesInput {
+export class JobProfileJobFamilyUpdateToOneWithWhereWithoutJobProfilesInput {
   @Field(() => JobProfileJobFamilyWhereInput, { nullable: true })
   @Type(() => JobProfileJobFamilyWhereInput)
   where?: JobProfileJobFamilyWhereInput;
 
-  @Field(() => JobProfileJobFamilyUpdateWithoutJob_profilesInput, { nullable: false })
-  @Type(() => JobProfileJobFamilyUpdateWithoutJob_profilesInput)
-  data!: JobProfileJobFamilyUpdateWithoutJob_profilesInput;
+  @Field(() => JobProfileJobFamilyUpdateWithoutJobProfilesInput, { nullable: false })
+  @Type(() => JobProfileJobFamilyUpdateWithoutJobProfilesInput)
+  data!: JobProfileJobFamilyUpdateWithoutJobProfilesInput;
 }

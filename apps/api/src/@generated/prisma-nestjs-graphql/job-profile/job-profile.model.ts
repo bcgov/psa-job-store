@@ -7,14 +7,13 @@ import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
 import { JobProfileClassification } from '../job-profile-classification/job-profile-classification.model';
 import { JobProfileOrganization } from '../job-profile-organization/job-profile-organization.model';
-import { JobProfileCareerGroup } from '../job-profile-career-group/job-profile-career-group.model';
 import { JobProfileContext } from '../job-profile-context/job-profile-context.model';
-import { JobProfileJobFamily } from '../job-profile-job-family/job-profile-job-family.model';
 import { JobProfileRole } from '../job-profile-role/job-profile-role.model';
 import { JobProfileRoleType } from '../job-profile-role-type/job-profile-role-type.model';
 import { JobProfileScope } from '../job-profile-scope/job-profile-scope.model';
-import { JobProfileStream } from '../job-profile-stream/job-profile-stream.model';
 import { User } from '../user/user.model';
+import { JobProfileJobFamilyLink } from '../job-profile-job-family-link/job-profile-job-family-link.model';
+import { JobProfileStreamLink } from '../job-profile-stream-link/job-profile-stream-link.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
 import { PositionRequest } from '../position-request/position-request.model';
 
@@ -22,12 +21,6 @@ import { PositionRequest } from '../position-request/position-request.model';
 export class JobProfile {
   @Field(() => Int, { nullable: false })
   id!: number;
-
-  @Field(() => Int, { nullable: false })
-  career_group_id!: number;
-
-  @Field(() => Int, { nullable: false })
-  job_family_id!: number;
 
   @Field(() => Int, { nullable: false })
   role_id!: number;
@@ -41,9 +34,6 @@ export class JobProfile {
   @Field(() => JobProfileState, { nullable: false, defaultValue: 'DRAFT' })
   state!: keyof typeof JobProfileState;
 
-  @Field(() => Int, { nullable: false })
-  stream_id!: number;
-
   @Field(() => JobProfileType, { nullable: false })
   type!: keyof typeof JobProfileType;
 
@@ -52,6 +42,12 @@ export class JobProfile {
 
   @Field(() => String, { nullable: true })
   owner_id!: string | null;
+
+  @Field(() => String, { nullable: true })
+  program_overview!: string | null;
+
+  @Field(() => Boolean, { nullable: true, defaultValue: false })
+  review_required!: boolean | null;
 
   @Field(() => String, { nullable: false })
   title!: string;
@@ -68,6 +64,24 @@ export class JobProfile {
   @Field(() => [String], { nullable: true })
   requirements!: Array<string>;
 
+  @Field(() => [String], { nullable: true })
+  professional_registration_requirements!: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  preferences!: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  knowledge_skills_abilities!: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  willingness_statements!: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  security_screenings!: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  total_comp_create_form_misc!: any | null;
+
   @Field(() => [JobProfileBehaviouralCompetency], { nullable: true })
   behavioural_competencies?: Array<JobProfileBehaviouralCompetency>;
 
@@ -77,14 +91,8 @@ export class JobProfile {
   @Field(() => [JobProfileOrganization], { nullable: true })
   organizations?: Array<JobProfileOrganization>;
 
-  @Field(() => JobProfileCareerGroup, { nullable: true })
-  career_group?: JobProfileCareerGroup | null;
-
   @Field(() => JobProfileContext, { nullable: true })
   context?: JobProfileContext | null;
-
-  @Field(() => JobProfileJobFamily, { nullable: true })
-  job_family?: JobProfileJobFamily | null;
 
   @Field(() => JobProfileRole, { nullable: true })
   role?: JobProfileRole | null;
@@ -95,11 +103,14 @@ export class JobProfile {
   @Field(() => JobProfileScope, { nullable: true })
   scope?: JobProfileScope | null;
 
-  @Field(() => JobProfileStream, { nullable: true })
-  stream?: JobProfileStream | null;
-
   @Field(() => User, { nullable: true })
   owner?: User | null;
+
+  @Field(() => [JobProfileJobFamilyLink], { nullable: true })
+  jobFamilies?: Array<JobProfileJobFamilyLink>;
+
+  @Field(() => [JobProfileStreamLink], { nullable: true })
+  streams?: Array<JobProfileStreamLink>;
 
   @Field(() => [JobProfileReportsTo], { nullable: true })
   reports_to?: Array<JobProfileReportsTo>;

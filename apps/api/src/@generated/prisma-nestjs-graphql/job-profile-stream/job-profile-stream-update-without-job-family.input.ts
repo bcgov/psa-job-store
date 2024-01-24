@@ -1,12 +1,12 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { JobProfileUpdateManyWithoutStreamNestedInput } from '../job-profile/job-profile-update-many-without-stream-nested.input';
+import { JobProfileStreamLinkUpdateManyWithoutStreamNestedInput } from '../job-profile-stream-link/job-profile-stream-link-update-many-without-stream-nested.input';
 
 @InputType()
 export class JobProfileStreamUpdateWithoutJob_familyInput {
   @Field(() => String, { nullable: true })
   name?: string;
 
-  @Field(() => JobProfileUpdateManyWithoutStreamNestedInput, { nullable: true })
-  job_profiles?: JobProfileUpdateManyWithoutStreamNestedInput;
+  @Field(() => JobProfileStreamLinkUpdateManyWithoutStreamNestedInput, { nullable: true })
+  jobProfiles?: JobProfileStreamLinkUpdateManyWithoutStreamNestedInput;
 }

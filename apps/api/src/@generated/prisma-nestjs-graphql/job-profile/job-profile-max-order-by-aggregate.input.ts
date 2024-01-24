@@ -8,12 +8,6 @@ export class JobProfileMaxOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  career_group_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  job_family_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
@@ -26,9 +20,6 @@ export class JobProfileMaxOrderByAggregateInput {
   state?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  stream_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   type?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
@@ -36,6 +27,12 @@ export class JobProfileMaxOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   owner_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  program_overview?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  review_required?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;

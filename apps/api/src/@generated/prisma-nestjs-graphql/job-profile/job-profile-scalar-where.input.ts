@@ -6,6 +6,7 @@ import { EnumJobProfileTypeFilter } from '../prisma/enum-job-profile-type-filter
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { UuidFilter } from '../prisma/uuid-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
+import { BoolFilter } from '../prisma/bool-filter.input';
 import { JsonFilter } from '../prisma/json-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
 
@@ -24,12 +25,6 @@ export class JobProfileScalarWhereInput {
   id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
-  career_group_id?: IntFilter;
-
-  @Field(() => IntFilter, { nullable: true })
-  job_family_id?: IntFilter;
-
-  @Field(() => IntFilter, { nullable: true })
   role_id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
@@ -41,9 +36,6 @@ export class JobProfileScalarWhereInput {
   @Field(() => EnumJobProfileStateFilter, { nullable: true })
   state?: EnumJobProfileStateFilter;
 
-  @Field(() => IntFilter, { nullable: true })
-  stream_id?: IntFilter;
-
   @Field(() => EnumJobProfileTypeFilter, { nullable: true })
   type?: EnumJobProfileTypeFilter;
 
@@ -52,6 +44,12 @@ export class JobProfileScalarWhereInput {
 
   @Field(() => UuidFilter, { nullable: true })
   owner_id?: UuidFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  program_overview?: StringFilter;
+
+  @Field(() => BoolFilter, { nullable: true })
+  review_required?: BoolFilter;
 
   @Field(() => StringFilter, { nullable: true })
   title?: StringFilter;
@@ -67,4 +65,22 @@ export class JobProfileScalarWhereInput {
 
   @Field(() => StringListFilter, { nullable: true })
   requirements?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  professional_registration_requirements?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  preferences?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  knowledge_skills_abilities?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  willingness_statements?: StringListFilter;
+
+  @Field(() => StringListFilter, { nullable: true })
+  security_screenings?: StringListFilter;
+
+  @Field(() => JsonFilter, { nullable: true })
+  total_comp_create_form_misc?: JsonFilter;
 }
