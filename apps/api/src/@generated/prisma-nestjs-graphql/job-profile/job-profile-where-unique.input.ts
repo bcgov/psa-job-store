@@ -14,7 +14,6 @@ import { StringListFilter } from '../prisma/string-list-filter.input';
 import { JobProfileBehaviouralCompetencyListRelationFilter } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-list-relation-filter.input';
 import { JobProfileClassificationListRelationFilter } from '../job-profile-classification/job-profile-classification-list-relation-filter.input';
 import { JobProfileOrganizationListRelationFilter } from '../job-profile-organization/job-profile-organization-list-relation-filter.input';
-import { JobProfileCareerGroupRelationFilter } from '../job-profile-career-group/job-profile-career-group-relation-filter.input';
 import { JobProfileContextRelationFilter } from '../job-profile-context/job-profile-context-relation-filter.input';
 import { JobProfileRoleRelationFilter } from '../job-profile-role/job-profile-role-relation-filter.input';
 import { JobProfileRoleTypeRelationFilter } from '../job-profile-role-type/job-profile-role-type-relation-filter.input';
@@ -41,9 +40,6 @@ export class JobProfileWhereUniqueInput {
 
   @Field(() => [JobProfileWhereInput], { nullable: true })
   NOT?: Array<JobProfileWhereInput>;
-
-  @Field(() => IntFilter, { nullable: true })
-  career_group_id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
   role_id?: IntFilter;
@@ -110,9 +106,6 @@ export class JobProfileWhereUniqueInput {
 
   @Field(() => JobProfileOrganizationListRelationFilter, { nullable: true })
   organizations?: JobProfileOrganizationListRelationFilter;
-
-  @Field(() => JobProfileCareerGroupRelationFilter, { nullable: true })
-  career_group?: JobProfileCareerGroupRelationFilter;
 
   @Field(() => JobProfileContextRelationFilter, { nullable: true })
   context?: JobProfileContextRelationFilter;

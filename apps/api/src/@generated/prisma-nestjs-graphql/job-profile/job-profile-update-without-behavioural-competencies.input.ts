@@ -6,7 +6,6 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileClassificationUpdateManyWithoutJob_profileNestedInput } from '../job-profile-classification/job-profile-classification-update-many-without-job-profile-nested.input';
 import { JobProfileOrganizationUpdateManyWithoutJob_profileNestedInput } from '../job-profile-organization/job-profile-organization-update-many-without-job-profile-nested.input';
-import { JobProfileCareerGroupUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-career-group/job-profile-career-group-update-one-without-job-profiles-nested.input';
 import { JobProfileContextUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-update-one-without-job-profile-nested.input';
 import { JobProfileRoleUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-role/job-profile-role-update-one-without-job-profiles-nested.input';
 import { JobProfileRoleTypeUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-role-type/job-profile-role-type-update-one-without-job-profiles-nested.input';
@@ -72,9 +71,6 @@ export class JobProfileUpdateWithoutBehavioural_competenciesInput {
 
   @Field(() => JobProfileOrganizationUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   organizations?: JobProfileOrganizationUpdateManyWithoutJob_profileNestedInput;
-
-  @Field(() => JobProfileCareerGroupUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
-  career_group?: JobProfileCareerGroupUpdateOneWithoutJob_profilesNestedInput;
 
   @Field(() => JobProfileContextUpdateOneWithoutJob_profileNestedInput, { nullable: true })
   context?: JobProfileContextUpdateOneWithoutJob_profileNestedInput;

@@ -25,9 +25,6 @@ export class JobProfileScalarWhereInput {
   id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
-  career_group_id?: IntFilter;
-
-  @Field(() => IntFilter, { nullable: true })
   role_id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })

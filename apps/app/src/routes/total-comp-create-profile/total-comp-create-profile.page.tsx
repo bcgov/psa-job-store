@@ -96,7 +96,7 @@ export const TotalCompCreateProfilePage = () => {
       classification: null,
       jobRole: null,
       professions: [{ jobFamily: -1, jobStreams: [] }],
-      role: 'individualContributor',
+      role: 1,
       reportToRelationship: [],
       scopeOfResponsibility: null,
       ministries: [],
@@ -808,8 +808,8 @@ export const TotalCompCreateProfilePage = () => {
                           control={control}
                           render={({ field }) => (
                             <Radio.Group {...field}>
-                              <Radio value="individualContributor">Individual Contributor</Radio>
-                              <Radio value="peopleLeader">People Leader</Radio>
+                              <Radio value={1}>Individual Contributor</Radio>
+                              <Radio value={2}>People Leader</Radio>
                             </Radio.Group>
                           )}
                         />
@@ -956,12 +956,6 @@ export const TotalCompCreateProfilePage = () => {
                     </Col>
                   </Row>
                 </Card>
-
-                <Form.Item>
-                  <Button type="primary" htmlType="submit">
-                    Submit
-                  </Button>
-                </Form.Item>
               </Form>
             </Col>
           </Row>
@@ -1686,12 +1680,6 @@ export const TotalCompCreateProfilePage = () => {
                     </Col>
                   </Row>
                 </Card>
-
-                <Form.Item>
-                  <Button type="primary" htmlType="submit">
-                    Submit Profile
-                  </Button>
-                </Form.Item>
               </Form>
             </Col>
           </Row>
@@ -1748,89 +1736,75 @@ export const TotalCompCreateProfilePage = () => {
     },
   ];
 
-  function transformFormDataToApiSchema(formData: any): CreateJobProfileInput {
-    return {
-      title: formData.jobTitle,
-      number: parseInt(formData.jobStoreNumber, 10),
-      overview: formData.overview,
-      program_overview: formData.programOverview,
-      review_required: formData.classificationReviewRequired,
-      // Other direct mappings...
-
-      // Relational data for JobProfileClassification
-      classifications: formData.classification
-        ? [
-            {
-              classification_id: formData.classification,
-              // job_profile_id is set by the server, so it's not included here
-            },
-          ]
-        : [],
-
-      // Handling JobProfileJobFamilyLink and JobProfileStreamLink
-      jobFamilies: formData.professions.map((profession: any) => ({
-        jobFamilyId: profession.jobFamily,
-        // jobProfileId will be set by the server
-      })),
-      streams: formData.professions.flatMap((profession: any) =>
-        profession.jobStreams.map((streamId: any) => ({
-          streamId,
-          // jobProfileId will be set by the server
-        })),
-      ),
-
-      // Handling JobProfileReportsTo
-      reports_to: formData.reportToRelationship.map((classificationId: any) => ({
-        classification_id: classificationId,
-        // job_profile_id will be set by the server
-      })),
-
-      // Handling JobProfileOrganization
-      organizations: formData.ministries.map((organizationId: any) => ({
-        organization_id: organizationId,
-        // job_profile_id will be set by the server
-      })),
-
-      role_id: formData.jobRole,
-      scope_id: formData.scopeOfResponsibility,
-
-      // JSON fields
-      accountabilities: {
-        required: formData.accountabilities.map((a: any) => a.text),
-        optional: formData.optionalAccountabilities.map((a: any) => a.text),
-      },
-
-      requirements: formData.educationAndWorkExperiences.map((e: any) => e.text),
-      professional_registration_requirements: formData.professionalRegistrationRequirements.map((p) => p.text),
-      preferences: formData.preferences.map((p: any) => p.text),
-      knowledge_skills_abilities: formData.knowledgeSkillsAbilities.map((k: any) => k.text),
-      willingness_statements: formData.willingnessStatements.map((w: any) => w.text),
-      security_screenings: formData.securityScreenings.map((s: any) => s.text),
-
-      // Handling behavioural competencies
-      behavioural_competencies: formData.behavioural_competencies.map((bc: any) => ({
-        behavioural_competency_id: bc.behavioural_competency.id,
-        // job_profile_id will be set by the server
-      })),
-
-      total_comp_create_form_misc: JSON.stringify({
-        markAllNonEditable: formData.markAllNonEditable,
-      }),
-
-      // Additional fields if required...
-    };
-  }
-
-  const [createJobProfile, { isLoading: isSaving, data: createResponse, error: createError }] =
-    useCreateJobProfileMutation();
+  const [createJobProfile] = useCreateJobProfileMutation();
 
   async function submitJobProfileData(transformedData: CreateJobProfileInput) {
     try {
       const response = await createJobProfile(transformedData).unwrap();
-      console.log('Job Profile Created: ', response);
+      console.log('Job Profile Created ok: ', response);
     } catch (error) {
       console.error('Error creating job profile: ', error);
     }
+  }
+
+  function transformFormDataToApiSchema(formData: any): CreateJobProfileInput {
+    return {
+      title: formData.jobTitle,
+      type: 'MINISTRY', // this gets set on the server
+      number: parseInt(formData.jobStoreNumber, 10),
+      overview: formData.overview,
+      program_overview: formData.programOverview,
+      review_required: formData.classificationReviewRequired,
+      accountabilities: {
+        required: formData.accountabilities.map((a: any) => a.text),
+        optional: formData.optionalAccountabilities.map((a: any) => a.text),
+      },
+      requirements: formData.educationAndWorkExperiences.map((e: any) => e.text),
+      professional_registration_requirements: formData.professionalRegistrationRequirements.map((p: any) => p.text),
+      preferences: formData.preferences.map((p: any) => p.text),
+      knowledge_skills_abilities: formData.knowledgeSkillsAbilities.map((k: any) => k.text),
+      willingness_statements: formData.willingnessStatements.map((w: any) => w.text),
+      security_screenings: formData.securityScreenings.map((s: any) => s.text),
+      total_comp_create_form_misc: JSON.stringify({ markAllNonEditable: formData.markAllNonEditable }),
+      behavioural_competencies: {
+        create: formData.behavioural_competencies.map((bc: any) => ({
+          behavioural_competency: { connect: { id: bc.behavioural_competency.id } },
+        })),
+      },
+      classifications: {
+        create: [
+          {
+            classification: { connect: { id: formData.classification } },
+          },
+        ],
+      },
+      organizations: {
+        create: formData.ministries.map((orgId: any) => ({
+          organization: { connect: { id: orgId } },
+        })),
+      },
+      context: { create: { description: formData.jobContext } },
+      role: { connect: { id: formData.jobRole } },
+      role_type: { connect: { id: formData.role } },
+      scope: { connect: { id: formData.scopeOfResponsibility } },
+      jobFamilies: {
+        create: formData.professions.map((pf: any) => ({
+          jobFamily: { connect: { id: pf.jobFamily } },
+        })),
+      },
+      streams: {
+        create: formData.professions.flatMap((pf: any) =>
+          pf.jobStreams.map((streamId: any) => ({
+            stream: { connect: { id: streamId } },
+          })),
+        ),
+      },
+      reports_to: {
+        create: formData.reportToRelationship.map((classificationId: any) => ({
+          classification: { connect: { id: classificationId } },
+        })),
+      },
+    };
   }
 
   const save = () => {
@@ -1850,7 +1824,7 @@ export const TotalCompCreateProfilePage = () => {
     submitJobProfileData(transformedData);
   };
 
-  if (!ministriesData || !careerGroupData) return <>Loading..</>;
+  if (!ministriesData) return <>Loading..</>;
 
   return (
     <>

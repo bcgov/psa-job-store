@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { JobProfileState, JobProfileType, Prisma } from '@prisma/client';
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { ClassificationService } from '../classification/classification.service';
@@ -38,7 +38,6 @@ export class JobProfileService {
       orderBy: [...(args.orderBy || []), { id: 'desc' }],
       include: {
         behavioural_competencies: true,
-        career_group: true,
         classifications: {
           include: {
             classification: true,
@@ -120,7 +119,6 @@ export class JobProfileService {
     return this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
-        career_group: true,
         classifications: {
           include: {
             classification: true,
@@ -200,31 +198,82 @@ export class JobProfileService {
     });
   }
 
-  async createJobProfile(data: JobProfileCreateInput) {
+  async createJobProfile(data: JobProfileCreateInput, userId: string) {
+    // todo: catch the "number" constraint failure and process the error on the client appropriately
     return this.prisma.jobProfile.create({
       data: {
-        state: data.state,
-        streams: data.streams,
-        title: data.title,
-        context: data.context,
-        overview: data.overview,
-        number: data.number,
-        accountabilities: data.accountabilities,
-        requirements: data.requirements,
-        classifications: data.classifications,
-        behavioural_competencies: data.behavioural_competencies,
-        reports_to: data.reports_to,
-        jobFamilies: data.jobFamilies,
-        organizations: data.organizations,
-        role: data.role,
-        type: data.type,
+        behavioural_competencies: {
+          create: data.behavioural_competencies.create.map((item) => ({
+            behavioural_competency: {
+              connect: { id: item.behavioural_competency.connect.id },
+            },
+          })),
+        },
+        classifications: {
+          create: data.classifications.create.map((item) => ({
+            classification: {
+              connect: { id: item.classification.connect.id },
+            },
+          })),
+        },
+        organizations: {
+          create: data.organizations.create.map((item) => ({
+            organization: {
+              connect: { id: item.organization.connect.id },
+            },
+          })),
+        },
+        context: {
+          create: { description: data.context.create.description },
+        },
+        role: {
+          connect: { id: data.role.connect.id },
+        },
+        role_type: {
+          connect: { id: data.role_type.connect.id },
+        },
+        scope: {
+          connect: { id: data.scope.connect.id },
+        },
+        state: JobProfileState.DRAFT,
+        type: data.organizations.create.length > 0 ? JobProfileType.MINISTRY : JobProfileType.CORPORATE, // should be MINISTRY if ministries provided, otherwise corporate
+        owner: {
+          connect: { id: userId },
+        },
+        jobFamilies: {
+          create: data.jobFamilies.create.map((item) => ({
+            jobFamily: {
+              connect: { id: item.jobFamily.connect.id },
+            },
+          })),
+        },
+        streams: {
+          create: data.streams.create.map((item) => ({
+            stream: {
+              connect: { id: item.stream.connect.id },
+            },
+          })),
+        },
         program_overview: data.program_overview,
         review_required: data.review_required,
+        title: data.title,
+        number: data.number,
+        overview: data.overview,
+        accountabilities: data.accountabilities,
+        requirements: data.requirements,
         professional_registration_requirements: data.professional_registration_requirements,
         preferences: data.preferences,
         knowledge_skills_abilities: data.knowledge_skills_abilities,
         willingness_statements: data.willingness_statements,
         security_screenings: data.security_screenings,
+        reports_to: {
+          create: data.reports_to.create.map((item) => ({
+            classification: {
+              connect: { id: item.classification.connect.id },
+            },
+          })),
+        },
+        total_comp_create_form_misc: data.total_comp_create_form_misc,
       } as any as Prisma.JobProfileCreateInput, // To prevent Excessive Stack Depth error,
     });
   }
@@ -239,43 +288,48 @@ export class JobProfileService {
   }
 
   async getJobProfilesCareerGroups() {
+    // todo: this is now professions
     // get unique career groups for all job profiles
-    const uniqueCareerGroups = await this.prisma.jobProfile.findMany({
-      where: { state: 'PUBLISHED' },
-      select: {
-        career_group: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      distinct: ['career_group_id'], // Add distinct option to return only distinct career groups
-    });
+    // const uniqueCareerGroups = await this.prisma.jobProfile.findMany({
+    //   where: { state: 'PUBLISHED' },
+    //   select: {
+    //     career_group: {
+    //       select: {
+    //         id: true,
+    //         name: true,
+    //       },
+    //     },
+    //   },
+    //   distinct: ['career_group_id'], // Add distinct option to return only distinct career groups
+    // });
 
-    const careerGroupsArray = uniqueCareerGroups.map((item) => item.career_group);
+    // const careerGroupsArray = uniqueCareerGroups.map((item) => item.career_group);
 
-    return careerGroupsArray;
+    // return careerGroupsArray;
+    return null;
   }
 
-  async getJobProfilesDraftsCareerGroups(userId: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getJobProfilesDraftsCareerGroups(_userId: string) {
+    // todo: this is now professions
     // get unique career groups for all job profiles
-    const uniqueCareerGroups = await this.prisma.jobProfile.findMany({
-      where: { state: 'DRAFT', owner_id: userId },
-      select: {
-        career_group: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      distinct: ['career_group_id'], // Add distinct option to return only distinct career groups
-    });
+    // const uniqueCareerGroups = await this.prisma.jobProfile.findMany({
+    //   where: { state: 'DRAFT', owner_id: userId },
+    //   select: {
+    //     career_group: {
+    //       select: {
+    //         id: true,
+    //         name: true,
+    //       },
+    //     },
+    //   },
+    //   distinct: ['career_group_id'], // Add distinct option to return only distinct career groups
+    // });
 
-    const careerGroupsArray = uniqueCareerGroups.map((item) => item.career_group);
+    // const careerGroupsArray = uniqueCareerGroups.map((item) => item.career_group);
 
-    return careerGroupsArray;
+    // return careerGroupsArray;
+    return null;
   }
 
   async getJobProfilesMinistries() {

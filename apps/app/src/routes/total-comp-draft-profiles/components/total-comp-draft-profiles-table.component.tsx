@@ -181,14 +181,14 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       dataIndex: 'number',
       key: 'number',
     },
-    {
-      sorter: allowSorting,
-      defaultSortOrder: getSortOrder('career_group'),
-      title: 'Career Group',
-      dataIndex: 'career_group',
-      key: 'career_group',
-      render: (careerGroup: any) => careerGroup?.name,
-    },
+    // {
+    //   sorter: allowSorting,
+    //   defaultSortOrder: getSortOrder('career_group'),
+    //   title: 'Career Group',
+    //   dataIndex: 'career_group',
+    //   key: 'career_group',
+    //   render: (careerGroup: any) => careerGroup?.name,
+    // },
     {
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('job_family'),
@@ -245,7 +245,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     const search = searchParams.get('search');
 
     const organizationFilter = searchParams.get('ministry_id__in');
-    const careerGroupFilter = searchParams.get('career_group_id__in');
+    // const careerGroupFilter = searchParams.get('career_group_id__in');
     const jobRoleFilter = searchParams.get('job_role_id__in');
     const classificationFilter = searchParams.get('classification_id__in');
     const jobFamilyFilter = searchParams.get('job_family_id__in');
@@ -265,7 +265,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
           orderBy: [
             {
               [sortField]:
-                sortField === 'career_group' || sortField === 'job_family'
+                sortField === 'job_family'
                   ? {
                       name: useSortOrder === 'ascend' ? 'asc' : 'desc',
                     }
@@ -284,15 +284,15 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       ...(search != null && { search }),
       where: {
         AND: [
-          ...(careerGroupFilter !== null
-            ? [
-                {
-                  career_group_id: {
-                    in: JSON.parse(`[${careerGroupFilter}]`),
-                  },
-                },
-              ]
-            : []),
+          // ...(careerGroupFilter !== null
+          //   ? [
+          //       {
+          //         career_group_id: {
+          //           in: JSON.parse(`[${careerGroupFilter}]`),
+          //         },
+          //       },
+          //     ]
+          //   : []), // todo: replace this with job family filter
           ...(organizationFilter != null
             ? [
                 {

@@ -72,10 +72,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                career_group {
-                  id
-                  name
-                }
                 organizations {
                   organization {
                     id
@@ -156,10 +152,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                career_group {
-                  id
-                  name
-                }
                 organizations {
                   organization {
                     id
@@ -230,10 +222,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   }
                 }
                 role {
-                  id
-                  name
-                }
-                career_group {
                   id
                   name
                 }

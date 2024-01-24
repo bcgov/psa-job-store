@@ -10,9 +10,6 @@ export class JobProfileCreateManyRoleInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
-  @Field(() => Int, { nullable: false })
-  career_group_id!: number;
-
   @Field(() => Int, { nullable: true })
   role_type_id?: number;
 

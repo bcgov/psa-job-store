@@ -21,7 +21,7 @@ export const TotalCompPublishedProfilesPage = () => {
     setHasData(isDataAvailable);
   };
 
-  if (!ministriesData || !careerGroupData) return <>Loading..</>;
+  if (!ministriesData) return <>Loading..</>;
 
   return (
     <>
@@ -40,7 +40,7 @@ export const TotalCompPublishedProfilesPage = () => {
 
         <TotalCompProfilesTable
           state="PUBLISHED"
-          itemsPerPage={2}
+          itemsPerPage={10}
           tableTitle={'Job profiles'}
           style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', flexGrow: 1 }}
           onDataAvailable={handleDataAvailability}

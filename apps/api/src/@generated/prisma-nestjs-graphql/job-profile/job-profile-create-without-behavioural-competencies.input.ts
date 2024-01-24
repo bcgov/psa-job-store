@@ -6,7 +6,6 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileClassificationCreateNestedManyWithoutJob_profileInput } from '../job-profile-classification/job-profile-classification-create-nested-many-without-job-profile.input';
 import { JobProfileOrganizationCreateNestedManyWithoutJob_profileInput } from '../job-profile-organization/job-profile-organization-create-nested-many-without-job-profile.input';
-import { JobProfileCareerGroupCreateNestedOneWithoutJob_profilesInput } from '../job-profile-career-group/job-profile-career-group-create-nested-one-without-job-profiles.input';
 import { JobProfileContextCreateNestedOneWithoutJob_profileInput } from '../job-profile-context/job-profile-context-create-nested-one-without-job-profile.input';
 import { JobProfileRoleCreateNestedOneWithoutJob_profilesInput } from '../job-profile-role/job-profile-role-create-nested-one-without-job-profiles.input';
 import { JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput } from '../job-profile-role-type/job-profile-role-type-create-nested-one-without-job-profiles.input';
@@ -72,9 +71,6 @@ export class JobProfileCreateWithoutBehavioural_competenciesInput {
 
   @Field(() => JobProfileOrganizationCreateNestedManyWithoutJob_profileInput, { nullable: true })
   organizations?: JobProfileOrganizationCreateNestedManyWithoutJob_profileInput;
-
-  @Field(() => JobProfileCareerGroupCreateNestedOneWithoutJob_profilesInput, { nullable: true })
-  career_group?: JobProfileCareerGroupCreateNestedOneWithoutJob_profilesInput;
 
   @Field(() => JobProfileContextCreateNestedOneWithoutJob_profileInput, { nullable: true })
   context?: JobProfileContextCreateNestedOneWithoutJob_profileInput;

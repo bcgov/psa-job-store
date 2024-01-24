@@ -21,7 +21,7 @@ export const TotalCompDraftProfilesPage = () => {
     setHasData(isDataAvailable);
   };
 
-  if (!ministriesData || !careerGroupData) return <>Loading..</>;
+  if (!ministriesData) return <>Loading..</>;
 
   return (
     <>
@@ -39,7 +39,7 @@ export const TotalCompDraftProfilesPage = () => {
         )}
 
         <TotalCompProfilesTable
-          itemsPerPage={2}
+          itemsPerPage={10}
           tableTitle={'Job profiles'}
           style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', flexGrow: 1 }}
           onDataAvailable={handleDataAvailability}

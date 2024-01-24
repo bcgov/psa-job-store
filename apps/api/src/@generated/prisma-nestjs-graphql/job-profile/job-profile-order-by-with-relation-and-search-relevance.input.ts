@@ -5,7 +5,6 @@ import { SortOrderInput } from '../prisma/sort-order.input';
 import { JobProfileBehaviouralCompetencyOrderByRelationAggregateInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-order-by-relation-aggregate.input';
 import { JobProfileClassificationOrderByRelationAggregateInput } from '../job-profile-classification/job-profile-classification-order-by-relation-aggregate.input';
 import { JobProfileOrganizationOrderByRelationAggregateInput } from '../job-profile-organization/job-profile-organization-order-by-relation-aggregate.input';
-import { JobProfileCareerGroupOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-career-group/job-profile-career-group-order-by-with-relation-and-search-relevance.input';
 import { JobProfileContextOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-context/job-profile-context-order-by-with-relation-and-search-relevance.input';
 import { JobProfileRoleOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-role/job-profile-role-order-by-with-relation-and-search-relevance.input';
 import { JobProfileRoleTypeOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-role-type/job-profile-role-type-order-by-with-relation-and-search-relevance.input';
@@ -21,9 +20,6 @@ import { JobProfileOrderByRelevanceInput } from './job-profile-order-by-relevanc
 export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrder, { nullable: true })
   id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  career_group_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
@@ -93,9 +89,6 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => JobProfileOrganizationOrderByRelationAggregateInput, { nullable: true })
   organizations?: JobProfileOrganizationOrderByRelationAggregateInput;
-
-  @Field(() => JobProfileCareerGroupOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
-  career_group?: JobProfileCareerGroupOrderByWithRelationAndSearchRelevanceInput;
 
   @Field(() => JobProfileContextOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   context?: JobProfileContextOrderByWithRelationAndSearchRelevanceInput;

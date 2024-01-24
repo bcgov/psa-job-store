@@ -126,7 +126,6 @@ enum JobProfileState {
 enum JobProfileType {
   CORPORATE
   MINISTRY
-  USER
 
   @@map("job_profile_type")
 }
@@ -136,24 +135,23 @@ model JobProfile {
   behavioural_competencies JobProfileBehaviouralCompetency[]
   classifications          JobProfileClassification[]
   organizations            JobProfileOrganization[]
-  career_group             JobProfileCareerGroup?            @relation(fields: [career_group_id], references: [id])
-  career_group_id          Int
-  context                  JobProfileContext?
-  role                     JobProfileRole?                   @relation(fields: [role_id], references: [id])
-  role_id                  Int
-  role_type                JobProfileRoleType?               @relation(fields: [role_type_id], references: [id])
-  role_type_id             Int?
-  scope                    JobProfileScope?                  @relation(fields: [scope_id], references: [id])
-  scope_id                 Int?
-  state                    JobProfileState                   @default(DRAFT)
-  type                     JobProfileType
-  updated_at               DateTime?                         @default(now()) @updatedAt
-  owner_id                 String?                           @db.Uuid
-  owner                    User?                             @relation(fields: [owner_id], references: [id])
-  jobFamilies              JobProfileJobFamilyLink[]
-  streams                  JobProfileStreamLink[]
-  program_overview         String?
-  review_required          Boolean?                          @default(false)
+
+  context          JobProfileContext?
+  role             JobProfileRole?           @relation(fields: [role_id], references: [id])
+  role_id          Int
+  role_type        JobProfileRoleType?       @relation(fields: [role_type_id], references: [id])
+  role_type_id     Int?
+  scope            JobProfileScope?          @relation(fields: [scope_id], references: [id])
+  scope_id         Int?
+  state            JobProfileState           @default(DRAFT)
+  type             JobProfileType
+  updated_at       DateTime?                 @default(now()) @updatedAt
+  owner_id         String?                   @db.Uuid
+  owner            User?                     @relation(fields: [owner_id], references: [id])
+  jobFamilies      JobProfileJobFamilyLink[]
+  streams          JobProfileStreamLink[]
+  program_overview String?
+  review_required  Boolean?                  @default(false)
 
   title                                  String
   number                                 Int                   @unique
@@ -200,14 +198,6 @@ model JobProfileBehaviouralCompetency {
 
   @@id([behavioural_competency_id, job_profile_id])
   @@map("job_profile_behavioural_competency")
-}
-
-model JobProfileCareerGroup {
-  id           Int          @id @default(autoincrement())
-  name         String
-  job_profiles JobProfile[]
-
-  @@map("job_profile_career_group")
 }
 
 model JobProfileClassification {

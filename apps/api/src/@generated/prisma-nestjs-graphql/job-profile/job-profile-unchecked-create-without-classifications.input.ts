@@ -18,9 +18,6 @@ export class JobProfileUncheckedCreateWithoutClassificationsInput {
   id?: number;
 
   @Field(() => Int, { nullable: false })
-  career_group_id!: number;
-
-  @Field(() => Int, { nullable: false })
   role_id!: number;
 
   @Field(() => Int, { nullable: true })

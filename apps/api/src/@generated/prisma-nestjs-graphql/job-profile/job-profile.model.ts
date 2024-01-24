@@ -7,7 +7,6 @@ import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
 import { JobProfileClassification } from '../job-profile-classification/job-profile-classification.model';
 import { JobProfileOrganization } from '../job-profile-organization/job-profile-organization.model';
-import { JobProfileCareerGroup } from '../job-profile-career-group/job-profile-career-group.model';
 import { JobProfileContext } from '../job-profile-context/job-profile-context.model';
 import { JobProfileRole } from '../job-profile-role/job-profile-role.model';
 import { JobProfileRoleType } from '../job-profile-role-type/job-profile-role-type.model';
@@ -22,9 +21,6 @@ import { PositionRequest } from '../position-request/position-request.model';
 export class JobProfile {
   @Field(() => Int, { nullable: false })
   id!: number;
-
-  @Field(() => Int, { nullable: false })
-  career_group_id!: number;
 
   @Field(() => Int, { nullable: false })
   role_id!: number;
@@ -94,9 +90,6 @@ export class JobProfile {
 
   @Field(() => [JobProfileOrganization], { nullable: true })
   organizations?: Array<JobProfileOrganization>;
-
-  @Field(() => JobProfileCareerGroup, { nullable: true })
-  career_group?: JobProfileCareerGroup | null;
 
   @Field(() => JobProfileContext, { nullable: true })
   context?: JobProfileContext | null;

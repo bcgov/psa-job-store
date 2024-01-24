@@ -550,7 +550,7 @@ export const DownloadJobProfileComponent = ({
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: `${defaultJobProfile?.career_group?.name}`,
+                                text: `${defaultJobProfile?.jobFamilies[0]?.job_family?.name}`, // todo: support multiple. This was career_group, got replaced with job_family
                               }),
                             ],
                           }),
