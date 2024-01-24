@@ -48,7 +48,6 @@ import { useGetJobProfileStreamsQuery } from '../../redux/services/graphql-api/j
 import { CreateJobProfileInput } from '../../redux/services/graphql-api/job-profile-types';
 import {
   useCreateJobProfileMutation,
-  useGetJobProfilesDraftsCareerGroupsQuery,
   useGetJobProfilesDraftsMinistriesQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
   useLazyIsJobProfileNumberAvailableQuery,
@@ -69,7 +68,7 @@ const { Text } = Typography;
 export const TotalCompCreateProfilePage = () => {
   // BASIC DETAILS FORM
   const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
-  const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
+  // const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
 
   const srOnlyStyle: CSSProperties = {
     position: 'absolute',
