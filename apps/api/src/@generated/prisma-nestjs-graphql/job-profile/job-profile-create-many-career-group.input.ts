@@ -11,9 +11,6 @@ export class JobProfileCreateManyCareer_groupInput {
   id?: number;
 
   @Field(() => Int, { nullable: false })
-  job_family_id!: number;
-
-  @Field(() => Int, { nullable: false })
   role_id!: number;
 
   @Field(() => Int, { nullable: true })
@@ -25,9 +22,6 @@ export class JobProfileCreateManyCareer_groupInput {
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 
-  @Field(() => Int, { nullable: false })
-  stream_id!: number;
-
   @Field(() => JobProfileType, { nullable: false })
   type!: keyof typeof JobProfileType;
 
@@ -36,6 +30,12 @@ export class JobProfileCreateManyCareer_groupInput {
 
   @Field(() => String, { nullable: true })
   owner_id?: string;
+
+  @Field(() => String, { nullable: true })
+  program_overview?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  review_required?: boolean;
 
   @Field(() => String, { nullable: false })
   title!: string;
@@ -51,4 +51,22 @@ export class JobProfileCreateManyCareer_groupInput {
 
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  professional_registration_requirements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  preferences?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  knowledge_skills_abilities?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  willingness_statements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  security_screenings?: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  total_comp_create_form_misc?: any;
 }

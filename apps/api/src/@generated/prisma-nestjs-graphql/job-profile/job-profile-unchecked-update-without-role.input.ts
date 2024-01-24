@@ -8,6 +8,8 @@ import { JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNes
 import { JobProfileClassificationUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-classification/job-profile-classification-unchecked-update-many-without-job-profile-nested.input';
 import { JobProfileOrganizationUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-organization/job-profile-organization-unchecked-update-many-without-job-profile-nested.input';
 import { JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-unchecked-update-one-without-job-profile-nested.input';
+import { JobProfileJobFamilyLinkUncheckedUpdateManyWithoutJobProfileNestedInput } from '../job-profile-job-family-link/job-profile-job-family-link-unchecked-update-many-without-job-profile-nested.input';
+import { JobProfileStreamLinkUncheckedUpdateManyWithoutJobProfileNestedInput } from '../job-profile-stream-link/job-profile-stream-link-unchecked-update-many-without-job-profile-nested.input';
 import { JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-update-many-without-job-profile-nested.input';
 import { PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-unchecked-update-many-without-parent-job-profile-nested.input';
 
@@ -20,9 +22,6 @@ export class JobProfileUncheckedUpdateWithoutRoleInput {
   career_group_id?: number;
 
   @Field(() => Int, { nullable: true })
-  job_family_id?: number;
-
-  @Field(() => Int, { nullable: true })
   role_type_id?: number;
 
   @Field(() => Int, { nullable: true })
@@ -30,9 +29,6 @@ export class JobProfileUncheckedUpdateWithoutRoleInput {
 
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
-
-  @Field(() => Int, { nullable: true })
-  stream_id?: number;
 
   @Field(() => JobProfileType, { nullable: true })
   type?: keyof typeof JobProfileType;
@@ -42,6 +38,12 @@ export class JobProfileUncheckedUpdateWithoutRoleInput {
 
   @Field(() => String, { nullable: true })
   owner_id?: string;
+
+  @Field(() => String, { nullable: true })
+  program_overview?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  review_required?: boolean;
 
   @Field(() => String, { nullable: true })
   title?: string;
@@ -58,6 +60,24 @@ export class JobProfileUncheckedUpdateWithoutRoleInput {
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;
 
+  @Field(() => [String], { nullable: true })
+  professional_registration_requirements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  preferences?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  knowledge_skills_abilities?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  willingness_statements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  security_screenings?: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  total_comp_create_form_misc?: any;
+
   @Field(() => JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput;
 
@@ -69,6 +89,12 @@ export class JobProfileUncheckedUpdateWithoutRoleInput {
 
   @Field(() => JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput, { nullable: true })
   context?: JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput;
+
+  @Field(() => JobProfileJobFamilyLinkUncheckedUpdateManyWithoutJobProfileNestedInput, { nullable: true })
+  jobFamilies?: JobProfileJobFamilyLinkUncheckedUpdateManyWithoutJobProfileNestedInput;
+
+  @Field(() => JobProfileStreamLinkUncheckedUpdateManyWithoutJobProfileNestedInput, { nullable: true })
+  streams?: JobProfileStreamLinkUncheckedUpdateManyWithoutJobProfileNestedInput;
 
   @Field(() => JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   reports_to?: JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput;

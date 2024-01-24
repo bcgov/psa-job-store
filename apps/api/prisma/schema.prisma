@@ -139,8 +139,6 @@ model JobProfile {
   career_group             JobProfileCareerGroup?            @relation(fields: [career_group_id], references: [id])
   career_group_id          Int
   context                  JobProfileContext?
-  job_family               JobProfileJobFamily?              @relation(fields: [job_family_id], references: [id])
-  job_family_id            Int
   role                     JobProfileRole?                   @relation(fields: [role_id], references: [id])
   role_id                  Int
   role_type                JobProfileRoleType?               @relation(fields: [role_type_id], references: [id])
@@ -148,22 +146,50 @@ model JobProfile {
   scope                    JobProfileScope?                  @relation(fields: [scope_id], references: [id])
   scope_id                 Int?
   state                    JobProfileState                   @default(DRAFT)
-  stream                   JobProfileStream?                 @relation(fields: [stream_id], references: [id])
-  stream_id                Int
   type                     JobProfileType
   updated_at               DateTime?                         @default(now()) @updatedAt
   owner_id                 String?                           @db.Uuid
   owner                    User?                             @relation(fields: [owner_id], references: [id])
+  jobFamilies              JobProfileJobFamilyLink[]
+  streams                  JobProfileStreamLink[]
+  program_overview         String?
+  review_required          Boolean?                          @default(false)
 
-  title            String
-  number           Int                   @unique
-  overview         String
-  accountabilities Json                  @default("{\"optional\": [], \"required\": []}") @db.JsonB
-  requirements     String[]
-  reports_to       JobProfileReportsTo[]
-  position_request PositionRequest[]
+  title                                  String
+  number                                 Int                   @unique
+  overview                               String
+  accountabilities                       Json                  @default("{\"optional\": [], \"required\": []}") @db.JsonB
+  requirements                           String[]
+  professional_registration_requirements String[]
+  preferences                            String[]
+  knowledge_skills_abilities             String[]
+  willingness_statements                 String[]
+  security_screenings                    String[]
+  reports_to                             JobProfileReportsTo[]
+  position_request                       PositionRequest[]
+  total_comp_create_form_misc            Json? // stores e.x. state of checkbox for markAllNonEditable for accountabilities
 
   @@map("job_profile")
+}
+
+model JobProfileJobFamilyLink {
+  jobProfileId Int
+  jobFamilyId  Int
+  jobProfile   JobProfile          @relation(fields: [jobProfileId], references: [id])
+  jobFamily    JobProfileJobFamily @relation(fields: [jobFamilyId], references: [id])
+
+  @@id([jobProfileId, jobFamilyId])
+  @@map("job_profile_job_family_link")
+}
+
+model JobProfileStreamLink {
+  jobProfileId Int
+  streamId     Int
+  jobProfile   JobProfile       @relation(fields: [jobProfileId], references: [id])
+  stream       JobProfileStream @relation(fields: [streamId], references: [id])
+
+  @@id([jobProfileId, streamId])
+  @@map("job_profile_stream_link")
 }
 
 model JobProfileBehaviouralCompetency {
@@ -223,9 +249,10 @@ model JobProfileContext {
 }
 
 model JobProfileJobFamily {
-  id               Int                @id @default(autoincrement())
+  id               Int                       @id @default(autoincrement())
   name             String
-  job_profiles     JobProfile[]
+  // job_profiles     JobProfile[]
+  jobProfiles      JobProfileJobFamilyLink[]
   JobProfileStream JobProfileStream[]
 
   @@map("job_profile_job_family")
@@ -270,11 +297,12 @@ model JobProfileRoleType {
 }
 
 model JobProfileStream {
-  id            Int                 @id @default(autoincrement())
-  job_family    JobProfileJobFamily @relation(fields: [job_family_id], references: [id])
+  id            Int                    @id @default(autoincrement())
+  job_family    JobProfileJobFamily    @relation(fields: [job_family_id], references: [id])
   job_family_id Int
   name          String
-  job_profiles  JobProfile[]
+  jobProfiles   JobProfileStreamLink[]
+  // job_profiles  JobProfile[]
 
   @@map("job_profile_stream")
 }

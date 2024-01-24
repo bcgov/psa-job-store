@@ -32,9 +32,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             ) {
               jobProfiles(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
                 id
-                stream {
-                  id
-                  name
+                streams {
+                  stream {
+                    id
+                    job_family_id
+                    name
+                  }
                 }
                 title
                 number
@@ -59,9 +62,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     name
                   }
                 }
-                job_family {
-                  id
-                  name
+                jobFamilies {
+                  jobFamily {
+                    id
+                    name
+                  }
                 }
                 role {
                   id
@@ -111,9 +116,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             ) {
               jobProfilesDrafts(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
                 id
-                stream {
-                  id
-                  name
+                streams {
+                  stream {
+                    id
+                    job_family_id
+                    name
+                  }
                 }
                 title
                 number
@@ -138,9 +146,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     name
                   }
                 }
-                job_family {
-                  id
-                  name
+                jobFamilies {
+                  jobFamily {
+                    id
+                    name
+                  }
                 }
                 role {
                   id
@@ -184,9 +194,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfile {
               jobProfile(id: "${args.id}") {
                 id
-                stream {
-                  id,
-                  name
+                streams {
+                  stream {
+                      id
+                      name
+                  }
                 }
                 title
                 number
@@ -211,9 +223,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     name
                   }
                 }
-                job_family {
-                  id
-                  name
+                jobFamilies {
+                  jobFamily {
+                      id
+                      name
+                  }
                 }
                 role {
                   id
@@ -349,6 +363,7 @@ export const {
   useLazyGetJobProfilesQuery,
   useLazyGetJobProfilesDraftsQuery,
   useCreateJobProfileMutation,
+
   useGetNextAvailableJobProfileNumberQuery,
   useIsJobProfileNumberAvailableQuery,
   useLazyIsJobProfileNumberAvailableQuery,

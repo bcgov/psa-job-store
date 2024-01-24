@@ -45,7 +45,9 @@ import { useGetJobFamiliesQuery } from '../../redux/services/graphql-api/job-fam
 import { useGetJobProfileMinimumRequirementsQuery } from '../../redux/services/graphql-api/job-profile-minimum-requirements.api';
 import { useGetJobProfileScopesQuery } from '../../redux/services/graphql-api/job-profile-scope';
 import { useGetJobProfileStreamsQuery } from '../../redux/services/graphql-api/job-profile-stream';
+import { CreateJobProfileInput } from '../../redux/services/graphql-api/job-profile-types';
 import {
+  useCreateJobProfileMutation,
   useGetJobProfilesDraftsCareerGroupsQuery,
   useGetJobProfilesDraftsMinistriesQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
@@ -98,7 +100,7 @@ export const TotalCompCreateProfilePage = () => {
       reportToRelationship: [],
       scopeOfResponsibility: null,
       ministries: [],
-      otherFunctions: false,
+      classificationReviewRequired: false,
       jobContext: '',
     },
     // resolver: zodResolver(schema)
@@ -225,6 +227,7 @@ export const TotalCompCreateProfilePage = () => {
   } = useForm({
     defaultValues: {
       overview: '',
+      programOverview: '',
       accountabilities: [] as AccountabilityItem[],
       optionalAccountabilities: [] as TextItem[],
       educationAndWorkExperiences: [] as TextItem[],
@@ -450,6 +453,28 @@ export const TotalCompCreateProfilePage = () => {
   };
 
   const treeDataConverted = treeData ? transformToTreeData(treeData.groupedClassifications) : [];
+
+  const [selectAll, setSelectAll] = useState(false);
+
+  const getAllTreeValues = (tree: any) => {
+    const values: any = [];
+    const getValues = (nodes: any) => {
+      nodes.forEach((node: any) => {
+        values.push(node.value);
+        if (node.children) {
+          getValues(node.children);
+        }
+      });
+    };
+    getValues(tree);
+    return values;
+  };
+
+  const handleSelectAllReportTo = (isChecked: any) => {
+    setSelectAll(isChecked);
+    const allValues = isChecked ? getAllTreeValues(treeDataConverted) : [];
+    setValue('reportToRelationship', allValues);
+  };
 
   //employee group selector
   const { data: employeeGroupData } = useGetEmployeeGroupsQuery();
@@ -796,21 +821,31 @@ export const TotalCompCreateProfilePage = () => {
                   <Row justify="start">
                     <Col xs={24} sm={12} md={10} lg={8} xl={8}>
                       {/* Report-to relationship Select */}
+
                       <Form.Item label="Report-to relationship" labelCol={{ className: 'card-label' }}>
                         <Controller
                           name="reportToRelationship"
                           control={control}
                           render={({ field }) => (
-                            <TreeSelect
-                              {...field}
-                              treeData={treeDataConverted} // Replace with your data
-                              // onChange={(value) => setReportToRelationship(value)}
-                              treeCheckable={true}
-                              showCheckedStrategy={SHOW_CHILD}
-                              placeholder="Choose all the positions this role should report to"
-                              style={{ width: '100%' }}
-                              maxTagCount={10}
-                            />
+                            <>
+                              <Checkbox
+                                onChange={(e) => handleSelectAllReportTo(e.target.checked)}
+                                checked={selectAll}
+                                style={{ marginBottom: '10px' }}
+                              >
+                                Select all
+                              </Checkbox>
+                              <TreeSelect
+                                {...field}
+                                treeData={treeDataConverted} // Replace with your data
+                                // onChange={(value) => setReportToRelationship(value)}
+                                treeCheckable={true}
+                                showCheckedStrategy={SHOW_CHILD}
+                                placeholder="Choose all the positions this role should report to"
+                                style={{ width: '100%' }}
+                                maxTagCount={10}
+                              />
+                            </>
                           )}
                         />
                       </Form.Item>
@@ -868,7 +903,6 @@ export const TotalCompCreateProfilePage = () => {
                               <Text type="secondary" style={{ marginBottom: '5px', display: 'block' }}>
                                 If selected, this role would be available only for those specific ministries.
                               </Text>
-                              <br></br>
                               <MinistriesSelect isMultiSelect={true} onChange={onChange} />
                             </>
                           )}
@@ -893,10 +927,15 @@ export const TotalCompCreateProfilePage = () => {
                         labelCol={{ className: 'card-label' }}
                       >
                         <Controller
-                          name="otherFunctions"
+                          name="classificationReviewRequired"
                           control={control}
                           render={({ field: { onChange, value, ref } }) => (
-                            <Switch checked={value} onChange={onChange} ref={ref} />
+                            <>
+                              <Switch checked={value} onChange={onChange} ref={ref} />
+                              <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
+                                Classification review required
+                              </span>
+                            </>
                           )}
                         />
                       </Form.Item>
@@ -942,7 +981,7 @@ export const TotalCompCreateProfilePage = () => {
                   console.log('profile data: ', data);
                 })}
               >
-                <Card title="Overview" bordered={false} className="custom-card">
+                <Card title="Job overview" bordered={false} className="custom-card">
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                       <Form.Item labelCol={{ className: 'card-label' }}>
@@ -958,6 +997,38 @@ export const TotalCompCreateProfilePage = () => {
                               onChange={onChange} // send value to hook form
                               onBlur={onBlur} // notify when input is touched/blur
                             />
+                          )}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Card>
+
+                <Card title="Program overview" bordered={false} style={{ marginTop: 16 }} className="custom-card">
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                      <Form.Item labelCol={{ className: 'card-label' }}>
+                        {/* Form.Item for cosmetic purposes */}
+                        <Controller
+                          name="programOverview"
+                          control={profileControl}
+                          render={({ field: { onChange, onBlur, value } }) => (
+                            <>
+                              <TextArea
+                                maxLength={320}
+                                autoSize
+                                placeholder="Provide a program overview of the job profile"
+                                aria-label="program overview"
+                                onChange={onChange} // send value to hook form
+                                onBlur={onBlur} // notify when input is touched/blur
+                              />
+                              <Typography.Paragraph
+                                type="secondary"
+                                style={{ textAlign: 'right', width: '100%', margin: '0' }}
+                              >
+                                {value.length} / 320
+                              </Typography.Paragraph>
+                            </>
                           )}
                         />
                       </Form.Item>
@@ -1677,6 +1748,91 @@ export const TotalCompCreateProfilePage = () => {
     },
   ];
 
+  function transformFormDataToApiSchema(formData: any): CreateJobProfileInput {
+    return {
+      title: formData.jobTitle,
+      number: parseInt(formData.jobStoreNumber, 10),
+      overview: formData.overview,
+      program_overview: formData.programOverview,
+      review_required: formData.classificationReviewRequired,
+      // Other direct mappings...
+
+      // Relational data for JobProfileClassification
+      classifications: formData.classification
+        ? [
+            {
+              classification_id: formData.classification,
+              // job_profile_id is set by the server, so it's not included here
+            },
+          ]
+        : [],
+
+      // Handling JobProfileJobFamilyLink and JobProfileStreamLink
+      jobFamilies: formData.professions.map((profession: any) => ({
+        jobFamilyId: profession.jobFamily,
+        // jobProfileId will be set by the server
+      })),
+      streams: formData.professions.flatMap((profession: any) =>
+        profession.jobStreams.map((streamId: any) => ({
+          streamId,
+          // jobProfileId will be set by the server
+        })),
+      ),
+
+      // Handling JobProfileReportsTo
+      reports_to: formData.reportToRelationship.map((classificationId: any) => ({
+        classification_id: classificationId,
+        // job_profile_id will be set by the server
+      })),
+
+      // Handling JobProfileOrganization
+      organizations: formData.ministries.map((organizationId: any) => ({
+        organization_id: organizationId,
+        // job_profile_id will be set by the server
+      })),
+
+      role_id: formData.jobRole,
+      scope_id: formData.scopeOfResponsibility,
+
+      // JSON fields
+      accountabilities: {
+        required: formData.accountabilities.map((a: any) => a.text),
+        optional: formData.optionalAccountabilities.map((a: any) => a.text),
+      },
+
+      requirements: formData.educationAndWorkExperiences.map((e: any) => e.text),
+      professional_registration_requirements: formData.professionalRegistrationRequirements.map((p) => p.text),
+      preferences: formData.preferences.map((p: any) => p.text),
+      knowledge_skills_abilities: formData.knowledgeSkillsAbilities.map((k: any) => k.text),
+      willingness_statements: formData.willingnessStatements.map((w: any) => w.text),
+      security_screenings: formData.securityScreenings.map((s: any) => s.text),
+
+      // Handling behavioural competencies
+      behavioural_competencies: formData.behavioural_competencies.map((bc: any) => ({
+        behavioural_competency_id: bc.behavioural_competency.id,
+        // job_profile_id will be set by the server
+      })),
+
+      total_comp_create_form_misc: JSON.stringify({
+        markAllNonEditable: formData.markAllNonEditable,
+      }),
+
+      // Additional fields if required...
+    };
+  }
+
+  const [createJobProfile, { isLoading: isSaving, data: createResponse, error: createError }] =
+    useCreateJobProfileMutation();
+
+  async function submitJobProfileData(transformedData: CreateJobProfileInput) {
+    try {
+      const response = await createJobProfile(transformedData).unwrap();
+      console.log('Job Profile Created: ', response);
+    } catch (error) {
+      console.error('Error creating job profile: ', error);
+    }
+  }
+
   const save = () => {
     console.log('save');
     const basicDetails = getBasicDetailsValues();
@@ -1688,6 +1844,10 @@ export const TotalCompCreateProfilePage = () => {
     };
 
     console.log('Combined form data:', combinedData);
+
+    const transformedData = transformFormDataToApiSchema(combinedData);
+    console.log('transformedData: ', transformedData);
+    submitJobProfileData(transformedData);
   };
 
   if (!ministriesData || !careerGroupData) return <>Loading..</>;

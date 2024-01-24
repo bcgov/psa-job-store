@@ -322,9 +322,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
           ...(jobFamilyFilter !== null
             ? [
                 {
-                  job_family_id: {
-                    in: JSON.parse(`[${jobFamilyFilter}]`),
-                  },
+                  jobFamilies: { some: { jobFamilyId: { in: JSON.parse(`[${jobFamilyFilter}]`) } } },
                 },
               ]
             : []),

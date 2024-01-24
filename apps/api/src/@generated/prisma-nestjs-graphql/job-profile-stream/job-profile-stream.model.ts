@@ -2,7 +2,7 @@ import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobProfileJobFamily } from '../job-profile-job-family/job-profile-job-family.model';
-import { JobProfile } from '../job-profile/job-profile.model';
+import { JobProfileStreamLink } from '../job-profile-stream-link/job-profile-stream-link.model';
 
 @ObjectType()
 export class JobProfileStream {
@@ -18,6 +18,6 @@ export class JobProfileStream {
   @Field(() => JobProfileJobFamily, { nullable: false })
   job_family?: JobProfileJobFamily;
 
-  @Field(() => [JobProfile], { nullable: true })
-  job_profiles?: Array<JobProfile>;
+  @Field(() => [JobProfileStreamLink], { nullable: true })
+  jobProfiles?: Array<JobProfileStreamLink>;
 }

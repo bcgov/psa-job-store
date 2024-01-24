@@ -3,7 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { JobProfileJobFamilyCreateNestedOneWithoutJobProfileStreamInput } from '../job-profile-job-family/job-profile-job-family-create-nested-one-without-job-profile-stream.input';
 
 @InputType()
-export class JobProfileStreamCreateWithoutJob_profilesInput {
+export class JobProfileStreamCreateWithoutJobProfilesInput {
   @Field(() => String, { nullable: false })
   name!: string;
 

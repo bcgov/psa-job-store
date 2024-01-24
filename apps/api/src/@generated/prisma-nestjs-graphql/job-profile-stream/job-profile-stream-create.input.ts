@@ -1,7 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { JobProfileJobFamilyCreateNestedOneWithoutJobProfileStreamInput } from '../job-profile-job-family/job-profile-job-family-create-nested-one-without-job-profile-stream.input';
-import { JobProfileCreateNestedManyWithoutStreamInput } from '../job-profile/job-profile-create-nested-many-without-stream.input';
+import { JobProfileStreamLinkCreateNestedManyWithoutStreamInput } from '../job-profile-stream-link/job-profile-stream-link-create-nested-many-without-stream.input';
 
 @InputType()
 export class JobProfileStreamCreateInput {
@@ -11,6 +11,6 @@ export class JobProfileStreamCreateInput {
   @Field(() => JobProfileJobFamilyCreateNestedOneWithoutJobProfileStreamInput, { nullable: false })
   job_family!: JobProfileJobFamilyCreateNestedOneWithoutJobProfileStreamInput;
 
-  @Field(() => JobProfileCreateNestedManyWithoutStreamInput, { nullable: true })
-  job_profiles?: JobProfileCreateNestedManyWithoutStreamInput;
+  @Field(() => JobProfileStreamLinkCreateNestedManyWithoutStreamInput, { nullable: true })
+  jobProfiles?: JobProfileStreamLinkCreateNestedManyWithoutStreamInput;
 }

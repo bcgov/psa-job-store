@@ -44,7 +44,11 @@ export class JobProfileService {
             classification: true,
           },
         },
-        job_family: true,
+        jobFamilies: {
+          include: {
+            jobFamily: true,
+          },
+        },
         organizations: {
           include: {
             organization: true,
@@ -52,7 +56,11 @@ export class JobProfileService {
         },
         reports_to: true,
         role: true,
-        stream: true,
+        streams: {
+          include: {
+            stream: true,
+          },
+        },
         context: true,
       },
     });
@@ -118,10 +126,18 @@ export class JobProfileService {
             classification: true,
           },
         },
-        job_family: true,
+        jobFamilies: {
+          include: {
+            jobFamily: true,
+          },
+        },
         organizations: true,
         role: true,
-        stream: true,
+        streams: {
+          include: {
+            stream: true,
+          },
+        },
         context: true,
       },
     });
@@ -188,7 +204,7 @@ export class JobProfileService {
     return this.prisma.jobProfile.create({
       data: {
         state: data.state,
-        stream: data.stream,
+        streams: data.streams,
         title: data.title,
         context: data.context,
         overview: data.overview,
@@ -198,10 +214,17 @@ export class JobProfileService {
         classifications: data.classifications,
         behavioural_competencies: data.behavioural_competencies,
         reports_to: data.reports_to,
-        job_family: data.job_family,
+        jobFamilies: data.jobFamilies,
         organizations: data.organizations,
         role: data.role,
         type: data.type,
+        program_overview: data.program_overview,
+        review_required: data.review_required,
+        professional_registration_requirements: data.professional_registration_requirements,
+        preferences: data.preferences,
+        knowledge_skills_abilities: data.knowledge_skills_abilities,
+        willingness_statements: data.willingness_statements,
+        security_screenings: data.security_screenings,
       } as any as Prisma.JobProfileCreateInput, // To prevent Excessive Stack Depth error,
     });
   }

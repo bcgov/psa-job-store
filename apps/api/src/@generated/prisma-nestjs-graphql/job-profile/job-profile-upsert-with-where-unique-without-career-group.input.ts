@@ -10,7 +10,7 @@ import { JobProfileCreateWithoutCareer_groupInput } from './job-profile-create-w
 export class JobProfileUpsertWithWhereUniqueWithoutCareer_groupInput {
   @Field(() => JobProfileWhereUniqueInput, { nullable: false })
   @Type(() => JobProfileWhereUniqueInput)
-  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileUpdateWithoutCareer_groupInput, { nullable: false })
   @Type(() => JobProfileUpdateWithoutCareer_groupInput)

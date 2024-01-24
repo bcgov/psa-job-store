@@ -579,7 +579,7 @@ export const DownloadJobProfileComponent = ({
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: `${defaultJobProfile?.job_family?.name}`,
+                                text: `${defaultJobProfile?.jobFamilies[0].jobFamily?.name}`,
                               }),
                             ],
                           }),
@@ -608,7 +608,7 @@ export const DownloadJobProfileComponent = ({
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: `${defaultJobProfile?.stream?.name}`,
+                                text: `${defaultJobProfile?.streams[0]?.stream?.name}`,
                               }),
                             ],
                           }),

@@ -18,5 +18,5 @@ export class JobProfileCreateNestedOneWithoutClassificationsInput {
 
   @Field(() => JobProfileWhereUniqueInput, { nullable: true })
   @Type(() => JobProfileWhereUniqueInput)
-  connect?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  connect?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 }

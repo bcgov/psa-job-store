@@ -5,7 +5,7 @@ import { JobProfileStreamWhereInput } from './job-profile-stream-where.input';
 import { IntFilter } from '../prisma/int-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { JobProfileJobFamilyRelationFilter } from '../job-profile-job-family/job-profile-job-family-relation-filter.input';
-import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
+import { JobProfileStreamLinkListRelationFilter } from '../job-profile-stream-link/job-profile-stream-link-list-relation-filter.input';
 
 @InputType()
 export class JobProfileStreamWhereUniqueInput {
@@ -30,6 +30,6 @@ export class JobProfileStreamWhereUniqueInput {
   @Field(() => JobProfileJobFamilyRelationFilter, { nullable: true })
   job_family?: JobProfileJobFamilyRelationFilter;
 
-  @Field(() => JobProfileListRelationFilter, { nullable: true })
-  job_profiles?: JobProfileListRelationFilter;
+  @Field(() => JobProfileStreamLinkListRelationFilter, { nullable: true })
+  jobProfiles?: JobProfileStreamLinkListRelationFilter;
 }

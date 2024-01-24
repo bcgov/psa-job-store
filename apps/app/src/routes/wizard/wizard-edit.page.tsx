@@ -5,7 +5,9 @@ import {
   ClassificationModel,
   ClassificationModelWrapped,
   GetClassificationsResponse,
+  JobFamily,
   JobProfileModel,
+  Stream,
   TrackedFieldArrayItem,
 } from '../../redux/services/graphql-api/job-profile-types';
 import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
@@ -74,11 +76,12 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
     // this is so that the edited data can be displayed for review (since this component uses API format data)
     const output: JobProfileModel = {
       id: parseInt(input.id),
-      stream: 'USER',
+      type: 'USER',
       title: { value: input['title.value'], isCustom: input['title.isCustom'], disabled: input['title.disabled'] },
       number: parseInt(input.number),
       organization_id: '-1',
-      family_id: -1,
+      jobFamilies: [] as JobFamily[],
+      streams: [] as Stream[],
       context: input.context,
       overview: {
         value: input['overview.value'],

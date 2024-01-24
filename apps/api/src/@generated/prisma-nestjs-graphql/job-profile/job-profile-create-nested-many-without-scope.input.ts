@@ -23,5 +23,5 @@ export class JobProfileCreateNestedManyWithoutScopeInput {
 
   @Field(() => [JobProfileWhereUniqueInput], { nullable: true })
   @Type(() => JobProfileWhereUniqueInput)
-  connect?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>>;
+  connect?: Array<Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>>;
 }

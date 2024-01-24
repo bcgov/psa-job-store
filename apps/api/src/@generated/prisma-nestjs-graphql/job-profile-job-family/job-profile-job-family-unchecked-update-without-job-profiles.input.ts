@@ -4,7 +4,7 @@ import { Int } from '@nestjs/graphql';
 import { JobProfileStreamUncheckedUpdateManyWithoutJob_familyNestedInput } from '../job-profile-stream/job-profile-stream-unchecked-update-many-without-job-family-nested.input';
 
 @InputType()
-export class JobProfileJobFamilyUncheckedUpdateWithoutJob_profilesInput {
+export class JobProfileJobFamilyUncheckedUpdateWithoutJobProfilesInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 

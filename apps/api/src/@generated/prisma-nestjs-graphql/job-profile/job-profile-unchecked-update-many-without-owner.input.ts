@@ -14,9 +14,6 @@ export class JobProfileUncheckedUpdateManyWithoutOwnerInput {
   career_group_id?: number;
 
   @Field(() => Int, { nullable: true })
-  job_family_id?: number;
-
-  @Field(() => Int, { nullable: true })
   role_id?: number;
 
   @Field(() => Int, { nullable: true })
@@ -28,14 +25,17 @@ export class JobProfileUncheckedUpdateManyWithoutOwnerInput {
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 
-  @Field(() => Int, { nullable: true })
-  stream_id?: number;
-
   @Field(() => JobProfileType, { nullable: true })
   type?: keyof typeof JobProfileType;
 
   @Field(() => Date, { nullable: true })
   updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  program_overview?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  review_required?: boolean;
 
   @Field(() => String, { nullable: true })
   title?: string;
@@ -51,4 +51,22 @@ export class JobProfileUncheckedUpdateManyWithoutOwnerInput {
 
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  professional_registration_requirements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  preferences?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  knowledge_skills_abilities?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  willingness_statements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  security_screenings?: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  total_comp_create_form_misc?: any;
 }

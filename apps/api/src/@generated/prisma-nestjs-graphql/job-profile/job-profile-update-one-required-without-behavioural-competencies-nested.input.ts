@@ -24,7 +24,7 @@ export class JobProfileUpdateOneRequiredWithoutBehavioural_competenciesNestedInp
 
   @Field(() => JobProfileWhereUniqueInput, { nullable: true })
   @Type(() => JobProfileWhereUniqueInput)
-  connect?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  connect?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileUpdateToOneWithWhereWithoutBehavioural_competenciesInput, { nullable: true })
   @Type(() => JobProfileUpdateToOneWithWhereWithoutBehavioural_competenciesInput)

@@ -84,11 +84,7 @@ export class JobProfileResolver {
   }
 
   @Mutation(() => Int)
-  async createJobProfile(
-    // @CurrentUser() { id: userId }: Express.User,
-    @Args({ name: 'data', type: () => JobProfileCreateInput }) data: JobProfileCreateInput,
-  ) {
-    // console.log('create DATA: ', data);
+  async createJobProfile(@Args({ name: 'data', type: () => JobProfileCreateInput }) data: JobProfileCreateInput) {
     const newJobProfile = await this.jobProfileService.createJobProfile(data);
     return newJobProfile.id;
   }

@@ -8,12 +8,12 @@ import { JobProfileClassificationUpdateManyWithoutJob_profileNestedInput } from 
 import { JobProfileOrganizationUpdateManyWithoutJob_profileNestedInput } from '../job-profile-organization/job-profile-organization-update-many-without-job-profile-nested.input';
 import { JobProfileCareerGroupUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-career-group/job-profile-career-group-update-one-without-job-profiles-nested.input';
 import { JobProfileContextUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-update-one-without-job-profile-nested.input';
-import { JobProfileJobFamilyUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-job-family/job-profile-job-family-update-one-without-job-profiles-nested.input';
 import { JobProfileRoleUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-role/job-profile-role-update-one-without-job-profiles-nested.input';
 import { JobProfileRoleTypeUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-role-type/job-profile-role-type-update-one-without-job-profiles-nested.input';
 import { JobProfileScopeUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-scope/job-profile-scope-update-one-without-job-profiles-nested.input';
-import { JobProfileStreamUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-stream/job-profile-stream-update-one-without-job-profiles-nested.input';
 import { UserUpdateOneWithoutJobProfileNestedInput } from '../user/user-update-one-without-job-profile-nested.input';
+import { JobProfileJobFamilyLinkUpdateManyWithoutJobProfileNestedInput } from '../job-profile-job-family-link/job-profile-job-family-link-update-many-without-job-profile-nested.input';
+import { JobProfileStreamLinkUpdateManyWithoutJobProfileNestedInput } from '../job-profile-stream-link/job-profile-stream-link-update-many-without-job-profile-nested.input';
 import { JobProfileReportsToUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-update-many-without-job-profile-nested.input';
 import { PositionRequestUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-update-many-without-parent-job-profile-nested.input';
 
@@ -27,6 +27,12 @@ export class JobProfileUpdateWithoutBehavioural_competenciesInput {
 
   @Field(() => Date, { nullable: true })
   updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  program_overview?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  review_required?: boolean;
 
   @Field(() => String, { nullable: true })
   title?: string;
@@ -43,6 +49,24 @@ export class JobProfileUpdateWithoutBehavioural_competenciesInput {
   @Field(() => [String], { nullable: true })
   requirements?: Array<string>;
 
+  @Field(() => [String], { nullable: true })
+  professional_registration_requirements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  preferences?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  knowledge_skills_abilities?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  willingness_statements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  security_screenings?: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  total_comp_create_form_misc?: any;
+
   @Field(() => JobProfileClassificationUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   classifications?: JobProfileClassificationUpdateManyWithoutJob_profileNestedInput;
 
@@ -55,9 +79,6 @@ export class JobProfileUpdateWithoutBehavioural_competenciesInput {
   @Field(() => JobProfileContextUpdateOneWithoutJob_profileNestedInput, { nullable: true })
   context?: JobProfileContextUpdateOneWithoutJob_profileNestedInput;
 
-  @Field(() => JobProfileJobFamilyUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
-  job_family?: JobProfileJobFamilyUpdateOneWithoutJob_profilesNestedInput;
-
   @Field(() => JobProfileRoleUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
   role?: JobProfileRoleUpdateOneWithoutJob_profilesNestedInput;
 
@@ -67,11 +88,14 @@ export class JobProfileUpdateWithoutBehavioural_competenciesInput {
   @Field(() => JobProfileScopeUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
   scope?: JobProfileScopeUpdateOneWithoutJob_profilesNestedInput;
 
-  @Field(() => JobProfileStreamUpdateOneWithoutJob_profilesNestedInput, { nullable: true })
-  stream?: JobProfileStreamUpdateOneWithoutJob_profilesNestedInput;
-
   @Field(() => UserUpdateOneWithoutJobProfileNestedInput, { nullable: true })
   owner?: UserUpdateOneWithoutJobProfileNestedInput;
+
+  @Field(() => JobProfileJobFamilyLinkUpdateManyWithoutJobProfileNestedInput, { nullable: true })
+  jobFamilies?: JobProfileJobFamilyLinkUpdateManyWithoutJobProfileNestedInput;
+
+  @Field(() => JobProfileStreamLinkUpdateManyWithoutJobProfileNestedInput, { nullable: true })
+  streams?: JobProfileStreamLinkUpdateManyWithoutJobProfileNestedInput;
 
   @Field(() => JobProfileReportsToUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   reports_to?: JobProfileReportsToUpdateManyWithoutJob_profileNestedInput;

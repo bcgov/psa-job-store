@@ -59,6 +59,25 @@ export interface GetClassificationsResponse {
   classifications: ClassificationModel[];
 }
 
+interface JobFamilyDetail {
+  id: number;
+  name: string;
+}
+
+interface StreamDetail {
+  id: number;
+  job_family_id: number;
+  name: string;
+}
+
+export interface JobFamily {
+  jobFamily: JobFamilyDetail;
+}
+
+export interface Stream {
+  stream: StreamDetail;
+}
+
 export interface JobProfileModel {
   id: number;
   accountabilities: Accountabilities;
@@ -66,12 +85,13 @@ export interface JobProfileModel {
   classifications: ClassificationModelWrapped[] | null;
   requirements: (string | TrackedFieldArrayItem)[];
   organization_id: string;
-  family_id: number;
-  stream: string;
+  streams: Stream[];
+  jobFamilies: JobFamily[];
   title: string | TrackedFieldArrayItem;
   number: number;
   context: ContextModel;
   overview: string | TrackedFieldArrayItem;
+  type: string;
 }
 
 export interface BehaviouralCompetencies {
@@ -133,6 +153,7 @@ export interface CreateJobProfileInput {
   classification: ClassificationConnectInput;
   parent: ParentConnectInput;
   state: string;
+  program_overview: string;
 }
 
 export interface CreateJobProfileResponse {
