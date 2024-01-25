@@ -180,6 +180,7 @@ export class PositionRequestApiService {
         updated_at: true,
         parent_job_profile: true,
         approved_at: true,
+        submitted_at: true,
       },
     });
 
@@ -478,11 +479,6 @@ export class PositionRequestApiService {
 
   async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
     // todo: AL-146 - tried to do this with a spread operator, but getting an error
-    let test = '';
-    if (id == 0) test = 'test';
-    test = 'test2';
-    if (test == 'test2') test = 'test3';
-
     const updatePayload: any = {};
 
     if (updateData.step !== undefined) {

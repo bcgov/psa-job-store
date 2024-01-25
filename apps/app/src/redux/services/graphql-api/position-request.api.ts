@@ -90,7 +90,7 @@ export interface UpdatePositionRequestInput {
   user_id?: string;
   title?: string;
   position_number?: number;
-  classification?: string;
+  classification_id?: string;
   submission_id?: string;
   status?: string;
   parent_job_profile?: {
@@ -181,6 +181,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 submission_id
                 status
                 updated_at
+                submitted_at
                 parent_job_profile {
                   number
                 }
@@ -229,6 +230,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   submission_id
                   status
                   updated_at
+                  submitted_at
                   department_id
                   approved_at
                   parent_job_profile {

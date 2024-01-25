@@ -2,6 +2,7 @@ import { Button } from 'antd';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
+import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import JobProfiles from '../job-profiles/components/job-profiles.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -22,6 +23,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack }) => {
   // const { id } = useParams();
   const { handleSubmit } = useForm<IFormInput>();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedClassificationId, setSelectedClassificationId] = useState<string | undefined>();
+
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { positionRequestId } = useWizardContext();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -37,6 +40,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack }) => {
           step: 2,
           profile_json: null,
           parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
+          classification_id: selectedClassificationId,
         }).unwrap();
       setPositionRequestProfileId(parseInt(selectedProfileId));
       if (onNext) onNext();
@@ -81,6 +85,11 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack }) => {
     if (onBack) onBack();
   };
 
+  const onSelectProfile = (profile: JobProfileModel) => {
+    setSelectedProfileId(profile.id.toString());
+    if (profile?.classifications != null) setSelectedClassificationId(profile?.classifications[0].classification.id);
+  };
+
   return (
     <WizardPageWrapper
       title="Choose a job profile"
@@ -96,7 +105,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack }) => {
       <WizardSteps current={1}></WizardSteps>
       <JobProfiles
         searchParams={searchParams}
-        onSelectProfile={setSelectedProfileId}
+        onSelectProfile={onSelectProfile}
         onUseProfile={handleSubmit(onSubmit)}
       />
     </WizardPageWrapper>

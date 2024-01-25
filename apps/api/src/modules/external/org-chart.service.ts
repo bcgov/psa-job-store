@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { isEmpty } from 'class-validator';
-import { Classification, Department } from '../../@generated/prisma-nestjs-graphql';
 import { ClassificationService } from './classification.service';
 import { DepartmentService } from './department.service';
 import { Employee } from './models/employee.model';
@@ -10,29 +9,22 @@ import { PeoplesoftService } from './peoplesoft.service';
 
 @Injectable()
 export class OrgChartService {
-  private classifications: Classification[];
-  private departments: Department[];
-
   constructor(
     private readonly classificationService: ClassificationService,
     private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
-  ) {
-    (async () => {
-      this.classifications = await this.classificationService.getClassifications({});
-      this.departments = await this.departmentService.getDepartments();
-    })();
-  }
+  ) {}
 
   private async populateOrgChart(
     result: Record<string, any>,
     edgeMap: Map<string, OrgChartEdge>,
     nodeMap: Map<string, OrgChartNode>,
   ) {
+    const classifications = await this.classificationService.getClassifications({});
+    const departments = await this.departmentService.getDepartments();
+
     const positionIds = (result?.data?.query?.rows ?? []).map((row) => row['A.POSITION_NBR']);
     const employees: Map<string, Employee[]> = await this.peoplesoftService.getEmployeesForPositions(positionIds);
-
-    console.log('result: ', result);
 
     // Loop through response and generate the tree for everyone in the _current department_
     (result?.data?.query?.rows ?? []).forEach((position) => {
@@ -48,11 +40,11 @@ export class OrgChartService {
       }
 
       const classification = !isEmpty(position['A.JOBCODE'])
-        ? this.classifications.find((classification) => classification.id === position['A.JOBCODE'])
+        ? classifications.find((classification) => classification.id === position['A.JOBCODE'])
         : null;
 
       const department = !isEmpty(position['A.DEPTID'])
-        ? this.departments.find((department) => department.id === position['A.DEPTID'])
+        ? departments.find((department) => department.id === position['A.DEPTID'])
         : null;
 
       // If the node doesn't exist, create it.
