@@ -37,7 +37,7 @@ npx -w api prisma db seed
 to apply the seeds to the database. If the database has been previously seeded, you should instead run
 
 ```
-npx -w api prisma db push --force-reset
+npx -w api prisma db push --force-reset --skip-generate
 
 npx -w api prisma db seed
 ```

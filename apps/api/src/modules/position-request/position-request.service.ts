@@ -322,6 +322,13 @@ export class PositionRequestApiService {
         ...whereConditions,
         status: { equals: 'COMPLETED' },
       };
+    } else if (userRoles.includes('classification')) {
+      // for classification, return the count of all entries that are not in draft state, across the board
+      whereConditions = {
+        ...whereConditions,
+        // classificationAssignedTo: { equals: userId }, // todo: enable this after testing session
+        status: { not: { equals: 'DRAFT' } },
+      };
     } else {
       whereConditions = {
         ...whereConditions,
