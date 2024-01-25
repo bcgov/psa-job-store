@@ -359,7 +359,6 @@ export class PositionRequestApiService {
     const escalatedCount = await getCountForStatus(PositionRequestStatus.ESCALATED);
     const actionRequiredCount = await getCountForStatus(PositionRequestStatus.ACTION_REQUIRED);
 
-    console.log('counts: ', draftCount, completedCount, inReviewCount);
     // Return the counts
     return {
       draft: draftCount,
