@@ -21,6 +21,7 @@ import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import '../../../components/app/common/css/filtered-table.component.css';
 import { useLazyGetPositionRequestsQuery } from '../../../redux/services/graphql-api/position-request.api';
+import { formatDateTime } from '../../../utils/Utils';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -97,18 +98,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       );
     }
   }, [data, mode]);
-
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns 0-11
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
 
   const getMenuContent = (record: any) => {
     return (
@@ -327,6 +316,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             title: 'Submitted at',
             dataIndex: 'submitted_at',
             key: 'submitted_at',
+            render: (text: string) => formatDateTime(text),
           },
         ]
       : []),
@@ -339,6 +329,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             title: 'Approved at',
             dataIndex: 'approved_at',
             key: 'approved_at',
+            render: (text: string) => formatDateTime(text),
           },
         ]
       : []),
@@ -600,7 +591,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             </div>
           ) : (
             <>
-              {mode == 'classification' ? (
+              {mode == 'classification' || mode == 'total-compensation' ? (
                 <>
                   <div
                     style={{

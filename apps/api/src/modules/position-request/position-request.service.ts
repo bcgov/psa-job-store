@@ -180,6 +180,7 @@ export class PositionRequestApiService {
         updated_at: true,
         parent_job_profile: true,
         approved_at: true,
+        submitted_at: true,
       },
     });
 

@@ -28,6 +28,7 @@ import {
   useLazyGetJobProfilesDraftsQuery,
   useLazyGetJobProfilesQuery,
 } from '../../../redux/services/graphql-api/job-profile.api';
+import { formatDateTime } from '../../../utils/Utils';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -191,11 +192,29 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     // },
     {
       sorter: allowSorting,
-      defaultSortOrder: getSortOrder('job_family'),
+      defaultSortOrder: getSortOrder('jobFamilies'),
       title: 'Job Family',
-      dataIndex: 'job_family',
-      key: 'job_family',
-      render: (jobFamily: any) => jobFamily?.name,
+      dataIndex: 'jobFamilies',
+      key: 'jobFamilies',
+      render: (jobFamilies: any[]) => {
+        if (jobFamilies.length === 0) {
+          return '-';
+        } else if (jobFamilies.length === 1) {
+          return jobFamilies[0].jobFamily.name;
+        }
+
+        // Create a string with all ministry names
+        const jobFamilyNames = jobFamilies.map((jobFamily) => jobFamily.jobFamily.name).join(', ');
+
+        return (
+          <span>
+            {jobFamilies.length}{' '}
+            <Tooltip title={jobFamilyNames}>
+              <InfoCircleOutlined />
+            </Tooltip>
+          </span>
+        );
+      },
     },
     {
       sorter: false,
@@ -379,18 +398,6 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     if (!newSortOrder) setSortField(null);
 
     if (handleTableChangeCallback) handleTableChangeCallback(pagination, _filters, sorter);
-  };
-
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns 0-11
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

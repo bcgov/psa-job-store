@@ -56,11 +56,11 @@ export class PositionRequestOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrderInput, { nullable: true })
   submission_id?: SortOrderInput;
 
-  @Field(() => SortOrderInput, { nullable: true })
-  submitted_at?: SortOrderInput;
+  @Field(() => SortOrder, { nullable: true })
+  submitted_at?: keyof typeof SortOrder;
 
-  @Field(() => SortOrderInput, { nullable: true })
-  approved_at?: SortOrderInput;
+  @Field(() => SortOrder, { nullable: true })
+  approved_at?: keyof typeof SortOrder;
 
   @Field(() => SortOrderInput, { nullable: true })
   status?: SortOrderInput;
