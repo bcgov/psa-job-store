@@ -59,11 +59,11 @@ export class PositionRequestGroupBy {
   @Field(() => String, { nullable: true })
   submission_id?: string;
 
-  @Field(() => Date, { nullable: true })
-  submitted_at?: Date | string;
+  @Field(() => Date, { nullable: false })
+  submitted_at!: Date | string;
 
-  @Field(() => Date, { nullable: true })
-  approved_at?: Date | string;
+  @Field(() => Date, { nullable: false })
+  approved_at!: Date | string;
 
   @Field(() => PositionRequestStatus, { nullable: true })
   status?: keyof typeof PositionRequestStatus;

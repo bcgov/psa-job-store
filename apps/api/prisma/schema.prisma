@@ -53,8 +53,8 @@ model PositionRequest {
   user_name                String? // this is just to satisfy type definition, no data is stored here AL-146
   email                    String? // this is just to satisfy type definition, no data is stored here AL-146
   submission_id            String?
-  submitted_at             DateTime?
-  approved_at              DateTime?
+  submitted_at             DateTime               @default(now())
+  approved_at              DateTime               @default(now())
   status                   PositionRequestStatus?
   updated_at               DateTime               @default(now()) @updatedAt
 

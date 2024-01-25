@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Empty, Pagination, Skeleton, Typography } from 'antd';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile-types';
+import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileCard } from './job-profile-card.component';
 import styles from './job-profile-search-results.module.css';
 
@@ -10,7 +10,7 @@ const { Text } = Typography;
 export interface JobProfileSearchResultsProps {
   data: GetJobProfilesResponse | undefined;
   isLoading: boolean;
-  onSelectProfile?: (id: string) => void;
+  onSelectProfile?: (profile: JobProfileModel) => void;
   currentPage: number;
   pageSize: number;
   totalResults: number;
@@ -97,7 +97,7 @@ export const JobProfileSearchResults = ({
           <Empty data-testid="empty-state" style={{ margin: '1rem' }} />
         ) : (
           (data?.jobProfiles ?? []).map((d) => (
-            <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d.id.toString())}>
+            <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d)}>
               <ReplaceLink tabIndex={-1} to={getLinkPath(d.id)}>
                 <JobProfileCard
                   data={d}

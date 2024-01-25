@@ -27,6 +27,7 @@ import {
   Tooltip,
   TreeSelect,
   Typography,
+  notification,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
@@ -1740,8 +1741,18 @@ export const TotalCompCreateProfilePage = () => {
   async function submitJobProfileData(transformedData: CreateJobProfileInput) {
     try {
       const response = await createJobProfile(transformedData).unwrap();
+      notification.success({
+        message: 'Success',
+        description: 'Job profile saved successfully.',
+        duration: 4, // Duration in seconds
+      });
       console.log('Job Profile Created ok: ', response);
     } catch (error) {
+      notification.error({
+        message: 'Error',
+        description: 'There was an error saving the job profile.',
+        duration: 4, // Duration in seconds
+      });
       console.error('Error creating job profile: ', error);
     }
   }

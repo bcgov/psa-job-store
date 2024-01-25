@@ -55,6 +55,14 @@ oc get secret/artifacts-default-[random] -o json | jq '.data.username' | tr -d "
 oc get secret/artifacts-default-[random] -o json | jq '.data.password' | tr -d "\"" | base64 -d
 ```
 
+## Run Prisma Studio with a remote database
+
+To run Prisma Studio that is connected to a remote database follow these steps:
+
+- Setup local port forwarding using `oc port-forward POD_NAME 5432` command, where POD_NAME is the name of the PostgreSQL pod
+- Update .env file entry for the `DATABASE_URL` parameter, change it to `postgresql://username:password@localhost:5432/db-name`. You can find the database address from the secrets in openshift (ensure it's `@localhost`)
+- Run prisma studio as usual using `npx -w api prisma studio`
+
 ## DB Troubleshooting
 
 _Note_ Below is for high availbility configuration. For MVP, configuraiton is using single database pod
