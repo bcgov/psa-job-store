@@ -46,6 +46,12 @@ export class PositionRequestStatusCounts {
 
   @Field(() => Int)
   total: number;
+
+  @Field(() => Int)
+  escalatedCount: number;
+
+  @Field(() => Int)
+  actionRequiredCount: number;
 }
 
 function generateShortId(length: number): string {
@@ -350,13 +356,18 @@ export class PositionRequestApiService {
     const draftCount = await getCountForStatus(PositionRequestStatus.DRAFT);
     const completedCount = await getCountForStatus(PositionRequestStatus.COMPLETED);
     const inReviewCount = await getCountForStatus(PositionRequestStatus.IN_REVIEW);
+    const escalatedCount = await getCountForStatus(PositionRequestStatus.ESCALATED);
+    const actionRequiredCount = await getCountForStatus(PositionRequestStatus.ACTION_REQUIRED);
 
+    console.log('counts: ', draftCount, completedCount, inReviewCount);
     // Return the counts
     return {
       draft: draftCount,
       completed: completedCount,
       inReview: inReviewCount,
-      total: draftCount + completedCount + inReviewCount,
+      escalatedCount: escalatedCount,
+      actionRequiredCount: actionRequiredCount,
+      total: draftCount + completedCount + inReviewCount + escalatedCount + actionRequiredCount,
     };
   }
 
