@@ -23,9 +23,10 @@ export const AppHeader = () => {
       }
 
       // Also, sign out from OIDC if necessary
-      auth.signoutSilent(); // can also do signoutPopup to show popup. signoutRedirect() is inconvinient as it stays on "you have been logged out" page
-
-      window.location.reload();
+      auth.signoutRedirect({
+        post_logout_redirect_uri: `${import.meta.env.VITE_KEYCLOAK_REDIRECT_URL}?logout=true`,
+        redirectMethod: 'replace',
+      }); // can also do signoutPopup to show popup. signoutRedirect() is inconvinient as it stays on "you have been logged out" page
     } catch (error) {
       console.error('Logout failed', error);
     }
@@ -53,28 +54,30 @@ export const AppHeader = () => {
         </Col>
 
         <Col className={styles.right}>
-          <div className={styles.headerToolbar}>
-            <div className={styles.iconWrapper}>
-              <QuestionCircleOutlined style={{ color: 'white' }} />
-            </div>
-            {/* <div className={styles.userContainer}>
+          {auth.user != null && (
+            <div className={styles.headerToolbar}>
+              <div className={styles.iconWrapper}>
+                <QuestionCircleOutlined style={{ color: 'white' }} />
+              </div>
+              {/* <div className={styles.userContainer}>
               <UserOutlined style={{ color: 'white' }} />
               <div className={styles.userTextContainer}>
                 <Text className={styles.userText}>{auth.user?.profile.name}</Text>
               </div>
             </div> */}
 
-            <Popover content={content} trigger="click">
-              <Button
-                aria-haspopup="true"
-                aria-expanded="false"
-                style={{ background: 'none', border: 'none', fontWeight: '600' }}
-                icon={<UserOutlined style={{ color: 'white' }} />}
-              >
-                <Text style={{ color: 'white' }}>{auth.user?.profile.name}</Text>
-              </Button>
-            </Popover>
-          </div>
+              <Popover content={content} trigger="click">
+                <Button
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  style={{ background: 'none', border: 'none', fontWeight: '600' }}
+                  icon={<UserOutlined style={{ color: 'white' }} />}
+                >
+                  <Text style={{ color: 'white' }}>{auth.user?.profile.name}</Text>
+                </Button>
+              </Popover>
+            </div>
+          )}
         </Col>
       </Row>
     </Header>
