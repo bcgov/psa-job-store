@@ -34,6 +34,7 @@ import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { useNavigate, useParams } from 'react-router-dom';
 import MinistriesSelect from '../../components/app/common/components/ministries-select.component';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
@@ -48,7 +49,8 @@ import { useGetJobProfileScopesQuery } from '../../redux/services/graphql-api/jo
 import { useGetJobProfileStreamsQuery } from '../../redux/services/graphql-api/job-profile-stream';
 import { CreateJobProfileInput } from '../../redux/services/graphql-api/job-profile-types';
 import {
-  useCreateJobProfileMutation,
+  useCreateOrUpdateJobProfileMutation,
+  useGetJobProfileQuery,
   useGetJobProfilesDraftsMinistriesQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
   useLazyIsJobProfileNumberAvailableQuery,
@@ -67,6 +69,24 @@ const { Option } = Select;
 const { Text } = Typography;
 
 export const TotalCompCreateProfilePage = () => {
+  const { id: urlId } = useParams();
+  const [id, setId] = useState(urlId);
+  const navigate = useNavigate();
+
+  // Update local state when URL parameter changes
+  useEffect(() => {
+    setId(urlId);
+  }, [urlId]);
+
+  const { data: jobProfileData, isLoading: isLoadingJobProfile } = useGetJobProfileQuery(
+    { id: parseInt(id ?? '') },
+    {
+      skip: !id,
+    },
+  );
+
+  // console.log('=== TotalCompCreateProfilePage, id: ', id, jobProfileData);
+
   // BASIC DETAILS FORM
   const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
   // const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
@@ -88,10 +108,12 @@ export const TotalCompCreateProfilePage = () => {
     watch,
     setValue,
     getValues: getBasicDetailsValues,
+    reset,
   } = useForm({
     defaultValues: {
       jobTitle: '',
       jobStoreNumber: '',
+      originalJobStoreNumber: '',
       employeeGroup: null,
       classification: null,
       jobRole: null,
@@ -116,8 +138,10 @@ export const TotalCompCreateProfilePage = () => {
 
   // Fetch the next available number initially
   useEffect(() => {
+    if (id) return;
+
     getNextAvailableNumber();
-  }, [getNextAvailableNumber]);
+  }, [getNextAvailableNumber, id]);
 
   // Set the fetched number as the default value
   useEffect(() => {
@@ -127,8 +151,15 @@ export const TotalCompCreateProfilePage = () => {
   }, [nextNumberData, setValue]);
 
   // Function to fetch the next available number
-  const fetchNextNumber = async () => {
+  const fetchNextNumber = useCallback(async () => {
     // Trigger the query to get the next available number
+    const originalNumberValue = parseInt(getBasicDetailsValues('originalJobStoreNumber'), 10);
+
+    if (originalNumberValue) {
+      setValue('jobStoreNumber', originalNumberValue.toString());
+      return;
+    }
+
     setFetchingNextNumber(true);
     await getNextAvailableNumber()
       .unwrap()
@@ -144,11 +175,17 @@ export const TotalCompCreateProfilePage = () => {
       .finally(() => {
         setFetchingNextNumber(false);
       });
-  };
+  }, [getNextAvailableNumber, setValue, setFetchingNextNumber, getBasicDetailsValues]);
 
   useEffect(() => {
     console.log('useEffect jobStoreNumber: ', jobStoreNumber);
     const numberValue = parseInt(jobStoreNumber, 10);
+    const originalNumberValue = parseInt(getBasicDetailsValues('originalJobStoreNumber'), 10);
+    if (numberValue === originalNumberValue) {
+      setValidationStatus('valid');
+      return;
+    }
+
     if (isNaN(numberValue)) {
       setValidationStatus('invalid');
     } else {
@@ -160,7 +197,7 @@ export const TotalCompCreateProfilePage = () => {
           setValidationStatus('invalid'); // handle error case
         });
     }
-  }, [jobStoreNumber, nextNumberData, checkNumberAvailability]);
+  }, [jobStoreNumber, nextNumberData, checkNumberAvailability, getBasicDetailsValues]);
 
   // professions field array config
   const {
@@ -218,34 +255,160 @@ export const TotalCompCreateProfilePage = () => {
 
   // PROFILE FORM
 
+  interface TextItem {
+    text: string;
+    id?: string;
+  }
+
   const {
     control: profileControl,
     handleSubmit: profileControlSubmit,
     watch: profileWatch,
     setValue: profileSetValue,
     getValues: getProfileValues,
+    reset: resetProfileForm,
   } = useForm({
     defaultValues: {
       overview: '',
       programOverview: '',
       accountabilities: [] as AccountabilityItem[],
-      optionalAccountabilities: [] as TextItem[],
-      educationAndWorkExperiences: [] as TextItem[],
+      educationAndWorkExperiences: [] as AccountabilityItem[],
       professionalRegistrationRequirements: [] as TextItem[],
       preferences: [] as TextItem[],
       knowledgeSkillsAbilities: [] as TextItem[],
       willingnessStatements: [] as TextItem[],
-      securityScreenings: [] as TextItem[],
+      securityScreenings: [] as AccountabilityItem[],
       behavioural_competencies: [] as BehaviouralCompetencyData[],
       markAllNonEditable: false,
+      markAllSignificant: false,
+      markAllNonEditableEdu: false,
+      markAllSignificantEdu: false,
+      markAllNonEditableSec: false,
+      markAllSignificantSec: false,
     },
   });
+
+  useEffect(() => {
+    // Check if the URL is for creating a new profile
+    if (!urlId) {
+      reset();
+      resetProfileForm();
+      fetchNextNumber();
+    }
+  }, [urlId, setValue, reset, resetProfileForm, fetchNextNumber]);
+
+  useEffect(() => {
+    console.log('jobProfileData: ', jobProfileData);
+    if (jobProfileData) {
+      // Basic Details Form
+      setValue('jobTitle', jobProfileData.jobProfile.title as string);
+      setValue('jobStoreNumber', jobProfileData.jobProfile.number.toString());
+      setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
+
+      setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup);
+      setValue('classification', jobProfileData.jobProfile?.classifications[0]?.classification.id);
+      setValue('jobRole', jobProfileData.jobProfile?.role?.id);
+
+      setValue('role', jobProfileData.jobProfile.role_type.id);
+      setValue(
+        'reportToRelationship',
+        jobProfileData.jobProfile.reports_to.map((r) => r.classification.id),
+      );
+      setValue('scopeOfResponsibility', jobProfileData.jobProfile?.scope?.id);
+      setValue(
+        'ministries',
+        jobProfileData.jobProfile.organizations.map((org) => org.organization.id),
+      );
+      setValue('classificationReviewRequired', jobProfileData.jobProfile.review_required);
+      setValue('jobContext', jobProfileData.jobProfile.context.description);
+
+      // Professions (assuming it's an array of jobFamily and jobStreams)
+      if (jobProfileData.jobProfile.jobFamilies && jobProfileData.jobProfile.streams) {
+        const professionsData = jobProfileData.jobProfile.jobFamilies.map((family, index) => ({
+          jobFamily: family.jobFamily.id,
+          jobStreams: jobProfileData.jobProfile.streams
+            .filter((stream) => stream.stream.job_family_id === family.jobFamily.id)
+            .map((stream) => stream.stream.id),
+        }));
+        setValue('professions', professionsData);
+      }
+
+      // Profile Form
+      profileSetValue('overview', jobProfileData.jobProfile.overview);
+      profileSetValue('programOverview', jobProfileData.jobProfile.program_overview);
+      profileSetValue(
+        'accountabilities',
+        jobProfileData.jobProfile.accountabilities.map((a) => ({
+          text: a.text,
+          nonEditable: a.is_readonly,
+          significant: a.is_significant,
+        })),
+      );
+      profileSetValue(
+        'educationAndWorkExperiences',
+        jobProfileData.jobProfile.requirements.map((r) => ({
+          text: r.text,
+          nonEditable: r.is_readonly,
+          significant: r.is_significant,
+        })),
+      );
+      profileSetValue(
+        'professionalRegistrationRequirements',
+        jobProfileData.jobProfile.professional_registration_requirements.map((r) => ({ text: r })),
+      );
+      profileSetValue(
+        'preferences',
+        jobProfileData.jobProfile.preferences.map((p) => ({ text: p })),
+      );
+      profileSetValue(
+        'knowledgeSkillsAbilities',
+        jobProfileData.jobProfile.knowledge_skills_abilities.map((k) => ({ text: k })),
+      );
+      profileSetValue(
+        'willingnessStatements',
+        jobProfileData.jobProfile.willingness_statements.map((w) => ({ text: w })),
+      );
+      profileSetValue(
+        'securityScreenings',
+        jobProfileData.jobProfile.security_screenings.map((s) => ({
+          text: s.text,
+          nonEditable: s.is_readonly,
+          significant: s.is_significant,
+        })),
+      );
+      profileSetValue(
+        'behavioural_competencies',
+        jobProfileData.jobProfile.behavioural_competencies.map((bc) => ({
+          behavioural_competency: bc.behavioural_competency,
+        })),
+      );
+      profileSetValue('markAllNonEditable', jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditable);
+      profileSetValue('markAllSignificant', jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificant);
+      profileSetValue(
+        'markAllNonEditableEdu',
+        jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableEdu,
+      );
+      profileSetValue(
+        'markAllSignificantEdu',
+        jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantEdu,
+      );
+      profileSetValue(
+        'markAllNonEditableSec',
+        jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableSec,
+      );
+      profileSetValue(
+        'markAllSignificantSec',
+        jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantSec,
+      );
+    }
+  }, [jobProfileData, setValue, profileSetValue]);
 
   // required accountabilties
   interface AccountabilityItem {
     text: string;
     id?: string;
     nonEditable: boolean;
+    significant: boolean;
   }
 
   const {
@@ -268,38 +431,67 @@ export const TotalCompCreateProfilePage = () => {
 
   // Update individual non-editable state based on "Mark all as non-editable" checkbox
   const updateNonEditable = (nonEditable: boolean) => {
-    const updatedAccountabilities = accountabilitiesFields.map((field) => ({
+    const updatedAccountabilities = accountabilities.map((field) => ({
       ...field,
       nonEditable: nonEditable,
+      significant: nonEditable ? true : false,
     }));
     profileSetValue('accountabilities', updatedAccountabilities as AccountabilityItem[]);
   };
 
-  const markAllNonEditable = profileWatch('markAllNonEditable');
-
-  // optional accountabilties
-  interface TextItem {
-    text: string;
-    id?: string;
-  }
-
-  const {
-    fields: optionalAccountabilitiesFields,
-    append: appendOptionalAccountability,
-    remove: removeOptionalAccountability,
-    move: moveOptionalAccountability,
-  } = useFieldArray({
-    control: profileControl,
-    name: 'optionalAccountabilities',
-  });
-
-  const handleOptionalAccountabilityMove = (index: number, direction: 'up' | 'down') => {
-    if (direction === 'up') {
-      moveOptionalAccountability(index, index - 1);
-    } else {
-      moveOptionalAccountability(index, index + 1);
-    }
+  const updateSignificant = (significant: boolean) => {
+    const updatedAccountabilities = accountabilities.map((field) => ({
+      ...field,
+      significant: significant,
+    }));
+    profileSetValue('accountabilities', updatedAccountabilities as AccountabilityItem[]);
   };
+
+  const updateSignificantEdu = (significant: boolean) => {
+    const updatedExperiences = educationAndWorkExperiences.map((field) => ({
+      ...field,
+      significant: significant,
+    }));
+    profileSetValue('educationAndWorkExperiences', updatedExperiences as AccountabilityItem[]);
+  };
+
+  const updateNonEditableEdu = (nonEditable: boolean) => {
+    const updatedExperiences = educationAndWorkExperiences.map((field) => ({
+      ...field,
+      nonEditable: nonEditable,
+      significant: nonEditable ? true : false,
+    }));
+    profileSetValue('educationAndWorkExperiences', updatedExperiences as AccountabilityItem[]);
+  };
+
+  const updateSignificantSec = (significant: boolean) => {
+    const securityScreeningsUpdated = securityScreenings.map((field) => ({
+      ...field,
+      significant: significant,
+    }));
+    profileSetValue('securityScreenings', securityScreeningsUpdated as AccountabilityItem[]);
+  };
+
+  const updateNonEditableSec = (nonEditable: boolean) => {
+    const securityScreeningsUpdated = securityScreenings.map((field) => ({
+      ...field,
+      nonEditable: nonEditable,
+      significant: nonEditable ? true : false,
+    }));
+    profileSetValue('securityScreenings', securityScreeningsUpdated as AccountabilityItem[]);
+  };
+
+  const markAllNonEditable = profileWatch('markAllNonEditable');
+  const markAllNonEditableEdu = profileWatch('markAllNonEditableEdu');
+  const markAllSignificantEdu = profileWatch('markAllSignificantEdu');
+
+  const markAllNonEditableSec = profileWatch('markAllNonEditableSec');
+  const markAllSignificantSec = profileWatch('markAllSignificantSec');
+
+  const markAllSignificant = profileWatch('markAllSignificant');
+  const accountabilities = profileWatch('accountabilities');
+  const securityScreenings = profileWatch('securityScreenings');
+  const educationAndWorkExperiences = profileWatch('educationAndWorkExperiences');
 
   // education And Work Experience
   const {
@@ -518,7 +710,7 @@ export const TotalCompCreateProfilePage = () => {
       if (jobProfileMinimumRequirements && selectedClassification) {
         const filteredRequirements = jobProfileMinimumRequirements.jobProfileMinimumRequirements
           .filter((req) => req.grade === selectedClassification.grade)
-          .map((req) => ({ text: req.requirement }));
+          .map((req) => ({ text: req.requirement, nonEditable: false, significant: true }));
 
         console.log('filteredRequirements: ', filteredRequirements);
         // Update the educationAndWorkExperiences field array
@@ -532,6 +724,153 @@ export const TotalCompCreateProfilePage = () => {
     updateMinimumRequirementsFromClassification(selectedClassificationId);
   };
   // END PROFILE FORM
+
+  const [createJobProfile] = useCreateOrUpdateJobProfileMutation();
+
+  function transformFormDataToApiSchema(formData: any): CreateJobProfileInput {
+    return {
+      data: {
+        state: formData.state,
+        title: formData.jobTitle,
+        type: 'MINISTRY', // this gets set on the server
+        number: parseInt(formData.jobStoreNumber, 10),
+        overview: formData.overview,
+        program_overview: formData.programOverview,
+        review_required: formData.classificationReviewRequired,
+        accountabilities: formData.accountabilities.map((a: any) => ({
+          text: a.text,
+          is_readonly: a.nonEditable,
+          is_significant: a.significant,
+        })),
+        requirements: formData.educationAndWorkExperiences.map((a: any) => ({
+          text: a.text,
+          is_readonly: a.nonEditable,
+          is_significant: a.significant,
+        })),
+        professional_registration_requirements: formData.professionalRegistrationRequirements.map((p: any) => p.text),
+        preferences: formData.preferences.map((p: any) => p.text),
+        knowledge_skills_abilities: formData.knowledgeSkillsAbilities.map((k: any) => k.text),
+        willingness_statements: formData.willingnessStatements.map((w: any) => w.text),
+        security_screenings: formData.securityScreenings.map((a: any) => ({
+          text: a.text,
+          is_readonly: a.nonEditable,
+          is_significant: a.significant,
+        })),
+        total_comp_create_form_misc: {
+          markAllNonEditable: formData.markAllNonEditable,
+          markAllSignificant: formData.markAllSignificant,
+          markAllNonEditableEdu: formData.markAllNonEditableEdu,
+          markAllSignificantEdu: formData.markAllSignificantEdu,
+          markAllNonEditableSec: formData.markAllNonEditableSec,
+          markAllSignificantSec: formData.markAllSignificantSec,
+          employeeGroup: formData.employeeGroup,
+        },
+        behavioural_competencies: {
+          create: formData.behavioural_competencies.map((bc: any) => ({
+            behavioural_competency: { connect: { id: bc.behavioural_competency.id } },
+          })),
+        },
+
+        ...(formData.classification && {
+          classifications: {
+            create: [
+              {
+                classification: { connect: { id: formData.classification } },
+              },
+            ],
+          },
+        }),
+        organizations: {
+          create: formData.ministries.map((orgId: any) => ({
+            organization: { connect: { id: orgId } },
+          })),
+        },
+        context: { create: { description: formData.jobContext } },
+        ...(formData.jobRole && {
+          role: { connect: { id: formData.jobRole } },
+        }),
+        role_type: { connect: { id: formData.role } },
+        ...(formData.scopeOfResponsibility && {
+          scope: { connect: { id: formData.scopeOfResponsibility } },
+        }),
+        jobFamilies: {
+          create: formData.professions
+            .filter((pf: any) => pf.jobFamily !== -1) // Filter out professions with jobFamily -1
+            .map((pf: any) => ({
+              jobFamily: { connect: { id: pf.jobFamily } },
+            })),
+        },
+        streams: {
+          create: formData.professions.flatMap((pf: any) =>
+            pf.jobStreams.map((streamId: any) => ({
+              stream: { connect: { id: streamId } },
+            })),
+          ),
+        },
+        reports_to: {
+          create: formData.reportToRelationship.map((classificationId: any) => ({
+            classification: { connect: { id: classificationId } },
+          })),
+        },
+      },
+      id: parseInt(id ?? ''),
+    };
+  }
+
+  async function submitJobProfileData(transformedData: CreateJobProfileInput, isPublishing = false) {
+    try {
+      const response = await createJobProfile(transformedData).unwrap();
+      console.log('response: ', response);
+      if (!isPublishing) {
+        const newId = response.createOrUpdateJobProfile.toString();
+        setId(newId);
+        navigate(`/total-compensation/profiles/${newId}`); // Update the URL
+      }
+
+      notification.success({
+        message: 'Success',
+        description: 'Job profile saved successfully.',
+        duration: 4, // Duration in seconds
+      });
+      console.log('Job Profile Created ok: ', response, id);
+    } catch (error: any) {
+      console.log('error: ', error);
+      let desc = 'There was an error saving the job profile.';
+
+      if (error?.message?.includes('A job profile with this number already exists'))
+        desc = 'A job profile with this number already exists. Please use a different number.';
+
+      notification.error({
+        message: 'Error',
+        description: desc,
+        duration: 4, // Duration in seconds
+      });
+      console.error('Error creating job profile: ', error);
+    }
+  }
+
+  const save = (isPublishing = false) => {
+    console.log('save');
+    const basicDetails = getBasicDetailsValues();
+    const profileDetails = getProfileValues();
+
+    const combinedData = {
+      ...basicDetails,
+      ...profileDetails,
+      // Set the state based on whether the job profile is being published
+      state: isPublishing ? 'PUBLISHED' : null,
+    };
+
+    console.log('Combined form data:', combinedData);
+
+    const transformedData = transformFormDataToApiSchema(combinedData);
+    console.log('transformedData: ', transformedData);
+    submitJobProfileData(transformedData);
+  };
+
+  const publish = () => {
+    save(true);
+  };
 
   const tabItems = [
     {
@@ -615,20 +954,22 @@ export const TotalCompCreateProfilePage = () => {
                         <Controller
                           name="employeeGroup"
                           control={control}
-                          render={({ field: { onChange, onBlur, value } }) => (
-                            <Select
-                              placeholder="Choose an employee group"
-                              onChange={onChange}
-                              onBlur={onBlur}
-                              defaultValue={value}
-                              style={{ width: '100%' }}
-                              // Transforming data to required format for the Select options prop
-                              options={employeeGroupData?.employeeGroups.map((group) => ({
-                                label: group.id,
-                                value: group.id,
-                              }))}
-                            />
-                          )}
+                          render={({ field: { onChange, onBlur, value } }) => {
+                            return (
+                              <Select
+                                placeholder="Choose an employee group"
+                                onChange={onChange}
+                                onBlur={onBlur}
+                                value={value}
+                                style={{ width: '100%' }}
+                                // Transforming data to required format for the Select options prop
+                                options={employeeGroupData?.employeeGroups.map((group) => ({
+                                  label: group.id,
+                                  value: group.id,
+                                }))}
+                              />
+                            );
+                          }}
                         />
                       </Form.Item>
                     </Col>
@@ -643,28 +984,30 @@ export const TotalCompCreateProfilePage = () => {
                         <Controller
                           name="classification"
                           control={control}
-                          render={({ field: { onChange, onBlur, value } }) => (
-                            <Select
-                              placeholder="Choose a classification"
-                              onChange={(newValue) => {
-                                onChange(newValue);
-                                handleClassificationChange(newValue);
-                              }}
-                              onBlur={onBlur} // notify when input is touched/blur
-                              defaultValue={value}
-                              style={{ width: '100%' }}
-                              showSearch={true}
-                              filterOption={(input, option) => {
-                                if (!option) return false;
-                                return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                              }}
-                              // Transforming data to required format for the Select options prop
-                              options={classificationsData?.classifications.map((classification) => ({
-                                label: classification.name,
-                                value: classification.id,
-                              }))}
-                            ></Select>
-                          )}
+                          render={({ field: { onChange, onBlur, value } }) => {
+                            return (
+                              <Select
+                                placeholder="Choose a classification"
+                                onChange={(newValue) => {
+                                  onChange(newValue);
+                                  handleClassificationChange(newValue);
+                                }}
+                                onBlur={onBlur} // notify when input is touched/blur
+                                value={value}
+                                style={{ width: '100%' }}
+                                showSearch={true}
+                                filterOption={(input, option) => {
+                                  if (!option) return false;
+                                  return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                                }}
+                                // Transforming data to required format for the Select options prop
+                                options={classificationsData?.classifications.map((classification) => ({
+                                  label: classification.name,
+                                  value: classification.id,
+                                }))}
+                              ></Select>
+                            );
+                          }}
                         />
                       </Form.Item>
                     </Col>
@@ -683,7 +1026,7 @@ export const TotalCompCreateProfilePage = () => {
                               placeholder="Choose a job role"
                               onChange={onChange}
                               onBlur={onBlur}
-                              defaultValue={value}
+                              value={value}
                               options={jobRolesData?.jobRoles.map((jobRole) => ({
                                 label: jobRole.name,
                                 value: jobRole.id,
@@ -712,16 +1055,17 @@ export const TotalCompCreateProfilePage = () => {
                               // ref={register()}
                               control={control}
                               name={`professions.${index}.jobFamily`}
-                              render={({ field: { onChange, onBlur } }) => (
+                              render={({ field: { onChange, onBlur, value } }) => (
                                 <Row gutter={8} wrap={false}>
                                   <Col flex="auto">
                                     <Select
-                                      onBlur={onBlur} // notify when input is touched/blur
+                                      value={value == -1 ? null : value}
+                                      onBlur={onBlur}
                                       placeholder="Choose a profession"
-                                      onChange={(value) => {
+                                      onChange={(v) => {
                                         // When profession changes, clear the jobStreams for this profession
                                         setValue(`professions.${index}.jobStreams`, []);
-                                        onChange(value);
+                                        onChange(v);
                                       }}
                                     >
                                       {/* Dynamically render profession options based on your data */}
@@ -760,16 +1104,22 @@ export const TotalCompCreateProfilePage = () => {
                               <Controller
                                 control={control}
                                 name={`professions.${index}.jobStreams`}
-                                render={({ field: field2 }) => {
+                                render={({
+                                  field: { onChange: onChangeInner, onBlur: onBlurInner, value: valueInner },
+                                }) => {
+                                  // console.log('valueInner: ', valueInner);
                                   return (
                                     <Select
-                                      {...field2}
+                                      // {...field2}
                                       mode="multiple"
                                       placeholder="Select the job streams this role is part of"
                                       style={{ width: '100%' }}
-                                      onChange={(selectedStreams) => {
-                                        field2.onChange(selectedStreams);
-                                      }}
+                                      onChange={onChangeInner}
+                                      value={valueInner}
+                                      onBlur={onBlurInner}
+                                      // onChange={(selectedStreams) => {
+                                      //   field2.onChange(selectedStreams);
+                                      // }}
                                       options={getJobStreamsForFamily(selectedProfession[index]?.jobFamily).map(
                                         (stream) => ({ label: stream.name, value: stream.id }),
                                       )}
@@ -866,7 +1216,7 @@ export const TotalCompCreateProfilePage = () => {
                               placeholder="Choose the scope of responsibility"
                               onChange={onChange}
                               onBlur={onBlur}
-                              defaultValue={value}
+                              value={value}
                               options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
                                 label: scope.name,
                                 value: scope.id,
@@ -898,12 +1248,17 @@ export const TotalCompCreateProfilePage = () => {
                         <Controller
                           name="ministries"
                           control={control}
-                          render={({ field: { onChange } }) => (
+                          render={({ field: { onChange, onBlur, value } }) => (
                             <>
                               <Text type="secondary" style={{ marginBottom: '5px', display: 'block' }}>
                                 If selected, this role would be available only for those specific ministries.
                               </Text>
-                              <MinistriesSelect isMultiSelect={true} onChange={onChange} />
+                              <MinistriesSelect
+                                isMultiSelect={true}
+                                onChange={onChange}
+                                onBlur={onBlur}
+                                value={value}
+                              />
                             </>
                           )}
                         />
@@ -983,9 +1338,10 @@ export const TotalCompCreateProfilePage = () => {
                         <Controller
                           name="overview"
                           control={profileControl}
-                          render={({ field: { onChange, onBlur } }) => (
+                          render={({ field: { onChange, onBlur, value } }) => (
                             <TextArea
                               autoSize
+                              value={value}
                               placeholder="Provide an overview of the job profile"
                               aria-label="overview"
                               onChange={onChange} // send value to hook form
@@ -1015,6 +1371,7 @@ export const TotalCompCreateProfilePage = () => {
                                 aria-label="program overview"
                                 onChange={onChange} // send value to hook form
                                 onBlur={onBlur} // notify when input is touched/blur
+                                value={value}
                               />
                               <Typography.Paragraph
                                 type="secondary"
@@ -1042,23 +1399,48 @@ export const TotalCompCreateProfilePage = () => {
                             <Col>Accountabilities</Col>
                             <Col>
                               <Form.Item style={{ margin: 0 }}>
-                                <Controller
-                                  control={profileControl}
-                                  name="markAllNonEditable"
-                                  render={({ field }) => (
-                                    <Checkbox
-                                      {...field}
-                                      checked={markAllNonEditable}
-                                      onChange={(e) => {
-                                        field.onChange(e.target.checked);
-                                        updateNonEditable(e.target.checked);
-                                      }}
-                                      disabled={accountabilitiesFields.length === 0}
-                                    >
-                                      Mark all as non-editable
-                                    </Checkbox>
-                                  )}
-                                ></Controller>
+                                <Row>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllNonEditable"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllNonEditable}
+                                          disabled={accountabilitiesFields.length === 0}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateNonEditable(e.target.checked);
+                                          }}
+                                        >
+                                          Mark all as non-editable
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllSignificant"
+                                      // disable if markAllNonEditable checkbox is on
+
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllSignificant || markAllNonEditable}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateSignificant(e.target.checked);
+                                          }}
+                                          disabled={markAllNonEditable || accountabilitiesFields.length === 0}
+                                        >
+                                          Mark all as significant
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                </Row>
                               </Form.Item>
                             </Col>
                           </Row>
@@ -1085,10 +1467,42 @@ export const TotalCompCreateProfilePage = () => {
                                     render={({ field: { onChange, value } }) => {
                                       return (
                                         <Checkbox
-                                          onChange={onChange} // send value to hook form
+                                          onChange={(args) => {
+                                            // set this item as significant as well
+                                            console.log('non-editable toggle: ', args);
+                                            if (args.target.checked) {
+                                              profileSetValue(`accountabilities.${index}.significant`, true);
+                                            }
+                                            if (!args.target.checked) {
+                                              console.log('setting markAllNonEditable to false');
+                                              profileSetValue('markAllNonEditable', false);
+                                            }
+                                            onChange(args);
+                                          }}
                                           checked={value}
                                         >
                                           Non-editable
+                                        </Checkbox>
+                                      );
+                                    }}
+                                  />
+                                  <Controller
+                                    name={`accountabilities.${index}.significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => {
+                                      return (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllSignificant', false);
+                                            }
+                                            onChange(args);
+                                          }} // send value to hook form
+                                          // disable if this item is non-editable
+                                          disabled={accountabilities[index].nonEditable}
+                                          checked={value || accountabilities[index].nonEditable}
+                                        >
+                                          Significant
                                         </Checkbox>
                                       );
                                     }}
@@ -1118,73 +1532,16 @@ export const TotalCompCreateProfilePage = () => {
                         <Form.Item>
                           <Button
                             type="link"
-                            onClick={() => appendAccountability({ text: '', nonEditable: markAllNonEditable })}
+                            onClick={() =>
+                              appendAccountability({
+                                text: '',
+                                nonEditable: markAllNonEditable,
+                                significant: markAllSignificant,
+                              })
+                            }
                             icon={<PlusOutlined />}
                           >
                             Add an accountability
-                          </Button>
-                        </Form.Item>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Divider className="hr-reduced-margin"></Divider>
-
-                  {/* Optional accountabilities */}
-                  <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
-                      <Form.Item
-                        style={{ marginBottom: '0' }}
-                        labelCol={{ className: 'full-width-label card-label' }}
-                        label={
-                          <Row justify="space-between" align="middle">
-                            <Col>Optional accountabilities</Col>
-                          </Row>
-                        }
-                      >
-                        {optionalAccountabilitiesFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleOptionalAccountabilityMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === optionalAccountabilitiesFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row>{/* Non-editable checkbox */}</Row>
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  <Form.Item>
-                                    <Controller
-                                      control={profileControl}
-                                      name={`optionalAccountabilities.${index}.text`}
-                                      render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add an optional accountability" {...field} />
-                                      )}
-                                    />
-                                  </Form.Item>
-                                </Col>
-
-                                <Col flex="none">
-                                  <Button
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => removeOptionalAccountability(index)}
-                                  />
-                                </Col>
-                              </Row>
-                            </Col>
-                          </Row>
-                        ))}
-                        <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() => appendOptionalAccountability({ text: '' })}
-                            icon={<PlusOutlined />}
-                          >
-                            Add an optional accountability
                           </Button>
                         </Form.Item>
                       </Form.Item>
@@ -1208,15 +1565,62 @@ export const TotalCompCreateProfilePage = () => {
                     showIcon
                   />
 
-                  {/* Education and work experience */}
+                  {/* Eductiona nd work experience NEW */}
+
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
-                          <Row justify="space-between" align="middle">
-                            <Col>Education and work experience</Col>
+                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                            <Col>Education and Work Experience</Col>
+                            <Col>
+                              <Form.Item style={{ margin: 0 }}>
+                                <Row>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllNonEditableEdu"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllNonEditableEdu}
+                                          disabled={educationAndWorkExperienceFields.length === 0}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateNonEditableEdu(e.target.checked);
+                                          }}
+                                        >
+                                          Mark all as non-editable
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllSignificantEdu"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllSignificantEdu || markAllNonEditableEdu}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateSignificantEdu(e.target.checked);
+                                          }}
+                                          disabled={
+                                            markAllNonEditableEdu || educationAndWorkExperienceFields.length === 0
+                                          }
+                                        >
+                                          Mark all as significant
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
                           </Row>
                         }
                       >
@@ -1232,7 +1636,50 @@ export const TotalCompCreateProfilePage = () => {
                               />
                             </Col>
                             <Col flex="auto">
-                              <Row>{/* Non-editable checkbox */}</Row>
+                              <Row>
+                                {/* Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`educationAndWorkExperiences.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(`educationAndWorkExperiences.${index}.significant`, true);
+                                          }
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableEdu', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
+                                  <Controller
+                                    name={`educationAndWorkExperiences.${index}.significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantEdu', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={educationAndWorkExperiences[index].nonEditable}
+                                        checked={value || educationAndWorkExperiences[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                              </Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
                                   <Form.Item>
@@ -1240,7 +1687,7 @@ export const TotalCompCreateProfilePage = () => {
                                       control={profileControl}
                                       name={`educationAndWorkExperiences.${index}.text`}
                                       render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add an optional accountability" {...field} />
+                                        <TextArea autoSize placeholder="Add education or work experience" {...field} />
                                       )}
                                     />
                                   </Form.Item>
@@ -1259,10 +1706,16 @@ export const TotalCompCreateProfilePage = () => {
                         <Form.Item>
                           <Button
                             type="link"
-                            onClick={() => appendEducationAndWorkExperience({ text: '' })}
+                            onClick={() =>
+                              appendEducationAndWorkExperience({
+                                text: '',
+                                nonEditable: markAllNonEditableEdu,
+                                significant: markAllSignificantEdu,
+                              })
+                            }
                             icon={<PlusOutlined />}
                           >
-                            Add an educational or work requirement
+                            Add education or work experience
                           </Button>
                         </Form.Item>
                       </Form.Item>
@@ -1518,15 +1971,59 @@ export const TotalCompCreateProfilePage = () => {
                     </Col>
                   </Row>
 
-                  {/* Security screenings */}
+                  {/* Security screenings NEW */}
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
-                          <Row justify="space-between" align="middle">
+                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                             <Col>Security Screenings</Col>
+                            <Col>
+                              <Form.Item style={{ margin: 0 }}>
+                                <Row>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllNonEditableSec"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllNonEditableSec}
+                                          disabled={securityScreeningsFields.length === 0}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateNonEditableSec(e.target.checked);
+                                          }}
+                                        >
+                                          Mark all as non-editable
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllSignificantSec"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllSignificantSec || markAllNonEditableSec}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateSignificantSec(e.target.checked);
+                                          }}
+                                          disabled={markAllNonEditableSec || securityScreeningsFields.length === 0}
+                                        >
+                                          Mark all as significant
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
                           </Row>
                         }
                       >
@@ -1542,7 +2039,49 @@ export const TotalCompCreateProfilePage = () => {
                               />
                             </Col>
                             <Col flex="auto">
-                              <Row>{/* Non-editable checkbox */}</Row>
+                              <Row>
+                                {/* Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`securityScreenings.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (args.target.checked) {
+                                            profileSetValue(`securityScreenings.${index}.significant`, true);
+                                          }
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableSec', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
+                                  <Controller
+                                    name={`securityScreenings.${index}.significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantSec', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={securityScreenings[index].nonEditable}
+                                        checked={value || securityScreenings[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                              </Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
                                   <Form.Item>
@@ -1570,7 +2109,13 @@ export const TotalCompCreateProfilePage = () => {
                         <Form.Item>
                           <Button
                             type="link"
-                            onClick={() => appendSecurityScreening({ text: '' })}
+                            onClick={() =>
+                              appendSecurityScreening({
+                                text: '',
+                                nonEditable: markAllNonEditableSec,
+                                significant: markAllSignificantSec,
+                              })
+                            }
                             icon={<PlusOutlined />}
                           >
                             Add a security screenings requirement
@@ -1698,7 +2243,7 @@ export const TotalCompCreateProfilePage = () => {
               <Card title="Save as Draft">
                 <Typography.Text>Save your progress and come back later to make changes.</Typography.Text>
                 <br></br>
-                <Button type="primary" style={{ marginTop: 16 }}>
+                <Button type="primary" style={{ marginTop: 16 }} onClick={() => save()}>
                   Save as Draft
                 </Button>
               </Card>
@@ -1710,7 +2255,7 @@ export const TotalCompCreateProfilePage = () => {
                   Publish the job profile to the Job Store will allow hiring managers view the profile.
                 </Typography.Text>
                 <br></br>
-                <Button type="primary" style={{ marginTop: 10 }}>
+                <Button type="primary" style={{ marginTop: 10 }} onClick={publish}>
                   Publish Profile
                 </Button>
 
@@ -1736,105 +2281,7 @@ export const TotalCompCreateProfilePage = () => {
     },
   ];
 
-  const [createJobProfile] = useCreateJobProfileMutation();
-
-  async function submitJobProfileData(transformedData: CreateJobProfileInput) {
-    try {
-      const response = await createJobProfile(transformedData).unwrap();
-      notification.success({
-        message: 'Success',
-        description: 'Job profile saved successfully.',
-        duration: 4, // Duration in seconds
-      });
-      console.log('Job Profile Created ok: ', response);
-    } catch (error) {
-      notification.error({
-        message: 'Error',
-        description: 'There was an error saving the job profile.',
-        duration: 4, // Duration in seconds
-      });
-      console.error('Error creating job profile: ', error);
-    }
-  }
-
-  function transformFormDataToApiSchema(formData: any): CreateJobProfileInput {
-    return {
-      title: formData.jobTitle,
-      type: 'MINISTRY', // this gets set on the server
-      number: parseInt(formData.jobStoreNumber, 10),
-      overview: formData.overview,
-      program_overview: formData.programOverview,
-      review_required: formData.classificationReviewRequired,
-      accountabilities: {
-        required: formData.accountabilities.map((a: any) => a.text),
-        optional: formData.optionalAccountabilities.map((a: any) => a.text),
-      },
-      requirements: formData.educationAndWorkExperiences.map((e: any) => e.text),
-      professional_registration_requirements: formData.professionalRegistrationRequirements.map((p: any) => p.text),
-      preferences: formData.preferences.map((p: any) => p.text),
-      knowledge_skills_abilities: formData.knowledgeSkillsAbilities.map((k: any) => k.text),
-      willingness_statements: formData.willingnessStatements.map((w: any) => w.text),
-      security_screenings: formData.securityScreenings.map((s: any) => s.text),
-      total_comp_create_form_misc: JSON.stringify({ markAllNonEditable: formData.markAllNonEditable }),
-      behavioural_competencies: {
-        create: formData.behavioural_competencies.map((bc: any) => ({
-          behavioural_competency: { connect: { id: bc.behavioural_competency.id } },
-        })),
-      },
-      classifications: {
-        create: [
-          {
-            classification: { connect: { id: formData.classification } },
-          },
-        ],
-      },
-      organizations: {
-        create: formData.ministries.map((orgId: any) => ({
-          organization: { connect: { id: orgId } },
-        })),
-      },
-      context: { create: { description: formData.jobContext } },
-      role: { connect: { id: formData.jobRole } },
-      role_type: { connect: { id: formData.role } },
-      scope: { connect: { id: formData.scopeOfResponsibility } },
-      jobFamilies: {
-        create: formData.professions.map((pf: any) => ({
-          jobFamily: { connect: { id: pf.jobFamily } },
-        })),
-      },
-      streams: {
-        create: formData.professions.flatMap((pf: any) =>
-          pf.jobStreams.map((streamId: any) => ({
-            stream: { connect: { id: streamId } },
-          })),
-        ),
-      },
-      reports_to: {
-        create: formData.reportToRelationship.map((classificationId: any) => ({
-          classification: { connect: { id: classificationId } },
-        })),
-      },
-    };
-  }
-
-  const save = () => {
-    console.log('save');
-    const basicDetails = getBasicDetailsValues();
-    const profileDetails = getProfileValues();
-
-    const combinedData = {
-      ...basicDetails,
-      ...profileDetails,
-    };
-
-    console.log('Combined form data:', combinedData);
-
-    const transformedData = transformFormDataToApiSchema(combinedData);
-    console.log('transformedData: ', transformedData);
-    submitJobProfileData(transformedData);
-  };
-
-  if (!ministriesData) return <>Loading..</>;
+  if (!ministriesData || (id && isLoadingJobProfile)) return <>Loading..</>;
 
   return (
     <>

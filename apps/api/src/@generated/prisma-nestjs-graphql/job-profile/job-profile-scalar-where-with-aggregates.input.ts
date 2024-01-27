@@ -63,8 +63,8 @@ export class JobProfileScalarWhereWithAggregatesInput {
   @Field(() => JsonWithAggregatesFilter, { nullable: true })
   accountabilities?: JsonWithAggregatesFilter;
 
-  @Field(() => StringListFilter, { nullable: true })
-  requirements?: StringListFilter;
+  @Field(() => JsonWithAggregatesFilter, { nullable: true })
+  requirements?: JsonWithAggregatesFilter;
 
   @Field(() => StringListFilter, { nullable: true })
   professional_registration_requirements?: StringListFilter;
@@ -78,8 +78,8 @@ export class JobProfileScalarWhereWithAggregatesInput {
   @Field(() => StringListFilter, { nullable: true })
   willingness_statements?: StringListFilter;
 
-  @Field(() => StringListFilter, { nullable: true })
-  security_screenings?: StringListFilter;
+  @Field(() => JsonWithAggregatesFilter, { nullable: true })
+  security_screenings?: JsonWithAggregatesFilter;
 
   @Field(() => JsonWithAggregatesFilter, { nullable: true })
   total_comp_create_form_misc?: JsonWithAggregatesFilter;

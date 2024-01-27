@@ -5,27 +5,27 @@ import { useGetOrganizationsQuery } from '../../../../redux/services/graphql-api
 
 const { Option } = Select;
 
-const MinistriesSelect = ({ onChange, isMultiSelect }: any) => {
+const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value }: any) => {
   const { data } = useGetOrganizationsQuery();
   const ministriesData = data?.organizations || [];
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  // const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     // Reset selections when the select mode changes
-    setSelectedItems([]);
+    // setSelectedItems([]);
     setSelectAll(false);
   }, [isMultiSelect]);
 
   const handleSelectAll = (checked: any) => {
     const allIds = ministriesData.map((item) => item.id);
-    setSelectedItems(checked ? allIds : []);
+    // setSelectedItems(checked ? allIds : []);
     onChange(checked ? allIds : []);
     setSelectAll(checked);
   };
 
   const handleSelectionChange = (selected: any) => {
-    setSelectedItems(selected);
+    // setSelectedItems(selected);
     setSelectAll(isMultiSelect && selected.length === ministriesData.length);
     onChange(selected);
   };
@@ -44,8 +44,9 @@ const MinistriesSelect = ({ onChange, isMultiSelect }: any) => {
       <Select
         mode={isMultiSelect ? 'multiple' : undefined}
         placeholder="Select ministries"
-        value={selectedItems}
+        value={value}
         onChange={handleSelectionChange}
+        onBlur={onBlur}
         style={{ width: '100%' }}
         maxTagCount={10}
       >

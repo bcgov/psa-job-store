@@ -77,8 +77,8 @@ export class JobProfileWhereUniqueInput {
   @Field(() => JsonFilter, { nullable: true })
   accountabilities?: JsonFilter;
 
-  @Field(() => StringListFilter, { nullable: true })
-  requirements?: StringListFilter;
+  @Field(() => JsonFilter, { nullable: true })
+  requirements?: JsonFilter;
 
   @Field(() => StringListFilter, { nullable: true })
   professional_registration_requirements?: StringListFilter;
@@ -92,8 +92,8 @@ export class JobProfileWhereUniqueInput {
   @Field(() => StringListFilter, { nullable: true })
   willingness_statements?: StringListFilter;
 
-  @Field(() => StringListFilter, { nullable: true })
-  security_screenings?: StringListFilter;
+  @Field(() => JsonFilter, { nullable: true })
+  security_screenings?: JsonFilter;
 
   @Field(() => JsonFilter, { nullable: true })
   total_comp_create_form_misc?: JsonFilter;

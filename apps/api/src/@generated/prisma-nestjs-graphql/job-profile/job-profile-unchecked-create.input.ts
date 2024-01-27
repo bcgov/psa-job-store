@@ -18,8 +18,8 @@ export class JobProfileUncheckedCreateInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
-  @Field(() => Int, { nullable: false })
-  role_id!: number;
+  @Field(() => Int, { nullable: true })
+  role_id?: number;
 
   @Field(() => Int, { nullable: true })
   role_type_id?: number;
@@ -57,8 +57,8 @@ export class JobProfileUncheckedCreateInput {
   @Field(() => GraphQLJSON, { nullable: true })
   accountabilities?: any;
 
-  @Field(() => [String], { nullable: true })
-  requirements?: Array<string>;
+  @Field(() => GraphQLJSON, { nullable: true })
+  requirements?: any;
 
   @Field(() => [String], { nullable: true })
   professional_registration_requirements?: Array<string>;
@@ -72,8 +72,8 @@ export class JobProfileUncheckedCreateInput {
   @Field(() => [String], { nullable: true })
   willingness_statements?: Array<string>;
 
-  @Field(() => [String], { nullable: true })
-  security_screenings?: Array<string>;
+  @Field(() => GraphQLJSON, { nullable: true })
+  security_screenings?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc?: any;
