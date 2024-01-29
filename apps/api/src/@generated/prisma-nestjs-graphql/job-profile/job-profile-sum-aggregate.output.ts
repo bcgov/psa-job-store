@@ -8,16 +8,13 @@ export class JobProfileSumAggregate {
   id?: number;
 
   @Field(() => Int, { nullable: true })
-  career_group_id?: number;
-
-  @Field(() => Int, { nullable: true })
-  job_family_id?: number;
-
-  @Field(() => Int, { nullable: true })
   role_id?: number;
 
   @Field(() => Int, { nullable: true })
-  stream_id?: number;
+  role_type_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  scope_id?: number;
 
   @Field(() => Int, { nullable: true })
   number?: number;

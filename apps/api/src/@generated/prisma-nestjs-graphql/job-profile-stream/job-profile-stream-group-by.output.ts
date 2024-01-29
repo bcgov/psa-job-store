@@ -12,6 +12,9 @@ export class JobProfileStreamGroupBy {
   @Field(() => Int, { nullable: false })
   id!: number;
 
+  @Field(() => Int, { nullable: false })
+  job_family_id!: number;
+
   @Field(() => String, { nullable: false })
   name!: string;
 

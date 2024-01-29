@@ -55,14 +55,20 @@ export class AuthService {
   }
 
   async getUserFromPayload(data: JwtPayload) {
-    const { idir_user_guid, name, email, client_roles, exp } = data;
+    const { idir_user_guid, idir_username, name, email, client_roles, exp } = data;
 
     const CACHE_KEY = `${CACHE_USER_PREFIX}${idir_user_guid}`;
     let match = await this.cacheManager.get<Express.User>(CACHE_KEY);
 
     if (!match) {
       // If user doesn't exist in cache, update the persisted user
-      const user = { id: idir_user_guid, name, email, roles: ((client_roles as string[]) ?? []).sort() };
+      const user = {
+        id: idir_user_guid,
+        name,
+        email,
+        username: idir_username,
+        roles: ((client_roles as string[]) ?? []).sort(),
+      };
       await this.upsertUser(user);
 
       // Add user to cache
@@ -84,5 +90,21 @@ export class AuthService {
       }),
     ];
     await this.prisma.$transaction(queries);
+  }
+
+  async logoutUser(idir_user_guid: string): Promise<void> {
+    const CACHE_KEY = `${CACHE_USER_PREFIX}${idir_user_guid}`;
+
+    // Check if the user is in the cache
+    const userInCache = await this.cacheManager.get<Express.User>(CACHE_KEY);
+
+    if (!userInCache) {
+      // it's possible that the user is not in the cache because it's expired
+      return;
+      // throw new HttpException('User not found in cache', HttpStatus.NOT_FOUND);
+    }
+
+    // Remove the user from the cache
+    await this.cacheManager.del(CACHE_KEY);
   }
 }

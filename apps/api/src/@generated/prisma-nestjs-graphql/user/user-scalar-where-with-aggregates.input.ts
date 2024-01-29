@@ -25,6 +25,9 @@ export class UserScalarWhereWithAggregatesInput {
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   email?: StringWithAggregatesFilter;
 
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  username?: StringWithAggregatesFilter;
+
   @Field(() => StringListFilter, { nullable: true })
   roles?: StringListFilter;
 

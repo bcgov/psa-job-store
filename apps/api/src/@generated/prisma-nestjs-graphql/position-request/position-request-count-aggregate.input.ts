@@ -13,13 +13,22 @@ export class PositionRequestCountAggregateInput {
   reports_to_position_id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  department_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   parent_job_profile_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   profile_json?: true;
 
   @Field(() => Boolean, { nullable: true })
+  orgchart_json?: true;
+
+  @Field(() => Boolean, { nullable: true })
   user_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  classificationAssignedTo?: true;
 
   @Field(() => Boolean, { nullable: true })
   title?: true;
@@ -34,10 +43,25 @@ export class PositionRequestCountAggregateInput {
   classification_code?: true;
 
   @Field(() => Boolean, { nullable: true })
+  user_name?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  email?: true;
+
+  @Field(() => Boolean, { nullable: true })
   submission_id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  submitted_at?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  approved_at?: true;
+
+  @Field(() => Boolean, { nullable: true })
   status?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  updated_at?: true;
 
   @Field(() => Boolean, { nullable: true })
   _all?: true;

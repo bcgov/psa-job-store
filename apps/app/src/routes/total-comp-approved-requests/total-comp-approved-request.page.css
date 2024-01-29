@@ -1,0 +1,7 @@
+.result-extra-content {
+    display: flex;
+    justify-content: center;
+    text-align:left;
+    margin:auto;
+    flex-direction: column;
+  }

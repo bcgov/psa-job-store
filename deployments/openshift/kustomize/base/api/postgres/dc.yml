@@ -14,8 +14,8 @@ spec:
         execNewPod:
           containerName: api-postgres
           command:
-            - "/bin/sh"
-            - "-c"
+            - '/bin/sh'
+            - '-c'
             - >-
               sleep 20 && psql postgresql://postgres:$POSTGRESQL_ADMIN_PASSWORD@api-postgres:5432/$POSTGRES_DB -c "ALTER USER $POSTGRESQL_USER WITH CREATEDB;"
 
@@ -25,50 +25,56 @@ spec:
         name: api-postgres
     spec:
       containers:
-      - env:
-        - name: POSTGRESQL_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: secrets
-              key: POSTGRES_DB        
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: secrets
-              key: DATABASE_URL
-        - name: POSTGRESQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: secrets
-              key: POSTGRES_USER
-        - name: POSTGRESQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: secrets
-              key: POSTGRES_PASSWORD
-        # Added the following environment variable for superuser
-        - name: POSTGRESQL_ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: secrets
-              key: POSTGRES_ADMIN_PASSWORD
-        image: 'registry.redhat.io/rhel8/postgresql-15'
-        name: api-postgres
-        ports:
-        - containerPort: 5432
-        volumeMounts:
-        - mountPath: /var/lib/pgsql/data
-          name: api-postgres-data
-        resources:
-          requests:
-            cpu: 200m 
-            memory: 500Mi 
-          limits:
-            cpu: 400m 
-            memory: 1Gi 
+        - env:
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: POSTGRES_DB
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: DATABASE_URL
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: POSTGRES_USER
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: POSTGRES_PASSWORD
+            # Added the following environment variable for superuser
+            - name: POSTGRESQL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: POSTGRES_ADMIN_PASSWORD
+          image: 'registry.redhat.io/rhel8/postgresql-15'
+          name: api-postgres
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - mountPath: /var/lib/pgsql/data
+              name: api-postgres-data
+            # - mountPath: /pgdata/pg15/postgresql.conf
+            #   name: api-postgresql-config
+            #   subPath: postgresql.conf
+          resources:
+            requests:
+              cpu: 200m
+              memory: 500Mi
+            limits:
+              cpu: 400m
+              memory: 1Gi
       volumes:
-      - name: api-postgres-data
-        persistentVolumeClaim:
-          claimName: api-postgres-data
+        - name: api-postgres-data
+          persistentVolumeClaim:
+            claimName: api-postgres-data
+        # - name: api-postgresql-config
+        #   secret:
+        #     secretName: api-postgresql-config
   triggers:
-  - type: ConfigChange
+    - type: ConfigChange

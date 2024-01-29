@@ -6,9 +6,10 @@ export interface SiderNavItemProps {
   icon: React.ReactNode;
   title: string;
   to: To;
+  hideTitle?: boolean;
 }
 
-export const SiderNavItem = ({ collapsed, icon, title, to }: SiderNavItemProps) => {
+export const SiderNavItem = ({ collapsed, icon, title, to, hideTitle }: SiderNavItemProps) => {
   return (
     <NavLink to={to}>
       {({ isActive }) => (
@@ -31,6 +32,7 @@ export const SiderNavItem = ({ collapsed, icon, title, to }: SiderNavItemProps) 
             </span>
             <span
               style={{
+                display: hideTitle ? 'none' : 'inline',
                 top: 0,
                 marginLeft: '1rem',
                 ...(collapsed === false

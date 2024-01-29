@@ -19,7 +19,7 @@ export class FindManyUserArgs {
   orderBy?: Array<UserOrderByWithRelationAndSearchRelevanceInput>;
 
   @HideField()
-  cursor?: Prisma.AtLeast<UserWhereUniqueInput, 'id' | 'email'>;
+  cursor?: Prisma.AtLeast<UserWhereUniqueInput, 'id' | 'email' | 'username'>;
 
   @Field(() => Int, { nullable: true })
   take?: number;

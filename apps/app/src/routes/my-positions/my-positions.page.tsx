@@ -4,11 +4,20 @@ import { Button, Card, Checkbox, Col, Row, Select, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import MyPositionsTable from './components/my-positions-table.component';
-import './my-positions.page.css';
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const statusFilterDataMap = [
+  { label: 'Draft', value: 'DRAFT' },
+  { label: 'In Review', value: 'IN_REVIEW' },
+  { label: 'Completed', value: 'COMPLETED' },
+  { label: 'Escalated', value: 'ESCALATED' },
+  { label: 'Action required', value: 'ACTION_REQUIRED' },
+];
 
 export const MyPositionsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,12 +52,6 @@ export const MyPositionsPage = () => {
     );
   };
 
-  const statusFilterData = [
-    { label: 'Draft', value: 'DRAFT' },
-    { label: 'In Review', value: 'IN_REVIEW' },
-    { label: 'Completed', value: 'COMPLETED' },
-  ];
-
   interface ClassificationOption {
     label: string;
     value: string;
@@ -79,7 +82,7 @@ export const MyPositionsPage = () => {
   };
 
   const dropdownRender = (type: any) => {
-    const options = type === 'status' ? statusFilterData : classificationFilterData;
+    const options = type === 'status' ? statusFilterDataMap : classificationFilterData;
     const selectedValues = type === 'status' ? selectedStatus : selectedClassification;
     return (
       <div>
@@ -107,7 +110,7 @@ export const MyPositionsPage = () => {
 
   const findLabel = (value: any, type: any) => {
     if (type === 'status') {
-      return statusFilterData.find((option) => option.value === value)?.label || value;
+      return statusFilterDataMap.find((option) => option.value === value)?.label || value;
     }
     if (type === 'classification') {
       return classificationFilterData.find((option) => option.value === value)?.label || value;
@@ -278,7 +281,7 @@ export const MyPositionsPage = () => {
                     dropdownRender={() => dropdownRender('status')}
                     className="customTagControlled"
                     placeholder="Status"
-                    options={statusFilterData}
+                    options={statusFilterDataMap}
                     style={{ width: 120 }}
                     // onChange={setSelectedStatus}
                     onChange={(newValues) => {

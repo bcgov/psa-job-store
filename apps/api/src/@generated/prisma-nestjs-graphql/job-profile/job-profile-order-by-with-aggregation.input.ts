@@ -14,25 +14,31 @@ export class JobProfileOrderByWithAggregationInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  career_group_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  job_family_id?: keyof typeof SortOrder;
+  role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrderInput, { nullable: true })
-  organization_id?: SortOrderInput;
+  role_type_id?: SortOrderInput;
 
-  @Field(() => SortOrder, { nullable: true })
-  role_id?: keyof typeof SortOrder;
+  @Field(() => SortOrderInput, { nullable: true })
+  scope_id?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   state?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  stream_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   type?: keyof typeof SortOrder;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  updated_at?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  owner_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  program_overview?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  review_required?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;
@@ -48,6 +54,24 @@ export class JobProfileOrderByWithAggregationInput {
 
   @Field(() => SortOrder, { nullable: true })
   requirements?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  professional_registration_requirements?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  preferences?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  knowledge_skills_abilities?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  willingness_statements?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  security_screenings?: keyof typeof SortOrder;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  total_comp_create_form_misc?: SortOrderInput;
 
   @Field(() => JobProfileCountOrderByAggregateInput, { nullable: true })
   _count?: JobProfileCountOrderByAggregateInput;

@@ -10,30 +10,55 @@ const DEFAULT_ORG_CHART: OrgChartData = { edges: [], nodes: [] };
 
 interface OrgChartRendererProps {
   selectedDepartment: string | null;
+  onCreateNewPosition?: () => void | null;
+  orgChartSnapshot?: OrgChartData;
+  highlightPositionId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  extraNodeInfo?: any;
 }
 
-const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({ selectedDepartment }) => {
-  const [orgChart, setOrgChart] = useState<OrgChartData>(DEFAULT_ORG_CHART);
+const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
+  selectedDepartment,
+  onCreateNewPosition,
+  highlightPositionId,
+  orgChartSnapshot = null,
+  extraNodeInfo,
+}) => {
+  const [orgChart, setOrgChart] = useState<OrgChartData>(orgChartSnapshot ?? DEFAULT_ORG_CHART);
   const [trigger, { data, isFetching }] = useLazyGetOrgChartQuery();
 
-  useEffect(() => {
-    setOrgChart(DEFAULT_ORG_CHART);
-    if (selectedDepartment != null) {
-      trigger(selectedDepartment);
-    }
-  }, [selectedDepartment, trigger]);
+  // console.log('selectedDepartment: ', selectedDepartment);
 
   useEffect(() => {
-    const objData: OrgChartData = data != null ? JSON.parse(JSON.stringify(data.orgChart)) : DEFAULT_ORG_CHART;
-    setOrgChart(objData);
-  }, [data]);
+    if (selectedDepartment != null && !orgChartSnapshot) {
+      // Fetch org chart data based on department if no snapshot
+      setOrgChart(DEFAULT_ORG_CHART);
+      trigger(selectedDepartment);
+    }
+  }, [selectedDepartment, trigger, orgChartSnapshot]);
+
+  useEffect(() => {
+    // console.log('org chart data: ', data);
+    if (!orgChartSnapshot) {
+      const objData: OrgChartData = data != null ? JSON.parse(JSON.stringify(data.orgChart)) : DEFAULT_ORG_CHART;
+      setOrgChart(objData);
+    }
+  }, [data, orgChartSnapshot]);
 
   return isFetching ? (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
       <Spin size="large" />
     </div>
   ) : orgChart.edges.length > 0 ? (
-    <OrgChart edges={orgChart.edges} nodes={orgChart.nodes} />
+    <OrgChart
+      disableCreateNewPosition={orgChartSnapshot != null}
+      edges={orgChart.edges}
+      nodes={orgChart.nodes}
+      selectedDepartment={selectedDepartment}
+      onCreateNewPosition={onCreateNewPosition}
+      highlightPositionId={highlightPositionId}
+      extraNodeInfo={extraNodeInfo}
+    />
   ) : (
     <Space style={{ height: '100%', width: '100%', justifyContent: 'center' }} align="center">
       <Empty

@@ -14,13 +14,22 @@ export class PositionRequestCountOrderByAggregateInput {
   reports_to_position_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  department_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   parent_job_profile_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   profile_json?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  orgchart_json?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   user_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  classificationAssignedTo?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;
@@ -35,8 +44,23 @@ export class PositionRequestCountOrderByAggregateInput {
   classification_code?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  user_name?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  email?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   submission_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  submitted_at?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  approved_at?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   status?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  updated_at?: keyof typeof SortOrder;
 }

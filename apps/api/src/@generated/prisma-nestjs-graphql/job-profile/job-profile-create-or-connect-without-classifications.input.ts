@@ -9,7 +9,7 @@ import { JobProfileCreateWithoutClassificationsInput } from './job-profile-creat
 export class JobProfileCreateOrConnectWithoutClassificationsInput {
   @Field(() => JobProfileWhereUniqueInput, { nullable: false })
   @Type(() => JobProfileWhereUniqueInput)
-  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileCreateWithoutClassificationsInput, { nullable: false })
   @Type(() => JobProfileCreateWithoutClassificationsInput)

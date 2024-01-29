@@ -7,16 +7,13 @@ export class JobProfileAvgAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  career_group_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
-  job_family_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
   role_id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  stream_id?: true;
+  role_type_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  scope_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   number?: true;

@@ -3,7 +3,8 @@ import { InputType } from '@nestjs/graphql';
 import { Int } from '@nestjs/graphql';
 import { JobProfileJobFamilyWhereInput } from './job-profile-job-family-where.input';
 import { StringFilter } from '../prisma/string-filter.input';
-import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
+import { JobProfileJobFamilyLinkListRelationFilter } from '../job-profile-job-family-link/job-profile-job-family-link-list-relation-filter.input';
+import { JobProfileStreamListRelationFilter } from '../job-profile-stream/job-profile-stream-list-relation-filter.input';
 
 @InputType()
 export class JobProfileJobFamilyWhereUniqueInput {
@@ -22,6 +23,9 @@ export class JobProfileJobFamilyWhereUniqueInput {
   @Field(() => StringFilter, { nullable: true })
   name?: StringFilter;
 
-  @Field(() => JobProfileListRelationFilter, { nullable: true })
-  job_profiles?: JobProfileListRelationFilter;
+  @Field(() => JobProfileJobFamilyLinkListRelationFilter, { nullable: true })
+  jobProfiles?: JobProfileJobFamilyLinkListRelationFilter;
+
+  @Field(() => JobProfileStreamListRelationFilter, { nullable: true })
+  JobProfileStream?: JobProfileStreamListRelationFilter;
 }

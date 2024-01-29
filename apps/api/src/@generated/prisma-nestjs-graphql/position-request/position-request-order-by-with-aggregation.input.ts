@@ -20,16 +20,25 @@ export class PositionRequestOrderByWithAggregationInput {
   reports_to_position_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  parent_job_profile_id?: keyof typeof SortOrder;
+  department_id?: keyof typeof SortOrder;
 
-  @Field(() => SortOrder, { nullable: true })
-  profile_json?: keyof typeof SortOrder;
+  @Field(() => SortOrderInput, { nullable: true })
+  parent_job_profile_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  profile_json?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  orgchart_json?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   user_id?: SortOrderInput;
 
-  @Field(() => SortOrder, { nullable: true })
-  title?: keyof typeof SortOrder;
+  @Field(() => SortOrderInput, { nullable: true })
+  classificationAssignedTo?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  title?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   position_number?: SortOrderInput;
@@ -41,10 +50,25 @@ export class PositionRequestOrderByWithAggregationInput {
   classification_code?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
+  user_name?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  email?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
   submission_id?: SortOrderInput;
+
+  @Field(() => SortOrder, { nullable: true })
+  submitted_at?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  approved_at?: keyof typeof SortOrder;
 
   @Field(() => SortOrderInput, { nullable: true })
   status?: SortOrderInput;
+
+  @Field(() => SortOrder, { nullable: true })
+  updated_at?: keyof typeof SortOrder;
 
   @Field(() => PositionRequestCountOrderByAggregateInput, { nullable: true })
   _count?: PositionRequestCountOrderByAggregateInput;

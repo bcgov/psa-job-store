@@ -12,6 +12,9 @@ export class UserMaxAggregate {
   @Field(() => String, { nullable: true })
   email?: string;
 
+  @Field(() => String, { nullable: true })
+  username?: string;
+
   @Field(() => Date, { nullable: true })
   created_at?: Date | string;
 

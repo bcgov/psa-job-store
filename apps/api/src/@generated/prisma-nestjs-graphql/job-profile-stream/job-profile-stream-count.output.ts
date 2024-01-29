@@ -5,5 +5,5 @@ import { Int } from '@nestjs/graphql';
 @ObjectType()
 export class JobProfileStreamCount {
   @Field(() => Int, { nullable: false })
-  job_profiles?: number;
+  jobProfiles?: number;
 }

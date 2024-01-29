@@ -5,6 +5,7 @@ import { StringFilter } from '../prisma/string-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { CommentListRelationFilter } from '../comment/comment-list-relation-filter.input';
+import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
 
 @InputType()
 export class UserWhereInput {
@@ -26,6 +27,9 @@ export class UserWhereInput {
   @Field(() => StringFilter, { nullable: true })
   email?: StringFilter;
 
+  @Field(() => StringFilter, { nullable: true })
+  username?: StringFilter;
+
   @Field(() => StringListFilter, { nullable: true })
   roles?: StringListFilter;
 
@@ -40,4 +44,7 @@ export class UserWhereInput {
 
   @Field(() => CommentListRelationFilter, { nullable: true })
   comments?: CommentListRelationFilter;
+
+  @Field(() => JobProfileListRelationFilter, { nullable: true })
+  JobProfile?: JobProfileListRelationFilter;
 }

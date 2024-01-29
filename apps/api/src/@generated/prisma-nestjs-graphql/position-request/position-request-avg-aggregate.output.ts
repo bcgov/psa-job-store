@@ -11,9 +11,6 @@ export class PositionRequestAvgAggregate {
   step?: number;
 
   @Field(() => Float, { nullable: true })
-  reports_to_position_id?: number;
-
-  @Field(() => Float, { nullable: true })
   parent_job_profile_id?: number;
 
   @Field(() => Float, { nullable: true })

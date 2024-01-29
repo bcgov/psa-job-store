@@ -1,9 +1,12 @@
-import { FileTextOutlined, HomeOutlined, PartitionOutlined, StarOutlined, UserAddOutlined } from '@ant-design/icons';
+import { FileTextOutlined, PartitionOutlined, UserAddOutlined } from '@ant-design/icons';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
+import RoleGuard from '../components/guards/role.guard';
 import { RouteGuard } from '../components/guards/route.guard';
 import { AuthRoute } from '../routes/auth';
 import { LoginPage } from '../routes/auth/login.page';
+import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
+import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
 import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/home.page';
 import { JobProfilesRoute } from '../routes/job-profiles';
@@ -12,12 +15,19 @@ import { MyPositionsRoute } from '../routes/my-positions';
 import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
+import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
+import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
+import { TotalCompCreateProfilePage } from '../routes/total-comp-create-profile/total-comp-create-profile.page';
+import { TotalCompDraftProfilesRoute } from '../routes/total-comp-draft-profiles';
+import { TotalCompDraftProfilesPage } from '../routes/total-comp-draft-profiles/total-comp-draft-profies.page';
+import { TotalCompPublishedProfilesPage } from '../routes/total-comp-published-profiles/total-comp-published-profies.page';
+import { UnauthorizedRoute } from '../routes/unauthorized';
+import UnauthorizedPage from '../routes/unauthorized/unauthorized.page';
 import { WizardRoute } from '../routes/wizard';
-import { WizardConfirmDetailsPage } from '../routes/wizard/wizard-confirm-details.page';
-import { WizardEditPage } from '../routes/wizard/wizard-edit.page';
-import { WizardResultPage } from '../routes/wizard/wizard-result.page';
-import { WizardReviewPage } from '../routes/wizard/wizard-review.page';
-import { WizardPage } from '../routes/wizard/wizard.page';
+import { PositionRequestPage } from '../routes/wizard/position-request.page';
+import { WizardOrgChartPage } from '../routes/wizard/wizard-org-chart.page';
+import { RoleBasedRouting } from './role-based-component';
 
 export const router = createBrowserRouter([
   {
@@ -25,8 +35,17 @@ export const router = createBrowserRouter([
     element: <AuthRoute />,
     children: [
       {
-        path: 'login',
-        element: <LoginPage />,
+        element: <AppLayout />,
+        children: [
+          {
+            path: 'login',
+            element: <LoginPage />,
+          },
+          {
+            path: 'logout',
+            element: <LoginPage />,
+          },
+        ],
       },
     ],
   },
@@ -39,17 +58,26 @@ export const router = createBrowserRouter([
           {
             path: '/',
             element: <HomeRoute />,
-            handle: {
-              breadcrumb: () => 'Home',
-              icon: <HomeOutlined />,
-            },
             children: [
               {
                 index: true,
-                element: <HomePage />,
+                handle: {
+                  // breadcrumb: () => 'My tasks',
+                },
+                element: (
+                  <RoleBasedRouting
+                    roleComponentMapping={{
+                      classification: ClassificationTasksPage,
+                      'total-compensation': TotalCompDraftProfilesPage,
+                      user: HomePage,
+                      default: HomePage, // Default component when no roles match
+                    }}
+                  />
+                ),
               },
             ],
           },
+
           {
             path: '/my-positions',
             element: <MyPositionsRoute />,
@@ -62,8 +90,13 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <MyPositionsPage />,
               },
+              {
+                path: 'create',
+                element: <WizardOrgChartPage />,
+              },
             ],
           },
+
           {
             path: '/org-chart',
             element: <OrgChartRoute />,
@@ -100,61 +133,92 @@ export const router = createBrowserRouter([
               },
             ],
           },
+
           {
-            path: '/wizard',
+            path: '/position-request/:positionRequestId',
             element: <WizardRoute />,
+            children: [
+              {
+                index: true,
+                element: <PositionRequestPage />,
+              },
+            ],
+          },
+          {
+            path: '/total-compensation/profiles',
+            element: (
+              <RoleGuard requiredRole="total-compensation">
+                <TotalCompDraftProfilesRoute />
+              </RoleGuard>
+            ),
             handle: {
-              breadcrumb: () => 'Wizard',
-              icon: <StarOutlined />,
+              breadcrumb: () => 'Job profiles',
+            },
+            children: [
+              {
+                path: 'drafts',
+                element: <TotalCompDraftProfilesPage />,
+              },
+              {
+                path: 'published',
+                element: <TotalCompPublishedProfilesPage />,
+              },
+              {
+                handle: {
+                  breadcrumb: () => 'Create profile',
+                },
+                path: 'create',
+                element: <TotalCompCreateProfilePage />,
+              },
+            ],
+          },
+          {
+            path: '/total-compensation/approved-requests',
+            element: (
+              <RoleGuard requiredRole="total-compensation">
+                <TotalCompApprovedRequestsRoute />
+              </RoleGuard>
+            ),
+            handle: {
+              breadcrumb: () => 'Approved requests',
             },
             children: [
               {
                 index: true,
-                element: <WizardPage />,
+                element: <TotalCompApprovedRequestsPage />,
               },
               {
-                path: ':id',
-                element: <WizardPage />,
+                path: ':positionRequestId',
+                element: <TotalCompApprovedRequestPage />,
               },
+            ],
+          },
+
+          {
+            path: '/classification-tasks/:positionRequestId',
+            element: (
+              <RoleGuard requiredRole="classification">
+                <TotalCompApprovedRequestsRoute />
+              </RoleGuard>
+            ),
+            handle: {
+              breadcrumb: () => 'My tasks',
+            },
+            children: [
               {
-                path: 'edit',
-                children: [
-                  {
-                    index: true,
-                    element: <WizardEditPage />,
-                    handle: {
-                      breadcrumb: () => 'Edit profile',
-                    },
-                  },
-                  {
-                    path: ':profileId', // matches "/wizard/edit/3"
-                    element: <WizardEditPage />,
-                    handle: {
-                      breadcrumb: () => 'Edit profile',
-                    },
-                  },
-                ],
+                index: true,
+                element: <ClassificationTaskPage />,
               },
+            ],
+          },
+
+          {
+            path: '/unauthorized',
+            element: <UnauthorizedRoute />,
+            children: [
               {
-                path: 'review',
-                element: <WizardReviewPage />,
-                handle: {
-                  breadcrumb: () => 'Review profile',
-                },
-              },
-              {
-                path: 'confirm',
-                element: <WizardConfirmDetailsPage />,
-                handle: {
-                  breadcrumb: () => 'Confirm details',
-                },
-              },
-              {
-                path: 'result',
-                element: <WizardResultPage />,
-                handle: {
-                  breadcrumb: () => 'Profile',
-                },
+                index: true,
+                element: <UnauthorizedPage />,
               },
             ],
           },

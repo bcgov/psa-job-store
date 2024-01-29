@@ -7,25 +7,31 @@ export class JobProfileCountAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
-  career_group_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
-  job_family_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
-  organization_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
   role_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  role_type_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  scope_id?: true;
 
   @Field(() => Boolean, { nullable: true })
   state?: true;
 
   @Field(() => Boolean, { nullable: true })
-  stream_id?: true;
+  type?: true;
 
   @Field(() => Boolean, { nullable: true })
-  type?: true;
+  updated_at?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  owner_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  program_overview?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  review_required?: true;
 
   @Field(() => Boolean, { nullable: true })
   title?: true;
@@ -41,6 +47,24 @@ export class JobProfileCountAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   requirements?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  professional_registration_requirements?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  preferences?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  knowledge_skills_abilities?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  willingness_statements?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  security_screenings?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  total_comp_create_form_misc?: true;
 
   @Field(() => Boolean, { nullable: true })
   _all?: true;

@@ -18,7 +18,7 @@ export class FindFirstJobProfileArgs {
   orderBy?: Array<JobProfileOrderByWithRelationAndSearchRelevanceInput>;
 
   @Field(() => JobProfileWhereUniqueInput, { nullable: true })
-  cursor?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  cursor?: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => Int, { nullable: true })
   take?: number;

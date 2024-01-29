@@ -3,6 +3,7 @@ import { Avatar, Button, Card, Col, Divider, Row, Space, Typography } from 'antd
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
+import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-positions/components/my-positions-table.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import ContentWrapper from './components/content-wrapper.component';
@@ -15,6 +16,7 @@ export const HomePage = () => {
   const auth = useAuth();
   const { data: positionsCountData } = useGetPositionRequestsCountQuery();
   const { total = 0, completed = 0, inReview = 0 } = positionsCountData?.positionRequestsCount || {};
+  const { data: profileData, isLoading: profileIsLoading } = useGetProfileQuery();
 
   return (
     <>
@@ -27,7 +29,7 @@ export const HomePage = () => {
                 <Avatar size={64} icon={<UserOutlined />} />
                 <div>
                   <Title level={4}>{auth.user?.profile.name}</Title>
-                  <Text type="secondary">HR Manager · Digital Talent & Capacity</Text>
+                  {/* <Text type="secondary">HR Manager · Digital Talent & Capacity</Text> */}
                 </div>
               </Space>
             </Space>
@@ -78,6 +80,7 @@ export const HomePage = () => {
         {/* Todo: pull in from actual user data */}
 
         <Card
+          loading={profileIsLoading}
           className="orgChartCart"
           style={{
             height: '500px',
@@ -95,7 +98,7 @@ export const HomePage = () => {
             </Link>
           }
         >
-          <OrgChartWrapped selectedDepartment="112-0074" />
+          <OrgChartWrapped selectedDepartment={profileData?.profile.department_id ?? null} />
         </Card>
       </ContentWrapper>
     </>
