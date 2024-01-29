@@ -14,7 +14,13 @@ export class JobProfileOrderByWithAggregationInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  role_id?: keyof typeof SortOrder;
+  all_organizations?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  all_reports_to?: keyof typeof SortOrder;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  role_id?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   role_type_id?: SortOrderInput;
@@ -49,11 +55,14 @@ export class JobProfileOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   overview?: keyof typeof SortOrder;
 
-  @Field(() => SortOrder, { nullable: true })
-  accountabilities?: keyof typeof SortOrder;
+  @Field(() => SortOrderInput, { nullable: true })
+  accountabilities?: SortOrderInput;
 
-  @Field(() => SortOrder, { nullable: true })
-  requirements?: keyof typeof SortOrder;
+  @Field(() => SortOrderInput, { nullable: true })
+  education?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  job_experience?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   professional_registration_requirements?: keyof typeof SortOrder;
@@ -67,8 +76,8 @@ export class JobProfileOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   willingness_statements?: keyof typeof SortOrder;
 
-  @Field(() => SortOrder, { nullable: true })
-  security_screenings?: keyof typeof SortOrder;
+  @Field(() => SortOrderInput, { nullable: true })
+  security_screenings?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   total_comp_create_form_misc?: SortOrderInput;

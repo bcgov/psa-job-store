@@ -8,6 +8,12 @@ export class JobProfileMaxOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  all_organizations?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  all_reports_to?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

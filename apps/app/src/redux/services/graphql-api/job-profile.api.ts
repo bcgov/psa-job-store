@@ -190,6 +190,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   stream {
                       id
                       name
+                      job_family_id
                   }
                 }
                 title
@@ -198,9 +199,27 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id,
                   description
                 }
+                security_screenings
+                all_reports_to
+                all_organizations
+                willingness_statements
+                knowledge_skills_abilities
+                professional_registration_requirements
+                program_overview
+                review_required
                 overview
                 accountabilities
-                requirements
+                preferences
+                education
+                job_experience
+                scope{
+                  id
+                  name
+                }
+                total_comp_create_form_misc
+                role_type {
+                  id
+                }
                 behavioural_competencies {
                   behavioural_competency {
                     id
@@ -243,16 +262,17 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    createJobProfile: build.mutation<CreateJobProfileResponse, CreateJobProfileInput>({
+    createOrUpdateJobProfile: build.mutation<CreateJobProfileResponse, CreateJobProfileInput>({
       query: (input: CreateJobProfileInput) => {
         return {
           document: gql`
-            mutation CreateJobProfile($data: JobProfileCreateInput!) {
-              createJobProfile(data: $data)
+            mutation CreateOrUpdateJobProfile($data: JobProfileCreateInput!, $id: Int) {
+              createOrUpdateJobProfile(data: $data, id: $id)
             }
           `,
           variables: {
-            data: input,
+            data: input.data,
+            id: input.id,
           },
         };
       },
@@ -350,7 +370,7 @@ export const {
   useGetJobProfilesQuery,
   useLazyGetJobProfilesQuery,
   useLazyGetJobProfilesDraftsQuery,
-  useCreateJobProfileMutation,
+  useCreateOrUpdateJobProfileMutation,
 
   useGetNextAvailableJobProfileNumberQuery,
   useIsJobProfileNumberAvailableQuery,

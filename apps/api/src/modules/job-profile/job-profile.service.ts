@@ -129,8 +129,14 @@ export class JobProfileService {
             jobFamily: true,
           },
         },
-        organizations: true,
+        organizations: {
+          include: {
+            organization: true,
+          },
+        },
+        scope: true,
         role: true,
+        role_type: true,
         streams: {
           include: {
             stream: true,
@@ -198,10 +204,12 @@ export class JobProfileService {
     });
   }
 
-  async createJobProfile(data: JobProfileCreateInput, userId: string) {
+  async createOrUpdateJobProfile(data: JobProfileCreateInput, userId: string, id?: number) {
     // todo: catch the "number" constraint failure and process the error on the client appropriately
-    return this.prisma.jobProfile.create({
-      data: {
+
+    const result = this.prisma.jobProfile.upsert({
+      where: { id: id || -1 },
+      create: {
         behavioural_competencies: {
           create: data.behavioural_competencies.create.map((item) => ({
             behavioural_competency: {
@@ -209,13 +217,15 @@ export class JobProfileService {
             },
           })),
         },
-        classifications: {
-          create: data.classifications.create.map((item) => ({
-            classification: {
-              connect: { id: item.classification.connect.id },
-            },
-          })),
-        },
+        ...(data.classifications && {
+          classifications: {
+            create: data.classifications.create.map((item) => ({
+              classification: {
+                connect: { id: item.classification.connect.id },
+              },
+            })),
+          },
+        }),
         organizations: {
           create: data.organizations.create.map((item) => ({
             organization: {
@@ -226,15 +236,21 @@ export class JobProfileService {
         context: {
           create: { description: data.context.create.description },
         },
-        role: {
-          connect: { id: data.role.connect.id },
-        },
+
+        ...(data.role && {
+          role: {
+            connect: { id: data.role.connect.id },
+          },
+        }),
         role_type: {
           connect: { id: data.role_type.connect.id },
         },
-        scope: {
-          connect: { id: data.scope.connect.id },
-        },
+
+        ...(data.scope && {
+          scope: {
+            connect: { id: data.scope.connect.id },
+          },
+        }),
         state: JobProfileState.DRAFT,
         type: data.organizations.create.length > 0 ? JobProfileType.MINISTRY : JobProfileType.CORPORATE, // should be MINISTRY if ministries provided, otherwise corporate
         owner: {
@@ -260,12 +276,15 @@ export class JobProfileService {
         number: data.number,
         overview: data.overview,
         accountabilities: data.accountabilities,
-        requirements: data.requirements,
+        education: data.education,
+        job_experience: data.job_experience,
         professional_registration_requirements: data.professional_registration_requirements,
         preferences: data.preferences,
         knowledge_skills_abilities: data.knowledge_skills_abilities,
         willingness_statements: data.willingness_statements,
         security_screenings: data.security_screenings,
+        all_reports_to: data.all_reports_to,
+        all_organizations: data.all_organizations,
         reports_to: {
           create: data.reports_to.create.map((item) => ({
             classification: {
@@ -275,7 +294,111 @@ export class JobProfileService {
         },
         total_comp_create_form_misc: data.total_comp_create_form_misc,
       } as any as Prisma.JobProfileCreateInput, // To prevent Excessive Stack Depth error,
+      update: {
+        title: data.title,
+        number: data.number,
+        overview: data.overview,
+        program_overview: data.program_overview,
+        review_required: data.review_required,
+
+        ...(data.state && { state: data.state }),
+
+        behavioural_competencies: {
+          deleteMany: {}, // Deletes all existing competencies for this job profile
+          create: data.behavioural_competencies.create.map((item) => ({
+            behavioural_competency: { connect: { id: item.behavioural_competency.connect.id } },
+          })),
+        },
+
+        ...(data.classifications && {
+          classifications: {
+            deleteMany: {},
+            create: data.classifications.create.map((item) => ({
+              classification: {
+                connect: { id: item.classification.connect.id },
+              },
+            })),
+          },
+        }),
+
+        // // Update or create classifications
+        // classifications: {
+        //   deleteMany: {},
+        //   create: data.classifications.create.map((item) => ({
+        //     classification: { connect: { id: item.classification.connect.id } },
+        //   })),
+        // },
+
+        // Update or create organizations
+        organizations: {
+          deleteMany: {},
+          create: data.organizations.create.map((item) => ({
+            organization: { connect: { id: item.organization.connect.id } },
+          })),
+        },
+
+        // Update context
+        context: {
+          update: { description: data.context.create.description },
+        },
+
+        // Connect role, role_type, and scope
+        ...(data.role && {
+          role: {
+            connect: { id: data.role.connect.id },
+          },
+        }),
+
+        role_type: { connect: { id: data.role_type.connect.id } },
+
+        ...(data.scope && {
+          scope: {
+            connect: { id: data.scope.connect.id },
+          },
+        }),
+
+        // Update jobFamilies
+        jobFamilies: {
+          deleteMany: {},
+          create: data.jobFamilies.create.map((item) => ({
+            jobFamily: { connect: { id: item.jobFamily.connect.id } },
+          })),
+        },
+
+        // Update streams
+        streams: {
+          deleteMany: {},
+          create: data.streams.create.map((item) => ({
+            stream: { connect: { id: item.stream.connect.id } },
+          })),
+        },
+
+        // Update accountabilities, requirements, and other string arrays
+        accountabilities: data.accountabilities,
+        education: data.education,
+        job_experience: data.job_experience,
+        professional_registration_requirements: data.professional_registration_requirements,
+        preferences: data.preferences,
+        knowledge_skills_abilities: data.knowledge_skills_abilities,
+        willingness_statements: data.willingness_statements,
+        security_screenings: data.security_screenings,
+        all_reports_to: data.all_reports_to,
+        all_organizations: data.all_organizations,
+
+        // Update reports_to
+        reports_to: {
+          deleteMany: {},
+          create: data.reports_to.create.map((item) => ({
+            classification: { connect: { id: item.classification.connect.id } },
+          })),
+        },
+
+        // Update miscellaneous data
+        total_comp_create_form_misc: data.total_comp_create_form_misc,
+      },
     });
+
+    return result;
   }
 
   async getReportsTo(job_profile_id: number) {

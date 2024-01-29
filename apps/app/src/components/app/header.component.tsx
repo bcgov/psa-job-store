@@ -56,7 +56,7 @@ export const AppHeader = () => {
         </Col>
 
         <Col className={styles.right}>
-          {auth.user != null && (
+          {auth.isAuthenticated && (
             <div className={styles.headerToolbar}>
               <div className={styles.iconWrapper}>
                 <QuestionCircleOutlined style={{ color: 'white' }} />

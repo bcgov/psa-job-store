@@ -22,8 +22,14 @@ export class JobProfile {
   @Field(() => Int, { nullable: false })
   id!: number;
 
-  @Field(() => Int, { nullable: false })
-  role_id!: number;
+  @Field(() => Boolean, { nullable: false, defaultValue: true })
+  all_organizations!: boolean;
+
+  @Field(() => Boolean, { nullable: false, defaultValue: false })
+  all_reports_to!: boolean;
+
+  @Field(() => Int, { nullable: true })
+  role_id!: number | null;
 
   @Field(() => Int, { nullable: true })
   role_type_id!: number | null;
@@ -58,11 +64,14 @@ export class JobProfile {
   @Field(() => String, { nullable: false })
   overview!: string;
 
-  @Field(() => GraphQLJSON, { nullable: false, defaultValue: '{"optional": [], "required": []}' })
-  accountabilities!: any;
+  @Field(() => GraphQLJSON, { nullable: true })
+  accountabilities!: any | null;
 
-  @Field(() => [String], { nullable: true })
-  requirements!: Array<string>;
+  @Field(() => GraphQLJSON, { nullable: true })
+  education!: any | null;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  job_experience!: any | null;
 
   @Field(() => [String], { nullable: true })
   professional_registration_requirements!: Array<string>;
@@ -76,8 +85,8 @@ export class JobProfile {
   @Field(() => [String], { nullable: true })
   willingness_statements!: Array<string>;
 
-  @Field(() => [String], { nullable: true })
-  security_screenings!: Array<string>;
+  @Field(() => GraphQLJSON, { nullable: true })
+  security_screenings!: any | null;
 
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc!: any | null;

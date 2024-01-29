@@ -165,7 +165,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       key: 'title',
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
-      render: (text: any, record: any) => <Link to={`/position-request/${record.id}`}>{text}</Link>,
+      render: (text: any, record: any) => <Link to={`/total-compensation/profiles/${record.id}`}>{text}</Link>,
     },
     {
       sorter: false,
@@ -521,7 +521,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
           <img src={EmptyJobPositionGraphic} alt="No positions" />
           <div>Looks like you’re not working on anything right now.</div>
           {/* Link button to the orgchart page */}
-          <Link to="/total-compensation/profiles/create">
+          <Link to="/total-compensation/create-profile">
             <Button type="primary" style={{ marginTop: '1rem' }}>
               Create new profile
             </Button>

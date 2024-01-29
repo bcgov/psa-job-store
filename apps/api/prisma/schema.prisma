@@ -135,10 +135,12 @@ model JobProfile {
   behavioural_competencies JobProfileBehaviouralCompetency[]
   classifications          JobProfileClassification[]
   organizations            JobProfileOrganization[]
+  all_organizations        Boolean                           @default(true)
+  all_reports_to           Boolean                           @default(false)
 
   context          JobProfileContext?
   role             JobProfileRole?           @relation(fields: [role_id], references: [id])
-  role_id          Int
+  role_id          Int?
   role_type        JobProfileRoleType?       @relation(fields: [role_type_id], references: [id])
   role_type_id     Int?
   scope            JobProfileScope?          @relation(fields: [scope_id], references: [id])
@@ -156,13 +158,14 @@ model JobProfile {
   title                                  String
   number                                 Int                   @unique
   overview                               String
-  accountabilities                       Json                  @default("{\"optional\": [], \"required\": []}") @db.JsonB
-  requirements                           String[]
+  accountabilities                       Json?                 @db.JsonB
+  education                              Json?                 @db.JsonB
+  job_experience                         Json?                 @db.JsonB
   professional_registration_requirements String[]
   preferences                            String[]
   knowledge_skills_abilities             String[]
   willingness_statements                 String[]
-  security_screenings                    String[]
+  security_screenings                    Json?                 @db.JsonB
   reports_to                             JobProfileReportsTo[]
   position_request                       PositionRequest[]
   total_comp_create_form_misc            Json? // stores e.x. state of checkbox for markAllNonEditable for accountabilities

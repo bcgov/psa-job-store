@@ -83,12 +83,25 @@ export class JobProfileResolver {
   }
 
   @Mutation(() => Int)
-  async createJobProfile(
+  async createOrUpdateJobProfile(
     @CurrentUser() { id: userId }: Express.User,
+    @Args('id', { type: () => Int, nullable: true }) id: number | null,
     @Args({ name: 'data', type: () => JobProfileCreateInput }) data: JobProfileCreateInput,
   ) {
-    const newJobProfile = await this.jobProfileService.createJobProfile(data, userId);
-    return newJobProfile.id;
+    try {
+      const newJobProfile = await this.jobProfileService.createOrUpdateJobProfile(data, userId, id);
+      return newJobProfile.id;
+    } catch (error: any) {
+      // Check if the error is due to a unique constraint failure on the 'number' field
+      if (error.message.includes('Unique constraint failed on the fields: (`number`)')) {
+        // Return a custom error response or throw a custom error
+        // Modify this according to how you handle errors in your application
+        throw new Error('A job profile with this number already exists. Please use a different number.');
+      } else {
+        // If the error is not due to the unique constraint, rethrow the error
+        throw error;
+      }
+    }
   }
 
   @ResolveField(() => JobProfileReportsTo)

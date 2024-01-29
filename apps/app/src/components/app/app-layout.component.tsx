@@ -83,7 +83,7 @@ export const AppLayout = () => {
     <Layout style={{ height: '100vh' }}>
       <AppHeader></AppHeader>
       <Layout hasSider style={{ height: '100%' }}>
-        {auth.user != null && (
+        {auth.isAuthenticated && (
           <Sider
             collapsible
             collapsed={collapsed}
@@ -153,7 +153,7 @@ export const AppLayout = () => {
                           {
                             icon: <FileAddFilled style={{ fontSize: '1.25rem', color: '#1677ff' }} />,
                             title: 'Create new profile',
-                            to: '/total-compensation/profiles/create',
+                            to: '/total-compensation/create-profile',
                             hideTitle: true,
                           },
                           {
@@ -179,7 +179,7 @@ export const AppLayout = () => {
                     ) : (
                       <>
                         <div style={{ padding: '10px 10px 2px 10px' }}>
-                          <Link to="/total-compensation/profiles/create">
+                          <Link to="/total-compensation/create-profile">
                             <Button
                               type="primary"
                               icon={<FileAddOutlined style={{ fontSize: '1.25rem' }} />}
