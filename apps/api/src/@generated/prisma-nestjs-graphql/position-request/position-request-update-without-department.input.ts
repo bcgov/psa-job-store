@@ -11,6 +11,9 @@ export class PositionRequestUpdateWithoutDepartmentInput {
   crm_id?: number;
 
   @Field(() => Int, { nullable: true })
+  crm_assigned_to_account_id?: number;
+
+  @Field(() => Int, { nullable: true })
   step?: number;
 
   @Field(() => String, { nullable: true })
@@ -27,9 +30,6 @@ export class PositionRequestUpdateWithoutDepartmentInput {
 
   @Field(() => String, { nullable: true })
   user_id?: string;
-
-  @Field(() => String, { nullable: true })
-  classificationAssignedTo?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;

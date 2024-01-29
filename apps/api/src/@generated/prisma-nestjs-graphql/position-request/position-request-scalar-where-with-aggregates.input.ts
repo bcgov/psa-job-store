@@ -25,6 +25,9 @@ export class PositionRequestScalarWhereWithAggregatesInput {
   crm_id?: IntWithAggregatesFilter;
 
   @Field(() => IntWithAggregatesFilter, { nullable: true })
+  crm_assigned_to_account_id?: IntWithAggregatesFilter;
+
+  @Field(() => IntWithAggregatesFilter, { nullable: true })
   step?: IntWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
@@ -47,9 +50,6 @@ export class PositionRequestScalarWhereWithAggregatesInput {
 
   @Field(() => UuidWithAggregatesFilter, { nullable: true })
   user_id?: UuidWithAggregatesFilter;
-
-  @Field(() => UuidWithAggregatesFilter, { nullable: true })
-  classificationAssignedTo?: UuidWithAggregatesFilter;
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   title?: StringWithAggregatesFilter;

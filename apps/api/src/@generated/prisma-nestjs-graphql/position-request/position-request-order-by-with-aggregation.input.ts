@@ -16,6 +16,9 @@ export class PositionRequestOrderByWithAggregationInput {
   @Field(() => SortOrderInput, { nullable: true })
   crm_id?: SortOrderInput;
 
+  @Field(() => SortOrderInput, { nullable: true })
+  crm_assigned_to_account_id?: SortOrderInput;
+
   @Field(() => SortOrder, { nullable: true })
   step?: keyof typeof SortOrder;
 
@@ -39,9 +42,6 @@ export class PositionRequestOrderByWithAggregationInput {
 
   @Field(() => SortOrderInput, { nullable: true })
   user_id?: SortOrderInput;
-
-  @Field(() => SortOrderInput, { nullable: true })
-  classificationAssignedTo?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
   title?: SortOrderInput;

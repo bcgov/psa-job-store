@@ -11,6 +11,9 @@ export class PositionRequestAvgAggregate {
   crm_id?: number;
 
   @Field(() => Float, { nullable: true })
+  crm_assigned_to_account_id?: number;
+
+  @Field(() => Float, { nullable: true })
   step?: number;
 
   @Field(() => Float, { nullable: true })

@@ -17,6 +17,9 @@ export class PositionRequestGroupBy {
   @Field(() => Int, { nullable: true })
   crm_id?: number;
 
+  @Field(() => Int, { nullable: true })
+  crm_assigned_to_account_id?: number;
+
   @Field(() => Int, { nullable: false })
   step!: number;
 
@@ -40,9 +43,6 @@ export class PositionRequestGroupBy {
 
   @Field(() => String, { nullable: true })
   user_id?: string;
-
-  @Field(() => String, { nullable: true })
-  classificationAssignedTo?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;

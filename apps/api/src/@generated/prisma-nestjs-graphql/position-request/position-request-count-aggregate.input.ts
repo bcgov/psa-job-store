@@ -10,6 +10,9 @@ export class PositionRequestCountAggregateInput {
   crm_id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  crm_assigned_to_account_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   step?: true;
 
   @Field(() => Boolean, { nullable: true })
@@ -32,9 +35,6 @@ export class PositionRequestCountAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   user_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
-  classificationAssignedTo?: true;
 
   @Field(() => Boolean, { nullable: true })
   title?: true;
