@@ -210,7 +210,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 overview
                 accountabilities
                 preferences
-                requirements
+                education
+                job_experience
                 scope{
                   id
                   name

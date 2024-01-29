@@ -53,7 +53,10 @@ export class SearchModule {
               title: profile.title,
               context: profile.context?.description,
               overview: profile.overview,
-              requirements: profile.requirements,
+              // requirements: profile.requirements,
+              education: profile.education,
+              job_experience: profile.job_experience,
+
               accountabilities: profile.accountabilities,
               behavioural_competencies: (
                 await prisma.jobProfileBehaviouralCompetency.findMany({

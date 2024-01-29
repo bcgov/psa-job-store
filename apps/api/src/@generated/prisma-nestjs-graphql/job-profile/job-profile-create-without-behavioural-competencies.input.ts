@@ -52,7 +52,10 @@ export class JobProfileCreateWithoutBehavioural_competenciesInput {
   accountabilities?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
-  requirements?: any;
+  education?: any;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  job_experience?: any;
 
   @Field(() => [String], { nullable: true })
   professional_registration_requirements?: Array<string>;

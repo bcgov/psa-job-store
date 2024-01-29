@@ -276,7 +276,8 @@ export class JobProfileService {
         number: data.number,
         overview: data.overview,
         accountabilities: data.accountabilities,
-        requirements: data.requirements,
+        education: data.education,
+        job_experience: data.job_experience,
         professional_registration_requirements: data.professional_registration_requirements,
         preferences: data.preferences,
         knowledge_skills_abilities: data.knowledge_skills_abilities,
@@ -299,7 +300,8 @@ export class JobProfileService {
         overview: data.overview,
         program_overview: data.program_overview,
         review_required: data.review_required,
-        state: data.state,
+
+        ...(data.state && { state: data.state }),
 
         behavioural_competencies: {
           deleteMany: {}, // Deletes all existing competencies for this job profile
@@ -373,7 +375,8 @@ export class JobProfileService {
 
         // Update accountabilities, requirements, and other string arrays
         accountabilities: data.accountabilities,
-        requirements: data.requirements,
+        education: data.education,
+        job_experience: data.job_experience,
         professional_registration_requirements: data.professional_registration_requirements,
         preferences: data.preferences,
         knowledge_skills_abilities: data.knowledge_skills_abilities,

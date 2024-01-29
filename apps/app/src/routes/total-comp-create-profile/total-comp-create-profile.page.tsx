@@ -62,6 +62,7 @@ import {
   useLazyIsJobProfileNumberAvailableQuery,
 } from '../../redux/services/graphql-api/job-profile.api';
 import { useGetJobRolesQuery } from '../../redux/services/graphql-api/job-role.api';
+import { useGetOrganizationsQuery } from '../../redux/services/graphql-api/organization';
 import { FormItem } from '../../utils/FormItem';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { IsIndigenousCompetency } from '../wizard/components/is-indigenous-competency.component';
@@ -102,6 +103,8 @@ export const TotalCompCreateProfilePage = () => {
 
   // BASIC DETAILS FORM
   const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
+  const { data: allMinistriesData } = useGetOrganizationsQuery();
+
   // const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
 
   const srOnlyStyle: CSSProperties = {
@@ -288,7 +291,8 @@ export const TotalCompCreateProfilePage = () => {
       overview: '' as string | TrackedFieldArrayItem,
       programOverview: '' as string | TrackedFieldArrayItem,
       accountabilities: [] as AccountabilityItem[],
-      educationAndWorkExperiences: [] as AccountabilityItem[],
+      education: [] as AccountabilityItem[],
+      job_experience: [] as AccountabilityItem[],
       professionalRegistrationRequirements: [] as TextItem[],
       preferences: [] as TextItem[],
       knowledgeSkillsAbilities: [] as TextItem[],
@@ -299,6 +303,8 @@ export const TotalCompCreateProfilePage = () => {
       markAllSignificant: false,
       markAllNonEditableEdu: false,
       markAllSignificantEdu: false,
+      markAllNonEditableJob_experience: false,
+      markAllSignificantJob_experience: false,
       markAllNonEditableSec: false,
       markAllSignificantSec: false,
     },
@@ -348,10 +354,7 @@ export const TotalCompCreateProfilePage = () => {
       setValue('role', jobProfileData.jobProfile.role_type.id);
 
       setValue('scopeOfResponsibility', jobProfileData.jobProfile?.scope?.id);
-      setValue(
-        'ministries',
-        jobProfileData.jobProfile.organizations.map((org) => org.organization.id),
-      );
+
       setValue('classificationReviewRequired', jobProfileData.jobProfile.review_required);
       setValue('jobContext', jobProfileData.jobProfile.context.description);
 
@@ -389,8 +392,19 @@ export const TotalCompCreateProfilePage = () => {
         ),
       );
       profileSetValue(
-        'educationAndWorkExperiences',
-        jobProfileData.jobProfile.requirements.map(
+        'education',
+        jobProfileData.jobProfile.education?.map(
+          (r) =>
+            ({
+              text: r.text,
+              nonEditable: r.is_readonly,
+              significant: r.is_significant,
+            }) as AccountabilityItem,
+        ),
+      );
+      profileSetValue(
+        'job_experience',
+        jobProfileData.jobProfile.job_experience?.map(
           (r) =>
             ({
               text: r.text,
@@ -442,7 +456,19 @@ export const TotalCompCreateProfilePage = () => {
         );
       }
 
-      setValue('all_organizations', jobProfileData.jobProfile.all_organizations);
+      const allOrganizationsValue = jobProfileData.jobProfile.all_organizations;
+      if (allOrganizationsValue) {
+        // If 'all_organizations' is true, set 'ministries' to all possible values
+        const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
+        setValue('ministries', allValues);
+      } else {
+        // If 'all_organizations' is false, set 'ministries' to specific values
+        setValue(
+          'ministries',
+          jobProfileData.jobProfile.organizations.map((org) => org.organization.id),
+        );
+      }
+      setValue('all_organizations', allOrganizationsValue);
 
       profileSetValue(
         'behavioural_competencies',
@@ -461,6 +487,15 @@ export const TotalCompCreateProfilePage = () => {
         jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantEdu,
       );
       profileSetValue(
+        'markAllNonEditableJob_experience',
+        jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableJob_experience,
+      );
+      profileSetValue(
+        'markAllSignificantJob_experience',
+        jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantJob_experience,
+      );
+
+      profileSetValue(
         'markAllNonEditableSec',
         jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableSec,
       );
@@ -468,8 +503,12 @@ export const TotalCompCreateProfilePage = () => {
         'markAllSignificantSec',
         jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantSec,
       );
+    } else {
+      // no profile data - select all ministries as that's the default setting
+      const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
+      setValue('ministries', allValues);
     }
-  }, [jobProfileData, setValue, profileSetValue, treeDataConverted]);
+  }, [jobProfileData, setValue, profileSetValue, treeDataConverted, ministriesData, allMinistriesData]);
 
   // required accountabilties
 
@@ -510,20 +549,37 @@ export const TotalCompCreateProfilePage = () => {
   };
 
   const updateSignificantEdu = (significant: boolean) => {
-    const updatedExperiences = educationAndWorkExperiences.map((field) => ({
+    const updatedExperiences = educations.map((field) => ({
       ...field,
       significant: significant,
     }));
-    profileSetValue('educationAndWorkExperiences', updatedExperiences as AccountabilityItem[]);
+    profileSetValue('education', updatedExperiences as AccountabilityItem[]);
   };
 
   const updateNonEditableEdu = (nonEditable: boolean) => {
-    const updatedExperiences = educationAndWorkExperiences.map((field) => ({
+    const updatedExperiences = educations.map((field) => ({
       ...field,
       nonEditable: nonEditable,
       significant: nonEditable ? true : false,
     }));
-    profileSetValue('educationAndWorkExperiences', updatedExperiences as AccountabilityItem[]);
+    profileSetValue('education', updatedExperiences as AccountabilityItem[]);
+  };
+
+  const updateSignificantJob_experience = (significant: boolean) => {
+    const updatedExperiences = job_experiences.map((field) => ({
+      ...field,
+      significant: significant,
+    }));
+    profileSetValue('job_experience', updatedExperiences as AccountabilityItem[]);
+  };
+
+  const updateNonEditableJob_experience = (nonEditable: boolean) => {
+    const updatedExperiences = job_experiences.map((field) => ({
+      ...field,
+      nonEditable: nonEditable,
+      significant: nonEditable ? true : false,
+    }));
+    profileSetValue('job_experience', updatedExperiences as AccountabilityItem[]);
   };
 
   const updateSignificantSec = (significant: boolean) => {
@@ -548,6 +604,8 @@ export const TotalCompCreateProfilePage = () => {
   const markAllNonEditable = profileWatch('markAllNonEditable');
   const markAllNonEditableEdu = profileWatch('markAllNonEditableEdu');
   const markAllSignificantEdu = profileWatch('markAllSignificantEdu');
+  const markAllNonEditableJob_experience = profileWatch('markAllNonEditableJob_experience');
+  const markAllSignificantJob_experience = profileWatch('markAllSignificantJob_experience');
 
   const markAllNonEditableSec = profileWatch('markAllNonEditableSec');
   const markAllSignificantSec = profileWatch('markAllSignificantSec');
@@ -555,9 +613,10 @@ export const TotalCompCreateProfilePage = () => {
   const markAllSignificant = profileWatch('markAllSignificant');
   const accountabilities = profileWatch('accountabilities');
   const securityScreenings = profileWatch('securityScreenings');
-  const educationAndWorkExperiences = profileWatch('educationAndWorkExperiences');
+  const educations = profileWatch('education');
+  const job_experiences = profileWatch('job_experience');
 
-  // education And Work Experience
+  // education
   const {
     fields: educationAndWorkExperienceFields,
     append: appendEducationAndWorkExperience,
@@ -565,7 +624,7 @@ export const TotalCompCreateProfilePage = () => {
     move: moveEducationAndWorkExperience,
   } = useFieldArray({
     control: profileControl,
-    name: 'educationAndWorkExperiences',
+    name: 'education',
   });
 
   const handleEducationAndWorkExperienceMove = (index: number, direction: 'up' | 'down') => {
@@ -573,6 +632,25 @@ export const TotalCompCreateProfilePage = () => {
       moveEducationAndWorkExperience(index, index - 1);
     } else {
       moveEducationAndWorkExperience(index, index + 1);
+    }
+  };
+
+  // work experience
+  const {
+    fields: job_experienceFields,
+    append: appendJob_experience,
+    remove: removeJob_experience,
+    move: moveJob_experience,
+  } = useFieldArray({
+    control: profileControl,
+    name: 'job_experience',
+  });
+
+  const handleJob_experienceMove = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up') {
+      moveJob_experience(index, index - 1);
+    } else {
+      moveJob_experience(index, index + 1);
     }
   };
 
@@ -731,7 +809,6 @@ export const TotalCompCreateProfilePage = () => {
 
   // job role selector data
   const { data: jobRolesData } = useGetJobRolesQuery();
-  console.log('jobRolesData: ', jobRolesData);
 
   // job profile scopes
   const { data: jobProfileScopes } = useGetJobProfileScopesQuery();
@@ -770,7 +847,7 @@ export const TotalCompCreateProfilePage = () => {
 
         // console.log('filteredRequirements: ', filteredRequirements);
         // Update the educationAndWorkExperiences field array
-        profileSetValue('educationAndWorkExperiences', filteredRequirements);
+        profileSetValue('education', filteredRequirements);
       }
     }
   };
@@ -798,7 +875,12 @@ export const TotalCompCreateProfilePage = () => {
           is_readonly: a.nonEditable,
           is_significant: a.significant,
         })),
-        requirements: formData.educationAndWorkExperiences.map((a: any) => ({
+        education: formData.education.map((a: any) => ({
+          text: a.text,
+          is_readonly: a.nonEditable,
+          is_significant: a.significant,
+        })),
+        job_experience: formData.job_experience.map((a: any) => ({
           text: a.text,
           is_readonly: a.nonEditable,
           is_significant: a.significant,
@@ -819,6 +901,9 @@ export const TotalCompCreateProfilePage = () => {
           markAllSignificant: formData.markAllSignificant,
           markAllNonEditableEdu: formData.markAllNonEditableEdu,
           markAllSignificantEdu: formData.markAllSignificantEdu,
+          markAllNonEditableJob_experience: formData.markAllNonEditableJob_experience,
+          markAllSignificantJob_experience: formData.markAllSignificantJob_experience,
+
           markAllNonEditableSec: formData.markAllNonEditableSec,
           markAllSignificantSec: formData.markAllSignificantSec,
           employeeGroup: formData.employeeGroup,
@@ -913,7 +998,7 @@ export const TotalCompCreateProfilePage = () => {
   }
 
   const save = (isPublishing = false) => {
-    // console.log('save');
+    console.log('save, isPublishing: ', isPublishing);
     const basicDetails = getBasicDetailsValues();
     const profileDetails = getProfileValues();
 
@@ -924,10 +1009,10 @@ export const TotalCompCreateProfilePage = () => {
       state: isPublishing ? 'PUBLISHED' : null,
     };
 
-    // console.log('Combined form data:', combinedData);
+    console.log('Combined form data:', combinedData);
 
     const transformedData = transformFormDataToApiSchema(combinedData);
-    // console.log('transformedData: ', transformedData);
+    console.log('transformedData: ', transformedData);
     submitJobProfileData(transformedData);
   };
 
@@ -1629,7 +1714,7 @@ export const TotalCompCreateProfilePage = () => {
                     showIcon
                   />
 
-                  {/* Eductiona nd work experience NEW */}
+                  {/* Eduction */}
 
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
@@ -1638,7 +1723,7 @@ export const TotalCompCreateProfilePage = () => {
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
                           <Row justify="space-between" align="middle" style={{ width: '100%' }}>
-                            <Col>Education and Work Experience</Col>
+                            <Col>Education</Col>
                             <Col>
                               <Form.Item style={{ margin: 0 }}>
                                 <Row>
@@ -1704,14 +1789,14 @@ export const TotalCompCreateProfilePage = () => {
                                 {/* Non-editable checkbox */}
                                 <div style={{ marginBottom: '5px' }}>
                                   <Controller
-                                    name={`educationAndWorkExperiences.${index}.nonEditable`}
+                                    name={`education.${index}.nonEditable`}
                                     control={profileControl}
                                     render={({ field: { onChange, value } }) => (
                                       <Checkbox
                                         onChange={(args) => {
                                           // set this item as significant as well
                                           if (args.target.checked) {
-                                            profileSetValue(`educationAndWorkExperiences.${index}.significant`, true);
+                                            profileSetValue(`education.${index}.significant`, true);
                                           }
                                           if (!args.target.checked) {
                                             profileSetValue('markAllNonEditableEdu', false);
@@ -1725,7 +1810,7 @@ export const TotalCompCreateProfilePage = () => {
                                     )}
                                   />
                                   <Controller
-                                    name={`educationAndWorkExperiences.${index}.significant`}
+                                    name={`education.${index}.significant`}
                                     control={profileControl}
                                     render={({ field: { onChange, value } }) => (
                                       <Checkbox
@@ -1735,8 +1820,8 @@ export const TotalCompCreateProfilePage = () => {
                                           }
                                           onChange(args);
                                         }}
-                                        disabled={educationAndWorkExperiences[index].nonEditable}
-                                        checked={value || educationAndWorkExperiences[index].nonEditable}
+                                        disabled={educations[index].nonEditable}
+                                        checked={value || educations[index].nonEditable}
                                       >
                                         Significant
                                       </Checkbox>
@@ -1749,9 +1834,9 @@ export const TotalCompCreateProfilePage = () => {
                                   <Form.Item>
                                     <Controller
                                       control={profileControl}
-                                      name={`educationAndWorkExperiences.${index}.text`}
+                                      name={`education.${index}.text`}
                                       render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add education or work experience" {...field} />
+                                        <TextArea autoSize placeholder="Add education" {...field} />
                                       )}
                                     />
                                   </Form.Item>
@@ -1779,7 +1864,160 @@ export const TotalCompCreateProfilePage = () => {
                             }
                             icon={<PlusOutlined />}
                           >
-                            Add education or work experience
+                            Add education
+                          </Button>
+                        </Form.Item>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  {/* Work experience */}
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                      <Form.Item
+                        style={{ marginBottom: '0' }}
+                        labelCol={{ className: 'full-width-label card-label' }}
+                        label={
+                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                            <Col>Work experience</Col>
+                            <Col>
+                              <Form.Item style={{ margin: 0 }}>
+                                <Row>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllNonEditableJob_experience"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllNonEditableJob_experience}
+                                          disabled={job_experienceFields.length === 0}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateNonEditableJob_experience(e.target.checked);
+                                          }}
+                                        >
+                                          Mark all as non-editable
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllSignificantJob_experience"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllSignificantJob_experience || markAllNonEditableJob_experience}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateSignificantJob_experience(e.target.checked);
+                                          }}
+                                          disabled={
+                                            markAllNonEditableJob_experience || job_experienceFields.length === 0
+                                          }
+                                        >
+                                          Mark all as significant
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                        }
+                      >
+                        {job_experienceFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                            {/* up/down controls */}
+                            <Col flex="none" className="reorder-controls">
+                              <ReorderButtons
+                                index={index}
+                                moveItem={handleJob_experienceMove}
+                                upperDisabled={index === 0}
+                                lowerDisabled={index === job_experienceFields.length - 1}
+                              />
+                            </Col>
+                            <Col flex="auto">
+                              <Row>
+                                {/* Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`job_experience.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(`job_experience.${index}.significant`, true);
+                                          }
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableJob_experience', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
+                                  <Controller
+                                    name={`job_experience.${index}.significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantJob_experience', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={job_experiences[index].nonEditable}
+                                        checked={value || job_experiences[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                              </Row>
+                              <Row gutter={10}>
+                                <Col flex="auto">
+                                  <Form.Item>
+                                    <Controller
+                                      control={profileControl}
+                                      name={`job_experience.${index}.text`}
+                                      render={({ field }) => (
+                                        <TextArea autoSize placeholder="Add work experience" {...field} />
+                                      )}
+                                    />
+                                  </Form.Item>
+                                </Col>
+
+                                <Col flex="none">
+                                  <Button icon={<DeleteOutlined />} onClick={() => removeJob_experience(index)} />
+                                </Col>
+                              </Row>
+                            </Col>
+                          </Row>
+                        ))}
+                        <Form.Item>
+                          <Button
+                            type="link"
+                            onClick={() =>
+                              appendJob_experience({
+                                text: '',
+                                nonEditable: markAllNonEditableJob_experience,
+                                significant: markAllSignificantJob_experience,
+                              })
+                            }
+                            icon={<PlusOutlined />}
+                          >
+                            Add work experience
                           </Button>
                         </Form.Item>
                       </Form.Item>
@@ -2355,7 +2593,7 @@ export const TotalCompCreateProfilePage = () => {
         showButton1
         showButton2
         button2Text="Save as draft"
-        button2Callback={save}
+        button2Callback={() => save()}
       />
 
       <ContentWrapper>

@@ -83,7 +83,8 @@ export interface JobProfileModel {
   accountabilities: AccountabilitiesModel[];
   behavioural_competencies: BehaviouralCompetencies[];
   classifications: ClassificationModelWrapped[] | null;
-  requirements: AccountabilitiesModel[]; //(string | TrackedFieldArrayItem)[];
+  education: AccountabilitiesModel[];
+  job_experience: AccountabilitiesModel[];
   organization_id: string;
   streams: Stream[];
   jobFamilies: JobFamily[];
@@ -99,6 +100,8 @@ export interface JobProfileModel {
     markAllSignificant: boolean;
     markAllNonEditableEdu: boolean;
     markAllSignificantEdu: boolean;
+    markAllNonEditableJob_experience: boolean;
+    markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;
     markAllSignificantSec: boolean;
   };
@@ -236,7 +239,8 @@ export interface CreateJobProfileInput {
     program_overview: string;
     review_required: boolean;
     accountabilities: AccountabilitiesInput;
-    requirements: string[];
+    education: string[];
+    job_experience: string[];
     professional_registration_requirements: string[];
     preferences: string[];
     knowledge_skills_abilities: string[];
