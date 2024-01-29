@@ -7,6 +7,12 @@ import { GraphQLJSON } from 'graphql-type-json';
 
 @InputType()
 export class JobProfileUpdateManyMutationInput {
+  @Field(() => Boolean, { nullable: true })
+  all_organizations?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  all_reports_to?: boolean;
+
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 

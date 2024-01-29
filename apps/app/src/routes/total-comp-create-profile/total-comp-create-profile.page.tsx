@@ -47,7 +47,13 @@ import { useGetJobFamiliesQuery } from '../../redux/services/graphql-api/job-fam
 import { useGetJobProfileMinimumRequirementsQuery } from '../../redux/services/graphql-api/job-profile-minimum-requirements.api';
 import { useGetJobProfileScopesQuery } from '../../redux/services/graphql-api/job-profile-scope';
 import { useGetJobProfileStreamsQuery } from '../../redux/services/graphql-api/job-profile-stream';
-import { CreateJobProfileInput } from '../../redux/services/graphql-api/job-profile-types';
+import {
+  ClassificationConnectInput,
+  CreateJobProfileInput,
+  OrganizationConnectInput,
+  ProfessionsModel,
+  TrackedFieldArrayItem,
+} from '../../redux/services/graphql-api/job-profile-types';
 import {
   useCreateOrUpdateJobProfileMutation,
   useGetJobProfileQuery,
@@ -114,16 +120,18 @@ export const TotalCompCreateProfilePage = () => {
       jobTitle: '',
       jobStoreNumber: '',
       originalJobStoreNumber: '',
-      employeeGroup: null,
-      classification: null,
-      jobRole: null,
-      professions: [{ jobFamily: -1, jobStreams: [] }],
+      employeeGroup: null as string | null,
+      classification: null as string | null,
+      jobRole: null as string | null,
+      professions: [{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[],
       role: 1,
-      reportToRelationship: [],
-      scopeOfResponsibility: null,
-      ministries: [],
+      reportToRelationship: [] as string[],
+      scopeOfResponsibility: null as number | null,
+      ministries: [] as string[],
       classificationReviewRequired: false,
       jobContext: '',
+      all_reports_to: false,
+      all_organizations: true,
     },
     // resolver: zodResolver(schema)
   });
@@ -211,6 +219,8 @@ export const TotalCompCreateProfilePage = () => {
 
   const selectedProfession = watch('professions'); // This will watch the change of profession's value
 
+  const allReportsTo = watch('all_reports_to');
+
   // user deleted last item - re-add a blank one
   if (selectedProfession.length == 0) {
     append({ jobFamily: -1, jobStreams: [] });
@@ -269,8 +279,8 @@ export const TotalCompCreateProfilePage = () => {
     reset: resetProfileForm,
   } = useForm({
     defaultValues: {
-      overview: '',
-      programOverview: '',
+      overview: '' as string | TrackedFieldArrayItem,
+      programOverview: '' as string | TrackedFieldArrayItem,
       accountabilities: [] as AccountabilityItem[],
       educationAndWorkExperiences: [] as AccountabilityItem[],
       professionalRegistrationRequirements: [] as TextItem[],
@@ -297,6 +307,26 @@ export const TotalCompCreateProfilePage = () => {
     }
   }, [urlId, setValue, reset, resetProfileForm, fetchNextNumber]);
 
+  const { data: treeData } = useGetGroupedClassificationsQuery({
+    employee_group_ids: ['MGT', 'GEU', 'OEX'],
+    effective_status: 'Active',
+  });
+
+  const transformToTreeData = (groupedClassifications: any) => {
+    const transformItem = (item: any) => ({
+      title: (item.groupName || item.name) + (item.employee_group_id ? ' (' + item.employee_group_id + ')' : ''),
+      value: item.id || item.groupName,
+      key: item.id || item.groupName,
+      children: item.items?.map(transformItem),
+    });
+
+    return groupedClassifications.map(transformItem);
+  };
+
+  const treeDataConverted = useMemo(() => {
+    return treeData ? transformToTreeData(treeData.groupedClassifications) : [];
+  }, [treeData]);
+
   useEffect(() => {
     console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
@@ -306,14 +336,11 @@ export const TotalCompCreateProfilePage = () => {
       setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
 
       setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup);
-      setValue('classification', jobProfileData.jobProfile?.classifications[0]?.classification.id);
-      setValue('jobRole', jobProfileData.jobProfile?.role?.id);
+      setValue('classification', jobProfileData.jobProfile?.classifications?.[0]?.classification.id ?? null);
+      setValue('jobRole', jobProfileData.jobProfile?.role?.id.toString());
 
       setValue('role', jobProfileData.jobProfile.role_type.id);
-      setValue(
-        'reportToRelationship',
-        jobProfileData.jobProfile.reports_to.map((r) => r.classification.id),
-      );
+
       setValue('scopeOfResponsibility', jobProfileData.jobProfile?.scope?.id);
       setValue(
         'ministries',
@@ -324,7 +351,7 @@ export const TotalCompCreateProfilePage = () => {
 
       // Professions (assuming it's an array of jobFamily and jobStreams)
       if (jobProfileData.jobProfile.jobFamilies && jobProfileData.jobProfile.streams) {
-        const professionsData = jobProfileData.jobProfile.jobFamilies.map((family, index) => ({
+        const professionsData = jobProfileData.jobProfile.jobFamilies.map((family) => ({
           jobFamily: family.jobFamily.id,
           jobStreams: jobProfileData.jobProfile.streams
             .filter((stream) => stream.stream.job_family_id === family.jobFamily.id)
@@ -338,44 +365,71 @@ export const TotalCompCreateProfilePage = () => {
       profileSetValue('programOverview', jobProfileData.jobProfile.program_overview);
       profileSetValue(
         'accountabilities',
-        jobProfileData.jobProfile.accountabilities.map((a) => ({
-          text: a.text,
-          nonEditable: a.is_readonly,
-          significant: a.is_significant,
-        })),
+        jobProfileData.jobProfile.accountabilities.map(
+          (a) =>
+            ({
+              text: a.text,
+              nonEditable: a.is_readonly,
+              significant: a.is_significant,
+            }) as AccountabilityItem,
+        ),
       );
       profileSetValue(
         'educationAndWorkExperiences',
-        jobProfileData.jobProfile.requirements.map((r) => ({
-          text: r.text,
-          nonEditable: r.is_readonly,
-          significant: r.is_significant,
-        })),
+        jobProfileData.jobProfile.requirements.map(
+          (r) =>
+            ({
+              text: r.text,
+              nonEditable: r.is_readonly,
+              significant: r.is_significant,
+            }) as AccountabilityItem,
+        ),
       );
       profileSetValue(
         'professionalRegistrationRequirements',
-        jobProfileData.jobProfile.professional_registration_requirements.map((r) => ({ text: r })),
+        jobProfileData.jobProfile.professional_registration_requirements.map((r: any) => ({ text: r })),
       );
       profileSetValue(
         'preferences',
-        jobProfileData.jobProfile.preferences.map((p) => ({ text: p })),
+        jobProfileData.jobProfile.preferences.map((p: any) => ({ text: p })),
       );
       profileSetValue(
         'knowledgeSkillsAbilities',
-        jobProfileData.jobProfile.knowledge_skills_abilities.map((k) => ({ text: k })),
+        jobProfileData.jobProfile.knowledge_skills_abilities.map((k: any) => ({ text: k })),
       );
       profileSetValue(
         'willingnessStatements',
-        jobProfileData.jobProfile.willingness_statements.map((w) => ({ text: w })),
+        jobProfileData.jobProfile.willingness_statements.map((w: any) => ({ text: w })),
       );
       profileSetValue(
         'securityScreenings',
-        jobProfileData.jobProfile.security_screenings.map((s) => ({
-          text: s.text,
-          nonEditable: s.is_readonly,
-          significant: s.is_significant,
-        })),
+        jobProfileData.jobProfile.security_screenings.map(
+          (s) =>
+            ({
+              text: s.text,
+              nonEditable: s.is_readonly,
+              significant: s.is_significant,
+            }) as AccountabilityItem,
+        ),
       );
+
+      const allReportsToValue = jobProfileData.jobProfile.all_reports_to;
+      setValue('all_reports_to', allReportsToValue);
+
+      if (allReportsToValue) {
+        // If 'all_reports_to' is true, set 'reportToRelationship' to all possible values
+        const allValues = getAllTreeValues(treeDataConverted);
+        setValue('reportToRelationship', allValues);
+      } else {
+        // If 'all_reports_to' is false, set 'reportToRelationship' to specific values
+        setValue(
+          'reportToRelationship',
+          jobProfileData.jobProfile.reports_to.map((r) => r.classification.id),
+        );
+      }
+
+      setValue('all_organizations', jobProfileData.jobProfile.all_organizations);
+
       profileSetValue(
         'behavioural_competencies',
         jobProfileData.jobProfile.behavioural_competencies.map((bc) => ({
@@ -401,7 +455,7 @@ export const TotalCompCreateProfilePage = () => {
         jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantSec,
       );
     }
-  }, [jobProfileData, setValue, profileSetValue]);
+  }, [jobProfileData, setValue, profileSetValue, treeDataConverted]);
 
   // required accountabilties
   interface AccountabilityItem {
@@ -480,6 +534,8 @@ export const TotalCompCreateProfilePage = () => {
     }));
     profileSetValue('securityScreenings', securityScreeningsUpdated as AccountabilityItem[]);
   };
+
+  const allOrganizations = watch('all_organizations');
 
   const markAllNonEditable = profileWatch('markAllNonEditable');
   const markAllNonEditableEdu = profileWatch('markAllNonEditableEdu');
@@ -628,31 +684,14 @@ export const TotalCompCreateProfilePage = () => {
 
   // Tree-select for report-to relationship
   const { SHOW_CHILD } = TreeSelect;
-  const { data: treeData } = useGetGroupedClassificationsQuery({
-    employee_group_ids: ['MGT', 'GEU', 'OEX'],
-    effective_status: 'Active',
-  });
-
-  const transformToTreeData = (groupedClassifications: any) => {
-    const transformItem = (item: any) => ({
-      title: (item.groupName || item.name) + (item.employee_group_id ? ' (' + item.employee_group_id + ')' : ''),
-      value: item.id || item.groupName,
-      key: item.id || item.groupName,
-      children: item.items?.map(transformItem),
-    });
-
-    return groupedClassifications.map(transformItem);
-  };
-
-  const treeDataConverted = treeData ? transformToTreeData(treeData.groupedClassifications) : [];
-
-  const [selectAll, setSelectAll] = useState(false);
 
   const getAllTreeValues = (tree: any) => {
     const values: any = [];
     const getValues = (nodes: any) => {
       nodes.forEach((node: any) => {
-        values.push(node.value);
+        if (node.key !== node.title) {
+          values.push(node.value);
+        }
         if (node.children) {
           getValues(node.children);
         }
@@ -662,9 +701,17 @@ export const TotalCompCreateProfilePage = () => {
     return values;
   };
 
-  const handleSelectAllReportTo = (isChecked: any) => {
-    setSelectAll(isChecked);
+  const handleSelectAllReportTo = (isChecked: boolean) => {
+    // Update the 'all_reports_to' form variable
+    setValue('all_reports_to', isChecked);
+    setAllReportToRelationships(isChecked);
+  };
+
+  const setAllReportToRelationships = (isChecked: boolean) => {
+    // Get all values for 'reportToRelationship' if isChecked is true, else an empty array
     const allValues = isChecked ? getAllTreeValues(treeDataConverted) : [];
+
+    // Update the 'reportToRelationship' form variable
     setValue('reportToRelationship', allValues);
   };
 
@@ -756,6 +803,8 @@ export const TotalCompCreateProfilePage = () => {
           is_readonly: a.nonEditable,
           is_significant: a.significant,
         })),
+        all_reports_to: formData.all_reports_to,
+        all_organizations: formData.all_organizations,
         total_comp_create_form_misc: {
           markAllNonEditable: formData.markAllNonEditable,
           markAllSignificant: formData.markAllSignificant,
@@ -780,11 +829,13 @@ export const TotalCompCreateProfilePage = () => {
             ],
           },
         }),
-        organizations: {
-          create: formData.ministries.map((orgId: any) => ({
-            organization: { connect: { id: orgId } },
-          })),
-        },
+        organizations: formData.all_organizations
+          ? { create: [] as OrganizationConnectInput[] }
+          : {
+              create: formData.ministries.map((orgId: any) => ({
+                organization: { connect: { id: orgId } },
+              })),
+            },
         context: { create: { description: formData.jobContext } },
         ...(formData.jobRole && {
           role: { connect: { id: formData.jobRole } },
@@ -807,11 +858,14 @@ export const TotalCompCreateProfilePage = () => {
             })),
           ),
         },
-        reports_to: {
-          create: formData.reportToRelationship.map((classificationId: any) => ({
-            classification: { connect: { id: classificationId } },
-          })),
-        },
+
+        reports_to: formData.all_reports_to
+          ? { create: [] as ClassificationConnectInput[] }
+          : {
+              create: formData.reportToRelationship.map((classificationId: any) => ({
+                classification: { connect: { id: classificationId } },
+              })),
+            },
       },
       id: parseInt(id ?? ''),
     };
@@ -1180,13 +1234,17 @@ export const TotalCompCreateProfilePage = () => {
                             <>
                               <Checkbox
                                 onChange={(e) => handleSelectAllReportTo(e.target.checked)}
-                                checked={selectAll}
+                                checked={allReportsTo}
                                 style={{ marginBottom: '10px' }}
                               >
                                 Select all
                               </Checkbox>
                               <TreeSelect
                                 {...field}
+                                onChange={(selectedItems) => {
+                                  setValue('all_reports_to', false);
+                                  field.onChange(selectedItems); // Continue with the original onChange
+                                }}
                                 treeData={treeDataConverted} // Replace with your data
                                 // onChange={(value) => setReportToRelationship(value)}
                                 treeCheckable={true}
@@ -1258,6 +1316,8 @@ export const TotalCompCreateProfilePage = () => {
                                 onChange={onChange}
                                 onBlur={onBlur}
                                 value={value}
+                                setValue={setValue}
+                                allOrganizations={allOrganizations}
                               />
                             </>
                           )}
@@ -1341,7 +1401,7 @@ export const TotalCompCreateProfilePage = () => {
                           render={({ field: { onChange, onBlur, value } }) => (
                             <TextArea
                               autoSize
-                              value={value}
+                              value={value as string}
                               placeholder="Provide an overview of the job profile"
                               aria-label="overview"
                               onChange={onChange} // send value to hook form
@@ -1371,13 +1431,13 @@ export const TotalCompCreateProfilePage = () => {
                                 aria-label="program overview"
                                 onChange={onChange} // send value to hook form
                                 onBlur={onBlur} // notify when input is touched/blur
-                                value={value}
+                                value={value as string}
                               />
                               <Typography.Paragraph
                                 type="secondary"
                                 style={{ textAlign: 'right', width: '100%', margin: '0' }}
                               >
-                                {value.length} / 320
+                                {(value as string).length} / 320
                               </Typography.Paragraph>
                             </>
                           )}

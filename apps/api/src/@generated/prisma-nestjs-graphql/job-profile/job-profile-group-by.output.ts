@@ -15,6 +15,12 @@ export class JobProfileGroupBy {
   @Field(() => Int, { nullable: false })
   id!: number;
 
+  @Field(() => Boolean, { nullable: false })
+  all_organizations!: boolean;
+
+  @Field(() => Boolean, { nullable: false })
+  all_reports_to!: boolean;
+
   @Field(() => Int, { nullable: true })
   role_id?: number;
 

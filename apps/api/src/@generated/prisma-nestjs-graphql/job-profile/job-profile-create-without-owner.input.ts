@@ -18,6 +18,12 @@ import { PositionRequestCreateNestedManyWithoutParent_job_profileInput } from '.
 
 @InputType()
 export class JobProfileCreateWithoutOwnerInput {
+  @Field(() => Boolean, { nullable: true })
+  all_organizations?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  all_reports_to?: boolean;
+
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 

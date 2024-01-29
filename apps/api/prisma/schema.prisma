@@ -135,6 +135,8 @@ model JobProfile {
   behavioural_competencies JobProfileBehaviouralCompetency[]
   classifications          JobProfileClassification[]
   organizations            JobProfileOrganization[]
+  all_organizations        Boolean                           @default(true)
+  all_reports_to           Boolean                           @default(false)
 
   context          JobProfileContext?
   role             JobProfileRole?           @relation(fields: [role_id], references: [id])

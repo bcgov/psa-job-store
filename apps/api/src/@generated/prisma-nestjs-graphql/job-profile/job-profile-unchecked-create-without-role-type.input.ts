@@ -18,6 +18,12 @@ export class JobProfileUncheckedCreateWithoutRole_typeInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
+  @Field(() => Boolean, { nullable: true })
+  all_organizations?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  all_reports_to?: boolean;
+
   @Field(() => Int, { nullable: true })
   role_id?: number;
 

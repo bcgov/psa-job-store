@@ -282,6 +282,8 @@ export class JobProfileService {
         knowledge_skills_abilities: data.knowledge_skills_abilities,
         willingness_statements: data.willingness_statements,
         security_screenings: data.security_screenings,
+        all_reports_to: data.all_reports_to,
+        all_organizations: data.all_organizations,
         reports_to: {
           create: data.reports_to.create.map((item) => ({
             classification: {
@@ -377,6 +379,8 @@ export class JobProfileService {
         knowledge_skills_abilities: data.knowledge_skills_abilities,
         willingness_statements: data.willingness_statements,
         security_screenings: data.security_screenings,
+        all_reports_to: data.all_reports_to,
+        all_organizations: data.all_organizations,
 
         // Update reports_to
         reports_to: {

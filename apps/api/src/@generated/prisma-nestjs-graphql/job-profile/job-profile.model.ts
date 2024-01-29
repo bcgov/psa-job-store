@@ -22,6 +22,12 @@ export class JobProfile {
   @Field(() => Int, { nullable: false })
   id!: number;
 
+  @Field(() => Boolean, { nullable: false, defaultValue: true })
+  all_organizations!: boolean;
+
+  @Field(() => Boolean, { nullable: false, defaultValue: false })
+  all_reports_to!: boolean;
+
   @Field(() => Int, { nullable: true })
   role_id!: number | null;
 

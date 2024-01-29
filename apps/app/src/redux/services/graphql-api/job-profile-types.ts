@@ -80,10 +80,10 @@ export interface Stream {
 
 export interface JobProfileModel {
   id: number;
-  accountabilities: Accountabilities;
+  accountabilities: AccountabilitiesModel[];
   behavioural_competencies: BehaviouralCompetencies[];
   classifications: ClassificationModelWrapped[] | null;
-  requirements: (string | TrackedFieldArrayItem)[];
+  requirements: AccountabilitiesModel[]; //(string | TrackedFieldArrayItem)[];
   organization_id: string;
   streams: Stream[];
   jobFamilies: JobFamily[];
@@ -94,7 +94,38 @@ export interface JobProfileModel {
   type: string;
   role: { id: number };
   total_comp_create_form_misc: {
-    employee_group: string;
+    employeeGroup: string;
+    markAllNonEditable: boolean;
+    markAllSignificant: boolean;
+    markAllNonEditableEdu: boolean;
+    markAllSignificantEdu: boolean;
+    markAllNonEditableSec: boolean;
+    markAllSignificantSec: boolean;
+  };
+  role_type: { id: number };
+  reports_to: ClassificationModelWrapped[];
+  organizations: OrganizationsModelWrapped[];
+  scope: { id: number };
+  review_required: boolean;
+  professions: ProfessionsModel[];
+  program_overview: string | TrackedFieldArrayItem;
+  professional_registration_requirements: string[];
+  preferences: string[];
+  knowledge_skills_abilities: string[];
+  willingness_statements: string[];
+  security_screenings: AccountabilitiesModel[];
+  all_organizations: boolean;
+  all_reports_to: boolean;
+}
+
+export interface ProfessionsModel {
+  jobFamily: number;
+  jobStreams: number[];
+}
+
+export interface OrganizationsModelWrapped {
+  organization: {
+    id: string;
   };
 }
 
@@ -108,9 +139,10 @@ export interface BehaviouralCompetency {
   description: string;
 }
 
-interface Accountabilities {
-  optional: (string | TrackedFieldArrayItem)[];
-  required: (string | TrackedFieldArrayItem)[];
+export interface AccountabilitiesModel {
+  text: string | TrackedFieldArrayItem;
+  is_readonly: boolean;
+  is_significant: boolean;
 }
 
 export class TrackedFieldArrayItem {
@@ -139,7 +171,7 @@ interface NumberConnectInput {
   };
 }
 
-interface ClassificationConnectInput {
+export interface ClassificationConnectInput {
   classification: {
     connect: {
       id: string;
@@ -147,7 +179,7 @@ interface ClassificationConnectInput {
   };
 }
 
-interface OrganizationConnectInput {
+export interface OrganizationConnectInput {
   organization: {
     connect: {
       id: string;

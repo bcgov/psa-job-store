@@ -19,6 +19,12 @@ import { PositionRequestUpdateManyWithoutParent_job_profileNestedInput } from '.
 
 @InputType()
 export class JobProfileUpdateInput {
+  @Field(() => Boolean, { nullable: true })
+  all_organizations?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  all_reports_to?: boolean;
+
   @Field(() => JobProfileState, { nullable: true })
   state?: keyof typeof JobProfileState;
 
