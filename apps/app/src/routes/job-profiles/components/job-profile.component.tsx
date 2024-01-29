@@ -110,7 +110,7 @@ export class JobProfileValidationModel {
 }
 
 export const JobProfile: React.FC<JobProfileProps> = () => {
-  return <div />;
+  return <div></div>;
   // const [searchParams] = useSearchParams();
   // const params = useParams();
   // const resolvedId = id ?? params.id ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
