@@ -2,6 +2,8 @@ import { registerEnumType } from '@nestjs/graphql';
 
 export enum JobProfileScalarFieldEnum {
   id = 'id',
+  all_organizations = 'all_organizations',
+  all_reports_to = 'all_reports_to',
   role_id = 'role_id',
   role_type_id = 'role_type_id',
   scope_id = 'scope_id',

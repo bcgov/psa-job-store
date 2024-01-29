@@ -1,12 +1,12 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { IntFilter } from '../prisma/int-filter.input';
+import { BoolFilter } from '../prisma/bool-filter.input';
 import { EnumJobProfileStateFilter } from '../prisma/enum-job-profile-state-filter.input';
 import { EnumJobProfileTypeFilter } from '../prisma/enum-job-profile-type-filter.input';
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { UuidFilter } from '../prisma/uuid-filter.input';
 import { StringFilter } from '../prisma/string-filter.input';
-import { BoolFilter } from '../prisma/bool-filter.input';
 import { JsonFilter } from '../prisma/json-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
 import { JobProfileBehaviouralCompetencyListRelationFilter } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-list-relation-filter.input';
@@ -35,6 +35,12 @@ export class JobProfileWhereInput {
 
   @Field(() => IntFilter, { nullable: true })
   id?: IntFilter;
+
+  @Field(() => BoolFilter, { nullable: true })
+  all_organizations?: BoolFilter;
+
+  @Field(() => BoolFilter, { nullable: true })
+  all_reports_to?: BoolFilter;
 
   @Field(() => IntFilter, { nullable: true })
   role_id?: IntFilter;
@@ -75,8 +81,8 @@ export class JobProfileWhereInput {
   @Field(() => JsonFilter, { nullable: true })
   accountabilities?: JsonFilter;
 
-  @Field(() => StringListFilter, { nullable: true })
-  requirements?: StringListFilter;
+  @Field(() => JsonFilter, { nullable: true })
+  requirements?: JsonFilter;
 
   @Field(() => StringListFilter, { nullable: true })
   professional_registration_requirements?: StringListFilter;
@@ -90,8 +96,8 @@ export class JobProfileWhereInput {
   @Field(() => StringListFilter, { nullable: true })
   willingness_statements?: StringListFilter;
 
-  @Field(() => StringListFilter, { nullable: true })
-  security_screenings?: StringListFilter;
+  @Field(() => JsonFilter, { nullable: true })
+  security_screenings?: JsonFilter;
 
   @Field(() => JsonFilter, { nullable: true })
   total_comp_create_form_misc?: JsonFilter;

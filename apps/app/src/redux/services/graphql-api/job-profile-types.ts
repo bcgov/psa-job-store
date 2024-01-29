@@ -80,10 +80,10 @@ export interface Stream {
 
 export interface JobProfileModel {
   id: number;
-  accountabilities: Accountabilities;
+  accountabilities: AccountabilitiesModel[];
   behavioural_competencies: BehaviouralCompetencies[];
   classifications: ClassificationModelWrapped[] | null;
-  requirements: (string | TrackedFieldArrayItem)[];
+  requirements: AccountabilitiesModel[]; //(string | TrackedFieldArrayItem)[];
   organization_id: string;
   streams: Stream[];
   jobFamilies: JobFamily[];
@@ -92,6 +92,41 @@ export interface JobProfileModel {
   context: ContextModel;
   overview: string | TrackedFieldArrayItem;
   type: string;
+  role: { id: number };
+  total_comp_create_form_misc: {
+    employeeGroup: string;
+    markAllNonEditable: boolean;
+    markAllSignificant: boolean;
+    markAllNonEditableEdu: boolean;
+    markAllSignificantEdu: boolean;
+    markAllNonEditableSec: boolean;
+    markAllSignificantSec: boolean;
+  };
+  role_type: { id: number };
+  reports_to: ClassificationModelWrapped[];
+  organizations: OrganizationsModelWrapped[];
+  scope: { id: number };
+  review_required: boolean;
+  professions: ProfessionsModel[];
+  program_overview: string | TrackedFieldArrayItem;
+  professional_registration_requirements: string[];
+  preferences: string[];
+  knowledge_skills_abilities: string[];
+  willingness_statements: string[];
+  security_screenings: AccountabilitiesModel[];
+  all_organizations: boolean;
+  all_reports_to: boolean;
+}
+
+export interface ProfessionsModel {
+  jobFamily: number;
+  jobStreams: number[];
+}
+
+export interface OrganizationsModelWrapped {
+  organization: {
+    id: string;
+  };
 }
 
 export interface BehaviouralCompetencies {
@@ -104,9 +139,10 @@ export interface BehaviouralCompetency {
   description: string;
 }
 
-interface Accountabilities {
-  optional: (string | TrackedFieldArrayItem)[];
-  required: (string | TrackedFieldArrayItem)[];
+export interface AccountabilitiesModel {
+  text: string | TrackedFieldArrayItem;
+  is_readonly: boolean;
+  is_significant: boolean;
 }
 
 export class TrackedFieldArrayItem {
@@ -135,7 +171,7 @@ interface NumberConnectInput {
   };
 }
 
-interface ClassificationConnectInput {
+export interface ClassificationConnectInput {
   classification: {
     connect: {
       id: string;
@@ -143,7 +179,7 @@ interface ClassificationConnectInput {
   };
 }
 
-interface OrganizationConnectInput {
+export interface OrganizationConnectInput {
   organization: {
     connect: {
       id: string;
@@ -191,48 +227,54 @@ interface AccountabilitiesInput {
 }
 
 export interface CreateJobProfileInput {
-  title: string;
-  type: string;
-  number: number;
-  overview: string;
-  program_overview: string;
-  review_required: boolean;
-  accountabilities: AccountabilitiesInput;
-  requirements: string[];
-  professional_registration_requirements: string[];
-  preferences: string[];
-  knowledge_skills_abilities: string[];
-  willingness_statements: string[];
-  security_screenings: string[];
-  total_comp_create_form_misc: string; // Assuming this is a JSON string
-  behavioural_competencies: BehaviouralCompetenciesInput;
-  classifications: {
-    create: ClassificationConnectInput[];
-  };
-  organizations: {
-    create: OrganizationConnectInput[];
-  };
-  context: {
-    create: {
-      description: string;
+  data: {
+    title: string;
+    type: string;
+    number: number;
+    overview: string;
+    state?: string;
+    program_overview: string;
+    review_required: boolean;
+    accountabilities: AccountabilitiesInput;
+    requirements: string[];
+    professional_registration_requirements: string[];
+    preferences: string[];
+    knowledge_skills_abilities: string[];
+    willingness_statements: string[];
+    security_screenings: string[];
+    total_comp_create_form_misc: any;
+    behavioural_competencies: BehaviouralCompetenciesInput;
+    classifications: {
+      create: ClassificationConnectInput[];
+    };
+    organizations: {
+      create: OrganizationConnectInput[];
+    };
+    context: {
+      create: {
+        description: string;
+      };
+    };
+    role: NumberConnectInput; // Assuming this connects to a classification-like entity
+    role_type: NumberConnectInput; // Assuming this connects to a classification-like entity
+    scope: NumberConnectInput; // Assuming this connects to a classification-like entity
+    jobFamilies: {
+      create: JobFamilyCreateInput[];
+    };
+    streams: {
+      create: StreamCreateInput[];
+    };
+    reports_to: {
+      create: ClassificationConnectInput[];
     };
   };
-  role: NumberConnectInput; // Assuming this connects to a classification-like entity
-  role_type: NumberConnectInput; // Assuming this connects to a classification-like entity
-  scope: NumberConnectInput; // Assuming this connects to a classification-like entity
-  jobFamilies: {
-    create: JobFamilyCreateInput[];
-  };
-  streams: {
-    create: StreamCreateInput[];
-  };
-  reports_to: {
-    create: ClassificationConnectInput[];
-  };
+  id?: number;
 }
 
 export interface CreateJobProfileResponse {
-  id: number;
+  createOrUpdateJobProfile: {
+    id: number;
+  };
 }
 
 export interface GetJobProfilesArgs {
