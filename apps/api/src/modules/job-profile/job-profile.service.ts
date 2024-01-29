@@ -148,6 +148,8 @@ export class JobProfileService {
   }
 
   async getJobProfileCount({ search, where }: FindManyJobProfileWithSearch) {
+    if (true) {
+    } // todo: remove
     const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
     return await this.prisma.jobProfile.count({
