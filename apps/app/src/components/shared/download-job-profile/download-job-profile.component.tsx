@@ -47,7 +47,7 @@ export const DownloadJobProfileComponent = ({
     if (data && data.jobProfilesCount > 0) {
       setDefaultJobProfile(data.jobProfiles[0]);
     }
-  }, [jobProfile, data]);
+  }, [jobProfile, data, trigger]);
 
   const paragraphSpacing: ISpacingProperties = { before: 140 };
 

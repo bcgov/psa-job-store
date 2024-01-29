@@ -279,7 +279,6 @@ export const TotalCompCreateProfilePage = () => {
 
   const {
     control: profileControl,
-    handleSubmit: profileControlSubmit,
     watch: profileWatch,
     setValue: profileSetValue,
     getValues: getProfileValues,
@@ -959,7 +958,7 @@ export const TotalCompCreateProfilePage = () => {
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
               <Form
                 layout="vertical"
-                onFinish={handleSubmit((data) => {
+                onFinish={handleSubmit(() => {
                   // console.log(data);
                 })}
               >
@@ -1394,12 +1393,7 @@ export const TotalCompCreateProfilePage = () => {
         <>
           <Row justify="center" style={{ margin: '1rem 0' }}>
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-              <Form
-                layout="vertical"
-                onFinish={profileControlSubmit((data) => {
-                  // console.log('profile data: ', data);
-                })}
-              >
+              <Form layout="vertical">
                 <Card title="Job overview" bordered={false} className="custom-card">
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
