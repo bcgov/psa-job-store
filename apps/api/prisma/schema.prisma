@@ -121,6 +121,7 @@ model BehaviouralCompetency {
 enum JobProfileState {
   DRAFT
   PUBLISHED
+  UNPUBLISHED
 }
 
 enum JobProfileType {
