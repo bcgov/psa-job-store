@@ -578,23 +578,19 @@ export class PositionRequestApiService {
     // If changes, create PENDING posn in PS, workable incident in CRM
 
     if (updateData.step === 5) {
-      const { accountabilities, requirements } = await this.prisma.jobProfile.findUnique({
-        where: { id: positionRequest.parent_job_profile_id },
-      });
-
-      const accountabilitiesModified = this.dataHasChanges(
-        JSON.stringify(accountabilities['required']),
-        JSON.stringify((positionRequest.profile_json['accountabilities']['required'] ?? []).map((obj) => obj.value)),
-      );
-
-      const requirementsModified = this.dataHasChanges(
-        JSON.stringify(requirements),
-        JSON.stringify((positionRequest.profile_json['requirements'] ?? []).map((obj) => obj.value)),
-      );
-
-      console.log(accountabilitiesModified);
-      console.log(requirementsModified);
-
+      // const { accountabilities } = await this.prisma.jobProfile.findUnique({
+      //   where: { id: positionRequest.parent_job_profile_id },
+      // });
+      // const accountabilitiesModified = this.dataHasChanges(
+      //   JSON.stringify(accountabilities['required']),
+      //   JSON.stringify((positionRequest.profile_json['accountabilities']['required'] ?? []).map((obj) => obj.value)),
+      // );
+      // const requirementsModified = this.dataHasChanges(
+      //   JSON.stringify(requirements),
+      //   JSON.stringify((positionRequest.profile_json['requirements'] ?? []).map((obj) => obj.value)),
+      // );
+      // console.log(accountabilitiesModified);
+      // console.log(requirementsModified);
       // console.log('*****************');
       // console.log('updateData: ', updateData);
       // console.log('----------------');
