@@ -186,7 +186,7 @@ export const TotalCompCreateProfilePage = () => {
   }, [getNextAvailableNumber, setValue, setFetchingNextNumber, getBasicDetailsValues]);
 
   useEffect(() => {
-    console.log('useEffect jobStoreNumber: ', jobStoreNumber);
+    // console.log('useEffect jobStoreNumber: ', jobStoreNumber);
     const numberValue = parseInt(jobStoreNumber, 10);
     const originalNumberValue = parseInt(getBasicDetailsValues('originalJobStoreNumber'), 10);
     if (numberValue === originalNumberValue) {
@@ -328,7 +328,7 @@ export const TotalCompCreateProfilePage = () => {
   }, [treeData]);
 
   useEffect(() => {
-    console.log('jobProfileData: ', jobProfileData);
+    // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
       // Basic Details Form
       setValue('jobTitle', jobProfileData.jobProfile.title as string);
@@ -753,13 +753,13 @@ export const TotalCompCreateProfilePage = () => {
       const selectedClassification = classificationsData?.classifications.find(
         (classification) => classification.id === classId,
       );
-      console.log('selectedClassification: ', selectedClassification);
+      // console.log('selectedClassification: ', selectedClassification);
       if (jobProfileMinimumRequirements && selectedClassification) {
         const filteredRequirements = jobProfileMinimumRequirements.jobProfileMinimumRequirements
           .filter((req) => req.grade === selectedClassification.grade)
           .map((req) => ({ text: req.requirement, nonEditable: false, significant: true }));
 
-        console.log('filteredRequirements: ', filteredRequirements);
+        // console.log('filteredRequirements: ', filteredRequirements);
         // Update the educationAndWorkExperiences field array
         profileSetValue('educationAndWorkExperiences', filteredRequirements);
       }
@@ -874,7 +874,7 @@ export const TotalCompCreateProfilePage = () => {
   async function submitJobProfileData(transformedData: CreateJobProfileInput, isPublishing = false) {
     try {
       const response = await createJobProfile(transformedData).unwrap();
-      console.log('response: ', response);
+      // console.log('response: ', response);
       if (!isPublishing) {
         const newId = response.createOrUpdateJobProfile.toString();
         setId(newId);
@@ -886,9 +886,9 @@ export const TotalCompCreateProfilePage = () => {
         description: 'Job profile saved successfully.',
         duration: 4, // Duration in seconds
       });
-      console.log('Job Profile Created ok: ', response, id);
+      // console.log('Job Profile Created ok: ', response, id);
     } catch (error: any) {
-      console.log('error: ', error);
+      // console.log('error: ', error);
       let desc = 'There was an error saving the job profile.';
 
       if (error?.message?.includes('A job profile with this number already exists'))
@@ -904,7 +904,7 @@ export const TotalCompCreateProfilePage = () => {
   }
 
   const save = (isPublishing = false) => {
-    console.log('save');
+    // console.log('save');
     const basicDetails = getBasicDetailsValues();
     const profileDetails = getProfileValues();
 
@@ -915,10 +915,10 @@ export const TotalCompCreateProfilePage = () => {
       state: isPublishing ? 'PUBLISHED' : null,
     };
 
-    console.log('Combined form data:', combinedData);
+    // console.log('Combined form data:', combinedData);
 
     const transformedData = transformFormDataToApiSchema(combinedData);
-    console.log('transformedData: ', transformedData);
+    // console.log('transformedData: ', transformedData);
     submitJobProfileData(transformedData);
   };
 
@@ -950,7 +950,7 @@ export const TotalCompCreateProfilePage = () => {
               <Form
                 layout="vertical"
                 onFinish={handleSubmit((data) => {
-                  console.log(data);
+                  // console.log(data);
                 })}
               >
                 <Card title="Job Title" bordered={false} className="custom-card">
@@ -1387,7 +1387,7 @@ export const TotalCompCreateProfilePage = () => {
               <Form
                 layout="vertical"
                 onFinish={profileControlSubmit((data) => {
-                  console.log('profile data: ', data);
+                  // console.log('profile data: ', data);
                 })}
               >
                 <Card title="Job overview" bordered={false} className="custom-card">
@@ -1529,12 +1529,12 @@ export const TotalCompCreateProfilePage = () => {
                                         <Checkbox
                                           onChange={(args) => {
                                             // set this item as significant as well
-                                            console.log('non-editable toggle: ', args);
+                                            // console.log('non-editable toggle: ', args);
                                             if (args.target.checked) {
                                               profileSetValue(`accountabilities.${index}.significant`, true);
                                             }
                                             if (!args.target.checked) {
-                                              console.log('setting markAllNonEditable to false');
+                                              // console.log('setting markAllNonEditable to false');
                                               profileSetValue('markAllNonEditable', false);
                                             }
                                             onChange(args);
