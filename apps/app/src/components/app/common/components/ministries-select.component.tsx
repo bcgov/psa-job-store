@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Checkbox, Select } from 'antd';
-import { useEffect, useState } from 'react';
 import { useGetOrganizationsQuery } from '../../../../redux/services/graphql-api/organization';
 
 const { Option } = Select;
@@ -9,30 +8,23 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
   const { data } = useGetOrganizationsQuery();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const ministriesData = data?.organizations || [];
-  const [selectedMinistries, setSelectedMinistries] = useState([] as number[]);
-
-  useEffect(() => {
-    if (allOrganizations) {
-      const allIds = ministriesData.map((item) => item.id);
-      setSelectedMinistries(allIds);
-      onChange(allIds);
-    } else {
-      setSelectedMinistries(value);
-    }
-  }, [allOrganizations, ministriesData, value, onChange]);
+  // const [selectedMinistries, setSelectedMinistries] = useState([] as number[]);
 
   const handleSelectAll = (checked: any) => {
+    console.log('handleSelectAll');
     const allIds = ministriesData.map((item) => item.id);
-    setSelectedMinistries(checked ? allIds : []);
+    // setSelectedMinistries(checked ? allIds : []);
     setValue('all_organizations', checked);
-    onChange(checked ? allIds : []);
+    // onChange(checked ? allIds : []);
+
+    // Update the 'reportToRelationship' form variable
+    console.log('setting minisries from select all: ', checked ? allIds : []);
+    setValue('ministries', checked ? allIds : []);
   };
 
   const handleSelectionChange = (selected: any) => {
-    setSelectedMinistries(selected);
-    if (selected.length < ministriesData.length) {
-      setValue('all_organizations', false);
-    }
+    // setSelectedMinistries(selected);
+    setValue('all_organizations', false);
     onChange(selected);
   };
 
@@ -40,7 +32,10 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
     <>
       {isMultiSelect && (
         <Checkbox
-          onChange={(e) => handleSelectAll(e.target.checked)}
+          onChange={(e) => {
+            console.log('onChange');
+            handleSelectAll(e.target.checked);
+          }}
           checked={allOrganizations}
           style={{ marginBottom: '10px' }}
         >
@@ -50,7 +45,7 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
       <Select
         mode={isMultiSelect ? 'multiple' : undefined}
         placeholder="Select ministries"
-        value={selectedMinistries}
+        value={value}
         onChange={handleSelectionChange}
         onBlur={onBlur}
         style={{ width: '100%' }}

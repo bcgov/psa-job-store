@@ -70,7 +70,10 @@ export class JobProfileScalarWhereWithAggregatesInput {
   accountabilities?: JsonWithAggregatesFilter;
 
   @Field(() => JsonWithAggregatesFilter, { nullable: true })
-  requirements?: JsonWithAggregatesFilter;
+  education?: JsonWithAggregatesFilter;
+
+  @Field(() => JsonWithAggregatesFilter, { nullable: true })
+  job_experience?: JsonWithAggregatesFilter;
 
   @Field(() => StringListFilter, { nullable: true })
   professional_registration_requirements?: StringListFilter;

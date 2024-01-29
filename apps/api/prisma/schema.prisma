@@ -159,7 +159,8 @@ model JobProfile {
   number                                 Int                   @unique
   overview                               String
   accountabilities                       Json?                 @db.JsonB
-  requirements                           Json?                 @db.JsonB
+  education                              Json?                 @db.JsonB
+  job_experience                         Json?                 @db.JsonB
   professional_registration_requirements String[]
   preferences                            String[]
   knowledge_skills_abilities             String[]
