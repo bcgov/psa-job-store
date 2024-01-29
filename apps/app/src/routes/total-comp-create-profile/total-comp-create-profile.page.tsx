@@ -27,6 +27,7 @@ import {
   Tooltip,
   TreeSelect,
   Typography,
+  message,
   notification,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
@@ -965,6 +966,17 @@ export const TotalCompCreateProfilePage = () => {
     };
   }
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        message.success('Error message copied!');
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err);
+      });
+  };
+
   async function submitJobProfileData(transformedData: CreateJobProfileInput, isPublishing = false) {
     try {
       const response = await createJobProfile(transformedData).unwrap();
@@ -987,11 +999,21 @@ export const TotalCompCreateProfilePage = () => {
 
       if (error?.message?.includes('A job profile with this number already exists'))
         desc = 'A job profile with this number already exists. Please use a different number.';
+      else desc = error.message;
+
+      const displayDesc = desc.length > 300 ? `${desc.substring(0, 300)}...` : desc;
 
       notification.error({
         message: 'Error',
-        description: desc,
-        duration: 4, // Duration in seconds
+        description: (
+          <div>
+            <p>{displayDesc}</p>
+            <Button type="primary" onClick={() => copyToClipboard(desc)}>
+              Copy Error Message
+            </Button>
+          </div>
+        ),
+        duration: 0, // don't hide error so user can copy error message
       });
       console.error('Error creating job profile: ', error);
     }
