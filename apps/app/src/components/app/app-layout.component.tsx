@@ -83,160 +83,164 @@ export const AppLayout = () => {
     <Layout style={{ height: '100vh' }}>
       <AppHeader></AppHeader>
       <Layout hasSider style={{ height: '100%' }}>
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          collapsedWidth="3.5rem"
-          onCollapse={setCollapsed}
-          trigger={null}
-          style={{
-            boxShadow: '2px 0 5px 0 #CCC',
-            zIndex: 1000,
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', flex: 'auto' }}>
-              {role === 'user' && (
-                <>
-                  {collapsed ? (
-                    <SiderNavItem
-                      collapsed={collapsed}
-                      icon={<PlusCircleFilled style={{ fontSize: '1.25rem' }} />}
-                      key={'Create new position'}
-                      title={'Create new position'}
-                      to={'/my-positions/create'}
-                      hideTitle={true}
-                    />
-                  ) : (
-                    <div style={{ padding: '10px 10px 2px 10px' }}>
-                      <Link to="/my-positions/create">
-                        <Button type="primary">Create new position</Button>
-                      </Link>
-                    </div>
-                  )}
-                  <SiderNav
-                    collapsed={collapsed}
-                    items={[
-                      {
-                        icon: <HomeOutlined style={{ fontSize: '1.25rem' }} />,
-                        title: 'Home',
-                        to: '/',
-                      },
-                      {
-                        icon: <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
-                        title: 'Org Chart',
-                        to: '/org-chart',
-                      },
-                      {
-                        icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
-                        title: 'Job Profiles',
-                        to: '/job-profiles',
-                      },
-                      {
-                        icon: <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
-                        title: 'My Positions',
-                        to: '/my-positions',
-                      },
-                    ]}
-                  />
-                </>
-              )}
-              {role === 'total-compensation' && (
-                <>
-                  {collapsed ? (
+        {auth.user != null && (
+          <Sider
+            collapsible
+            collapsed={collapsed}
+            collapsedWidth="3.5rem"
+            onCollapse={setCollapsed}
+            trigger={null}
+            style={{
+              boxShadow: '2px 0 5px 0 #CCC',
+              zIndex: 1000,
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <div
+                style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', flex: 'auto' }}
+              >
+                {role === 'user' && (
+                  <>
+                    {collapsed ? (
+                      <SiderNavItem
+                        collapsed={collapsed}
+                        icon={<PlusCircleFilled style={{ fontSize: '1.25rem' }} />}
+                        key={'Create new position'}
+                        title={'Create new position'}
+                        to={'/my-positions/create'}
+                        hideTitle={true}
+                      />
+                    ) : (
+                      <div style={{ padding: '10px 10px 2px 10px' }}>
+                        <Link to="/my-positions/create">
+                          <Button type="primary">Create new position</Button>
+                        </Link>
+                      </div>
+                    )}
                     <SiderNav
                       collapsed={collapsed}
                       items={[
                         {
-                          icon: <FileAddFilled style={{ fontSize: '1.25rem', color: '#1677ff' }} />,
-                          title: 'Create new profile',
-                          to: '/total-compensation/create-profile',
-                          hideTitle: true,
+                          icon: <HomeOutlined style={{ fontSize: '1.25rem' }} />,
+                          title: 'Home',
+                          to: '/',
                         },
                         {
-                          icon: <FileOutlined style={{ fontSize: '1.25rem' }} />,
-                          title: 'Draft job profiles',
-                          to: '/total-compensation/profiles/drafts',
-                          hideTitle: true,
+                          icon: <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
+                          title: 'Org Chart',
+                          to: '/org-chart',
                         },
                         {
-                          icon: <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
-                          title: 'Published job profiles',
-                          to: '/total-compensation/profiles/published',
-                          hideTitle: true,
+                          icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
+                          title: 'Job Profiles',
+                          to: '/job-profiles',
                         },
                         {
-                          icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
-                          title: 'Approved requests',
-                          to: '/total-compensation/approved-requests',
-                          hideTitle: true,
+                          icon: <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
+                          title: 'My Positions',
+                          to: '/my-positions',
                         },
                       ]}
                     />
-                  ) : (
-                    <>
-                      <div style={{ padding: '10px 10px 2px 10px' }}>
-                        <Link to="/total-compensation/create-profile">
-                          <Button
-                            type="primary"
-                            icon={<FileAddOutlined style={{ fontSize: '1.25rem' }} />}
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                          >
-                            Create new profile
-                          </Button>
-                        </Link>
-                      </div>
-
-                      <Menu
-                        style={{ transition: 'width 0.2s ease-out', width: '200px' }}
-                        defaultOpenKeys={['sub1']}
-                        mode="inline"
-                        items={totalCompensationMenuItems}
-                      />
-
+                  </>
+                )}
+                {role === 'total-compensation' && (
+                  <>
+                    {collapsed ? (
                       <SiderNav
                         collapsed={collapsed}
                         items={[
                           {
+                            icon: <FileAddFilled style={{ fontSize: '1.25rem', color: '#1677ff' }} />,
+                            title: 'Create new profile',
+                            to: '/total-compensation/create-profile',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <FileOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'Draft job profiles',
+                            to: '/total-compensation/profiles/drafts',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'Published job profiles',
+                            to: '/total-compensation/profiles/published',
+                            hideTitle: true,
+                          },
+                          {
                             icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
-                            title: 'Approved Reqs',
+                            title: 'Approved requests',
                             to: '/total-compensation/approved-requests',
+                            hideTitle: true,
                           },
                         ]}
                       />
-                    </>
-                  )}
-                </>
-              )}
-              {role === 'classification' && (
-                <>
-                  <SiderNav
-                    collapsed={collapsed}
-                    items={[
-                      {
-                        icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
-                        title: 'My tasks',
-                        to: '/',
-                      },
-                    ]}
-                  />
-                </>
-              )}
+                    ) : (
+                      <>
+                        <div style={{ padding: '10px 10px 2px 10px' }}>
+                          <Link to="/total-compensation/create-profile">
+                            <Button
+                              type="primary"
+                              icon={<FileAddOutlined style={{ fontSize: '1.25rem' }} />}
+                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                              Create new profile
+                            </Button>
+                          </Link>
+                        </div>
+
+                        <Menu
+                          style={{ transition: 'width 0.2s ease-out', width: '200px' }}
+                          defaultOpenKeys={['sub1']}
+                          mode="inline"
+                          items={totalCompensationMenuItems}
+                        />
+
+                        <SiderNav
+                          collapsed={collapsed}
+                          items={[
+                            {
+                              icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
+                              title: 'Approved Reqs',
+                              to: '/total-compensation/approved-requests',
+                            },
+                          ]}
+                        />
+                      </>
+                    )}
+                  </>
+                )}
+                {role === 'classification' && (
+                  <>
+                    <SiderNav
+                      collapsed={collapsed}
+                      items={[
+                        {
+                          icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
+                          title: 'My tasks',
+                          to: '/',
+                        },
+                      ]}
+                    />
+                  </>
+                )}
+              </div>
+              <div style={{ borderTop: '1px solid #CCC', flexShrink: 0 }}>
+                <Button
+                  icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                  onClick={() => setCollapsed(!collapsed)}
+                  type="link"
+                  style={{
+                    color: '#000',
+                    fontSize: '16px',
+                    margin: '0.5rem 0 0.5rem 0.75rem',
+                  }}
+                />
+              </div>
             </div>
-            <div style={{ borderTop: '1px solid #CCC', flexShrink: 0 }}>
-              <Button
-                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                onClick={() => setCollapsed(!collapsed)}
-                type="link"
-                style={{
-                  color: '#000',
-                  fontSize: '16px',
-                  margin: '0.5rem 0 0.5rem 0.75rem',
-                }}
-              />
-            </div>
-          </div>
-        </Sider>
+          </Sider>
+        )}
         <Layout>
           <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
             <Content style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#FFF', flex: '1 0 auto' }}>

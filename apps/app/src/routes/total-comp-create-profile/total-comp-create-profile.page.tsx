@@ -74,6 +74,13 @@ import './total-comp-published-profies.page.css';
 const { Option } = Select;
 const { Text } = Typography;
 
+export interface AccountabilityItem {
+  text: string;
+  id?: string;
+  nonEditable: boolean;
+  significant: boolean;
+}
+
 export const TotalCompCreateProfilePage = () => {
   const { id: urlId } = useParams();
   const [id, setId] = useState(urlId);
@@ -122,7 +129,7 @@ export const TotalCompCreateProfilePage = () => {
       originalJobStoreNumber: '',
       employeeGroup: null as string | null,
       classification: null as string | null,
-      jobRole: null as string | null,
+      jobRole: null as number | null,
       professions: [{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[],
       role: 1,
       reportToRelationship: [] as string[],
@@ -272,7 +279,6 @@ export const TotalCompCreateProfilePage = () => {
 
   const {
     control: profileControl,
-    handleSubmit: profileControlSubmit,
     watch: profileWatch,
     setValue: profileSetValue,
     getValues: getProfileValues,
@@ -337,7 +343,7 @@ export const TotalCompCreateProfilePage = () => {
 
       setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup);
       setValue('classification', jobProfileData.jobProfile?.classifications?.[0]?.classification.id ?? null);
-      setValue('jobRole', jobProfileData.jobProfile?.role?.id.toString());
+      setValue('jobRole', jobProfileData.jobProfile?.role?.id);
 
       setValue('role', jobProfileData.jobProfile.role_type.id);
 
@@ -357,7 +363,15 @@ export const TotalCompCreateProfilePage = () => {
             .filter((stream) => stream.stream.job_family_id === family.jobFamily.id)
             .map((stream) => stream.stream.id),
         }));
-        setValue('professions', professionsData);
+
+        if (professionsData.length == 0) {
+          // set to [{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[]
+          setValue('professions', [{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[]);
+        } else {
+          setValue('professions', professionsData);
+        }
+
+        // professions: ,
       }
 
       // Profile Form
@@ -458,12 +472,6 @@ export const TotalCompCreateProfilePage = () => {
   }, [jobProfileData, setValue, profileSetValue, treeDataConverted]);
 
   // required accountabilties
-  interface AccountabilityItem {
-    text: string;
-    id?: string;
-    nonEditable: boolean;
-    significant: boolean;
-  }
 
   const {
     fields: accountabilitiesFields,
@@ -723,6 +731,7 @@ export const TotalCompCreateProfilePage = () => {
 
   // job role selector data
   const { data: jobRolesData } = useGetJobRolesQuery();
+  console.log('jobRolesData: ', jobRolesData);
 
   // job profile scopes
   const { data: jobProfileScopes } = useGetJobProfileScopesQuery();
@@ -949,7 +958,7 @@ export const TotalCompCreateProfilePage = () => {
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
               <Form
                 layout="vertical"
-                onFinish={handleSubmit((data) => {
+                onFinish={handleSubmit(() => {
                   // console.log(data);
                 })}
               >
@@ -1384,12 +1393,7 @@ export const TotalCompCreateProfilePage = () => {
         <>
           <Row justify="center" style={{ margin: '1rem 0' }}>
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-              <Form
-                layout="vertical"
-                onFinish={profileControlSubmit((data) => {
-                  // console.log('profile data: ', data);
-                })}
-              >
+              <Form layout="vertical">
                 <Card title="Job overview" bordered={false} className="custom-card">
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
