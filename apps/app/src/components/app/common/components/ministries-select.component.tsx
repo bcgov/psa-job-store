@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Checkbox, Select } from 'antd';
 import { useEffect, useState } from 'react';
 import { useGetOrganizationsQuery } from '../../../../redux/services/graphql-api/organization';
 
 const { Option } = Select;
 
-const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizations, setValue }) => {
+const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizations, setValue }: any) => {
   const { data } = useGetOrganizationsQuery();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const ministriesData = data?.organizations || [];
-  const [selectedMinistries, setSelectedMinistries] = useState([]);
+  const [selectedMinistries, setSelectedMinistries] = useState([] as number[]);
 
   useEffect(() => {
     if (allOrganizations) {
@@ -19,14 +21,14 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
     }
   }, [allOrganizations, ministriesData, value, onChange]);
 
-  const handleSelectAll = (checked) => {
+  const handleSelectAll = (checked: any) => {
     const allIds = ministriesData.map((item) => item.id);
     setSelectedMinistries(checked ? allIds : []);
     setValue('all_organizations', checked);
     onChange(checked ? allIds : []);
   };
 
-  const handleSelectionChange = (selected) => {
+  const handleSelectionChange = (selected: any) => {
     setSelectedMinistries(selected);
     if (selected.length < ministriesData.length) {
       setValue('all_organizations', false);
