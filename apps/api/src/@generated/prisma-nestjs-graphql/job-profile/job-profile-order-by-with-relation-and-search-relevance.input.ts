@@ -67,7 +67,10 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
   accountabilities?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
-  requirements?: SortOrderInput;
+  education?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  job_experience?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   professional_registration_requirements?: keyof typeof SortOrder;

@@ -68,7 +68,10 @@ export class JobProfile {
   accountabilities!: any | null;
 
   @Field(() => GraphQLJSON, { nullable: true })
-  requirements!: any | null;
+  education!: any | null;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  job_experience!: any | null;
 
   @Field(() => [String], { nullable: true })
   professional_registration_requirements!: Array<string>;

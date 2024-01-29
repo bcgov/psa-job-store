@@ -84,7 +84,10 @@ export class JobProfileWhereUniqueInput {
   accountabilities?: JsonFilter;
 
   @Field(() => JsonFilter, { nullable: true })
-  requirements?: JsonFilter;
+  education?: JsonFilter;
+
+  @Field(() => JsonFilter, { nullable: true })
+  job_experience?: JsonFilter;
 
   @Field(() => StringListFilter, { nullable: true })
   professional_registration_requirements?: StringListFilter;
