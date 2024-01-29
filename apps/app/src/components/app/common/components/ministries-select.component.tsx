@@ -1,37 +1,34 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Checkbox, Select } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGetOrganizationsQuery } from '../../../../redux/services/graphql-api/organization';
 
 const { Option } = Select;
 
-const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizations, setValue }: any) => {
+const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizations, setValue }) => {
   const { data } = useGetOrganizationsQuery();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const ministriesData = data?.organizations || [];
+  const [selectedMinistries, setSelectedMinistries] = useState([]);
 
   useEffect(() => {
     if (allOrganizations) {
       const allIds = ministriesData.map((item) => item.id);
+      setSelectedMinistries(allIds);
       onChange(allIds);
     } else {
-      onChange([]);
+      setSelectedMinistries(value);
     }
-  }, [allOrganizations, ministriesData, onChange]);
+  }, [allOrganizations, ministriesData, value, onChange]);
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = (checked) => {
     const allIds = ministriesData.map((item) => item.id);
-    onChange(checked ? allIds : []);
-
-    // Update the 'all_organizations' form variable
-    // console.log('all_org setting: ', checked);
+    setSelectedMinistries(checked ? allIds : []);
     setValue('all_organizations', checked);
+    onChange(checked ? allIds : []);
   };
 
-  const handleSelectionChange = (selected: any) => {
-    // Check if the number of selected items is less than the total
+  const handleSelectionChange = (selected) => {
+    setSelectedMinistries(selected);
     if (selected.length < ministriesData.length) {
-      // If so, set 'all_organizations' to false, but keep the selected items
       setValue('all_organizations', false);
     }
     onChange(selected);
@@ -51,7 +48,7 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
       <Select
         mode={isMultiSelect ? 'multiple' : undefined}
         placeholder="Select ministries"
-        value={value}
+        value={selectedMinistries}
         onChange={handleSelectionChange}
         onBlur={onBlur}
         style={{ width: '100%' }}
