@@ -163,11 +163,35 @@ export const router = createBrowserRouter([
                 path: 'published',
                 element: <TotalCompPublishedProfilesPage />,
               },
+              // {
+              //   handle: {
+              //     breadcrumb: () => 'Create profile',
+              //   },
+              //   path: 'create',
+              //   element: <TotalCompCreateProfilePage />,
+              // },
+              {
+                path: ':id',
+                element: <TotalCompCreateProfilePage />,
+              },
+            ],
+          },
+          {
+            path: '/total-compensation/create-profile',
+            element: (
+              <RoleGuard requiredRole="total-compensation">
+                <TotalCompDraftProfilesRoute />
+              </RoleGuard>
+            ),
+            handle: {
+              breadcrumb: () => 'Approved requests',
+            },
+            children: [
               {
                 handle: {
                   breadcrumb: () => 'Create profile',
                 },
-                path: 'create',
+                index: true,
                 element: <TotalCompCreateProfilePage />,
               },
             ],

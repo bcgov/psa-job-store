@@ -5,12 +5,10 @@ export enum JobProfileOrderByRelevanceFieldEnum {
   program_overview = 'program_overview',
   title = 'title',
   overview = 'overview',
-  requirements = 'requirements',
   professional_registration_requirements = 'professional_registration_requirements',
   preferences = 'preferences',
   knowledge_skills_abilities = 'knowledge_skills_abilities',
   willingness_statements = 'willingness_statements',
-  security_screenings = 'security_screenings',
 }
 
 registerEnumType(JobProfileOrderByRelevanceFieldEnum, {

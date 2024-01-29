@@ -63,6 +63,10 @@ To run Prisma Studio that is connected to a remote database follow these steps:
 - Update .env file entry for the `DATABASE_URL` parameter, change it to `postgresql://username:password@localhost:5432/db-name`. You can find the database address from the secrets in openshift (ensure it's `@localhost`)
 - Run prisma studio as usual using `npx -w api prisma studio`
 
+## "Uknown blob" or "manifest invalid" build issue
+
+If you get an "Unknown blob" or "manifest invalid" error message during build process, this is likely caused by artifactory being full. To resolve, delete old images from the artifactory repository to free up space and retry the action.
+
 ## DB Troubleshooting
 
 _Note_ Below is for high availbility configuration. For MVP, configuraiton is using single database pod
