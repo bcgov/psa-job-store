@@ -63,7 +63,8 @@ export const PositionRequestPage = () => {
       case 1:
         return <WizardPage onNext={onNext} onBack={onBack} />;
       case 2:
-        return <WizardEditPage onBack={onBack} onNext={onNext} />;
+        return <WizardEditPage />; // todo: undo
+      // onBack={onBack} onNext={onNext}
 
       case 3:
         return <WizardReviewPage onNext={onNext} onBack={onBack} />;
