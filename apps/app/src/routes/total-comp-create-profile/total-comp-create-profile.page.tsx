@@ -27,6 +27,7 @@ import {
   Tooltip,
   TreeSelect,
   Typography,
+  message,
   notification,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
@@ -347,7 +348,7 @@ export const TotalCompCreateProfilePage = () => {
       setValue('jobStoreNumber', jobProfileData.jobProfile.number.toString());
       setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
 
-      setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup);
+      setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup ?? null);
       setValue('classification', jobProfileData.jobProfile?.classifications?.[0]?.classification.id ?? null);
       setValue('jobRole', jobProfileData.jobProfile?.role?.id);
 
@@ -356,7 +357,11 @@ export const TotalCompCreateProfilePage = () => {
       setValue('scopeOfResponsibility', jobProfileData.jobProfile?.scope?.id);
 
       setValue('classificationReviewRequired', jobProfileData.jobProfile.review_required);
-      setValue('jobContext', jobProfileData.jobProfile.context.description);
+      if (typeof jobProfileData.jobProfile.context === 'string') {
+        setValue('jobContext', jobProfileData.jobProfile.context);
+      } else {
+        setValue('jobContext', jobProfileData.jobProfile.context.description);
+      }
 
       // Professions (assuming it's an array of jobFamily and jobStreams)
       if (jobProfileData.jobProfile.jobFamilies && jobProfileData.jobProfile.streams) {
@@ -476,32 +481,38 @@ export const TotalCompCreateProfilePage = () => {
           behavioural_competency: bc.behavioural_competency,
         })),
       );
-      profileSetValue('markAllNonEditable', jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditable);
-      profileSetValue('markAllSignificant', jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificant);
+      profileSetValue(
+        'markAllNonEditable',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditable ?? false,
+      );
+      profileSetValue(
+        'markAllSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificant ?? false,
+      );
       profileSetValue(
         'markAllNonEditableEdu',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableEdu,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableEdu ?? false,
       );
       profileSetValue(
         'markAllSignificantEdu',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantEdu,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantEdu ?? false,
       );
       profileSetValue(
         'markAllNonEditableJob_experience',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableJob_experience,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableJob_experience ?? false,
       );
       profileSetValue(
         'markAllSignificantJob_experience',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantJob_experience,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantJob_experience ?? false,
       );
 
       profileSetValue(
         'markAllNonEditableSec',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableSec,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableSec ?? false,
       );
       profileSetValue(
         'markAllSignificantSec',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantSec,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantSec ?? false,
       );
     } else {
       // no profile data - select all ministries as that's the default setting
@@ -965,6 +976,17 @@ export const TotalCompCreateProfilePage = () => {
     };
   }
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        message.success('Error message copied!');
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err);
+      });
+  };
+
   async function submitJobProfileData(transformedData: CreateJobProfileInput, isPublishing = false) {
     try {
       const response = await createJobProfile(transformedData).unwrap();
@@ -987,11 +1009,21 @@ export const TotalCompCreateProfilePage = () => {
 
       if (error?.message?.includes('A job profile with this number already exists'))
         desc = 'A job profile with this number already exists. Please use a different number.';
+      else desc = error.message;
+
+      const displayDesc = desc.length > 300 ? `${desc.substring(0, 300)}...` : desc;
 
       notification.error({
         message: 'Error',
-        description: desc,
-        duration: 4, // Duration in seconds
+        description: (
+          <div>
+            <p>{displayDesc}</p>
+            <Button type="primary" onClick={() => copyToClipboard(desc)}>
+              Copy Error Message
+            </Button>
+          </div>
+        ),
+        duration: 0, // don't hide error so user can copy error message
       });
       console.error('Error creating job profile: ', error);
     }

@@ -90,11 +90,11 @@ export interface JobProfileModel {
   jobFamilies: JobFamily[];
   title: string | TrackedFieldArrayItem;
   number: number;
-  context: ContextModel;
+  context: ContextModel | string;
   overview: string | TrackedFieldArrayItem;
   type: string;
   role: { id: number };
-  total_comp_create_form_misc: {
+  total_comp_create_form_misc?: {
     employeeGroup: string;
     markAllNonEditable: boolean;
     markAllSignificant: boolean;
@@ -144,8 +144,12 @@ export interface BehaviouralCompetency {
 
 export interface AccountabilitiesModel {
   text: string | TrackedFieldArrayItem;
-  is_readonly: boolean;
-  is_significant: boolean;
+  is_readonly?: boolean;
+  is_significant?: boolean;
+
+  // HM view
+  isCustom?: boolean;
+  disabled?: boolean;
 }
 
 export class TrackedFieldArrayItem {

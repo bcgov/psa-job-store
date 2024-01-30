@@ -25,7 +25,6 @@ export const diffLegendContent = (
   </>
 );
 
-// export const WizardReviewPage = () => {
 export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({ onNext, onBack }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { wizardData, positionRequestId } = useWizardContext();
