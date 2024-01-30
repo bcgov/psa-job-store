@@ -348,7 +348,7 @@ export const TotalCompCreateProfilePage = () => {
       setValue('jobStoreNumber', jobProfileData.jobProfile.number.toString());
       setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
 
-      setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup);
+      setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup ?? null);
       setValue('classification', jobProfileData.jobProfile?.classifications?.[0]?.classification.id ?? null);
       setValue('jobRole', jobProfileData.jobProfile?.role?.id);
 
@@ -477,32 +477,38 @@ export const TotalCompCreateProfilePage = () => {
           behavioural_competency: bc.behavioural_competency,
         })),
       );
-      profileSetValue('markAllNonEditable', jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditable);
-      profileSetValue('markAllSignificant', jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificant);
+      profileSetValue(
+        'markAllNonEditable',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditable ?? false,
+      );
+      profileSetValue(
+        'markAllSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificant ?? false,
+      );
       profileSetValue(
         'markAllNonEditableEdu',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableEdu,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableEdu ?? false,
       );
       profileSetValue(
         'markAllSignificantEdu',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantEdu,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantEdu ?? false,
       );
       profileSetValue(
         'markAllNonEditableJob_experience',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableJob_experience,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableJob_experience ?? false,
       );
       profileSetValue(
         'markAllSignificantJob_experience',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantJob_experience,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantJob_experience ?? false,
       );
 
       profileSetValue(
         'markAllNonEditableSec',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllNonEditableSec,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableSec ?? false,
       );
       profileSetValue(
         'markAllSignificantSec',
-        jobProfileData.jobProfile.total_comp_create_form_misc.markAllSignificantSec,
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantSec ?? false,
       );
     } else {
       // no profile data - select all ministries as that's the default setting

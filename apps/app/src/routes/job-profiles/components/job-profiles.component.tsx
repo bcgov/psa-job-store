@@ -12,6 +12,7 @@ import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/pos
 import { WizardProvider } from '../../wizard/components/wizard.provider';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 import { JobProfileSearch } from './job-profile-search.component';
+import { JobProfile } from './job-profile.component';
 
 const { Text, Title } = Typography;
 const { useBreakpoint } = Grid;
@@ -23,8 +24,7 @@ interface JobProfilesContentProps {
   onUseProfile?: () => void;
 }
 
-const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile }) => {
-  // , onUseProfile todo: undo
+const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile, onUseProfile }) => {
   const dispatch = useAppDispatch();
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
   const [classificationIdFilter, setClassificationIdFilter] = useState<string | null>(null);
@@ -200,9 +200,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
   // console.log('params: ', params, 'searchParams: ', searchParams.toString());
   const renderJobProfile = () => {
     return params.id || searchParams.get('selectedProfile') ? (
-      // todo: undo
-      // <JobProfile onUseProfile={onUseProfile} />
-      <div></div>
+      <JobProfile onUseProfile={onUseProfile} />
     ) : (
       <div style={{ marginTop: '16rem' }} data-testid="job-profile-empty">
         <Empty

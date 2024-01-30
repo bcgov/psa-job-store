@@ -4,6 +4,7 @@ import { useBlocker, useParams } from 'react-router-dom';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useWizardContext } from './components/wizard.provider';
 import { WizardConfirmDetailsPage } from './wizard-confirm-details.page';
+import { WizardEditPage } from './wizard-edit.page';
 import { WizardOrgChartPage } from './wizard-org-chart.page';
 import { WizardResultPage } from './wizard-result.page';
 import { WizardReviewPage } from './wizard-review.page';
@@ -62,8 +63,7 @@ export const PositionRequestPage = () => {
       case 1:
         return <WizardPage onNext={onNext} onBack={onBack} />;
       case 2:
-        return <div></div>;
-      // return <WizardEditPage onBack={onBack} onNext={onNext} />; // todo: undo
+        return <WizardEditPage onBack={onBack} onNext={onNext} />;
 
       case 3:
         return <WizardReviewPage onNext={onNext} onBack={onBack} />;
