@@ -83,7 +83,7 @@ export const AppLayout = () => {
     <Layout style={{ height: '100vh' }}>
       <AppHeader></AppHeader>
       <Layout hasSider style={{ height: '100%' }}>
-        {auth.user != null && (
+        {auth.isAuthenticated && (
           <Sider
             collapsible
             collapsed={collapsed}
