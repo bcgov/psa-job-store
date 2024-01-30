@@ -129,16 +129,16 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
           }
         }
 
-        if (key.startsWith('required_accountabilities')) {
+        if (key.startsWith('accountabilities')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
 
           if (!output.accountabilities[index]) {
-            if (input[`required_accountabilities.${index}.value`] != '') {
+            if (input[`accountabilities.${index}.text`] != '') {
               output.accountabilities[index] = {
-                text: input[`required_accountabilities.${index}.value`],
-                isCustom: input[`required_accountabilities.${index}.isCustom`],
-                disabled: input[`required_accountabilities.${index}.disabled`],
+                text: input[`accountabilities.${index}.text`],
+                isCustom: input[`accountabilities.${index}.isCustom`],
+                disabled: input[`accountabilities.${index}.disabled`],
               };
             }
           }
@@ -155,17 +155,17 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
               };
             }
           }
-        } else if (key.startsWith('requirements')) {
+        } else if (key.startsWith('education')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
 
           if (!output.education[index]) {
             // todo: implement job_experience as well
-            if (input[`requirements.${index}.value`] != '') {
+            if (input[`education.${index}.text`] != '') {
               output.education[index] = {
-                text: input[`requirements.${index}.value`],
-                isCustom: input[`requirements.${index}.isCustom`],
-                disabled: input[`requirements.${index}.disabled`],
+                text: input[`education.${index}.text`],
+                isCustom: input[`education.${index}.isCustom`],
+                disabled: input[`education.${index}.disabled`],
               };
             }
           }
@@ -218,7 +218,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
     // Create an entry in My Positions
 
     const formData = wizardEditProfileRef.current?.getFormData();
+    // console.log('formData: ', formData);
     const transformedData = transformFormData(formData);
+    // console.log('transformedData: ', transformedData);
     setWizardData(transformedData);
 
     try {
@@ -240,6 +242,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
     if (onNext) onNext();
   };
 
+  // console.log('wizardData: ', wizardData);
   return (
     <WizardPageWrapper
       title="Edit profile"

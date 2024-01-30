@@ -357,7 +357,11 @@ export const TotalCompCreateProfilePage = () => {
       setValue('scopeOfResponsibility', jobProfileData.jobProfile?.scope?.id);
 
       setValue('classificationReviewRequired', jobProfileData.jobProfile.review_required);
-      setValue('jobContext', jobProfileData.jobProfile.context.description);
+      if (typeof jobProfileData.jobProfile.context === 'string') {
+        setValue('jobContext', jobProfileData.jobProfile.context);
+      } else {
+        setValue('jobContext', jobProfileData.jobProfile.context.description);
+      }
 
       // Professions (assuming it's an array of jobFamily and jobStreams)
       if (jobProfileData.jobProfile.jobFamilies && jobProfileData.jobProfile.streams) {

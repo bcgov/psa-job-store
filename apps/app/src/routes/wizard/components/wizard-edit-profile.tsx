@@ -121,6 +121,7 @@ const WizardEditProfile = forwardRef(
       setOriginalOptReqFields,
     } = useWizardContext();
 
+    // console.log('effectiveData: ', effectiveData);
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData) {
         const classificationIds =
@@ -247,11 +248,13 @@ const WizardEditProfile = forwardRef(
 
         if (!originalValuesSet) setOriginalValuesSet(true);
 
+        // console.log('effectiveData?.context?.description: ', effectiveData?.context?.description);
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
           title: originalTitleValue,
-          context: effectiveData?.context?.description,
+          context:
+            typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description,
           overview: originalOverviewValue,
           classifications: classificationIds,
           // array fileds are required to be nested in objects, so wrap string values in {value: item}
@@ -435,7 +438,7 @@ const WizardEditProfile = forwardRef(
 
     // Function to handle adding a new field
     const handleAccReqAddNew = () => {
-      acc_req_append({ value: '', isCustom: true, disabled: false });
+      acc_req_append({ text: '', isCustom: true, disabled: false });
       trigger();
     };
 
@@ -469,7 +472,7 @@ const WizardEditProfile = forwardRef(
           </FormItem>
 
           <FormItem
-            name={`accountabilities.${index}.value`}
+            name={`accountabilities.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
           >
@@ -644,7 +647,7 @@ const WizardEditProfile = forwardRef(
 
     // Function to handle adding a new field
     const handleMinReqAddNew = () => {
-      education_append({ value: '', isCustom: true, disabled: false });
+      education_append({ text: '', isCustom: true, disabled: false });
       trigger();
     };
 
@@ -678,7 +681,7 @@ const WizardEditProfile = forwardRef(
           </FormItem>
 
           <FormItem
-            name={`education.${index}.value`}
+            name={`education.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
           >
@@ -888,7 +891,11 @@ const WizardEditProfile = forwardRef(
               description={
                 <>
                   <div></div>
-                  <b style={{ marginTop: '10px', display: 'block' }}>{effectiveData?.context?.description}</b>
+                  <b style={{ marginTop: '10px', display: 'block' }}>
+                    {typeof effectiveData?.context === 'string'
+                      ? effectiveData?.context
+                      : effectiveData?.context.description}
+                  </b>
                 </>
               }
               type="warning"

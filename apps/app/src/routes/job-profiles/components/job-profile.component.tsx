@@ -61,12 +61,28 @@ export class OverviewField extends TrackedFieldArrayItem {
   declare value: string;
 }
 
+function getItemValue(item: string | TrackedFieldArrayItem | AccountabilitiesModel): string {
+  if (!item) return '';
+  if (typeof item === 'string') {
+    return item;
+  } else if ('text' in item) {
+    // Handle AccountabilitiesModel
+    return typeof item.text === 'string' ? item.text : '';
+  } else if ('value' in item) {
+    // Handle TrackedFieldArrayItem
+    return item.value;
+  } else {
+    return '';
+  }
+}
+
 @ValidatorConstraint({ async: false })
 class AllDisabledConstraint implements ValidatorConstraintInterface {
-  validate(array: (TrackedFieldArrayItem | string)[]) {
+  validate(array: (TrackedFieldArrayItem | string | AccountabilitiesModel)[]) {
     return !array?.every((item) => {
       // Check if the item is disabled or empty
-      return typeof item === 'object' && (item.disabled === true || item.value.length == 0);
+      const itemValue = getItemValue(item);
+      return typeof item === 'object' && (item.disabled === true || itemValue.length == 0);
     });
   }
 
@@ -109,12 +125,12 @@ export class JobProfileValidationModel {
   overview: OverviewField | string;
 
   @AllDisabled({ message: 'There must be at least one accountability.' })
-  accountabilities: (TrackedFieldArrayItem | ValueString)[];
+  accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   // optional_accountabilities: (TrackedFieldArrayItem | ValueString)[];
 
   @AllDisabled({ message: 'There must be at least one education requirement.' })
-  education: (TrackedFieldArrayItem | ValueString)[];
+  education: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   @AllDisabled({ message: 'There must be at least one job experience requirement.' })
   job_experience: (TrackedFieldArrayItem | ValueString)[];
@@ -204,7 +220,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     modified: (string | TrackedFieldArrayItem | AccountabilitiesModel)[] | undefined,
   ): JSX.Element[] => {
     const comparisonResult: JSX.Element[] = [];
-
+    // console.log('compareLists: ', original, modified);
     if (!modified || !original) return comparisonResult;
 
     const maxLength = Math.max(original.length, modified.length);
@@ -215,7 +231,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       const originalItemValue = getItemValue(originalVal);
 
       const modifiedItem = modified[i];
-      const modifiedItemValue = getItemValue(modifiedItem);
+      let modifiedItemValue = getItemValue(modifiedItem);
+      modifiedItemValue =
+        typeof modifiedItem === 'string' ? modifiedItemValue : modifiedItem?.disabled ? '' : modifiedItemValue || '';
 
       if (originalItemValue || modifiedItemValue) {
         const diff = dmp.diff_main(originalItemValue, modifiedItemValue);
@@ -244,21 +262,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
     return comparisonResult;
   };
-
-  function getItemValue(item: string | TrackedFieldArrayItem | AccountabilitiesModel): string {
-    if (!item) return '';
-    if (typeof item === 'string') {
-      return item;
-    } else if ('text' in item) {
-      // Handle AccountabilitiesModel
-      return typeof item.text === 'string' ? item.text : '';
-    } else if ('value' in item) {
-      // Handle TrackedFieldArrayItem
-      return item.value;
-    } else {
-      return '';
-    }
-  }
 
   const compareCompetencies = (original: BehaviouralCompetency[], modified: BehaviouralCompetency[]): JSX.Element[] => {
     const allNames = new Set([...original.map((item) => item.name), ...modified.map((item) => item.name)]);
@@ -296,7 +299,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return <p aria-live="polite">Loading job profile...</p>;
   }
 
-  console.log('effectiveData: ', effectiveData);
+  // console.log('effectiveData: ', effectiveData);
 
   const items: DescriptionsProps['items'] = [
     {
@@ -336,8 +339,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: 'Job Context',
       children:
         showDiff && originalData
-          ? compareData(originalData.context.description, effectiveData?.context?.description)
-          : effectiveData?.context?.description,
+          ? compareData(
+              typeof originalData.context === 'string' ? originalData.context : originalData.context?.description || '',
+              effectiveData?.context?.toString(),
+            )
+          : typeof effectiveData?.context === 'string'
+            ? effectiveData?.context
+            : effectiveData?.context.description,
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
@@ -364,7 +372,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {showDiff && originalData
             ? compareLists(originalData.accountabilities, effectiveData?.accountabilities)
             : effectiveData?.accountabilities.map((accountability, index) => {
-                console.log('accountability: ', accountability);
+                // console.log('accountability: ', accountability);
                 if (typeof accountability === 'string') {
                   return <li key={index}>{accountability}</li>;
                 }
@@ -511,7 +519,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <p>{/* last updated info */}</p>
 
           <h3>Job Context</h3>
-          <p>{effectiveData?.context?.description}</p>
+          <p>
+            {typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description}
+          </p>
 
           <h3>Job Overview</h3>
           <p>
@@ -531,6 +541,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               }
               if (accountability.text instanceof TrackedFieldArrayItem) {
                 return <li key={accountability.text.value}>{accountability.text.value}</li>;
+              } else if (typeof accountability.text === 'string') {
+                return <li key={accountability.text}>{accountability.text}</li>;
               }
             })}
           </ul>
@@ -565,6 +577,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
               if (requirement.text instanceof TrackedFieldArrayItem) {
                 return <li key={requirement.text.value}>{requirement.text.value}</li>;
+              } else if (typeof requirement.text === 'string') {
+                return <li key={requirement.text}>{requirement.text}</li>;
               }
             })}
           </ul>

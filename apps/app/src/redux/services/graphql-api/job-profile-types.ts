@@ -90,7 +90,7 @@ export interface JobProfileModel {
   jobFamilies: JobFamily[];
   title: string | TrackedFieldArrayItem;
   number: number;
-  context: ContextModel;
+  context: ContextModel | string;
   overview: string | TrackedFieldArrayItem;
   type: string;
   role: { id: number };
