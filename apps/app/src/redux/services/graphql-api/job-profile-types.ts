@@ -13,6 +13,7 @@ export interface ClassificationModel {
   code: string;
   name: string;
   grade: string;
+  employee_group_id: string;
 }
 
 export interface ClassificationModelWrapped {
@@ -103,7 +104,6 @@ export interface JobProfileModel {
     markAllNonEditableJob_experience: boolean;
     markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;
-    markAllSignificantSec: boolean;
   };
   role_type: { id: number };
   reports_to: ClassificationModelWrapped[];
@@ -116,9 +116,10 @@ export interface JobProfileModel {
   preferences: string[];
   knowledge_skills_abilities: string[];
   willingness_statements: string[];
-  security_screenings: AccountabilitiesModel[];
+  security_screenings: SecuritiyScreeningModel[];
   all_organizations: boolean;
   all_reports_to: boolean;
+  state?: string;
 }
 
 export interface ProfessionsModel {
@@ -146,6 +147,15 @@ export interface AccountabilitiesModel {
   text: string | TrackedFieldArrayItem;
   is_readonly?: boolean;
   is_significant?: boolean;
+
+  // HM view
+  isCustom?: boolean;
+  disabled?: boolean;
+}
+
+export interface SecuritiyScreeningModel {
+  text: string | TrackedFieldArrayItem;
+  is_readonly?: boolean;
 
   // HM view
   isCustom?: boolean;
@@ -283,6 +293,10 @@ export interface CreateJobProfileResponse {
   createOrUpdateJobProfile: {
     id: number;
   };
+}
+
+export interface DuplicateJobProfileResponse {
+  duplicateJobProfile: number;
 }
 
 export interface GetJobProfilesArgs {
