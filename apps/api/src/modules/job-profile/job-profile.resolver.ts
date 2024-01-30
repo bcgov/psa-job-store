@@ -83,6 +83,8 @@ export class JobProfileResolver {
   }
 
   @Mutation(() => Int)
+  @Roles('total-compensation')
+  @UseGuards(RoleGuard)
   async createOrUpdateJobProfile(
     @CurrentUser() { id: userId }: Express.User,
     @Args('id', { type: () => Int, nullable: true }) id: number | null,
@@ -102,6 +104,16 @@ export class JobProfileResolver {
         throw error;
       }
     }
+  }
+
+  @Mutation(() => Int)
+  @Roles('total-compensation') // Adjust role as per your requirements
+  @UseGuards(RoleGuard)
+  async duplicateJobProfile(
+    @CurrentUser() { id: userId }: Express.User,
+    @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
+  ) {
+    return this.jobProfileService.duplicateJobProfile(jobProfileId, userId);
   }
 
   @ResolveField(() => JobProfileReportsTo)
