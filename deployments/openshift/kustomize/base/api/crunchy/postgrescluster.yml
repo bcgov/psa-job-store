@@ -1,0 +1,91 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: api-postgres
+spec:
+  instances:
+    - replicas: 1
+      resources:
+        requests:
+          cpu: "30m"  # Further reduced from 100m
+          memory: "128Mi"  # Further reduced from 256Mi
+        limits:
+          cpu: "50m"  # Further reduced from 200m
+          memory: "128Mi"  # Further reduced from 512Mi
+      dataVolumeClaimSpec:
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 1Gi  # Adjust the storage size as per your requirement
+  backups:
+    pgbackrest:
+      repos:
+        - name: repo1
+          schedules:
+            full: 0 8 * * *
+            incremental: 0 0,4,12,16,20 * * *
+          volume:
+            volumeClaimSpec:
+              accessModes:
+              - "ReadWriteOnce"
+              resources:
+                requests:
+                  storage: 1Gi  # Adjust as needed
+      repoHost:
+        resources:
+          requests:
+            cpu: 1m
+            memory: 64Mi
+          limits:
+            cpu: 50m
+            memory: 128Mi
+      sidecars:
+        requests:
+          cpu: 1m
+          memory: 64Mi
+        limits:
+          cpu: 50m
+          memory: 128Mi
+  postgresVersion: 15
+  # image: 'registry.redhat.io/rhel8/postgresql-15'  # Use Crunchy Data equivalent image
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        pg_hba: "host all all 0.0.0.0/0 md5"
+        parameters:
+          shared_buffers: 16MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
+          wal_buffers: "64kB" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
+          min_wal_size: 32MB
+          max_wal_size: 64MB # default is 1GB
+          max_slot_wal_keep_size: 128MB # default is -1, allowing unlimited wal growth when replicas fall behind
+  resources:
+    requests:
+      cpu: "50m"  # Further reduced from 100m
+      memory: "128Mi"  # Further reduced from 256Mi
+    limits:
+      cpu: "100m"  # Further reduced from 200m
+      memory: "256Mi"  # Further reduced from 512Mi
+  # proxy:
+  #   pgBouncer:
+  #     replicas: 2
+  #     requests:
+  #       cpu: 1m
+  #       memory: 64Mi
+  #     limits:
+  #       cpu: 10m
+  #       memory: 128Mi
+  primary:
+    expose:
+      service:
+        type: ClusterIP
+        ports:
+          - name: postgresql
+            port: 5432
+            protocol: TCP
+            targetPort: 5432
+  users:
+      - name: admin
+        options: CREATEDB
+        databases:
+          - api
