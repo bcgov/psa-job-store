@@ -13,6 +13,12 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 
+interface SignificantObject {
+  text: string;
+  is_readonly: boolean;
+  is_significant: boolean;
+}
+
 @ObjectType()
 export class PositionRequestResponse {
   @Field()
@@ -578,6 +584,8 @@ export class PositionRequestApiService {
     // If changes, create PENDING posn in PS, workable incident in CRM
 
     if (updateData.step === 5) {
+      const needsReview = await this.positionRequestNeedsReview(id);
+      console.log(needsReview);
       // const { accountabilities } = await this.prisma.jobProfile.findUnique({
       //   where: { id: positionRequest.parent_job_profile_id },
       // });
@@ -602,5 +610,76 @@ export class PositionRequestApiService {
     }
 
     return positionRequest;
+  }
+
+  async positionRequestNeedsReview(id: number) {
+    const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id: id } });
+    const jobProfile = await this.prisma.jobProfile.findUnique({
+      where: { id: positionRequest.parent_job_profile_id },
+    });
+
+    // Remove typing to simplify comparing values
+    const {
+      accountabilities: prAccountabilities,
+      education: prEducation,
+      job_experience: prJobExperience,
+      security_screenings: prSecurityScreenings,
+    }: Record<
+      'accountabilities' | 'education' | 'job_experience' | 'security_screenings',
+      SignificantObject[]
+    > = JSON.parse(JSON.stringify(positionRequest.profile_json));
+
+    const {
+      accountabilities: jpAccountabilities,
+      education: jpEducation,
+      job_experience: jpJobExperience,
+      security_screenings: jpSecurityScreenings,
+    }: Record<
+      'accountabilities' | 'education' | 'job_experience' | 'security_screenings',
+      SignificantObject[]
+    > = JSON.parse(JSON.stringify(jobProfile));
+
+    // If job profile is marked as review_required, return true immediately
+    if (jobProfile.review_required === true) return true;
+
+    // If the following values are _not_ arrays, return true as we can't compare them
+    if (
+      !Array.isArray(prAccountabilities) ||
+      !Array.isArray(prEducation) ||
+      !Array.isArray(prJobExperience) ||
+      !Array.isArray(prSecurityScreenings) ||
+      !Array.isArray(jpAccountabilities) ||
+      !Array.isArray(jpEducation) ||
+      !Array.isArray(jpJobExperience) ||
+      !Array.isArray(jpSecurityScreenings)
+    ) {
+      return true;
+    }
+
+    const prValues = {
+      accountabilities: prAccountabilities.map((o) => o.text),
+      education: prEducation.map((o) => o.text),
+      job_experience: prJobExperience.map((o) => o.text),
+      security_screenings: prSecurityScreenings.map((o) => o.text),
+    };
+
+    const jpValues = {
+      accountabilities: jpAccountabilities.filter((o) => o.is_significant === true).map((o) => o.text),
+      education: jpEducation.filter((o) => o.is_significant === true).map((o) => o.text),
+      job_experience: jpJobExperience.filter((o) => o.is_significant === true).map((o) => o.text),
+      security_screening: jpSecurityScreenings.filter((o) => o.is_significant === true).map((o) => o.text),
+    };
+
+    // Iterate through Object.entries(jpValues) and compare with prValues.  If value in left matches value in right, objects are considered the same
+    for (const [key, value] of Object.entries(jpValues)) {
+      for (let i = 0; i < value.length; i++) {
+        if (value[i] !== prValues[key][i]) {
+          console.log(`value[${key}][${i}]: `, value[i]);
+          console.log(`prValues[${key}][${i}]: `, prValues[key][i]);
+        }
+      }
+    }
+
+    return false;
   }
 }
