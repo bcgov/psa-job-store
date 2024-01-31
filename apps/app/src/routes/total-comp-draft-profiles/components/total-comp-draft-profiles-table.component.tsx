@@ -404,9 +404,9 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const [duplicateJobProfile] = useDuplicateJobProfileMutation();
   const navigate = useNavigate();
   const duplicate = async (record: any) => {
-    console.log('duplicate', record);
+    // console.log('duplicate', record);
     const res = await duplicateJobProfile({ jobProfileId: record.id }).unwrap();
-    console.log('res: ', res);
+    // console.log('res: ', res);
     navigate(`/total-compensation/profiles/${res.duplicateJobProfile}`);
   };
 

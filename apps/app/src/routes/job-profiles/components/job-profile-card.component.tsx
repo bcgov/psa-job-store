@@ -36,7 +36,9 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       </div>
       <div>
         <Text strong>Context: </Text>
-        <Paragraph ellipsis={{ rows: 3 }}>{data.context.description}</Paragraph>
+        <Paragraph ellipsis={{ rows: 3 }}>
+          {typeof data?.context === 'string' ? data.context : data.context.description}
+        </Paragraph>
       </div>
       <div>
         <Text strong>Overview:</Text>
