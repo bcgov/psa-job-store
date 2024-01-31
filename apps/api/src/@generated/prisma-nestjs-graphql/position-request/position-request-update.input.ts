@@ -9,10 +9,19 @@ import { DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput } from '..
 @InputType()
 export class PositionRequestUpdateInput {
   @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  crm_assigned_to_account_id?: number;
+
+  @Field(() => Int, { nullable: true })
   step?: number;
 
   @Field(() => String, { nullable: true })
   reports_to_position_id?: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  crm_json?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
@@ -22,9 +31,6 @@ export class PositionRequestUpdateInput {
 
   @Field(() => String, { nullable: true })
   user_id?: string;
-
-  @Field(() => String, { nullable: true })
-  classificationAssignedTo?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;

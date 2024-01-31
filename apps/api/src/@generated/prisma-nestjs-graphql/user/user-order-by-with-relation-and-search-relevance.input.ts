@@ -23,6 +23,9 @@ export class UserOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrder, { nullable: true })
   roles?: keyof typeof SortOrder;
 
+  @Field(() => SortOrderInput, { nullable: true })
+  metadata?: SortOrderInput;
+
   @Field(() => SortOrder, { nullable: true })
   created_at?: keyof typeof SortOrder;
 

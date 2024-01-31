@@ -6,6 +6,7 @@ import { Cache } from 'cache-manager';
 import { JwtPayload } from 'jsonwebtoken';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
+import { CrmService } from '../external/crm.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CACHE_USER_PREFIX, KEYCLOAK_PUBLIC_KEY } from './auth.constants';
 
@@ -14,6 +15,7 @@ export class AuthService {
   constructor(
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly configService: ConfigService<AppConfigDto, true>,
+    private readonly crmService: CrmService,
     private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
   ) {}
@@ -62,13 +64,36 @@ export class AuthService {
 
     if (!match) {
       // If user doesn't exist in cache, update the persisted user
+      let crmMetadata: Record<string, any> = {
+        account_id: null,
+        contact_id: null,
+      };
+
+      const userFromDb = await this.prisma.user.findUnique({ where: { id: idir_user_guid } });
+      if (
+        (userFromDb != null && userFromDb?.metadata?.['crm']['account_id'] == null) ||
+        userFromDb?.metadata?.['crm']['contact_id'] == null
+      ) {
+        const accountId = await this.crmService.getAccountId(idir_username);
+        const contactId = await this.crmService.getContactId(idir_username);
+
+        crmMetadata = {
+          account_id: accountId ?? null,
+          contact_id: contactId ?? null,
+        };
+      }
+
       const user = {
         id: idir_user_guid,
         name,
         email,
         username: idir_username,
         roles: ((client_roles as string[]) ?? []).sort(),
+        metadata: {
+          crm: crmMetadata,
+        },
       };
+
       await this.upsertUser(user);
 
       // Add user to cache

@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { CommentUncheckedUpdateManyWithoutAuthorNestedInput } from '../comment/comment-unchecked-update-many-without-author-nested.input';
 
 @InputType()
@@ -18,6 +19,9 @@ export class UserUncheckedUpdateWithoutJobProfileInput {
 
   @Field(() => [String], { nullable: true })
   roles?: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  metadata?: any;
 
   @Field(() => Date, { nullable: true })
   created_at?: Date | string;
