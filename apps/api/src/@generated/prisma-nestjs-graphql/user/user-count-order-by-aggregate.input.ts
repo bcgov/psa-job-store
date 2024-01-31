@@ -20,6 +20,9 @@ export class UserCountOrderByAggregateInput {
   roles?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  metadata?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   created_at?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

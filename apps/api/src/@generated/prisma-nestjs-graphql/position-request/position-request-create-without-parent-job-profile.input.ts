@@ -7,11 +7,20 @@ import { DepartmentCreateNestedOneWithoutPositionRequestInput } from '../departm
 
 @InputType()
 export class PositionRequestCreateWithoutParent_job_profileInput {
+  @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  crm_assigned_to_account_id?: number;
+
   @Field(() => Int, { nullable: false })
   step!: number;
 
   @Field(() => String, { nullable: false })
   reports_to_position_id!: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  crm_json?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
@@ -21,9 +30,6 @@ export class PositionRequestCreateWithoutParent_job_profileInput {
 
   @Field(() => String, { nullable: true })
   user_id?: string;
-
-  @Field(() => String, { nullable: true })
-  classificationAssignedTo?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;

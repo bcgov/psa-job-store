@@ -37,26 +37,28 @@ enum PositionRequestStatus {
 }
 
 model PositionRequest {
-  id                       Int                    @id @default(autoincrement())
-  step                     Int
-  reports_to_position_id   String
-  department_id            String
-  parent_job_profile_id    Int?
-  profile_json             Json?                  @db.JsonB
-  orgchart_json            Json?                  @db.JsonB
-  user_id                  String?                @db.Uuid
-  classificationAssignedTo String?                @db.Uuid // to whom this position request was assigned to in the CRM - will filter by this field when classificaton user sees their tasks
-  title                    String?
-  position_number          Int?
-  classification_id        String?
-  classification_code      String? // this is just to satisfy type definition, no data is stored here AL-146
-  user_name                String? // this is just to satisfy type definition, no data is stored here AL-146
-  email                    String? // this is just to satisfy type definition, no data is stored here AL-146
-  submission_id            String?
-  submitted_at             DateTime               @default(now())
-  approved_at              DateTime               @default(now())
-  status                   PositionRequestStatus?
-  updated_at               DateTime               @default(now()) @updatedAt
+  id                         Int                    @id @default(autoincrement())
+  crm_id                     Int?
+  crm_assigned_to_account_id Int? // CRM account id of the classifications user who is assigned to the incident
+  step                       Int
+  reports_to_position_id     String
+  department_id              String
+  parent_job_profile_id      Int?
+  crm_json                   Json?                  @db.JsonB
+  profile_json               Json?                  @db.JsonB
+  orgchart_json              Json?                  @db.JsonB
+  user_id                    String?                @db.Uuid
+  title                      String?
+  position_number            Int?
+  classification_id          String?
+  classification_code        String? // this is just to satisfy type definition, no data is stored here AL-146
+  user_name                  String? // this is just to satisfy type definition, no data is stored here AL-146
+  email                      String? // this is just to satisfy type definition, no data is stored here AL-146
+  submission_id              String?
+  submitted_at               DateTime               @default(now())
+  approved_at                DateTime               @default(now())
+  status                     PositionRequestStatus?
+  updated_at                 DateTime               @default(now()) @updatedAt
 
   // TODO: AL-146
   // user        User       @relation(fields: [user_id], references: [id])
@@ -73,6 +75,7 @@ model User {
   email      String?   @unique
   username   String?   @unique
   roles      String[]
+  metadata   Json?     @db.JsonB
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now()) @updatedAt
   deleted_at DateTime?

@@ -28,12 +28,16 @@ export class OrgChartService {
 
     // Loop through response and generate the tree for everyone in the _current department_
     (result?.data?.query?.rows ?? []).forEach((position) => {
-      const existingEdge = edgeMap.get(`${position['A.REPORTS_TO']}-${position['A.POSITION_NBR']}`);
+      // In rare cases, positions do _not_ include a value for A.REPORTS_TO, which causes the org chart to crash.
+      // This workaround prevents a crash and allows positions to float in space with no reporting relationship
+      const reportsTo = position['A.REPORTS_TO'].length > 0 ? position['A.REPORTS_TO'] : '-1';
+
+      const existingEdge = edgeMap.get(`${reportsTo}-${position['A.POSITION_NBR']}`);
       if (existingEdge == null) {
-        edgeMap.set(`${position['A.REPORTS_TO']}-${position['A.POSITION_NBR']}`, {
-          // id: `${position['A.REPORTS_TO']}-${position['A.POSITION_NBR']}`,
-          id: `${position['A.REPORTS_TO']}-${position['A.POSITION_NBR']}`,
-          source: `${position['A.REPORTS_TO']}`,
+        edgeMap.set(`${reportsTo}-${position['A.POSITION_NBR']}`, {
+          // id: `${reportsTo}-${position['A.POSITION_NBR']}`,
+          id: `${reportsTo}-${position['A.POSITION_NBR']}`,
+          source: `${reportsTo}`,
           target: `${position['A.POSITION_NBR']}`,
           type: 'smoothstep',
         });
