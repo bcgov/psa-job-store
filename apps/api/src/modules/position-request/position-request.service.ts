@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import GraphQLJSON from 'graphql-type-json';
 import {
@@ -10,14 +11,16 @@ import {
   PositionRequestWhereInput,
   UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
+import { ClassificationService } from '../external/classification.service';
+import { CrmService } from '../external/crm.service';
+import {
+  IncidentStatus,
+  IncidentThreadChannel,
+  IncidentThreadContentType,
+  IncidentThreadEntryType,
+} from '../external/models/incident-create.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
-
-interface SignificantObject {
-  text: string;
-  is_readonly: boolean;
-  is_significant: boolean;
-}
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -74,7 +77,11 @@ function generateShortId(length: number): string {
 export class PositionRequestApiService {
   // ...(searchResultIds != null && { id: { in: searchResultIds } }),
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly classificationService: ClassificationService,
+    private readonly crmService: CrmService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async generateUniqueShortId(length: number, retries: number = 5): Promise<string> {
     for (let attempt = 0; attempt < retries; attempt++) {
@@ -527,7 +534,7 @@ export class PositionRequestApiService {
     const updatePayload: any = {};
 
     if (updateData.step !== undefined) {
-      updatePayload.step = updateData.step === 5 ? 4 : updateData.step;
+      updatePayload.step = updateData.step;
     }
 
     if (updateData.reports_to_position_id !== undefined) {
@@ -584,29 +591,37 @@ export class PositionRequestApiService {
     // If changes, create PENDING posn in PS, workable incident in CRM
 
     if (updateData.step === 5) {
-      const needsReview = await this.positionRequestNeedsReview(id);
-      console.log(needsReview);
-      // const { accountabilities } = await this.prisma.jobProfile.findUnique({
-      //   where: { id: positionRequest.parent_job_profile_id },
-      // });
-      // const accountabilitiesModified = this.dataHasChanges(
-      //   JSON.stringify(accountabilities['required']),
-      //   JSON.stringify((positionRequest.profile_json['accountabilities']['required'] ?? []).map((obj) => obj.value)),
-      // );
-      // const requirementsModified = this.dataHasChanges(
-      //   JSON.stringify(requirements),
-      //   JSON.stringify((positionRequest.profile_json['requirements'] ?? []).map((obj) => obj.value)),
-      // );
-      // console.log(accountabilitiesModified);
-      // console.log(requirementsModified);
-      // console.log('*****************');
-      // console.log('updateData: ', updateData);
-      // console.log('----------------');
-      // console.log('positionRequest: ', positionRequest);
-      // console.log('*****************');
-      // if (positionRequest.crm_id == null) {
-      //   const result =
-      // }
+      if (positionRequest.crm_id == null) {
+        const incident = await this.createCrmIncidentForPositionRequest(id);
+
+        const positionRequestStatus = (() => {
+          switch (incident.statusWithType.status.id) {
+            case IncidentStatus.Solved:
+            case IncidentStatus.SolvedTraining:
+              return PositionRequestStatus.COMPLETED;
+            case IncidentStatus.Unresolved:
+            case IncidentStatus.Updated:
+              return PositionRequestStatus.IN_REVIEW;
+            case IncidentStatus.WaitingClient:
+              return PositionRequestStatus.ACTION_REQUIRED;
+            case IncidentStatus.WaitingInternal:
+              return PositionRequestStatus.ESCALATED;
+            default:
+              // Don't update status if not covered by the above
+              return null;
+          }
+        })();
+
+        await this.prisma.positionRequest.update({
+          where: { id },
+          data: {
+            crm_id: incident.id,
+            ...(positionRequestStatus != null && { status: positionRequestStatus }),
+          },
+        });
+      } else {
+        // Update Incident
+      }
     }
 
     return positionRequest;
@@ -618,68 +633,92 @@ export class PositionRequestApiService {
       where: { id: positionRequest.parent_job_profile_id },
     });
 
-    // Remove typing to simplify comparing values
-    const {
-      accountabilities: prAccountabilities,
-      education: prEducation,
-      job_experience: prJobExperience,
-      security_screenings: prSecurityScreenings,
-    }: Record<
-      'accountabilities' | 'education' | 'job_experience' | 'security_screenings',
-      SignificantObject[]
-    > = JSON.parse(JSON.stringify(positionRequest.profile_json));
+    // This will be more comprehensive once the positionRequest.<accountabilities|education|job_experience
+    //  |security_screenings> are expanded to include { is_readonly: boolean; is_significant: boolean }
 
-    const {
-      accountabilities: jpAccountabilities,
-      education: jpEducation,
-      job_experience: jpJobExperience,
-      security_screenings: jpSecurityScreenings,
-    }: Record<
-      'accountabilities' | 'education' | 'job_experience' | 'security_screenings',
-      SignificantObject[]
-    > = JSON.parse(JSON.stringify(jobProfile));
+    // Get accountabilities, education, job_experience and security_screenings from PR.profile_json
+    // compare with same fields on the JP
+    // Do logic, return if review is needed
 
-    // If job profile is marked as review_required, return true immediately
-    if (jobProfile.review_required === true) return true;
-
-    // If the following values are _not_ arrays, return true as we can't compare them
-    if (
-      !Array.isArray(prAccountabilities) ||
-      !Array.isArray(prEducation) ||
-      !Array.isArray(prJobExperience) ||
-      !Array.isArray(prSecurityScreenings) ||
-      !Array.isArray(jpAccountabilities) ||
-      !Array.isArray(jpEducation) ||
-      !Array.isArray(jpJobExperience) ||
-      !Array.isArray(jpSecurityScreenings)
-    ) {
-      return true;
-    }
-
-    const prValues = {
-      accountabilities: prAccountabilities.map((o) => o.text),
-      education: prEducation.map((o) => o.text),
-      job_experience: prJobExperience.map((o) => o.text),
-      security_screenings: prSecurityScreenings.map((o) => o.text),
-    };
-
-    const jpValues = {
-      accountabilities: jpAccountabilities.filter((o) => o.is_significant === true).map((o) => o.text),
-      education: jpEducation.filter((o) => o.is_significant === true).map((o) => o.text),
-      job_experience: jpJobExperience.filter((o) => o.is_significant === true).map((o) => o.text),
-      security_screening: jpSecurityScreenings.filter((o) => o.is_significant === true).map((o) => o.text),
-    };
-
-    // Iterate through Object.entries(jpValues) and compare with prValues.  If value in left matches value in right, objects are considered the same
-    for (const [key, value] of Object.entries(jpValues)) {
-      for (let i = 0; i < value.length; i++) {
-        if (value[i] !== prValues[key][i]) {
-          console.log(`value[${key}][${i}]: `, value[i]);
-          console.log(`prValues[${key}][${i}]: `, prValues[key][i]);
-        }
-      }
-    }
-
-    return false;
+    return jobProfile.review_required;
   }
+
+  async createCrmIncidentForPositionRequest(id: number) {
+    const needsReview = await this.positionRequestNeedsReview(id);
+
+    const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+    const classification = await this.classificationService.getClassification({
+      where: { id: positionRequest.classification_id },
+    });
+    const { metadata } = await this.prisma.user.findUnique({ where: { id: positionRequest.user_id } });
+    const contactId = ((metadata ?? {}) as Record<string, any>).crm.contact_id;
+    const department = await this.prisma.department.findUnique({ where: { id: positionRequest.department_id } });
+    const location = await this.prisma.location.findUnique({ where: { id: department.location_id } });
+    const parentJobProfile = await this.prisma.jobProfile.findUnique({
+      where: { id: positionRequest.parent_job_profile_id },
+    });
+
+    const incident = await this.crmService.createIncident({
+      subject: `Position Number Request - ${classification.code}`,
+      primaryContact: { id: contactId },
+      assignedTo: {
+        staffGroup: {
+          lookupName: 'HRSC - Classification',
+        },
+      },
+      statusWithType: {
+        status: {
+          id: needsReview ? IncidentStatus.Unresolved : IncidentStatus.Solved,
+        },
+      },
+      // Need to determine usage of this block
+      category: {
+        id: 1460,
+      },
+      severity: {
+        lookupName: '4 - Routine',
+      },
+      threads: [
+        {
+          channel: {
+            id: IncidentThreadChannel.CSSWeb,
+          },
+          contentType: {
+            id: IncidentThreadContentType.TextHtml,
+          },
+          entryType: {
+            id: IncidentThreadEntryType.Customer,
+          },
+          text: `
+          <ul>
+            <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
+            <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
+            <li>What is the pay list/department ID number?    ${positionRequest.department_id}</li>
+            <li>What is the expected classification level?    ${classification.code} (${classification.name})</li>
+            <li>Is this position included or excluded?    Included</li>
+            <li>Is the position full-time or part-time?    Full-time</li>
+            <li>What is the job title?    ${positionRequest.title}</li>
+            <li>Is this a regular or temporary position?    Regular</li>
+            <li>Who is the first level excluded manager for this position?    ${
+              positionRequest.reports_to_position_id
+            }</li>
+            <li>Where is the position location?    ${location.name}</li>
+            <li>Which position number will the position report to?    ${positionRequest.reports_to_position_id}</li>
+            <li>Is a Job Store profile being used? If so, what is the Job Store profile number?    ${
+              parentJobProfile.number
+            }</li>
+            <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
+            <li>Please attach a copy of the job profile you will be using.    Attached</li>
+            <li>Please attach a copy of your Organization Chart that shows the topic position and the job titles, position numbers and classifiction levels, of the supervisor, peer and subordinate positions.    Attached</li>
+        </ul>
+          `,
+        },
+      ],
+      fileAttachments: [],
+    });
+
+    return incident;
+  }
+
+  // async updateCrmIncidentForPositionRequest(id: number) {}
 }
