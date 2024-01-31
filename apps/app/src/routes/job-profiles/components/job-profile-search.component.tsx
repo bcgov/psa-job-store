@@ -3,7 +3,7 @@ import { Button, Card, Col, Input, Row, Tag } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
-import { useGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
+import { useGetFilteredClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
 import {
   useGetJobProfilesCareerGroupsQuery,
@@ -73,7 +73,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // const organizationData = useGetOrganizationsQuery().data?.organizations;
   // const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
   const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
-  const classificationData = useGetClassificationsQuery().data?.classifications;
+  const classificationData = useGetFilteredClassificationsQuery().data?.classifications;
 
   if (!careerGroupData)
     // eslint-disable-next-line react-hooks/rules-of-hooks

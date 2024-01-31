@@ -31,6 +31,10 @@ spec:
         ports:
         - containerPort: 3000
           protocol: TCP
+        volumeMounts:
+            - name: seed-volume
+              mountPath: /usr/src/apps/api/prisma/seed.ts
+              subPath: seed.ts
         envFrom:
         # - configMapRef:
         #     name: api-configmap
@@ -42,3 +46,7 @@ spec:
             memory: 500Mi 
           limits:
             cpu: 200m 
+      volumes:
+      - name: seed-volume
+        secret:
+          secretName: seed-secret

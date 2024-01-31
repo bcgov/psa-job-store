@@ -16,7 +16,7 @@ import { SerializedError } from '@reduxjs/toolkit';
 import { Button, Card, Col, Menu, Popover, Row, Table, Tooltip } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
-import { ErrorResponse, Link, useSearchParams } from 'react-router-dom';
+import { ErrorResponse, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import '../../../components/app/common/css/filtered-table.component.css';
@@ -25,6 +25,7 @@ import {
   GetJobProfilesResponse,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import {
+  useDuplicateJobProfileMutation,
   useLazyGetJobProfilesDraftsQuery,
   useLazyGetJobProfilesQuery,
 } from '../../../redux/services/graphql-api/job-profile.api';
@@ -400,6 +401,15 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     if (handleTableChangeCallback) handleTableChangeCallback(pagination, _filters, sorter);
   };
 
+  const [duplicateJobProfile] = useDuplicateJobProfileMutation();
+  const navigate = useNavigate();
+  const duplicate = async (record: any) => {
+    // console.log('duplicate', record);
+    const res = await duplicateJobProfile({ jobProfileId: record.id }).unwrap();
+    // console.log('res: ', res);
+    navigate(`/total-compensation/profiles/${res.duplicateJobProfile}`);
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getMenuContent = (_record: any) => {
     return (
@@ -413,7 +423,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
               <Menu.Item key="unpublish" icon={<ArrowDownOutlined />}>
                 Unpublish
               </Menu.Item>
-              <Menu.Item key="duplicate" icon={<CopyOutlined />}>
+              <Menu.Item key="duplicate" icon={<CopyOutlined />} onClick={() => duplicate(_record)}>
                 Duplicate
               </Menu.Item>
               <Menu.Item key="copy" icon={<LinkOutlined />}>
@@ -428,7 +438,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
               <Menu.Item key="publish" icon={<DownloadOutlined />}>
                 Publish
               </Menu.Item>
-              <Menu.Item key="duplicate" icon={<CopyOutlined />}>
+              <Menu.Item key="duplicate" icon={<CopyOutlined />} onClick={() => duplicate(_record)}>
                 Duplicate
               </Menu.Item>
               <Menu.Item key="copy" icon={<LinkOutlined />}>
