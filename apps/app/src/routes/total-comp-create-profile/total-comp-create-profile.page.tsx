@@ -770,7 +770,7 @@ export const TotalCompCreateProfilePage = () => {
     }
   };
 
-  // work experience
+  // related experience
   const {
     fields: job_experienceFields,
     append: appendJob_experience,
@@ -1655,7 +1655,7 @@ export const TotalCompCreateProfilePage = () => {
                             <>
                               <Switch checked={value} onChange={onChange} ref={ref} />
                               <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
-                                Classification review required
+                                Verification or Classification Review required
                               </span>
                             </>
                           )}
@@ -2096,7 +2096,7 @@ export const TotalCompCreateProfilePage = () => {
                     </Col>
                   </Row>
 
-                  {/* Work experience */}
+                  {/* Related experience */}
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                       <Form.Item
@@ -2223,7 +2223,7 @@ export const TotalCompCreateProfilePage = () => {
                                       control={profileControl}
                                       name={`job_experience.${index}.text`}
                                       render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add work experience" {...field} />
+                                        <TextArea autoSize placeholder="Add related experience" {...field} />
                                       )}
                                     />
                                   </Form.Item>
