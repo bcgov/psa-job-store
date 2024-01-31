@@ -127,13 +127,14 @@ export class JobProfileValidationModel {
   @AllDisabled({ message: 'There must be at least one accountability.' })
   accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  // optional_accountabilities: (TrackedFieldArrayItem | ValueString)[];
+  optional_accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   @AllDisabled({ message: 'There must be at least one education requirement.' })
   education: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @AllDisabled({ message: 'There must be at least one job experience requirement.' })
-  job_experience: (TrackedFieldArrayItem | ValueString)[];
+  // @AllDisabled({ message: 'There must be at least one job experience requirement.' })
+  job_experience: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+  security_screenings: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 }
