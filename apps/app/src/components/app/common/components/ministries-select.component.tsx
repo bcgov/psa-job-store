@@ -34,7 +34,7 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
       {isMultiSelect && (
         <Checkbox
           onChange={(e) => {
-            console.log('onChange');
+            // console.log('onChange');
             handleSelectAll(e.target.checked);
           }}
           checked={allOrganizations}

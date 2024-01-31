@@ -498,7 +498,7 @@ export class JobProfileService {
     };
 
     const newJobProfile = await this.prisma.jobProfile.create({
-      data: newJobProfileData,
+      data: newJobProfileData as any as Prisma.JobProfileCreateInput,
     });
 
     return newJobProfile.id;
