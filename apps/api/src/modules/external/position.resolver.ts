@@ -1,42 +1,67 @@
-import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import {
-  Classification,
-  Department,
-  FindManyPositionArgs,
-  Organization,
-  Position,
-} from '../../@generated/prisma-nestjs-graphql';
+import { Args, Query, Resolver } from '@nestjs/graphql';
+import { Classification } from '@prisma/client';
+import { Department } from '../../@generated/prisma-nestjs-graphql';
 import { ClassificationService } from './classification.service';
 import { DepartmentService } from './department.service';
+import { FindUniquePositionArgs } from './models/find-unique-position.args';
+import { Position } from './models/position.model';
 import { OrganizationService } from './organization.service';
-import { PositionService } from './position.service';
+import { PeoplesoftService } from './peoplesoft.service';
 
 @Resolver(() => Position)
 export class PositionResolver {
+  private classifications: Classification[];
+  private departments: Department[];
+
   constructor(
     private readonly classificationService: ClassificationService,
     private readonly departmentService: DepartmentService,
+    private readonly peoplesoftService: PeoplesoftService,
     private readonly organizationService: OrganizationService,
-    private readonly positionService: PositionService,
-  ) {}
-
-  @Query(() => [Position], { name: 'positions' })
-  getPositions(@Args() args?: FindManyPositionArgs) {
-    return this.positionService.getPositions(args);
+  ) {
+    (async () => {
+      this.classifications = await this.classificationService.getClassifications({});
+      this.departments = await this.departmentService.getDepartments();
+    })();
   }
+  @Query(() => Position, { name: 'position' })
+  async getPosition(@Args() args?: FindUniquePositionArgs) {
+    const result = await this.peoplesoftService.getPosition(args.where.id);
+    const rows = result?.data?.query?.rows;
+    let position: Position | null = null;
 
-  @ResolveField(() => Classification)
-  classification(@Parent() { classification_id }: Position) {
-    return this.classificationService.getClassification({ where: { id: classification_id } });
-  }
+    if (rows.length > 0) {
+      const raw = rows[0];
 
-  @ResolveField(() => Department)
-  department(@Parent() { department_id }: Position) {
-    return this.departmentService.getDepartment({ where: { id: department_id } });
-  }
+      const classification =
+        raw['A.JOBCODE'] != null
+          ? await this.classificationService.getClassification({ where: { id: raw['A.JOBCODE'] } })
+          : null;
 
-  @ResolveField(() => Organization)
-  organization(@Parent() { organization_id }: Position) {
-    return this.organizationService.getOrganization({ where: { id: organization_id } });
+      const department =
+        raw['A.DEPTID'] != null ? await this.departmentService.getDepartment({ where: { id: raw['A.DEPTID'] } }) : null;
+
+      const organization =
+        raw['A.BUSINESS_UNIT'] != null
+          ? await this.organizationService.getOrganization({ where: { id: raw['A.BUSINESS_UNIT'] } })
+          : null;
+
+      position = {
+        id: raw['A.POSITION_NBR'],
+        classification_id: raw['A.JOBCODE'],
+        classification: classification,
+        department_id: raw['A.DEPTID'],
+        department: department,
+        organization_id: raw['A.BUSINESS_UNIT'],
+        organization: organization,
+        supervisor_id: raw['A.REPORTS_TO'],
+        title: raw['A.DESCR'],
+        job_profile_number: raw['A.TGB_E_CLASS'],
+        effective_status: raw['A.EFF_STATUS'],
+        effective_date: raw['A.EFFDT'],
+      };
+    }
+
+    return position;
   }
 }

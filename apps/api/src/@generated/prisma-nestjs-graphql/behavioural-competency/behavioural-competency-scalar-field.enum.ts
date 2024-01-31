@@ -2,8 +2,8 @@ import { registerEnumType } from '@nestjs/graphql';
 
 export enum BehaviouralCompetencyScalarFieldEnum {
   id = 'id',
-  membership = 'membership',
-  group = 'group',
+  type = 'type',
+  category = 'category',
   name = 'name',
   description = 'description',
 }

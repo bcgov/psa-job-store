@@ -6,6 +6,6 @@ export class JobRoleService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getJobRoles() {
-    return this.prisma.jobRole.findMany();
+    return this.prisma.jobProfileRole.findMany();
   }
 }

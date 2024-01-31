@@ -39,6 +39,10 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({ current, xl = 14 }) =>
           current={current}
           items={[
             {
+              title: 'Organization chart',
+              description: 'Choose the supervisor',
+            },
+            {
               title: 'Choose a job profile',
               description: 'Choose and modify a job profile',
             },
@@ -55,8 +59,8 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({ current, xl = 14 }) =>
               description: 'Provide additional info',
             },
             {
-              title: 'Submission Result',
-              description: 'Find out the result of your request',
+              title: 'Actions',
+              description: 'Get position number',
             },
           ]}
         />

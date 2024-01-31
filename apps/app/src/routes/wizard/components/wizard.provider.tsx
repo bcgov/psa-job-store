@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ReactNode, useContext, useState } from 'react';
-import { GetClassificationsResponse } from '../../../redux/services/graphql-api/classification.api';
-import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile.api';
+import { GetClassificationsResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 
 // interface WizardData {
 //   [key: string]: string;
@@ -33,6 +32,15 @@ interface WizardContextProps {
   originalMinReqFields: any[];
   originalTitle: any;
   originalOverview: any;
+
+  positionRequestId: number | null;
+  setPositionRequestId: React.Dispatch<React.SetStateAction<number | null>>;
+
+  positionRequestProfileId: number | null;
+  setPositionRequestProfileId: React.Dispatch<React.SetStateAction<number | null>>;
+
+  positionRequestDepartmentId: string | null;
+  setPositionRequestDepartmentId: React.Dispatch<React.SetStateAction<string | null>>;
 
   setOriginalValuesSet: React.Dispatch<React.SetStateAction<boolean>>;
   setOriginalAccReqFields: React.Dispatch<React.SetStateAction<any[]>>;
@@ -68,6 +76,9 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalMinReqFields, setOriginalMinReqFields] = useState<any[]>([]);
   const [originalTitle, setOriginalTitle] = useState<any>({});
   const [originalOverview, setOriginalOverview] = useState<any>({});
+  const [positionRequestId, setPositionRequestId] = useState<number | null>(null);
+  const [positionRequestProfileId, setPositionRequestProfileId] = useState<number | null>(null);
+  const [positionRequestDepartmentId, setPositionRequestDepartmentId] = useState<string | null>(null);
 
   const value = {
     wizardData,
@@ -92,6 +103,12 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setOriginalTitle,
     originalOverview,
     setOriginalOverview,
+    positionRequestId,
+    setPositionRequestId,
+    positionRequestProfileId,
+    setPositionRequestProfileId,
+    positionRequestDepartmentId,
+    setPositionRequestDepartmentId,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

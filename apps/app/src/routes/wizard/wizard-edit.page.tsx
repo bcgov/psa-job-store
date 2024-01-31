@@ -1,12 +1,16 @@
 import { FormInstance, List, Modal } from 'antd';
 import { useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ClassificationModel, GetClassificationsResponse } from '../../redux/services/graphql-api/classification.api';
 import {
+  AccountabilitiesModel,
   BehaviouralCompetencies,
+  ClassificationModel,
+  ClassificationModelWrapped,
+  GetClassificationsResponse,
+  JobFamily,
   JobProfileModel,
-  TrackedFieldArrayItem,
-} from '../../redux/services/graphql-api/job-profile.api';
+  Stream,
+} from '../../redux/services/graphql-api/job-profile-types';
+import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import WizardEditProfile from './components/wizard-edit-profile';
@@ -18,12 +22,27 @@ export interface InputData {
   [key: string]: any;
 }
 
-export const WizardEditPage = () => {
+interface WizardEditPageProps {
+  onBack?: () => void;
+  onNext?: () => void;
+}
+
+export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }) => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
-  const { wizardData, setWizardData, classificationsData, setClassificationsData, errors, setErrors } =
-    useWizardContext();
-  const { profileId } = useParams();
+  const {
+    wizardData,
+    setWizardData,
+    classificationsData,
+    setClassificationsData,
+    errors,
+    setErrors,
+    positionRequestProfileId,
+    positionRequestId,
+  } = useWizardContext();
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
+
+  const profileId = positionRequestProfileId;
 
   function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
     setClassificationsData(data);
@@ -57,51 +76,69 @@ export const WizardEditPage = () => {
     // this is so that the edited data can be displayed for review (since this component uses API format data)
     const output: JobProfileModel = {
       id: parseInt(input.id),
-      stream: 'USER',
+      type: 'USER',
       title: { value: input['title.value'], isCustom: input['title.isCustom'], disabled: input['title.disabled'] },
       number: parseInt(input.number),
       organization_id: '-1',
-      family_id: -1,
+      jobFamilies: [] as JobFamily[],
+      streams: [] as Stream[],
       context: input.context,
       overview: {
         value: input['overview.value'],
         isCustom: input['overview.isCustom'],
         disabled: input['overview.disabled'],
       },
-      accountabilities: {
-        optional: [] as TrackedFieldArrayItem[],
-        required: [] as TrackedFieldArrayItem[],
-      },
-      requirements: [] as string[],
+      accountabilities: [] as AccountabilitiesModel[],
+      education: [] as AccountabilitiesModel[],
+      job_experience: [] as AccountabilitiesModel[],
       behavioural_competencies: [] as BehaviouralCompetencies[],
-      classification: {
-        id: input.classification,
-      } as ClassificationModel,
+      classifications: [] as ClassificationModelWrapped[],
+
+      role: { id: input.roleId || null },
+      role_type: { id: input.roleTypeId || null },
+      reports_to: [],
+      organizations: [],
+      scope: { id: input.scopeId || null },
+      review_required: false,
+      professions: [],
+      program_overview: '',
+      professional_registration_requirements: [],
+      preferences: [],
+      knowledge_skills_abilities: [],
+      willingness_statements: [],
+      security_screenings: [],
+      all_organizations: false,
+      all_reports_to: false,
     };
 
     Object.keys(input).forEach((key) => {
       const keys = key.split('.');
       const value = input[key];
 
-      if (keys.length === 1) {
-        if (key === 'classification') {
+      if (keys.length !== 1) {
+        if (key.startsWith('classification')) {
+          // console.log('starts with classification');
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+          // console.log('index: ', index, ' value: ', value);
           const classificationData = getClassificationById(value);
 
+          // console.log('classificationData: ', classificationData);
           if (classificationData) {
-            output.classification = classificationData;
+            if (output.classifications) output.classifications[index] = { classification: classificationData };
           }
         }
-      } else {
-        if (key.startsWith('required_accountabilities')) {
+
+        if (key.startsWith('accountabilities')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
 
-          if (!output.accountabilities.required[index]) {
-            if (input[`required_accountabilities.${index}.value`] != '') {
-              output.accountabilities.required[index] = {
-                value: input[`required_accountabilities.${index}.value`],
-                isCustom: input[`required_accountabilities.${index}.isCustom`],
-                disabled: input[`required_accountabilities.${index}.disabled`],
+          if (!output.accountabilities[index]) {
+            if (input[`accountabilities.${index}.text`] != '') {
+              output.accountabilities[index] = {
+                text: input[`accountabilities.${index}.text`],
+                isCustom: input[`accountabilities.${index}.isCustom`],
+                disabled: input[`accountabilities.${index}.disabled`],
               };
             }
           }
@@ -109,25 +146,26 @@ export const WizardEditPage = () => {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
 
-          if (!output.accountabilities.optional[index]) {
+          if (!output.accountabilities[index]) {
             if (input[`optional_accountabilities.${index}.value`] != '') {
-              output.accountabilities.optional[index] = {
-                value: input[`optional_accountabilities.${index}.value`],
+              output.accountabilities[index] = {
+                text: input[`optional_accountabilities.${index}.value`],
                 isCustom: input[`optional_accountabilities.${index}.isCustom`],
                 disabled: input[`optional_accountabilities.${index}.disabled`],
               };
             }
           }
-        } else if (key.startsWith('requirements')) {
+        } else if (key.startsWith('education')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
 
-          if (!output.requirements[index]) {
-            if (input[`requirements.${index}.value`] != '') {
-              output.requirements[index] = {
-                value: input[`requirements.${index}.value`],
-                isCustom: input[`requirements.${index}.isCustom`],
-                disabled: input[`requirements.${index}.disabled`],
+          if (!output.education[index]) {
+            // todo: implement job_experience as well
+            if (input[`education.${index}.text`] != '') {
+              output.education[index] = {
+                text: input[`education.${index}.text`],
+                isCustom: input[`education.${index}.isCustom`],
+                disabled: input[`education.${index}.disabled`],
               };
             }
           }
@@ -159,8 +197,9 @@ export const WizardEditPage = () => {
     getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
   }>(null);
 
-  const navigate = useNavigate();
-  const onNext = () => {
+  // const navigate = useNavigate();
+
+  const onNextCallback = async () => {
     if (errors.length) {
       Modal.error({
         title: 'Errors',
@@ -176,12 +215,34 @@ export const WizardEditPage = () => {
       });
       return;
     }
+    // Create an entry in My Positions
+
     const formData = wizardEditProfileRef.current?.getFormData();
+    // console.log('formData: ', formData);
     const transformedData = transformFormData(formData);
+    // console.log('transformedData: ', transformedData);
     setWizardData(transformedData);
-    navigate('/wizard/review');
+
+    try {
+      if (positionRequestId)
+        await updatePositionRequest({
+          id: positionRequestId,
+          step: 3,
+          profile_json: transformedData,
+          title: formData['title.value'],
+          // classification_code: classification ? classification.code : '',
+        }).unwrap();
+    } catch (error) {
+      // Handle the error, possibly showing another modal
+      Modal.error({
+        title: 'Error updating position',
+        content: 'An unknown error occurred', //error.data?.message ||
+      });
+    }
+    if (onNext) onNext();
   };
 
+  // console.log('wizardData: ', wizardData);
   return (
     <WizardPageWrapper
       title="Edit profile"
@@ -190,13 +251,19 @@ export const WizardEditPage = () => {
       xl={18}
       lg={18}
     >
-      <WizardSteps current={1} xl={24}></WizardSteps>
-      <WizardEditControlBar style={{ marginBottom: '1rem' }} onNext={onNext} showChooseDifferentProfile={true} />
+      <WizardSteps current={2} xl={24}></WizardSteps>
+      <WizardEditControlBar
+        style={{ marginBottom: '1rem' }}
+        onNext={onNextCallback}
+        onChooseDifferentProfile={onBack}
+        showChooseDifferentProfile={true}
+        nextText="Save and Next"
+      />
 
       <WizardEditProfile
         ref={wizardEditProfileRef}
         profileData={wizardData}
-        id={profileId}
+        id={profileId?.toString()}
         submitText="Review Profile"
         // submitHandler={onSubmit}
         showBackButton={true}

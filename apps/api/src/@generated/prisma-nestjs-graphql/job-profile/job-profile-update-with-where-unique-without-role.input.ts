@@ -9,7 +9,7 @@ import { JobProfileUpdateWithoutRoleInput } from './job-profile-update-without-r
 export class JobProfileUpdateWithWhereUniqueWithoutRoleInput {
   @Field(() => JobProfileWhereUniqueInput, { nullable: false })
   @Type(() => JobProfileWhereUniqueInput)
-  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileUpdateWithoutRoleInput, { nullable: false })
   @Type(() => JobProfileUpdateWithoutRoleInput)

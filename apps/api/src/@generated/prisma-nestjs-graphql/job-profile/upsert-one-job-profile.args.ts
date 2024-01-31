@@ -10,7 +10,7 @@ import { JobProfileUpdateInput } from './job-profile-update.input';
 export class UpsertOneJobProfileArgs {
   @Field(() => JobProfileWhereUniqueInput, { nullable: false })
   @Type(() => JobProfileWhereUniqueInput)
-  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileCreateInput, { nullable: false })
   @Type(() => JobProfileCreateInput)

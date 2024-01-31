@@ -1,35 +1,49 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { JobProfileState } from '../prisma/job-profile-state.enum';
-import { JobStream } from '../prisma/job-stream.enum';
+import { JobProfileType } from '../prisma/job-profile-type.enum';
 import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyCreateNestedManyWithoutJob_profileInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-create-nested-many-without-job-profile.input';
-import { CareerGroupCreateNestedOneWithoutProfilesInput } from '../career-group/career-group-create-nested-one-without-profiles.input';
-import { JobProfileCreateNestedManyWithoutParentInput } from './job-profile-create-nested-many-without-parent.input';
-import { ClassificationCreateNestedOneWithoutJob_profilesInput } from '../classification/classification-create-nested-one-without-job-profiles.input';
-import { JobFamilyCreateNestedOneWithoutProfilesInput } from '../job-family/job-family-create-nested-one-without-profiles.input';
-import { OrganizationCreateNestedOneWithoutJob_provilesInput } from '../organization/organization-create-nested-one-without-job-proviles.input';
-import { UserCreateNestedOneWithoutJob_profilesInput } from '../user/user-create-nested-one-without-job-profiles.input';
-import { JobProfileCreateNestedOneWithoutChildrenInput } from './job-profile-create-nested-one-without-children.input';
-import { JobRoleCreateNestedOneWithoutProfilesInput } from '../job-role/job-role-create-nested-one-without-profiles.input';
+import { JobProfileClassificationCreateNestedManyWithoutJob_profileInput } from '../job-profile-classification/job-profile-classification-create-nested-many-without-job-profile.input';
+import { JobProfileOrganizationCreateNestedManyWithoutJob_profileInput } from '../job-profile-organization/job-profile-organization-create-nested-many-without-job-profile.input';
+import { JobProfileContextCreateNestedOneWithoutJob_profileInput } from '../job-profile-context/job-profile-context-create-nested-one-without-job-profile.input';
+import { JobProfileRoleCreateNestedOneWithoutJob_profilesInput } from '../job-profile-role/job-profile-role-create-nested-one-without-job-profiles.input';
+import { JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput } from '../job-profile-role-type/job-profile-role-type-create-nested-one-without-job-profiles.input';
+import { JobProfileScopeCreateNestedOneWithoutJob_profilesInput } from '../job-profile-scope/job-profile-scope-create-nested-one-without-job-profiles.input';
+import { UserCreateNestedOneWithoutJobProfileInput } from '../user/user-create-nested-one-without-job-profile.input';
+import { JobProfileJobFamilyLinkCreateNestedManyWithoutJobProfileInput } from '../job-profile-job-family-link/job-profile-job-family-link-create-nested-many-without-job-profile.input';
+import { JobProfileStreamLinkCreateNestedManyWithoutJobProfileInput } from '../job-profile-stream-link/job-profile-stream-link-create-nested-many-without-job-profile.input';
+import { PositionRequestCreateNestedManyWithoutParent_job_profileInput } from '../position-request/position-request-create-nested-many-without-parent-job-profile.input';
 
 @InputType()
 export class JobProfileCreateWithoutReports_toInput {
-  @Field(() => JobProfileState, { nullable: false })
-  state!: keyof typeof JobProfileState;
+  @Field(() => Boolean, { nullable: true })
+  all_organizations?: boolean;
 
-  @Field(() => JobStream, { nullable: false })
-  stream!: keyof typeof JobStream;
+  @Field(() => Boolean, { nullable: true })
+  all_reports_to?: boolean;
+
+  @Field(() => JobProfileState, { nullable: true })
+  state?: keyof typeof JobProfileState;
+
+  @Field(() => JobProfileType, { nullable: false })
+  type!: keyof typeof JobProfileType;
+
+  @Field(() => Date, { nullable: true })
+  updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  program_overview?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  review_required?: boolean;
 
   @Field(() => String, { nullable: false })
   title!: string;
 
-  @Field(() => Int, { nullable: true })
-  number?: number;
-
-  @Field(() => String, { nullable: false })
-  context!: string;
+  @Field(() => Int, { nullable: false })
+  number!: number;
 
   @Field(() => String, { nullable: false })
   overview!: string;
@@ -37,33 +51,60 @@ export class JobProfileCreateWithoutReports_toInput {
   @Field(() => GraphQLJSON, { nullable: true })
   accountabilities?: any;
 
+  @Field(() => GraphQLJSON, { nullable: true })
+  education?: any;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  job_experience?: any;
+
   @Field(() => [String], { nullable: true })
-  requirements?: Array<string>;
+  professional_registration_requirements?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  preferences?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  knowledge_skills_abilities?: Array<string>;
+
+  @Field(() => [String], { nullable: true })
+  willingness_statements?: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  security_screenings?: any;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  total_comp_create_form_misc?: any;
 
   @Field(() => JobProfileBehaviouralCompetencyCreateNestedManyWithoutJob_profileInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyCreateNestedManyWithoutJob_profileInput;
 
-  @Field(() => CareerGroupCreateNestedOneWithoutProfilesInput, { nullable: true })
-  career_group?: CareerGroupCreateNestedOneWithoutProfilesInput;
+  @Field(() => JobProfileClassificationCreateNestedManyWithoutJob_profileInput, { nullable: true })
+  classifications?: JobProfileClassificationCreateNestedManyWithoutJob_profileInput;
 
-  @Field(() => JobProfileCreateNestedManyWithoutParentInput, { nullable: true })
-  children?: JobProfileCreateNestedManyWithoutParentInput;
+  @Field(() => JobProfileOrganizationCreateNestedManyWithoutJob_profileInput, { nullable: true })
+  organizations?: JobProfileOrganizationCreateNestedManyWithoutJob_profileInput;
 
-  @Field(() => ClassificationCreateNestedOneWithoutJob_profilesInput, { nullable: false })
-  classification!: ClassificationCreateNestedOneWithoutJob_profilesInput;
+  @Field(() => JobProfileContextCreateNestedOneWithoutJob_profileInput, { nullable: true })
+  context?: JobProfileContextCreateNestedOneWithoutJob_profileInput;
 
-  @Field(() => JobFamilyCreateNestedOneWithoutProfilesInput, { nullable: true })
-  family?: JobFamilyCreateNestedOneWithoutProfilesInput;
+  @Field(() => JobProfileRoleCreateNestedOneWithoutJob_profilesInput, { nullable: true })
+  role?: JobProfileRoleCreateNestedOneWithoutJob_profilesInput;
 
-  @Field(() => OrganizationCreateNestedOneWithoutJob_provilesInput, { nullable: true })
-  organization?: OrganizationCreateNestedOneWithoutJob_provilesInput;
+  @Field(() => JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput, { nullable: true })
+  role_type?: JobProfileRoleTypeCreateNestedOneWithoutJob_profilesInput;
 
-  @Field(() => UserCreateNestedOneWithoutJob_profilesInput, { nullable: true })
-  owner?: UserCreateNestedOneWithoutJob_profilesInput;
+  @Field(() => JobProfileScopeCreateNestedOneWithoutJob_profilesInput, { nullable: true })
+  scope?: JobProfileScopeCreateNestedOneWithoutJob_profilesInput;
 
-  @Field(() => JobProfileCreateNestedOneWithoutChildrenInput, { nullable: true })
-  parent?: JobProfileCreateNestedOneWithoutChildrenInput;
+  @Field(() => UserCreateNestedOneWithoutJobProfileInput, { nullable: true })
+  owner?: UserCreateNestedOneWithoutJobProfileInput;
 
-  @Field(() => JobRoleCreateNestedOneWithoutProfilesInput, { nullable: true })
-  role?: JobRoleCreateNestedOneWithoutProfilesInput;
+  @Field(() => JobProfileJobFamilyLinkCreateNestedManyWithoutJobProfileInput, { nullable: true })
+  jobFamilies?: JobProfileJobFamilyLinkCreateNestedManyWithoutJobProfileInput;
+
+  @Field(() => JobProfileStreamLinkCreateNestedManyWithoutJobProfileInput, { nullable: true })
+  streams?: JobProfileStreamLinkCreateNestedManyWithoutJobProfileInput;
+
+  @Field(() => PositionRequestCreateNestedManyWithoutParent_job_profileInput, { nullable: true })
+  position_request?: PositionRequestCreateNestedManyWithoutParent_job_profileInput;
 }

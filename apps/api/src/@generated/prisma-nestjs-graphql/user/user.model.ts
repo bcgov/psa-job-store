@@ -1,7 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
 import { Comment } from '../comment/comment.model';
-import { Identity } from '../identity/identity.model';
 import { JobProfile } from '../job-profile/job-profile.model';
 
 @ObjectType()
@@ -14,6 +13,9 @@ export class User {
 
   @Field(() => String, { nullable: true })
   email!: string | null;
+
+  @Field(() => String, { nullable: true })
+  username!: string | null;
 
   @Field(() => [String], { nullable: true })
   roles!: Array<string>;
@@ -30,9 +32,6 @@ export class User {
   @Field(() => [Comment], { nullable: true })
   comments?: Array<Comment>;
 
-  @Field(() => [Identity], { nullable: true })
-  identities?: Array<Identity>;
-
   @Field(() => [JobProfile], { nullable: true })
-  job_profiles?: Array<JobProfile>;
+  JobProfile?: Array<JobProfile>;
 }

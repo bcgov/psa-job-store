@@ -1,108 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
-import { ClassificationModel } from './classification.api';
-
-export interface JobProfileModel {
-  id: number;
-  accountabilities: Accountabilities;
-  behavioural_competencies: BehaviouralCompetencies[];
-  classification: ClassificationModel | null;
-  requirements: (string | TrackedFieldArrayItem)[];
-  organization_id: string;
-  family_id: number;
-  stream: string;
-  title: string | TrackedFieldArrayItem;
-  number: number;
-  context: string;
-  overview: string | TrackedFieldArrayItem;
-}
-
-export interface BehaviouralCompetencies {
-  behavioural_competency: BehaviouralCompetency;
-}
-
-export interface BehaviouralCompetency {
-  id: number;
-  name: string;
-  description: string;
-}
-
-interface Accountabilities {
-  optional: (string | TrackedFieldArrayItem)[];
-  required: (string | TrackedFieldArrayItem)[];
-}
-
-export class TrackedFieldArrayItem {
-  value: string;
-  disabled?: boolean;
-  isCustom?: boolean;
-}
-
-interface BehaviouralCompetencyConnect {
-  id: number;
-}
-
-interface BehaviouralCompetencyItem {
-  behavioural_competency: {
-    connect: BehaviouralCompetencyConnect;
-  };
-}
-
-interface BehaviouralCompetenciesInput {
-  create: BehaviouralCompetencyItem[];
-}
-
-interface ClassificationConnectInput {
-  connect: {
-    id: string;
-  };
-}
-
-interface ParentConnectInput {
-  connect: {
-    id: number;
-  };
-}
-
-export interface CreateJobProfileInput {
-  stream: string;
-  title: string;
-  number: number;
-  context: string;
-  overview: string;
-  accountabilities: Accountabilities;
-  requirements: string[];
-  behavioural_competencies?: BehaviouralCompetenciesInput;
-  classification: ClassificationConnectInput;
-  state: string;
-  parent: ParentConnectInput;
-}
-
-export interface CreateJobProfileResponse {
-  id: number;
-}
-
-export interface GetJobProfilesArgs {
-  search?: string;
-  where?: Record<string, any>;
-  orderBy?: Record<string, any>;
-  take?: number;
-  skip?: number;
-}
-
-export interface GetJobProfilesResponse {
-  jobProfiles: JobProfileModel[];
-  jobProfilesCount: number;
-}
-
-export interface GetJobProfileArgs {
-  id: number;
-}
-
-export interface GetJobProfileResponse {
-  jobProfile: JobProfileModel;
-}
+import {
+  CreateJobProfileInput,
+  CreateJobProfileResponse,
+  DuplicateJobProfileResponse,
+  GetJobProfileArgs,
+  GetJobProfileResponse,
+  GetJobProfilesArgs,
+  GetJobProfilesDraftsResponse,
+  GetJobProfilesResponse,
+  IsJobProfileNumberAvailableResponse,
+  JobProfilesCareerGroupsResponse,
+  JobProfilesDraftsCareerGroupsResponse,
+  JobProfilesDraftsMinistriesResponse,
+  JobProfilesMinistriesResponse,
+  NextAvailableJobProfileNumberResponse,
+} from './job-profile-types';
 
 export const jobProfileApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
@@ -110,16 +24,32 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       query: (args: GetJobProfilesArgs = {}) => {
         return {
           document: gql`
-            query JobProfiles($search: String, $where: JobProfileWhereInput, $take: Int, $skip: Int) {
-              jobProfiles(search: $search, where: $where, take: $take, skip: $skip) {
+            query JobProfiles(
+              $search: String
+              $where: JobProfileWhereInput
+              $take: Int
+              $skip: Int
+              $orderBy: [JobProfileOrderByWithRelationAndSearchRelevanceInput!]
+            ) {
+              jobProfiles(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
                 id
-                stream
+                streams {
+                  stream {
+                    id
+                    job_family_id
+                    name
+                  }
+                }
                 title
                 number
-                context
+                context {
+                  id
+                  description
+                }
                 overview
                 accountabilities
-                requirements
+                education
+                job_experience
                 behavioural_competencies {
                   behavioural_competency {
                     id
@@ -127,25 +57,28 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     description
                   }
                 }
-                classification {
-                  id
-                  code
+                classifications {
+                  classification {
+                    id
+                    code
+                    name
+                  }
                 }
-                family {
-                  id
-                  name
+                jobFamilies {
+                  jobFamily {
+                    id
+                    name
+                  }
                 }
                 role {
                   id
                   name
                 }
-                career_group {
-                  id
-                  name
-                }
-                organization {
-                  id
-                  name
+                organizations {
+                  organization {
+                    id
+                    name
+                  }
                 }
                 reports_to {
                   classification {
@@ -153,6 +86,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     code
                   }
                 }
+                updated_at
               }
               jobProfilesCount(search: $search, where: $where)
             }
@@ -162,6 +96,88 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             where: args.where,
             skip: args.skip,
             take: args.take,
+            orderBy: args.orderBy,
+          },
+        };
+      },
+    }),
+    getJobProfilesDrafts: build.query<GetJobProfilesDraftsResponse, GetJobProfilesArgs | undefined>({
+      query: (args: GetJobProfilesArgs = {}) => {
+        return {
+          document: gql`
+            query JobProfilesDrafts(
+              $search: String
+              $where: JobProfileWhereInput
+              $take: Int
+              $skip: Int
+              $orderBy: [JobProfileOrderByWithRelationAndSearchRelevanceInput!]
+            ) {
+              jobProfilesDrafts(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
+                id
+                streams {
+                  stream {
+                    id
+                    job_family_id
+                    name
+                  }
+                }
+                title
+                number
+                context {
+                  id
+                  description
+                }
+                overview
+                accountabilities
+                education
+                job_experience
+                behavioural_competencies {
+                  behavioural_competency {
+                    id
+                    name
+                    description
+                  }
+                }
+                classifications {
+                  classification {
+                    id
+                    code
+                    name
+                  }
+                }
+                jobFamilies {
+                  jobFamily {
+                    id
+                    name
+                  }
+                }
+                role {
+                  id
+                  name
+                }
+                organizations {
+                  organization {
+                    id
+                    name
+                  }
+                }
+                reports_to {
+                  classification {
+                    id
+                    code
+                  }
+                }
+                updated_at
+              }
+              jobProfilesDraftsCount(search: $search, where: $where)
+            }
+          `,
+          variables: {
+            search: args.search,
+            where: args.where,
+            skip: args.skip,
+            take: args.take,
+            orderBy: args.orderBy,
           },
         };
       },
@@ -173,13 +189,41 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfile {
               jobProfile(id: "${args.id}") {
                 id
-                stream
+                streams {
+                  stream {
+                      id
+                      name
+                      job_family_id
+                  }
+                }
                 title
                 number
-                context
+                context {
+                  id,
+                  description
+                }
+                state
+                security_screenings
+                all_reports_to
+                all_organizations
+                willingness_statements
+                knowledge_skills_abilities
+                professional_registration_requirements
+                program_overview
+                review_required
                 overview
                 accountabilities
-                requirements
+                preferences
+                education
+                job_experience
+                scope{
+                  id
+                  name
+                }
+                total_comp_create_form_misc
+                role_type {
+                  id
+                }
                 behavioural_competencies {
                   behavioural_competency {
                     id
@@ -187,25 +231,28 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     description
                   }
                 }
-                classification {
-                  id
-                  code
+                classifications {
+                  classification {
+                    id
+                    code
+                    name
+                  }
                 }
-                family {
-                  id
-                  name
+                jobFamilies {
+                  jobFamily {
+                      id
+                      name
+                  }
                 }
                 role {
                   id
                   name
                 }
-                career_group {
-                  id
-                  name
-                }
-                organization {
-                  id
-                  name
+                organizations {
+                  organization{
+                    id
+                    name
+                  }
                 }
                 reports_to {
                   classification {
@@ -219,27 +266,132 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    createJobProfile: build.mutation<CreateJobProfileResponse, CreateJobProfileInput>({
+    createOrUpdateJobProfile: build.mutation<CreateJobProfileResponse, CreateJobProfileInput>({
       query: (input: CreateJobProfileInput) => {
         return {
           document: gql`
-            mutation CreateJobProfile($data: JobProfileCreateInput!) {
-              createJobProfile(data: $data)
+            mutation CreateOrUpdateJobProfile($data: JobProfileCreateInput!, $id: Int) {
+              createOrUpdateJobProfile(data: $data, id: $id)
             }
           `,
           variables: {
-            data: input,
+            data: input.data,
+            id: input.id,
           },
         };
       },
+    }),
+
+    duplicateJobProfile: build.mutation<DuplicateJobProfileResponse, { jobProfileId: number }>({
+      query: (args) => {
+        return {
+          document: gql`
+            mutation DuplicateJobProfile($jobProfileId: Int!) {
+              duplicateJobProfile(jobProfileId: $jobProfileId)
+            }
+          `,
+          variables: args,
+        };
+      },
+    }),
+
+    getJobProfilesCareerGroups: build.query<JobProfilesCareerGroupsResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query JobProfilesCareerGroups {
+              jobProfilesCareerGroups {
+                id
+                name
+              }
+            }
+          `,
+        };
+      },
+    }),
+    getJobProfilesMinistries: build.query<JobProfilesMinistriesResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query JobProfilesMinistries {
+              jobProfilesMinistries {
+                id
+                name
+              }
+            }
+          `,
+        };
+      },
+    }),
+    getJobProfilesDraftsMinistries: build.query<JobProfilesDraftsMinistriesResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query JobProfilesDraftsMinistries {
+              jobProfilesDraftsMinistries {
+                id
+                name
+              }
+            }
+          `,
+        };
+      },
+    }),
+    getJobProfilesDraftsCareerGroups: build.query<JobProfilesDraftsCareerGroupsResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query JobProfilesDraftsCareerGroups {
+              jobProfilesDraftsCareerGroups {
+                id
+                name
+              }
+            }
+          `,
+        };
+      },
+    }),
+
+    getNextAvailableJobProfileNumber: build.query<NextAvailableJobProfileNumberResponse, void>({
+      query: () => ({
+        document: gql`
+          query NextAvailableJobProfileNumber {
+            nextAvailableJobProfileNumber
+          }
+        `,
+      }),
+    }),
+
+    isJobProfileNumberAvailable: build.query<IsJobProfileNumberAvailableResponse, number>({
+      query: (number) => ({
+        document: gql`
+          query IsJobProfileNumberAvailable($number: Int!) {
+            isJobProfileNumberAvailable(number: $number)
+          }
+        `,
+        variables: {
+          number,
+        },
+      }),
     }),
   }),
 });
 
 export const {
   useGetJobProfileQuery,
+  useGetJobProfilesCareerGroupsQuery,
+  useGetJobProfilesDraftsCareerGroupsQuery,
+  useGetJobProfilesMinistriesQuery,
+  useGetJobProfilesDraftsMinistriesQuery,
   useLazyGetJobProfileQuery,
   useGetJobProfilesQuery,
   useLazyGetJobProfilesQuery,
-  useCreateJobProfileMutation,
+  useLazyGetJobProfilesDraftsQuery,
+  useCreateOrUpdateJobProfileMutation,
+
+  useGetNextAvailableJobProfileNumberQuery,
+  useIsJobProfileNumberAvailableQuery,
+  useLazyIsJobProfileNumberAvailableQuery,
+  useLazyGetNextAvailableJobProfileNumberQuery,
+  useDuplicateJobProfileMutation,
 } = jobProfileApi;

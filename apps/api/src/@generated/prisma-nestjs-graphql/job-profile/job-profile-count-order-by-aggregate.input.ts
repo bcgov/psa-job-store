@@ -8,31 +8,37 @@ export class JobProfileCountOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  career_group_id?: keyof typeof SortOrder;
+  all_organizations?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  classification_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  family_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  organization_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  owner_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  parent_id?: keyof typeof SortOrder;
+  all_reports_to?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   role_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  role_type_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  scope_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   state?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  stream?: keyof typeof SortOrder;
+  type?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  updated_at?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  owner_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  program_overview?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  review_required?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;
@@ -41,14 +47,32 @@ export class JobProfileCountOrderByAggregateInput {
   number?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  context?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
   overview?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   accountabilities?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
-  requirements?: keyof typeof SortOrder;
+  education?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  job_experience?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  professional_registration_requirements?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  preferences?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  knowledge_skills_abilities?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  willingness_statements?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  security_screenings?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  total_comp_create_form_misc?: keyof typeof SortOrder;
 }

@@ -3,7 +3,6 @@ import { InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
 import { SortOrderInput } from '../prisma/sort-order.input';
 import { CommentOrderByRelationAggregateInput } from '../comment/comment-order-by-relation-aggregate.input';
-import { IdentityOrderByRelationAggregateInput } from '../identity/identity-order-by-relation-aggregate.input';
 import { JobProfileOrderByRelationAggregateInput } from '../job-profile/job-profile-order-by-relation-aggregate.input';
 import { UserOrderByRelevanceInput } from './user-order-by-relevance.input';
 
@@ -17,6 +16,9 @@ export class UserOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => SortOrderInput, { nullable: true })
   email?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  username?: SortOrderInput;
 
   @Field(() => SortOrder, { nullable: true })
   roles?: keyof typeof SortOrder;
@@ -33,11 +35,8 @@ export class UserOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => CommentOrderByRelationAggregateInput, { nullable: true })
   comments?: CommentOrderByRelationAggregateInput;
 
-  @Field(() => IdentityOrderByRelationAggregateInput, { nullable: true })
-  identities?: IdentityOrderByRelationAggregateInput;
-
   @Field(() => JobProfileOrderByRelationAggregateInput, { nullable: true })
-  job_profiles?: JobProfileOrderByRelationAggregateInput;
+  JobProfile?: JobProfileOrderByRelationAggregateInput;
 
   @Field(() => UserOrderByRelevanceInput, { nullable: true })
   _relevance?: UserOrderByRelevanceInput;

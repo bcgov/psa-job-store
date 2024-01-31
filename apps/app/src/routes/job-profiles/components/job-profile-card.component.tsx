@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Space, Typography } from 'antd';
-import { Link, useParams } from 'react-router-dom';
-import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile.api';
+import { useParams } from 'react-router-dom';
+import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -10,9 +10,10 @@ export interface JobProfileCardProps {
   link: string;
 }
 
-export const JobProfileCard = ({ data, link }: JobProfileCardProps) => {
+export const JobProfileCard = ({ data }: JobProfileCardProps) => {
   const params = useParams();
 
+  // console.log('card data: ', data.classifications);
   return (
     <Space
       direction="vertical"
@@ -23,19 +24,21 @@ export const JobProfileCard = ({ data, link }: JobProfileCardProps) => {
         padding: '1rem',
       }}
     >
-      <Title level={2} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }}>
+      <Title level={2} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
         {typeof data?.title === 'string' ? data?.title : data?.title?.value}
       </Title>
       <div>
-        <Text type="secondary">
-          {data.classification?.code} | Job Store # {data.number}
+        <Text type="secondary" data-cy="card-classification">
+          {data.classifications?.map((c) => c.classification.code).join(', ')} | Job Store # {data.number}
         </Text>
         <br />
         <Text type="secondary">Reports to excluded manager</Text>
       </div>
       <div>
         <Text strong>Context: </Text>
-        <Paragraph ellipsis={{ rows: 3 }}>{data.context}</Paragraph>
+        <Paragraph ellipsis={{ rows: 3 }}>
+          {typeof data?.context === 'string' ? data.context : data.context.description}
+        </Paragraph>
       </div>
       <div>
         <Text strong>Overview:</Text>
@@ -43,11 +46,9 @@ export const JobProfileCard = ({ data, link }: JobProfileCardProps) => {
           {typeof data?.overview === 'string' ? data?.overview : data?.overview?.value}
         </Paragraph>
       </div>
-      <Link to={link} tabIndex={-1}>
-        <Button type="link" aria-label={`click to see details for ${data.title}`} style={{ padding: '0' }}>
-          See details
-        </Button>
-      </Link>
+      <Button type="link" aria-label={`click to see details for ${data.title}`} style={{ padding: '0' }}>
+        See details
+      </Button>
     </Space>
   );
 };

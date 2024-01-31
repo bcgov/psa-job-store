@@ -1,0 +1,25 @@
+# Use the Elasticsearch image
+FROM docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+
+# Set the container name
+LABEL name="elasticsearch"
+
+# Set environment variables
+ENV ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+ENV CLI_JAVA_OPTS="-Xms2g -Xmx2g"
+ENV bootstrap.memory_lock=true
+ENV discovery.type=single-node
+ENV xpack.security.enabled=false
+ENV xpack.security.enrollment.enabled=false
+
+# Expose ports
+EXPOSE 9200
+
+# Set ulimit settings
+# RUN ulimit -l unlimited && \
+#     ulimit -n 65536
+
+# Set resource limits (note: Dockerfile doesn't directly support deploy settings, so this is more of a documentation)
+# CPUs: limits: 2.0, reservations: 1.0
+
+# The entrypoint is inherited from the base Elasticsearch image

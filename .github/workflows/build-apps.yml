@@ -71,7 +71,6 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value=${{ steps.app-version.outputs.prop }},enable={{is_default_branch}}
             type=raw,value=${{ github.ref_name }}-latest,enable=${{ github.ref != github.event.repository.default_branch }}
-            type=raw,value=${{ github.ref_name }}-${{ steps.app-version.outputs.prop }}@${{ needs.metadata.outputs.short-sha }},enable=${{ github.ref != github.event.repository.default_branch }}
       - name: Build and Push
         uses: docker/build-push-action@v4
         with:

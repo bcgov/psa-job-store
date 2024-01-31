@@ -3,8 +3,8 @@ import { graphqlApi } from '.';
 
 export interface BehaviouralCompetencyModel {
   id: number;
-  membership: string;
-  group: string;
+  type: string;
+  category: string;
   name: string;
   description: string;
 }
@@ -22,8 +22,8 @@ export const behaviouralCompetenciesApi = graphqlApi.injectEndpoints({
             query BehaviouralComptencies {
               behaviouralComptencies(orderBy: { name: asc }) {
                 id
-                membership
-                group
+                type
+                category
                 name
                 description
               }

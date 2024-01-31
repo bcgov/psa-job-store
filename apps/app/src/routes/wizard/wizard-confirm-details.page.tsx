@@ -1,75 +1,76 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Button, Card, Modal, Typography } from 'antd';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  CreateJobProfileInput,
-  JobProfileModel,
-  TrackedFieldArrayItem,
-  useCreateJobProfileMutation,
-} from '../../redux/services/graphql-api/job-profile.api';
+import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
 const { Text } = Typography;
 
-function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJobProfileInput {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { behavioural_competencies, classification, id, organization_id, family_id, ...rest } = inputData;
+// function transformJobProfileDataForCreation(inputData: JobProfileModel): CreateJobProfileInput {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+//   const { behavioural_competencies, classification, id, organization_id, family_id, ...rest } = inputData;
 
-  const title = typeof inputData.title === 'string' ? inputData.title : inputData.title.value;
-  const overview = typeof inputData.overview === 'string' ? inputData.overview : inputData.overview.value;
+//   const title = typeof inputData.title === 'string' ? inputData.title : inputData.title.value;
+//   const overview = typeof inputData.overview === 'string' ? inputData.overview : inputData.overview.value;
 
-  const requiredAccountabilities = inputData.accountabilities.required
-    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
-    .map((item) => item.value);
+//   const requiredAccountabilities = inputData.accountabilities.required
+//     .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+//     .map((item) => item.value);
 
-  const optionalAccountabilities = inputData.accountabilities.optional
-    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
-    .map((item) => item.value);
+//   const optionalAccountabilities = inputData.accountabilities.optional
+//     .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+//     .map((item) => item.value);
 
-  const requirements = inputData.requirements
-    .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
-    .map((item) => item.value);
+//   const requirements = inputData.requirements
+//     .filter((item): item is TrackedFieldArrayItem => typeof item !== 'string' && !item.disabled)
+//     .map((item) => item.value);
 
-  // Map behavioural competencies if they exist
-  const behaviouralCompetenciesInput = behavioural_competencies?.length
-    ? {
-        create: behavioural_competencies.map(({ behavioural_competency: { id } }) => ({
-          behavioural_competency: { connect: { id } },
-        })),
-      }
-    : undefined;
+//   // Map behavioural competencies if they exist
+//   const behaviouralCompetenciesInput = behavioural_competencies?.length
+//     ? {
+//         create: behavioural_competencies.map(({ behavioural_competency: { id } }) => ({
+//           behavioural_competency: { connect: { id } },
+//         })),
+//       }
+//     : undefined;
 
-  // Connect classification if it exists
-  const classificationConnectInput = classification?.id
-    ? { connect: { id: classification.id } }
-    : { connect: { id: '-1' } };
+//   // Connect classification if it exists
+//   const classificationConnectInput = classification?.id
+//     ? { connect: { id: classification.id } }
+//     : { connect: { id: '-1' } };
 
-  // Construct the result with the correct type and provide default values or handle them as required by the API
-  const result: CreateJobProfileInput = {
-    ...rest,
-    overview: overview,
-    title: title,
-    requirements: requirements,
-    accountabilities: {
-      optional: optionalAccountabilities,
-      required: requiredAccountabilities,
-    },
-    behavioural_competencies: behaviouralCompetenciesInput,
-    classification: classificationConnectInput,
-    state: 'SUBMITTED',
-    parent: { connect: { id: id } },
-  };
+//   // Construct the result with the correct type and provide default values or handle them as required by the API
+//   const result: CreateJobProfileInput = {
+//     ...rest,
+//     overview: overview,
+//     title: title,
+//     requirements: requirements,
+//     accountabilities: {
+//       optional: optionalAccountabilities,
+//       required: requiredAccountabilities,
+//     },
+//     behavioural_competencies: behaviouralCompetenciesInput,
+//     classification: classificationConnectInput,
+//     state: 'DRAFT',
+//     parent: { connect: { id: id } },
+//   };
 
-  return result;
+//   return result;
+// }
+
+interface WizardConfirmPageProps {
+  onNext?: () => void;
+  onBack?: () => void;
 }
 
-export const WizardConfirmDetailsPage = () => {
-  const navigate = useNavigate();
+// export const WizardReviewPage = () => {
+export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onNext, onBack }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [createJobProfile] = useCreateJobProfileMutation();
+  // const [createJobProfile] = useCreateJobProfileMutation();
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  const { positionRequestId } = useWizardContext();
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -84,27 +85,54 @@ export const WizardConfirmDetailsPage = () => {
     // Hide the modal
     setIsModalVisible(false);
 
-    if (wizardData != null) {
-      // console.log('review wizard data: ', wizardData);
+    // if (wizardData != null) {
+    //   // console.log('review wizard data: ', wizardData);
 
-      // Convert form data into API data format
-      // e.g. remove references such as "required_accountabilities.0"
-      // const transformedData = transformFormData(wizardData);
-      const createInput = wizardData; // as unknown as CreateJobProfileInputPreTransform;
-      const inpt = transformJobProfileDataForCreation(createInput);
-      // console.log('createInput: ', inpt);
-      await createJobProfile(inpt);
+    //   // Convert form data into API data format
+    //   // e.g. remove references such as "required_accountabilities.0"
+    //   // const transformedData = transformFormData(wizardData);
+    //   const createInput = wizardData; // as unknown as CreateJobProfileInputPreTransform;
+    //   const inpt = transformJobProfileDataForCreation(createInput);
+    //   // console.log('createInput: ', inpt);
+    //   await createJobProfile(inpt);
+    // }
+
+    try {
+      if (positionRequestId) {
+        await updatePositionRequest({
+          id: positionRequestId,
+          step: 5,
+          status: 'COMPLETED',
+          position_number: 123456,
+        }).unwrap();
+        if (onNext) onNext();
+      } else {
+        throw Error('Position request not found');
+      }
+    } catch (error) {
+      // Handle the error, possibly showing another modal
+      Modal.error({
+        title: 'Error Creating Position',
+        content: 'An unknown error occurred', //error.data?.message ||
+      });
     }
-    navigate('/wizard/result');
   };
 
   const handleCancel = () => {
     setIsModalVisible(false);
   };
 
-  const { wizardData } = useWizardContext();
-  const onBack = () => {
-    navigate(-1);
+  // const { wizardData } = useWizardContext();
+  const onBackCallback = async () => {
+    if (positionRequestId) {
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: 3,
+      }).unwrap();
+      if (onBack) onBack();
+    } else {
+      throw Error('Position request not found');
+    }
   };
 
   return (
@@ -114,11 +142,11 @@ export const WizardConfirmDetailsPage = () => {
       xxl={14}
       xl={18}
     >
-      <WizardSteps current={3} xl={24}></WizardSteps>
+      <WizardSteps current={4} xl={24}></WizardSteps>
       <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
         onNext={showModal}
-        onBack={onBack}
+        onBack={onBackCallback}
         nextText="Submit for a new position #"
       />
 
@@ -155,12 +183,30 @@ export const WizardConfirmDetailsPage = () => {
             <p>By clicking “Create Position” I affirm that:</p>
             <ul>
               <li>
-                The reporting relationship, job accountabilities, and scope of work reflected in this job profile is the
-                actual work performed of the position(s).
+                I confirm this Statement of Job Responsibilities accurately reflects the actual work to be performed of
+                the position(s) as outlined in{' '}
+                <a
+                  target="_blank"
+                  href="https://www2.gov.bc.ca/assets/gov/careers/managers-supervisors/managing-employee-labour-relations/hr-policy-pdf-documents/06_job_evaluation_policy.pdf"
+                >
+                  Human Resources Policy 06 – Job Evaluation
+                </a>
+                , and
               </li>
-              <li>I will be accountable for risks and decisions.</li>
+              <li>
+                I confirm the accountabilities are not similar to the supervisor, peer, or management positions within
+                the work unit, and
+              </li>
+              <li>
+                As the excluded manager or delegate, I confirm the job role, accountabilities, and scope of
+                responsibility are true and accurate, and in establishing this position (s), I confirm the content I
+                assume all risks related to this decision.{' '}
+              </li>
               <li>I will respond to audits in a timely manner.</li>
-              <li>I will abide by Public Service Act.</li>
+              <li>
+                I will abide by the Public Service Act and all Human Resources policies for hiring decisions related to
+                this position.
+              </li>
             </ul>
           </div>
         </div>

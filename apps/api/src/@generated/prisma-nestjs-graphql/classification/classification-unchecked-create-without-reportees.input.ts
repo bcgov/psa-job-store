@@ -1,8 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { JobProfileUncheckedCreateNestedManyWithoutClassificationInput } from '../job-profile/job-profile-unchecked-create-nested-many-without-classification.input';
-import { EmployeeUncheckedCreateNestedManyWithoutClassificationInput } from '../employee/employee-unchecked-create-nested-many-without-classification.input';
-import { PositionUncheckedCreateNestedManyWithoutClassificationInput } from '../position/position-unchecked-create-nested-many-without-classification.input';
+import { JobProfileClassificationUncheckedCreateNestedManyWithoutClassificationInput } from '../job-profile-classification/job-profile-classification-unchecked-create-nested-many-without-classification.input';
 
 @InputType()
 export class ClassificationUncheckedCreateWithoutReporteesInput {
@@ -10,14 +8,26 @@ export class ClassificationUncheckedCreateWithoutReporteesInput {
   id!: string;
 
   @Field(() => String, { nullable: false })
+  peoplesoft_id!: string;
+
+  @Field(() => String, { nullable: false })
   code!: string;
 
-  @Field(() => JobProfileUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
-  job_profiles?: JobProfileUncheckedCreateNestedManyWithoutClassificationInput;
+  @Field(() => String, { nullable: false })
+  name!: string;
 
-  @Field(() => EmployeeUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
-  employees?: EmployeeUncheckedCreateNestedManyWithoutClassificationInput;
+  @Field(() => String, { nullable: false })
+  employee_group_id!: string;
 
-  @Field(() => PositionUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
-  positions?: PositionUncheckedCreateNestedManyWithoutClassificationInput;
+  @Field(() => String, { nullable: false })
+  grade!: string;
+
+  @Field(() => String, { nullable: false })
+  effective_status!: string;
+
+  @Field(() => Date, { nullable: false })
+  effective_date!: Date | string;
+
+  @Field(() => JobProfileClassificationUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
+  job_profiles?: JobProfileClassificationUncheckedCreateNestedManyWithoutClassificationInput;
 }

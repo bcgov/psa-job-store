@@ -1,21 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Alert, Button, Col, Form, Input, List, Modal, Row, Select } from 'antd';
+import { Alert, Button, Col, Form, Input, List, Modal, Row } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/typography/Title';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+
+import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
-  ClassificationModel,
   GetClassificationsResponse,
-  useLazyGetClassificationsQuery,
-} from '../../../redux/services/graphql-api/classification.api';
-import {
   JobProfileModel,
   TrackedFieldArrayItem,
-  useLazyGetJobProfileQuery,
-} from '../../../redux/services/graphql-api/job-profile.api';
+} from '../../../redux/services/graphql-api/job-profile-types';
+import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
@@ -68,11 +66,10 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
-    const { register, control, reset, handleSubmit, getValues, formState, trigger } =
-      useForm<JobProfileValidationModel>({
-        resolver: classValidatorResolver(JobProfileValidationModel),
-        mode: 'onChange',
-      });
+    const { control, reset, handleSubmit, getValues, formState, trigger } = useForm<JobProfileValidationModel>({
+      resolver: classValidatorResolver(JobProfileValidationModel),
+      mode: 'onChange',
+    });
 
     useEffect(() => {
       if (!profileData && data && !isLoading) {
@@ -124,20 +121,22 @@ const WizardEditProfile = forwardRef(
       setOriginalOptReqFields,
     } = useWizardContext();
 
+    // console.log('effectiveData: ', effectiveData);
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData) {
-        const classificationId = effectiveData?.classification?.id ?? null;
+        const classificationIds =
+          effectiveData?.classifications?.map((c) => ({ classification: c.classification.id })) ?? [];
 
-        const originalAccReqFieldsValue = effectiveData.accountabilities.required.map((item) => {
+        const originalAccReqFieldsValue = effectiveData.accountabilities.map((item) => {
           if (typeof item === 'string') {
             return {
-              value: item,
+              text: item,
               isCustom: false,
               disabled: false,
             };
           } else {
             return {
-              value: item.value,
+              text: item.text,
               isCustom: item.isCustom,
               disabled: item.disabled,
             };
@@ -152,50 +151,50 @@ const WizardEditProfile = forwardRef(
         // Iterate over each minimum requirement field and compare with the original value
         originalAccReqFieldsValue.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalAccReqFields[index]?.value;
+          const isEdited = item.text !== originalAccReqFields[index]?.text;
           initialEditStatus[index] = isEdited;
         });
 
         // Set the editedMinReqFields state
         setEditedAccReqFields(initialEditStatus);
 
-        const originalOptReqFieldsValue = effectiveData.accountabilities.optional.map((item) => {
+        // const originalOptReqFieldsValue = effectiveData.accountabilities.map((item) => {
+        //   if (typeof item === 'string') {
+        //     return {
+        //       value: item,
+        //       isCustom: false,
+        //       disabled: false,
+        //     };
+        //   } else {
+        //     return {
+        //       value: item.text,
+        //       isCustom: item.isCustom,
+        //       disabled: item.disabled,
+        //     };
+        //   }
+        // });
+        // if (!originalValuesSet) setOriginalOptReqFields(originalOptReqFieldsValue);
+
+        // // Iterate over each minimum requirement field and compare with the original value
+        // originalOptReqFieldsValue.forEach((item, index) => {
+        //   // Determine if the field has been edited
+        //   const isEdited = item.value !== originalOptReqFields[index]?.value;
+        //   initialEditStatus[index] = isEdited;
+        // });
+
+        // // Set the editedMinReqFields state
+        // setEditedOptReqFields(initialEditStatus);
+
+        const originalMinReqFieldsValue = effectiveData.education?.map((item) => {
           if (typeof item === 'string') {
             return {
-              value: item,
+              text: item,
               isCustom: false,
               disabled: false,
             };
           } else {
             return {
-              value: item.value,
-              isCustom: item.isCustom,
-              disabled: item.disabled,
-            };
-          }
-        });
-        if (!originalValuesSet) setOriginalOptReqFields(originalOptReqFieldsValue);
-
-        // Iterate over each minimum requirement field and compare with the original value
-        originalOptReqFieldsValue.forEach((item, index) => {
-          // Determine if the field has been edited
-          const isEdited = item.value !== originalOptReqFields[index]?.value;
-          initialEditStatus[index] = isEdited;
-        });
-
-        // Set the editedMinReqFields state
-        setEditedOptReqFields(initialEditStatus);
-
-        const originalMinReqFieldsValue = effectiveData.requirements.map((item) => {
-          if (typeof item === 'string') {
-            return {
-              value: item,
-              isCustom: false,
-              disabled: false,
-            };
-          } else {
-            return {
-              value: item.value,
+              text: item.text,
               isCustom: item.isCustom,
               disabled: item.disabled,
             };
@@ -207,9 +206,9 @@ const WizardEditProfile = forwardRef(
         initialEditStatus = {};
 
         // Iterate over each minimum requirement field and compare with the original value
-        originalMinReqFieldsValue.forEach((item, index) => {
+        originalMinReqFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalMinReqFields[index]?.value;
+          const isEdited = item.text !== originalMinReqFields[index]?.text;
           initialEditStatus[index] = isEdited;
         });
 
@@ -249,17 +248,18 @@ const WizardEditProfile = forwardRef(
 
         if (!originalValuesSet) setOriginalValuesSet(true);
 
+        // console.log('effectiveData?.context?.description: ', effectiveData?.context?.description);
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
           title: originalTitleValue,
-          context: effectiveData?.context,
+          context:
+            typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description,
           overview: originalOverviewValue,
-          classification: classificationId,
+          classifications: classificationIds,
           // array fileds are required to be nested in objects, so wrap string values in {value: item}
-          required_accountabilities: originalAccReqFieldsValue,
-          optional_accountabilities: originalOptReqFieldsValue,
-          requirements: originalMinReqFieldsValue,
+          accountabilities: originalAccReqFieldsValue,
+          education: originalMinReqFieldsValue,
           behavioural_competencies: effectiveData?.behavioural_competencies || [],
         });
       }
@@ -292,29 +292,28 @@ const WizardEditProfile = forwardRef(
       update: acc_req_update,
     } = useFieldArray({
       control,
-      name: 'required_accountabilities',
-    });
-
-    // Optional Accountability Fields
-    const {
-      fields: acc_opt_fields,
-      append: acc_opt_append,
-      remove: acc_opt_remove,
-      update: acc_opt_update,
-    } = useFieldArray({
-      control,
-      name: 'optional_accountabilities',
+      name: 'accountabilities',
     });
 
     const {
-      fields: requirement_fields,
-      append: requirement_append,
-      remove: requirement_remove,
-      update: requirement_update,
+      fields: education_fields,
+      append: education_append,
+      remove: education_remove,
+      update: education_update,
     } = useFieldArray({
       control,
-      name: 'requirements',
+      name: 'education',
     });
+
+    // const {
+    //   fields: job_experience_fields,
+    //   append: job_experience_append,
+    //   remove: job_experience_remove,
+    //   update: job_experience_update,
+    // } = useFieldArray({
+    //   control,
+    //   name: 'job_experience',
+    // });
 
     const {
       fields: behavioural_competencies_fields,
@@ -323,6 +322,11 @@ const WizardEditProfile = forwardRef(
     } = useFieldArray({
       control,
       name: 'behavioural_competencies',
+    });
+
+    const { fields: classifications_fields } = useFieldArray({
+      control,
+      name: 'classifications',
     });
 
     // useImperativeHandle to expose the submitForm function
@@ -408,7 +412,7 @@ const WizardEditProfile = forwardRef(
 
     // Required accountabilities
     const handleAccReqRemove = (index: number) => {
-      const currentValues = getValues('required_accountabilities');
+      const currentValues = getValues('accountabilities');
       if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
         // If it's a custom field, remove it from the form
         Modal.confirm({
@@ -428,13 +432,13 @@ const WizardEditProfile = forwardRef(
 
     // Function to add back a removed field
     const handleAccReqAddBack = (index: number) => {
-      const currentValues = getValues('required_accountabilities');
+      const currentValues = getValues('accountabilities');
       acc_req_update(index, { ...currentValues[index], disabled: false });
     };
 
     // Function to handle adding a new field
     const handleAccReqAddNew = () => {
-      acc_req_append({ value: '', isCustom: true, disabled: false });
+      acc_req_append({ text: '', isCustom: true, disabled: false });
       trigger();
     };
 
@@ -460,15 +464,15 @@ const WizardEditProfile = forwardRef(
             borderBottom: 'none',
           }}
         >
-          <FormItem name={`required_accountabilities.${index}.disabled`} control={control} hidden>
+          <FormItem name={`accountabilities.${index}.disabled`} control={control} hidden>
             <Input />
           </FormItem>
-          <FormItem name={`required_accountabilities.${index}.isCustom`} control={control} hidden>
+          <FormItem name={`accountabilities.${index}.isCustom`} control={control} hidden>
             <Input />
           </FormItem>
 
           <FormItem
-            name={`required_accountabilities.${index}.value`}
+            name={`accountabilities.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
           >
@@ -516,108 +520,108 @@ const WizardEditProfile = forwardRef(
     };
 
     // OPTIONAL ACCOUNTABILITIES DIFF
-    const handleOptReqRemove = (index: number) => {
-      const currentValues = getValues('optional_accountabilities');
-      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
-        // If it's a custom field, remove it from the form
-        Modal.confirm({
-          title: 'Are you sure you want to delete this item?',
-          content: 'This action cannot be undone.',
-          onOk: () => {
-            // If confirmed, remove the item
-            acc_opt_remove(index);
-          },
-        });
-      } else {
-        // If it's an original field, mark as disabled
-        acc_opt_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
-      }
-    };
+    // const handleOptReqRemove = (index: number) => {
+    //   const currentValues = getValues('optional_accountabilities');
+    //   if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+    //     // If it's a custom field, remove it from the form
+    //     Modal.confirm({
+    //       title: 'Are you sure you want to delete this item?',
+    //       content: 'This action cannot be undone.',
+    //       onOk: () => {
+    //         // If confirmed, remove the item
+    //         acc_opt_remove(index);
+    //       },
+    //     });
+    //   } else {
+    //     // If it's an original field, mark as disabled
+    //     acc_opt_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+    //   }
+    // };
 
-    // Function to add back a removed field
-    const handleOptReqAddBack = (index: number) => {
-      const currentValues = getValues('optional_accountabilities');
-      acc_opt_update(index, { ...currentValues[index], disabled: false });
-    };
+    // // Function to add back a removed field
+    // const handleOptReqAddBack = (index: number) => {
+    //   const currentValues = getValues('optional_accountabilities');
+    //   acc_opt_update(index, { ...currentValues[index], disabled: false });
+    // };
 
-    // Function to handle adding a new field
-    const handleOptReqAddNew = () => {
-      acc_opt_append({ value: '', isCustom: true, disabled: false });
-    };
+    // // Function to handle adding a new field
+    // const handleOptReqAddNew = () => {
+    //   acc_opt_append({ value: '', isCustom: true, disabled: false });
+    // };
 
-    const [editedOptReqFields, setEditedOptReqFields] = useState<{ [key: number]: boolean }>({});
+    // const [editedOptReqFields, setEditedOptReqFields] = useState<{ [key: number]: boolean }>({});
 
-    const renderOptReqFields = (field: any, index: number) => {
-      const isEdited = editedOptReqFields[index] || field.isCustom;
+    // const renderOptReqFields = (field: any, index: number) => {
+    //   const isEdited = editedOptReqFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
-        setEditedOptReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalOptReqFields[index]?.value }));
-      };
+    //   const handleFieldChange = (event: any) => {
+    //     const updatedValue = event.target.value;
+    //     setEditedOptReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalOptReqFields[index]?.value }));
+    //   };
 
-      return (
-        <List.Item
-          key={field.id}
-          style={{
-            textDecoration: field.disabled ? 'line-through' : 'none',
-            display: 'flex',
-            alignItems: 'flex-start',
-            marginBottom: '0px',
-            borderBottom: 'none',
-          }}
-        >
-          <FormItem name={`optional_accountabilities.${index}.disabled`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`optional_accountabilities.${index}.isCustom`} control={control} hidden>
-            <Input />
-          </FormItem>
+    //   return (
+    //     <List.Item
+    //       key={field.id}
+    //       style={{
+    //         textDecoration: field.disabled ? 'line-through' : 'none',
+    //         display: 'flex',
+    //         alignItems: 'flex-start',
+    //         marginBottom: '0px',
+    //         borderBottom: 'none',
+    //       }}
+    //     >
+    //       <FormItem name={`optional_accountabilities.${index}.disabled`} control={control} hidden>
+    //         <Input />
+    //       </FormItem>
+    //       <FormItem name={`optional_accountabilities.${index}.isCustom`} control={control} hidden>
+    //         <Input />
+    //       </FormItem>
 
-          <FormItem
-            name={`optional_accountabilities.${index}.value`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onChange={handleFieldChange}
-            />
-          </FormItem>
-          {field.disabled ? (
-            <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                // acc_req_remove(index);
-                handleOptReqAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                handleOptReqRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          )}
-        </List.Item>
-      );
-    };
+    //       <FormItem
+    //         name={`optional_accountabilities.${index}.value`}
+    //         control={control}
+    //         style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+    //       >
+    //         <TextArea
+    //           autoSize
+    //           disabled={field.disabled}
+    //           className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+    //           onChange={handleFieldChange}
+    //         />
+    //       </FormItem>
+    //       {field.disabled ? (
+    //         <Button
+    //           icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+    //           style={{
+    //             border: 'none', // Removes the border
+    //             padding: 0, // Removes padding
+    //           }}
+    //           onClick={() => {
+    //             // acc_req_remove(index);
+    //             handleOptReqAddBack(index);
+    //             setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+    //           }}
+    //         />
+    //       ) : (
+    //         <Button
+    //           icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+    //           style={{
+    //             border: 'none', // Removes the border
+    //             padding: 0, // Removes padding
+    //           }}
+    //           onClick={() => {
+    //             handleOptReqRemove(index);
+    //             setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+    //           }}
+    //         />
+    //       )}
+    //     </List.Item>
+    //   );
+    // };
 
-    // MINIMUM REQUIREMENTS DIFF
+    // EDUCATION REQUIREMENTS DIFF
     const handleMinReqRemove = (index: number) => {
-      const currentValues = getValues('requirements');
+      const currentValues = getValues('education');
       if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
         // If it's a custom field, remove it from the form
         Modal.confirm({
@@ -625,25 +629,25 @@ const WizardEditProfile = forwardRef(
           content: 'This action cannot be undone.',
           onOk: () => {
             // If confirmed, remove the item
-            requirement_remove(index);
+            education_remove(index);
           },
         });
       } else {
         // If it's an original field, mark as disabled
-        requirement_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+        education_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
     };
 
     // Function to add back a removed field
     const handleMinReqAddBack = (index: number) => {
-      const currentValues = getValues('requirements');
-      requirement_update(index, { ...currentValues[index], disabled: false });
+      const currentValues = getValues('education');
+      education_update(index, { ...currentValues[index], disabled: false });
     };
 
     // Function to handle adding a new field
     const handleMinReqAddNew = () => {
-      requirement_append({ value: '', isCustom: true, disabled: false });
+      education_append({ text: '', isCustom: true, disabled: false });
       trigger();
     };
 
@@ -669,15 +673,15 @@ const WizardEditProfile = forwardRef(
             borderBottom: 'none',
           }}
         >
-          <FormItem name={`requirements.${index}.disabled`} control={control} hidden>
+          <FormItem name={`education.${index}.disabled`} control={control} hidden>
             <Input />
           </FormItem>
-          <FormItem name={`requirements.${index}.isCustom`} control={control} hidden>
+          <FormItem name={`education.${index}.isCustom`} control={control} hidden>
             <Input />
           </FormItem>
 
           <FormItem
-            name={`requirements.${index}.value`}
+            name={`education.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
           >
@@ -843,9 +847,37 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem name="classification" control={control} hidden>
-            <Input />
-          </FormItem>
+          {/* {effectiveData?.classifications?.map((c, index) => {
+            console.log('hidden classifications field: ', c.classification.id);
+            return (
+              <FormItem key={index} name={`classifications[${index}].classification.id`} control={control} hidden>
+                <Input />
+              </FormItem>
+            );
+          })} */}
+
+          <List
+            style={{ display: 'none' }}
+            dataSource={classifications_fields}
+            renderItem={(field, index) => (
+              <List.Item
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start', // Align items to the top
+                  marginBottom: '0px',
+                  borderBottom: 'none',
+
+                  padding: '5px 0',
+                }}
+                key={field.id} // Ensure this is a unique value
+              >
+                {/* Hidden fields to submit actual data */}
+                <FormItem name={`classifications.${index}.classification`} control={control} hidden>
+                  <Input />
+                </FormItem>
+              </List.Item>
+            )}
+          />
 
           <FormItem name="context" control={control} hidden>
             <Input />
@@ -859,7 +891,11 @@ const WizardEditProfile = forwardRef(
               description={
                 <>
                   <div></div>
-                  <b style={{ marginTop: '10px', display: 'block' }}>{effectiveData?.context}</b>
+                  <b style={{ marginTop: '10px', display: 'block' }}>
+                    {typeof effectiveData?.context === 'string'
+                      ? effectiveData?.context
+                      : effectiveData?.context.description}
+                  </b>
                 </>
               }
               type="warning"
@@ -871,7 +907,7 @@ const WizardEditProfile = forwardRef(
           {!config?.classificationEditable ? (
             <div style={{ marginBottom: '24px' }}>
               <Title level={4} style={titleStyle}>
-                Classification - {`${effectiveData?.classification?.code}`}
+                Classification - {effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}
               </Title>
             </div>
           ) : (
@@ -883,16 +919,18 @@ const WizardEditProfile = forwardRef(
               {renderTitle(getValues('title'))}
 
               {config?.classificationEditable ? (
-                <FormItem name="classification" control={control} label="Classification">
-                  <Select {...register('classification')}>
-                    {classificationsData?.classifications.map((classification: ClassificationModel) => (
-                      <Select.Option value={classification.id} key={classification.id}>
-                        {`${classification.code}`}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </FormItem>
+                <></>
               ) : (
+                // todo: allow multiple classificaton editing
+                // <FormItem name="classification" control={control} label="Classification">
+                //   <Select {...register('classification')}>
+                //     {classificationsData?.classifications.map((classification: ClassificationModel) => (
+                //       <Select.Option value={classification.id} key={classification.id}>
+                //         {`${classification.code}`}
+                //       </Select.Option>
+                //     ))}
+                //   </Select>
+                // </FormItem>
                 <></>
               )}
 
@@ -946,42 +984,11 @@ const WizardEditProfile = forwardRef(
                 </Button>
               </>
 
-              <Title level={4} style={titleStyle}>
+              {/* <Title level={4} style={titleStyle}>
                 Optional Accountabilities
               </Title>
               <>
                 <List dataSource={acc_opt_fields} renderItem={renderOptReqFields} />
-
-                {/* <List
-                  dataSource={acc_opt_fields}
-                  renderItem={(_field, index) => (
-                    <List.Item
-                      style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '0px', borderBottom: 'none' }}
-                      key={_field.id}
-                    >
-                      <FormItem
-                        name={`optional_accountabilities.${index}.value`}
-                        style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-                        control={control}
-                      >
-                        <TextArea autoSize />
-                      </FormItem>
-
-                      <Button
-                        type="text" // Changed to 'text' for an icon-only button
-                        icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
-                        onClick={() => {
-                          acc_opt_remove(index);
-                          setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                        }}
-                        style={{
-                          border: 'none', // Removes the border
-                          padding: 0, // Removes padding
-                        }}
-                      />
-                    </List.Item>
-                  )}
-                /> */}
 
                 <Button
                   type="link"
@@ -994,10 +1001,10 @@ const WizardEditProfile = forwardRef(
                 >
                   Add optional accountability
                 </Button>
-              </>
+              </> */}
 
               <Title level={4} style={titleStyle}>
-                Minimum Job Requirements
+                Minimum education requirements
               </Title>
 
               <Alert
@@ -1013,46 +1020,7 @@ const WizardEditProfile = forwardRef(
               />
 
               <>
-                <List dataSource={requirement_fields} renderItem={renderMinReqFields} />
-                {/* <List
-                  dataSource={requirement_fields}
-                  renderItem={(_field, index) => (
-                    <List.Item
-                      style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        marginBottom: '0px',
-                        borderBottom: 'none',
-                      }}
-                      key={_field.id}
-                    >
-                      <FormItem
-                        name={`requirements.${index}.value`}
-                        style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-                        control={control}
-                      >
-                        <TextArea autoSize onFocus={() => showMinReqModal(() => {}, false)} />
-                      </FormItem>
-
-                      <Button
-                        type="text" // Changed to 'text' for an icon-only button
-                        icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />} // Using the DeleteOutlined icon
-                        onClick={() => {
-                          showMinReqModal(() => {
-                            requirement_remove(index);
-                            setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                          }, false);
-                        }}
-                        style={{
-                          border: 'none', // Removes the border
-                          padding: 0, // Removes padding
-                          // Adjust the following to align the icon properly with your design
-                        }}
-                      />
-                    </List.Item>
-                  )}
-                /> */}
-
+                <List dataSource={education_fields} renderItem={renderMinReqFields} />
                 <Button
                   type="link"
                   icon={<PlusOutlined />}
@@ -1152,6 +1120,7 @@ const WizardEditProfile = forwardRef(
                   <BehaviouralComptencyPicker
                     onAdd={addBehaviouralCompetency}
                     onCancel={() => setPickerVisible(false)}
+                    filterIds={behavioural_competencies_fields.map((b) => b.behavioural_competency.id)}
                     style={{ marginTop: '20px' }}
                   />
                 ) : (

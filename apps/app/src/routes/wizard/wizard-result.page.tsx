@@ -11,7 +11,7 @@ export const WizardResultPage = () => {
 
   return (
     <WizardPageWrapper title="Result" subTitle="Find out the result of your request" xxl={14} xl={18}>
-      <WizardSteps current={4} xl={24}></WizardSteps>
+      <WizardSteps current={5} xl={24}></WizardSteps>
       <Result
         status="success"
         title="Your position has been created."

@@ -1,9 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { DepartmentUncheckedUpdateManyWithoutOrganizationNestedInput } from '../department/department-unchecked-update-many-without-organization-nested.input';
-import { PositionUncheckedUpdateManyWithoutOrganizationNestedInput } from '../position/position-unchecked-update-many-without-organization-nested.input';
-import { EmployeeUncheckedUpdateManyWithoutOrganizationNestedInput } from '../employee/employee-unchecked-update-many-without-organization-nested.input';
-import { JobProfileUncheckedUpdateManyWithoutOrganizationNestedInput } from '../job-profile/job-profile-unchecked-update-many-without-organization-nested.input';
+import { JobProfileOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput } from '../job-profile-organization/job-profile-organization-unchecked-update-many-without-organization-nested.input';
 
 @InputType()
 export class OrganizationUncheckedUpdateInput {
@@ -11,17 +9,23 @@ export class OrganizationUncheckedUpdateInput {
   id?: string;
 
   @Field(() => String, { nullable: true })
+  peoplesoft_id?: string;
+
+  @Field(() => String, { nullable: true })
+  code?: string;
+
+  @Field(() => String, { nullable: true })
   name?: string;
+
+  @Field(() => String, { nullable: true })
+  effective_status?: string;
+
+  @Field(() => Date, { nullable: true })
+  effective_date?: Date | string;
 
   @Field(() => DepartmentUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
   departments?: DepartmentUncheckedUpdateManyWithoutOrganizationNestedInput;
 
-  @Field(() => PositionUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
-  positions?: PositionUncheckedUpdateManyWithoutOrganizationNestedInput;
-
-  @Field(() => EmployeeUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
-  employees?: EmployeeUncheckedUpdateManyWithoutOrganizationNestedInput;
-
-  @Field(() => JobProfileUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
-  job_proviles?: JobProfileUncheckedUpdateManyWithoutOrganizationNestedInput;
+  @Field(() => JobProfileOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput, { nullable: true })
+  JobProfileOrganization?: JobProfileOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput;
 }

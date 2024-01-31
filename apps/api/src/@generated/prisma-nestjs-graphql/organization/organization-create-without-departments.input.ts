@@ -1,8 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
-import { PositionCreateNestedManyWithoutOrganizationInput } from '../position/position-create-nested-many-without-organization.input';
-import { EmployeeCreateNestedManyWithoutOrganizationInput } from '../employee/employee-create-nested-many-without-organization.input';
-import { JobProfileCreateNestedManyWithoutOrganizationInput } from '../job-profile/job-profile-create-nested-many-without-organization.input';
+import { JobProfileOrganizationCreateNestedManyWithoutOrganizationInput } from '../job-profile-organization/job-profile-organization-create-nested-many-without-organization.input';
 
 @InputType()
 export class OrganizationCreateWithoutDepartmentsInput {
@@ -10,14 +8,20 @@ export class OrganizationCreateWithoutDepartmentsInput {
   id!: string;
 
   @Field(() => String, { nullable: false })
+  peoplesoft_id!: string;
+
+  @Field(() => String, { nullable: false })
+  code!: string;
+
+  @Field(() => String, { nullable: false })
   name!: string;
 
-  @Field(() => PositionCreateNestedManyWithoutOrganizationInput, { nullable: true })
-  positions?: PositionCreateNestedManyWithoutOrganizationInput;
+  @Field(() => String, { nullable: false })
+  effective_status!: string;
 
-  @Field(() => EmployeeCreateNestedManyWithoutOrganizationInput, { nullable: true })
-  employees?: EmployeeCreateNestedManyWithoutOrganizationInput;
+  @Field(() => Date, { nullable: false })
+  effective_date!: Date | string;
 
-  @Field(() => JobProfileCreateNestedManyWithoutOrganizationInput, { nullable: true })
-  job_proviles?: JobProfileCreateNestedManyWithoutOrganizationInput;
+  @Field(() => JobProfileOrganizationCreateNestedManyWithoutOrganizationInput, { nullable: true })
+  JobProfileOrganization?: JobProfileOrganizationCreateNestedManyWithoutOrganizationInput;
 }

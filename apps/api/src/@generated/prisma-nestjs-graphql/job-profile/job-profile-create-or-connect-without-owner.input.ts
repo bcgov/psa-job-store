@@ -9,7 +9,7 @@ import { JobProfileCreateWithoutOwnerInput } from './job-profile-create-without-
 export class JobProfileCreateOrConnectWithoutOwnerInput {
   @Field(() => JobProfileWhereUniqueInput, { nullable: false })
   @Type(() => JobProfileWhereUniqueInput)
-  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileCreateWithoutOwnerInput, { nullable: false })
   @Type(() => JobProfileCreateWithoutOwnerInput)

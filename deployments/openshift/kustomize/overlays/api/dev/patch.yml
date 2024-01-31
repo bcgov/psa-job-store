@@ -4,24 +4,3 @@ metadata:
     name: nestjs-app
 spec:
   host: pjs-api.apps.silver.devops.gov.bc.ca
----
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
-metadata:
-  name: nestjs-app
-spec:
-  template:
-    spec:
-      containers:
-        - name: nestjs-app
-          volumeMounts:
-            - name: seed-volume
-              mountPath: /usr/src/apps/api/prisma/seed.ts
-              subPath: seed.ts
-          envFrom:
-            - secretRef:
-                name: secrets
-      volumes:
-      - name: seed-volume
-        secret:
-          secretName: seed-secret

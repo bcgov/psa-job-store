@@ -9,7 +9,7 @@ import { JobProfileCreateWithoutBehavioural_competenciesInput } from './job-prof
 export class JobProfileCreateOrConnectWithoutBehavioural_competenciesInput {
   @Field(() => JobProfileWhereUniqueInput, { nullable: false })
   @Type(() => JobProfileWhereUniqueInput)
-  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<JobProfileWhereUniqueInput, 'id' | 'number'>;
 
   @Field(() => JobProfileCreateWithoutBehavioural_competenciesInput, { nullable: false })
   @Type(() => JobProfileCreateWithoutBehavioural_competenciesInput)

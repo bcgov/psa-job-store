@@ -10,6 +10,7 @@ interface WizardPageWrapperProps {
   xl?: number;
   lg?: number;
   hpad?: boolean;
+  pageHeaderExtra?: ReactNode[];
 }
 
 export const WizardPageWrapper: React.FC<WizardPageWrapperProps> = ({
@@ -19,9 +20,10 @@ export const WizardPageWrapper: React.FC<WizardPageWrapperProps> = ({
   xxl = 24,
   xl = 24,
   lg = 24,
+  pageHeaderExtra = null,
 }) => (
   <Space direction="vertical" style={{ width: '100%' }} size="large">
-    <PageHeader title={title} subTitle={subTitle} />
+    <PageHeader title={title} subTitle={subTitle} extra={pageHeaderExtra} />
     <Row justify="center" style={{ padding: '0 1rem' }}>
       <Col xs={24} md={24} lg={lg} xl={xl} xxl={xxl}>
         {children}
