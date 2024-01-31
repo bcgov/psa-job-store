@@ -169,20 +169,16 @@ export class JobProfileService {
         ...searchConditions,
         // ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
-        // owner_id: userId,
+        owner_id: userId,
         state: 'DRAFT',
         ...where,
       },
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getJobProfilesDraftsMinistries(userId: string) {
     const jobProfiles = await this.prisma.jobProfile.findMany({
-      where: {
-        state: 'DRAFT',
-        // owner_id: userId
-      },
+      where: { state: 'DRAFT', owner_id: userId },
       select: {
         organizations: {
           select: {
@@ -498,7 +494,7 @@ export class JobProfileService {
     };
 
     const newJobProfile = await this.prisma.jobProfile.create({
-      data: newJobProfileData as any as Prisma.JobProfileCreateInput,
+      data: newJobProfileData as any as Prisma.JobProfileCreateInput, // To prevent Excessive Stack Depth error
     });
 
     return newJobProfile.id;
