@@ -8,6 +8,12 @@ export class PositionRequestSumAggregate {
   id?: number;
 
   @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  crm_assigned_to_account_id?: number;
+
+  @Field(() => Int, { nullable: true })
   step?: number;
 
   @Field(() => Int, { nullable: true })

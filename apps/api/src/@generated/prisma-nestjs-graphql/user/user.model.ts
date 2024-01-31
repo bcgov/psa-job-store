@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { Comment } from '../comment/comment.model';
 import { JobProfile } from '../job-profile/job-profile.model';
 
@@ -19,6 +20,9 @@ export class User {
 
   @Field(() => [String], { nullable: true })
   roles!: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  metadata!: any | null;
 
   @Field(() => Date, { nullable: false })
   created_at!: Date;
