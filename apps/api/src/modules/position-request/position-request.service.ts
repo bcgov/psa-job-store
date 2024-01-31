@@ -20,6 +20,14 @@ import {
   IncidentThreadContentType,
   IncidentThreadEntryType,
 } from '../external/models/incident-create.input';
+import {
+  PositionCreateInput,
+  PositionDuration,
+  PositionSecurityScreenRequired,
+  PositionStatus,
+  PositionType,
+} from '../external/models/position-create.input';
+import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 
@@ -81,6 +89,7 @@ export class PositionRequestApiService {
   constructor(
     private readonly classificationService: ClassificationService,
     private readonly crmService: CrmService,
+    private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -570,7 +579,7 @@ export class PositionRequestApiService {
     const updatePayload: any = {};
 
     if (updateData.step !== undefined) {
-      updatePayload.step = updateData.step;
+      updatePayload.step = updateData.step === 5 ? 4 : updateData.step;
     }
 
     if (updateData.reports_to_position_id !== undefined) {
@@ -817,5 +826,39 @@ export class PositionRequestApiService {
     }
 
     return incident;
+  }
+
+  // async updateCrmIncidentForPositionRequest(id: number) {}
+
+  async createPositionForPositionRequest(id: number) {
+    const needsReview = await this.positionRequestNeedsReview(id);
+    const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+    const department = await this.prisma.department.findUnique({
+      select: { organization: { select: { id: true } } },
+      where: { id: positionRequest.department_id },
+    });
+    const parentJobProfile = await this.prisma.jobProfile.findUnique({
+      where: { id: positionRequest.parent_job_profile_id },
+    });
+
+    const data: PositionCreateInput = {
+      BUSINESS_UNIT: department.organization.id,
+      DEPTID: positionRequest.department_id,
+      JOBCODE: positionRequest.classification_id,
+      POSN_STATUS: needsReview ? PositionStatus.Proposed : PositionStatus.Active,
+      DESCR: positionRequest.title,
+      REG_TEMP: PositionDuration.Regular,
+      FULL_PART_TIME: PositionType.FullTime,
+      TGB_E_CLASS: `P${parentJobProfile.number}`,
+      TGB_APPRV_MGR: positionRequest.reports_to_position_id,
+      TGB_SCRTY_SCRN_REQ: PositionSecurityScreenRequired.Yes,
+      // TGB_SCRTY_SCRN_DT: '01-JAN-2024',
+    };
+
+    console.log('data: ', data);
+
+    const position = await this.peoplesoftService.createPosition(data);
+
+    return position;
   }
 }

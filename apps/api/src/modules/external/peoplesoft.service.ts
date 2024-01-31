@@ -8,9 +8,11 @@ import { AppConfigDto } from '../../dtos/app-config.dto';
 import { Environment } from '../../enums/environment.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { Employee } from './models/employee.model';
+import { PositionCreateInput } from './models/position-create.input';
 
 enum Endpoint {
   Classifications = 'PJS_TGB_REST_JOB_CODE',
+  CreatePosition = 'TGB_PJS_POSITION.v1',
   Departments = 'PJS_TGB_REST_DEPT',
   DepartmentClassifications = 'PJS_TGB_REST_JOBCODE_DEPT',
   Employees = 'PJS_TGB_REST_EMPLOYEE',
@@ -458,4 +460,41 @@ export class PeoplesoftService {
 
     return response;
   }
+
+  async createPosition(data: PositionCreateInput) {
+    // this.httpService.get(
+    //   `${this.configService.get('PEOPLESOFT_URL')}/${endpoint}/JSON/NONFILE?isconnectedquery=n&maxrows=${pageSize}${
+    //     extra != null ? `&${extra}` : ''
+    //   }&json_resp=true`,
+    //   { headers: this.headers },
+    // );
+
+    const response = await firstValueFrom(
+      this.httpService
+        .post(`${this.configService.get('PEOPLESOFT_URL')}/${Endpoint.CreatePosition}`, data, { headers: this.headers })
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
+  // async getEmployee(id: string) {
+  //   const response = await firstValueFrom(
+  //     this.request(Endpoint.Employees, 1, `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=,${id}`).pipe(
+  //       map((r) => r.data),
+  //       retry(3),
+  //       catchError((err) => {
+  //         throw new Error(err);
+  //       }),
+  //     ),
+  //   );
+
+  //   return response;
+  // }
 }
