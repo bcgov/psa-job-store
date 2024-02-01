@@ -73,11 +73,10 @@ RUN npx prisma generate
 
 #For debugging: create and write the contents of start.sh in the container
 
-RUN rm start.sh
 RUN echo "#!/bin/bash" >> start.sh && \
     echo "sleep 10" >> start.sh && \
     echo "# push the schema to the database and sync the client" >> start.sh && \
-    echo "npx prisma db push --schema='/usr/src/app/prisma/schema.prisma' " >> start.sh && \
+    echo "npx prisma migrate deploy dev" >> start.sh && \
     echo "" >> start.sh && \
     echo "# Start the application" >> start.sh && \
     echo "npm run start:dev" >> start.sh
