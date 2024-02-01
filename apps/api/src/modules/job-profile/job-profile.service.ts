@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { JobProfileState, JobProfileType, Prisma } from '@prisma/client';
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
@@ -37,6 +38,7 @@ export class JobProfileService {
       ...args,
       orderBy: [...(args.orderBy || []), { id: 'desc' }],
       include: {
+        owner: true,
         behavioural_competencies: true,
         classifications: {
           include: {
@@ -106,7 +108,8 @@ export class JobProfileService {
       where,
       args,
       'DRAFT',
-      userId,
+      // userId,
+      null,
       this.getDraftSearchConditions(userId, search),
     );
   }
@@ -169,7 +172,7 @@ export class JobProfileService {
         ...searchConditions,
         // ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
-        owner_id: userId,
+        // owner_id: userId,
         state: 'DRAFT',
         ...where,
       },
@@ -178,7 +181,10 @@ export class JobProfileService {
 
   async getJobProfilesDraftsMinistries(userId: string) {
     const jobProfiles = await this.prisma.jobProfile.findMany({
-      where: { state: 'DRAFT', owner_id: userId },
+      where: {
+        state: 'DRAFT',
+        // owner_id: userId
+      },
       select: {
         organizations: {
           select: {
