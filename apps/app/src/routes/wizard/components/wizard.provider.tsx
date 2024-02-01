@@ -26,10 +26,14 @@ interface WizardContextProps {
   reqAlertShown: boolean;
   setReqAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 
+  relWorkAlertShown: boolean;
+  setRelWorkAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
   originalValuesSet: boolean;
   originalAccReqFields: any[];
   originalOptReqFields: any[];
   originalMinReqFields: any[];
+  originalRelWorkFields: any[];
   originalTitle: any;
   originalOverview: any;
 
@@ -46,8 +50,14 @@ interface WizardContextProps {
   setOriginalAccReqFields: React.Dispatch<React.SetStateAction<any[]>>;
   setOriginalOptReqFields: React.Dispatch<React.SetStateAction<any[]>>;
   setOriginalMinReqFields: React.Dispatch<React.SetStateAction<any[]>>;
+  setOriginalRelWorkFields: React.Dispatch<React.SetStateAction<any[]>>;
   setOriginalTitle: React.Dispatch<React.SetStateAction<any>>;
   setOriginalOverview: React.Dispatch<React.SetStateAction<any>>;
+
+  originalSecurityScreeningsFields: any[];
+  setOriginalSecurityScreeningsFields: React.Dispatch<React.SetStateAction<any[]>>;
+  securityScreeningsAlertShown: boolean;
+  setSecurityScreeningsAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -74,6 +84,12 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalAccReqFields, setOriginalAccReqFields] = useState<any[]>([]);
   const [originalOptReqFields, setOriginalOptReqFields] = useState<any[]>([]);
   const [originalMinReqFields, setOriginalMinReqFields] = useState<any[]>([]);
+  const [originalRelWorkFields, setOriginalRelWorkFields] = useState<any[]>([]);
+  const [relWorkAlertShown, setRelWorkAlertShown] = useState<boolean>(false);
+
+  const [originalSecurityScreeningsFields, setOriginalSecurityScreeningsFields] = useState<any[]>([]);
+  const [securityScreeningsAlertShown, setSecurityScreeningsAlertShown] = useState<boolean>(false);
+
   const [originalTitle, setOriginalTitle] = useState<any>({});
   const [originalOverview, setOriginalOverview] = useState<any>({});
   const [positionRequestId, setPositionRequestId] = useState<number | null>(null);
@@ -89,6 +105,19 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setErrors,
     minReqAlertShown,
     setMinReqAlertShown,
+    originalMinReqFields,
+    setOriginalMinReqFields,
+
+    relWorkAlertShown,
+    setRelWorkAlertShown,
+    originalRelWorkFields,
+    setOriginalRelWorkFields,
+
+    securityScreeningsAlertShown,
+    setSecurityScreeningsAlertShown,
+    originalSecurityScreeningsFields,
+    setOriginalSecurityScreeningsFields,
+
     reqAlertShown,
     setReqAlertShown,
     originalValuesSet,
@@ -97,8 +126,6 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setOriginalAccReqFields,
     originalOptReqFields,
     setOriginalOptReqFields,
-    originalMinReqFields,
-    setOriginalMinReqFields,
     originalTitle,
     setOriginalTitle,
     originalOverview,

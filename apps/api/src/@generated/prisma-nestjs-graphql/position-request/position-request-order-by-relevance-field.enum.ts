@@ -4,7 +4,6 @@ export enum PositionRequestOrderByRelevanceFieldEnum {
   reports_to_position_id = 'reports_to_position_id',
   department_id = 'department_id',
   user_id = 'user_id',
-  classificationAssignedTo = 'classificationAssignedTo',
   title = 'title',
   classification_id = 'classification_id',
   classification_code = 'classification_code',

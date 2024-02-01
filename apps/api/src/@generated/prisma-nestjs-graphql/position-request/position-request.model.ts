@@ -11,6 +11,12 @@ export class PositionRequest {
   @Field(() => Int, { nullable: false })
   id!: number;
 
+  @Field(() => Int, { nullable: true })
+  crm_id!: number | null;
+
+  @Field(() => Int, { nullable: true })
+  crm_assigned_to_account_id!: number | null;
+
   @Field(() => Int, { nullable: false })
   step!: number;
 
@@ -24,6 +30,9 @@ export class PositionRequest {
   parent_job_profile_id!: number | null;
 
   @Field(() => GraphQLJSON, { nullable: true })
+  crm_json!: any | null;
+
+  @Field(() => GraphQLJSON, { nullable: true })
   profile_json!: any | null;
 
   @Field(() => GraphQLJSON, { nullable: true })
@@ -31,9 +40,6 @@ export class PositionRequest {
 
   @Field(() => String, { nullable: true })
   user_id!: string | null;
-
-  @Field(() => String, { nullable: true })
-  classificationAssignedTo!: string | null;
 
   @Field(() => String, { nullable: true })
   title!: string | null;

@@ -24,6 +24,12 @@ export class PositionRequestWhereInput {
   id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
+  crm_id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
+  crm_assigned_to_account_id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
   step?: IntFilter;
 
   @Field(() => StringFilter, { nullable: true })
@@ -36,6 +42,9 @@ export class PositionRequestWhereInput {
   parent_job_profile_id?: IntFilter;
 
   @Field(() => JsonFilter, { nullable: true })
+  crm_json?: JsonFilter;
+
+  @Field(() => JsonFilter, { nullable: true })
   profile_json?: JsonFilter;
 
   @Field(() => JsonFilter, { nullable: true })
@@ -43,9 +52,6 @@ export class PositionRequestWhereInput {
 
   @Field(() => UuidFilter, { nullable: true })
   user_id?: UuidFilter;
-
-  @Field(() => UuidFilter, { nullable: true })
-  classificationAssignedTo?: UuidFilter;
 
   @Field(() => StringFilter, { nullable: true })
   title?: StringFilter;

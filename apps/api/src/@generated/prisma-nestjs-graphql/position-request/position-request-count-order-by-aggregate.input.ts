@@ -8,6 +8,12 @@ export class PositionRequestCountOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  crm_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  crm_assigned_to_account_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   step?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
@@ -20,6 +26,9 @@ export class PositionRequestCountOrderByAggregateInput {
   parent_job_profile_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  crm_json?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   profile_json?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
@@ -27,9 +36,6 @@ export class PositionRequestCountOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   user_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  classificationAssignedTo?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;

@@ -251,7 +251,7 @@ export class JobProfileService {
             connect: { id: data.scope.connect.id },
           },
         }),
-        state: JobProfileState.DRAFT,
+        state: data.state ? data.state : JobProfileState.DRAFT,
         type: data.organizations.create.length > 0 ? JobProfileType.MINISTRY : JobProfileType.CORPORATE, // should be MINISTRY if ministries provided, otherwise corporate
         owner: {
           connect: { id: userId },
@@ -310,24 +310,16 @@ export class JobProfileService {
           })),
         },
 
-        ...(data.classifications && {
-          classifications: {
-            deleteMany: {},
-            create: data.classifications.create.map((item) => ({
-              classification: {
-                connect: { id: item.classification.connect.id },
-              },
-            })),
-          },
-        }),
-
-        // // Update or create classifications
-        // classifications: {
-        //   deleteMany: {},
-        //   create: data.classifications.create.map((item) => ({
-        //     classification: { connect: { id: item.classification.connect.id } },
-        //   })),
-        // },
+        classifications: data.classifications
+          ? {
+              deleteMany: {}, // Clear existing classifications
+              create: data.classifications.create.map((item) => ({
+                classification: {
+                  connect: { id: item.classification.connect.id },
+                },
+              })),
+            }
+          : { deleteMany: {} },
 
         // Update or create organizations
         organizations: {
@@ -399,6 +391,113 @@ export class JobProfileService {
     });
 
     return result;
+  }
+
+  async duplicateJobProfile(jobProfileId: number, userId: string): Promise<number> {
+    const jobProfileToDuplicate = await this.prisma.jobProfile.findUnique({
+      where: { id: jobProfileId },
+      include: {
+        behavioural_competencies: {
+          include: {
+            behavioural_competency: true,
+          },
+        },
+        classifications: {
+          include: {
+            classification: true,
+          },
+        },
+        jobFamilies: {
+          include: {
+            jobFamily: true,
+          },
+        },
+        organizations: {
+          include: {
+            organization: true,
+          },
+        },
+        scope: true,
+        role: true,
+        role_type: true,
+        streams: {
+          include: {
+            stream: true,
+          },
+        },
+        context: true,
+        reports_to: {
+          include: {
+            classification: true,
+          },
+        },
+      },
+    });
+
+    if (!jobProfileToDuplicate) {
+      throw new Error('Job Profile not found');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, role_id, role_type_id, scope_id, owner_id, title, ...jobProfileDataWithoutId } = jobProfileToDuplicate;
+
+    // Modify fields that should be unique for the new record
+    // Create a new JobProfileCreateInput object
+    const newJobProfileData: JobProfileCreateInput = {
+      // Spread the original job profile data
+      ...jobProfileDataWithoutId,
+      title: title + ' (Copy)',
+      // Set the owner to the current user
+      owner: { connect: { id: userId } },
+
+      // Set the state to DRAFT or as per your requirement
+      state: JobProfileState.DRAFT,
+
+      // Generate a new unique number
+      number: await this.getNextAvailableNumber(),
+
+      // Map each relation
+      behavioural_competencies: {
+        create: jobProfileToDuplicate.behavioural_competencies.map((bc) => ({
+          behavioural_competency: { connect: { id: bc.behavioural_competency_id } },
+        })),
+      },
+      classifications: {
+        create: jobProfileToDuplicate.classifications.map((cl) => ({
+          classification: { connect: { id: cl.classification.id } },
+        })),
+      },
+      jobFamilies: {
+        create: jobProfileToDuplicate.jobFamilies.map((jf) => ({
+          jobFamily: { connect: { id: jf.jobFamily.id } },
+        })),
+      },
+      organizations: {
+        create: jobProfileToDuplicate.organizations.map((org) => ({
+          organization: { connect: { id: org.organization.id } },
+        })),
+      },
+      scope: jobProfileToDuplicate.scope ? { connect: { id: jobProfileToDuplicate.scope.id } } : undefined,
+      role: jobProfileToDuplicate.role ? { connect: { id: jobProfileToDuplicate.role.id } } : undefined,
+      role_type: jobProfileToDuplicate.role_type ? { connect: { id: jobProfileToDuplicate.role_type.id } } : undefined,
+      streams: {
+        create: jobProfileToDuplicate.streams.map((s) => ({
+          stream: { connect: { id: s.stream.id } },
+        })),
+      },
+      reports_to: {
+        create: jobProfileToDuplicate.reports_to.map((rt) => ({
+          classification: { connect: { id: rt.classification.id } },
+        })),
+      },
+      context: { create: { description: jobProfileToDuplicate.context.description } },
+    };
+
+    const newJobProfile = await this.prisma.jobProfile.create({
+      data: newJobProfileData as any as Prisma.JobProfileCreateInput, // To prevent Excessive Stack Depth error
+    });
+
+    return newJobProfile.id;
   }
 
   async getReportsTo(job_profile_id: number) {

@@ -4,6 +4,7 @@ import { graphqlApi } from '.';
 import {
   CreateJobProfileInput,
   CreateJobProfileResponse,
+  DuplicateJobProfileResponse,
   GetJobProfileArgs,
   GetJobProfileResponse,
   GetJobProfilesArgs,
@@ -201,6 +202,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id,
                   description
                 }
+                state
                 security_screenings
                 all_reports_to
                 all_organizations
@@ -276,6 +278,19 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             data: input.data,
             id: input.id,
           },
+        };
+      },
+    }),
+
+    duplicateJobProfile: build.mutation<DuplicateJobProfileResponse, { jobProfileId: number }>({
+      query: (args) => {
+        return {
+          document: gql`
+            mutation DuplicateJobProfile($jobProfileId: Int!) {
+              duplicateJobProfile(jobProfileId: $jobProfileId)
+            }
+          `,
+          variables: args,
         };
       },
     }),
@@ -378,4 +393,5 @@ export const {
   useIsJobProfileNumberAvailableQuery,
   useLazyIsJobProfileNumberAvailableQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
+  useDuplicateJobProfileMutation,
 } = jobProfileApi;

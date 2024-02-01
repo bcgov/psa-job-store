@@ -5,6 +5,7 @@ declare namespace Express {
     email: string | undefined;
     username: string | undefined;
     roles: string[];
+    metadata: Record<string, any> | undefined;
   }
 
   interface Request {
