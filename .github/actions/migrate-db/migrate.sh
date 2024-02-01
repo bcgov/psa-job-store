@@ -19,6 +19,6 @@ oc project $NAMESPACE
 
 DATABASE_POD_NAME=$(oc get pods -n $NAMESPACE -l name=api-postgres -o jsonpath='{.items[0].metadata.name}')
 oc port-forward $DATABASE_POD_NAME 5432 &
-
+npx prisma migrate resolve --applied 0_init
 #run the db migration
 npx -w api prisma migrate deploy
