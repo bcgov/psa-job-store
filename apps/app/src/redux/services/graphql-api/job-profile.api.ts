@@ -168,6 +168,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   }
                 }
                 updated_at
+                owner {
+                  name
+                }
               }
               jobProfilesDraftsCount(search: $search, where: $where)
             }
