@@ -20,6 +20,7 @@ export interface ClassificationModelWrapped {
   classification: {
     id: string;
     code: string;
+    name: string;
   };
 }
 
