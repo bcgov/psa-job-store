@@ -10,7 +10,7 @@ echo "Deploying to $ENVIRONMENT"
 
 npm install prisma
 
-NAMESPACE="fd34fb-$ENVIRONMENT"
+NAMESPACE="f3c07a-$ENVIRONMENT"
 
 oc login $OPENSHIFT_SERVER --token=$TOKEN --insecure-skip-tls-verify=true
 oc project $NAMESPACE

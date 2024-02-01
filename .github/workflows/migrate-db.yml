@@ -39,7 +39,7 @@ jobs:
             with:
                 environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
                 openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
-                dev-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
+                api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
                 database-url: ${{ secrets.DATABASE_URL }}
     trigger_build_apps:
       needs: migrate
