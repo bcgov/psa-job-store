@@ -183,6 +183,14 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       dataIndex: 'number',
       key: 'number',
     },
+    {
+      sorter: allowSorting,
+      defaultSortOrder: getSortOrder('owner'),
+      title: 'Owner',
+      dataIndex: 'owner',
+      key: 'owner',
+      render: (owner: any) => owner.name,
+    },
     // {
     //   sorter: allowSorting,
     //   defaultSortOrder: getSortOrder('career_group'),
