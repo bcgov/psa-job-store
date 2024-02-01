@@ -845,6 +845,7 @@ export class PositionRequestApiService {
       BUSINESS_UNIT: department.organization.id,
       DEPTID: positionRequest.department_id,
       JOBCODE: positionRequest.classification_id,
+      REPORTS_TO: positionRequest.reports_to_position_id,
       POSN_STATUS: needsReview ? PositionStatus.Proposed : PositionStatus.Active,
       DESCR: positionRequest.title,
       REG_TEMP: PositionDuration.Regular,

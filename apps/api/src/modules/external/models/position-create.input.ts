@@ -24,6 +24,7 @@ export interface PositionCreateInput {
   DEPTID: string;
   JOBCODE: string;
   DESCR: string;
+  REPORTS_TO: string;
   POSN_STATUS: PositionStatus;
   REG_TEMP: PositionDuration;
   FULL_PART_TIME: PositionType;

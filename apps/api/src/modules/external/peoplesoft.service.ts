@@ -462,13 +462,6 @@ export class PeoplesoftService {
   }
 
   async createPosition(data: PositionCreateInput) {
-    // this.httpService.get(
-    //   `${this.configService.get('PEOPLESOFT_URL')}/${endpoint}/JSON/NONFILE?isconnectedquery=n&maxrows=${pageSize}${
-    //     extra != null ? `&${extra}` : ''
-    //   }&json_resp=true`,
-    //   { headers: this.headers },
-    // );
-
     const response = await firstValueFrom(
       this.httpService
         .post(`${this.configService.get('PEOPLESOFT_URL')}/${Endpoint.CreatePosition}`, data, { headers: this.headers })
@@ -483,18 +476,4 @@ export class PeoplesoftService {
 
     return response;
   }
-
-  // async getEmployee(id: string) {
-  //   const response = await firstValueFrom(
-  //     this.request(Endpoint.Employees, 1, `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=,${id}`).pipe(
-  //       map((r) => r.data),
-  //       retry(3),
-  //       catchError((err) => {
-  //         throw new Error(err);
-  //       }),
-  //     ),
-  //   );
-
-  //   return response;
-  // }
 }
