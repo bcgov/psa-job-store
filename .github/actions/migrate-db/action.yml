@@ -11,6 +11,9 @@ inputs:
   api-token:
     description: 'OpenShift service account API token'
     required: true
+  database-url:
+    description: 'postgres connection string'
+    required: true
 runs:
   using: 'composite'
   steps:
