@@ -139,19 +139,22 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
                 text: input[`accountabilities.${index}.text`],
                 isCustom: input[`accountabilities.${index}.isCustom`],
                 disabled: input[`accountabilities.${index}.disabled`],
+                is_significant: input[`accountabilities.${index}.is_significant`],
+                is_readonly: input[`accountabilities.${index}.is_readonly`],
               };
             }
           }
-        } else if (key.startsWith('optional_accountabilities')) {
+        } else if (key.startsWith('security_screenings')) {
           const parts = key.split('.');
           const index = parseInt(parts[1]);
 
-          if (!output.accountabilities[index]) {
-            if (input[`optional_accountabilities.${index}.value`] != '') {
-              output.accountabilities[index] = {
-                text: input[`optional_accountabilities.${index}.value`],
-                isCustom: input[`optional_accountabilities.${index}.isCustom`],
-                disabled: input[`optional_accountabilities.${index}.disabled`],
+          if (!output.security_screenings[index]) {
+            if (input[`security_screenings.${index}.text`] != '') {
+              output.security_screenings[index] = {
+                text: input[`security_screenings.${index}.text`],
+                isCustom: input[`security_screenings.${index}.isCustom`],
+                disabled: input[`security_screenings.${index}.disabled`],
+                is_readonly: input[`security_screenings.${index}.is_readonly`],
               };
             }
           }
@@ -160,12 +163,27 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
           const index = parseInt(parts[1]);
 
           if (!output.education[index]) {
-            // todo: implement job_experience as well
             if (input[`education.${index}.text`] != '') {
               output.education[index] = {
                 text: input[`education.${index}.text`],
                 isCustom: input[`education.${index}.isCustom`],
                 disabled: input[`education.${index}.disabled`],
+                is_significant: input[`education.${index}.is_significant`],
+                is_readonly: input[`education.${index}.is_readonly`],
+              };
+            }
+          }
+        } else if (key.startsWith('job_experience')) {
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+          if (!output.job_experience[index]) {
+            if (input[`job_experience.${index}.text`] != '') {
+              output.job_experience[index] = {
+                text: input[`job_experience.${index}.text`],
+                isCustom: input[`job_experience.${index}.isCustom`],
+                disabled: input[`job_experience.${index}.disabled`],
+                is_significant: input[`job_experience.${index}.is_significant`],
+                is_readonly: input[`job_experience.${index}.is_readonly`],
               };
             }
           }
@@ -184,6 +202,34 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
           } else if (parts[3] === 'id') {
             output.behavioural_competencies[index].behavioural_competency.id = parseInt(value);
           }
+        }
+      }
+    });
+
+    // Process optional accountabilities as a separate step
+    const processedIndices = new Set();
+    Object.keys(input).forEach((key) => {
+      if (key.startsWith('optional_accountabilities')) {
+        const parts = key.split('.');
+        const index = parseInt(parts[1]);
+
+        // Check if the index has already been processed
+        if (processedIndices.has(index)) {
+          // Skip this index as it's already been processed
+          return;
+        }
+
+        // Mark this index as processed
+        processedIndices.add(index);
+
+        if (input[`optional_accountabilities.${index}.text`] != '') {
+          output.accountabilities.push({
+            text: input[`optional_accountabilities.${index}.text`],
+            isCustom: input[`optional_accountabilities.${index}.isCustom`],
+            disabled: input[`optional_accountabilities.${index}.disabled`],
+            is_significant: input[`optional_accountabilities.${index}.is_significant`],
+            is_readonly: input[`optional_accountabilities.${index}.is_readonly`],
+          });
         }
       }
     });
@@ -218,9 +264,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
     // Create an entry in My Positions
 
     const formData = wizardEditProfileRef.current?.getFormData();
-    // console.log('formData: ', formData);
+    console.log('formData: ', formData);
     const transformedData = transformFormData(formData);
-    // console.log('transformedData: ', transformedData);
+    console.log('transformedData: ', transformedData);
     setWizardData(transformedData);
 
     try {
@@ -242,14 +288,14 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
     if (onNext) onNext();
   };
 
-  // console.log('wizardData: ', wizardData);
+  console.log('wizardData: ', wizardData);
   return (
     <WizardPageWrapper
       title="Edit profile"
       subTitle="Make changes to an approved job profile (optional)"
-      xxl={14}
-      xl={18}
-      lg={18}
+      xxl={20}
+      xl={20}
+      lg={20}
     >
       <WizardSteps current={2} xl={24}></WizardSteps>
       <WizardEditControlBar

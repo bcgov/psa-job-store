@@ -58,4 +58,4 @@ RUN chmod +x ./start.sh
 EXPOSE 4000
 
 # Start the application
-CMD ["./start.sh"]
+CMD ["npm","run","start:prod"]

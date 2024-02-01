@@ -1,0 +1,27 @@
+name: Migrate DB Schema
+description: 'Migrate DB Schema'
+inputs:
+  environment:
+    description: 'Deployment environment'
+    required: true
+    default: 'test'
+  openshift-server:
+    description: 'OpenShift server'
+    required: true
+  api-token:
+    description: 'OpenShift service account API token'
+    required: true
+  database-url:
+    description: 'postgres connection string'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    # - name: List files in current directory
+    #   run: ls -al
+    #   shell: bash
+    - name: Create the instance
+      run: |
+        chmod +x ./.github/actions/migrate-db/migrate.sh
+        ./.github/actions/migrate-db/migrate.sh "${{ inputs.environment }}" "${{ inputs.openshift-server }}" "${{ inputs.api-token }}" "${{ inputs.database-url }}"
+      shell: bash

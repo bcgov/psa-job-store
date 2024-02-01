@@ -1,0 +1,56 @@
+name: Migrate DB Schema
+on:
+    push:
+      branches: [main, stage, develop]
+    workflow_dispatch:
+jobs:
+    metadata:
+        name: Get Metadata
+        runs-on: ubuntu-20.04
+        outputs:
+          changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+            with:
+              ref: ${{ github.ref }}
+          - name: Get Changed Apps
+            id: get-changed-apps
+            uses: dorny/paths-filter@v2
+            with:
+              base: ${{ github.ref }}
+              filters: |
+                api:
+                  - 'apps/api/prisma/migrations/**'
+    migrate:
+        name: Migrate DB Schema
+        needs: metadata
+        if: ${{ needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != '' }}
+        runs-on: ubuntu-20.04
+        environment:
+          name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+            with:
+              ref: ${{ github.ref }}
+          - name: 'migrate db'
+            uses: ./.github/actions/migrate-db
+            with:
+                environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+                openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
+                api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
+                database-url: ${{ secrets.DATABASE_URL }}
+    trigger_build_apps:
+      needs: migrate
+      if: ${{ !failure() }} # Ensures this runs only if previous steps were successful
+      runs-on: ubuntu-latest
+      steps:
+        - name: Trigger Build Apps Workflow
+          run: |
+            curl \
+              -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ github.repository }}/dispatches \
+              -d '{"event_type": "build-apps-trigger", "client_payload": { "ref": "${{ github.ref }}", "ref_name": "${{ github.ref_name }}" }}'
