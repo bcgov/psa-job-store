@@ -21,6 +21,14 @@ Project is also configured to generate reports with `jest-html-reporter`, which 
 
 To update the seed file, run `oc set data secret/seed-secret --from-file=seed.ts`
 
+## To generate new changeset entry
+
+When completing a feature, run
+
+`npx changeset`
+
+in the project root and follow the prompts. This info is going to be automatically included in change log.
+
 ## @generated files and slow commits
 
 To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)

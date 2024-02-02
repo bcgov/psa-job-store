@@ -193,7 +193,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
         // If the form is valid, show the modal
         setIsModalVisible(true);
       },
-      (errors) => {
+      () => {
         // console.log('form errors: ', errors);
         // Handle form validation errors
         // You might want to log or display these errors
