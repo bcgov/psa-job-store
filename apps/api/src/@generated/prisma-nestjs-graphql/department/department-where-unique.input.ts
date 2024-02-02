@@ -50,4 +50,7 @@ export class DepartmentWhereUniqueInput {
 
   @Field(() => PositionRequestListRelationFilter, { nullable: true })
   PositionRequest?: PositionRequestListRelationFilter;
+
+  @Field(() => PositionRequestListRelationFilter, { nullable: true })
+  PositionRequestsByPaylistDepartment?: PositionRequestListRelationFilter;
 }

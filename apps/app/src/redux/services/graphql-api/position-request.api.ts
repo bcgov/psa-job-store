@@ -93,6 +93,19 @@ export interface UpdatePositionRequestInput {
   classification_id?: string;
   submission_id?: string;
   status?: string;
+
+  workLocation?: {
+    connect: {
+      id: string;
+    };
+  };
+  paylist_department?: {
+    connect: {
+      id: string;
+    };
+  };
+  additional_info_excluded_mgr_position_number?: string;
+  additional_info_comments?: string;
   parent_job_profile?: {
     connect: {
       id: number;

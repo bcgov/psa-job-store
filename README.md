@@ -25,6 +25,35 @@ To update the seed file, run `oc set data secret/seed-secret --from-file=seed.ts
 
 To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)
 
+## To apply a db change via db migration
+
+If first time, set the baseline migration:
+`npx -w api prisma migrate resolve --applied 0_init`
+
+Create migration:
+`npx -w api prisma migrate dev --name MIGRATION_NAME`
+
+## Making a database backup to local drive
+
+Login to psql pod:
+`oc exec -it  SQL_POD_NAME -- /bin/bash`
+`cd ~`
+
+Get db info:
+
+`psql`
+`psql \l`
+
+Create dump:
+`pg_dump -U USER_NAME DB_NAME > backup.sql`
+
+Exit pod and copy file:
+`oc rsync SQL_POD_NAME:/var/lib/pgsql/backup.sql ~/`
+
+Remove remote backup file:
+
+`oc exec SQL_POD_NAME -- rm /var/lib/pgsql/backup.sql`
+
 ## Recursive relationships in schema.prisma
 
 To avoid maximum call stack depth for cases where there is recursive relationship in schema.prisma, cast the input object into

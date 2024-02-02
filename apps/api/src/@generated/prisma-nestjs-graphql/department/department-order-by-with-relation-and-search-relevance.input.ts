@@ -41,6 +41,9 @@ export class DepartmentOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => PositionRequestOrderByRelationAggregateInput, { nullable: true })
   PositionRequest?: PositionRequestOrderByRelationAggregateInput;
 
+  @Field(() => PositionRequestOrderByRelationAggregateInput, { nullable: true })
+  PositionRequestsByPaylistDepartment?: PositionRequestOrderByRelationAggregateInput;
+
   @Field(() => DepartmentOrderByRelevanceInput, { nullable: true })
   _relevance?: DepartmentOrderByRelevanceInput;
 }
