@@ -5,6 +5,7 @@ import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 import { JobProfile } from '../job-profile/job-profile.model';
 import { Department } from '../department/department.model';
+import { Location } from '../location/location.model';
 
 @ObjectType()
 export class PositionRequest {
@@ -74,9 +75,27 @@ export class PositionRequest {
   @Field(() => Date, { nullable: false })
   updated_at!: Date;
 
+  @Field(() => String, { nullable: true })
+  additional_info_work_location_id!: string | null;
+
+  @Field(() => String, { nullable: true })
+  additional_info_department_id!: string | null;
+
+  @Field(() => String, { nullable: true })
+  additional_info_excluded_mgr_position_number!: string | null;
+
+  @Field(() => String, { nullable: true })
+  additional_info_comments!: string | null;
+
   @Field(() => JobProfile, { nullable: true })
   parent_job_profile?: JobProfile | null;
 
   @Field(() => Department, { nullable: false })
   department?: Department;
+
+  @Field(() => Location, { nullable: true })
+  workLocation?: Location | null;
+
+  @Field(() => Department, { nullable: true })
+  paylist_department?: Department | null;
 }

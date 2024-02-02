@@ -59,4 +59,16 @@ export class PositionRequestMaxAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   updated_at?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  additional_info_work_location_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  additional_info_department_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  additional_info_excluded_mgr_position_number?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  additional_info_comments?: true;
 }

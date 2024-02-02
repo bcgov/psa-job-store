@@ -83,4 +83,16 @@ export class PositionRequestScalarWhereInput {
 
   @Field(() => DateTimeFilter, { nullable: true })
   updated_at?: DateTimeFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_work_location_id?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_department_id?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_excluded_mgr_position_number?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_comments?: StringFilter;
 }

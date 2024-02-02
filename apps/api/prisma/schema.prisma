@@ -60,11 +60,19 @@ model PositionRequest {
   status                     PositionRequestStatus?
   updated_at                 DateTime               @default(now()) @updatedAt
 
+  // additional information form data
+  additional_info_work_location_id             String?
+  additional_info_department_id                String?
+  additional_info_excluded_mgr_position_number String?
+  additional_info_comments                     String?
+
   // TODO: AL-146
   // user        User       @relation(fields: [user_id], references: [id])
   // classification     Classification @relation(fields: [classification_id], references: [id])
   parent_job_profile JobProfile? @relation(fields: [parent_job_profile_id], references: [id])
   department         Department  @relation(fields: [department_id], references: [id])
+  workLocation       Location?   @relation(fields: [additional_info_work_location_id], references: [id])
+  paylist_department Department? @relation(name: "PositionRequestPaylistDepartment", fields: [additional_info_department_id], references: [id])
 
   @@map("position_request")
 }
@@ -362,17 +370,19 @@ model Classification {
 }
 
 model Department {
-  id               String            @id // DEPTID
-  location         Location          @relation(fields: [location_id], references: [id])
+  id               String       @id // DEPTID
+  location         Location     @relation(fields: [location_id], references: [id])
   location_id      String
-  organization     Organization      @relation(fields: [organization_id], references: [id])
+  organization     Organization @relation(fields: [organization_id], references: [id])
   organization_id  String
   peoplesoft_id    String // SETID
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS
-  effective_date   DateTime          @db.Date // EFFDT
-  PositionRequest  PositionRequest[]
+  effective_date   DateTime     @db.Date // EFFDT
+
+  PositionRequest                     PositionRequest[]
+  PositionRequestsByPaylistDepartment PositionRequest[] @relation(name: "PositionRequestPaylistDepartment")
 
   @@map("department")
 }
@@ -385,7 +395,8 @@ model Location {
   effective_status String // EFF_STATUS
   effective_date   DateTime @db.Date // EFFDT
 
-  departments Department[]
+  departments      Department[]
+  positionRequests PositionRequest[]
 
   @@map("location")
 }

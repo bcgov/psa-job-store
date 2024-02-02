@@ -76,6 +76,18 @@ export class PositionRequestOrderByWithAggregationInput {
   @Field(() => SortOrder, { nullable: true })
   updated_at?: keyof typeof SortOrder;
 
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info_work_location_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info_department_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info_excluded_mgr_position_number?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info_comments?: SortOrderInput;
+
   @Field(() => PositionRequestCountOrderByAggregateInput, { nullable: true })
   _count?: PositionRequestCountOrderByAggregateInput;
 

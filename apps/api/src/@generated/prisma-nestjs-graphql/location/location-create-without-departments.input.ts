@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
+import { PositionRequestCreateNestedManyWithoutWorkLocationInput } from '../position-request/position-request-create-nested-many-without-work-location.input';
 
 @InputType()
 export class LocationCreateWithoutDepartmentsInput {
@@ -20,4 +21,7 @@ export class LocationCreateWithoutDepartmentsInput {
 
   @Field(() => Date, { nullable: false })
   effective_date!: Date | string;
+
+  @Field(() => PositionRequestCreateNestedManyWithoutWorkLocationInput, { nullable: true })
+  positionRequests?: PositionRequestCreateNestedManyWithoutWorkLocationInput;
 }

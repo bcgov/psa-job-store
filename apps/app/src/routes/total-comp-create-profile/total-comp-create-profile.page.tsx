@@ -382,7 +382,7 @@ export const TotalCompCreateProfilePage = () => {
   }, [urlId, setValue, reset, resetProfileForm, fetchNextNumber]);
 
   const { data: treeData } = useGetGroupedClassificationsQuery({
-    employee_group_ids: ['MGT', 'GEU', 'OEX'],
+    employee_group_ids: ['MGT', 'GEU', 'OEX', 'NUR'],
     effective_status: 'Active',
   });
 

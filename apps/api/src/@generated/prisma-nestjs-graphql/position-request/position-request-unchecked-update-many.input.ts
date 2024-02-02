@@ -71,4 +71,16 @@ export class PositionRequestUncheckedUpdateManyInput {
 
   @Field(() => Date, { nullable: true })
   updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_work_location_id?: string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_department_id?: string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_excluded_mgr_position_number?: string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_comments?: string;
 }

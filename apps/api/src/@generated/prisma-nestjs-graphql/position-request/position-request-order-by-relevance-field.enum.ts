@@ -10,6 +10,10 @@ export enum PositionRequestOrderByRelevanceFieldEnum {
   user_name = 'user_name',
   email = 'email',
   submission_id = 'submission_id',
+  additional_info_work_location_id = 'additional_info_work_location_id',
+  additional_info_department_id = 'additional_info_department_id',
+  additional_info_excluded_mgr_position_number = 'additional_info_excluded_mgr_position_number',
+  additional_info_comments = 'additional_info_comments',
 }
 
 registerEnumType(PositionRequestOrderByRelevanceFieldEnum, {
