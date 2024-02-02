@@ -71,5 +71,17 @@ export class PositionRequestCountAggregate {
   updated_at!: number;
 
   @Field(() => Int, { nullable: false })
+  additional_info_work_location_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  additional_info_department_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  additional_info_excluded_mgr_position_number!: number;
+
+  @Field(() => Int, { nullable: false })
+  additional_info_comments!: number;
+
+  @Field(() => Int, { nullable: false })
   _all!: number;
 }

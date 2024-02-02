@@ -23,6 +23,10 @@ export enum PositionRequestScalarFieldEnum {
   approved_at = 'approved_at',
   status = 'status',
   updated_at = 'updated_at',
+  additional_info_work_location_id = 'additional_info_work_location_id',
+  additional_info_department_id = 'additional_info_department_id',
+  additional_info_excluded_mgr_position_number = 'additional_info_excluded_mgr_position_number',
+  additional_info_comments = 'additional_info_comments',
 }
 
 registerEnumType(PositionRequestScalarFieldEnum, { name: 'PositionRequestScalarFieldEnum', description: undefined });

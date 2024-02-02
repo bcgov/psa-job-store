@@ -571,16 +571,33 @@ export class PositionRequestApiService {
     }
 
     if (updateData.parent_job_profile !== undefined) {
-      updatePayload.parent_job_profile = updateData.parent_job_profile;
+      updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
     }
 
     if (updateData.department !== undefined) {
-      updatePayload.department = updateData.department;
+      updatePayload.department = { connect: { id: updateData.department.connect.id } };
     }
 
-    // ...add similar checks for other fields...
+    // additional information form data:
 
-    // First pass update
+    if (updateData.additional_info_excluded_mgr_position_number !== undefined) {
+      updatePayload.additional_info_excluded_mgr_position_number =
+        updateData.additional_info_excluded_mgr_position_number;
+    }
+
+    if (updateData.additional_info_comments !== undefined) {
+      updatePayload.additional_info_comments = updateData.additional_info_comments;
+    }
+
+    if (updateData.workLocation !== undefined) {
+      updatePayload.workLocation = { connect: { id: updateData.workLocation.connect.id } };
+    }
+
+    if (updateData.paylist_department !== undefined) {
+      updatePayload.paylist_department = { connect: { id: updateData.paylist_department.connect.id } };
+    }
+
+    // First pass updates
     const positionRequest = await this.prisma.positionRequest.update({
       where: { id: id },
       data: updatePayload,

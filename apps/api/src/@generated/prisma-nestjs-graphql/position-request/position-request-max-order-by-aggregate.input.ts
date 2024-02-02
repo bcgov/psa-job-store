@@ -60,4 +60,16 @@ export class PositionRequestMaxOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   updated_at?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  additional_info_work_location_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  additional_info_department_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  additional_info_excluded_mgr_position_number?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  additional_info_comments?: keyof typeof SortOrder;
 }

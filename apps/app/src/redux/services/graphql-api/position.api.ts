@@ -19,12 +19,30 @@ export interface PositionModel {
   organization: OrganizationModel;
 }
 
+export interface PositionProfileModel {
+  positionNumber: string;
+  positionDescription: string;
+  departmentName: string;
+  employeeName: string;
+  classification: string;
+  ministry: string;
+  status: string;
+}
+
+export interface PositionProfileModelResponse {
+  positionProfile: PositionProfileModel[];
+}
+
 export interface GetPositionResponse {
   position: PositionModel;
 }
 
 export interface GetPositionArgs {
   where: { id: string };
+}
+
+export interface GetPositionResponseArgs {
+  positionNumber: string;
 }
 
 export const positionApi = graphqlApi.injectEndpoints({
@@ -46,7 +64,35 @@ export const positionApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getPositionProfile: build.query<PositionProfileModelResponse, GetPositionResponseArgs>({
+      providesTags: () => ['jobProfiles'],
+      query: (args: GetPositionResponseArgs) => {
+        return {
+          document: gql`
+            query PositionProfile($positionNumber: String!) {
+              positionProfile(positionNumber: $positionNumber) {
+                positionNumber
+                positionDescription
+                departmentName
+                employeeName
+                classification
+                ministry
+                status
+              }
+            }
+          `,
+          variables: {
+            positionNumber: args.positionNumber,
+          },
+        };
+      },
+    }),
   }),
 });
 
-export const { useGetPositionQuery, useLazyGetPositionQuery } = positionApi;
+export const {
+  useGetPositionQuery,
+  useLazyGetPositionQuery,
+  useGetPositionProfileQuery,
+  useLazyGetPositionProfileQuery,
+} = positionApi;

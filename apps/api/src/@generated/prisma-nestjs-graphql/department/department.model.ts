@@ -38,4 +38,7 @@ export class Department {
 
   @Field(() => [PositionRequest], { nullable: true })
   PositionRequest?: Array<PositionRequest>;
+
+  @Field(() => [PositionRequest], { nullable: true })
+  PositionRequestsByPaylistDepartment?: Array<PositionRequest>;
 }

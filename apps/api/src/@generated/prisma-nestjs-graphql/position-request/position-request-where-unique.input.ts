@@ -10,6 +10,7 @@ import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { EnumPositionRequestStatusFilter } from '../prisma/enum-position-request-status-filter.input';
 import { JobProfileRelationFilter } from '../job-profile/job-profile-relation-filter.input';
 import { DepartmentRelationFilter } from '../department/department-relation-filter.input';
+import { LocationRelationFilter } from '../location/location-relation-filter.input';
 
 @InputType()
 export class PositionRequestWhereUniqueInput {
@@ -88,9 +89,27 @@ export class PositionRequestWhereUniqueInput {
   @Field(() => DateTimeFilter, { nullable: true })
   updated_at?: DateTimeFilter;
 
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_work_location_id?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_department_id?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_excluded_mgr_position_number?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_comments?: StringFilter;
+
   @Field(() => JobProfileRelationFilter, { nullable: true })
   parent_job_profile?: JobProfileRelationFilter;
 
   @Field(() => DepartmentRelationFilter, { nullable: true })
   department?: DepartmentRelationFilter;
+
+  @Field(() => LocationRelationFilter, { nullable: true })
+  workLocation?: LocationRelationFilter;
+
+  @Field(() => DepartmentRelationFilter, { nullable: true })
+  paylist_department?: DepartmentRelationFilter;
 }

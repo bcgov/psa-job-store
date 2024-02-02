@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
+import { PositionRequestUncheckedCreateNestedManyWithoutPaylist_departmentInput } from '../position-request/position-request-unchecked-create-nested-many-without-paylist-department.input';
 
 @InputType()
 export class DepartmentUncheckedCreateWithoutPositionRequestInput {
@@ -26,4 +27,7 @@ export class DepartmentUncheckedCreateWithoutPositionRequestInput {
 
   @Field(() => Date, { nullable: false })
   effective_date!: Date | string;
+
+  @Field(() => PositionRequestUncheckedCreateNestedManyWithoutPaylist_departmentInput, { nullable: true })
+  PositionRequestsByPaylistDepartment?: PositionRequestUncheckedCreateNestedManyWithoutPaylist_departmentInput;
 }

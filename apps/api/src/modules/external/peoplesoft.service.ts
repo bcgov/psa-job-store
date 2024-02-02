@@ -85,7 +85,9 @@ export class PeoplesoftService {
     // Filter by applicable employee groups
     // Sort rows by effective date ASC
     const sortedRows = (response?.data?.query?.rows ?? [])
-      .filter((row) => ['BCSET'].includes(row.SETID) && ['GEU', 'MGT', 'OEX', 'PEA'].includes(row.SAL_ADMIN_PLAN))
+      .filter(
+        (row) => ['BCSET'].includes(row.SETID) && ['GEU', 'MGT', 'OEX', 'PEA', 'NUR'].includes(row.SAL_ADMIN_PLAN),
+      )
       .sort((a, b) => {
         if (a.EFFDT > b.EFFDT) {
           return -1;
