@@ -22,7 +22,7 @@ export const PositionRequestPage = () => {
   let mode = 'editable';
   mode = 'readonly';
 
-  mode = 'readonly';
+  mode = 'editable';
 
   let readonlyMode = 'sentForVerification';
   readonlyMode = 'reSubmittedForVerification';
