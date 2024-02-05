@@ -22,7 +22,7 @@ export const PositionRequestPage = () => {
   let mode = 'editable';
   mode = 'readonly';
 
-  mode = 'editable';
+  mode = 'readonly';
 
   let readonlyMode = 'sentForVerification';
   readonlyMode = 'reSubmittedForVerification';
@@ -96,7 +96,9 @@ export const PositionRequestPage = () => {
 
   // READONLY MODE
 
-  const snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
+  let snapshotCopy = {};
+  if (data?.positionRequest?.orgchart_json)
+    snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
 
   const tabItems = [
     {
