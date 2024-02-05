@@ -38,6 +38,10 @@ To avoid slow commits when auto-generation takes place, run `git add .` and then
 If first time, set the baseline migration:
 `npx -w api prisma migrate resolve --applied 0_init`
 
+To reset database with migrations:
+
+`prisma migrate reset` - this will reset the schema and apply the migrations in order.
+
 Create migration:
 `npx -w api prisma migrate dev --name MIGRATION_NAME`
 
