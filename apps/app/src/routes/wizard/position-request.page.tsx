@@ -1,4 +1,4 @@
-import { ClockCircleFilled, ExclamationCircleFilled } from '@ant-design/icons';
+import { ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography } from 'antd';
 import Title from 'antd/es/typography/Title';
 import { useEffect, useState } from 'react';
@@ -26,6 +26,7 @@ export const PositionRequestPage = () => {
 
   let readonlyMode = 'sentForVerification';
   readonlyMode = 'reSubmittedForVerification';
+  readonlyMode = 'completed';
   readonlyMode = 'inQueue';
 
   const { setWizardData, setPositionRequestId, setPositionRequestProfileId, setPositionRequestDepartmentId } =
@@ -236,6 +237,45 @@ export const PositionRequestPage = () => {
           )}
 
           {readonlyMode === 'inQueue' && (
+            <>
+              <Result
+                status="error"
+                icon={<FundFilled></FundFilled>}
+                title="Your classification review is in the queue"
+                subTitle="Thank you for your submission. A Classification specialist will reach out to you via email shortly."
+                extra={[
+                  <Button type="primary" key="console" onClick={() => {}}>
+                    Go to Dashboard
+                  </Button>,
+                ]}
+              />
+              <Row justify="center" style={{ padding: '0 1rem', marginBottom: '5rem' }}>
+                <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
+                  <Card title="Information" bordered={false}>
+                    <Descriptions bordered layout="horizontal" column={1}>
+                      <Descriptions.Item label="Position number">
+                        123456 <Button type="link">Copy</Button>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Job Details">
+                        <Button type="link">View</Button> | <Button type="link">Download</Button>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Organization chart">
+                        <Button type="link">View</Button> | <Button type="link">Download</Button>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Job store job profile">
+                        <Button type="link">View</Button> | <Button type="link">Download</Button>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Modified job profile">
+                        <Button type="link">View</Button> | <Button type="link">Download</Button>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  </Card>
+                </Col>
+              </Row>
+            </>
+          )}
+
+          {readonlyMode === 'completed' && (
             <>
               <Result
                 status="success"
