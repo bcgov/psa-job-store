@@ -51,6 +51,13 @@ export interface GetPositionRequestResponseContent {
   parent_job_profile?: {
     number: number;
   };
+
+  additional_info_work_location_id?: string;
+  additional_info_department_id?: string;
+  additional_info_excluded_mgr_position_number?: string;
+  additional_info_comments?: string;
+
+  crm_id?: string;
 }
 
 export interface GetPositionRequestResponse {
@@ -198,6 +205,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 parent_job_profile {
                   number
                 }
+                crm_id
               }
               positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
                 draft
@@ -249,6 +257,11 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   parent_job_profile {
                     number
                   }
+                  additional_info_work_location_id
+                  additional_info_department_id
+                  additional_info_excluded_mgr_position_number
+                  additional_info_comments
+                  crm_id
               }
           }
           `,

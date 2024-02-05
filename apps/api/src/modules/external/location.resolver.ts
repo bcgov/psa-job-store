@@ -1,5 +1,5 @@
 import { Args, Field, Int, ObjectType, Query, Resolver } from '@nestjs/graphql';
-import { FindManyLocationArgs, Location } from '../../@generated/prisma-nestjs-graphql';
+import { FindManyLocationArgs, FindUniqueLocationArgs, Location } from '../../@generated/prisma-nestjs-graphql';
 import { LocationService } from './location.service';
 
 @ObjectType()
@@ -20,5 +20,10 @@ export class LocationResolver {
         departmentCount: location._count?.departments,
       })),
     );
+  }
+
+  @Query(() => Location, { name: 'location', nullable: true })
+  getLocation(@Args() args: FindUniqueLocationArgs) {
+    return this.locationService.getLocation(args);
   }
 }

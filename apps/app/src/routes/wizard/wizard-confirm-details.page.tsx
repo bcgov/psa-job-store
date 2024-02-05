@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import { Button, Card, Col, Divider, Empty, Form, Input, Modal, Row, Select, Switch, Tooltip, Typography } from 'antd';
 import { IsNotEmpty, ValidationOptions, registerDecorator } from 'class-validator';
@@ -85,7 +84,6 @@ export class WizardConfirmDetailsModel {
 
 // export const WizardReviewPage = () => {
 export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onNext, onBack }) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
   // const [createJobProfile] = useCreateJobProfileMutation();
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [
@@ -162,6 +160,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
     id: positionRequestId ?? -1,
   });
 
+  // console.log('positionRequestData: ', positionRequestData);
+
   // get profile info for reporting position from reports_to_position_id using GetPositionProfileQuery and useEffect
   useEffect(() => {
     if (positionRequestData?.positionRequest?.reports_to_position_id) {
@@ -191,7 +191,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
     handleSubmit(
       () => {
         // If the form is valid, show the modal
-        setIsModalVisible(true);
+        // setIsModalVisible(true);
+        handleOk();
       },
       () => {
         // console.log('form errors: ', errors);
@@ -208,17 +209,15 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
     // User confirmed the terms in the modal by pressing OK
 
     // Hide the modal
-    setIsModalVisible(false);
     const formData = getValues();
-    // return;
 
     try {
       if (positionRequestId) {
         await updatePositionRequest({
           id: positionRequestId,
           step: 5,
-          status: 'COMPLETED',
-          position_number: 123456,
+          // status: 'COMPLETED',
+          // position_number: 123456,
 
           // attach additional information
           workLocation: { connect: { id: formData.workLocation || '' } },
@@ -233,14 +232,10 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
     } catch (error) {
       // Handle the error, possibly showing another modal
       Modal.error({
-        title: 'Error Creating Position',
+        title: 'Error updating position',
         content: 'An unknown error occurred', //error.data?.message ||
       });
     }
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
   };
 
   // const { wizardData } = useWizardContext();
@@ -276,6 +271,31 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
     },
   });
 
+  useEffect(() => {
+    if (positionRequestData && positionRequestData.positionRequest) {
+      const {
+        additional_info_work_location_id,
+        additional_info_department_id,
+        additional_info_excluded_mgr_position_number,
+        additional_info_comments,
+      } = positionRequestData.positionRequest;
+
+      setValue('workLocation', additional_info_work_location_id || null);
+      setValue('payListDepartmentId', additional_info_department_id || null);
+      setValue('excludedManagerPositionNumber', additional_info_excluded_mgr_position_number || '');
+      setValue('comments', additional_info_comments || '');
+
+      if (
+        additional_info_work_location_id ||
+        additional_info_department_id ||
+        additional_info_excluded_mgr_position_number ||
+        additional_info_comments
+      ) {
+        setValue('confirmation', true);
+      }
+    }
+  }, [positionRequestData, setValue]);
+
   const confirmation = watch('confirmation');
 
   const srOnlyStyle: CSSProperties = {
@@ -293,14 +313,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
 
   return (
     <>
-      <PageHeader
-        title="Review and submit"
-        subTitle="Review the profile before creating a new position"
-        // showButton1
-        // showButton2
-        // button2Text={state == 'PUBLISHED' ? 'Save and publish' : 'Save as draft'}
-        // button2Callback={() => save()}
-      />
+      <PageHeader title="Review and submit" subTitle="Review the profile before creating a new position" />
 
       <Row justify="center" style={{ padding: '0 1rem' }}>
         <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
@@ -318,7 +331,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
       >
         <Row justify="center">
           <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-            <WizardEditControlBar onNext={showModal} onBack={onBackCallback} nextText="Submit for a new position #" />
+            <WizardEditControlBar onNext={showModal} onBack={onBackCallback} />
 
             {/* <Card
         style={{
@@ -355,7 +368,16 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
                           <Controller
                             name="confirmation"
                             control={control}
-                            render={({ field }) => <Switch {...field} checkedChildren="Yes" unCheckedChildren="No" />}
+                            render={({ field: { onChange, value } }) => {
+                              return (
+                                <Switch
+                                  checked={value}
+                                  onChange={(newValue) => {
+                                    onChange(newValue);
+                                  }}
+                                />
+                              );
+                            }}
                           />
                           <span style={{ marginLeft: '1rem' }}>
                             I confirm that I have received executive approval (Deputy Minister or delegate) for this new
@@ -566,55 +588,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
                 </Form>
               </Col>
             </Row>
-
-            <Modal
-              title="Affirmation"
-              open={isModalVisible}
-              onOk={handleOk}
-              onCancel={handleCancel}
-              footer={[
-                <Button key="back" onClick={handleCancel}>
-                  Review details again
-                </Button>,
-                <Button key="submit" type="primary" onClick={handleOk}>
-                  Create Position
-                </Button>,
-              ]}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                <ExclamationCircleOutlined style={{ color: 'orange', fontSize: '24px', marginRight: '16px' }} />
-                <div>
-                  <p>By clicking “Create Position” I affirm that:</p>
-                  <ul>
-                    <li>
-                      I confirm this Statement of Job Responsibilities accurately reflects the actual work to be
-                      performed of the position(s) as outlined in{' '}
-                      <a
-                        target="_blank"
-                        href="https://www2.gov.bc.ca/assets/gov/careers/managers-supervisors/managing-employee-labour-relations/hr-policy-pdf-documents/06_job_evaluation_policy.pdf"
-                      >
-                        Human Resources Policy 06 – Job Evaluation
-                      </a>
-                      , and
-                    </li>
-                    <li>
-                      I confirm the accountabilities are not similar to the supervisor, peer, or management positions
-                      within the work unit, and
-                    </li>
-                    <li>
-                      As the excluded manager or delegate, I confirm the job role, accountabilities, and scope of
-                      responsibility are true and accurate, and in establishing this position (s), I confirm the content
-                      I assume all risks related to this decision.{' '}
-                    </li>
-                    <li>I will respond to audits in a timely manner.</li>
-                    <li>
-                      I will abide by the Public Service Act and all Human Resources policies for hiring decisions
-                      related to this position.
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </Modal>
 
             {/* Other details card */}
             <Card

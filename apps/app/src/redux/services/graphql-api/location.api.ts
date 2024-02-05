@@ -8,11 +8,15 @@ export interface LocationModel {
   code: string;
   name: string;
   effective_status: string;
-  departmentCount: number;
+  departmentCount?: number;
 }
 
 export interface GetLocationsResponse {
   locations: LocationModel[];
+}
+
+export interface GetLocationResponse {
+  location: LocationModel;
 }
 
 export const locationApi = graphqlApi.injectEndpoints({
@@ -35,7 +39,25 @@ export const locationApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getLocation: build.query<GetLocationResponse, { id: string }>({
+      query: (args) => {
+        return {
+          document: gql`
+            query Location($id: String!) {
+              location(where: { id: $id }) {
+                id
+                peoplesoft_id
+                code
+                name
+                effective_status
+              }
+            }
+          `,
+          variables: args,
+        };
+      },
+    }),
   }),
 });
 
-export const { useGetLocationsQuery, useLazyGetLocationsQuery } = locationApi;
+export const { useGetLocationsQuery, useLazyGetLocationsQuery, useGetLocationQuery } = locationApi;
