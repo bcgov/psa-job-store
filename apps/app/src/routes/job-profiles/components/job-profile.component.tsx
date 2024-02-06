@@ -13,6 +13,7 @@ import {
   registerDecorator,
 } from 'class-validator';
 import { diff_match_patch } from 'diff-match-patch';
+import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
@@ -354,14 +355,25 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'context',
       label: 'Job Context',
       children:
-        showDiff && originalData
-          ? compareData(
-              typeof originalData.context === 'string' ? originalData.context : originalData.context?.description || '',
-              effectiveData?.context?.toString(),
-            )
-          : typeof effectiveData?.context === 'string'
-            ? effectiveData?.context
-            : effectiveData?.context.description,
+        showDiff && originalData ? (
+          compareData(
+            typeof originalData.context === 'string' ? originalData.context : originalData.context?.description || '',
+            effectiveData?.context?.toString(),
+          )
+        ) : (
+          <span
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(
+                typeof effectiveData?.context === 'string'
+                  ? effectiveData?.context
+                  : effectiveData?.context.description ?? '',
+              ),
+            }}
+          ></span>
+        ),
+      // : typeof effectiveData?.context === 'string'
+      //   ? effectiveData?.context
+      //   : effectiveData?.context.description,
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
@@ -535,9 +547,15 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <p>{/* last updated info */}</p>
 
           <h3>Job Context</h3>
-          <p>
-            {typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description}
-          </p>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(
+                typeof effectiveData?.context === 'string'
+                  ? effectiveData?.context
+                  : effectiveData?.context.description ?? '',
+              ),
+            }}
+          ></p>
 
           <h3>Job Overview</h3>
           <p>

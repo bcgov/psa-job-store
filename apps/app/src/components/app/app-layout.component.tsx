@@ -56,6 +56,8 @@ export const AppLayout = () => {
       setRole('total-compensation');
     } else if (roles && (roles as string[]).includes('classification')) {
       setRole('classification');
+    } else if (roles && (roles as string[]).includes('hiring-manager')) {
+      setRole('hiring-manager');
     } else {
       setRole('user');
     }
@@ -77,6 +79,35 @@ export const AppLayout = () => {
       ),
     ]),
   ];
+  const hiringManagerMenuItems: MenuProps['items'] = [
+    getItem('Hiring Manager', 'sub2', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
+      getItem(
+        <Link to="/my-positions/create">Create new position</Link>,
+        '3',
+        <PlusCircleFilled style={{ fontSize: '1.25rem' }} />,
+      ),
+      getItem(<Link to="/org-chart">Org Chart</Link>, '5', <PartitionOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(<Link to="/job-profiles">Job Profiles</Link>, '6', <FileTextOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(<Link to="/my-positions">My Positions</Link>, '7', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
+    ]),
+  ];
+
+  if (role === 'user') {
+    return (
+      <Layout style={{ height: '100vh' }}>
+        <AppHeader></AppHeader>
+        <Layout style={{ height: '100%' }}>
+          <Layout>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
+              <Content style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#FFF', flex: '1 0 auto' }}>
+                <Outlet />
+              </Content>
+            </div>
+          </Layout>
+        </Layout>
+      </Layout>
+    );
+  }
 
   // console.log('role: ', role);
   return (
@@ -99,7 +130,7 @@ export const AppLayout = () => {
               <div
                 style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', flex: 'auto' }}
               >
-                {role === 'user' && (
+                {role === 'hiring-manager' && (
                   <>
                     {collapsed ? (
                       <SiderNavItem
@@ -206,6 +237,12 @@ export const AppLayout = () => {
                               to: '/total-compensation/approved-requests',
                             },
                           ]}
+                        />
+
+                        <Menu
+                          style={{ transition: 'width 0.2s ease-out', width: '200px', marginTop: '10px' }}
+                          mode="inline"
+                          items={hiringManagerMenuItems}
                         />
                       </>
                     )}
