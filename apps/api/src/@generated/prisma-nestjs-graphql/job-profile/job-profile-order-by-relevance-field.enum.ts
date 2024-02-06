@@ -9,6 +9,7 @@ export enum JobProfileOrderByRelevanceFieldEnum {
   preferences = 'preferences',
   knowledge_skills_abilities = 'knowledge_skills_abilities',
   willingness_statements = 'willingness_statements',
+  optional_requirements = 'optional_requirements',
 }
 
 registerEnumType(JobProfileOrderByRelevanceFieldEnum, {

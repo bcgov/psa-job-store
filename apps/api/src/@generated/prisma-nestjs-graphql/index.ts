@@ -411,6 +411,7 @@ export { JobProfileCreateWithoutScopeInput } from './job-profile/job-profile-cre
 export { JobProfileCreateWithoutStreamsInput } from './job-profile/job-profile-create-without-streams.input';
 export { JobProfileCreateInput } from './job-profile/job-profile-create.input';
 export { JobProfileCreateknowledge_skills_abilitiesInput } from './job-profile/job-profile-createknowledge-skills-abilities.input';
+export { JobProfileCreateoptional_requirementsInput } from './job-profile/job-profile-createoptional-requirements.input';
 export { JobProfileCreatepreferencesInput } from './job-profile/job-profile-createpreferences.input';
 export { JobProfileCreateprofessional_registration_requirementsInput } from './job-profile/job-profile-createprofessional-registration-requirements.input';
 export { JobProfileCreatewillingness_statementsInput } from './job-profile/job-profile-createwillingness-statements.input';
@@ -517,6 +518,7 @@ export { JobProfileUpdateWithoutScopeInput } from './job-profile/job-profile-upd
 export { JobProfileUpdateWithoutStreamsInput } from './job-profile/job-profile-update-without-streams.input';
 export { JobProfileUpdateInput } from './job-profile/job-profile-update.input';
 export { JobProfileUpdateknowledge_skills_abilitiesInput } from './job-profile/job-profile-updateknowledge-skills-abilities.input';
+export { JobProfileUpdateoptional_requirementsInput } from './job-profile/job-profile-updateoptional-requirements.input';
 export { JobProfileUpdatepreferencesInput } from './job-profile/job-profile-updatepreferences.input';
 export { JobProfileUpdateprofessional_registration_requirementsInput } from './job-profile/job-profile-updateprofessional-registration-requirements.input';
 export { JobProfileUpdatewillingness_statementsInput } from './job-profile/job-profile-updatewillingness-statements.input';

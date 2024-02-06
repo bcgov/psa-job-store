@@ -357,6 +357,7 @@ export const TotalCompCreateProfilePage = () => {
       education: [] as AccountabilityItem[],
       job_experience: [] as AccountabilityItem[],
       professionalRegistrationRequirements: [] as TextItem[],
+      optionalRequirements: [] as TextItem[],
       preferences: [] as TextItem[],
       knowledgeSkillsAbilities: [] as TextItem[],
       willingnessStatements: [] as TextItem[],
@@ -543,6 +544,10 @@ export const TotalCompCreateProfilePage = () => {
       profileSetValue(
         'professionalRegistrationRequirements',
         jobProfileData.jobProfile.professional_registration_requirements.map((r: any) => ({ text: r })),
+      );
+      profileSetValue(
+        'optionalRequirements',
+        jobProfileData.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
       );
       profileSetValue(
         'preferences',
@@ -808,6 +813,25 @@ export const TotalCompCreateProfilePage = () => {
     }
   };
 
+  // optional requirements
+  const {
+    fields: optionalRequirementsFields,
+    append: appendOptionalRequirement,
+    remove: removeOptionalRequirement,
+    move: moveOptionalRequirement,
+  } = useFieldArray({
+    control: profileControl,
+    name: 'optionalRequirements',
+  });
+
+  const handleOptionalRequirementsMove = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up') {
+      moveOptionalRequirement(index, index - 1);
+    } else {
+      moveOptionalRequirement(index, index + 1);
+    }
+  };
+
   // preferences
 
   const {
@@ -1004,6 +1028,7 @@ export const TotalCompCreateProfilePage = () => {
           is_significant: a.significant,
         })),
         professional_registration_requirements: formData.professionalRegistrationRequirements.map((p: any) => p.text),
+        optional_requirements: formData.optionalRequirements.map((o: any) => o.text),
         preferences: formData.preferences.map((p: any) => p.text),
         knowledge_skills_abilities: formData.knowledgeSkillsAbilities.map((k: any) => k.text),
         willingness_statements: formData.willingnessStatements.map((w: any) => w.text),
@@ -2614,6 +2639,64 @@ export const TotalCompCreateProfilePage = () => {
                             icon={<PlusOutlined />}
                           >
                             Add a security screenings requirement
+                          </Button>
+                        </Form.Item>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  {/* optional requirements */}
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                      <Form.Item
+                        style={{ marginBottom: '0' }}
+                        labelCol={{ className: 'full-width-label card-label' }}
+                        label={
+                          <Row justify="space-between" align="middle">
+                            <Col>Optional requirements</Col>
+                          </Row>
+                        }
+                      >
+                        {optionalRequirementsFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                            {/* up/down controls */}
+                            <Col flex="none" className="reorder-controls">
+                              <ReorderButtons
+                                index={index}
+                                moveItem={handleOptionalRequirementsMove}
+                                upperDisabled={index === 0}
+                                lowerDisabled={index === optionalRequirementsFields.length - 1}
+                              />
+                            </Col>
+                            <Col flex="auto">
+                              <Row>{/* Non-editable checkbox */}</Row>
+                              <Row gutter={10}>
+                                <Col flex="auto">
+                                  <Form.Item>
+                                    <Controller
+                                      control={profileControl}
+                                      name={`optionalRequirements.${index}.text`}
+                                      render={({ field }) => (
+                                        <TextArea autoSize placeholder="Add an optional requirement" {...field} />
+                                      )}
+                                    />
+                                  </Form.Item>
+                                </Col>
+
+                                <Col flex="none">
+                                  <Button icon={<DeleteOutlined />} onClick={() => removeOptionalRequirement(index)} />
+                                </Col>
+                              </Row>
+                            </Col>
+                          </Row>
+                        ))}
+                        <Form.Item>
+                          <Button
+                            type="link"
+                            onClick={() => appendOptionalRequirement({ text: '' })}
+                            icon={<PlusOutlined />}
+                          >
+                            Add an optional requirement
                           </Button>
                         </Form.Item>
                       </Form.Item>

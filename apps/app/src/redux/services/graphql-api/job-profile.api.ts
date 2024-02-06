@@ -215,6 +215,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 willingness_statements
                 knowledge_skills_abilities
                 professional_registration_requirements
+                optional_requirements
                 program_overview
                 review_required
                 overview
