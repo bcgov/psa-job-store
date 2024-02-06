@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Space, Typography } from 'antd';
+import DOMPurify from 'dompurify';
 import { useParams } from 'react-router-dom';
 import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 
@@ -36,8 +37,15 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       </div>
       <div>
         <Text strong>Context: </Text>
+
         <Paragraph ellipsis={{ rows: 3 }}>
-          {typeof data?.context === 'string' ? data.context : data.context.description}
+          <span
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(
+                typeof data?.context === 'string' ? data.context : data.context.description ?? '',
+              ),
+            }}
+          ></span>
         </Paragraph>
       </div>
       <div>

@@ -3,6 +3,7 @@ import { isEmpty } from 'class-validator';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { AllowNoRoles } from './guards/role-global.guard';
 import { Profile } from './models/profile.model';
 
 @ObjectType()
@@ -19,6 +20,7 @@ export class ProfileResolver {
   ) {}
 
   @Query(() => LogoutResponse, { name: 'logout' })
+  @AllowNoRoles()
   async logout(@CurrentUser() { id: userId }: Express.User) {
     await this.authService.logoutUser(userId);
     return { success: true };
