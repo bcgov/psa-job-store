@@ -6,6 +6,7 @@ import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { EmployeeGroupRelationFilter } from '../employee-group/employee-group-relation-filter.input';
 import { JobProfileClassificationListRelationFilter } from '../job-profile-classification/job-profile-classification-list-relation-filter.input';
 import { JobProfileReportsToListRelationFilter } from '../job-profile-reports-to/job-profile-reports-to-list-relation-filter.input';
+import { ClassificationDepartmentListRelationFilter } from '../classification-department/classification-department-list-relation-filter.input';
 
 @InputType()
 export class ClassificationWhereUniqueInput {
@@ -50,4 +51,7 @@ export class ClassificationWhereUniqueInput {
 
   @Field(() => JobProfileReportsToListRelationFilter, { nullable: true })
   reportees?: JobProfileReportsToListRelationFilter;
+
+  @Field(() => ClassificationDepartmentListRelationFilter, { nullable: true })
+  departments?: ClassificationDepartmentListRelationFilter;
 }

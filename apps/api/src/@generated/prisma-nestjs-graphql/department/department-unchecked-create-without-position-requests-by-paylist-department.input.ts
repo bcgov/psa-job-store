@@ -1,6 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { PositionRequestUncheckedCreateNestedManyWithoutDepartmentInput } from '../position-request/position-request-unchecked-create-nested-many-without-department.input';
+import { ClassificationDepartmentUncheckedCreateNestedManyWithoutDepartmentInput } from '../classification-department/classification-department-unchecked-create-nested-many-without-department.input';
 
 @InputType()
 export class DepartmentUncheckedCreateWithoutPositionRequestsByPaylistDepartmentInput {
@@ -30,4 +31,7 @@ export class DepartmentUncheckedCreateWithoutPositionRequestsByPaylistDepartment
 
   @Field(() => PositionRequestUncheckedCreateNestedManyWithoutDepartmentInput, { nullable: true })
   PositionRequest?: PositionRequestUncheckedCreateNestedManyWithoutDepartmentInput;
+
+  @Field(() => ClassificationDepartmentUncheckedCreateNestedManyWithoutDepartmentInput, { nullable: true })
+  classifications?: ClassificationDepartmentUncheckedCreateNestedManyWithoutDepartmentInput;
 }
