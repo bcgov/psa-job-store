@@ -47,6 +47,9 @@ class GroupedClassification {
   @Field({ nullable: true })
   groupName?: string;
 
+  @Field({ nullable: true })
+  id?: string;
+
   @Field(() => [ClassificationItem], { nullable: true })
   items?: ClassificationItem[];
 }

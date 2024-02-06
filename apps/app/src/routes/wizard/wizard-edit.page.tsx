@@ -88,6 +88,11 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
         isCustom: input['overview.isCustom'],
         disabled: input['overview.disabled'],
       },
+      program_overview: {
+        value: input['program_overview.value'],
+        isCustom: input['program_overview.isCustom'],
+        disabled: input['program_overview.disabled'],
+      },
       accountabilities: [] as AccountabilitiesModel[],
       education: [] as AccountabilitiesModel[],
       job_experience: [] as AccountabilitiesModel[],
@@ -101,8 +106,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
       scope: { id: input.scopeId || null },
       review_required: false,
       professions: [],
-      program_overview: '',
       professional_registration_requirements: [],
+      optional_requirements: [],
       preferences: [],
       knowledge_skills_abilities: [],
       willingness_statements: [],
@@ -155,6 +160,71 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
                 isCustom: input[`security_screenings.${index}.isCustom`],
                 disabled: input[`security_screenings.${index}.disabled`],
                 is_readonly: input[`security_screenings.${index}.is_readonly`],
+              };
+            }
+          }
+        } else if (key.startsWith('professional_registration')) {
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+
+          if (!output.professional_registration_requirements[index]) {
+            if (input[`professional_registration.${index}.value`] != '') {
+              output.professional_registration_requirements[index] = {
+                value: input[`professional_registration.${index}.value`],
+                isCustom: input[`professional_registration.${index}.isCustom`],
+                disabled: input[`professional_registration.${index}.disabled`],
+              };
+            }
+          }
+        } else if (key.startsWith('optional_requirements')) {
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+
+          if (!output.optional_requirements[index]) {
+            if (input[`optional_requirements.${index}.value`] != '') {
+              output.optional_requirements[index] = {
+                value: input[`optional_requirements.${index}.value`],
+                isCustom: input[`optional_requirements.${index}.isCustom`],
+                disabled: input[`optional_requirements.${index}.disabled`],
+              };
+            }
+          }
+        } else if (key.startsWith('preferences')) {
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+
+          if (!output.preferences[index]) {
+            if (input[`preferences.${index}.value`] != '') {
+              output.preferences[index] = {
+                value: input[`preferences.${index}.value`],
+                isCustom: input[`preferences.${index}.isCustom`],
+                disabled: input[`preferences.${index}.disabled`],
+              };
+            }
+          }
+        } else if (key.startsWith('knowledge_skills_abilities')) {
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+
+          if (!output.knowledge_skills_abilities[index]) {
+            if (input[`knowledge_skills_abilities.${index}.value`] != '') {
+              output.knowledge_skills_abilities[index] = {
+                value: input[`knowledge_skills_abilities.${index}.value`],
+                isCustom: input[`knowledge_skills_abilities.${index}.isCustom`],
+                disabled: input[`knowledge_skills_abilities.${index}.disabled`],
+              };
+            }
+          }
+        } else if (key.startsWith('provisos')) {
+          const parts = key.split('.');
+          const index = parseInt(parts[1]);
+
+          if (!output.willingness_statements[index]) {
+            if (input[`provisos.${index}.text`] != '') {
+              output.willingness_statements[index] = {
+                value: input[`provisos.${index}.value`],
+                isCustom: input[`provisos.${index}.isCustom`],
+                disabled: input[`provisos.${index}.disabled`],
               };
             }
           }
@@ -267,6 +337,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
     console.log('formData: ', formData);
     const transformedData = transformFormData(formData);
     console.log('transformedData: ', transformedData);
+
+    // return;
     setWizardData(transformedData);
 
     try {

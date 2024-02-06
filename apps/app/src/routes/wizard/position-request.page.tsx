@@ -96,7 +96,7 @@ export const PositionRequestPage = () => {
 
   // READONLY MODE
 
-  let snapshotCopy = {};
+  let snapshotCopy = { edges: [], nodes: [] };
   if (data?.positionRequest?.orgchart_json)
     snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
 
