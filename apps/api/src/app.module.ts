@@ -13,6 +13,7 @@ import { AppConfigDto } from './dtos/app-config.dto';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
+import { RolesGlobalGuard } from './modules/auth/guards/role-global.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
@@ -76,7 +77,15 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     SiteMinderGuidTestApiModule,
   ],
   controllers: [],
-  providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RolesGlobalGuard,
+    },
+    { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_GUARD, useClass: RoleGuard },
+    AppResolver,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
