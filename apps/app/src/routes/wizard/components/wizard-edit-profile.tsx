@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Alert, Button, Col, Descriptions, Form, Input, List, Modal, Row } from 'antd';
+import { Alert, Button, Col, Descriptions, Form, Input, List, Modal, Row, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/typography/Title';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
+import DOMPurify from 'dompurify';
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
   GetClassificationsResponse,
@@ -14,6 +15,8 @@ import {
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
+import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
@@ -111,6 +114,8 @@ const WizardEditProfile = forwardRef(
       setOriginalValuesSet,
       originalOverview,
       setOriginalOverview,
+      originalProgramOverview,
+      setOriginalProgramOverview,
       originalTitle,
       setOriginalTitle,
       originalMinReqFields,
@@ -123,6 +128,21 @@ const WizardEditProfile = forwardRef(
       setOriginalAccReqFields,
       originalOptReqFields,
       setOriginalOptReqFields,
+
+      originalProfessionalRegistrationFields,
+      setOriginalProfessionalRegistrationFields,
+
+      originalOptionalRequirementsFields,
+      setOriginalOptionalRequirementsFields,
+
+      originalPreferencesFields,
+      setOriginalPreferencesFields,
+      originalKnowledgeSkillsAbilitiesFields,
+      setOriginalKnowledgeSkillsAbilitiesFields,
+      originalProvisosFields,
+      setOriginalProvisosFields,
+
+      positionRequestId,
     } = useWizardContext();
 
     // console.log('effectiveData: ', effectiveData);
@@ -295,6 +315,152 @@ const WizardEditProfile = forwardRef(
         // Set the editedSecurityScreeningsFields state
         setEditedSecurityScreeningsFields(initialEditStatus);
 
+        // PROFESSIONAL REGISTRATION
+        //   originalProfessionalRegistrationFields,
+        // setOriginalProfessionalRegistrationFields,
+        initialEditStatus = {};
+        const originalProfessionalRegistrationFieldsValue = effectiveData.professional_registration_requirements?.map(
+          (item) => {
+            if (typeof item === 'string') {
+              return {
+                value: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              return {
+                value: item.value,
+                isCustom: item.isCustom,
+                disabled: item.disabled,
+              };
+            }
+          },
+        );
+        if (!originalValuesSet) setOriginalProfessionalRegistrationFields(originalProfessionalRegistrationFieldsValue);
+
+        originalProfessionalRegistrationFieldsValue?.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalProfessionalRegistrationFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        setEditedProfessionalRegistrationFields(initialEditStatus);
+
+        // OPTIONAL REQUIREMENTS
+        initialEditStatus = {};
+        const originalOptionalRequirementsFieldsValue = effectiveData.optional_requirements?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        if (!originalValuesSet) setOriginalOptionalRequirementsFields(originalOptionalRequirementsFieldsValue);
+
+        originalOptionalRequirementsFieldsValue?.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalOptionalRequirementsFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        setEditedOptionalRequirementsFields(initialEditStatus);
+
+        // PREFERENCES
+        // originalPreferencesFields,
+        // setOriginalPreferencesFields,
+        initialEditStatus = {};
+        const originalPreferencesFieldsValue = effectiveData.preferences?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        if (!originalValuesSet) setOriginalPreferencesFields(originalPreferencesFieldsValue);
+
+        originalPreferencesFieldsValue?.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalPreferencesFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        setEditedPreferencesFields(initialEditStatus);
+
+        // KNOWLEDGE SKILLS ABILITIES
+        // originalKnowledgeSkillsAbilitiesFields,
+        // setOriginalKnowledgeSkillsAbilitiesFields,
+        initialEditStatus = {};
+        const originalKnowledgeSkillsAbilitiesFieldsValue = effectiveData.knowledge_skills_abilities?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        if (!originalValuesSet) setOriginalKnowledgeSkillsAbilitiesFields(originalKnowledgeSkillsAbilitiesFieldsValue);
+
+        originalKnowledgeSkillsAbilitiesFieldsValue?.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalKnowledgeSkillsAbilitiesFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        setEditedKnowledgeSkillsAbilitiesFields(initialEditStatus);
+
+        // PROVISOS
+        // originalProvisosFields,
+        // setOriginalProvisosFields,
+        initialEditStatus = {};
+        const originalProvisosFieldsValue = effectiveData.willingness_statements?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        if (!originalValuesSet) setOriginalProvisosFields(originalProvisosFieldsValue);
+
+        // Iterate over each proviso field and compare with the original value
+        originalProvisosFieldsValue?.forEach((item, index) => {
+          // Determine if the field has been edited
+          const isEdited = item.value !== originalProvisosFields[index]?.value;
+          initialEditStatus[index] = isEdited;
+        });
+
+        setEditedProvisosFields(initialEditStatus);
+
         // TITLE
         // Set the original value for title
         const originalTitleValue =
@@ -313,6 +479,7 @@ const WizardEditProfile = forwardRef(
         if (!originalValuesSet) setOriginalTitle(originalTitleValue);
         setTitleEdited(originalTitle.value !== originalTitleValue.value);
 
+        // OVERVIEW
         const originalOverviewValue =
           typeof effectiveData.overview === 'string'
             ? {
@@ -328,9 +495,27 @@ const WizardEditProfile = forwardRef(
         if (!originalValuesSet) setOriginalOverview(originalOverviewValue);
         setOverviewEdited(originalOverview.value !== originalOverviewValue.value);
 
+        // PROGRAM OVERVIEW
+        const originalProgramOverviewValue =
+          typeof effectiveData.program_overview === 'string'
+            ? {
+                value: effectiveData.program_overview,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: effectiveData.program_overview.value,
+                isCustom: effectiveData.program_overview.isCustom,
+                disabled: effectiveData.program_overview.disabled,
+              };
+        if (!originalValuesSet) setOriginalProgramOverview(originalProgramOverviewValue);
+        setProgramOverviewEdited(originalProgramOverviewValue.value !== originalProgramOverviewValue.value);
+
+        // DONE FIELDS
         if (!originalValuesSet) setOriginalValuesSet(true);
 
         // console.log('effectiveData?.context?.description: ', effectiveData?.context?.description);
+        console.log('originalProfessionalRegistrationFieldsValue: ', originalProfessionalRegistrationFieldsValue);
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
@@ -338,6 +523,7 @@ const WizardEditProfile = forwardRef(
           context:
             typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description,
           overview: originalOverviewValue,
+          program_overview: originalProgramOverviewValue,
           classifications: classificationIds,
           // array fileds are required to be nested in objects, so wrap string values in {value: item}
           accountabilities: originalAccReqFieldsValue,
@@ -346,9 +532,16 @@ const WizardEditProfile = forwardRef(
           job_experience: originalRelWorkFieldsValue,
           security_screenings: originalSecurityScreeningsFieldsValue,
           behavioural_competencies: effectiveData?.behavioural_competencies || [],
+
+          professional_registration: originalProfessionalRegistrationFieldsValue,
+          preferences: originalPreferencesFieldsValue,
+          knowledge_skills_abilities: originalKnowledgeSkillsAbilitiesFieldsValue,
+          provisos: originalProvisosFieldsValue,
+          optional_requirements: originalOptionalRequirementsFieldsValue,
         });
       }
       setRenderKey((prevKey) => prevKey + 1);
+      console.log('reset!');
     }, [
       effectiveData,
       isLoading,
@@ -361,8 +554,8 @@ const WizardEditProfile = forwardRef(
       setOriginalOverview,
       setOriginalTitle,
       setOriginalValuesSet,
-      originalOverview.value,
-      originalTitle.value,
+      originalOverview,
+      originalTitle,
       originalAccReqFields,
       originalMinReqFields,
       originalOptReqFields,
@@ -370,6 +563,17 @@ const WizardEditProfile = forwardRef(
       setOriginalRelWorkFields,
       originalSecurityScreeningsFields,
       setOriginalSecurityScreeningsFields,
+      setOriginalProgramOverview,
+      originalKnowledgeSkillsAbilitiesFields,
+      originalPreferencesFields,
+      originalProfessionalRegistrationFields,
+      originalProvisosFields,
+      setOriginalKnowledgeSkillsAbilitiesFields,
+      setOriginalPreferencesFields,
+      setOriginalProfessionalRegistrationFields,
+      setOriginalProvisosFields,
+      originalOptionalRequirementsFields,
+      setOriginalOptionalRequirementsFields,
     ]);
 
     // Required Accountability Fields
@@ -423,6 +627,56 @@ const WizardEditProfile = forwardRef(
     } = useFieldArray({
       control,
       name: 'security_screenings',
+    });
+
+    const {
+      fields: professional_registration_fields,
+      append: professional_registration_append,
+      remove: professional_registration_remove,
+      update: professional_registration_update,
+    } = useFieldArray({
+      control,
+      name: 'professional_registration',
+    });
+
+    const {
+      fields: optional_requirements_fields,
+      append: optional_requirements_append,
+      remove: optional_requirements_remove,
+      update: optional_requirements_update,
+    } = useFieldArray({
+      control,
+      name: 'optional_requirements',
+    });
+
+    const {
+      fields: preferences_fields,
+      append: preferences_append,
+      remove: preferences_remove,
+      update: preferences_update,
+    } = useFieldArray({
+      control,
+      name: 'preferences',
+    });
+
+    const {
+      fields: knowledge_skills_abilities_fields,
+      append: knowledge_skills_abilities_append,
+      remove: knowledge_skills_abilities_remove,
+      update: knowledge_skills_abilities_update,
+    } = useFieldArray({
+      control,
+      name: 'knowledge_skills_abilities',
+    });
+
+    const {
+      fields: provisos_fields,
+      append: provisos_append,
+      remove: provisos_remove,
+      update: provisos_update,
+    } = useFieldArray({
+      control,
+      name: 'provisos',
     });
 
     const {
@@ -1133,6 +1387,539 @@ const WizardEditProfile = forwardRef(
       );
     };
 
+    // PROFESSIONAL REGISTRATION DIFF
+    const handleProfessionalRegistrationRemove = (index: number) => {
+      const currentValues = getValues('professional_registration');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            professional_registration_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        professional_registration_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+      trigger();
+    };
+
+    // Function to add back a removed field
+    const handleProfessionalRegistrationAddBack = (index: number) => {
+      const currentValues = getValues('professional_registration');
+      professional_registration_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleProfessionalRegistrationAddNew = () => {
+      professional_registration_append({ value: '', isCustom: true, disabled: false });
+      trigger();
+    };
+
+    const [editedProfessionalRegistrationFields, setEditedProfessionalRegistrationFields] = useState<{
+      [key: number]: boolean;
+    }>({});
+
+    const renderProfessionalRegistrationFields = (field: any, index: number) => {
+      const isEdited = editedProfessionalRegistrationFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedProfessionalRegistrationFields((prev) => ({
+          ...prev,
+          [index]: updatedValue !== originalProfessionalRegistrationFields[index]?.value,
+        }));
+        trigger();
+      };
+      // console.log('field', JSON.stringify(field));
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`professional_registration.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`professional_registration.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`professional_registration.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleProfessionalRegistrationAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleProfessionalRegistrationRemove(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          )}
+        </List.Item>
+      );
+    };
+
+    // OPTIONAL REQUIREMENTS DIFF
+    const handleOptionalRequirementsRemove = (index: number) => {
+      const currentValues = getValues('optional_requirements');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            optional_requirements_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        optional_requirements_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+      trigger();
+    };
+
+    // Function to add back a removed field
+    const handleOptionalRequirementsAddBack = (index: number) => {
+      const currentValues = getValues('optional_requirements');
+      optional_requirements_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleOptionalRequirementsAddNew = () => {
+      optional_requirements_append({ value: '', isCustom: true, disabled: false });
+      trigger();
+    };
+
+    const [editedOptionalRequirementsFields, setEditedOptionalRequirementsFields] = useState<{
+      [key: number]: boolean;
+    }>({});
+
+    const renderOptionalRequirementsFields = (field: any, index: number) => {
+      const isEdited = editedOptionalRequirementsFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedOptionalRequirementsFields((prev) => ({
+          ...prev,
+          [index]: updatedValue !== originalOptionalRequirementsFields[index]?.value,
+        }));
+        trigger();
+      };
+      // console.log('field', JSON.stringify(field));
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`optional_requirements.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`optional_requirements.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`optional_requirements.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleOptionalRequirementsAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleOptionalRequirementsRemove(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          )}
+        </List.Item>
+      );
+    };
+
+    // PREFERENCES DIFF
+    const handlePreferencesRemove = (index: number) => {
+      const currentValues = getValues('preferences');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            preferences_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        preferences_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+      trigger();
+    };
+
+    // Function to add back a removed field
+    const handlePreferencesAddBack = (index: number) => {
+      const currentValues = getValues('preferences');
+      preferences_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handlePreferencesAddNew = () => {
+      preferences_append({ value: '', isCustom: true, disabled: false });
+      trigger();
+    };
+
+    const [editedPreferencesFields, setEditedPreferencesFields] = useState<{ [key: number]: boolean }>({});
+
+    const renderPreferencesFields = (field: any, index: number) => {
+      const isEdited = editedPreferencesFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedPreferencesFields((prev) => ({
+          ...prev,
+          [index]: updatedValue !== originalPreferencesFields[index]?.value,
+        }));
+        trigger();
+      };
+      // console.log('field', JSON.stringify(field));
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`preferences.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`preferences.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`preferences.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handlePreferencesAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handlePreferencesRemove(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          )}
+        </List.Item>
+      );
+    };
+
+    // KNOWLEDGE SKILL ABILITIES DIFF
+    const handleKnowledgeSkillsAbilitiesRemove = (index: number) => {
+      const currentValues = getValues('knowledge_skills_abilities');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            knowledge_skills_abilities_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        knowledge_skills_abilities_update(index, {
+          ...(currentValues[index] as TrackedFieldArrayItem),
+          disabled: true,
+        });
+      }
+      trigger();
+    };
+
+    // Function to add back a removed field
+    const handleKnowledgeSkillsAbilitiesAddBack = (index: number) => {
+      const currentValues = getValues('knowledge_skills_abilities');
+      knowledge_skills_abilities_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleKnowledgeSkillsAbilitiesAddNew = () => {
+      knowledge_skills_abilities_append({ value: '', isCustom: true, disabled: false });
+      trigger();
+    };
+
+    const [editedKnowledgeSkillsAbilitiesFields, setEditedKnowledgeSkillsAbilitiesFields] = useState<{
+      [key: number]: boolean;
+    }>({});
+
+    const renderKnowledgeSkillsAbilitiesFields = (field: any, index: number) => {
+      const isEdited = editedKnowledgeSkillsAbilitiesFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedKnowledgeSkillsAbilitiesFields((prev) => ({
+          ...prev,
+          [index]: updatedValue !== originalKnowledgeSkillsAbilitiesFields[index]?.value,
+        }));
+        trigger();
+      };
+      // console.log('field', JSON.stringify(field));
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`knowledge_skills_abilities.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`knowledge_skills_abilities.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`knowledge_skills_abilities.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleKnowledgeSkillsAbilitiesAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleKnowledgeSkillsAbilitiesRemove(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          )}
+        </List.Item>
+      );
+    };
+
+    // PROVISOS DIFF
+    const handleProvisosRemove = (index: number) => {
+      const currentValues = getValues('provisos');
+      if ((currentValues[index] as TrackedFieldArrayItem).isCustom) {
+        // If it's a custom field, remove it from the form
+        Modal.confirm({
+          title: 'Are you sure you want to delete this item?',
+          content: 'This action cannot be undone.',
+          onOk: () => {
+            // If confirmed, remove the item
+            provisos_remove(index);
+          },
+        });
+      } else {
+        // If it's an original field, mark as disabled
+        provisos_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      }
+      trigger();
+    };
+
+    // Function to add back a removed field
+    const handleProvisosAddBack = (index: number) => {
+      const currentValues = getValues('provisos');
+      provisos_update(index, { ...currentValues[index], disabled: false });
+    };
+
+    // Function to handle adding a new field
+    const handleProvisosAddNew = () => {
+      provisos_append({ value: '', isCustom: true, disabled: false });
+      trigger();
+    };
+
+    const [editedProvisosFields, setEditedProvisosFields] = useState<{ [key: number]: boolean }>({});
+
+    const renderProvisosFields = (field: any, index: number) => {
+      const isEdited = editedProvisosFields[index] || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setEditedProvisosFields((prev) => ({
+          ...prev,
+          [index]: updatedValue !== originalProvisosFields[index]?.value,
+        }));
+        trigger();
+      };
+      // console.log('field', JSON.stringify(field));
+      return (
+        <List.Item
+          key={field.id}
+          style={{
+            textDecoration: field.disabled ? 'line-through' : 'none',
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginBottom: '0px',
+            borderBottom: 'none',
+          }}
+        >
+          <FormItem name={`provisos.${index}.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`provisos.${index}.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            name={`provisos.${index}.value`}
+            control={control}
+            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+          >
+            <TextArea
+              autoSize
+              disabled={field.disabled}
+              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+              onChange={handleFieldChange}
+            />
+          </FormItem>
+          {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleProvisosAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          ) : (
+            <Button
+              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                handleProvisosRemove(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+              }}
+            />
+          )}
+        </List.Item>
+      );
+    };
     // TITLE DIFF
 
     const [titleEdited, setTitleEdited] = useState<boolean>(false);
@@ -1197,13 +1984,89 @@ const WizardEditProfile = forwardRef(
             name="overview.value"
             control={control}
             colon={false}
-            label={<span style={titleStyle}>Overview</span>}
+            label={<span style={titleStyle}>Job overview</span>}
           >
             <TextArea autoSize className={`${isEdited ? 'edited-textarea' : ''}`} onChange={handleFieldChange} />
           </FormItem>
         </>
       );
     };
+
+    // PROGRAM OVERVIEW
+
+    const [programOverviewEdited, setProgramOverviewEdited] = useState<boolean>(false);
+
+    const renderProgramOverview = (field: any) => {
+      console.log('renderProgramOverview: ', field);
+      if (!field) return null;
+
+      const isEdited = programOverviewEdited || field.isCustom;
+
+      const handleFieldChange = (event: any) => {
+        const updatedValue = event.target.value;
+        setProgramOverviewEdited(() => updatedValue !== originalProgramOverview?.value);
+      };
+
+      return (
+        <>
+          <FormItem name={`program_overview.disabled`} control={control} hidden>
+            <Input />
+          </FormItem>
+          <FormItem name={`program_overview.isCustom`} control={control} hidden>
+            <Input />
+          </FormItem>
+
+          <FormItem
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
+            name="program_overview.value"
+            control={control}
+            colon={false}
+            label={<span style={titleStyle}>Program overview</span>}
+            style={{ marginBottom: 0 }}
+          >
+            <TextArea
+              autoSize
+              className={`${isEdited ? 'edited-textarea' : ''}`}
+              onChange={handleFieldChange}
+              maxLength={320}
+              placeholder="(Optional) Add more details about the program"
+            />
+          </FormItem>
+          <Typography.Paragraph type="secondary" style={{ textAlign: 'right', width: '100%', margin: '0' }}>
+            {(getValues('program_overview.value') as string).length} / 320
+          </Typography.Paragraph>
+        </>
+      );
+    };
+
+    // DIFFS DONE
+
+    const [getPositionProfile, { data: positionProfileData, isFetching: isFetchingPositionProfile }] =
+      useLazyGetPositionProfileQuery();
+
+    const { data: positionRequestData } = useGetPositionRequestQuery({
+      id: positionRequestId ? positionRequestId : -1,
+    });
+
+    useEffect(() => {
+      if (positionRequestData?.positionRequest?.reports_to_position_id) {
+        getPositionProfile({ positionNumber: positionRequestData.positionRequest.reports_to_position_id.toString() });
+      }
+    }, [positionRequestData, getPositionProfile]);
+
+    const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel>();
+    const [additionalPositions, setAdditionalPositions] = useState(0);
+
+    useEffect(() => {
+      if (positionProfileData && positionProfileData.positionProfile) {
+        const activePositions = positionProfileData.positionProfile.filter((p) => p.status === 'Active');
+        setFirstActivePosition(activePositions[0] || null);
+
+        // Set state to the number of additional active positions
+        setAdditionalPositions(positionProfileData.positionProfile.length - 1);
+      }
+    }, [positionProfileData]);
 
     if (isLoading || renderKey === 0) {
       return <p>Loading...</p>;
@@ -1231,7 +2094,24 @@ const WizardEditProfile = forwardRef(
       <>
         <Row gutter={[24, 24]}>
           <Col xs={24} sm={24} lg={8}>
+            <Alert
+              type="info"
+              showIcon
+              message="Job context"
+              description={
+                <p
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(
+                      typeof effectiveData?.context === 'string'
+                        ? effectiveData?.context
+                        : effectiveData?.context?.description ?? '',
+                    ),
+                  }}
+                ></p>
+              }
+            ></Alert>
             <Descriptions
+              style={{ marginTop: '1rem' }}
               title={
                 <div>
                   Job Details
@@ -1250,7 +2130,20 @@ const WizardEditProfile = forwardRef(
                 {effectiveData?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
-                Hill, Nathan CITZ:EX Sr. Director, Digital Portfolio
+                {isFetchingPositionProfile && <>Loading...</>}
+                {firstActivePosition && !isFetchingPositionProfile && (
+                  <div>
+                    <p
+                      style={{ margin: 0 }}
+                    >{`${firstActivePosition.employeeName}, ${firstActivePosition.ministry}`}</p>
+                    <Typography.Paragraph type="secondary">
+                      {`${firstActivePosition.positionDescription}, ${firstActivePosition.classification}`}
+                      <br></br>
+                      {`Position No.: ${firstActivePosition.positionNumber}`}
+                      {additionalPositions > 0 && ` +${additionalPositions}`}
+                    </Typography.Paragraph>
+                  </div>
+                )}
               </Descriptions.Item>
               <Descriptions.Item label="Job Store #">{effectiveData?.number}</Descriptions.Item>
             </Descriptions>
@@ -1260,6 +2153,7 @@ const WizardEditProfile = forwardRef(
               form={form}
               key={renderKey}
               onFinish={handleSubmit((data) => {
+                console.log('onFinish: ', data);
                 submitHandler?.(data);
               })}
             >
@@ -1321,20 +2215,10 @@ const WizardEditProfile = forwardRef(
 
               {!config?.contextEditable ? (
                 <Alert
+                  type="info"
                   role="note"
                   style={{ marginBottom: '24px' }}
-                  message="Your organization must follow the following criteria in order for this role to be feasible"
-                  description={
-                    <>
-                      <div></div>
-                      <b style={{ marginTop: '10px', display: 'block' }}>
-                        {typeof effectiveData?.context === 'string'
-                          ? effectiveData?.context
-                          : effectiveData?.context.description}
-                      </b>
-                    </>
-                  }
-                  type="warning"
+                  message="Some fields are standard and cannot be edited, others are marked as significant and may result in a classification request.  Those not marked as significant or shaded, may be edited without a classification impact."
                   showIcon
                 />
               ) : (
@@ -1354,6 +2238,8 @@ const WizardEditProfile = forwardRef(
               <Row gutter={24}>
                 <Col xl={24}>
                   {renderTitle(getValues('title'))}
+
+                  {renderProgramOverview(getValues('program_overview'))}
 
                   {config?.classificationEditable ? (
                     <></>
@@ -1388,7 +2274,7 @@ const WizardEditProfile = forwardRef(
                   {renderOverview(getValues('overview'))}
 
                   <Title level={4} style={titleStyle}>
-                    Required Accountabilities
+                    Accountabilities
                   </Title>
 
                   <Alert
@@ -1396,7 +2282,8 @@ const WizardEditProfile = forwardRef(
                     style={{ marginBottom: '10px', marginTop: '1rem' }}
                     message={
                       <>
-                        Removing required accountabilities <strong>may</strong> trigger a classification review
+                        Choose from the provided list of accountabilities to avoid the review by the classification team
+                        and create your position right away
                       </>
                     }
                     type="warning"
@@ -1404,8 +2291,7 @@ const WizardEditProfile = forwardRef(
                   />
 
                   <>
-                    <List dataSource={acc_req_fields} renderItem={renderAccReqFields} />
-
+                    {acc_req_fields.length > 0 && <List dataSource={acc_req_fields} renderItem={renderAccReqFields} />}
                     <Button
                       type="link"
                       icon={<PlusOutlined />}
@@ -1422,11 +2308,10 @@ const WizardEditProfile = forwardRef(
                   </>
 
                   <Title level={4} style={titleStyle}>
-                    Optional Accountabilities
+                    Optional accountabilities
                   </Title>
                   <>
-                    <List dataSource={acc_opt_fields} renderItem={renderOptReqFields} />
-
+                    {acc_opt_fields.length > 0 && <List dataSource={acc_opt_fields} renderItem={renderOptReqFields} />}
                     <Button
                       type="link"
                       icon={<PlusOutlined />}
@@ -1449,15 +2334,24 @@ const WizardEditProfile = forwardRef(
                     style={{ marginBottom: '10px', marginTop: '1rem' }}
                     message={
                       <>
-                        Significant changes to this area <strong>may</strong> trigger a classification review
+                        Keep the minimum job requirements to avoid the review by the classification team and create your
+                        position right away
                       </>
                     }
                     type="warning"
                     showIcon
                   />
 
+                  <Typography.Paragraph type="secondary">
+                    Minimum years of experience are required, and you may add or refine the education requirements (add
+                    a degree or diploma program). These equivalencies are designed to be inclusive of different
+                    backgrounds.
+                  </Typography.Paragraph>
+
                   <>
-                    <List dataSource={education_fields} renderItem={renderMinReqFields} />
+                    {education_fields.length > 0 && (
+                      <List dataSource={education_fields} renderItem={renderMinReqFields} />
+                    )}
                     <Button
                       type="link"
                       icon={<PlusOutlined />}
@@ -1479,7 +2373,7 @@ const WizardEditProfile = forwardRef(
                     Related experience
                   </Title>
 
-                  <Alert
+                  {/* <Alert
                     role="note"
                     style={{ marginBottom: '10px', marginTop: '1rem' }}
                     message={
@@ -1489,10 +2383,12 @@ const WizardEditProfile = forwardRef(
                     }
                     type="warning"
                     showIcon
-                  />
+                  /> */}
 
                   <>
-                    <List dataSource={job_experience_fields} renderItem={renderRelWorkFields} />
+                    {job_experience_fields.length > 0 && (
+                      <List dataSource={job_experience_fields} renderItem={renderRelWorkFields} />
+                    )}
                     <Button
                       type="link"
                       icon={<PlusOutlined />}
@@ -1504,7 +2400,109 @@ const WizardEditProfile = forwardRef(
                         }, false);
                       }}
                     >
-                      Add another related experience
+                      Add a related experience
+                    </Button>
+                  </>
+
+                  {/* Professional registration requirements */}
+
+                  <Title level={4} style={titleStyle}>
+                    Professional registration requirement
+                  </Title>
+                  <Typography.Paragraph type="secondary">
+                    Professional registration is required for a number of positions in the BC Public Service. You can
+                    add those requirements here.
+                  </Typography.Paragraph>
+
+                  <>
+                    {professional_registration_fields.length > 0 && (
+                      <List
+                        dataSource={professional_registration_fields}
+                        renderItem={renderProfessionalRegistrationFields}
+                      />
+                    )}
+                    <Button
+                      type="link"
+                      icon={<PlusOutlined />}
+                      style={addStyle}
+                      onClick={() => {
+                        handleProfessionalRegistrationAddNew();
+                        setRenderKey((prevKey) => prevKey + 1);
+                      }}
+                    >
+                      Add a professional registration requirement
+                    </Button>
+                  </>
+
+                  {/* Preferences */}
+
+                  <Title level={4} style={titleStyle}>
+                    Preferences
+                  </Title>
+
+                  <>
+                    {preferences_fields.length > 0 && (
+                      <List dataSource={preferences_fields} renderItem={renderPreferencesFields} />
+                    )}
+                    <Button
+                      type="link"
+                      icon={<PlusOutlined />}
+                      style={addStyle}
+                      onClick={() => {
+                        handlePreferencesAddNew();
+                        setRenderKey((prevKey) => prevKey + 1);
+                      }}
+                    >
+                      Add a job preference
+                    </Button>
+                  </>
+
+                  {/* Knowledge, skills and abilities */}
+
+                  <Title level={4} style={titleStyle}>
+                    Knowledge, skills and abilities
+                  </Title>
+
+                  <>
+                    {knowledge_skills_abilities_fields.length > 0 && (
+                      <List
+                        dataSource={knowledge_skills_abilities_fields}
+                        renderItem={renderKnowledgeSkillsAbilitiesFields}
+                      />
+                    )}
+                    <Button
+                      type="link"
+                      icon={<PlusOutlined />}
+                      style={addStyle}
+                      onClick={() => {
+                        handleKnowledgeSkillsAbilitiesAddNew();
+                        setRenderKey((prevKey) => prevKey + 1);
+                      }}
+                    >
+                      Add a knowledge, skill or ability requirement
+                    </Button>
+                  </>
+
+                  {/* Willingness statements or provisos */}
+
+                  <Title level={4} style={titleStyle}>
+                    Willingness statements or provisos
+                  </Title>
+
+                  <>
+                    {provisos_fields.length > 0 && (
+                      <List dataSource={provisos_fields} renderItem={renderProvisosFields} />
+                    )}
+                    <Button
+                      type="link"
+                      icon={<PlusOutlined />}
+                      style={addStyle}
+                      onClick={() => {
+                        handleProvisosAddNew();
+                        setRenderKey((prevKey) => prevKey + 1);
+                      }}
+                    >
+                      Add a proviso
                     </Button>
                   </>
 
@@ -1514,20 +2512,10 @@ const WizardEditProfile = forwardRef(
                     Security screenings
                   </Title>
 
-                  <Alert
-                    role="note"
-                    style={{ marginBottom: '10px', marginTop: '1rem' }}
-                    message={
-                      <>
-                        Significant changes to this area <strong>may</strong> trigger a classification review
-                      </>
-                    }
-                    type="warning"
-                    showIcon
-                  />
-
                   <>
-                    <List dataSource={security_screenings_fields} renderItem={renderSecurityScreeningsFields} />
+                    {security_screenings_fields.length > 0 && (
+                      <List dataSource={security_screenings_fields} renderItem={renderSecurityScreeningsFields} />
+                    )}
                     <Button
                       type="link"
                       icon={<PlusOutlined />}
@@ -1540,6 +2528,29 @@ const WizardEditProfile = forwardRef(
                       }}
                     >
                       Add another security screening
+                    </Button>
+                  </>
+
+                  {/* Optional requirements */}
+
+                  <Title level={4} style={titleStyle}>
+                    Optional requirements
+                  </Title>
+
+                  <>
+                    {optional_requirements_fields.length > 0 && (
+                      <List dataSource={optional_requirements_fields} renderItem={renderOptionalRequirementsFields} />
+                    )}
+                    <Button
+                      type="link"
+                      icon={<PlusOutlined />}
+                      style={addStyle}
+                      onClick={() => {
+                        handleOptionalRequirementsAddNew();
+                        setRenderKey((prevKey) => prevKey + 1);
+                      }}
+                    >
+                      Add an optional requirement
                     </Button>
                   </>
 

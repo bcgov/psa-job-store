@@ -61,6 +61,11 @@ export class OverviewField extends TrackedFieldArrayItem {
   declare value: string;
 }
 
+export class ProgramOverviewField extends TrackedFieldArrayItem {
+  @Length(0, 320, { message: 'Program overview must be between 0 and 320 characters.' })
+  declare value: string;
+}
+
 function getItemValue(item: string | TrackedFieldArrayItem | AccountabilitiesModel): string {
   if (!item) return '';
   if (typeof item === 'string') {
@@ -124,6 +129,10 @@ export class JobProfileValidationModel {
   @Type(() => OverviewField)
   overview: OverviewField | string;
 
+  @ValidateNested()
+  @Type(() => ProgramOverviewField)
+  program_overview: ProgramOverviewField | string;
+
   @AllDisabled({ message: 'There must be at least one accountability.' })
   accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
@@ -137,6 +146,12 @@ export class JobProfileValidationModel {
   security_screenings: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
+
+  professional_registration: (TrackedFieldArrayItem | ValueString)[];
+  preferences: (TrackedFieldArrayItem | ValueString)[];
+  knowledge_skills_abilities: (TrackedFieldArrayItem | ValueString)[];
+  provisos: (TrackedFieldArrayItem | ValueString)[];
+  optional_requirements: (TrackedFieldArrayItem | ValueString)[];
 }
 
 export const JobProfile: React.FC<JobProfileProps> = ({

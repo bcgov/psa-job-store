@@ -71,6 +71,9 @@ export class JobProfileCountOrderByAggregateInput {
   willingness_statements?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  optional_requirements?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   security_screenings?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

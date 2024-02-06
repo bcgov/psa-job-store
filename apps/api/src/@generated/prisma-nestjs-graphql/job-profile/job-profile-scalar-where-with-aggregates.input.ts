@@ -87,6 +87,9 @@ export class JobProfileScalarWhereWithAggregatesInput {
   @Field(() => StringListFilter, { nullable: true })
   willingness_statements?: StringListFilter;
 
+  @Field(() => StringListFilter, { nullable: true })
+  optional_requirements?: StringListFilter;
+
   @Field(() => JsonWithAggregatesFilter, { nullable: true })
   security_screenings?: JsonWithAggregatesFilter;
 

@@ -69,6 +69,9 @@ export class JobProfileUpdateWithoutBehavioural_competenciesInput {
   @Field(() => [String], { nullable: true })
   willingness_statements?: Array<string>;
 
+  @Field(() => [String], { nullable: true })
+  optional_requirements?: Array<string>;
+
   @Field(() => GraphQLJSON, { nullable: true })
   security_screenings?: any;
 

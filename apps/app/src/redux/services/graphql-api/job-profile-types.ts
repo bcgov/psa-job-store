@@ -113,10 +113,11 @@ export interface JobProfileModel {
   review_required: boolean;
   professions: ProfessionsModel[];
   program_overview: string | TrackedFieldArrayItem;
-  professional_registration_requirements: string[];
-  preferences: string[];
-  knowledge_skills_abilities: string[];
-  willingness_statements: string[];
+  professional_registration_requirements: TrackedFieldArrayItem[];
+  optional_requirements: TrackedFieldArrayItem[];
+  preferences: TrackedFieldArrayItem[];
+  knowledge_skills_abilities: TrackedFieldArrayItem[];
+  willingness_statements: TrackedFieldArrayItem[];
   security_screenings: SecuritiyScreeningModel[];
   all_organizations: boolean;
   all_reports_to: boolean;
@@ -257,6 +258,7 @@ export interface CreateJobProfileInput {
     education: string[];
     job_experience: string[];
     professional_registration_requirements: string[];
+    optional_requirements: string[];
     preferences: string[];
     knowledge_skills_abilities: string[];
     willingness_statements: string[];

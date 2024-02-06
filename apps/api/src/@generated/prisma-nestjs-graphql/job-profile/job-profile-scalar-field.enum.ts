@@ -23,6 +23,7 @@ export enum JobProfileScalarFieldEnum {
   preferences = 'preferences',
   knowledge_skills_abilities = 'knowledge_skills_abilities',
   willingness_statements = 'willingness_statements',
+  optional_requirements = 'optional_requirements',
   security_screenings = 'security_screenings',
   total_comp_create_form_misc = 'total_comp_create_form_misc',
 }

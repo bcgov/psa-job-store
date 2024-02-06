@@ -70,6 +70,9 @@ export class JobProfileCountAggregateInput {
   willingness_statements?: true;
 
   @Field(() => Boolean, { nullable: true })
+  optional_requirements?: true;
+
+  @Field(() => Boolean, { nullable: true })
   security_screenings?: true;
 
   @Field(() => Boolean, { nullable: true })
