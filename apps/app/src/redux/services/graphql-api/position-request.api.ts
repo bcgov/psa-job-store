@@ -51,6 +51,13 @@ export interface GetPositionRequestResponseContent {
   parent_job_profile?: {
     number: number;
   };
+
+  additional_info_work_location_id?: string;
+  additional_info_department_id?: string;
+  additional_info_excluded_mgr_position_number?: string;
+  additional_info_comments?: string;
+
+  crm_id?: string;
 }
 
 export interface GetPositionRequestResponse {
@@ -93,6 +100,19 @@ export interface UpdatePositionRequestInput {
   classification_id?: string;
   submission_id?: string;
   status?: string;
+
+  workLocation?: {
+    connect: {
+      id: string;
+    };
+  };
+  paylist_department?: {
+    connect: {
+      id: string;
+    };
+  };
+  additional_info_excluded_mgr_position_number?: string;
+  additional_info_comments?: string;
   parent_job_profile?: {
     connect: {
       id: number;
@@ -103,6 +123,10 @@ export interface UpdatePositionRequestInput {
       id: string;
     };
   };
+}
+
+export interface SubmitPositionRequestInput {
+  id: number;
 }
 
 export interface GetPositionRequestsArgs {
@@ -185,6 +209,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 parent_job_profile {
                   number
                 }
+                crm_id
               }
               positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
                 draft
@@ -236,6 +261,11 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   parent_job_profile {
                     number
                   }
+                  additional_info_work_location_id
+                  additional_info_department_id
+                  additional_info_excluded_mgr_position_number
+                  additional_info_comments
+                  crm_id
               }
           }
           `,
@@ -273,6 +303,39 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               ...input,
               id: undefined,
             },
+          },
+        };
+      },
+    }),
+    submitPositionRequest: build.mutation<GetPositionRequestResponse, SubmitPositionRequestInput>({
+      invalidatesTags: ['positionRequest'],
+      query: (input: SubmitPositionRequestInput) => {
+        return {
+          document: gql`
+            mutation SubmitPositionRequest($id: Int!) {
+              submitPositionRequest(id: $id) {
+                id
+                step
+                reports_to_position_id
+                department_id
+                parent_job_profile_id
+                profile_json
+                user_id
+                title
+                position_number
+                classification_id
+                classification_code
+                user_name
+                email
+                submission_id
+                approved_at
+                status
+                updated_at
+              }
+            }
+          `,
+          variables: {
+            id: input.id,
           },
         };
       },
@@ -372,6 +435,7 @@ export const {
   useLazyGetPositionRequestQuery,
   useCreatePositionRequestMutation,
   useUpdatePositionRequestMutation,
+  useSubmitPositionRequestMutation,
   useGetPositionRequestsCountQuery,
   useGetPositionRequestClassificationsQuery,
   useGetPositionRequestJobStoreNumbersQuery,

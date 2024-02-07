@@ -4,6 +4,7 @@ import { SortOrder } from '../prisma/sort-order.enum';
 import { SortOrderInput } from '../prisma/sort-order.input';
 import { JobProfileOrderByWithRelationAndSearchRelevanceInput } from '../job-profile/job-profile-order-by-with-relation-and-search-relevance.input';
 import { DepartmentOrderByWithRelationAndSearchRelevanceInput } from '../department/department-order-by-with-relation-and-search-relevance.input';
+import { LocationOrderByWithRelationAndSearchRelevanceInput } from '../location/location-order-by-with-relation-and-search-relevance.input';
 import { PositionRequestOrderByRelevanceInput } from './position-request-order-by-relevance.input';
 
 @InputType()
@@ -74,11 +75,29 @@ export class PositionRequestOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrder, { nullable: true })
   updated_at?: keyof typeof SortOrder;
 
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info_work_location_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info_department_id?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info_excluded_mgr_position_number?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info_comments?: SortOrderInput;
+
   @Field(() => JobProfileOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   parent_job_profile?: JobProfileOrderByWithRelationAndSearchRelevanceInput;
 
   @Field(() => DepartmentOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   department?: DepartmentOrderByWithRelationAndSearchRelevanceInput;
+
+  @Field(() => LocationOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
+  workLocation?: LocationOrderByWithRelationAndSearchRelevanceInput;
+
+  @Field(() => DepartmentOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
+  paylist_department?: DepartmentOrderByWithRelationAndSearchRelevanceInput;
 
   @Field(() => PositionRequestOrderByRelevanceInput, { nullable: true })
   _relevance?: PositionRequestOrderByRelevanceInput;

@@ -6,6 +6,7 @@ import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { LocationRelationFilter } from '../location/location-relation-filter.input';
 import { OrganizationRelationFilter } from '../organization/organization-relation-filter.input';
 import { PositionRequestListRelationFilter } from '../position-request/position-request-list-relation-filter.input';
+import { ClassificationDepartmentListRelationFilter } from '../classification-department/classification-department-list-relation-filter.input';
 
 @InputType()
 export class DepartmentWhereUniqueInput {
@@ -50,4 +51,10 @@ export class DepartmentWhereUniqueInput {
 
   @Field(() => PositionRequestListRelationFilter, { nullable: true })
   PositionRequest?: PositionRequestListRelationFilter;
+
+  @Field(() => PositionRequestListRelationFilter, { nullable: true })
+  PositionRequestsByPaylistDepartment?: PositionRequestListRelationFilter;
+
+  @Field(() => ClassificationDepartmentListRelationFilter, { nullable: true })
+  classifications?: ClassificationDepartmentListRelationFilter;
 }

@@ -21,9 +21,50 @@ Project is also configured to generate reports with `jest-html-reporter`, which 
 
 To update the seed file, run `oc set data secret/seed-secret --from-file=seed.ts`
 
+## To generate new changeset entry
+
+When completing a feature, run
+
+`npx changeset`
+
+in the project root and follow the prompts. This info is going to be automatically included in change log.
+
 ## @generated files and slow commits
 
 To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)
+
+## To apply a db change via db migration
+
+If first time, set the baseline migration:
+`npx -w api prisma migrate resolve --applied 0_init`
+
+To reset database with migrations:
+
+`prisma migrate reset` - this will reset the schema and apply the migrations in order.
+
+Create migration:
+`npx -w api prisma migrate dev --name MIGRATION_NAME`
+
+## Making a database backup to local drive
+
+Login to psql pod:
+`oc exec -it  SQL_POD_NAME -- /bin/bash`
+`cd ~`
+
+Get db info:
+
+`psql`
+`psql \l`
+
+Create dump:
+`pg_dump -U USER_NAME DB_NAME > backup.sql`
+
+Exit pod and copy file:
+`oc rsync SQL_POD_NAME:/var/lib/pgsql/backup.sql ~/`
+
+Remove remote backup file:
+
+`oc exec SQL_POD_NAME -- rm /var/lib/pgsql/backup.sql`
 
 ## Recursive relationships in schema.prisma
 

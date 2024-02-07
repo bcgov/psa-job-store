@@ -101,6 +101,9 @@ export class JobProfileWhereUniqueInput {
   @Field(() => StringListFilter, { nullable: true })
   willingness_statements?: StringListFilter;
 
+  @Field(() => StringListFilter, { nullable: true })
+  optional_requirements?: StringListFilter;
+
   @Field(() => JsonFilter, { nullable: true })
   security_screenings?: JsonFilter;
 

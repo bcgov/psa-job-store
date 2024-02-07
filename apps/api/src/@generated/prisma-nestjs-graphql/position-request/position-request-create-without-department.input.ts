@@ -4,6 +4,8 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 import { JobProfileCreateNestedOneWithoutPosition_requestInput } from '../job-profile/job-profile-create-nested-one-without-position-request.input';
+import { LocationCreateNestedOneWithoutPositionRequestsInput } from '../location/location-create-nested-one-without-position-requests.input';
+import { DepartmentCreateNestedOneWithoutPositionRequestsByPaylistDepartmentInput } from '../department/department-create-nested-one-without-position-requests-by-paylist-department.input';
 
 @InputType()
 export class PositionRequestCreateWithoutDepartmentInput {
@@ -64,6 +66,18 @@ export class PositionRequestCreateWithoutDepartmentInput {
   @Field(() => Date, { nullable: true })
   updated_at?: Date | string;
 
+  @Field(() => String, { nullable: true })
+  additional_info_excluded_mgr_position_number?: string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_comments?: string;
+
   @Field(() => JobProfileCreateNestedOneWithoutPosition_requestInput, { nullable: true })
   parent_job_profile?: JobProfileCreateNestedOneWithoutPosition_requestInput;
+
+  @Field(() => LocationCreateNestedOneWithoutPositionRequestsInput, { nullable: true })
+  workLocation?: LocationCreateNestedOneWithoutPositionRequestsInput;
+
+  @Field(() => DepartmentCreateNestedOneWithoutPositionRequestsByPaylistDepartmentInput, { nullable: true })
+  paylist_department?: DepartmentCreateNestedOneWithoutPositionRequestsByPaylistDepartmentInput;
 }

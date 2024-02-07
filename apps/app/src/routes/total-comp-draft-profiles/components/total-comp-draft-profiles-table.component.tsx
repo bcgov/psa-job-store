@@ -189,7 +189,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       title: 'Owner',
       dataIndex: 'owner',
       key: 'owner',
-      render: (owner: any) => owner.name,
+      render: (owner: any) => owner?.name,
     },
     // {
     //   sorter: allowSorting,

@@ -16,7 +16,7 @@ export const OrgChartPage = () => {
   }, [profileData]);
 
   return (
-    <div style={{ height: '100%' }}>
+    <div style={{ height: 'calc(100% - 110px)' }}>
       <PageHeader title="Org Chart" />
       <OrgChartFilter
         setSelectedDepartment={setSelectedDepartment}

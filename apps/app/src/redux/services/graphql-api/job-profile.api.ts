@@ -87,6 +87,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   }
                 }
                 updated_at
+                owner {
+                  name
+                }
               }
               jobProfilesCount(search: $search, where: $where)
             }
@@ -192,6 +195,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfile {
               jobProfile(id: "${args.id}") {
                 id
+                updated_at
                 streams {
                   stream {
                       id
@@ -212,6 +216,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 willingness_statements
                 knowledge_skills_abilities
                 professional_registration_requirements
+                optional_requirements
                 program_overview
                 review_required
                 overview
@@ -222,10 +227,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 scope{
                   id
                   name
+                  description
                 }
                 total_comp_create_form_misc
                 role_type {
                   id
+                  name
                 }
                 behavioural_competencies {
                   behavioural_competency {

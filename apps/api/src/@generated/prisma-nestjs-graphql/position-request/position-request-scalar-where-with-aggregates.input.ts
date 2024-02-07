@@ -83,4 +83,16 @@ export class PositionRequestScalarWhereWithAggregatesInput {
 
   @Field(() => DateTimeWithAggregatesFilter, { nullable: true })
   updated_at?: DateTimeWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  additional_info_work_location_id?: StringWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  additional_info_department_id?: StringWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  additional_info_excluded_mgr_position_number?: StringWithAggregatesFilter;
+
+  @Field(() => StringWithAggregatesFilter, { nullable: true })
+  additional_info_comments?: StringWithAggregatesFilter;
 }

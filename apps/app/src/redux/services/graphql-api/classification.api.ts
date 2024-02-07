@@ -76,6 +76,7 @@ export const classificationApi = graphqlApi.injectEndpoints({
                 }
               ) {
                 groupName
+                id
                 items {
                   id
                   name

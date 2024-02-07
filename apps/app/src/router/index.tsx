@@ -69,8 +69,11 @@ export const router = createBrowserRouter([
                     roleComponentMapping={{
                       classification: ClassificationTasksPage,
                       'total-compensation': TotalCompDraftProfilesPage,
-                      user: HomePage,
-                      default: HomePage, // Default component when no roles match
+                      'hiring-manager': HomePage,
+                      user: UnauthorizedPage,
+                      default: UnauthorizedPage,
+
+                      // default: HomePage,
                     }}
                   />
                 ),

@@ -20,7 +20,7 @@ export interface IncidentUpdateInput {
   threads?: {
     channel: { id: number };
     contentType: { id: number };
-    entityType: { id: number };
+    entryType: { id: number };
     text: string;
   }[];
   fileAttachments?: {

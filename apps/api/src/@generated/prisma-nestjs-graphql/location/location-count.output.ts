@@ -6,4 +6,7 @@ import { Int } from '@nestjs/graphql';
 export class LocationCount {
   @Field(() => Int, { nullable: false })
   departments?: number;
+
+  @Field(() => Int, { nullable: false })
+  positionRequests?: number;
 }

@@ -1,6 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { DepartmentCreateNestedManyWithoutLocationInput } from '../department/department-create-nested-many-without-location.input';
+import { PositionRequestCreateNestedManyWithoutWorkLocationInput } from '../position-request/position-request-create-nested-many-without-work-location.input';
 
 @InputType()
 export class LocationCreateInput {
@@ -24,4 +25,7 @@ export class LocationCreateInput {
 
   @Field(() => DepartmentCreateNestedManyWithoutLocationInput, { nullable: true })
   departments?: DepartmentCreateNestedManyWithoutLocationInput;
+
+  @Field(() => PositionRequestCreateNestedManyWithoutWorkLocationInput, { nullable: true })
+  positionRequests?: PositionRequestCreateNestedManyWithoutWorkLocationInput;
 }

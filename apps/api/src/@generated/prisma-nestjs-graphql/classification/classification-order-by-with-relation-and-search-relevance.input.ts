@@ -4,6 +4,7 @@ import { SortOrder } from '../prisma/sort-order.enum';
 import { EmployeeGroupOrderByWithRelationAndSearchRelevanceInput } from '../employee-group/employee-group-order-by-with-relation-and-search-relevance.input';
 import { JobProfileClassificationOrderByRelationAggregateInput } from '../job-profile-classification/job-profile-classification-order-by-relation-aggregate.input';
 import { JobProfileReportsToOrderByRelationAggregateInput } from '../job-profile-reports-to/job-profile-reports-to-order-by-relation-aggregate.input';
+import { ClassificationDepartmentOrderByRelationAggregateInput } from '../classification-department/classification-department-order-by-relation-aggregate.input';
 import { ClassificationOrderByRelevanceInput } from './classification-order-by-relevance.input';
 
 @InputType()
@@ -40,6 +41,9 @@ export class ClassificationOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => JobProfileReportsToOrderByRelationAggregateInput, { nullable: true })
   reportees?: JobProfileReportsToOrderByRelationAggregateInput;
+
+  @Field(() => ClassificationDepartmentOrderByRelationAggregateInput, { nullable: true })
+  departments?: ClassificationDepartmentOrderByRelationAggregateInput;
 
   @Field(() => ClassificationOrderByRelevanceInput, { nullable: true })
   _relevance?: ClassificationOrderByRelevanceInput;

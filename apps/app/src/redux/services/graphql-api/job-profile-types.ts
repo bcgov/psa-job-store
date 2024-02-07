@@ -95,7 +95,8 @@ export interface JobProfileModel {
   context: ContextModel | string;
   overview: string | TrackedFieldArrayItem;
   type: string;
-  role: { id: number };
+  role: { id: number; name?: string };
+  updated_at?: string;
   total_comp_create_form_misc?: {
     employeeGroup: string;
     markAllNonEditable: boolean;
@@ -106,17 +107,18 @@ export interface JobProfileModel {
     markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;
   };
-  role_type: { id: number };
+  role_type: { id: number; name?: string };
   reports_to: ClassificationModelWrapped[];
   organizations: OrganizationsModelWrapped[];
-  scope: { id: number };
+  scope: { id: number; name?: string; description?: string };
   review_required: boolean;
   professions: ProfessionsModel[];
   program_overview: string | TrackedFieldArrayItem;
-  professional_registration_requirements: string[];
-  preferences: string[];
-  knowledge_skills_abilities: string[];
-  willingness_statements: string[];
+  professional_registration_requirements: TrackedFieldArrayItem[];
+  optional_requirements: TrackedFieldArrayItem[];
+  preferences: TrackedFieldArrayItem[];
+  knowledge_skills_abilities: TrackedFieldArrayItem[];
+  willingness_statements: TrackedFieldArrayItem[];
   security_screenings: SecuritiyScreeningModel[];
   all_organizations: boolean;
   all_reports_to: boolean;
@@ -131,6 +133,7 @@ export interface ProfessionsModel {
 export interface OrganizationsModelWrapped {
   organization: {
     id: string;
+    name?: string;
   };
 }
 
@@ -257,6 +260,7 @@ export interface CreateJobProfileInput {
     education: string[];
     job_experience: string[];
     professional_registration_requirements: string[];
+    optional_requirements: string[];
     preferences: string[];
     knowledge_skills_abilities: string[];
     willingness_statements: string[];
