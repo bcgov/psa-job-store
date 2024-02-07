@@ -16,9 +16,8 @@ oc login $OPENSHIFT_SERVER --token=$TOKEN --insecure-skip-tls-verify=true
 oc project $NAMESPACE
 
 #set up port forwarding to access the database
+POD_NAME=$(oc get pod -l name=nestjs-app -o jsonpath="{.items[0].metadata.name}")
 
-DATABASE_POD_NAME=$(oc get pods -n $NAMESPACE -l name=api-postgres -o jsonpath='{.items[0].metadata.name}')
-oc port-forward $DATABASE_POD_NAME 5432 &
+oc cp ./apps/api/prisma $POD_NAME:/tmp/prisma
 
-#run the db migration
-npx -w api prisma migrate deploy
+oc exec $POD_NAME -- npx prisma migrate deploy --schema=/tmp/prisma/schema.prisma
