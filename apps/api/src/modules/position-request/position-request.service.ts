@@ -14,6 +14,7 @@ import {
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
 import {
+  IncidentCreateUpdateInput,
   IncidentStatus,
   IncidentThreadChannel,
   IncidentThreadContentType,
@@ -123,6 +124,41 @@ export class PositionRequestApiService {
       //   parent_job_profile: true,
       // },
     });
+  }
+
+  convertIncidentStatusToPositionRequestStatus = (incident: Record<string, any>) => {
+    switch (incident.statusWithType.status.id) {
+      case IncidentStatus.Solved:
+      case IncidentStatus.SolvedTraining:
+        return PositionRequestStatus.COMPLETED;
+      case IncidentStatus.Unresolved:
+      case IncidentStatus.Updated:
+        return PositionRequestStatus.IN_REVIEW;
+      case IncidentStatus.WaitingClient:
+        return PositionRequestStatus.ACTION_REQUIRED;
+      case IncidentStatus.WaitingInternal:
+        return PositionRequestStatus.ESCALATED;
+      default:
+        // Don't update status if not covered by the above
+        return null;
+    }
+  };
+
+  async submitPositionRequest(id: number) {
+    let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+
+    // CRM Incident Management
+    const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
+    console.log('incident: ', incident);
+    positionRequest = await this.prisma.positionRequest.update({
+      where: { id },
+      data: {
+        crm_id: incident.id,
+        status: this.convertIncidentStatusToPositionRequestStatus(incident),
+      },
+    });
+
+    return positionRequest;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -603,43 +639,43 @@ export class PositionRequestApiService {
       data: updatePayload,
     });
 
-    // If step 5, compare accountabilities, requirements
-    // If no changes, create APPROVED posn in PS, auto-completed incident in CRM
-    // If changes, create PENDING posn in PS, workable incident in CRM
+    // // If step 5, compare accountabilities, requirements
+    // // If no changes, create APPROVED posn in PS, auto-completed incident in CRM
+    // // If changes, create PENDING posn in PS, workable incident in CRM
 
-    if (updateData.step === 5) {
-      if (positionRequest.crm_id == null) {
-        const incident = await this.createCrmIncidentForPositionRequest(id);
+    // if (updateData.step === 5) {
+    //   if (positionRequest.crm_id == null) {
+    //     const incident = await this.createCrmIncidentForPositionRequest(id);
 
-        const positionRequestStatus = (() => {
-          switch (incident.statusWithType.status.id) {
-            case IncidentStatus.Solved:
-            case IncidentStatus.SolvedTraining:
-              return PositionRequestStatus.COMPLETED;
-            case IncidentStatus.Unresolved:
-            case IncidentStatus.Updated:
-              return PositionRequestStatus.IN_REVIEW;
-            case IncidentStatus.WaitingClient:
-              return PositionRequestStatus.ACTION_REQUIRED;
-            case IncidentStatus.WaitingInternal:
-              return PositionRequestStatus.ESCALATED;
-            default:
-              // Don't update status if not covered by the above
-              return null;
-          }
-        })();
+    //     const positionRequestStatus = (() => {
+    //       switch (incident.statusWithType.status.id) {
+    //         case IncidentStatus.Solved:
+    //         case IncidentStatus.SolvedTraining:
+    //           return PositionRequestStatus.COMPLETED;
+    //         case IncidentStatus.Unresolved:
+    //         case IncidentStatus.Updated:
+    //           return PositionRequestStatus.IN_REVIEW;
+    //         case IncidentStatus.WaitingClient:
+    //           return PositionRequestStatus.ACTION_REQUIRED;
+    //         case IncidentStatus.WaitingInternal:
+    //           return PositionRequestStatus.ESCALATED;
+    //         default:
+    //           // Don't update status if not covered by the above
+    //           return null;
+    //       }
+    //     })();
 
-        await this.prisma.positionRequest.update({
-          where: { id },
-          data: {
-            crm_id: incident.id,
-            ...(positionRequestStatus != null && { status: positionRequestStatus }),
-          },
-        });
-      } else {
-        // Update Incident
-      }
-    }
+    //     await this.prisma.positionRequest.update({
+    //       where: { id },
+    //       data: {
+    //         crm_id: incident.id,
+    //         ...(positionRequestStatus != null && { status: positionRequestStatus }),
+    //       },
+    //     });
+    //   } else {
+    //     // Update Incident
+    //   }
+    // }
 
     return positionRequest;
   }
@@ -650,17 +686,73 @@ export class PositionRequestApiService {
       where: { id: positionRequest.parent_job_profile_id },
     });
 
-    // This will be more comprehensive once the positionRequest.<accountabilities|education|job_experience
-    //  |security_screenings> are expanded to include { is_readonly: boolean; is_significant: boolean }
+    // If the Job Profile is denoted as requiring review, it _must_ be reviewed every time
+    if (jobProfile.review_required === true) return true;
 
-    // Get accountabilities, education, job_experience and security_screenings from PR.profile_json
-    // compare with same fields on the JP
-    // Do logic, return if review is needed
+    // If the job profile is _not_ denoted as requiring review, it must be reviewed _only_ if significant sections have been changed
+    const prJobProfile = positionRequest.profile_json as Record<string, any>;
 
-    return jobProfile.review_required;
+    // Find position request job profile signficant sections
+    const prJobProfileSignificantSections = {
+      accountabilities: prJobProfile.accountabilities.filter(
+        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
+      ),
+      education: prJobProfile.education.filter(
+        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
+      ),
+      job_experience: prJobProfile.job_experience.filter(
+        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
+      ),
+      security_screenings: prJobProfile.security_screenings.filter(
+        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
+      ),
+    };
+
+    // Find base job profile significant sections
+    const jobProfileSignficantSections = {
+      accountabilities: (jobProfile.accountabilities as Record<string, any>).filter(
+        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
+      ),
+      education: (jobProfile.education as Record<string, any>).filter(
+        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
+      ),
+      job_experience: (jobProfile.job_experience as Record<string, any>).filter(
+        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
+      ),
+      security_screenings: (jobProfile.security_screenings as Record<string, any>).filter(
+        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
+      ),
+    };
+
+    // Compare changes between position request job profile significant sections and
+    // job profile significant sections
+    const significantSectionChanges = [
+      // Accountabilities
+      this.dataHasChanges(
+        JSON.stringify(jobProfileSignficantSections.accountabilities),
+        JSON.stringify(prJobProfileSignificantSections.accountabilities),
+      ),
+      // Education
+      this.dataHasChanges(
+        JSON.stringify(jobProfileSignficantSections.education),
+        JSON.stringify(prJobProfileSignificantSections.education),
+      ),
+      // Job Experience
+      this.dataHasChanges(
+        JSON.stringify(jobProfileSignficantSections.job_experience),
+        JSON.stringify(prJobProfileSignificantSections.job_experience),
+      ),
+      // Security Screenings
+      this.dataHasChanges(
+        JSON.stringify(jobProfileSignficantSections.security_screenings),
+        JSON.stringify(prJobProfileSignificantSections.security_screenings),
+      ),
+    ];
+
+    return significantSectionChanges.some((value) => value === true);
   }
 
-  async createCrmIncidentForPositionRequest(id: number) {
+  async createOrUpdateCrmIncidentForPositionRequest(id: number) {
     const needsReview = await this.positionRequestNeedsReview(id);
 
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
@@ -675,7 +767,7 @@ export class PositionRequestApiService {
       where: { id: positionRequest.parent_job_profile_id },
     });
 
-    const incident = await this.crmService.createIncident({
+    const data: IncidentCreateUpdateInput = {
       subject: `Position Number Request - ${classification.code}`,
       primaryContact: { id: contactId },
       assignedTo: {
@@ -732,10 +824,16 @@ export class PositionRequestApiService {
         },
       ],
       fileAttachments: [],
-    });
+    };
+
+    let incident: Record<string, any> = {};
+    if (positionRequest.crm_id === null) {
+      incident = await this.crmService.createIncident(data);
+    } else {
+      await this.crmService.updateIncident(positionRequest.crm_id, data);
+      incident = await this.crmService.getIncident(positionRequest.crm_id);
+    }
 
     return incident;
   }
-
-  // async updateCrmIncidentForPositionRequest(id: number) {}
 }

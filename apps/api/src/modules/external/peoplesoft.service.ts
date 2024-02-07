@@ -16,19 +16,41 @@ enum Endpoint {
   HrScope = 'PJS_TGB_REST_HRSCOPE',
   Locations = 'PJS_TGB_REST_LOCATION',
   Organizations = 'PJS_TGB_REST_BUS_UNIT',
+  PositionCreate = 'TGB_PJS_POSITION.v1',
   Profile = 'PJS_TGB_REST_USER_PROFILE',
 }
+
+enum RequestMethod {
+  GET = 'get',
+  POST = 'post',
+}
+
+type GetRequestParams = { method: RequestMethod.GET; endpoint: Endpoint; pageSize: number; extra?: string };
+type PostRequestParams = { method: RequestMethod.POST; endpoint: Endpoint.PositionCreate; data: Record<string, any> };
+
+type RequestParams = GetRequestParams | PostRequestParams;
 
 @Injectable()
 export class PeoplesoftService {
   private readonly headers: AxiosHeaders;
-  private request = (endpoint: Endpoint, pageSize: number = 10, extra?: string) =>
-    this.httpService.get(
-      `${this.configService.get('PEOPLESOFT_URL')}/${endpoint}/JSON/NONFILE?isconnectedquery=n&maxrows=${pageSize}${
-        extra != null ? `&${extra}` : ''
-      }&json_resp=true`,
-      { headers: this.headers },
-    );
+  private request = (params: RequestParams) => {
+    if (params.method === RequestMethod.GET) {
+      const { endpoint, pageSize, extra } = params;
+
+      return this.httpService.get(
+        `${this.configService.get('PEOPLESOFT_URL')}/${endpoint}/JSON/NONFILE?isconnectedquery=n&maxrows=${pageSize}${
+          extra != null ? `&${extra}` : ''
+        }&json_resp=true`,
+        { headers: this.headers },
+      );
+    } else if (params.method === RequestMethod.POST) {
+      const { endpoint, data } = params;
+
+      return this.httpService.post(`${this.configService.get('PEOPLESOFT_URL')}/${endpoint}`, data, {
+        headers: this.headers,
+      });
+    }
+  };
 
   constructor(
     private readonly configService: ConfigService<AppConfigDto, true>,
@@ -73,7 +95,7 @@ export class PeoplesoftService {
   @Cron('0 0 * * * *')
   async syncClassifications() {
     const response = await firstValueFrom(
-      this.request(Endpoint.Classifications, 4000).pipe(
+      this.request({ method: RequestMethod.GET, endpoint: Endpoint.Classifications, pageSize: 4000 }).pipe(
         map((r) => r.data),
         retry(3),
         catchError((err) => {
@@ -127,7 +149,7 @@ export class PeoplesoftService {
   @Cron('0 0 * * * *')
   async syncLocations() {
     const response = await firstValueFrom(
-      this.request(Endpoint.Locations, 5000).pipe(
+      this.request({ method: RequestMethod.GET, endpoint: Endpoint.Locations, pageSize: 5000 }).pipe(
         map((r) => r.data),
         retry(3),
         catchError((err) => {
@@ -168,7 +190,7 @@ export class PeoplesoftService {
 
   async syncOrganizations() {
     const response = await firstValueFrom(
-      this.request(Endpoint.Organizations, 500).pipe(
+      this.request({ method: RequestMethod.GET, endpoint: Endpoint.Organizations, pageSize: 500 }).pipe(
         map((r) => r.data),
         retry(3),
         catchError((err) => {
@@ -205,7 +227,7 @@ export class PeoplesoftService {
     });
 
     const response = await firstValueFrom(
-      this.request(Endpoint.Departments, 25000).pipe(
+      this.request({ method: RequestMethod.GET, endpoint: Endpoint.Departments, pageSize: 25000 }).pipe(
         map((r) => r.data),
         retry(3),
         catchError((err) => {
@@ -280,11 +302,12 @@ export class PeoplesoftService {
     positions.map((position) =>
       requests.push(
         firstValueFrom(
-          this.request(
-            Endpoint.Employees,
-            0,
-            `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=${position},`,
-          ).pipe(
+          this.request({
+            method: RequestMethod.GET,
+            endpoint: Endpoint.Employees,
+            pageSize: 0,
+            extra: `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=${position},`,
+          }).pipe(
             map((r) => r.data),
             retry(3),
             catchError((err) => {
@@ -321,7 +344,12 @@ export class PeoplesoftService {
 
   async getEmployee(id: string) {
     const response = await firstValueFrom(
-      this.request(Endpoint.Employees, 1, `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=,${id}`).pipe(
+      this.request({
+        method: RequestMethod.GET,
+        endpoint: Endpoint.Employees,
+        pageSize: 1,
+        extra: `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=,${id}`,
+      }).pipe(
         map((r) => r.data),
         retry(3),
         catchError((err) => {
@@ -335,7 +363,12 @@ export class PeoplesoftService {
 
   async getProfile(idir: string) {
     const response = await firstValueFrom(
-      this.request(Endpoint.Profile, 1, `prompt_uniquepromptname=USERID&prompt_fieldvalue=${idir}`).pipe(
+      this.request({
+        method: RequestMethod.GET,
+        endpoint: Endpoint.Profile,
+        pageSize: 1,
+        extra: `prompt_uniquepromptname=USERID&prompt_fieldvalue=${idir}`,
+      }).pipe(
         map((r) => {
           return r.data;
         }),
@@ -351,11 +384,12 @@ export class PeoplesoftService {
 
   async getPositionsForDepartment(department_id: string) {
     const response = await firstValueFrom(
-      this.request(
-        Endpoint.HrScope,
-        0,
-        `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=${department_id},`,
-      ).pipe(
+      this.request({
+        method: RequestMethod.GET,
+        endpoint: Endpoint.HrScope,
+        pageSize: 0,
+        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=${department_id},`,
+      }).pipe(
         map((r) => r.data),
         retry(3),
         catchError((err) => {
@@ -369,11 +403,12 @@ export class PeoplesoftService {
 
   async getPosition(position_id: string) {
     const response = await firstValueFrom(
-      this.request(
-        Endpoint.HrScope,
-        0,
-        `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=,${position_id}`,
-      ).pipe(
+      this.request({
+        method: RequestMethod.GET,
+        endpoint: Endpoint.HrScope,
+        pageSize: 0,
+        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=,${position_id}`,
+      }).pipe(
         map((r) => r.data),
         retry(3),
         catchError((err) => {
@@ -384,18 +419,4 @@ export class PeoplesoftService {
 
     return response;
   }
-
-  // async getEmployee(id: string) {
-  //   const response = await firstValueFrom(
-  //     this.request(Endpoint.Employees, 1, `prompt_uniquepromptname=POSITION_NBR,EMPLID&prompt_fieldvalue=,${id}`).pipe(
-  //       map((r) => r.data),
-  //       retry(3),
-  //       catchError((err) => {
-  //         throw new Error(err);
-  //       }),
-  //     ),
-  //   );
-
-  //   return response;
-  // }
 }
