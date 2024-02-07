@@ -188,8 +188,8 @@ export class PeoplesoftService {
   async syncOrganizationsAndDepartments() {
     // Use this function instead of calling syncOrganizations, syncDepartments independently
     // Departments rely on organizations which must exist prior to syncing departments
-    // await this.syncOrganizations();
-    // await this.syncDepartments();
+    await this.syncOrganizations();
+    await this.syncDepartments();
     await this.syncDepartmentsForClassifications();
   }
 
