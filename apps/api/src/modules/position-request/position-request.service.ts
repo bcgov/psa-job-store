@@ -149,7 +149,7 @@ export class PositionRequestApiService {
 
     // CRM Incident Management
     const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
-    console.log('incident: ', incident);
+    // console.log('incident: ', incident);
     positionRequest = await this.prisma.positionRequest.update({
       where: { id },
       data: {
@@ -555,11 +555,8 @@ export class PositionRequestApiService {
     const accDiff = dmp.diff_main(original, modified);
     dmp.diff_cleanupSemantic(accDiff);
 
-    for (const d of accDiff) {
-      if (d[0] === 1) {
-        isDifferent = true;
-        break;
-      }
+    if (accDiff.some((arr) => arr[0] < 0 || arr[0] > 0)) {
+      isDifferent = true;
     }
 
     return isDifferent;
@@ -639,44 +636,6 @@ export class PositionRequestApiService {
       data: updatePayload,
     });
 
-    // // If step 5, compare accountabilities, requirements
-    // // If no changes, create APPROVED posn in PS, auto-completed incident in CRM
-    // // If changes, create PENDING posn in PS, workable incident in CRM
-
-    // if (updateData.step === 5) {
-    //   if (positionRequest.crm_id == null) {
-    //     const incident = await this.createCrmIncidentForPositionRequest(id);
-
-    //     const positionRequestStatus = (() => {
-    //       switch (incident.statusWithType.status.id) {
-    //         case IncidentStatus.Solved:
-    //         case IncidentStatus.SolvedTraining:
-    //           return PositionRequestStatus.COMPLETED;
-    //         case IncidentStatus.Unresolved:
-    //         case IncidentStatus.Updated:
-    //           return PositionRequestStatus.IN_REVIEW;
-    //         case IncidentStatus.WaitingClient:
-    //           return PositionRequestStatus.ACTION_REQUIRED;
-    //         case IncidentStatus.WaitingInternal:
-    //           return PositionRequestStatus.ESCALATED;
-    //         default:
-    //           // Don't update status if not covered by the above
-    //           return null;
-    //       }
-    //     })();
-
-    //     await this.prisma.positionRequest.update({
-    //       where: { id },
-    //       data: {
-    //         crm_id: incident.id,
-    //         ...(positionRequestStatus != null && { status: positionRequestStatus }),
-    //       },
-    //     });
-    //   } else {
-    //     // Update Incident
-    //   }
-    // }
-
     return positionRequest;
   }
 
@@ -694,34 +653,34 @@ export class PositionRequestApiService {
 
     // Find position request job profile signficant sections
     const prJobProfileSignificantSections = {
-      accountabilities: prJobProfile.accountabilities.filter(
-        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
-      ),
-      education: prJobProfile.education.filter(
-        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
-      ),
-      job_experience: prJobProfile.job_experience.filter(
-        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
-      ),
-      security_screenings: prJobProfile.security_screenings.filter(
-        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
-      ),
+      accountabilities: prJobProfile.accountabilities
+        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .map((obj) => obj.text),
+      education: prJobProfile.education
+        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .map((obj) => obj.text),
+      job_experience: prJobProfile.job_experience
+        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .map((obj) => obj.text),
+      security_screenings: prJobProfile.security_screenings
+        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .map((obj) => obj.text),
     };
 
     // Find base job profile significant sections
     const jobProfileSignficantSections = {
-      accountabilities: (jobProfile.accountabilities as Record<string, any>).filter(
-        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
-      ),
-      education: (jobProfile.education as Record<string, any>).filter(
-        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
-      ),
-      job_experience: (jobProfile.job_experience as Record<string, any>).filter(
-        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
-      ),
-      security_screenings: (jobProfile.security_screenings as Record<string, any>).filter(
-        (obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1,
-      ),
+      accountabilities: (jobProfile.accountabilities as Record<string, any>)
+        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .map((obj) => obj.text),
+      education: (jobProfile.education as Record<string, any>)
+        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .map((obj) => obj.text),
+      job_experience: (jobProfile.job_experience as Record<string, any>)
+        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .map((obj) => obj.text),
+      security_screenings: (jobProfile.security_screenings as Record<string, any>)
+        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .map((obj) => obj.text),
     };
 
     // Compare changes between position request job profile significant sections and
