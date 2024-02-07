@@ -3,6 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { LocationUpdateOneRequiredWithoutDepartmentsNestedInput } from '../location/location-update-one-required-without-departments-nested.input';
 import { OrganizationUpdateOneRequiredWithoutDepartmentsNestedInput } from '../organization/organization-update-one-required-without-departments-nested.input';
 import { PositionRequestUpdateManyWithoutPaylist_departmentNestedInput } from '../position-request/position-request-update-many-without-paylist-department-nested.input';
+import { ClassificationDepartmentUpdateManyWithoutDepartmentNestedInput } from '../classification-department/classification-department-update-many-without-department-nested.input';
 
 @InputType()
 export class DepartmentUpdateWithoutPositionRequestInput {
@@ -32,4 +33,7 @@ export class DepartmentUpdateWithoutPositionRequestInput {
 
   @Field(() => PositionRequestUpdateManyWithoutPaylist_departmentNestedInput, { nullable: true })
   PositionRequestsByPaylistDepartment?: PositionRequestUpdateManyWithoutPaylist_departmentNestedInput;
+
+  @Field(() => ClassificationDepartmentUpdateManyWithoutDepartmentNestedInput, { nullable: true })
+  classifications?: ClassificationDepartmentUpdateManyWithoutDepartmentNestedInput;
 }

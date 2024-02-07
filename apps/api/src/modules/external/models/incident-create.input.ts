@@ -21,7 +21,7 @@ export enum IncidentThreadEntryType {
   Customer = 3,
 }
 
-export interface IncidentCreateInput {
+export interface IncidentCreateUpdateInput {
   subject: string;
   primaryContact: { id: number };
   assignedTo: {

@@ -1,6 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { JobProfileClassificationUncheckedCreateNestedManyWithoutClassificationInput } from '../job-profile-classification/job-profile-classification-unchecked-create-nested-many-without-classification.input';
+import { ClassificationDepartmentUncheckedCreateNestedManyWithoutClassificationInput } from '../classification-department/classification-department-unchecked-create-nested-many-without-classification.input';
 
 @InputType()
 export class ClassificationUncheckedCreateWithoutReporteesInput {
@@ -30,4 +31,7 @@ export class ClassificationUncheckedCreateWithoutReporteesInput {
 
   @Field(() => JobProfileClassificationUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
   job_profiles?: JobProfileClassificationUncheckedCreateNestedManyWithoutClassificationInput;
+
+  @Field(() => ClassificationDepartmentUncheckedCreateNestedManyWithoutClassificationInput, { nullable: true })
+  departments?: ClassificationDepartmentUncheckedCreateNestedManyWithoutClassificationInput;
 }

@@ -4,8 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
-import { IncidentCreateInput } from './models/incident-create.input';
-import { IncidentUpdateInput } from './models/incident-update.input';
+import { IncidentCreateUpdateInput } from './models/incident-create.input';
 
 enum Endpoint {
   Accounts = 'accounts',
@@ -65,7 +64,7 @@ export class CrmService {
     return contactId;
   }
 
-  async createIncident(data: IncidentCreateInput) {
+  async createIncident(data: IncidentCreateUpdateInput) {
     const response = await firstValueFrom(
       this.httpService
         .post(`${this.configService.get('CRM_URL')}/${Endpoint.Incidents}`, data, {
@@ -83,8 +82,40 @@ export class CrmService {
     return response;
   }
 
-  async updateIncident(id: number, data: IncidentUpdateInput) {
-    console.log(id);
-    console.log(data);
+  async updateIncident(id: number, data: IncidentCreateUpdateInput) {
+    const updateHeaders = this.headers;
+    updateHeaders.set('X-HTTP-Method-Override', 'PATCH');
+
+    const response = await firstValueFrom(
+      this.httpService
+        .post(`${this.configService.get('CRM_URL')}/${Endpoint.Incidents}/${id}`, data, {
+          headers: updateHeaders,
+        })
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
+  async getIncident(id: number) {
+    const response = await firstValueFrom(
+      this.httpService
+        .get(`${this.configService.get('CRM_URL')}/${Endpoint.Incidents}/${id}`, { headers: this.headers })
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
   }
 }

@@ -366,8 +366,20 @@ model Classification {
   employee_group EmployeeGroup              @relation(fields: [employee_group_id], references: [id])
   job_profiles   JobProfileClassification[]
   reportees      JobProfileReportsTo[]
+  departments    ClassificationDepartment[]
 
   @@map("classification")
+}
+
+model ClassificationDepartment {
+  classification_id String
+  department_id     String
+
+  classification Classification @relation(fields: [classification_id], references: [id])
+  department     Department     @relation(fields: [department_id], references: [id])
+
+  @@id([classification_id, department_id])
+  @@map("classification_department")
 }
 
 model Department {
@@ -383,7 +395,8 @@ model Department {
   effective_date   DateTime     @db.Date // EFFDT
 
   PositionRequest                     PositionRequest[]
-  PositionRequestsByPaylistDepartment PositionRequest[] @relation(name: "PositionRequestPaylistDepartment")
+  PositionRequestsByPaylistDepartment PositionRequest[]          @relation(name: "PositionRequestPaylistDepartment")
+  classifications                     ClassificationDepartment[]
 
   @@map("department")
 }
