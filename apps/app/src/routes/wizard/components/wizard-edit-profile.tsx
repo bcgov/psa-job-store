@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Alert, Button, Col, Descriptions, Form, Input, List, Modal, Row, Typography } from 'antd';
+import { Alert, Button, Col, Descriptions, Form, Input, List, Modal, Row, Tooltip, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import Title from 'antd/es/typography/Title';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
@@ -515,7 +515,7 @@ const WizardEditProfile = forwardRef(
         if (!originalValuesSet) setOriginalValuesSet(true);
 
         // console.log('effectiveData?.context?.description: ', effectiveData?.context?.description);
-        console.log('originalProfessionalRegistrationFieldsValue: ', originalProfessionalRegistrationFieldsValue);
+        // console.log('originalAccReqFieldsValue: ', originalAccReqFieldsValue);
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
@@ -892,19 +892,43 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
+          {field.is_readonly && (
+            <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
+          )}
           <FormItem
+            hidden={field.is_readonly}
             name={`accountabilities.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
           >
             <TextArea
               autoSize
-              disabled={field.disabled}
+              disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onFocus={() => showReqModal(() => {}, false)}
               onChange={handleFieldChange}
             />
           </FormItem>
+
+          {/* <Controller
+            name={`accountabilities.${index}.text`}
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                value={value as string}
+                onBlur={onBlur} // notify when input is touched/blur
+                autoSize
+                disabled={field.disabled || field.is_readonly}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onFocus={() => showReqModal(() => {}, false)}
+                onChange={(event) => {
+                  handleFieldChange(event);
+                  onChange(event);
+                }}
+              />
+            )}
+          /> */}
+
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -921,20 +945,23 @@ const WizardEditProfile = forwardRef(
               }
             />
           ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() =>
-                showReqModal(() => {
-                  // acc_req_remove(index);
-                  handleAccReqRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                }, false)
-              }
-            />
+            <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+              <Button
+                disabled={field.is_readonly}
+                icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+                style={{
+                  border: 'none', // Removes the border
+                  padding: 0, // Removes padding
+                }}
+                onClick={() =>
+                  showReqModal(() => {
+                    // acc_req_remove(index);
+                    handleAccReqRemove(index);
+                    setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  }, false)
+                }
+              />
+            </Tooltip>
           )}
         </List.Item>
       );
@@ -1113,7 +1140,11 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
+          {field.is_readonly && (
+            <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
+          )}
           <FormItem
+            hidden={field.is_readonly}
             name={`education.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1126,6 +1157,7 @@ const WizardEditProfile = forwardRef(
               onChange={handleFieldChange}
             />
           </FormItem>
+
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1141,19 +1173,22 @@ const WizardEditProfile = forwardRef(
               }
             />
           ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() =>
-                showMinReqModal(() => {
-                  handleMinReqRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                }, false)
-              }
-            />
+            <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+              <Button
+                disabled={field.is_readonly}
+                icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+                style={{
+                  border: 'none', // Removes the border
+                  padding: 0, // Removes padding
+                }}
+                onClick={() =>
+                  showMinReqModal(() => {
+                    handleMinReqRemove(index);
+                    setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  }, false)
+                }
+              />
+            </Tooltip>
           )}
         </List.Item>
       );
@@ -1226,7 +1261,11 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
+          {field.is_readonly && (
+            <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
+          )}
           <FormItem
+            hidden={field.is_readonly}
             name={`job_experience.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1239,6 +1278,7 @@ const WizardEditProfile = forwardRef(
               onChange={handleFieldChange}
             />
           </FormItem>
+
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1254,19 +1294,22 @@ const WizardEditProfile = forwardRef(
               }
             />
           ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() =>
-                showRelWorkModal(() => {
-                  handleRelWorkRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                }, false)
-              }
-            />
+            <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+              <Button
+                disabled={field.is_readonly}
+                icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+                style={{
+                  border: 'none', // Removes the border
+                  padding: 0, // Removes padding
+                }}
+                onClick={() =>
+                  showRelWorkModal(() => {
+                    handleRelWorkRemove(index);
+                    setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  }, false)
+                }
+              />
+            </Tooltip>
           )}
         </List.Item>
       );
@@ -1341,7 +1384,11 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
+          {field.is_readonly && (
+            <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
+          )}
           <FormItem
+            hidden={field.is_readonly}
             name={`security_screenings.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1354,6 +1401,7 @@ const WizardEditProfile = forwardRef(
               onChange={handleFieldChange}
             />
           </FormItem>
+
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1369,19 +1417,22 @@ const WizardEditProfile = forwardRef(
               }
             />
           ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() =>
-                showSecurityScreeningsModal(() => {
-                  handleSecurityScreeningsRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                }, false)
-              }
-            />
+            <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+              <Button
+                disabled={field.is_readonly}
+                icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+                style={{
+                  border: 'none', // Removes the border
+                  padding: 0, // Removes padding
+                }}
+                onClick={() =>
+                  showSecurityScreeningsModal(() => {
+                    handleSecurityScreeningsRemove(index);
+                    setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  }, false)
+                }
+              />
+            </Tooltip>
           )}
         </List.Item>
       );

@@ -657,7 +657,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         bordered
         column={24}
         items={basicInfoItems}
-        style={{ marginTop: '24px' }}
+        style={{ marginTop: '24px', marginBottom: '24px' }}
         labelStyle={{
           fontWeight: 700,
           width: '100px',
