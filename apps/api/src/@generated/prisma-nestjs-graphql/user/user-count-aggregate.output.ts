@@ -20,6 +20,9 @@ export class UserCountAggregate {
   roles!: number;
 
   @Field(() => Int, { nullable: false })
+  metadata!: number;
+
+  @Field(() => Int, { nullable: false })
   created_at!: number;
 
   @Field(() => Int, { nullable: false })

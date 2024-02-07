@@ -4,14 +4,25 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 import { DepartmentCreateNestedOneWithoutPositionRequestInput } from '../department/department-create-nested-one-without-position-request.input';
+import { LocationCreateNestedOneWithoutPositionRequestsInput } from '../location/location-create-nested-one-without-position-requests.input';
+import { DepartmentCreateNestedOneWithoutPositionRequestsByPaylistDepartmentInput } from '../department/department-create-nested-one-without-position-requests-by-paylist-department.input';
 
 @InputType()
 export class PositionRequestCreateWithoutParent_job_profileInput {
+  @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  crm_assigned_to_account_id?: number;
+
   @Field(() => Int, { nullable: false })
   step!: number;
 
   @Field(() => String, { nullable: false })
   reports_to_position_id!: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  crm_json?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
@@ -21,9 +32,6 @@ export class PositionRequestCreateWithoutParent_job_profileInput {
 
   @Field(() => String, { nullable: true })
   user_id?: string;
-
-  @Field(() => String, { nullable: true })
-  classificationAssignedTo?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;
@@ -58,6 +66,18 @@ export class PositionRequestCreateWithoutParent_job_profileInput {
   @Field(() => Date, { nullable: true })
   updated_at?: Date | string;
 
+  @Field(() => String, { nullable: true })
+  additional_info_excluded_mgr_position_number?: string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_comments?: string;
+
   @Field(() => DepartmentCreateNestedOneWithoutPositionRequestInput, { nullable: false })
   department!: DepartmentCreateNestedOneWithoutPositionRequestInput;
+
+  @Field(() => LocationCreateNestedOneWithoutPositionRequestsInput, { nullable: true })
+  workLocation?: LocationCreateNestedOneWithoutPositionRequestsInput;
+
+  @Field(() => DepartmentCreateNestedOneWithoutPositionRequestsByPaylistDepartmentInput, { nullable: true })
+  paylist_department?: DepartmentCreateNestedOneWithoutPositionRequestsByPaylistDepartmentInput;
 }

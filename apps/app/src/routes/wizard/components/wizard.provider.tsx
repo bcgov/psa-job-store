@@ -26,12 +26,15 @@ interface WizardContextProps {
   reqAlertShown: boolean;
   setReqAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 
+  relWorkAlertShown: boolean;
+  setRelWorkAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
   originalValuesSet: boolean;
   originalAccReqFields: any[];
   originalOptReqFields: any[];
   originalMinReqFields: any[];
+  originalRelWorkFields: any[];
   originalTitle: any;
-  originalOverview: any;
 
   positionRequestId: number | null;
   setPositionRequestId: React.Dispatch<React.SetStateAction<number | null>>;
@@ -46,8 +49,28 @@ interface WizardContextProps {
   setOriginalAccReqFields: React.Dispatch<React.SetStateAction<any[]>>;
   setOriginalOptReqFields: React.Dispatch<React.SetStateAction<any[]>>;
   setOriginalMinReqFields: React.Dispatch<React.SetStateAction<any[]>>;
+  setOriginalRelWorkFields: React.Dispatch<React.SetStateAction<any[]>>;
   setOriginalTitle: React.Dispatch<React.SetStateAction<any>>;
+  originalOverview: any;
   setOriginalOverview: React.Dispatch<React.SetStateAction<any>>;
+
+  originalProgramOverview: any;
+  setOriginalProgramOverview: React.Dispatch<React.SetStateAction<any>>;
+  originalSecurityScreeningsFields: any[];
+  setOriginalSecurityScreeningsFields: React.Dispatch<React.SetStateAction<any[]>>;
+  securityScreeningsAlertShown: boolean;
+  setSecurityScreeningsAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
+  originalProfessionalRegistrationFields: any[];
+  setOriginalProfessionalRegistrationFields: React.Dispatch<React.SetStateAction<any[]>>;
+  originalPreferencesFields: any[];
+  setOriginalPreferencesFields: React.Dispatch<React.SetStateAction<any[]>>;
+  originalKnowledgeSkillsAbilitiesFields: any[];
+  setOriginalKnowledgeSkillsAbilitiesFields: React.Dispatch<React.SetStateAction<any[]>>;
+  originalProvisosFields: any[];
+  setOriginalProvisosFields: React.Dispatch<React.SetStateAction<any[]>>;
+  originalOptionalRequirementsFields: any[];
+  setOriginalOptionalRequirementsFields: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -74,11 +97,24 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalAccReqFields, setOriginalAccReqFields] = useState<any[]>([]);
   const [originalOptReqFields, setOriginalOptReqFields] = useState<any[]>([]);
   const [originalMinReqFields, setOriginalMinReqFields] = useState<any[]>([]);
+  const [originalRelWorkFields, setOriginalRelWorkFields] = useState<any[]>([]);
+  const [relWorkAlertShown, setRelWorkAlertShown] = useState<boolean>(false);
+
+  const [originalSecurityScreeningsFields, setOriginalSecurityScreeningsFields] = useState<any[]>([]);
+  const [securityScreeningsAlertShown, setSecurityScreeningsAlertShown] = useState<boolean>(false);
+
   const [originalTitle, setOriginalTitle] = useState<any>({});
   const [originalOverview, setOriginalOverview] = useState<any>({});
+  const [originalProgramOverview, setOriginalProgramOverview] = useState<any>({});
   const [positionRequestId, setPositionRequestId] = useState<number | null>(null);
   const [positionRequestProfileId, setPositionRequestProfileId] = useState<number | null>(null);
   const [positionRequestDepartmentId, setPositionRequestDepartmentId] = useState<string | null>(null);
+
+  const [originalProfessionalRegistrationFields, setOriginalProfessionalRegistrationFields] = useState<any[]>([]);
+  const [originalOptionalRequirementsFields, setOriginalOptionalRequirementsFields] = useState<any[]>([]);
+  const [originalPreferencesFields, setOriginalPreferencesFields] = useState<any[]>([]);
+  const [originalKnowledgeSkillsAbilitiesFields, setOriginalKnowledgeSkillsAbilitiesFields] = useState<any[]>([]);
+  const [originalProvisosFields, setOriginalProvisosFields] = useState<any[]>([]);
 
   const value = {
     wizardData,
@@ -89,6 +125,19 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setErrors,
     minReqAlertShown,
     setMinReqAlertShown,
+    originalMinReqFields,
+    setOriginalMinReqFields,
+
+    relWorkAlertShown,
+    setRelWorkAlertShown,
+    originalRelWorkFields,
+    setOriginalRelWorkFields,
+
+    securityScreeningsAlertShown,
+    setSecurityScreeningsAlertShown,
+    originalSecurityScreeningsFields,
+    setOriginalSecurityScreeningsFields,
+
     reqAlertShown,
     setReqAlertShown,
     originalValuesSet,
@@ -97,18 +146,31 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setOriginalAccReqFields,
     originalOptReqFields,
     setOriginalOptReqFields,
-    originalMinReqFields,
-    setOriginalMinReqFields,
     originalTitle,
     setOriginalTitle,
     originalOverview,
     setOriginalOverview,
+    originalProgramOverview,
+    setOriginalProgramOverview,
     positionRequestId,
     setPositionRequestId,
     positionRequestProfileId,
     setPositionRequestProfileId,
     positionRequestDepartmentId,
     setPositionRequestDepartmentId,
+
+    originalProfessionalRegistrationFields,
+    setOriginalProfessionalRegistrationFields,
+
+    originalOptionalRequirementsFields,
+    setOriginalOptionalRequirementsFields,
+
+    originalPreferencesFields,
+    setOriginalPreferencesFields,
+    originalKnowledgeSkillsAbilitiesFields,
+    setOriginalKnowledgeSkillsAbilitiesFields,
+    originalProvisosFields,
+    setOriginalProvisosFields,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

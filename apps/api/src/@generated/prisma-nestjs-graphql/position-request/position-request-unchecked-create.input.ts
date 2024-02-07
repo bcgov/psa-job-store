@@ -9,6 +9,12 @@ export class PositionRequestUncheckedCreateInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
+  @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  crm_assigned_to_account_id?: number;
+
   @Field(() => Int, { nullable: false })
   step!: number;
 
@@ -22,6 +28,9 @@ export class PositionRequestUncheckedCreateInput {
   parent_job_profile_id?: number;
 
   @Field(() => GraphQLJSON, { nullable: true })
+  crm_json?: any;
+
+  @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
@@ -29,9 +38,6 @@ export class PositionRequestUncheckedCreateInput {
 
   @Field(() => String, { nullable: true })
   user_id?: string;
-
-  @Field(() => String, { nullable: true })
-  classificationAssignedTo?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;
@@ -65,4 +71,16 @@ export class PositionRequestUncheckedCreateInput {
 
   @Field(() => Date, { nullable: true })
   updated_at?: Date | string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_work_location_id?: string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_department_id?: string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_excluded_mgr_position_number?: string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_comments?: string;
 }

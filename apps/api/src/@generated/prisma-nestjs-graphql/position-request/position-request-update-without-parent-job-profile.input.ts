@@ -4,14 +4,25 @@ import { Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 import { DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput } from '../department/department-update-one-required-without-position-request-nested.input';
+import { LocationUpdateOneWithoutPositionRequestsNestedInput } from '../location/location-update-one-without-position-requests-nested.input';
+import { DepartmentUpdateOneWithoutPositionRequestsByPaylistDepartmentNestedInput } from '../department/department-update-one-without-position-requests-by-paylist-department-nested.input';
 
 @InputType()
 export class PositionRequestUpdateWithoutParent_job_profileInput {
+  @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  crm_assigned_to_account_id?: number;
+
   @Field(() => Int, { nullable: true })
   step?: number;
 
   @Field(() => String, { nullable: true })
   reports_to_position_id?: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  crm_json?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
   profile_json?: any;
@@ -21,9 +32,6 @@ export class PositionRequestUpdateWithoutParent_job_profileInput {
 
   @Field(() => String, { nullable: true })
   user_id?: string;
-
-  @Field(() => String, { nullable: true })
-  classificationAssignedTo?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;
@@ -58,6 +66,18 @@ export class PositionRequestUpdateWithoutParent_job_profileInput {
   @Field(() => Date, { nullable: true })
   updated_at?: Date | string;
 
+  @Field(() => String, { nullable: true })
+  additional_info_excluded_mgr_position_number?: string;
+
+  @Field(() => String, { nullable: true })
+  additional_info_comments?: string;
+
   @Field(() => DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput, { nullable: true })
   department?: DepartmentUpdateOneRequiredWithoutPositionRequestNestedInput;
+
+  @Field(() => LocationUpdateOneWithoutPositionRequestsNestedInput, { nullable: true })
+  workLocation?: LocationUpdateOneWithoutPositionRequestsNestedInput;
+
+  @Field(() => DepartmentUpdateOneWithoutPositionRequestsByPaylistDepartmentNestedInput, { nullable: true })
+  paylist_department?: DepartmentUpdateOneWithoutPositionRequestsByPaylistDepartmentNestedInput;
 }

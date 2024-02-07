@@ -19,6 +19,9 @@ export class UserCountAggregateInput {
   roles?: true;
 
   @Field(() => Boolean, { nullable: true })
+  metadata?: true;
+
+  @Field(() => Boolean, { nullable: true })
   created_at?: true;
 
   @Field(() => Boolean, { nullable: true })

@@ -40,7 +40,6 @@ ENV NODE_ENV "production"
 
 WORKDIR /usr/src
 COPY --from=builder /tmp/build ./
-COPY /apps/api/start.sh ./apps/api/start.sh
 COPY /apps/api/prisma ./apps/api/prisma
 COPY /apps/api/package*.json ./apps/api/
 
@@ -51,11 +50,9 @@ WORKDIR /usr/src/apps/api/
 RUN mkdir /.npm
 RUN chgrp -R 0 /.npm && chmod -R g=u /.npm
 
-# Set execute permissions for the start.sh script.
-RUN chmod +x ./start.sh
 
 # Expose port 4000
 EXPOSE 4000
 
 # Start the application
-CMD ["./start.sh"]
+CMD ["npm","run","start:prod"]

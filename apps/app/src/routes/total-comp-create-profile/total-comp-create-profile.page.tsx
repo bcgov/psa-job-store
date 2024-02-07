@@ -4,6 +4,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   DeleteOutlined,
+  InfoCircleOutlined,
   LoadingOutlined,
   PlusOutlined,
   ReloadOutlined,
@@ -33,14 +34,14 @@ import {
 import TextArea from 'antd/es/input/TextArea';
 import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import ReactQuill from 'react-quill';
+import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import MinistriesSelect from '../../components/app/common/components/ministries-select.component';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import {
-  useGetClassificationsQuery,
+  useGetFilteredClassificationsQuery,
   useGetGroupedClassificationsQuery,
 } from '../../redux/services/graphql-api/classification.api';
 import { useGetEmployeeGroupsQuery } from '../../redux/services/graphql-api/employee-group.api';
@@ -50,6 +51,7 @@ import { useGetJobProfileScopesQuery } from '../../redux/services/graphql-api/jo
 import { useGetJobProfileStreamsQuery } from '../../redux/services/graphql-api/job-profile-stream';
 import {
   ClassificationConnectInput,
+  ClassificationModel,
   CreateJobProfileInput,
   OrganizationConnectInput,
   ProfessionsModel,
@@ -76,6 +78,18 @@ import './total-comp-published-profies.page.css';
 const { Option } = Select;
 const { Text } = Typography;
 
+// Define a custom clipboard to handle paste events
+class PlainTextClipboard extends Quill.import('modules/clipboard') {
+  onPaste(event: any) {
+    event.preventDefault();
+    const text = event.clipboardData.getData('text/plain');
+    this.quill.clipboard.dangerouslyPasteHTML(this.quill.getSelection().index, text);
+  }
+}
+
+// Register the custom clipboard module
+Quill.register('modules/clipboard', PlainTextClipboard, true);
+
 export interface AccountabilityItem {
   text: string;
   id?: string;
@@ -83,22 +97,44 @@ export interface AccountabilityItem {
   significant: boolean;
 }
 
+export interface SecurityScreeningItem {
+  text: string;
+  id?: string;
+  nonEditable: boolean;
+}
+
 export const TotalCompCreateProfilePage = () => {
   const { id: urlId } = useParams();
   const [id, setId] = useState(urlId);
   const navigate = useNavigate();
 
-  // Update local state when URL parameter changes
-  useEffect(() => {
-    setId(urlId);
-  }, [urlId]);
-
-  const { data: jobProfileData, isLoading: isLoadingJobProfile } = useGetJobProfileQuery(
+  const {
+    data: jobProfileData,
+    isLoading: isLoadingJobProfile,
+    isFetching: isFetchingJobProfile,
+    refetch,
+  } = useGetJobProfileQuery(
     { id: parseInt(id ?? '') },
     {
       skip: !id,
     },
   );
+
+  // Update local state when URL parameter changes
+  useEffect(() => {
+    setId(urlId);
+    if (urlId) {
+      refetch();
+    }
+  }, [urlId, refetch]);
+
+  // Refetch data when the component mounts or the id changes
+  useEffect(() => {
+    setId(urlId);
+    if (urlId) {
+      refetch();
+    }
+  }, [urlId, refetch]);
 
   // console.log('=== TotalCompCreateProfilePage, id: ', id, jobProfileData);
 
@@ -229,6 +265,9 @@ export const TotalCompCreateProfilePage = () => {
   });
 
   const selectedProfession = watch('professions'); // This will watch the change of profession's value
+  const employeeGroup = watch('employeeGroup');
+  // State to hold filtered classifications
+  const [filteredClassifications, setFilteredClassifications] = useState([] as ClassificationModel[]);
 
   const allReportsTo = watch('all_reports_to');
 
@@ -267,9 +306,31 @@ export const TotalCompCreateProfilePage = () => {
   //   [jobStreams],
   // );
 
+  // const handlePaste = (event, editor, next) => {
+  //   // Prevent the default paste behavior
+  //   event.preventDefault();
+
+  //   // Get the plain text from the clipboard
+  //   const text = event.clipboardData.getData('text/plain');
+
+  //   // Insert the plain text at the current cursor position
+  //   editor.clipboard.dangerouslyPasteHTML(editor.getSelection().index, text);
+  // };
+
   //quill modules for rich text editing
   const quill_modules = {
-    toolbar: [[{ list: 'ordered' }, { list: 'bullet' }], ['link'], [{ indent: '+1' }, { indent: '-1' }]],
+    toolbar: [
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['bold', 'italic'],
+      ['link'],
+      [{ indent: '+1' }, { indent: '-1' }],
+    ],
+    clipboard: true,
+    // clipboard: {
+    //   // Use the custom paste handler
+    //   matchVisual: false,
+    //   matchers: [['', handlePaste]],
+    // },
   };
 
   // END BASIC DETAILS FORM
@@ -289,16 +350,18 @@ export const TotalCompCreateProfilePage = () => {
     reset: resetProfileForm,
   } = useForm({
     defaultValues: {
+      state: '',
       overview: '' as string | TrackedFieldArrayItem,
       programOverview: '' as string | TrackedFieldArrayItem,
       accountabilities: [] as AccountabilityItem[],
       education: [] as AccountabilityItem[],
       job_experience: [] as AccountabilityItem[],
       professionalRegistrationRequirements: [] as TextItem[],
+      optionalRequirements: [] as TextItem[],
       preferences: [] as TextItem[],
       knowledgeSkillsAbilities: [] as TextItem[],
       willingnessStatements: [] as TextItem[],
-      securityScreenings: [] as AccountabilityItem[],
+      securityScreenings: [] as SecurityScreeningItem[],
       behavioural_competencies: [] as BehaviouralCompetencyData[],
       markAllNonEditable: false,
       markAllSignificant: false,
@@ -307,7 +370,6 @@ export const TotalCompCreateProfilePage = () => {
       markAllNonEditableJob_experience: false,
       markAllSignificantJob_experience: false,
       markAllNonEditableSec: false,
-      markAllSignificantSec: false,
     },
   });
 
@@ -321,28 +383,87 @@ export const TotalCompCreateProfilePage = () => {
   }, [urlId, setValue, reset, resetProfileForm, fetchNextNumber]);
 
   const { data: treeData } = useGetGroupedClassificationsQuery({
-    employee_group_ids: ['MGT', 'GEU', 'OEX'],
+    employee_group_ids: ['MGT', 'GEU', 'OEX', 'NUR'],
     effective_status: 'Active',
   });
 
-  const transformToTreeData = (groupedClassifications: any) => {
-    const transformItem = (item: any) => ({
-      title: (item.groupName || item.name) + (item.employee_group_id ? ' (' + item.employee_group_id + ')' : ''),
-      value: item.id || item.groupName,
-      key: item.id || item.groupName,
-      children: item.items?.map(transformItem),
-    });
+  const selectedClassificationId = watch('classification');
+
+  const getAllTreeValues = useCallback((tree: any) => {
+    const values: any = [];
+    const getValues = (nodes: any) => {
+      nodes.forEach((node: any) => {
+        if (node.key !== node.title) {
+          values.push(node.value);
+        }
+        if (node.children) {
+          getValues(node.children);
+        }
+      });
+    };
+    getValues(tree);
+    return values;
+  }, []);
+
+  const transformToTreeData = useCallback((groupedClassifications: any) => {
+    const transformItem = (item: any) => {
+      // console.log('transformItem item: ', item, selectedClassificationId);
+      // Filter out the selected classification
+      // if (selectedClassificationId && item.id === selectedClassificationId) {
+      //   console.log('FILTERED ITEM: ', item);
+      //   return;
+      // }
+
+      return {
+        title: (item.groupName || item.name) + (item.employee_group_id ? ' (' + item.employee_group_id + ')' : ''),
+        value: item.id || item.groupName,
+        key: item.id || item.groupName,
+        id: item.id,
+        children: item.items?.map(transformItem),
+      };
+    };
 
     return groupedClassifications.map(transformItem);
-  };
+  }, []);
 
   const treeDataConverted = useMemo(() => {
     return treeData ? transformToTreeData(treeData.groupedClassifications) : [];
-  }, [treeData]);
+  }, [treeData, transformToTreeData]);
+
+  const setAllReportToRelationships = useCallback(
+    (isChecked: boolean) => {
+      // Get all values for 'reportToRelationship' if isChecked is true, else an empty array
+      const allValues = isChecked ? getAllTreeValues(treeDataConverted) : [];
+
+      // filter out the selected classification
+      let filteredReportToRelationship = allValues;
+      if (selectedClassificationId)
+        filteredReportToRelationship = allValues.filter((r: string) => r !== selectedClassificationId);
+
+      // Update the 'reportToRelationship' form variable
+      setValue('reportToRelationship', filteredReportToRelationship);
+    },
+    [getAllTreeValues, treeDataConverted, selectedClassificationId, setValue],
+  );
+
+  const handleSelectAllReportTo = useCallback(
+    (isChecked: boolean) => {
+      // Update the 'all_reports_to' form variable
+      setValue('all_reports_to', isChecked);
+      setAllReportToRelationships(isChecked);
+    },
+    [setValue, setAllReportToRelationships],
+  );
+
+  useEffect(() => {
+    // if select all is checked, need to update the list to include all items properly
+    if (allReportsTo) handleSelectAllReportTo(allReportsTo);
+  }, [selectedClassificationId, handleSelectAllReportTo, allReportsTo]);
 
   useEffect(() => {
     // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
+      console.log('setting values..');
       // Basic Details Form
       setValue('jobTitle', jobProfileData.jobProfile.title as string);
       setValue('jobStoreNumber', jobProfileData.jobProfile.number.toString());
@@ -352,7 +473,7 @@ export const TotalCompCreateProfilePage = () => {
       setValue('classification', jobProfileData.jobProfile?.classifications?.[0]?.classification.id ?? null);
       setValue('jobRole', jobProfileData.jobProfile?.role?.id);
 
-      setValue('role', jobProfileData.jobProfile.role_type.id);
+      if (jobProfileData.jobProfile.role_type) setValue('role', jobProfileData.jobProfile.role_type.id);
 
       setValue('scopeOfResponsibility', jobProfileData.jobProfile?.scope?.id);
 
@@ -383,6 +504,8 @@ export const TotalCompCreateProfilePage = () => {
       }
 
       // Profile Form
+      if (jobProfileData.jobProfile.state) profileSetValue('state', jobProfileData.jobProfile.state);
+
       profileSetValue('overview', jobProfileData.jobProfile.overview);
       profileSetValue('programOverview', jobProfileData.jobProfile.program_overview);
       profileSetValue(
@@ -423,6 +546,10 @@ export const TotalCompCreateProfilePage = () => {
         jobProfileData.jobProfile.professional_registration_requirements.map((r: any) => ({ text: r })),
       );
       profileSetValue(
+        'optionalRequirements',
+        jobProfileData.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
+      );
+      profileSetValue(
         'preferences',
         jobProfileData.jobProfile.preferences.map((p: any) => ({ text: p })),
       );
@@ -441,8 +568,7 @@ export const TotalCompCreateProfilePage = () => {
             ({
               text: s.text,
               nonEditable: s.is_readonly,
-              significant: s.is_significant,
-            }) as AccountabilityItem,
+            }) as SecurityScreeningItem,
         ),
       );
 
@@ -510,16 +636,28 @@ export const TotalCompCreateProfilePage = () => {
         'markAllNonEditableSec',
         jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableSec ?? false,
       );
-      profileSetValue(
-        'markAllSignificantSec',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantSec ?? false,
-      );
     } else {
       // no profile data - select all ministries as that's the default setting
       const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
       setValue('ministries', allValues);
     }
-  }, [jobProfileData, setValue, profileSetValue, treeDataConverted, ministriesData, allMinistriesData]);
+  }, [
+    jobProfileData,
+    setValue,
+    profileSetValue,
+    treeDataConverted,
+    ministriesData,
+    allMinistriesData,
+    getAllTreeValues,
+  ]);
+
+  // Update local state when URL parameter changes
+  useEffect(() => {
+    if (!urlId) {
+      const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
+      setValue('ministries', allValues);
+    }
+  }, [urlId, setValue, allMinistriesData]);
 
   // required accountabilties
 
@@ -593,25 +731,17 @@ export const TotalCompCreateProfilePage = () => {
     profileSetValue('job_experience', updatedExperiences as AccountabilityItem[]);
   };
 
-  const updateSignificantSec = (significant: boolean) => {
-    const securityScreeningsUpdated = securityScreenings.map((field) => ({
-      ...field,
-      significant: significant,
-    }));
-    profileSetValue('securityScreenings', securityScreeningsUpdated as AccountabilityItem[]);
-  };
-
   const updateNonEditableSec = (nonEditable: boolean) => {
     const securityScreeningsUpdated = securityScreenings.map((field) => ({
       ...field,
       nonEditable: nonEditable,
-      significant: nonEditable ? true : false,
     }));
-    profileSetValue('securityScreenings', securityScreeningsUpdated as AccountabilityItem[]);
+    profileSetValue('securityScreenings', securityScreeningsUpdated as SecurityScreeningItem[]);
   };
 
   const allOrganizations = watch('all_organizations');
 
+  const state = profileWatch('state');
   const markAllNonEditable = profileWatch('markAllNonEditable');
   const markAllNonEditableEdu = profileWatch('markAllNonEditableEdu');
   const markAllSignificantEdu = profileWatch('markAllSignificantEdu');
@@ -619,7 +749,6 @@ export const TotalCompCreateProfilePage = () => {
   const markAllSignificantJob_experience = profileWatch('markAllSignificantJob_experience');
 
   const markAllNonEditableSec = profileWatch('markAllNonEditableSec');
-  const markAllSignificantSec = profileWatch('markAllSignificantSec');
 
   const markAllSignificant = profileWatch('markAllSignificant');
   const accountabilities = profileWatch('accountabilities');
@@ -646,7 +775,7 @@ export const TotalCompCreateProfilePage = () => {
     }
   };
 
-  // work experience
+  // related experience
   const {
     fields: job_experienceFields,
     append: appendJob_experience,
@@ -681,6 +810,25 @@ export const TotalCompCreateProfilePage = () => {
       moveProfessionalRegistrationRequirement(index, index - 1);
     } else {
       moveProfessionalRegistrationRequirement(index, index + 1);
+    }
+  };
+
+  // optional requirements
+  const {
+    fields: optionalRequirementsFields,
+    append: appendOptionalRequirement,
+    remove: removeOptionalRequirement,
+    move: moveOptionalRequirement,
+  } = useFieldArray({
+    control: profileControl,
+    name: 'optionalRequirements',
+  });
+
+  const handleOptionalRequirementsMove = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up') {
+      moveOptionalRequirement(index, index - 1);
+    } else {
+      moveOptionalRequirement(index, index + 1);
     }
   };
 
@@ -782,41 +930,19 @@ export const TotalCompCreateProfilePage = () => {
   // Tree-select for report-to relationship
   const { SHOW_CHILD } = TreeSelect;
 
-  const getAllTreeValues = (tree: any) => {
-    const values: any = [];
-    const getValues = (nodes: any) => {
-      nodes.forEach((node: any) => {
-        if (node.key !== node.title) {
-          values.push(node.value);
-        }
-        if (node.children) {
-          getValues(node.children);
-        }
-      });
-    };
-    getValues(tree);
-    return values;
-  };
-
-  const handleSelectAllReportTo = (isChecked: boolean) => {
-    // Update the 'all_reports_to' form variable
-    setValue('all_reports_to', isChecked);
-    setAllReportToRelationships(isChecked);
-  };
-
-  const setAllReportToRelationships = (isChecked: boolean) => {
-    // Get all values for 'reportToRelationship' if isChecked is true, else an empty array
-    const allValues = isChecked ? getAllTreeValues(treeDataConverted) : [];
-
-    // Update the 'reportToRelationship' form variable
-    setValue('reportToRelationship', allValues);
-  };
-
   //employee group selector
   const { data: employeeGroupData } = useGetEmployeeGroupsQuery();
 
   // classifications selector data
-  const { data: classificationsData } = useGetClassificationsQuery();
+  const { data: classificationsData } = useGetFilteredClassificationsQuery();
+
+  // useEffect to update the filteredClassifications when employeeGroup changes
+  useEffect(() => {
+    if (employeeGroup && classificationsData?.classifications) {
+      const filtered = classificationsData.classifications.filter((c) => c.employee_group_id === employeeGroup);
+      setFilteredClassifications(filtered);
+    }
+  }, [employeeGroup, classificationsData, setValue]);
 
   // job role selector data
   const { data: jobRolesData } = useGetJobRolesQuery();
@@ -832,12 +958,17 @@ export const TotalCompCreateProfilePage = () => {
 
   // minimum requirements that change in reponse to classification changes
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const selectedClassificationId = watch('classification');
 
   const { data: jobProfileMinimumRequirements } = useGetJobProfileMinimumRequirementsQuery();
 
   // Handler for classification change
   const handleClassificationChange = (newValue: string | null) => {
+    // if this classification exists in reportToRelationship, remove it
+
+    const currentReportToRelationship = getBasicDetailsValues('reportToRelationship');
+    const filteredReportToRelationship = currentReportToRelationship.filter((r: string) => r !== newValue);
+    setValue('reportToRelationship', filteredReportToRelationship);
+
     if (selectedClassificationId) {
       setIsModalVisible(true);
     } else {
@@ -897,13 +1028,13 @@ export const TotalCompCreateProfilePage = () => {
           is_significant: a.significant,
         })),
         professional_registration_requirements: formData.professionalRegistrationRequirements.map((p: any) => p.text),
+        optional_requirements: formData.optionalRequirements.map((o: any) => o.text),
         preferences: formData.preferences.map((p: any) => p.text),
         knowledge_skills_abilities: formData.knowledgeSkillsAbilities.map((k: any) => k.text),
         willingness_statements: formData.willingnessStatements.map((w: any) => w.text),
         security_screenings: formData.securityScreenings.map((a: any) => ({
           text: a.text,
           is_readonly: a.nonEditable,
-          is_significant: a.significant,
         })),
         all_reports_to: formData.all_reports_to,
         all_organizations: formData.all_organizations,
@@ -916,7 +1047,6 @@ export const TotalCompCreateProfilePage = () => {
           markAllSignificantJob_experience: formData.markAllSignificantJob_experience,
 
           markAllNonEditableSec: formData.markAllNonEditableSec,
-          markAllSignificantSec: formData.markAllSignificantSec,
           employeeGroup: formData.employeeGroup,
         },
         behavioural_competencies: {
@@ -1029,10 +1159,12 @@ export const TotalCompCreateProfilePage = () => {
     }
   }
 
-  const save = (isPublishing = false) => {
+  const save = (isPublishing = false, isUnpublishing = false) => {
     console.log('save, isPublishing: ', isPublishing);
     const basicDetails = getBasicDetailsValues();
     const profileDetails = getProfileValues();
+
+    if (isUnpublishing) isPublishing = false;
 
     const combinedData = {
       ...basicDetails,
@@ -1041,6 +1173,12 @@ export const TotalCompCreateProfilePage = () => {
       state: isPublishing ? 'PUBLISHED' : null,
     };
 
+    if (isPublishing) profileSetValue('state', 'PUBLISHED');
+    if (isUnpublishing) {
+      combinedData.state = 'DRAFT';
+      profileSetValue('state', 'DRAFT');
+    }
+
     console.log('Combined form data:', combinedData);
 
     const transformedData = transformFormDataToApiSchema(combinedData);
@@ -1048,8 +1186,61 @@ export const TotalCompCreateProfilePage = () => {
     submitJobProfileData(transformedData);
   };
 
+  const unpublish = () => {
+    save(false, true);
+  };
+
   const publish = () => {
     save(true);
+  };
+
+  const filterTreeData = (data: any, selectedId: any) => {
+    // Filter out the selected classification from the tree data
+    const ret = data
+      .filter((item: any) => {
+        const compareResult = item.id !== selectedId || item.id == null;
+        // if (!compareResult) console.log('filtering: ', item.id, selectedId, item);
+        return compareResult;
+      })
+      .map((item: any) => ({
+        ...item,
+        children: item.children ? filterTreeData(item.children, selectedId) : [],
+      }));
+    return ret;
+  };
+
+  const showPublishConfirm = () => {
+    Modal.confirm({
+      title: 'Publish profile',
+      content:
+        'Publishing the job profile to the Job Store will allow hiring managers view the profile. Are you sure you want to continue?',
+      okText: 'Publish profile',
+      cancelText: 'Cancel',
+      onOk() {
+        // Call the function to handle the publish action
+        publish();
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
+  };
+
+  const showUnPublishConfirm = () => {
+    Modal.confirm({
+      title: 'Un-publish Profile',
+      content:
+        'Un-publishing the job profile from the Job Store will remove public access to the profile. Are you sure you want to continue?',
+      okText: 'Un-publish profile',
+      cancelText: 'Cancel',
+      onOk() {
+        // Call the function to handle the publish action
+        unpublish();
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
   };
 
   const tabItems = [
@@ -1068,7 +1259,8 @@ export const TotalCompCreateProfilePage = () => {
           >
             <p>
               Changing ‘Classification’ would result in updates to some of the system generated fields in the ‘Job
-              Profile’ page. Are you sure you want to continue?
+              Profile’ page. Report-to relationship may also get updated to exclude this classification. Are you sure
+              you want to continue?
             </p>
           </Modal>
           <Row justify="center" style={{ margin: '1rem 0' }}>
@@ -1081,7 +1273,7 @@ export const TotalCompCreateProfilePage = () => {
               >
                 <Card title="Job Title" bordered={false} className="custom-card">
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       <FormItem control={control} name="jobTitle">
                         <label style={srOnlyStyle} htmlFor="jobTitle">
                           Job Title
@@ -1094,7 +1286,7 @@ export const TotalCompCreateProfilePage = () => {
 
                 <Card title="JobStore Number" style={{ marginTop: 16 }} bordered={false} className="custom-card">
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       <FormItem control={control} name="jobStoreNumber">
                         <label style={srOnlyStyle} htmlFor="jobStoreNumber">
                           JobStore Number
@@ -1129,7 +1321,7 @@ export const TotalCompCreateProfilePage = () => {
 
                 <Card title="Classification" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       <Form.Item label="Employee group" labelCol={{ className: 'card-label' }}>
                         <Controller
                           name="employeeGroup"
@@ -1138,7 +1330,15 @@ export const TotalCompCreateProfilePage = () => {
                             return (
                               <Select
                                 placeholder="Choose an employee group"
-                                onChange={onChange}
+                                onChange={(arg) => {
+                                  console.log('arg employee group: ', arg);
+                                  // Filter classifications based on the selected employee group
+                                  // Clear the classification selection
+                                  setValue('classification', null);
+
+                                  // Call the original onChange to update the form state
+                                  onChange(arg);
+                                }}
                                 onBlur={onBlur}
                                 value={value}
                                 style={{ width: '100%' }}
@@ -1158,7 +1358,7 @@ export const TotalCompCreateProfilePage = () => {
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       <Form.Item label="Classification" labelCol={{ className: 'card-label' }}>
                         {/* Form.Item for cosmetic purposes */}
                         <Controller
@@ -1181,7 +1381,11 @@ export const TotalCompCreateProfilePage = () => {
                                   return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
                                 }}
                                 // Transforming data to required format for the Select options prop
-                                options={classificationsData?.classifications.map((classification) => ({
+                                // options={classificationsData?.classifications.map((classification) => ({
+                                //   label: classification.name,
+                                //   value: classification.id,
+                                // }))}
+                                options={filteredClassifications.map((classification) => ({
                                   label: classification.name,
                                   value: classification.id,
                                 }))}
@@ -1196,7 +1400,7 @@ export const TotalCompCreateProfilePage = () => {
 
                 <Card title="Type" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       <Form.Item label="Job role" labelCol={{ className: 'card-label' }}>
                         <Controller
                           name="jobRole"
@@ -1221,7 +1425,7 @@ export const TotalCompCreateProfilePage = () => {
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       <Form.Item
                         label="Job Family / Profession"
                         labelCol={{ className: 'card-label' }}
@@ -1330,7 +1534,7 @@ export const TotalCompCreateProfilePage = () => {
 
                 <Card title="Additional information" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={10} xl={10}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       {/* Role Radio Buttons */}
                       <Form.Item label="Role" labelCol={{ className: 'card-label' }}>
                         <Controller
@@ -1349,7 +1553,7 @@ export const TotalCompCreateProfilePage = () => {
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       {/* Report-to relationship Select */}
 
                       <Form.Item label="Report-to relationship" labelCol={{ className: 'card-label' }}>
@@ -1371,7 +1575,9 @@ export const TotalCompCreateProfilePage = () => {
                                   setValue('all_reports_to', false);
                                   field.onChange(selectedItems); // Continue with the original onChange
                                 }}
-                                treeData={treeDataConverted} // Replace with your data
+                                // todo: do the filtering externally, wasn't able to do it because of inifinite render loop
+                                treeData={filterTreeData(treeDataConverted, selectedClassificationId)}
+                                // treeData={treeDataConverted} // Replace with your data
                                 // onChange={(value) => setReportToRelationship(value)}
                                 treeCheckable={true}
                                 showCheckedStrategy={SHOW_CHILD}
@@ -1389,7 +1595,7 @@ export const TotalCompCreateProfilePage = () => {
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       {/* Scope of Responsibility Select */}
                       <Form.Item label="Scope of Responsibility" labelCol={{ className: 'card-label' }}>
                         <Controller
@@ -1416,7 +1622,7 @@ export const TotalCompCreateProfilePage = () => {
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={14} lg={14} xl={14}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       {/* Ministries Select */}
 
                       <Form.Item
@@ -1455,7 +1661,7 @@ export const TotalCompCreateProfilePage = () => {
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={8} xl={8}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       {/* Other Functions Checkbox */}
                       <Form.Item
                         label={
@@ -1474,7 +1680,7 @@ export const TotalCompCreateProfilePage = () => {
                             <>
                               <Switch checked={value} onChange={onChange} ref={ref} />
                               <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
-                                Classification review required
+                                Verification or Classification Review required
                               </span>
                             </>
                           )}
@@ -1486,7 +1692,7 @@ export const TotalCompCreateProfilePage = () => {
 
                 <Card title="Job Context" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={10} lg={10} xl={10}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                       <Controller
                         control={control}
                         name="jobContext"
@@ -1596,6 +1802,9 @@ export const TotalCompCreateProfilePage = () => {
                                           }}
                                         >
                                           Mark all as non-editable
+                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
                                         </Checkbox>
                                       )}
                                     ></Controller>
@@ -1617,6 +1826,9 @@ export const TotalCompCreateProfilePage = () => {
                                           disabled={markAllNonEditable || accountabilitiesFields.length === 0}
                                         >
                                           Mark all as significant
+                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
                                         </Checkbox>
                                       )}
                                     ></Controller>
@@ -1774,6 +1986,9 @@ export const TotalCompCreateProfilePage = () => {
                                           }}
                                         >
                                           Mark all as non-editable
+                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
                                         </Checkbox>
                                       )}
                                     ></Controller>
@@ -1795,6 +2010,9 @@ export const TotalCompCreateProfilePage = () => {
                                           }
                                         >
                                           Mark all as significant
+                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
                                         </Checkbox>
                                       )}
                                     ></Controller>
@@ -1903,7 +2121,7 @@ export const TotalCompCreateProfilePage = () => {
                     </Col>
                   </Row>
 
-                  {/* Work experience */}
+                  {/* Related experience */}
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                       <Form.Item
@@ -1911,7 +2129,7 @@ export const TotalCompCreateProfilePage = () => {
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
                           <Row justify="space-between" align="middle" style={{ width: '100%' }}>
-                            <Col>Work experience</Col>
+                            <Col>Related experience</Col>
                             <Col>
                               <Form.Item style={{ margin: 0 }}>
                                 <Row>
@@ -1930,6 +2148,9 @@ export const TotalCompCreateProfilePage = () => {
                                           }}
                                         >
                                           Mark all as non-editable
+                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
                                         </Checkbox>
                                       )}
                                     ></Controller>
@@ -1951,6 +2172,9 @@ export const TotalCompCreateProfilePage = () => {
                                           }
                                         >
                                           Mark all as significant
+                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
                                         </Checkbox>
                                       )}
                                     ></Controller>
@@ -2024,7 +2248,7 @@ export const TotalCompCreateProfilePage = () => {
                                       control={profileControl}
                                       name={`job_experience.${index}.text`}
                                       render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add work experience" {...field} />
+                                        <TextArea autoSize placeholder="Add related experience" {...field} />
                                       )}
                                     />
                                   </Form.Item>
@@ -2049,7 +2273,7 @@ export const TotalCompCreateProfilePage = () => {
                             }
                             icon={<PlusOutlined />}
                           >
-                            Add work experience
+                            Add an experience requirement
                           </Button>
                         </Form.Item>
                       </Form.Item>
@@ -2332,25 +2556,9 @@ export const TotalCompCreateProfilePage = () => {
                                           }}
                                         >
                                           Mark all as non-editable
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllSignificantSec"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllSignificantSec || markAllNonEditableSec}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateSignificantSec(e.target.checked);
-                                          }}
-                                          disabled={markAllNonEditableSec || securityScreeningsFields.length === 0}
-                                        >
-                                          Mark all as significant
+                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
                                         </Checkbox>
                                       )}
                                     ></Controller>
@@ -2382,9 +2590,6 @@ export const TotalCompCreateProfilePage = () => {
                                     render={({ field: { onChange, value } }) => (
                                       <Checkbox
                                         onChange={(args) => {
-                                          if (args.target.checked) {
-                                            profileSetValue(`securityScreenings.${index}.significant`, true);
-                                          }
                                           if (!args.target.checked) {
                                             profileSetValue('markAllNonEditableSec', false);
                                           }
@@ -2393,24 +2598,6 @@ export const TotalCompCreateProfilePage = () => {
                                         checked={value}
                                       >
                                         Non-editable
-                                      </Checkbox>
-                                    )}
-                                  />
-                                  <Controller
-                                    name={`securityScreenings.${index}.significant`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllSignificantSec', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        disabled={securityScreenings[index].nonEditable}
-                                        checked={value || securityScreenings[index].nonEditable}
-                                      >
-                                        Significant
                                       </Checkbox>
                                     )}
                                   />
@@ -2447,12 +2634,69 @@ export const TotalCompCreateProfilePage = () => {
                               appendSecurityScreening({
                                 text: '',
                                 nonEditable: markAllNonEditableSec,
-                                significant: markAllSignificantSec,
                               })
                             }
                             icon={<PlusOutlined />}
                           >
                             Add a security screenings requirement
+                          </Button>
+                        </Form.Item>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  {/* optional requirements */}
+                  <Row justify="start">
+                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                      <Form.Item
+                        style={{ marginBottom: '0' }}
+                        labelCol={{ className: 'full-width-label card-label' }}
+                        label={
+                          <Row justify="space-between" align="middle">
+                            <Col>Optional requirements</Col>
+                          </Row>
+                        }
+                      >
+                        {optionalRequirementsFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                            {/* up/down controls */}
+                            <Col flex="none" className="reorder-controls">
+                              <ReorderButtons
+                                index={index}
+                                moveItem={handleOptionalRequirementsMove}
+                                upperDisabled={index === 0}
+                                lowerDisabled={index === optionalRequirementsFields.length - 1}
+                              />
+                            </Col>
+                            <Col flex="auto">
+                              <Row>{/* Non-editable checkbox */}</Row>
+                              <Row gutter={10}>
+                                <Col flex="auto">
+                                  <Form.Item>
+                                    <Controller
+                                      control={profileControl}
+                                      name={`optionalRequirements.${index}.text`}
+                                      render={({ field }) => (
+                                        <TextArea autoSize placeholder="Add an optional requirement" {...field} />
+                                      )}
+                                    />
+                                  </Form.Item>
+                                </Col>
+
+                                <Col flex="none">
+                                  <Button icon={<DeleteOutlined />} onClick={() => removeOptionalRequirement(index)} />
+                                </Col>
+                              </Row>
+                            </Col>
+                          </Row>
+                        ))}
+                        <Form.Item>
+                          <Button
+                            type="link"
+                            onClick={() => appendOptionalRequirement({ text: '' })}
+                            icon={<PlusOutlined />}
+                          >
+                            Add an optional requirement
                           </Button>
                         </Form.Item>
                       </Form.Item>
@@ -2574,26 +2818,66 @@ export const TotalCompCreateProfilePage = () => {
           <Row justify="center" style={{ margin: '1rem 0' }}>
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
               {/* Save as Draft Card */}
-              <Card title="Save as Draft">
-                <Typography.Text>Save your progress and come back later to make changes.</Typography.Text>
-                <br></br>
-                <Button type="primary" style={{ marginTop: 16 }} onClick={() => save()}>
-                  Save as Draft
-                </Button>
-              </Card>
+              {state != 'PUBLISHED' && (
+                <Card title="Save as Draft">
+                  <Typography.Text>Save your progress and come back later to make changes.</Typography.Text>
+                  <br></br>
+                  <Button type="primary" style={{ marginTop: 16 }} onClick={() => save()}>
+                    Save as Draft
+                  </Button>
+                </Card>
+              )}
+
+              {state == 'PUBLISHED' && (
+                <Card title="Save and publish">
+                  <Typography.Text>Save your progress and publish changes.</Typography.Text>
+                  <br></br>
+                  <Button type="primary" style={{ marginTop: 16 }} onClick={() => save()}>
+                    Save and publish
+                  </Button>
+                </Card>
+              )}
 
               {/* Other Actions Card */}
               <Card style={{ marginTop: 24 }} title="Other Actions">
-                <Typography.Title level={5}>Publish</Typography.Title>
-                <Typography.Text>
-                  Publish the job profile to the Job Store will allow hiring managers view the profile.
-                </Typography.Text>
-                <br></br>
-                <Button type="primary" style={{ marginTop: 10 }} onClick={publish}>
-                  Publish Profile
-                </Button>
+                {state != 'PUBLISHED' && (
+                  <>
+                    <Typography.Title level={5}>Publish</Typography.Title>
+                    <Typography.Text>
+                      Publish the job profile to the Job Store will allow hiring managers view the profile.
+                    </Typography.Text>
+                    <br></br>
+                    <Button type="primary" style={{ marginTop: 10 }} onClick={showPublishConfirm}>
+                      Publish Profile
+                    </Button>
+                  </>
+                )}
+
+                {state == 'PUBLISHED' && (
+                  <>
+                    <Typography.Title level={5}>Download job profile</Typography.Title>
+                    <Typography.Text>Download a copy of the job profile.</Typography.Text>
+                    <br></br>
+                    <Button style={{ marginTop: 10 }}>Download job profile</Button>
+                  </>
+                )}
 
                 <Divider></Divider>
+
+                {state == 'PUBLISHED' && (
+                  <>
+                    <Typography.Title level={5}>Un-publish</Typography.Title>
+                    <Typography.Text>
+                      Un-publishing the job profile from the Job Store will remove public access to the profile. After
+                      which you can access the profile from the ‘Drafts’ section.
+                    </Typography.Text>
+                    <br></br>
+                    <Button style={{ marginTop: 10 }} onClick={showUnPublishConfirm}>
+                      Un-publish profile
+                    </Button>
+                    <Divider></Divider>
+                  </>
+                )}
 
                 <Typography.Title level={5}>Allow others to edit</Typography.Title>
                 <Typography.Paragraph>
@@ -2603,10 +2887,30 @@ export const TotalCompCreateProfilePage = () => {
 
                 <Divider></Divider>
 
-                <Typography.Title level={5}>View all profiles</Typography.Title>
-                <Typography.Text>View all profiles that you have created.</Typography.Text>
-                <br></br>
-                <Button style={{ marginTop: 10 }}>Go to Drafts</Button>
+                {state == 'PUBLISHED' && (
+                  <>
+                    <Typography.Title level={5}>View all published profiles</Typography.Title>
+                    <Typography.Text>View all published profiles that you have created.</Typography.Text>
+                    <br></br>
+                    <Button
+                      style={{ marginTop: 10 }}
+                      onClick={() => navigate('/total-compensation/profiles/published')}
+                    >
+                      Go to published profiles
+                    </Button>
+                  </>
+                )}
+
+                {state != 'PUBLISHED' && (
+                  <>
+                    <Typography.Title level={5}>View all profiles</Typography.Title>
+                    <Typography.Text>View all profiles that you have created.</Typography.Text>
+                    <br></br>
+                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/total-compensation/profiles/drafts')}>
+                      Go to drafts
+                    </Button>
+                  </>
+                )}
               </Card>
             </Col>
           </Row>
@@ -2615,7 +2919,21 @@ export const TotalCompCreateProfilePage = () => {
     },
   ];
 
-  if (!ministriesData || (id && isLoadingJobProfile)) return <>Loading..</>;
+  // console.log('isLoadingJobProfile: ', isLoadingJobProfile, isFetchingJobProfile);
+  if (
+    !ministriesData ||
+    (id && (isLoadingJobProfile || isFetchingJobProfile)) ||
+    !allMinistriesData ||
+    !jobFamiliesData ||
+    !jobProfileStreamsData ||
+    !treeData ||
+    !employeeGroupData ||
+    !classificationsData ||
+    !jobRolesData ||
+    !jobProfileScopes ||
+    !jobProfileMinimumRequirements
+  )
+    return <>Loading..</>;
 
   return (
     <>
@@ -2624,7 +2942,7 @@ export const TotalCompCreateProfilePage = () => {
         subTitle="New profile"
         showButton1
         showButton2
-        button2Text="Save as draft"
+        button2Text={state == 'PUBLISHED' ? 'Save and publish' : 'Save as draft'}
         button2Callback={() => save()}
       />
 

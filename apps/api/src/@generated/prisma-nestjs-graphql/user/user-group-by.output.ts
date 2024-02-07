@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { ObjectType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { UserCountAggregate } from './user-count-aggregate.output';
 import { UserMinAggregate } from './user-min-aggregate.output';
 import { UserMaxAggregate } from './user-max-aggregate.output';
@@ -20,6 +21,9 @@ export class UserGroupBy {
 
   @Field(() => [String], { nullable: true })
   roles?: Array<string>;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  metadata?: any;
 
   @Field(() => Date, { nullable: false })
   created_at!: Date | string;

@@ -1,6 +1,8 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
 import { PositionRequestUncheckedUpdateManyWithoutDepartmentNestedInput } from '../position-request/position-request-unchecked-update-many-without-department-nested.input';
+import { PositionRequestUncheckedUpdateManyWithoutPaylist_departmentNestedInput } from '../position-request/position-request-unchecked-update-many-without-paylist-department-nested.input';
+import { ClassificationDepartmentUncheckedUpdateManyWithoutDepartmentNestedInput } from '../classification-department/classification-department-unchecked-update-many-without-department-nested.input';
 
 @InputType()
 export class DepartmentUncheckedUpdateInput {
@@ -30,4 +32,10 @@ export class DepartmentUncheckedUpdateInput {
 
   @Field(() => PositionRequestUncheckedUpdateManyWithoutDepartmentNestedInput, { nullable: true })
   PositionRequest?: PositionRequestUncheckedUpdateManyWithoutDepartmentNestedInput;
+
+  @Field(() => PositionRequestUncheckedUpdateManyWithoutPaylist_departmentNestedInput, { nullable: true })
+  PositionRequestsByPaylistDepartment?: PositionRequestUncheckedUpdateManyWithoutPaylist_departmentNestedInput;
+
+  @Field(() => ClassificationDepartmentUncheckedUpdateManyWithoutDepartmentNestedInput, { nullable: true })
+  classifications?: ClassificationDepartmentUncheckedUpdateManyWithoutDepartmentNestedInput;
 }

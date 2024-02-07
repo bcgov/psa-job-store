@@ -4,6 +4,7 @@ import { SortOrder } from '../prisma/sort-order.enum';
 import { LocationOrderByWithRelationAndSearchRelevanceInput } from '../location/location-order-by-with-relation-and-search-relevance.input';
 import { OrganizationOrderByWithRelationAndSearchRelevanceInput } from '../organization/organization-order-by-with-relation-and-search-relevance.input';
 import { PositionRequestOrderByRelationAggregateInput } from '../position-request/position-request-order-by-relation-aggregate.input';
+import { ClassificationDepartmentOrderByRelationAggregateInput } from '../classification-department/classification-department-order-by-relation-aggregate.input';
 import { DepartmentOrderByRelevanceInput } from './department-order-by-relevance.input';
 
 @InputType()
@@ -40,6 +41,12 @@ export class DepartmentOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => PositionRequestOrderByRelationAggregateInput, { nullable: true })
   PositionRequest?: PositionRequestOrderByRelationAggregateInput;
+
+  @Field(() => PositionRequestOrderByRelationAggregateInput, { nullable: true })
+  PositionRequestsByPaylistDepartment?: PositionRequestOrderByRelationAggregateInput;
+
+  @Field(() => ClassificationDepartmentOrderByRelationAggregateInput, { nullable: true })
+  classifications?: ClassificationDepartmentOrderByRelationAggregateInput;
 
   @Field(() => DepartmentOrderByRelevanceInput, { nullable: true })
   _relevance?: DepartmentOrderByRelevanceInput;

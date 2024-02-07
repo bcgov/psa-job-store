@@ -3,6 +3,7 @@ import { ObjectType } from '@nestjs/graphql';
 import { EmployeeGroup } from '../employee-group/employee-group.model';
 import { JobProfileClassification } from '../job-profile-classification/job-profile-classification.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
+import { ClassificationDepartment } from '../classification-department/classification-department.model';
 
 @ObjectType()
 export class Classification {
@@ -38,4 +39,7 @@ export class Classification {
 
   @Field(() => [JobProfileReportsTo], { nullable: true })
   reportees?: Array<JobProfileReportsTo>;
+
+  @Field(() => [ClassificationDepartment], { nullable: true })
+  departments?: Array<ClassificationDepartment>;
 }

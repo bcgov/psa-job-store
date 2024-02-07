@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { InputType } from '@nestjs/graphql';
+import { PositionRequestUpdateManyWithoutWorkLocationNestedInput } from '../position-request/position-request-update-many-without-work-location-nested.input';
 
 @InputType()
 export class LocationUpdateWithoutDepartmentsInput {
@@ -20,4 +21,7 @@ export class LocationUpdateWithoutDepartmentsInput {
 
   @Field(() => Date, { nullable: true })
   effective_date?: Date | string;
+
+  @Field(() => PositionRequestUpdateManyWithoutWorkLocationNestedInput, { nullable: true })
+  positionRequests?: PositionRequestUpdateManyWithoutWorkLocationNestedInput;
 }
