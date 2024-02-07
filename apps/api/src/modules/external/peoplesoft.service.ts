@@ -12,6 +12,7 @@ import { Employee } from './models/employee.model';
 enum Endpoint {
   Classifications = 'PJS_TGB_REST_JOB_CODE',
   Departments = 'PJS_TGB_REST_DEPT',
+  DepartmentClassifications = 'PJS_TGB_REST_JOBCODE_DEPT',
   Employees = 'PJS_TGB_REST_EMPLOYEE',
   HrScope = 'PJS_TGB_REST_HRSCOPE',
   Locations = 'PJS_TGB_REST_LOCATION',
@@ -68,6 +69,8 @@ export class PeoplesoftService {
     (async () => {
       // To reduce API requests in non-production mode, only fetch these records if their counts === 0
       // In production, fetch records on server start
+      console.log("this.configService.get('NODE_ENV'): ", this.configService.get('NODE_ENV'));
+
       if (this.configService.get('NODE_ENV') !== Environment.Production) {
         const classificationCount = await this.prisma.classification.count();
         if (classificationCount < 100) {
@@ -81,7 +84,8 @@ export class PeoplesoftService {
 
         const organizationCount = await this.prisma.organization.count();
         const departmentCount = await this.prisma.department.count();
-        if (organizationCount < 100 || departmentCount < 100) {
+        const classificationDepartmentsCount = await this.prisma.classificationDepartment.count();
+        if (organizationCount < 100 || departmentCount < 100 || classificationDepartmentsCount < 100) {
           await this.syncOrganizationsAndDepartments();
         }
       } else {
@@ -186,6 +190,7 @@ export class PeoplesoftService {
     // Departments rely on organizations which must exist prior to syncing departments
     await this.syncOrganizations();
     await this.syncDepartments();
+    await this.syncDepartmentsForClassifications();
   }
 
   async syncOrganizations() {
@@ -293,6 +298,60 @@ export class PeoplesoftService {
           },
         });
       } catch (error) {}
+    }
+  }
+
+  async syncDepartmentsForClassifications() {
+    const classifications = await this.prisma.classification.findMany({
+      where: {
+        effective_status: 'Active',
+      },
+    });
+
+    for await (const classification of classifications) {
+      // Upsert classifications for department
+      const classificationResponse = await firstValueFrom(
+        this.request({
+          method: RequestMethod.GET,
+          endpoint: Endpoint.DepartmentClassifications,
+          pageSize: 25000,
+          extra: `prompt_uniquepromptname=JOBCODE,DEPTID&prompt_fieldvalue=${classification.id},&filterfields=A.JOBCODE,B.DEPTID`,
+        }).pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+      );
+
+      const classificationDepartmentsCount = await this.prisma.classificationDepartment.count({
+        where: { classification_id: classification.id },
+      });
+      if (classificationDepartmentsCount > 0) {
+        await this.prisma.classificationDepartment.deleteMany({
+          where: {
+            AND: {
+              classification_id: classification.id,
+            },
+          },
+        });
+      }
+
+      for (const row of classificationResponse?.data?.query?.rows ?? []) {
+        try {
+          await this.prisma.classificationDepartment.upsert({
+            where: {
+              classification_id_department_id: { classification_id: row['A.JOBCODE'], department_id: row['B.DEPTID'] },
+            },
+            create: {
+              classification_id: row['A.JOBCODE'],
+              department_id: row['B.DEPTID'],
+            },
+            update: {},
+          });
+        } catch (error) {}
+      }
     }
   }
 
