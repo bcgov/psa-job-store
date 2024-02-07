@@ -339,7 +339,6 @@ export class PeoplesoftService {
       }
 
       for (const row of classificationResponse?.data?.query?.rows ?? []) {
-        console.log('ROW: ', row);
         try {
           await this.prisma.classificationDepartment.upsert({
             where: {
