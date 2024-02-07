@@ -5,7 +5,7 @@ import Title from 'antd/es/typography/Title';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/app/page-header.component';
-import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
+import { useSubmitPositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';
@@ -20,7 +20,8 @@ export const WizardResultPage = () => {
 
   const { positionRequestId } = useWizardContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  // const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  const [submitPositionRequest] = useSubmitPositionRequestMutation();
 
   const showModal = async () => {
     setIsModalVisible(true);
@@ -40,11 +41,14 @@ export const WizardResultPage = () => {
 
     try {
       if (positionRequestId) {
-        await updatePositionRequest({
+        // await updatePositionRequest({
+        //   id: positionRequestId,
+        //   status: 'COMPLETE',
+        //   step: 6,
+        // }).unwrap();
+        await submitPositionRequest({
           id: positionRequestId,
-          status: 'COMPLETE',
-          step: 6,
-        }).unwrap();
+        });
       } else {
         throw Error('Position request not found');
       }

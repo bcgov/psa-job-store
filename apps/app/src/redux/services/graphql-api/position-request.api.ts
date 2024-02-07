@@ -125,6 +125,10 @@ export interface UpdatePositionRequestInput {
   };
 }
 
+export interface SubmitPositionRequestInput {
+  id: number;
+}
+
 export interface GetPositionRequestsArgs {
   search?: string;
   where?: Record<string, any>;
@@ -303,6 +307,39 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    submitPositionRequest: build.mutation<GetPositionRequestResponse, SubmitPositionRequestInput>({
+      invalidatesTags: ['positionRequest'],
+      query: (input: SubmitPositionRequestInput) => {
+        return {
+          document: gql`
+            mutation SubmitPositionRequest($id: Int!) {
+              submitPositionRequest(id: $id) {
+                id
+                step
+                reports_to_position_id
+                department_id
+                parent_job_profile_id
+                profile_json
+                user_id
+                title
+                position_number
+                classification_id
+                classification_code
+                user_name
+                email
+                submission_id
+                approved_at
+                status
+                updated_at
+              }
+            }
+          `,
+          variables: {
+            id: input.id,
+          },
+        };
+      },
+    }),
     getPositionRequestUserClassifications: build.query<GetPositionRequestUserClassificationsResponse, void>({
       query: () => {
         return {
@@ -398,6 +435,7 @@ export const {
   useLazyGetPositionRequestQuery,
   useCreatePositionRequestMutation,
   useUpdatePositionRequestMutation,
+  useSubmitPositionRequestMutation,
   useGetPositionRequestsCountQuery,
   useGetPositionRequestClassificationsQuery,
   useGetPositionRequestJobStoreNumbersQuery,
