@@ -195,6 +195,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfile {
               jobProfile(id: "${args.id}") {
                 id
+                updated_at
                 streams {
                   stream {
                       id
@@ -226,10 +227,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 scope{
                   id
                   name
+                  description
                 }
                 total_comp_create_form_misc
                 role_type {
                   id
+                  name
                 }
                 behavioural_competencies {
                   behavioural_competency {
