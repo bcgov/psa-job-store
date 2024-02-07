@@ -78,12 +78,13 @@ import { validateAppConfig } from './utils/validate-app-config.util';
   ],
   controllers: [],
   providers: [
+    { provide: APP_GUARD, useClass: AuthGuard },
     {
       provide: APP_GUARD,
       useClass: RolesGlobalGuard,
     },
-    { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RoleGuard },
+
     AppResolver,
   ],
 })

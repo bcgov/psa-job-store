@@ -1,18 +1,21 @@
-import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
+import { ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 
 export const AllowNoRoles = () => SetMetadata('allowNoRoles', true);
 
 @Injectable()
-export class RolesGlobalGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+export class RolesGlobalGuard extends PassportAuthGuard('keycloak') {
+  constructor(private reflector: Reflector) {
+    super();
+  }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
-    const user = request.user;
+    const gqlContext = GqlExecutionContext.create(context);
+    const request = gqlContext.getContext().req;
+    const { user } = request;
 
     // Allow all requests to the logout endpoint
     // Check if the endpoint allows unauthenticated access
@@ -24,6 +27,7 @@ export class RolesGlobalGuard implements CanActivate {
 
     // Check if user has one of the required roles
     const requiredRoles = ['hiring-manager', 'total-compensation', 'classification'];
+
     return user && user.roles.some((role) => requiredRoles.includes(role));
   }
 }

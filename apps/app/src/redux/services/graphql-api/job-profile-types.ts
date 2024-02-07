@@ -95,7 +95,8 @@ export interface JobProfileModel {
   context: ContextModel | string;
   overview: string | TrackedFieldArrayItem;
   type: string;
-  role: { id: number };
+  role: { id: number; name?: string };
+  updated_at?: string;
   total_comp_create_form_misc?: {
     employeeGroup: string;
     markAllNonEditable: boolean;
@@ -106,10 +107,10 @@ export interface JobProfileModel {
     markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;
   };
-  role_type: { id: number };
+  role_type: { id: number; name?: string };
   reports_to: ClassificationModelWrapped[];
   organizations: OrganizationsModelWrapped[];
-  scope: { id: number };
+  scope: { id: number; name?: string; description?: string };
   review_required: boolean;
   professions: ProfessionsModel[];
   program_overview: string | TrackedFieldArrayItem;
@@ -132,6 +133,7 @@ export interface ProfessionsModel {
 export interface OrganizationsModelWrapped {
   organization: {
     id: string;
+    name?: string;
   };
 }
 
