@@ -112,10 +112,10 @@ export const JobProfileSearchResults = ({
       </ul>
       <Pagination
         data-testid="pagination"
-        showSizeChanger
+        // showSizeChanger
         current={currentPage}
         pageSize={pageSize}
-        pageSizeOptions={[1, 2, 3, 5, 10]}
+        // pageSizeOptions={[1, 2, 3, 5, 10]}
         total={totalResults}
         onChange={onPageChange}
         style={{ textAlign: 'center', margin: '1rem' }}

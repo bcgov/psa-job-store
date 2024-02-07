@@ -2290,7 +2290,7 @@ export const TotalCompCreateProfilePage = () => {
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
                           <Row justify="space-between" align="middle">
-                            <Col>Professional registration requirement</Col>
+                            <Col>Professional registration requirements</Col>
                           </Row>
                         }
                       >

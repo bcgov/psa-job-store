@@ -45,6 +45,12 @@ To reset database with migrations:
 Create migration:
 `npx -w api prisma migrate dev --name MIGRATION_NAME`
 
+To apply new migrations after pulling latest code:
+
+`npx prisma migrate deploy`
+
+`npx prisma generate`
+
 ## Making a database backup to local drive
 
 Login to psql pod:
