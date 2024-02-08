@@ -27,7 +27,10 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
 
   // console.log('positionRequestDepartmentId from wizard org chart page: ', positionRequestDepartmentId);
   return (
-    <WizardPageWrapper title="New position" subTitle="Select a supervisor">
+    <WizardPageWrapper
+      title="New position"
+      subTitle="Here you are able to create a position. Start by clicking the supervisor of the position you would like to create."
+    >
       <WizardSteps current={0}></WizardSteps>
       <OrgChartFilter
         setSelectedDepartment={setSelectedDepartment}

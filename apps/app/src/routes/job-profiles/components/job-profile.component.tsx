@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeftOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import { Alert, Descriptions, DescriptionsProps, Grid, Typography } from 'antd';
+import { ArrowLeftOutlined, ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
+import { Alert, Descriptions, DescriptionsProps, Grid, Tooltip, Typography } from 'antd';
 import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -747,7 +747,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       // </Button>
       null}
       <Alert
-        message="Job context"
+        message={
+          <span>
+            Job context{' '}
+            <Tooltip title="The job context is important to understand as you proceed to create the position. You will be asked prior to approving that you understand the context of the job.">
+              <InfoCircleOutlined style={{ cursor: 'pointer' }} />
+            </Tooltip>
+          </span>
+        }
         description={
           <span
             dangerouslySetInnerHTML={{

@@ -92,8 +92,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack }) => {
 
   return (
     <WizardPageWrapper
-      title="Choose a job profile"
-      subTitle="Choose a job profile to modify for the new positions"
+      title="New position"
+      // subTitle="Choose a job profile to modify for the new positions"
       hpad={false}
       pageHeaderExtra={[
         <Button onClick={back}>Back</Button>,

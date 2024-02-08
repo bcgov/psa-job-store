@@ -4,7 +4,7 @@ import { PageHeader } from '../../../components/app/page-header.component';
 
 interface WizardPageWrapperProps {
   title: string;
-  subTitle: string;
+  subTitle?: string;
   children: ReactNode;
   xxl?: number;
   xl?: number;
