@@ -3,12 +3,9 @@
 ENVIRONMENT=$1
 OPENSHIFT_SERVER=$2
 TOKEN=$3
-export DATABASE_URL=$4
 
 #Log in to OpenShift
 echo "Deploying to $ENVIRONMENT"
-
-npm install prisma
 
 NAMESPACE="f3c07a-$ENVIRONMENT"
 
