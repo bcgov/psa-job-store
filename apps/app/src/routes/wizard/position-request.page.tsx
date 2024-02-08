@@ -19,15 +19,22 @@ import { WizardPage } from './wizard.page';
 const { Paragraph } = Typography;
 
 export const PositionRequestPage = () => {
-  let mode = 'editable';
-  mode = 'readonly';
+  // let mode = 'editable';
+  // mode = 'readonly';
 
-  mode = 'editable';
+  // mode = 'editable';
 
-  let readonlyMode = 'sentForVerification';
-  readonlyMode = 'reSubmittedForVerification';
-  readonlyMode = 'completed';
-  readonlyMode = 'inQueue';
+  // let readonlyMode = 'sentForVerification';
+  // readonlyMode = 'reSubmittedForVerification';
+  // readonlyMode = 'completed';
+  // readonlyMode = 'inQueue';
+
+  const [mode, setMode] = useState('editable');
+  const [readonlyMode, setReadonlyMode] = useState('');
+  const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
+
+  // console.log('parent mode: ', mode);
+  // console.log('parent readonlyMode: ', readonlyMode);
 
   const { setWizardData, setPositionRequestId, setPositionRequestProfileId, setPositionRequestDepartmentId } =
     useWizardContext();
@@ -69,6 +76,18 @@ export const PositionRequestPage = () => {
     setCurrentStep(currentStep ? currentStep - 1 : 1);
   };
 
+  const setStep = (step: number) => {
+    setCurrentStep(step);
+  };
+
+  const switchParentMode = (mode: string) => {
+    setMode(mode);
+  };
+
+  const switchParentReadonlyMode = (mode: string) => {
+    setReadonlyMode(mode);
+  };
+
   // nav block
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) => currentLocation.pathname !== nextLocation.pathname && currentStep != 5,
@@ -88,7 +107,15 @@ export const PositionRequestPage = () => {
       case 4:
         return <WizardConfirmDetailsPage onNext={onNext} onBack={onBack} />;
       case 5:
-        return <WizardResultPage />;
+        return (
+          <WizardResultPage
+            onBack={onBack}
+            setStep={setStep}
+            switchParentMode={switchParentMode}
+            switchParentReadonlyMode={switchParentReadonlyMode}
+            setReadOnlySelectedTab={setReadOnlySelectedTab}
+          />
+        );
       default:
         return <div>Loading or invalid step...</div>;
     }
@@ -256,7 +283,7 @@ export const PositionRequestPage = () => {
                   <Card title="Information" bordered={false}>
                     <Descriptions bordered layout="horizontal" column={1}>
                       <Descriptions.Item label="Position number">
-                        123456 <Button type="link">Copy</Button>
+                        {data?.positionRequest.position_number} <Button type="link">Copy</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Job Details">
                         <Button type="link">View</Button> | <Button type="link">Download</Button>
@@ -294,7 +321,7 @@ export const PositionRequestPage = () => {
                   <Card title="Information" bordered={false}>
                     <Descriptions bordered layout="horizontal" column={1}>
                       <Descriptions.Item label="Position number">
-                        123456 <Button type="link">Copy</Button>
+                        {data?.positionRequest.position_number} <Button type="link">Copy</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Job Details">
                         <Button type="link">View</Button> | <Button type="link">Download</Button>
@@ -325,7 +352,7 @@ export const PositionRequestPage = () => {
         <>
           <ContentWrapper>
             <Tabs
-              defaultActiveKey="1"
+              defaultActiveKey={readOnlySelectedTab}
               items={tabItems}
               tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
             />

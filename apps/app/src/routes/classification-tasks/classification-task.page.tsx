@@ -94,8 +94,9 @@ export const ClassificationTaskPage = () => {
     },
     {
       key: '6',
-      title: 'CRM: Assign ticket to the specialist',
-      subtitle: 'Reassign the CRM ticket to the same specialist that will be taking over the classification review.',
+      title: 'CRM: Assign service request to the specialist',
+      subtitle:
+        'Reassign the CRM service request to the same specialist that will be taking over the classification review.',
     },
   ];
 
@@ -199,8 +200,8 @@ export const ClassificationTaskPage = () => {
                         style={{ marginBottom: '1rem' }}
                         message={
                           <div className="alert-with-link">
-                            To re-open this service request, go to the corresponding CRM ticket and change the state to
-                            'Unresolved'
+                            To re-open this service request, go to the corresponding CRM service request and change the
+                            state to 'Unresolved'
                             <Link to="#" className="alert-extra-link">
                               Learn More
                             </Link>
@@ -216,8 +217,8 @@ export const ClassificationTaskPage = () => {
                         style={{ marginBottom: '1rem' }}
                         message={
                           <div className="alert-with-link">
-                            This service request was processed successfully, go to the corresponding CRM ticket to view
-                            more details.
+                            This service request was processed successfully, go to the corresponding CRM service request
+                            to view more details.
                             <Link to="#" className="alert-extra-link">
                               Learn More
                             </Link>

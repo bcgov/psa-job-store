@@ -120,6 +120,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({ onNext, onBa
         showBackToResults={false}
         showDiff={showDiff}
         id={wizardData?.id.toString()}
+        showBasicInfo={false}
       />
     </WizardPageWrapper>
   );
