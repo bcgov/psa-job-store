@@ -33,6 +33,9 @@ export const PositionRequestPage = () => {
   const [readonlyMode, setReadonlyMode] = useState('');
   const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
 
+  // console.log('parent mode: ', mode);
+  // console.log('parent readonlyMode: ', readonlyMode);
+
   const { setWizardData, setPositionRequestId, setPositionRequestProfileId, setPositionRequestDepartmentId } =
     useWizardContext();
   // console.log('wizardData: ', wizardData);
@@ -280,7 +283,7 @@ export const PositionRequestPage = () => {
                   <Card title="Information" bordered={false}>
                     <Descriptions bordered layout="horizontal" column={1}>
                       <Descriptions.Item label="Position number">
-                        123456 <Button type="link">Copy</Button>
+                        {data?.positionRequest.position_number} <Button type="link">Copy</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Job Details">
                         <Button type="link">View</Button> | <Button type="link">Download</Button>
@@ -318,7 +321,7 @@ export const PositionRequestPage = () => {
                   <Card title="Information" bordered={false}>
                     <Descriptions bordered layout="horizontal" column={1}>
                       <Descriptions.Item label="Position number">
-                        123456 <Button type="link">Copy</Button>
+                        {data?.positionRequest.position_number} <Button type="link">Copy</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Job Details">
                         <Button type="link">View</Button> | <Button type="link">Download</Button>

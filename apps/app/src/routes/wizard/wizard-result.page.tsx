@@ -87,7 +87,23 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       setMode('verificationRequired_edits');
       return;
     }
-  }, [positionNeedsRivew, positionRequestData, positionRequestLoading, positionNeedsRivewLoading]);
+
+    // if state is COMPLETE, then set parent to readonly mode
+    if (positionRequestData?.positionRequest.status === 'COMPLETED') {
+      switchParentMode && switchParentMode('readonly');
+      switchParentReadonlyMode && switchParentReadonlyMode('completed');
+      setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+      return;
+    }
+  }, [
+    positionNeedsRivew,
+    positionRequestData,
+    positionRequestLoading,
+    positionNeedsRivewLoading,
+    switchParentMode,
+    switchParentReadonlyMode,
+    setReadOnlySelectedTab,
+  ]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   // const [updatePositionRequest] = useUpdatePositionRequestMutation();
