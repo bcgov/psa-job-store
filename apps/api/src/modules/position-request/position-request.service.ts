@@ -156,7 +156,7 @@ export class PositionRequestApiService {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
     const position = await this.createPositionForPositionRequest(id);
-    console.log('position: ', position);
+
     if (position.positionNbr.length > 0) {
       positionRequest = await this.prisma.positionRequest.update({
         where: { id },

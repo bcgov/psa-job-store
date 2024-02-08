@@ -1,6 +1,5 @@
 import { useAuth } from 'react-oidc-context';
-
-const LoadingComponent = () => <div>Loading...</div>;
+import LoadingSpinnerWithMessage from '../components/app/common/components/loading.component';
 
 // Define a type for the role to component mapping
 type RoleComponentMapping = {
@@ -12,7 +11,7 @@ export const RoleBasedRouting = ({ roleComponentMapping }: { roleComponentMappin
   const auth = useAuth();
 
   if (auth.isLoading) {
-    return <LoadingComponent />;
+    return <LoadingSpinnerWithMessage />;
   }
 
   const roles = auth.user?.profile['client_roles'] || [];

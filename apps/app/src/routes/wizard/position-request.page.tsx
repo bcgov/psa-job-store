@@ -1,8 +1,10 @@
 import { ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography } from 'antd';
 import Title from 'antd/es/typography/Title';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { useBlocker, useParams } from 'react-router-dom';
+import { useBlocker, useNavigate, useParams } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
@@ -93,6 +95,9 @@ export const PositionRequestPage = () => {
     ({ currentLocation, nextLocation }) => currentLocation.pathname !== nextLocation.pathname && currentStep != 5,
   );
 
+  // get navigate
+  const navigate = useNavigate();
+
   const renderStepComponent = () => {
     switch (currentStep) {
       case 0:
@@ -117,7 +122,7 @@ export const PositionRequestPage = () => {
           />
         );
       default:
-        return <div>Loading or invalid step...</div>;
+        return <LoadingSpinnerWithMessage />;
     }
   };
 
@@ -169,7 +174,9 @@ export const PositionRequestPage = () => {
               <Result
                 icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
                 title="Sent for verification"
-                subTitle="The profile was submitted for review on: " // todo: add date
+                subTitle={`The profile was submitted for review on: ${dayjs(data?.positionRequest?.updated_at).format(
+                  'MMM d, YYYY',
+                )}`}
               />
 
               <Row justify="center" style={{ padding: '0 1rem' }}>
@@ -201,7 +208,7 @@ export const PositionRequestPage = () => {
 
                     <Title level={5}>View all Positions</Title>
                     <Paragraph>View all positions that you have created.</Paragraph>
-                    <Button type="default" onClick={() => {}}>
+                    <Button type="default" onClick={() => navigate('/')}>
                       Go to Dashboard
                     </Button>
                   </Card>
@@ -256,7 +263,7 @@ export const PositionRequestPage = () => {
 
                     <Title level={5}>View all Positions</Title>
                     <Paragraph>View all positions that you have created.</Paragraph>
-                    <Button type="default" onClick={() => {}}>
+                    <Button type="default" onClick={() => navigate('/')}>
                       Go to Dashboard
                     </Button>
                   </Card>
@@ -273,7 +280,7 @@ export const PositionRequestPage = () => {
                 title="Your classification review is in the queue"
                 subTitle="Thank you for your submission. A Classification specialist will reach out to you via email shortly."
                 extra={[
-                  <Button type="primary" key="console" onClick={() => {}}>
+                  <Button type="primary" key="console" onClick={() => navigate('/')}>
                     Go to Dashboard
                   </Button>,
                 ]}
@@ -311,7 +318,7 @@ export const PositionRequestPage = () => {
                 title="Your position has been created."
                 subTitle="Find the information needed for recruitment in the table below."
                 extra={[
-                  <Button type="primary" key="console" onClick={() => {}}>
+                  <Button type="primary" key="console" onClick={() => navigate('/')}>
                     Go to Dashboard
                   </Button>,
                 ]}
@@ -373,7 +380,7 @@ export const PositionRequestPage = () => {
               <p>You can resume the process from "My Positions" page</p>
             </Modal>
           )}
-          {currentStep !== null ? renderStepComponent() : <div>Loading position request information...</div>}
+          {currentStep !== null ? renderStepComponent() : <LoadingSpinnerWithMessage />}
         </>
       )}
     </>

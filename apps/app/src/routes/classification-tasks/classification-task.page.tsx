@@ -12,6 +12,7 @@ import { MenuProps } from 'antd/es/menu';
 import TabPane from 'antd/es/tabs/TabPane';
 import { cloneElement } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
@@ -141,7 +142,7 @@ export const ClassificationTaskPage = () => {
   const statusDetails = statusIconColorMap[currentStatus as keyof typeof statusIconColorMap];
 
   if (!data) {
-    return <div>Loading...</div>;
+    return <LoadingSpinnerWithMessage />;
   }
 
   // console.log('positionRequest data: ', data?.positionRequest);

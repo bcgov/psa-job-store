@@ -8,6 +8,7 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
+import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
   GetClassificationsResponse,
@@ -2122,7 +2123,7 @@ const WizardEditProfile = forwardRef(
     }, [positionProfileData]);
 
     if (isLoading || renderKey === 0) {
-      return <p>Loading...</p>;
+      return <LoadingSpinnerWithMessage />;
     }
 
     const titleStyle = {
@@ -2183,7 +2184,7 @@ const WizardEditProfile = forwardRef(
                 {effectiveData?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
-                {isFetchingPositionProfile && <>Loading...</>}
+                {isFetchingPositionProfile && <LoadingSpinnerWithMessage />}
                 {firstActivePosition && !isFetchingPositionProfile && (
                   <div>
                     <p

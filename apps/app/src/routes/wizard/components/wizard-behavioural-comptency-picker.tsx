@@ -1,5 +1,6 @@
 import { Button, Card, Col, Row, Select, Space } from 'antd';
 import React, { CSSProperties, useState } from 'react';
+import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
 import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile-types';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
@@ -87,7 +88,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     }
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <LoadingSpinnerWithMessage />;
   if (error) return <p>An error occurred</p>;
 
   return (

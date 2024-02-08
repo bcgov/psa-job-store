@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from 'react';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import {
@@ -21,7 +22,7 @@ export const TotalCompDraftProfilesPage = () => {
     setHasData(isDataAvailable);
   };
 
-  if (!ministriesData) return <>Loading..</>;
+  if (!ministriesData) return <LoadingSpinnerWithMessage />;
 
   return (
     <>

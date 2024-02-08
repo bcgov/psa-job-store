@@ -17,6 +17,7 @@ import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import {
   AccountabilitiesModel,
   JobProfileModel,
@@ -316,7 +317,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   };
 
   if (isLoading) {
-    return <p aria-live="polite">Loading job profile...</p>;
+    return <LoadingSpinnerWithMessage />;
   }
 
   // console.log('effectiveData: ', effectiveData);
@@ -331,7 +332,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'Lastupdated',
       label: 'Last updated',
-      children: `${dayjs(effectiveData?.updated_at).format('MMM d, YYYY')}`,
+      children: `${dayjs(effectiveData?.updated_at).format('MMM D, YYYY')}`,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
 
