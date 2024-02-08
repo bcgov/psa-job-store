@@ -64,6 +64,15 @@ export interface GetPositionRequestResponse {
   positionRequest: GetPositionRequestResponseContent;
 }
 
+export interface PositionNeedsReviewResponse {
+  positionNeedsRivew: PositionNeedsReviewResponseContent;
+}
+
+export interface PositionNeedsReviewResponseContent {
+  result: boolean;
+  reasons: string[];
+}
+
 export interface PositionRequestStatusCounts {
   draft: number;
   completed: number;
@@ -424,6 +433,24 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+
+    positionNeedsRivew: build.query<PositionNeedsReviewResponse, GetPositionRequestArgs>({
+      query: (args: GetPositionRequestArgs) => {
+        return {
+          document: gql`
+            query PositionNeedsRivew {
+              positionNeedsRivew(id: ${args.id}) {
+                result
+                reasons
+              }
+            }
+          `,
+          variables: {
+            id: args.id,
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -441,4 +468,5 @@ export const {
   useGetPositionRequestJobStoreNumbersQuery,
   useGetPositionRequestStatusesQuery,
   useGetPositionRequestSubmittedByQuery,
+  usePositionNeedsRivewQuery,
 } = positionRequestApi;

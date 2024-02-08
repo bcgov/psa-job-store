@@ -288,6 +288,7 @@ export class PositionRequestApiService {
   }
 
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
+    // console.log('getPositionRequest!', userRoles);
     let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
     // If the user does not have the "total-compesation" or "classification" role, the filter will include the requesting user id
@@ -295,7 +296,7 @@ export class PositionRequestApiService {
     if (['classification', 'total-compensation'].some((value) => userRoles.includes(value))) {
       whereCondition = {
         ...whereCondition,
-        NOT: [{ status: { equals: 'DRAFT' } }],
+        // NOT: [{ status: { equals: 'DRAFT' } }],
       };
     } else {
       whereCondition = {
@@ -310,6 +311,8 @@ export class PositionRequestApiService {
         parent_job_profile: true,
       },
     });
+
+    // console.log('positionRequest: ', positionRequest, JSON.stringify(whereCondition));
 
     if (!positionRequest) {
       return null;
@@ -640,13 +643,17 @@ export class PositionRequestApiService {
   }
 
   async positionRequestNeedsReview(id: number) {
+    const reasons = [];
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id: id } });
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id: positionRequest.parent_job_profile_id },
     });
 
     // If the Job Profile is denoted as requiring review, it _must_ be reviewed every time
-    if (jobProfile.review_required === true) return true;
+    if (jobProfile.review_required === true) {
+      reasons.push('Job Profile is denoted as requiring review');
+      return { result: true, reasons: reasons };
+    }
 
     // If the job profile is _not_ denoted as requiring review, it must be reviewed _only_ if significant sections have been changed
     const prJobProfile = positionRequest.profile_json as Record<string, any>;
@@ -662,8 +669,8 @@ export class PositionRequestApiService {
       job_experience: prJobProfile.job_experience
         .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
         .map((obj) => obj.text),
-      security_screenings: prJobProfile.security_screenings
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+      security_screenings: prJobProfile.security_screenings // all security screenings are significant - there is no is_significant flag
+        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1)
         .map((obj) => obj.text),
     };
 
@@ -678,8 +685,8 @@ export class PositionRequestApiService {
       job_experience: (jobProfile.job_experience as Record<string, any>)
         .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
         .map((obj) => obj.text),
-      security_screenings: (jobProfile.security_screenings as Record<string, any>)
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+      security_screenings: (jobProfile.security_screenings as Record<string, any>) // all security screenings are significant - there is no is_significant flag
+        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1)
         .map((obj) => obj.text),
     };
 
@@ -708,11 +715,27 @@ export class PositionRequestApiService {
       ),
     ];
 
-    return significantSectionChanges.some((value) => value === true);
+    // Collect reasons for changes
+    if (significantSectionChanges.some((value) => value === true)) {
+      if (significantSectionChanges[0]) {
+        reasons.push('Changes in Accountabilities');
+      }
+      if (significantSectionChanges[1]) {
+        reasons.push('Changes in Education');
+      }
+      if (significantSectionChanges[2]) {
+        reasons.push('Changes in Job Experience');
+      }
+      if (significantSectionChanges[3]) {
+        reasons.push('Changes in Security Screenings');
+      }
+    }
+
+    return { result: significantSectionChanges.some((value) => value === true), reasons: reasons };
   }
 
   async createOrUpdateCrmIncidentForPositionRequest(id: number) {
-    const needsReview = await this.positionRequestNeedsReview(id);
+    const needsReview = (await this.positionRequestNeedsReview(id)).result;
 
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
     const classification = await this.classificationService.getClassification({

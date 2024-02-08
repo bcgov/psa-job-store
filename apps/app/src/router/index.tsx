@@ -104,7 +104,7 @@ export const router = createBrowserRouter([
             path: '/org-chart',
             element: <OrgChartRoute />,
             handle: {
-              breadcrumb: () => 'Org Chart',
+              breadcrumb: () => 'My organizations',
               icon: <PartitionOutlined />,
             },
             children: [
