@@ -107,7 +107,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   // const [updatePositionRequest] = useUpdatePositionRequestMutation();
-  const [submitPositionRequest] = useSubmitPositionRequestMutation();
+  const [submitPositionRequest, { isLoading: submitPositionRequestIsLoading }] = useSubmitPositionRequestMutation();
 
   const showModal = async () => {
     setIsModalVisible(true);
@@ -150,10 +150,10 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       }
     } catch (error) {
       // Handle the error, possibly showing another modal
-      Modal.error({
-        title: 'Error Creating Position',
-        content: 'An unknown error occurred', //error.data?.message ||
-      });
+      // Modal.error({
+      //   title: 'Error Creating Position',
+      //   content: 'An unknown error occurred', //error.data?.message ||
+      // });
     }
   };
 
@@ -209,7 +209,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         irreversable).
                       </div>
                     </Form.Item>
-                    <Button type="primary" onClick={showModal}>
+                    <Button type="primary" onClick={showModal} loading={submitPositionRequestIsLoading}>
                       Generate position number
                     </Button>
                   </Form>
@@ -434,7 +434,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             <Button key="back" onClick={handleCancel}>
               Cancel
             </Button>,
-            <Button key="submit" type="primary" onClick={handleOk}>
+            <Button key="submit" type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
               Generate position number
             </Button>,
           ]}
