@@ -28,8 +28,8 @@ export interface PositionCreateInput {
   POSN_STATUS: PositionStatus;
   REG_TEMP: PositionDuration;
   FULL_PART_TIME: PositionType;
-  TGB_E_CLASS: string;
-  TGB_APPRV_MGR: string;
-  TGB_SCRTY_SCRN_REQ: PositionSecurityScreenRequired;
+  TGB_E_CLASS?: string;
+  TGB_APPRV_MGR?: string;
+  TGB_SCRTY_SCRN_REQ?: PositionSecurityScreenRequired;
   TGB_SCRTY_SCRN_DT?: string;
 }

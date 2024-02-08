@@ -23,7 +23,6 @@ import {
 import {
   PositionCreateInput,
   PositionDuration,
-  PositionSecurityScreenRequired,
   PositionStatus,
   PositionType,
 } from '../external/models/position-create.input';
@@ -155,6 +154,17 @@ export class PositionRequestApiService {
 
   async submitPositionRequest(id: number) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+
+    const position = await this.createPositionForPositionRequest(id);
+    console.log('position: ', position);
+    if (position.positionNbr.length > 0) {
+      positionRequest = await this.prisma.positionRequest.update({
+        where: { id },
+        data: {
+          position_number: +position.positionNbr,
+        },
+      });
+    }
 
     // CRM Incident Management
     const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
@@ -579,7 +589,7 @@ export class PositionRequestApiService {
     const updatePayload: any = {};
 
     if (updateData.step !== undefined) {
-      updatePayload.step = updateData.step === 5 ? 4 : updateData.step;
+      updatePayload.step = updateData.step;
     }
 
     if (updateData.reports_to_position_id !== undefined) {
@@ -828,18 +838,17 @@ export class PositionRequestApiService {
     return incident;
   }
 
-  // async updateCrmIncidentForPositionRequest(id: number) {}
-
   async createPositionForPositionRequest(id: number) {
     const needsReview = await this.positionRequestNeedsReview(id);
+
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
     const department = await this.prisma.department.findUnique({
       select: { organization: { select: { id: true } } },
       where: { id: positionRequest.department_id },
     });
-    const parentJobProfile = await this.prisma.jobProfile.findUnique({
-      where: { id: positionRequest.parent_job_profile_id },
-    });
+    // const parentJobProfile = await this.prisma.jobProfile.findUnique({
+    //   where: { id: positionRequest.parent_job_profile_id },
+    // });
 
     const data: PositionCreateInput = {
       BUSINESS_UNIT: department.organization.id,
@@ -850,13 +859,11 @@ export class PositionRequestApiService {
       DESCR: positionRequest.title,
       REG_TEMP: PositionDuration.Regular,
       FULL_PART_TIME: PositionType.FullTime,
-      TGB_E_CLASS: `P${parentJobProfile.number}`,
-      TGB_APPRV_MGR: positionRequest.reports_to_position_id,
-      TGB_SCRTY_SCRN_REQ: PositionSecurityScreenRequired.Yes,
+      // TGB_E_CLASS: `P${parentJobProfile.number}`,
+      // TGB_APPRV_MGR: positionRequest.reports_to_position_id,
+      // TGB_SCRTY_SCRN_REQ: PositionSecurityScreenRequired.Yes,
       // TGB_SCRTY_SCRN_DT: '01-JAN-2024',
     };
-
-    console.log('data: ', data);
 
     const position = await this.peoplesoftService.createPosition(data);
 

@@ -19,7 +19,6 @@ enum Endpoint {
   HrScope = 'PJS_TGB_REST_HRSCOPE',
   Locations = 'PJS_TGB_REST_LOCATION',
   Organizations = 'PJS_TGB_REST_BUS_UNIT',
-  PositionCreate = 'TGB_PJS_POSITION.v1',
   Profile = 'PJS_TGB_REST_USER_PROFILE',
 }
 
@@ -29,7 +28,7 @@ enum RequestMethod {
 }
 
 type GetRequestParams = { method: RequestMethod.GET; endpoint: Endpoint; pageSize: number; extra?: string };
-type PostRequestParams = { method: RequestMethod.POST; endpoint: Endpoint.PositionCreate; data: Record<string, any> };
+type PostRequestParams = { method: RequestMethod.POST; endpoint: Endpoint.CreatePosition; data: Record<string, any> };
 
 type RequestParams = GetRequestParams | PostRequestParams;
 
@@ -464,7 +463,13 @@ export class PeoplesoftService {
   async createPosition(data: PositionCreateInput) {
     const response = await firstValueFrom(
       this.httpService
-        .post(`${this.configService.get('PEOPLESOFT_URL')}/${Endpoint.CreatePosition}`, data, { headers: this.headers })
+        .post(
+          `${this.configService.get('PEOPLESOFT_URL').replace('/ExecuteQuery.v1/PUBLIC', '')}/${
+            Endpoint.CreatePosition
+          }`,
+          data,
+          { headers: this.headers },
+        )
         .pipe(
           map((r) => r.data),
           retry(3),
