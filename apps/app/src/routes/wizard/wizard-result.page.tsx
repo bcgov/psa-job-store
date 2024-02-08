@@ -72,7 +72,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
   }, [positionRequestId, refetchPositionRequest, refetchPositionNeedsRivew]);
 
-  console.log('positionNeedsRivew: ', positionNeedsRivew);
+  // console.log('positionNeedsRivew: ', positionNeedsRivew);
   useEffect(() => {
     // if loading
     if (positionRequestLoading || positionNeedsRivewLoading) return;

@@ -542,7 +542,7 @@ const WizardEditProfile = forwardRef(
         });
       }
       setRenderKey((prevKey) => prevKey + 1);
-      console.log('reset!');
+      // console.log('reset!');
     }, [
       effectiveData,
       isLoading,
@@ -2207,7 +2207,7 @@ const WizardEditProfile = forwardRef(
               form={form}
               key={renderKey}
               onFinish={handleSubmit((data) => {
-                console.log('onFinish: ', data);
+                // console.log('onFinish: ', data);
                 submitHandler?.(data);
               })}
             >
