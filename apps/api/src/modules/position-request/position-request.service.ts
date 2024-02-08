@@ -680,32 +680,50 @@ export class PositionRequestApiService {
     // Find position request job profile signficant sections
     const prJobProfileSignificantSections = {
       accountabilities: prJobProfile.accountabilities
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       education: prJobProfile.education
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       job_experience: prJobProfile.job_experience
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       security_screenings: prJobProfile.security_screenings // all security screenings are significant - there is no is_significant flag
-        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1)
+        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
         .map((obj) => obj.text),
     };
 
     // Find base job profile significant sections
     const jobProfileSignficantSections = {
       accountabilities: (jobProfile.accountabilities as Record<string, any>)
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       education: (jobProfile.education as Record<string, any>)
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       job_experience: (jobProfile.job_experience as Record<string, any>)
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       security_screenings: (jobProfile.security_screenings as Record<string, any>) // all security screenings are significant - there is no is_significant flag
-        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1)
+        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
         .map((obj) => obj.text),
     };
 
