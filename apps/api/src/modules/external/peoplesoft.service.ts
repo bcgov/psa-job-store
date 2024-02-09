@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { AxiosHeaders } from 'axios';
@@ -33,6 +33,8 @@ type RequestParams = GetRequestParams | PostRequestParams;
 
 @Injectable()
 export class PeoplesoftService {
+  private readonly logger = new Logger(PeoplesoftService.name);
+
   private readonly headers: AxiosHeaders;
   private request = (params: RequestParams) => {
     if (params.method === RequestMethod.GET) {
@@ -69,6 +71,8 @@ export class PeoplesoftService {
 
   @Cron('0 0 * * * *')
   async syncClassifications() {
+    this.logger.log(`Start syncClassifications @ ${new Date()}`);
+
     const response = await firstValueFrom(
       this.request({ method: RequestMethod.GET, endpoint: Endpoint.Classifications, pageSize: 4000 }).pipe(
         map((r) => r.data),
@@ -119,10 +123,14 @@ export class PeoplesoftService {
         },
       });
     }
+
+    this.logger.log(`End syncClassifications @ ${new Date()}`);
   }
 
   @Cron('0 0 * * * *')
   async syncLocations() {
+    this.logger.log(`Start syncLocations @ ${new Date()}`);
+
     const response = await firstValueFrom(
       this.request({ method: RequestMethod.GET, endpoint: Endpoint.Locations, pageSize: 5000 }).pipe(
         map((r) => r.data),
@@ -153,6 +161,8 @@ export class PeoplesoftService {
         },
       });
     }
+
+    this.logger.log(`End syncLocations @ ${new Date()}`);
   }
 
   @Cron('0 0 * * * *')
@@ -161,10 +171,14 @@ export class PeoplesoftService {
     // Departments rely on organizations which must exist prior to syncing departments
     await this.syncOrganizations();
     await this.syncDepartments();
-    await this.syncDepartmentClassificationMapping();
+
+    // Commented out until the API returns useful data
+    // await this.syncDepartmentClassificationMapping();
   }
 
   async syncOrganizations() {
+    this.logger.log(`Start syncOrganizations @ ${new Date()}`);
+
     const response = await firstValueFrom(
       this.request({ method: RequestMethod.GET, endpoint: Endpoint.Organizations, pageSize: 500 }).pipe(
         map((r) => r.data),
@@ -195,9 +209,13 @@ export class PeoplesoftService {
         },
       });
     }
+
+    this.logger.log(`End syncOrganizations @ ${new Date()}`);
   }
 
   async syncDepartments() {
+    this.logger.log(`Start syncDepartments @ ${new Date()}`);
+
     const organizations = await this.prisma.organization.findMany({
       select: { id: true, peoplesoft_id: true },
     });
@@ -270,6 +288,8 @@ export class PeoplesoftService {
         });
       } catch (error) {}
     }
+
+    this.logger.log(`End syncDepartments @ ${new Date()}`);
   }
 
   async syncDepartmentClassificationMapping() {
