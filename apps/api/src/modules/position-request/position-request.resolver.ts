@@ -124,6 +124,11 @@ export class PositionRequestApiResolver {
     return this.positionRequestService.getPositionRequestUserClassifications(userId);
   }
 
+  @Mutation(() => PositionRequestResponse, { name: 'deletePositionRequest' })
+  async deletePositionRequest(@Args('id', { type: () => Int }) id: number) {
+    return this.positionRequestService.deletePositionRequest(id);
+  }
+
   @Roles('total-compensation', 'classification')
   @UseGuards(RoleGuard)
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestClassifications' })
