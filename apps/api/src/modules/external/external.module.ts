@@ -56,24 +56,24 @@ export class ExternalModule {
       if (this.configService.get('NODE_ENV') !== Environment.Production) {
         const classificationCount = await this.prisma.classification.count();
         if (classificationCount < 100) {
-          await this.peoplesoftService.syncClassifications();
+          // await this.peoplesoftService.syncClassifications();
         }
 
         const locationCount = await this.prisma.location.count();
         if (locationCount < 100) {
-          await this.peoplesoftService.syncLocations();
+          // await this.peoplesoftService.syncLocations();
         }
 
         const organizationCount = await this.prisma.organization.count();
         const departmentCount = await this.prisma.department.count();
         const classificationDepartmentsCount = await this.prisma.classificationDepartment.count();
         if (organizationCount < 100 || departmentCount < 100 || classificationDepartmentsCount < 100) {
-          await this.peoplesoftService.syncOrganizationsAndDepartments();
+          // await this.peoplesoftService.syncOrganizationsAndDepartments();
         }
       } else {
-        await this.peoplesoftService.syncClassifications();
-        await this.peoplesoftService.syncLocations();
-        await this.peoplesoftService.syncOrganizationsAndDepartments();
+        // await this.peoplesoftService.syncClassifications();
+        // await this.peoplesoftService.syncLocations();
+        // await this.peoplesoftService.syncOrganizationsAndDepartments();
       }
 
       this.logger.log(`End PeopleSoft Sync @ ${new Date()}`);

@@ -100,6 +100,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   }, [data, mode]);
 
   const getMenuContent = (record: any) => {
+    console.log('record: ', record);
+
     return (
       <Menu>
         {mode == null && (
@@ -107,7 +109,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'DRAFT' && (
               <>
                 <Menu.Item key="edit" icon={<EditOutlined />}>
-                  Edit
+                  <Link to={`/position-request/${record.id}`}>Edit</Link>
                 </Menu.Item>
                 <Menu.Item key="copy" icon={<LinkOutlined />}>
                   Copy link
@@ -121,7 +123,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'COMPLETED' && (
               <>
                 <Menu.Item key="view" icon={<EyeOutlined />}>
-                  View
+                  <Link to={`/position-request/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item key="download" icon={<FilePdfOutlined />}>
                   Download profile
@@ -138,7 +140,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'IN_REVIEW' && (
               <>
                 <Menu.Item key="view" icon={<EyeOutlined />}>
-                  View
+                  <Link to={`/position-request/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item key="copy" icon={<LinkOutlined />}>
                   Copy link
