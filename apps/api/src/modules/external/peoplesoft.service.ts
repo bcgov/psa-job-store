@@ -5,7 +5,6 @@ import { Cron } from '@nestjs/schedule';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
-import { Environment } from '../../enums/environment.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { Employee } from './models/employee.model';
 import { PositionCreateInput } from './models/position-create.input';
@@ -66,35 +65,6 @@ export class PeoplesoftService {
         `${this.configService.get('PEOPLESOFT_USERNAME')}:${this.configService.get('PEOPLESOFT_PASSWORD')}`,
       ).toString('base64')}`,
     );
-
-    (async () => {
-      // To reduce API requests in non-production mode, only fetch these records if their counts === 0
-      // In production, fetch records on server start
-      console.log("this.configService.get('NODE_ENV'): ", this.configService.get('NODE_ENV'));
-
-      if (this.configService.get('NODE_ENV') !== Environment.Production) {
-        const classificationCount = await this.prisma.classification.count();
-        if (classificationCount < 100) {
-          await this.syncClassifications();
-        }
-
-        const locationCount = await this.prisma.location.count();
-        if (locationCount < 100) {
-          await this.syncLocations();
-        }
-
-        const organizationCount = await this.prisma.organization.count();
-        const departmentCount = await this.prisma.department.count();
-        const classificationDepartmentsCount = await this.prisma.classificationDepartment.count();
-        if (organizationCount < 100 || departmentCount < 100 || classificationDepartmentsCount < 100) {
-          await this.syncOrganizationsAndDepartments();
-        }
-      } else {
-        await this.syncClassifications();
-        await this.syncLocations();
-        await this.syncOrganizationsAndDepartments();
-      }
-    })();
   }
 
   @Cron('0 0 * * * *')
