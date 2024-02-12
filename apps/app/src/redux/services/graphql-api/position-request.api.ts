@@ -138,6 +138,10 @@ export interface SubmitPositionRequestInput {
   id: number;
 }
 
+export interface DeletePositionRequestInput {
+  id: number;
+}
+
 export interface GetPositionRequestsArgs {
   search?: string;
   where?: Record<string, any>;
@@ -240,7 +244,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     getPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
-      providesTags: () => ['positionRequest'],
+      providesTags: ['positionRequest'],
       // result
       //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
       //   : [{ type: 'PositionRequest' as const, id: 'id' }],
@@ -349,6 +353,23 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    deletePositionRequest: build.mutation<void, DeletePositionRequestInput>({
+      invalidatesTags: ['positionRequest'],
+      query: (input: DeletePositionRequestInput) => {
+        return {
+          document: gql`
+            mutation DeletePositionRequest($id: Int!) {
+              deletePositionRequest(id: $id) {
+                id
+              }
+            }
+          `,
+          variables: {
+            id: input.id,
+          },
+        };
+      },
+    }),
     getPositionRequestUserClassifications: build.query<GetPositionRequestUserClassificationsResponse, void>({
       query: () => {
         return {
@@ -433,7 +454,6 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-
     positionNeedsRivew: build.query<PositionNeedsReviewResponse, GetPositionRequestArgs>({
       query: (args: GetPositionRequestArgs) => {
         return {
@@ -463,6 +483,7 @@ export const {
   useCreatePositionRequestMutation,
   useUpdatePositionRequestMutation,
   useSubmitPositionRequestMutation,
+  useDeletePositionRequestMutation,
   useGetPositionRequestsCountQuery,
   useGetPositionRequestClassificationsQuery,
   useGetPositionRequestJobStoreNumbersQuery,

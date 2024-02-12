@@ -661,6 +661,11 @@ export class PositionRequestApiService {
     return positionRequest;
   }
 
+  async deletePositionRequest(id: number) {
+    const result = await this.prisma.positionRequest.delete({ where: { id } });
+    return result;
+  }
+
   async positionRequestNeedsReview(id: number) {
     const reasons = [];
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id: id } });

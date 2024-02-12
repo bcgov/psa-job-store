@@ -11,7 +11,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Popover, Result, Row, Space, Table, Tooltip, message } from 'antd';
+import { Button, Card, Col, Menu, Modal, Popover, Result, Row, Space, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import copy from 'copy-to-clipboard';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
@@ -20,7 +20,10 @@ import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import '../../../components/app/common/css/filtered-table.component.css';
-import { useLazyGetPositionRequestsQuery } from '../../../redux/services/graphql-api/position-request.api';
+import {
+  useDeletePositionRequestMutation,
+  useLazyGetPositionRequestsQuery,
+} from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
 
 // Define the new PositionsTable component
@@ -61,6 +64,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   onDataAvailable,
 }) => {
   const [trigger, { data, isLoading, error: fetchError }] = useLazyGetPositionRequestsQuery();
+  const [deletePositionRequest] = useDeletePositionRequestMutation();
   const [searchParams] = useSearchParams();
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -99,7 +103,22 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     }
   }, [data, mode]);
 
+  const showDeleteConfirm = (id: number) => {
+    Modal.confirm({
+      title: 'Delete Position Request',
+      content: 'Do you want to delete the position request?',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: async () => {
+        await deletePositionRequest({ id: id });
+        await updateData();
+      },
+    });
+  };
+
   const getMenuContent = (record: any) => {
+    console.log('record: ', record);
+
     return (
       <Menu>
         {mode == null && (
@@ -107,12 +126,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'DRAFT' && (
               <>
                 <Menu.Item key="edit" icon={<EditOutlined />}>
-                  Edit
+                  <Link to={`/position-request/${record.id}`}>Edit</Link>
                 </Menu.Item>
                 <Menu.Item key="copy" icon={<LinkOutlined />}>
                   Copy link
                 </Menu.Item>
-                <Menu.Item key="delete" icon={<DeleteOutlined />}>
+                <Menu.Item key="delete" icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(record.id)}>
                   Delete
                 </Menu.Item>
               </>
@@ -121,7 +140,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'COMPLETED' && (
               <>
                 <Menu.Item key="view" icon={<EyeOutlined />}>
-                  View
+                  <Link to={`/position-request/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item key="download" icon={<FilePdfOutlined />}>
                   Download profile
@@ -138,7 +157,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'IN_REVIEW' && (
               <>
                 <Menu.Item key="view" icon={<EyeOutlined />}>
-                  View
+                  <Link to={`/position-request/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item key="copy" icon={<LinkOutlined />}>
                   Copy link
