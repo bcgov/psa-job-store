@@ -96,8 +96,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack }) => {
       subTitle="Choose a job profile to modify for the new positions"
       hpad={false}
       pageHeaderExtra={[
-        <Button onClick={back}>Back</Button>,
-        <Button type="primary" disabled={selectedProfileId == null} onClick={handleSubmit(onSubmit)}>
+        <Button key="back" onClick={back}>
+          Back
+        </Button>,
+        <Button key="next" type="primary" disabled={selectedProfileId == null} onClick={handleSubmit(onSubmit)}>
           Select and next
         </Button>,
       ]}
