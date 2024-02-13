@@ -25,7 +25,6 @@ interface Props {
   extraNodeInfo?: any;
   allowSelection?: boolean;
   onNodeSelected?: (node: any) => void;
-  onOrgChartLoad?: (orgChartData: any) => void;
 }
 
 const dagreGraph = new dagre.graphlib.Graph();
@@ -76,7 +75,6 @@ export const OrgChart = ({
   allowSelection = false, // will mark the card as selected if true instead of showing the popover
   extraNodeInfo,
   onNodeSelected,
-  onOrgChartLoad,
 }: Props) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
 
