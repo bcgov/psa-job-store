@@ -185,7 +185,7 @@ export const OrgChartCard = memo(
 
       // Polling for zoom level changes
       const intervalId = setInterval(() => {
-        // updateScale();
+        updateScale();
       }, 50); // Adjust interval as needed
 
       updateScale(); // Initial update
