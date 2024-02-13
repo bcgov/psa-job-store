@@ -1,5 +1,10 @@
 import { Outlet } from 'react-router-dom';
+import { PositionProvider } from '../../components/app/common/contexts/position.context';
 
 export const HomeRoute = () => {
-  return <Outlet />;
+  return (
+    <PositionProvider>
+      <Outlet />
+    </PositionProvider>
+  );
 };

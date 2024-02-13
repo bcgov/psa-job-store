@@ -666,7 +666,7 @@ export const DownloadJobProfileComponent = ({
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: `${dayjs(defaultJobProfile?.updated_at).format('MMM d, YYYY')}`,
+                                text: `${dayjs(defaultJobProfile?.updated_at).format('MMM D, YYYY')}`,
                               }),
                             ],
                           }),

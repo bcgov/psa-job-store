@@ -8,6 +8,7 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
+import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
   GetClassificationsResponse,
@@ -541,7 +542,7 @@ const WizardEditProfile = forwardRef(
         });
       }
       setRenderKey((prevKey) => prevKey + 1);
-      console.log('reset!');
+      // console.log('reset!');
     }, [
       effectiveData,
       isLoading,
@@ -2122,7 +2123,7 @@ const WizardEditProfile = forwardRef(
     }, [positionProfileData]);
 
     if (isLoading || renderKey === 0) {
-      return <p>Loading...</p>;
+      return <LoadingSpinnerWithMessage />;
     }
 
     const titleStyle = {
@@ -2183,7 +2184,7 @@ const WizardEditProfile = forwardRef(
                 {effectiveData?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
-                {isFetchingPositionProfile && <>Loading...</>}
+                {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
                 {firstActivePosition && !isFetchingPositionProfile && (
                   <div>
                     <p
@@ -2197,6 +2198,9 @@ const WizardEditProfile = forwardRef(
                     </Typography.Paragraph>
                   </div>
                 )}
+                {!firstActivePosition && !isFetchingPositionProfile && (
+                  <div>Position {positionRequestData?.positionRequest?.reports_to_position_id} is unoccupied</div>
+                )}
               </Descriptions.Item>
               <Descriptions.Item label="Job Store #">{effectiveData?.number}</Descriptions.Item>
             </Descriptions>
@@ -2206,7 +2210,7 @@ const WizardEditProfile = forwardRef(
               form={form}
               key={renderKey}
               onFinish={handleSubmit((data) => {
-                console.log('onFinish: ', data);
+                // console.log('onFinish: ', data);
                 submitHandler?.(data);
               })}
             >

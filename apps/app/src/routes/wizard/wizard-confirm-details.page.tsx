@@ -6,6 +6,7 @@ import { IsNotEmpty, ValidationOptions, registerDecorator } from 'class-validato
 import debounce from 'lodash.debounce';
 import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
 import { useGetLocationsQuery } from '../../redux/services/graphql-api/location.api';
@@ -309,7 +310,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
     border: '0',
   };
 
-  if (!allLocations) return <>Loading...</>;
+  if (!allLocations) return <LoadingSpinnerWithMessage />;
 
   return (
     <>
@@ -548,7 +549,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
                             </div>
                           )}
                           {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
-                          {isFetchingPositionProfile && <p>Loading...</p>}
+                          {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
                           {/* {errors.excludedManagerPositionNumber && !isFetchingPositionProfile && (
                       <p style={{ color: 'red' }}>{errors.excludedManagerPositionNumber.message}</p>
                     )} */}
@@ -643,7 +644,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
                       </div>
                     )}
                     {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
-                    {(isFetchingPositionProfile2 || positionRequestLoading) && <p>Loading...</p>}
+                    {(isFetchingPositionProfile2 || positionRequestLoading) && <LoadingSpinnerWithMessage />}
                     {(isFetchingPositionProfileError2 || positionRequestLoadingError) && (
                       <p>Error loading, please refresh page</p>
                     )}

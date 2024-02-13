@@ -19,6 +19,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
+import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import {
   useDeletePositionRequestMutation,
@@ -63,7 +64,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   mode = null,
   onDataAvailable,
 }) => {
-  const [trigger, { data, isLoading, error: fetchError }] = useLazyGetPositionRequestsQuery();
+  const [trigger, { data, isLoading, error: fetchError, isFetching }] = useLazyGetPositionRequestsQuery();
   const [deletePositionRequest] = useDeletePositionRequestMutation();
   const [searchParams] = useSearchParams();
 
@@ -73,6 +74,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const [pageSize, setPageSize] = useState(itemsPerPage);
   const [sortField, setSortField] = useState<null | string>(null);
   const [sortOrder, setSortOrder] = useState<null | string>(null);
+  const [hasPositionRequests, setHasPositionRequests] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
@@ -88,12 +90,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
   // Check if data is available and call the callback function to notify the parent component
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || isFetching) return;
     const hasData = data && 'positionRequests' in data && data.positionRequests.length > 0;
     if (onDataAvailable) {
       onDataAvailable(hasData || hasSearched || false);
     }
-  }, [data, onDataAvailable, isLoading, hasSearched]);
+    setHasPositionRequests(data?.positionRequests && data.positionRequests.length > 0 ? true : false);
+  }, [data, onDataAvailable, isLoading, hasSearched, isFetching]);
 
   useEffect(() => {
     if (data && data.positionRequestsCount !== undefined) {
@@ -513,8 +516,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     if (handleTableChangeCallback) handleTableChangeCallback(pagination, _filters, sorter);
   };
 
-  const hasPositionRequests = data?.positionRequests && data.positionRequests.length > 0;
-
   const rowSelection = {
     selectedRowKeys,
     onChange: (selectedKeys: any) => {
@@ -530,7 +531,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     }
   }, [fetchError]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading || isFetching) return <LoadingSpinnerWithMessage />;
 
   return (
     <div style={style}>

@@ -4,10 +4,12 @@ import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import {
   useGetPositionRequestQuery,
   usePositionNeedsRivewQuery,
   useSubmitPositionRequestMutation,
+  useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
@@ -70,7 +72,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
   }, [positionRequestId, refetchPositionRequest, refetchPositionNeedsRivew]);
 
-  console.log('positionNeedsRivew: ', positionNeedsRivew);
+  // console.log('positionNeedsRivew: ', positionNeedsRivew);
   useEffect(() => {
     // if loading
     if (positionRequestLoading || positionNeedsRivewLoading) return;
@@ -82,6 +84,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
 
     // if state is draft and position needs review, set mode to verificationRequired_edits
+    // Will show a warning message and a links that take user to the sections that if changes will not require verification
     if (positionRequestData?.positionRequest.status === 'DRAFT' && positionNeedsRivew?.positionNeedsRivew.result) {
       setVerificationNeededReasons(positionNeedsRivew.positionNeedsRivew.reasons);
       setMode('verificationRequired_edits');
@@ -89,10 +92,31 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
 
     // if state is COMPLETE, then set parent to readonly mode
+    // Will show "Your position has been created" screen
     if (positionRequestData?.positionRequest.status === 'COMPLETED') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('completed');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+      return;
+    }
+
+    // if it's in IN_REVIEW;, set mode to sentForVerification
+    if (positionRequestData?.positionRequest.status === 'IN_REVIEW') {
+      switchParentMode && switchParentMode('readonly');
+      switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
+      setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+      return;
+    }
+
+    // if it's in ACTION_REQUIRED show alternate verification required screen
+    if (positionRequestData?.positionRequest.status === 'ACTION_REQUIRED') {
+      setMode('verificationRequired_retry');
+      return;
+    }
+
+    // if it's in ESCALATED status, show "classification review required" screen
+    if (positionRequestData?.positionRequest.status === 'ESCALATED') {
+      setMode('classificationReviewRequired');
       return;
     }
   }, [
@@ -158,8 +182,41 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
 
   const navigate = useNavigate();
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
-  const handleSendForReview = async () => {};
+  const handleSendForReview = async () => {
+    if (positionRequestId) {
+      try {
+        // todo: replace with proper endpoint - this one just flips the status to IN_REVIEW
+
+        const result = await updatePositionRequest({
+          id: positionRequestId,
+          status: 'IN_REVIEW',
+        }).unwrap();
+
+        // const result = await submitPositionRequest({
+        //   id: positionRequestId,
+        // }).unwrap();
+
+        // todo - change check for position_number
+        if (result?.positionRequest.status != 'IN_REVIEW') throw new Error('API failure');
+
+        // if successfull, switch parent to readonly mode and show sent for verification message
+        // switchParentMode, switchParentReadonlyMode
+        switchParentMode && switchParentMode('readonly');
+        switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
+        setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+      } catch (error) {
+        // Handle the error, possibly showing another modal
+        // Modal.error({
+        //   title: 'Error Creating Position',
+        //   content: 'An unknown error occurred', //error.data?.message ||
+        // });
+      }
+    } else {
+      throw Error('Position request not found');
+    }
+  };
 
   const back = () => {
     onBack && onBack();
@@ -170,7 +227,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
 
   if (positionRequestLoading || positionNeedsRivewLoading || isFetchingPositionNeedsRivew || isFetchingPositionRequest)
-    return <p>Loading...</p>;
+    return <LoadingSpinnerWithMessage />;
 
   return (
     <>

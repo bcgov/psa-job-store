@@ -8,15 +8,6 @@ import MyPositionsTable from '../my-positions/components/my-positions-table.comp
 import { PositionRequestsSearch } from '../total-comp-approved-requests/components/position-requests-search.component';
 
 export const ClassificationTasksPage = () => {
-  // const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
-  // const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
-
-  // const handleDataAvailability = (isDataAvailable: boolean) => {
-  //   setHasData(isDataAvailable);
-  // };
-
-  // if (!ministriesData || !careerGroupData) return <>Loading..</>;
-
   const [hasData, setHasData] = useState(false);
 
   const handleDataAvailability = (isDataAvailable: boolean) => {

@@ -1,5 +1,9 @@
-import { useEffect, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Button } from 'antd';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'reactflow/dist/style.css';
+import { usePosition } from '../../components/app/common/contexts/position.context';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { OrgChartFilter } from '../org-chart/components/org-chart-filter.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
@@ -25,17 +29,75 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
     }
   }, [profileData, selectedDepartment]);
 
+  const navigate = useNavigate();
+
+  const [selectedNode, setSelectedNode] = useState<any | null>(null);
+  const orgChartJsonRef = useRef(null);
+  const onNodeSelected = (node: any) => {
+    setSelectedNode(node);
+  };
+
+  const { createNewPosition } = usePosition();
+  const next = () => {
+    if (selectedDepartment == null) return;
+    console.log(
+      'selectedNode.id, selectedDepartment, orgChartJson: ',
+      selectedNode.id,
+      selectedDepartment,
+      orgChartJsonRef.current,
+    );
+    createNewPosition(selectedNode.id, selectedDepartment, orgChartJsonRef.current);
+  };
+
+  const onOrgChartLoad = (orgChartData: any) => {
+    // console.log('setting orgchart json: ', orgChartData);
+    // console.log('A:', JSON.stringify(orgChartData));
+    // console.log('B:', JSON.stringify(orgChartJson));
+
+    orgChartJsonRef.current = orgChartData;
+  };
+
+  // state for selected node
+
   // console.log('positionRequestDepartmentId from wizard org chart page: ', positionRequestDepartmentId);
   return (
-    <WizardPageWrapper title="New position" subTitle="Select a supervisor">
+    <WizardPageWrapper
+      title="New position"
+      subTitle="Here you are able to create a position. Start by clicking the supervisor of the position you would like to create."
+      hpad={false}
+      additionalBreadcrumb={{ title: 'New position' }}
+      grayBg={false}
+      pageHeaderExtra={[
+        <Button onClick={() => navigate('/')}>Cancel</Button>,
+        <Button type="primary" disabled={selectedNode == null} onClick={next}>
+          Next
+        </Button>,
+      ]}
+    >
       <WizardSteps current={0}></WizardSteps>
       <OrgChartFilter
         setSelectedDepartment={setSelectedDepartment}
         selectedDepartment={selectedDepartment}
         defaultValue={positionRequestDepartmentId}
       />
-      <div style={{ overflow: 'hidden', position: 'relative', height: '500px' }}>
-        <OrgChartWrapped selectedDepartment={selectedDepartment} onCreateNewPosition={onCreateNewPosition} />
+      <div
+        style={{
+          overflow: 'hidden',
+          position: 'relative',
+          height: '100%',
+          background: 'rgb(240, 242, 245)',
+          marginLeft: '-1rem',
+          marginRight: '-1rem',
+          marginTop: '-1px',
+        }}
+      >
+        <OrgChartWrapped
+          selectedDepartment={selectedDepartment}
+          onCreateNewPosition={onCreateNewPosition}
+          allowSelection={true}
+          onNodeSelected={onNodeSelected}
+          onOrgChartLoad={onOrgChartLoad}
+        />
       </div>
     </WizardPageWrapper>
   );

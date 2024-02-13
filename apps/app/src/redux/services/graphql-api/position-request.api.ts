@@ -47,6 +47,7 @@ export interface GetPositionRequestResponseContent {
   status?: string;
   department_id?: string;
   approved_at?: string;
+  updated_at?: string;
   email?: string;
   parent_job_profile?: {
     number: number;

@@ -1,9 +1,12 @@
 import { Outlet } from 'react-router-dom';
+import { PositionProvider } from '../../components/app/common/contexts/position.context';
 
 export const WizardRoute = () => {
   return (
-    <div>
-      <Outlet />
+    <div style={{ height: '100%' }}>
+      <PositionProvider>
+        <Outlet />
+      </PositionProvider>
     </div>
   );
 };
