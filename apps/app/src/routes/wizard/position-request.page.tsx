@@ -3,6 +3,7 @@ import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typog
 import Title from 'antd/es/typography/Title';
 import { useEffect, useState } from 'react';
 import { useBlocker, useParams } from 'react-router-dom';
+import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
@@ -333,7 +334,12 @@ export const PositionRequestPage = () => {
                         <Button type="link">View</Button> | <Button type="link">Download</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Modified job profile">
-                        <Button type="link">View</Button> | <Button type="link">Download</Button>
+                        <Button type="link">View</Button> |{' '}
+                        <Button type="link">
+                          <DownloadJobProfileComponent jobProfile={data?.positionRequest.profile_json}>
+                            Download
+                          </DownloadJobProfileComponent>
+                        </Button>
                       </Descriptions.Item>
                     </Descriptions>
                   </Card>
