@@ -2184,7 +2184,7 @@ const WizardEditProfile = forwardRef(
                 {effectiveData?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
-                {isFetchingPositionProfile && <LoadingSpinnerWithMessage />}
+                {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
                 {firstActivePosition && !isFetchingPositionProfile && (
                   <div>
                     <p
@@ -2197,6 +2197,9 @@ const WizardEditProfile = forwardRef(
                       {additionalPositions > 0 && ` +${additionalPositions}`}
                     </Typography.Paragraph>
                   </div>
+                )}
+                {!firstActivePosition && !isFetchingPositionProfile && (
+                  <div>Position {positionRequestData?.positionRequest?.reports_to_position_id} is unoccupied</div>
                 )}
               </Descriptions.Item>
               <Descriptions.Item label="Job Store #">{effectiveData?.number}</Descriptions.Item>

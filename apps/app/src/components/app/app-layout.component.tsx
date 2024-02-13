@@ -139,7 +139,7 @@ export const AppLayout = () => {
                     {collapsed ? (
                       <SiderNavItem
                         collapsed={collapsed}
-                        icon={<PlusCircleFilled style={{ fontSize: '1.25rem' }} />}
+                        icon={<PlusCircleFilled style={{ fontSize: '1.25rem', color: '#1677ff' }} />}
                         key={'Create new position'}
                         title={'Create new position'}
                         to={'/my-positions/create'}

@@ -23,6 +23,9 @@ interface Props {
   disableCreateNewPosition?: boolean;
   highlightPositionId?: string;
   extraNodeInfo?: any;
+  allowSelection?: boolean;
+  onNodeSelected?: (node: any) => void;
+  onOrgChartLoad?: (orgChartData: any) => void;
 }
 
 const dagreGraph = new dagre.graphlib.Graph();
@@ -70,7 +73,10 @@ export const OrgChart = ({
   onCreateNewPosition,
   highlightPositionId,
   disableCreateNewPosition = false,
+  allowSelection = false, // will mark the card as selected if true instead of showing the popover
   extraNodeInfo,
+  onNodeSelected,
+  onOrgChartLoad,
 }: Props) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
 
@@ -79,6 +85,12 @@ export const OrgChart = ({
   const [nodes, setNodes] = useNodesState(layoutedNodes);
   const [edges, setEdges] = useEdgesState(layoutedEdges);
   const [selectedNode, setSelectedNode] = useState<any>();
+
+  // callback on selectedNode
+
+  useEffect(() => {
+    onNodeSelected && onNodeSelected(selectedNode);
+  }, [selectedNode, onNodeSelected]);
 
   const getIncomers = useCallback((node: Node | Connection | Edge, nodes: any[], edges: any[]) => {
     if (!isNode(node)) {
@@ -283,6 +295,7 @@ export const OrgChart = ({
           incomerIds={incomerIds}
           outgoerIds={outgoerIds}
           disableCreateNewPosition={disableCreateNewPosition}
+          allowSelection={allowSelection}
         />
       ),
     }),
@@ -296,6 +309,7 @@ export const OrgChart = ({
       incomerIds,
       outgoerIds,
       disableCreateNewPosition,
+      allowSelection,
     ],
   );
 
