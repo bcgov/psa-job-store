@@ -13,7 +13,7 @@ oc login $OPENSHIFT_SERVER --token=$TOKEN --insecure-skip-tls-verify=true
 oc project $NAMESPACE
 
 #set up port forwarding to access the database
-POD_NAME=$(oc get pod -l name=nestjs-app -o jsonpath="{.items[0].metadata.name}")
+POD_NAME=$(oc get pod -l name=sidecar -o jsonpath="{.items[0].metadata.name}")
 
 oc cp ./apps/api/prisma $POD_NAME:/tmp/prisma
 
