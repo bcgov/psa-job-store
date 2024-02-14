@@ -3,6 +3,7 @@ import { EllipsisOutlined } from '@ant-design/icons';
 import { PageHeader as AntdProPageHeader, PageHeaderProps } from '@ant-design/pro-layout';
 import { Button } from 'antd';
 import { useMatches } from 'react-router-dom';
+import './page-header.component.css';
 
 interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
   additionalBreadcrumb?: { title: string | undefined; path?: string; icon?: React.ReactNode };

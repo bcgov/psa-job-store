@@ -44,13 +44,15 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   }, [selectedDepartment, trigger, orgChartSnapshot]);
 
   useEffect(() => {
-    // console.log('org chart data: ', data);
     if (!orgChartSnapshot) {
       const objData: OrgChartData = data != null ? JSON.parse(JSON.stringify(data.orgChart)) : DEFAULT_ORG_CHART;
       setOrgChart(objData);
-      onOrgChartLoad?.(objData);
     }
-  }, [data, orgChartSnapshot, onOrgChartLoad]);
+  }, [data, orgChartSnapshot]);
+
+  useEffect(() => {
+    onOrgChartLoad?.(orgChart);
+  }, [orgChart, onOrgChartLoad]);
 
   return isFetching ? (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
