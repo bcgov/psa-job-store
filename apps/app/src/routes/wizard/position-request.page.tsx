@@ -2,7 +2,7 @@ import { ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-des
 import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography } from 'antd';
 import Title from 'antd/es/typography/Title';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useBlocker, useNavigate, useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
@@ -11,6 +11,7 @@ import { ServiceRequestDetails } from '../classification-tasks/components/servic
 import ContentWrapper from '../home/components/content-wrapper.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import { useWizardContext } from './components/wizard.provider';
+import './position-request.page.css';
 import { WizardConfirmDetailsPage } from './wizard-confirm-details.page';
 import { WizardEditPage } from './wizard-edit.page';
 import { WizardOrgChartPage } from './wizard-org-chart.page';
@@ -38,8 +39,14 @@ export const PositionRequestPage = () => {
   // console.log('parent mode: ', mode);
   // console.log('parent readonlyMode: ', readonlyMode);
 
-  const { setWizardData, setPositionRequestId, setPositionRequestProfileId, setPositionRequestDepartmentId } =
-    useWizardContext();
+  const {
+    setWizardData,
+    setPositionRequestId,
+    setPositionRequestProfileId,
+    setPositionRequestDepartmentId,
+    setPositionRequestData,
+  } = useWizardContext();
+
   // console.log('wizardData: ', wizardData);
   const { positionRequestId } = useParams();
 
@@ -56,6 +63,8 @@ export const PositionRequestPage = () => {
 
     if (step != null) setCurrentStep(step);
 
+    if (data) setPositionRequestData(data.positionRequest);
+
     if (data?.positionRequest?.id) {
       setPositionRequestId(data?.positionRequest?.id);
     }
@@ -68,7 +77,14 @@ export const PositionRequestPage = () => {
     if (data?.positionRequest?.department_id) {
       setPositionRequestDepartmentId(data?.positionRequest?.department_id);
     }
-  }, [data, setPositionRequestId, setWizardData, setPositionRequestProfileId, setPositionRequestDepartmentId]);
+  }, [
+    data,
+    setPositionRequestId,
+    setWizardData,
+    setPositionRequestProfileId,
+    setPositionRequestDepartmentId,
+    setPositionRequestData,
+  ]);
 
   const onNext = async () => {
     setCurrentStep(currentStep ? currentStep + 1 : 1);
@@ -90,20 +106,28 @@ export const PositionRequestPage = () => {
     setReadonlyMode(mode);
   };
 
-  // nav block
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) => currentLocation.pathname !== nextLocation.pathname && currentStep != 5,
-  );
-
   // get navigate
   const navigate = useNavigate();
+
+  // nav block
+  const isBlocking = useRef(true);
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    return currentLocation.pathname !== nextLocation.pathname && currentStep != 5 && isBlocking.current;
+  });
+
+  const disableBlockingAndNavigateHome = () => {
+    isBlocking.current = false; // This will disable the blocker
+    navigate('/'); // Replace with the path where the user should be redirected
+  };
 
   const renderStepComponent = () => {
     switch (currentStep) {
       case 0:
         return <WizardOrgChartPage onCreateNewPosition={onNext} />;
       case 1:
-        return <WizardPage onNext={onNext} onBack={onBack} />;
+        return (
+          <WizardPage onNext={onNext} onBack={onBack} disableBlockingAndNavigateHome={disableBlockingAndNavigateHome} />
+        );
       case 2:
         return <WizardEditPage onBack={onBack} onNext={onNext} />;
 
