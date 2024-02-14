@@ -162,8 +162,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
         <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
           <Button icon={<EllipsisOutlined />}></Button>
         </Popover>,
-        <Button onClick={back}>Back</Button>,
-        <Button type="primary" disabled={selectedProfileId == null} onClick={handleSubmit(onSubmit)}>
+        <Button onClick={back} key="back">
+          Back
+        </Button>,
+        <Button key="next" type="primary" disabled={selectedProfileId == null} onClick={handleSubmit(onSubmit)}>
           Save and next
         </Button>,
       ]}

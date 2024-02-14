@@ -61,6 +61,10 @@ export interface GetClassificationsResponse {
   classifications: ClassificationModel[];
 }
 
+export interface GetClassificationResponse {
+  classification: ClassificationModel;
+}
+
 interface JobFamilyDetail {
   id: number;
   name: string;

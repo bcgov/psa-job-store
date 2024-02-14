@@ -72,7 +72,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
   }, [positionRequestId, refetchPositionRequest, refetchPositionNeedsRivew]);
 
-  // console.log('positionNeedsRivew: ', positionNeedsRivew);
   useEffect(() => {
     // if loading
     if (positionRequestLoading || positionNeedsRivewLoading) return;
@@ -234,7 +233,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       <WizardPageWrapper
         title="Result"
         subTitle="Find out the result of your request"
-        pageHeaderExtra={[<Button onClick={back}>Back</Button>]}
+        pageHeaderExtra={[
+          <Button key="back" onClick={back}>
+            Back
+          </Button>,
+        ]}
         grayBg={true}
       >
         <div style={{ background: 'white', margin: '0 -16px', padding: '10px 24px' }}>
