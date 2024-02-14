@@ -249,6 +249,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
     // If the job family or classification filters have changed, de-select the selected profile
     if (jobFamilyChanged || classificationChanged || ministryChanged) {
+      newSearchParams.set('page', '1');
       newSearchParams.delete('selectedProfile');
       // console.log('navigating.. B', getBasePath(location.pathname));
       navigate(

@@ -86,9 +86,13 @@ export const AppLayout = () => {
         '3',
         <PlusCircleFilled style={{ fontSize: '1.25rem' }} />,
       ),
-      getItem(<Link to="/org-chart">Org Chart</Link>, '5', <PartitionOutlined style={{ fontSize: '1.25rem' }} />),
-      getItem(<Link to="/job-profiles">Job Profiles</Link>, '6', <FileTextOutlined style={{ fontSize: '1.25rem' }} />),
-      getItem(<Link to="/my-positions">My Positions</Link>, '7', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(
+        <Link to="/org-chart">My organizations</Link>,
+        '5',
+        <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
+      ),
+      getItem(<Link to="/job-profiles">Job profiles</Link>, '6', <FileTextOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(<Link to="/my-positions">My positions</Link>, '7', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
     ]),
   ];
 
@@ -135,7 +139,7 @@ export const AppLayout = () => {
                     {collapsed ? (
                       <SiderNavItem
                         collapsed={collapsed}
-                        icon={<PlusCircleFilled style={{ fontSize: '1.25rem' }} />}
+                        icon={<PlusCircleFilled style={{ fontSize: '1.25rem', color: '#1677ff' }} />}
                         key={'Create new position'}
                         title={'Create new position'}
                         to={'/my-positions/create'}
@@ -158,17 +162,17 @@ export const AppLayout = () => {
                         },
                         {
                           icon: <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
-                          title: 'Org Chart',
+                          title: 'My organizations',
                           to: '/org-chart',
                         },
                         {
                           icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
-                          title: 'Job Profiles',
+                          title: 'Job profiles',
                           to: '/job-profiles',
                         },
                         {
                           icon: <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
-                          title: 'My Positions',
+                          title: 'My positions',
                           to: '/my-positions',
                         },
                       ]}

@@ -37,6 +37,7 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate, useParams } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import MinistriesSelect from '../../components/app/common/components/ministries-select.component';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
@@ -2290,7 +2291,7 @@ export const TotalCompCreateProfilePage = () => {
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
                           <Row justify="space-between" align="middle">
-                            <Col>Professional registration requirement</Col>
+                            <Col>Professional registration requirements</Col>
                           </Row>
                         }
                       >
@@ -2933,7 +2934,7 @@ export const TotalCompCreateProfilePage = () => {
     !jobProfileScopes ||
     !jobProfileMinimumRequirements
   )
-    return <>Loading..</>;
+    return <LoadingSpinnerWithMessage />;
 
   return (
     <>

@@ -17,6 +17,15 @@ import {
 } from './position-request.service';
 
 @ObjectType()
+export class PositionNeedsReviewResult {
+  @Field(() => Boolean)
+  result: boolean;
+
+  @Field(() => [String])
+  reasons: string[];
+}
+
+@ObjectType()
 export class PositionRequestUserClassification {
   @Field(() => String, { nullable: false })
   id!: string;
@@ -101,9 +110,23 @@ export class PositionRequestApiResolver {
     return this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
   }
 
+  @Query(() => PositionNeedsReviewResult, { name: 'positionNeedsRivew' })
+  async positionNeedsReview(@CurrentUser() user: Express.User, @Args('id') id: number) {
+    const position = await this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
+    if (!position) {
+      return false;
+    }
+    return this.positionRequestService.positionRequestNeedsReview(+id);
+  }
+
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestUserClassifications' })
   async getPositionRequestUserClassifications(@CurrentUser() { id: userId }: Express.User) {
     return this.positionRequestService.getPositionRequestUserClassifications(userId);
+  }
+
+  @Mutation(() => PositionRequestResponse, { name: 'deletePositionRequest' })
+  async deletePositionRequest(@Args('id', { type: () => Int }) id: number) {
+    return this.positionRequestService.deletePositionRequest(id);
   }
 
   @Roles('total-compensation', 'classification')

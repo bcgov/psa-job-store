@@ -1,0 +1,22 @@
+/* This prevents arrow rendering incorrectly when near the edge */
+.createButtonPopOver .ant-popover-arrow {
+    transform: translateX(-50%) translateY(-100%) !important;
+    top: 0 !important;
+}
+
+.createButtonPopOver {
+    top:140.8px !important;
+    left: 50% !important;
+    translate: -50%;
+}
+/* .createButtonPopOver {
+    top: 50% !important;
+    left: 50% !important;
+    translate: -50% 200%;
+} */
+
+/* .createButtonPopOver, 
+.createButtonPopOver * {
+  animation: none !important;
+  transition: none !important;
+} */

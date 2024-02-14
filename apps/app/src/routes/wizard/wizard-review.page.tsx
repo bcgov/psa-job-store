@@ -89,8 +89,8 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({ onNext, onBa
 
   return (
     <WizardPageWrapper
-      title="Review and submit"
-      subTitle="Review the profile before creating a new position"
+      title="New position"
+      subTitle="View the edits you've made to the generic profile. Review to make sure it meets your requirements."
       xxl={14}
       xl={18}
     >
@@ -120,6 +120,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({ onNext, onBa
         showBackToResults={false}
         showDiff={showDiff}
         id={wizardData?.id.toString()}
+        showBasicInfo={false}
       />
     </WizardPageWrapper>
   );

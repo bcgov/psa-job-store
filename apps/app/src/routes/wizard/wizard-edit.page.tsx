@@ -360,15 +360,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
     if (onNext) onNext();
   };
 
-  console.log('wizardData: ', wizardData);
+  // console.log('wizardData: ', wizardData);
   return (
-    <WizardPageWrapper
-      title="Edit profile"
-      subTitle="Make changes to an approved job profile (optional)"
-      xxl={20}
-      xl={20}
-      lg={20}
-    >
+    <WizardPageWrapper title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}>
       <WizardSteps current={2} xl={24}></WizardSteps>
       <WizardEditControlBar
         style={{ marginBottom: '1rem' }}

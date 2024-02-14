@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import { Alert, Button, Col, Descriptions, Form, Input, List, Modal, Row, Tooltip, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
@@ -8,6 +8,7 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
+import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
   GetClassificationsResponse,
@@ -541,7 +542,7 @@ const WizardEditProfile = forwardRef(
         });
       }
       setRenderKey((prevKey) => prevKey + 1);
-      console.log('reset!');
+      // console.log('reset!');
     }, [
       effectiveData,
       isLoading,
@@ -718,108 +719,108 @@ const WizardEditProfile = forwardRef(
 
     // FOCUS ALERTS
     // when user focuses on required accountabilities and minimum requirements fields, show an alert once
-    const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
-    const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
-    const { securityScreeningsAlertShown, setSecurityScreeningsAlertShown } = useWizardContext();
+    // const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
+    // const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
+    // const { securityScreeningsAlertShown, setSecurityScreeningsAlertShown } = useWizardContext();
 
-    const { reqAlertShown, setReqAlertShown } = useWizardContext();
+    // const { reqAlertShown, setReqAlertShown } = useWizardContext();
 
-    // Function to handle focus
-    const showMinReqModal = (action: () => void, showCancel: boolean) => {
-      if (!minReqAlertShown) {
-        setMinReqAlertShown(true);
-        Modal.confirm({
-          title: 'Attention',
-          content: (
-            <div role="alert">
-              Significant changes to this area <strong>may</strong> trigger a classification review.
-            </div>
-          ),
-          okText: 'Proceed',
-          cancelText: 'Cancel',
-          onOk: action,
-          // The following props are set to style the modal like a warning
-          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-          okButtonProps: { style: {} },
-          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-          autoFocusButton: null,
-        });
-      } else {
-        action();
-      }
-    };
+    // // Function to handle focus
+    // const showMinReqModal = (action: () => void, showCancel: boolean) => {
+    //   if (!minReqAlertShown) {
+    //     setMinReqAlertShown(true);
+    //     Modal.confirm({
+    //       title: 'Attention',
+    //       content: (
+    //         <div role="alert">
+    //           Significant changes to this area <strong>may</strong> trigger a classification review.
+    //         </div>
+    //       ),
+    //       okText: 'Proceed',
+    //       cancelText: 'Cancel',
+    //       onOk: action,
+    //       // The following props are set to style the modal like a warning
+    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+    //       okButtonProps: { style: {} },
+    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+    //       autoFocusButton: null,
+    //     });
+    //   } else {
+    //     action();
+    //   }
+    // };
 
-    const showRelWorkModal = (action: () => void, showCancel: boolean) => {
-      if (!relWorkAlertShown) {
-        setRelWorkAlertShown(true);
-        Modal.confirm({
-          title: 'Attention',
-          content: (
-            <div role="alert">
-              Significant changes to this area <strong>may</strong> trigger a classification review.
-            </div>
-          ),
-          okText: 'Proceed',
-          cancelText: 'Cancel',
-          onOk: action,
-          // The following props are set to style the modal like a warning
-          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-          okButtonProps: { style: {} },
-          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-          autoFocusButton: null,
-        });
-      } else {
-        action();
-      }
-    };
+    // const showRelWorkModal = (action: () => void, showCancel: boolean) => {
+    //   if (!relWorkAlertShown) {
+    //     setRelWorkAlertShown(true);
+    //     Modal.confirm({
+    //       title: 'Attention',
+    //       content: (
+    //         <div role="alert">
+    //           Significant changes to this area <strong>may</strong> trigger a classification review.
+    //         </div>
+    //       ),
+    //       okText: 'Proceed',
+    //       cancelText: 'Cancel',
+    //       onOk: action,
+    //       // The following props are set to style the modal like a warning
+    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+    //       okButtonProps: { style: {} },
+    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+    //       autoFocusButton: null,
+    //     });
+    //   } else {
+    //     action();
+    //   }
+    // };
 
-    const showSecurityScreeningsModal = (action: () => void, showCancel: boolean) => {
-      if (!securityScreeningsAlertShown) {
-        setSecurityScreeningsAlertShown(true);
-        Modal.confirm({
-          title: 'Attention',
-          content: (
-            <div role="alert">
-              Significant changes to this area <strong>may</strong> trigger a classification review.
-            </div>
-          ),
-          okText: 'Proceed',
-          cancelText: 'Cancel',
-          onOk: action,
-          // The following props are set to style the modal like a warning
-          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-          okButtonProps: { style: {} },
-          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-          autoFocusButton: null,
-        });
-      } else {
-        action();
-      }
-    };
+    // const showSecurityScreeningsModal = (action: () => void, showCancel: boolean) => {
+    //   if (!securityScreeningsAlertShown) {
+    //     setSecurityScreeningsAlertShown(true);
+    //     Modal.confirm({
+    //       title: 'Attention',
+    //       content: (
+    //         <div role="alert">
+    //           Significant changes to this area <strong>may</strong> trigger a classification review.
+    //         </div>
+    //       ),
+    //       okText: 'Proceed',
+    //       cancelText: 'Cancel',
+    //       onOk: action,
+    //       // The following props are set to style the modal like a warning
+    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+    //       okButtonProps: { style: {} },
+    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+    //       autoFocusButton: null,
+    //     });
+    //   } else {
+    //     action();
+    //   }
+    // };
 
-    const showReqModal = (action: () => void, showCancel: boolean) => {
-      if (!reqAlertShown) {
-        setReqAlertShown(true);
-        Modal.confirm({
-          title: 'Attention',
-          content: (
-            <div role="alert">
-              Removing required accountabilities <strong>may</strong> trigger a classification review
-            </div>
-          ),
-          okText: 'Proceed',
-          cancelText: 'Cancel',
-          onOk: action,
-          // The following props are set to style the modal like a warning
-          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-          okButtonProps: { style: {} },
-          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-          autoFocusButton: null,
-        });
-      } else {
-        action();
-      }
-    };
+    // const showReqModal = (action: () => void, showCancel: boolean) => {
+    //   if (!reqAlertShown) {
+    //     setReqAlertShown(true);
+    //     Modal.confirm({
+    //       title: 'Attention',
+    //       content: (
+    //         <div role="alert">
+    //           Removing required accountabilities <strong>may</strong> trigger a classification review
+    //         </div>
+    //       ),
+    //       okText: 'Proceed',
+    //       cancelText: 'Cancel',
+    //       onOk: action,
+    //       // The following props are set to style the modal like a warning
+    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+    //       okButtonProps: { style: {} },
+    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+    //       autoFocusButton: null,
+    //     });
+    //   } else {
+    //     action();
+    //   }
+    // };
 
     // DIFF HANDLING
     // Cross out deleted core items, allow ability to add back
@@ -853,7 +854,9 @@ const WizardEditProfile = forwardRef(
 
     // Function to handle adding a new field
     const handleAccReqAddNew = () => {
-      acc_req_append({ text: '', isCustom: true, disabled: false });
+      // adding as significant here because it needs to be sorted into regular accountabilities
+      // instead of optional
+      acc_req_append({ text: '', isCustom: true, disabled: false, is_significant: true });
       trigger();
     };
 
@@ -905,7 +908,7 @@ const WizardEditProfile = forwardRef(
               autoSize
               disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onFocus={() => showReqModal(() => {}, false)}
+              // onFocus={() => showReqModal(() => {}, false)}
               onChange={handleFieldChange}
             />
           </FormItem>
@@ -936,13 +939,13 @@ const WizardEditProfile = forwardRef(
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
               }}
-              onClick={() =>
-                showReqModal(() => {
-                  // acc_req_remove(index);
-                  handleAccReqAddBack(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                }, false)
-              }
+              onClick={() => {
+                // showReqModal(() => {
+                // acc_req_remove(index);
+                handleAccReqAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // }, false)
+              }}
             />
           ) : (
             <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
@@ -953,13 +956,13 @@ const WizardEditProfile = forwardRef(
                   border: 'none', // Removes the border
                   padding: 0, // Removes padding
                 }}
-                onClick={() =>
-                  showReqModal(() => {
-                    // acc_req_remove(index);
-                    handleAccReqRemove(index);
-                    setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                  }, false)
-                }
+                onClick={() => {
+                  // showReqModal(() => {
+                  // acc_req_remove(index);
+                  handleAccReqRemove(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // }, false)
+                }}
               />
             </Tooltip>
           )}
@@ -1153,7 +1156,7 @@ const WizardEditProfile = forwardRef(
               autoSize
               disabled={field.disabled}
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onFocus={() => showMinReqModal(() => {}, false)}
+              // onFocus={() => showMinReqModal(() => {}, false)}
               onChange={handleFieldChange}
             />
           </FormItem>
@@ -1165,12 +1168,12 @@ const WizardEditProfile = forwardRef(
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
               }}
-              onClick={() =>
-                showMinReqModal(() => {
-                  handleMinReqAddBack(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                }, false)
-              }
+              onClick={() => {
+                // showMinReqModal(() => {
+                handleMinReqAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // }, false)
+              }}
             />
           ) : (
             <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
@@ -1181,12 +1184,12 @@ const WizardEditProfile = forwardRef(
                   border: 'none', // Removes the border
                   padding: 0, // Removes padding
                 }}
-                onClick={() =>
-                  showMinReqModal(() => {
-                    handleMinReqRemove(index);
-                    setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                  }, false)
-                }
+                onClick={() => {
+                  // showMinReqModal(() => {
+                  handleMinReqRemove(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // }, false)
+                }}
               />
             </Tooltip>
           )}
@@ -1274,7 +1277,7 @@ const WizardEditProfile = forwardRef(
               autoSize
               disabled={field.disabled}
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onFocus={() => showRelWorkModal(() => {}, false)}
+              // onFocus={() => showRelWorkModal(() => {}, false)}
               onChange={handleFieldChange}
             />
           </FormItem>
@@ -1286,12 +1289,12 @@ const WizardEditProfile = forwardRef(
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
               }}
-              onClick={() =>
-                showRelWorkModal(() => {
-                  handleRelWorkAddBack(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                }, false)
-              }
+              onClick={() => {
+                // showRelWorkModal(() => {
+                handleRelWorkAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // }, false)
+              }}
             />
           ) : (
             <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
@@ -1302,12 +1305,12 @@ const WizardEditProfile = forwardRef(
                   border: 'none', // Removes the border
                   padding: 0, // Removes padding
                 }}
-                onClick={() =>
-                  showRelWorkModal(() => {
-                    handleRelWorkRemove(index);
-                    setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                  }, false)
-                }
+                onClick={() => {
+                  // showRelWorkModal(() => {
+                  handleRelWorkRemove(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // }, false)
+                }}
               />
             </Tooltip>
           )}
@@ -1397,7 +1400,7 @@ const WizardEditProfile = forwardRef(
               autoSize
               disabled={field.disabled}
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onFocus={() => showSecurityScreeningsModal(() => {}, false)}
+              // onFocus={() => showSecurityScreeningsModal(() => {}, false)}
               onChange={handleFieldChange}
             />
           </FormItem>
@@ -1409,12 +1412,12 @@ const WizardEditProfile = forwardRef(
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
               }}
-              onClick={() =>
-                showSecurityScreeningsModal(() => {
-                  handleSecurityScreeningsAddBack(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                }, false)
-              }
+              onClick={() => {
+                // showSecurityScreeningsModal(() => {
+                handleSecurityScreeningsAddBack(index);
+                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // }, false)
+              }}
             />
           ) : (
             <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
@@ -1425,12 +1428,12 @@ const WizardEditProfile = forwardRef(
                   border: 'none', // Removes the border
                   padding: 0, // Removes padding
                 }}
-                onClick={() =>
-                  showSecurityScreeningsModal(() => {
-                    handleSecurityScreeningsRemove(index);
-                    setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                  }, false)
-                }
+                onClick={() => {
+                  // showSecurityScreeningsModal(() => {
+                  handleSecurityScreeningsRemove(index);
+                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // }, false)
+                }}
               />
             </Tooltip>
           )}
@@ -2048,7 +2051,7 @@ const WizardEditProfile = forwardRef(
     const [programOverviewEdited, setProgramOverviewEdited] = useState<boolean>(false);
 
     const renderProgramOverview = (field: any) => {
-      console.log('renderProgramOverview: ', field);
+      // console.log('renderProgramOverview: ', field);
       if (!field) return null;
 
       const isEdited = programOverviewEdited || field.isCustom;
@@ -2120,7 +2123,7 @@ const WizardEditProfile = forwardRef(
     }, [positionProfileData]);
 
     if (isLoading || renderKey === 0) {
-      return <p>Loading...</p>;
+      return <LoadingSpinnerWithMessage />;
     }
 
     const titleStyle = {
@@ -2139,7 +2142,7 @@ const WizardEditProfile = forwardRef(
       display: 'block',
     };
 
-    console.log('effectiveData: ', effectiveData);
+    // console.log('effectiveData: ', effectiveData);
 
     return (
       <>
@@ -2181,7 +2184,7 @@ const WizardEditProfile = forwardRef(
                 {effectiveData?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
-                {isFetchingPositionProfile && <>Loading...</>}
+                {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
                 {firstActivePosition && !isFetchingPositionProfile && (
                   <div>
                     <p
@@ -2195,6 +2198,9 @@ const WizardEditProfile = forwardRef(
                     </Typography.Paragraph>
                   </div>
                 )}
+                {!firstActivePosition && !isFetchingPositionProfile && (
+                  <div>Position {positionRequestData?.positionRequest?.reports_to_position_id} is unoccupied</div>
+                )}
               </Descriptions.Item>
               <Descriptions.Item label="Job Store #">{effectiveData?.number}</Descriptions.Item>
             </Descriptions>
@@ -2204,7 +2210,7 @@ const WizardEditProfile = forwardRef(
               form={form}
               key={renderKey}
               onFinish={handleSubmit((data) => {
-                console.log('onFinish: ', data);
+                // console.log('onFinish: ', data);
                 submitHandler?.(data);
               })}
             >
@@ -2347,12 +2353,12 @@ const WizardEditProfile = forwardRef(
                       type="link"
                       icon={<PlusOutlined />}
                       style={addStyle}
-                      onClick={() =>
-                        showReqModal(() => {
-                          handleAccReqAddNew();
-                          setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                        }, false)
-                      }
+                      onClick={() => {
+                        // showReqModal(() => {
+                        handleAccReqAddNew();
+                        setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                        // }, false)
+                      }}
                     >
                       Add another accountability
                     </Button>
@@ -2408,10 +2414,12 @@ const WizardEditProfile = forwardRef(
                       icon={<PlusOutlined />}
                       style={addStyle}
                       onClick={() => {
-                        showMinReqModal(() => {
+                        {
+                          // showMinReqModal(() => {
                           handleMinReqAddNew();
                           setRenderKey((prevKey) => prevKey + 1);
-                        }, false);
+                          // }, false);
+                        }
                       }}
                     >
                       Add another requirement
@@ -2445,10 +2453,12 @@ const WizardEditProfile = forwardRef(
                       icon={<PlusOutlined />}
                       style={addStyle}
                       onClick={() => {
-                        showRelWorkModal(() => {
+                        {
+                          // showRelWorkModal(() => {
                           handleRelWorkAddNew();
                           setRenderKey((prevKey) => prevKey + 1);
-                        }, false);
+                          // }, false);
+                        }
                       }}
                     >
                       Add a related experience
@@ -2458,7 +2468,7 @@ const WizardEditProfile = forwardRef(
                   {/* Professional registration requirements */}
 
                   <Title level={4} style={titleStyle}>
-                    Professional registration requirement
+                    Professional registration requirements
                   </Title>
                   <Typography.Paragraph type="secondary">
                     Professional registration is required for a number of positions in the BC Public Service. You can
@@ -2572,10 +2582,12 @@ const WizardEditProfile = forwardRef(
                       icon={<PlusOutlined />}
                       style={addStyle}
                       onClick={() => {
-                        showSecurityScreeningsModal(() => {
+                        {
+                          // showSecurityScreeningsModal(() => {
                           handleSecurityScreeningsAddNew();
                           setRenderKey((prevKey) => prevKey + 1);
-                        }, false);
+                          // }, false);
+                        }
                       }}
                     >
                       Add another security screening
