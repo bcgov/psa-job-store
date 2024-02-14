@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import 'reactflow/dist/style.css';
 import { usePosition } from '../../components/app/common/contexts/position.context';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
@@ -53,7 +54,6 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
     // console.log('setting orgchart json: ', orgChartData);
     // console.log('A:', JSON.stringify(orgChartData));
     // console.log('B:', JSON.stringify(orgChartJson));
-
     orgChartJsonRef.current = orgChartData;
   };
 
@@ -62,7 +62,14 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
   // console.log('positionRequestDepartmentId from wizard org chart page: ', positionRequestDepartmentId);
   return (
     <WizardPageWrapper
-      title="New position"
+      title={
+        <div>
+          <Link to="/">
+            <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+          </Link>
+          New position
+        </div>
+      }
       subTitle="Here you are able to create a position. Start by clicking the supervisor of the position you would like to create."
       hpad={false}
       additionalBreadcrumb={{ title: 'New position' }}
