@@ -21,6 +21,10 @@
     "preview": "vite preview",
     "test": "vitest"
   },
+  "dependencies": {
+    "dayjs": "^1.11.10",
+    "docx": "^8.5.0"
+  },
   "devDependencies": {
     "@types/node": "^20.11.17",
     "eslint-config-custom": "*",

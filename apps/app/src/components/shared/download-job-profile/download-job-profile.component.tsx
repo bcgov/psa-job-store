@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DownloadOutlined } from '@ant-design/icons';
 import { Button, Spin } from 'antd';
+import { generateJobProfile } from 'common-kit';
 import { Packer } from 'docx';
 import { saveAs } from 'file-saver';
 import React, { useEffect, useState } from 'react';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import { generateJobProfile } from './generate-job-profile.util';
 
 export interface DownloadJobProfileComponentProps {
   jobProfile: Record<string, any> | null;
