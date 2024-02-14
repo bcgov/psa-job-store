@@ -73,7 +73,7 @@ interface WizardContextProps {
   originalOptionalRequirementsFields: any[];
   setOriginalOptionalRequirementsFields: React.Dispatch<React.SetStateAction<any[]>>;
 
-  positionRequestData: GetPositionRequestResponseContent;
+  positionRequestData: GetPositionRequestResponseContent | null;
   setPositionRequestData: React.Dispatch<React.SetStateAction<GetPositionRequestResponseContent | null>>;
 }
 
