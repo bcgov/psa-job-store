@@ -37,6 +37,7 @@
     "cache-manager": "^5.3.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "common-kit": "*",
     "csvtojson": "^2.0.10",
     "dayjs": "^1.11.10",
     "diff-match-patch": "^1.0.5",

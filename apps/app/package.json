@@ -24,6 +24,7 @@
     "buffer": "^6.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "common-kit": "*",
     "copy-to-clipboard": "^3.3.3",
     "dayjs": "^1.11.10",
     "diff-match-patch": "^1.0.5",
