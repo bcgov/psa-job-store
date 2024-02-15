@@ -75,20 +75,25 @@ export const JobProfileSearchResults = ({
   };
   return (
     <div
-      style={{ border: '1px solid #CCC' }}
+      style={{ border: '1px solid #D9D9D9', borderRadius: '8px', background: 'white' }}
       role="region"
       aria-label="job profiles list"
       data-testid="job-profile-search-results"
     >
-      <div style={{ borderBottom: '1px solid #CCC', padding: '1rem' }}>
+      <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0rem 1rem' }}>
         <h1>
+          <Text style={{ fontSize: '13pt' }}>Job profiles</Text>
+        </h1>
+      </div>
+      <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0.5rem 1rem' }}>
+        <h2>
           <Text style={{ fontSize: '10pt' }}>
             Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of{' '}
             {totalResults} results
           </Text>
-        </h1>
+        </h2>
       </div>
-      <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list">
+      <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list" style={{ padding: '0' }}>
         {isLoading ? (
           <div data-testid="skeleton-loading">
             <Skeleton loading={isLoading} />

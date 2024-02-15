@@ -171,11 +171,24 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
       ]}
     >
       <WizardSteps current={1}></WizardSteps>
-      <JobProfiles
-        searchParams={searchParams}
-        onSelectProfile={onSelectProfile}
-        onUseProfile={handleSubmit(onSubmit)}
-      />
+      <div
+        style={{
+          overflow: 'hidden',
+          position: 'relative',
+          height: '100%',
+          background: 'rgb(240, 242, 245)',
+          marginLeft: '-1rem',
+          marginRight: '-1rem',
+          marginTop: '-1px',
+          padding: '0 1rem',
+        }}
+      >
+        <JobProfiles
+          searchParams={searchParams}
+          onSelectProfile={onSelectProfile}
+          // onUseProfile={handleSubmit(onSubmit)}
+        />
+      </div>
     </WizardPageWrapper>
   );
 };

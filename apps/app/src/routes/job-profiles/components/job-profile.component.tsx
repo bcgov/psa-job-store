@@ -24,7 +24,7 @@ import {
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import WizardEditControlBar from '../../wizard/components/wizard-edit-control-bar';
+import './job-profile.component.css';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -36,7 +36,7 @@ interface JobProfileProps {
   showBackToResults?: boolean;
   showDiff?: boolean;
   style?: CSSProperties;
-  onUseProfile?: () => void;
+  // onUseProfile?: () => void;
   showBasicInfo?: boolean;
 }
 
@@ -165,7 +165,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   showBackToResults = true,
   showDiff = false,
   style,
-  onUseProfile,
+  // onUseProfile,
   showBasicInfo = true,
 }) => {
   const [searchParams] = useSearchParams();
@@ -740,12 +740,26 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       ) : (
         <div />
       )}
-      {onUseProfile ? (
+      {/* {onUseProfile ? (
         <WizardEditControlBar onNext={onUseProfile} nextText="Use Profile" style={{ marginBottom: '1rem' }} />
-      ) : // <Button onClick={() => onUseProfile()} type="primary">
-      //   Use Profile
-      // </Button>
-      null}
+      ) :
+      null} */}
+
+      {effectiveData?.review_required && (
+        <Alert
+          message={<span>Will require verification</span>}
+          description={
+            <span>
+              This profile will need to be verified by the classification team before a position number is generated.
+            </span>
+          }
+          type="warning"
+          showIcon
+          icon={<ExclamationCircleFilled />}
+          style={{ marginBottom: '24px' }}
+        />
+      )}
+
       <Alert
         message={
           <span>
@@ -771,7 +785,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         icon={<ExclamationCircleFilled />}
         style={{ marginBottom: '24px' }}
       />
+
       <Descriptions
+        className="profileDescriptions"
         title="Job profile"
         aria-hidden="true"
         bordered
@@ -781,14 +797,17 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           fontWeight: 700,
           width: '100px',
           verticalAlign: 'top',
+          background: '#FAFAFA',
         }}
         contentStyle={{
+          background: 'white',
           verticalAlign: 'top',
         }}
       />
 
       {showBasicInfo && (
         <Descriptions
+          className="profileDescriptions"
           title="Basic information"
           bordered
           column={24}
@@ -798,8 +817,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             fontWeight: 700,
             width: '100px',
             verticalAlign: 'top',
+            background: '#FAFAFA',
           }}
           contentStyle={{
+            background: 'white',
             verticalAlign: 'top',
           }}
         />
