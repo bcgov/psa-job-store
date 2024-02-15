@@ -55,7 +55,6 @@ ENV NODE_ENV "development"
 
 WORKDIR /usr/src
 COPY --from=builder /tmp/build ./
-COPY /apps/api/start.sh ./apps/api/start.sh
 COPY /apps/api/prisma ./apps/api/prisma
 COPY /apps/api/package*.json ./apps/api/
 

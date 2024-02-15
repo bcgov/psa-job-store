@@ -47,6 +47,7 @@ export interface GetPositionRequestResponseContent {
   status?: string;
   department_id?: string;
   approved_at?: string;
+  updated_at?: string;
   email?: string;
   parent_job_profile?: {
     number: number;
@@ -62,6 +63,15 @@ export interface GetPositionRequestResponseContent {
 
 export interface GetPositionRequestResponse {
   positionRequest: GetPositionRequestResponseContent;
+}
+
+export interface PositionNeedsReviewResponse {
+  positionNeedsRivew: PositionNeedsReviewResponseContent;
+}
+
+export interface PositionNeedsReviewResponseContent {
+  result: boolean;
+  reasons: string[];
 }
 
 export interface PositionRequestStatusCounts {
@@ -126,6 +136,10 @@ export interface UpdatePositionRequestInput {
 }
 
 export interface SubmitPositionRequestInput {
+  id: number;
+}
+
+export interface DeletePositionRequestInput {
   id: number;
 }
 
@@ -231,7 +245,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     getPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
-      providesTags: () => ['positionRequest'],
+      providesTags: ['positionRequest'],
       // result
       //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
       //   : [{ type: 'PositionRequest' as const, id: 'id' }],
@@ -340,6 +354,23 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    deletePositionRequest: build.mutation<void, DeletePositionRequestInput>({
+      invalidatesTags: ['positionRequest'],
+      query: (input: DeletePositionRequestInput) => {
+        return {
+          document: gql`
+            mutation DeletePositionRequest($id: Int!) {
+              deletePositionRequest(id: $id) {
+                id
+              }
+            }
+          `,
+          variables: {
+            id: input.id,
+          },
+        };
+      },
+    }),
     getPositionRequestUserClassifications: build.query<GetPositionRequestUserClassificationsResponse, void>({
       query: () => {
         return {
@@ -424,6 +455,23 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    positionNeedsRivew: build.query<PositionNeedsReviewResponse, GetPositionRequestArgs>({
+      query: (args: GetPositionRequestArgs) => {
+        return {
+          document: gql`
+            query PositionNeedsRivew {
+              positionNeedsRivew(id: ${args.id}) {
+                result
+                reasons
+              }
+            }
+          `,
+          variables: {
+            id: args.id,
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -436,9 +484,11 @@ export const {
   useCreatePositionRequestMutation,
   useUpdatePositionRequestMutation,
   useSubmitPositionRequestMutation,
+  useDeletePositionRequestMutation,
   useGetPositionRequestsCountQuery,
   useGetPositionRequestClassificationsQuery,
   useGetPositionRequestJobStoreNumbersQuery,
   useGetPositionRequestStatusesQuery,
   useGetPositionRequestSubmittedByQuery,
+  usePositionNeedsRivewQuery,
 } = positionRequestApi;

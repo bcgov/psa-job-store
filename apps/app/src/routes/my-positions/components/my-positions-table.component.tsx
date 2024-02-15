@@ -11,7 +11,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Popover, Result, Row, Space, Table, Tooltip, message } from 'antd';
+import { Button, Card, Col, Menu, Modal, Popover, Result, Row, Space, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import copy from 'copy-to-clipboard';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
@@ -19,8 +19,12 @@ import { Link, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
+import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
-import { useLazyGetPositionRequestsQuery } from '../../../redux/services/graphql-api/position-request.api';
+import {
+  useDeletePositionRequestMutation,
+  useLazyGetPositionRequestsQuery,
+} from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
 
 // Define the new PositionsTable component
@@ -60,7 +64,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   mode = null,
   onDataAvailable,
 }) => {
-  const [trigger, { data, isLoading, error: fetchError }] = useLazyGetPositionRequestsQuery();
+  const [trigger, { data, isLoading, error: fetchError, isFetching }] = useLazyGetPositionRequestsQuery();
+  const [deletePositionRequest] = useDeletePositionRequestMutation();
   const [searchParams] = useSearchParams();
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -69,6 +74,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const [pageSize, setPageSize] = useState(itemsPerPage);
   const [sortField, setSortField] = useState<null | string>(null);
   const [sortOrder, setSortOrder] = useState<null | string>(null);
+  const [hasPositionRequests, setHasPositionRequests] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
@@ -84,12 +90,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
   // Check if data is available and call the callback function to notify the parent component
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || isFetching) return;
     const hasData = data && 'positionRequests' in data && data.positionRequests.length > 0;
     if (onDataAvailable) {
       onDataAvailable(hasData || hasSearched || false);
     }
-  }, [data, onDataAvailable, isLoading, hasSearched]);
+    setHasPositionRequests(data?.positionRequests && data.positionRequests.length > 0 ? true : false);
+  }, [data, onDataAvailable, isLoading, hasSearched, isFetching]);
 
   useEffect(() => {
     if (data && data.positionRequestsCount !== undefined) {
@@ -99,7 +106,22 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     }
   }, [data, mode]);
 
+  const showDeleteConfirm = (id: number) => {
+    Modal.confirm({
+      title: 'Delete Position Request',
+      content: 'Do you want to delete the position request?',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: async () => {
+        await deletePositionRequest({ id: id });
+        await updateData();
+      },
+    });
+  };
+
   const getMenuContent = (record: any) => {
+    console.log('record: ', record);
+
     return (
       <Menu>
         {mode == null && (
@@ -107,12 +129,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'DRAFT' && (
               <>
                 <Menu.Item key="edit" icon={<EditOutlined />}>
-                  Edit
+                  <Link to={`/position-request/${record.id}`}>Edit</Link>
                 </Menu.Item>
                 <Menu.Item key="copy" icon={<LinkOutlined />}>
                   Copy link
                 </Menu.Item>
-                <Menu.Item key="delete" icon={<DeleteOutlined />}>
+                <Menu.Item key="delete" icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(record.id)}>
                   Delete
                 </Menu.Item>
               </>
@@ -121,7 +143,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'COMPLETED' && (
               <>
                 <Menu.Item key="view" icon={<EyeOutlined />}>
-                  View
+                  <Link to={`/position-request/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item key="download" icon={<FilePdfOutlined />}>
                   Download profile
@@ -138,7 +160,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'IN_REVIEW' && (
               <>
                 <Menu.Item key="view" icon={<EyeOutlined />}>
-                  View
+                  <Link to={`/position-request/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item key="copy" icon={<LinkOutlined />}>
                   Copy link
@@ -494,8 +516,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     if (handleTableChangeCallback) handleTableChangeCallback(pagination, _filters, sorter);
   };
 
-  const hasPositionRequests = data?.positionRequests && data.positionRequests.length > 0;
-
   const rowSelection = {
     selectedRowKeys,
     onChange: (selectedKeys: any) => {
@@ -511,7 +531,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     }
   }, [fetchError]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading || isFetching) return <LoadingSpinnerWithMessage />;
 
   return (
     <div style={style}>

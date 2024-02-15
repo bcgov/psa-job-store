@@ -12,6 +12,7 @@ import {
   GetJobProfilesResponse,
   IsJobProfileNumberAvailableResponse,
   JobProfilesCareerGroupsResponse,
+  JobProfilesClassificationsResponse,
   JobProfilesDraftsCareerGroupsResponse,
   JobProfilesDraftsMinistriesResponse,
   JobProfilesMinistriesResponse,
@@ -333,6 +334,23 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getJobProfilesClassifications: build.query<JobProfilesClassificationsResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query JobProfilesClassifications {
+              jobProfilesClassifications {
+                id
+                code
+                name
+                grade
+                employee_group_id
+              }
+            }
+          `,
+        };
+      },
+    }),
     getJobProfilesDraftsMinistries: build.query<JobProfilesDraftsMinistriesResponse, void>({
       query: () => {
         return {
@@ -404,4 +422,5 @@ export const {
   useLazyIsJobProfileNumberAvailableQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
   useDuplicateJobProfileMutation,
+  useGetJobProfilesClassificationsQuery,
 } = jobProfileApi;

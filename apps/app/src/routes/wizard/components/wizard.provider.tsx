@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ReactNode, useContext, useState } from 'react';
 import { GetClassificationsResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
+import { GetPositionRequestResponseContent } from '../../../redux/services/graphql-api/position-request.api';
 
 // interface WizardData {
 //   [key: string]: string;
@@ -71,6 +72,9 @@ interface WizardContextProps {
   setOriginalProvisosFields: React.Dispatch<React.SetStateAction<any[]>>;
   originalOptionalRequirementsFields: any[];
   setOriginalOptionalRequirementsFields: React.Dispatch<React.SetStateAction<any[]>>;
+
+  positionRequestData: GetPositionRequestResponseContent | null;
+  setPositionRequestData: React.Dispatch<React.SetStateAction<GetPositionRequestResponseContent | null>>;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -106,6 +110,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalTitle, setOriginalTitle] = useState<any>({});
   const [originalOverview, setOriginalOverview] = useState<any>({});
   const [originalProgramOverview, setOriginalProgramOverview] = useState<any>({});
+  const [positionRequestData, setPositionRequestData] = useState<GetPositionRequestResponseContent | null>(null);
+
   const [positionRequestId, setPositionRequestId] = useState<number | null>(null);
   const [positionRequestProfileId, setPositionRequestProfileId] = useState<number | null>(null);
   const [positionRequestDepartmentId, setPositionRequestDepartmentId] = useState<string | null>(null);
@@ -171,6 +177,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setOriginalKnowledgeSkillsAbilitiesFields,
     originalProvisosFields,
     setOriginalProvisosFields,
+    positionRequestData,
+    setPositionRequestData,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

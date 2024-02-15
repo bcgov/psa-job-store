@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeftOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import { Alert, Descriptions, DescriptionsProps, Grid, Typography } from 'antd';
+import { ArrowLeftOutlined, ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
+import { Alert, Descriptions, DescriptionsProps, Grid, Tooltip, Typography } from 'antd';
 import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -17,6 +17,7 @@ import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import {
   AccountabilitiesModel,
   JobProfileModel,
@@ -36,6 +37,7 @@ interface JobProfileProps {
   showDiff?: boolean;
   style?: CSSProperties;
   onUseProfile?: () => void;
+  showBasicInfo?: boolean;
 }
 
 class BehaviouralCompetency {
@@ -164,6 +166,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   showDiff = false,
   style,
   onUseProfile,
+  showBasicInfo = true,
 }) => {
   const [searchParams] = useSearchParams();
   const params = useParams();
@@ -314,7 +317,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   };
 
   if (isLoading) {
-    return <p aria-live="polite">Loading job profile...</p>;
+    return <LoadingSpinnerWithMessage />;
   }
 
   // console.log('effectiveData: ', effectiveData);
@@ -329,7 +332,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'Lastupdated',
       label: 'Last updated',
-      children: `${dayjs(effectiveData?.updated_at).format('MMM d, YYYY')}`,
+      children: `${dayjs(effectiveData?.updated_at).format('MMM D, YYYY')}`,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
 
@@ -403,12 +406,38 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             : effectiveData?.title?.value,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
+
     {
       key: 'classification',
       label: 'Classification',
       children: <div>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
+    ...(effectiveData?.program_overview &&
+    (typeof effectiveData.program_overview === 'string'
+      ? effectiveData.program_overview.trim()
+      : effectiveData.program_overview.value.trim()) !== ''
+      ? [
+          {
+            key: 'program_overview',
+            label: 'Program Overview',
+            children:
+              showDiff && originalData
+                ? compareData(
+                    typeof originalData.program_overview === 'string'
+                      ? originalData.program_overview
+                      : originalData?.program_overview?.value,
+                    typeof effectiveData?.program_overview === 'string'
+                      ? effectiveData?.program_overview
+                      : effectiveData?.program_overview?.value,
+                  )
+                : typeof effectiveData?.program_overview === 'string'
+                  ? effectiveData?.program_overview
+                  : effectiveData?.program_overview?.value,
+            span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
+          },
+        ]
+      : []),
     // {
     //   key: 'context',
     //   label: 'Job Context',
@@ -548,6 +577,86 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             </>
           )}
 
+          {effectiveData?.professional_registration_requirements &&
+            effectiveData?.professional_registration_requirements.length > 0 && (
+              <>
+                <h4>Professional registration requirements</h4>
+                <ul>
+                  {showDiff && originalData
+                    ? compareLists(
+                        originalData.professional_registration_requirements,
+                        effectiveData?.professional_registration_requirements,
+                      )
+                    : effectiveData?.professional_registration_requirements?.map((requirement, index) => {
+                        if (typeof requirement === 'string') {
+                          return <li key={index}>{requirement}</li>;
+                        }
+                        if (requirement.disabled) {
+                          return null;
+                        }
+                        return <li key={index}>{requirement.value}</li>;
+                      })}
+                </ul>
+              </>
+            )}
+
+          {effectiveData?.preferences && effectiveData?.preferences.length > 0 && (
+            <>
+              <h4>Preferences</h4>
+              <ul>
+                {showDiff && originalData
+                  ? compareLists(originalData.preferences, effectiveData?.preferences)
+                  : effectiveData?.preferences?.map((requirement, index) => {
+                      if (typeof requirement === 'string') {
+                        return <li key={index}>{requirement}</li>;
+                      }
+                      if (requirement.disabled) {
+                        return null;
+                      }
+                      return <li key={index}>{requirement.value}</li>;
+                    })}
+              </ul>
+            </>
+          )}
+
+          {effectiveData?.knowledge_skills_abilities && effectiveData?.knowledge_skills_abilities.length > 0 && (
+            <>
+              <h4>Knowledge, skills and abilities</h4>
+              <ul>
+                {showDiff && originalData
+                  ? compareLists(originalData.knowledge_skills_abilities, effectiveData?.knowledge_skills_abilities)
+                  : effectiveData?.knowledge_skills_abilities?.map((requirement, index) => {
+                      if (typeof requirement === 'string') {
+                        return <li key={index}>{requirement}</li>;
+                      }
+                      if (requirement.disabled) {
+                        return null;
+                      }
+                      return <li key={index}>{requirement.value}</li>;
+                    })}
+              </ul>
+            </>
+          )}
+
+          {effectiveData?.willingness_statements && effectiveData?.willingness_statements.length > 0 && (
+            <>
+              <h4>Willingness statements or provisos</h4>
+              <ul>
+                {showDiff && originalData
+                  ? compareLists(originalData.willingness_statements, effectiveData?.willingness_statements)
+                  : effectiveData?.willingness_statements?.map((requirement, index) => {
+                      if (typeof requirement === 'string') {
+                        return <li key={index}>{requirement}</li>;
+                      }
+                      if (requirement.disabled) {
+                        return null;
+                      }
+                      return <li key={index}>{requirement.value}</li>;
+                    })}
+              </ul>
+            </>
+          )}
+
           {effectiveData?.security_screenings && effectiveData?.security_screenings.length > 0 && (
             <>
               <h4>Security screening</h4>
@@ -566,6 +675,25 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                       } else if (typeof requirement.text === 'string') {
                         return <li key={index}>{requirement.text}</li>;
                       }
+                    })}
+              </ul>
+            </>
+          )}
+
+          {effectiveData?.optional_requirements && effectiveData?.optional_requirements.length > 0 && (
+            <>
+              <h4>Optional requirements</h4>
+              <ul>
+                {showDiff && originalData
+                  ? compareLists(originalData.optional_requirements, effectiveData?.optional_requirements)
+                  : effectiveData?.optional_requirements?.map((requirement, index) => {
+                      if (typeof requirement === 'string') {
+                        return <li key={index}>{requirement}</li>;
+                      }
+                      if (requirement.disabled) {
+                        return null;
+                      }
+                      return <li key={index}>{requirement.value}</li>;
                     })}
               </ul>
             </>
@@ -619,7 +747,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       // </Button>
       null}
       <Alert
-        message="Job context"
+        message={
+          <span>
+            Job context{' '}
+            <Tooltip title="The job context is important to understand as you proceed to create the position. You will be asked prior to approving that you understand the context of the job.">
+              <InfoCircleOutlined style={{ cursor: 'pointer' }} />
+            </Tooltip>
+          </span>
+        }
         description={
           <span
             dangerouslySetInnerHTML={{
@@ -652,22 +787,23 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         }}
       />
 
-      <Descriptions
-        title="Basic information"
-        bordered
-        column={24}
-        items={basicInfoItems}
-        style={{ marginTop: '24px', marginBottom: '24px' }}
-        labelStyle={{
-          fontWeight: 700,
-          width: '100px',
-          verticalAlign: 'top',
-        }}
-        contentStyle={{
-          verticalAlign: 'top',
-        }}
-      />
-
+      {showBasicInfo && (
+        <Descriptions
+          title="Basic information"
+          bordered
+          column={24}
+          items={basicInfoItems}
+          style={{ marginTop: '24px', marginBottom: '24px' }}
+          labelStyle={{
+            fontWeight: 700,
+            width: '100px',
+            verticalAlign: 'top',
+          }}
+          contentStyle={{
+            verticalAlign: 'top',
+          }}
+        />
+      )}
       <div
         style={{
           position: 'absolute',

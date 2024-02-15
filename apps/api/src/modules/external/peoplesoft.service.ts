@@ -1,23 +1,23 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
-import { Environment } from '../../enums/environment.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { Employee } from './models/employee.model';
+import { PositionCreateInput } from './models/position-create.input';
 
 enum Endpoint {
   Classifications = 'PJS_TGB_REST_JOB_CODE',
+  CreatePosition = 'TGB_PJS_POSITION.v1',
   Departments = 'PJS_TGB_REST_DEPT',
   DepartmentClassifications = 'PJS_TGB_REST_JOBCODE_DEPT',
   Employees = 'PJS_TGB_REST_EMPLOYEE',
   HrScope = 'PJS_TGB_REST_HRSCOPE',
   Locations = 'PJS_TGB_REST_LOCATION',
   Organizations = 'PJS_TGB_REST_BUS_UNIT',
-  PositionCreate = 'TGB_PJS_POSITION.v1',
   Profile = 'PJS_TGB_REST_USER_PROFILE',
 }
 
@@ -27,12 +27,14 @@ enum RequestMethod {
 }
 
 type GetRequestParams = { method: RequestMethod.GET; endpoint: Endpoint; pageSize: number; extra?: string };
-type PostRequestParams = { method: RequestMethod.POST; endpoint: Endpoint.PositionCreate; data: Record<string, any> };
+type PostRequestParams = { method: RequestMethod.POST; endpoint: Endpoint.CreatePosition; data: Record<string, any> };
 
 type RequestParams = GetRequestParams | PostRequestParams;
 
 @Injectable()
 export class PeoplesoftService {
+  private readonly logger = new Logger(PeoplesoftService.name);
+
   private readonly headers: AxiosHeaders;
   private request = (params: RequestParams) => {
     if (params.method === RequestMethod.GET) {
@@ -65,39 +67,12 @@ export class PeoplesoftService {
         `${this.configService.get('PEOPLESOFT_USERNAME')}:${this.configService.get('PEOPLESOFT_PASSWORD')}`,
       ).toString('base64')}`,
     );
-
-    (async () => {
-      // To reduce API requests in non-production mode, only fetch these records if their counts === 0
-      // In production, fetch records on server start
-      console.log("this.configService.get('NODE_ENV'): ", this.configService.get('NODE_ENV'));
-
-      if (this.configService.get('NODE_ENV') !== Environment.Production) {
-        const classificationCount = await this.prisma.classification.count();
-        if (classificationCount < 100) {
-          await this.syncClassifications();
-        }
-
-        const locationCount = await this.prisma.location.count();
-        if (locationCount < 100) {
-          await this.syncLocations();
-        }
-
-        const organizationCount = await this.prisma.organization.count();
-        const departmentCount = await this.prisma.department.count();
-        const classificationDepartmentsCount = await this.prisma.classificationDepartment.count();
-        if (organizationCount < 100 || departmentCount < 100 || classificationDepartmentsCount < 100) {
-          await this.syncOrganizationsAndDepartments();
-        }
-      } else {
-        await this.syncClassifications();
-        await this.syncLocations();
-        await this.syncOrganizationsAndDepartments();
-      }
-    })();
   }
 
   @Cron('0 0 * * * *')
   async syncClassifications() {
+    this.logger.log(`Start syncClassifications @ ${new Date()}`);
+
     const response = await firstValueFrom(
       this.request({ method: RequestMethod.GET, endpoint: Endpoint.Classifications, pageSize: 4000 }).pipe(
         map((r) => r.data),
@@ -148,10 +123,14 @@ export class PeoplesoftService {
         },
       });
     }
+
+    this.logger.log(`End syncClassifications @ ${new Date()}`);
   }
 
   @Cron('0 0 * * * *')
   async syncLocations() {
+    this.logger.log(`Start syncLocations @ ${new Date()}`);
+
     const response = await firstValueFrom(
       this.request({ method: RequestMethod.GET, endpoint: Endpoint.Locations, pageSize: 5000 }).pipe(
         map((r) => r.data),
@@ -182,6 +161,8 @@ export class PeoplesoftService {
         },
       });
     }
+
+    this.logger.log(`End syncLocations @ ${new Date()}`);
   }
 
   @Cron('0 0 * * * *')
@@ -190,10 +171,14 @@ export class PeoplesoftService {
     // Departments rely on organizations which must exist prior to syncing departments
     await this.syncOrganizations();
     await this.syncDepartments();
-    await this.syncDepartmentClassificationMapping();
+
+    // Commented out until the API returns useful data
+    // await this.syncDepartmentClassificationMapping();
   }
 
   async syncOrganizations() {
+    this.logger.log(`Start syncOrganizations @ ${new Date()}`);
+
     const response = await firstValueFrom(
       this.request({ method: RequestMethod.GET, endpoint: Endpoint.Organizations, pageSize: 500 }).pipe(
         map((r) => r.data),
@@ -224,9 +209,13 @@ export class PeoplesoftService {
         },
       });
     }
+
+    this.logger.log(`End syncOrganizations @ ${new Date()}`);
   }
 
   async syncDepartments() {
+    this.logger.log(`Start syncDepartments @ ${new Date()}`);
+
     const organizations = await this.prisma.organization.findMany({
       select: { id: true, peoplesoft_id: true },
     });
@@ -299,6 +288,8 @@ export class PeoplesoftService {
         });
       } catch (error) {}
     }
+
+    this.logger.log(`End syncDepartments @ ${new Date()}`);
   }
 
   async syncDepartmentClassificationMapping() {
@@ -454,6 +445,28 @@ export class PeoplesoftService {
           throw new Error(err);
         }),
       ),
+    );
+
+    return response;
+  }
+
+  async createPosition(data: PositionCreateInput) {
+    const response = await firstValueFrom(
+      this.httpService
+        .post(
+          `${this.configService.get('PEOPLESOFT_URL').replace('/ExecuteQuery.v1/PUBLIC', '')}/${
+            Endpoint.CreatePosition
+          }`,
+          data,
+          { headers: this.headers },
+        )
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
     );
 
     return response;

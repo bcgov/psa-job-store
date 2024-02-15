@@ -15,6 +15,9 @@ interface OrgChartRendererProps {
   highlightPositionId?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   extraNodeInfo?: any;
+  allowSelection?: boolean;
+  onNodeSelected?: (nodeId: string) => void;
+  onOrgChartLoad?: (orgChartData: OrgChartData) => void;
 }
 
 const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
@@ -23,6 +26,9 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   highlightPositionId,
   orgChartSnapshot = null,
   extraNodeInfo,
+  allowSelection = false,
+  onNodeSelected,
+  onOrgChartLoad,
 }) => {
   const [orgChart, setOrgChart] = useState<OrgChartData>(orgChartSnapshot ?? DEFAULT_ORG_CHART);
   const [trigger, { data, isFetching }] = useLazyGetOrgChartQuery();
@@ -38,12 +44,15 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   }, [selectedDepartment, trigger, orgChartSnapshot]);
 
   useEffect(() => {
-    // console.log('org chart data: ', data);
     if (!orgChartSnapshot) {
       const objData: OrgChartData = data != null ? JSON.parse(JSON.stringify(data.orgChart)) : DEFAULT_ORG_CHART;
       setOrgChart(objData);
     }
   }, [data, orgChartSnapshot]);
+
+  useEffect(() => {
+    onOrgChartLoad?.(orgChart);
+  }, [orgChart, onOrgChartLoad]);
 
   return isFetching ? (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -58,6 +67,8 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
       onCreateNewPosition={onCreateNewPosition}
       highlightPositionId={highlightPositionId}
       extraNodeInfo={extraNodeInfo}
+      allowSelection={allowSelection}
+      onNodeSelected={onNodeSelected}
     />
   ) : (
     <Space style={{ height: '100%', width: '100%', justifyContent: 'center' }} align="center">

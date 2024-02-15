@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Card, Col, Input, Row, Tag } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { Button, Card, Col, Input, Row, Tag, TreeSelect } from 'antd';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
-import { useGetFilteredClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
+import { useGetJobProfileStreamsQuery } from '../../../redux/services/graphql-api/job-profile-stream';
 import {
   useGetJobProfilesCareerGroupsQuery,
+  useGetJobProfilesClassificationsQuery,
   useGetJobProfilesMinistriesQuery,
 } from '../../../redux/services/graphql-api/job-profile.api';
 import './job-profile-search.component.css';
@@ -60,7 +61,7 @@ interface MinistriesOption {
 
 export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   searchPlaceHolderText = 'Search by job title or keyword',
-  additionalFilters = false,
+  // additionalFilters = false,
   fullWidth = false,
   ministriesData = null,
   careerGroupData = null,
@@ -73,7 +74,53 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // const organizationData = useGetOrganizationsQuery().data?.organizations;
   // const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
   const jobFamilyData = useGetJobFamiliesQuery().data?.jobFamilies;
-  const classificationData = useGetFilteredClassificationsQuery().data?.classifications;
+  const jobRoleTypeData = useMemo(
+    () => [
+      {
+        id: 1,
+        name: 'Individual Contributor',
+      },
+      {
+        id: 2,
+        name: 'People Leader',
+      },
+    ],
+    [],
+  );
+  const classificationData = useGetJobProfilesClassificationsQuery().data?.jobProfilesClassifications;
+
+  // JOB FAMILIES AND STREAMS TREE VIEW
+  const { data: jobFamiliesData } = useGetJobFamiliesQuery();
+  const { data: jobProfileStreamsData } = useGetJobProfileStreamsQuery();
+
+  const [searchValue, setSearchValue] = useState('');
+  const [treeData, setTreeData] = useState<any>([]);
+  const { SHOW_CHILD } = TreeSelect;
+
+  useEffect(() => {
+    if (jobFamiliesData && jobProfileStreamsData) {
+      const formattedTreeData = jobFamiliesData.jobFamilies.map((jobFamily) => {
+        const children = jobProfileStreamsData.jobProfileStreams
+          .filter((stream) => stream.job_family_id === jobFamily.id)
+          .map((stream) => ({
+            value: `stream-${stream.id}`, // Prefix with 'stream-'
+            title: stream.name,
+            key: `stream-${stream.id}`,
+          }));
+
+        return {
+          value: `job_family-${jobFamily.id}`, // Prefix with 'job_family-'
+          title: jobFamily.name,
+          key: `job_family-${jobFamily.id}`,
+          children: children,
+        };
+      });
+
+      setTreeData(formattedTreeData);
+    }
+  }, [jobFamiliesData, jobProfileStreamsData]);
+
+  // DONE JOB FAMILIES AND STREAMS TREE VIEW
 
   if (!careerGroupData)
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -85,6 +132,9 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   const [allSelections, setAllSelections] = useState<Selection[]>([]); // holds tags from all filters
   const [classificationFilterData, setClassificationOptions] = useState<ClassificationOption[]>([]); // holds options for classification filter
   const [jobFamilyFilterData, setJobFamilyOptions] = useState<ClassificationOption[]>([]); // holds options for job family filter
+  const [jobStreamFilterData, setJobStreamOptions] = useState<ClassificationOption[]>([]); // holds options for job family filter
+  const [jobRoleTypeFilterData, setjobRoleTypeOptions] = useState<ClassificationOption[]>([]);
+  // const [professionAndDisciplineFilterData, setProfessionAndDisciplineOptions] = useState<ClassificationOption[]>([]);
   const [careerGroupFilterData, setCareerGroupOptions] = useState<CareerGroupOption[]>([]);
   const [ministriesFilterData, setMinistriesOptions] = useState<MinistriesOption[]>([]);
 
@@ -109,7 +159,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   useEffect(() => {
     if (classificationData) {
       const newOptions = classificationData.map((classification) => ({
-        label: classification.code,
+        label: classification.name,
         value: classification.id,
       }));
       setClassificationOptions(newOptions);
@@ -136,6 +186,16 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     }
   }, [careerGroupData]);
 
+  useEffect(() => {
+    if (jobProfileStreamsData) {
+      const newOptions = jobProfileStreamsData.jobProfileStreams.map((stream) => ({
+        label: stream.name,
+        value: stream.id.toString(),
+      }));
+      setJobStreamOptions(newOptions);
+    }
+  }, [jobProfileStreamsData]);
+
   // Update the job family Select components when data changes
   useEffect(() => {
     if (jobFamilyData) {
@@ -147,16 +207,34 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     }
   }, [jobFamilyData]);
 
+  // Update the job role type Select components when data changes
+  useEffect(() => {
+    if (jobRoleTypeData) {
+      const newOptions = jobRoleTypeData.map((classification) => ({
+        label: classification.name,
+        value: classification.id.toString(),
+      }));
+      setjobRoleTypeOptions(newOptions);
+    }
+  }, [jobRoleTypeData]);
+
   // Update the Select components when selections change
-  const selectedJobFamily = allSelections.filter((s) => s.type === 'jobFamily').map((s) => s.value);
+  // const selectedProfessionAndDisciplineFamily = allSelections.filter((s) => s.type === 'professionAndDiscipline').map((s) => s.value);
+  const selectedJobRoleType = allSelections.filter((s) => s.type === 'jobRoleType').map((s) => s.value);
   const selectedClassification = allSelections.filter((s) => s.type === 'classification').map((s) => s.value);
-  const selectedCareerGroup = allSelections.filter((s) => s.type === 'careerGroup').map((s) => s.value);
+  // const selectedCareerGroup = allSelections.filter((s) => s.type === 'careerGroup').map((s) => s.value);
   const selectedMinistry = allSelections.filter((s) => s.type === 'ministry').map((s) => s.value);
 
   // Find the label for a given value
   const findLabel = (value: any, type: any) => {
     if (type === 'jobFamily') {
       return jobFamilyFilterData.find((option) => option.value === value)?.label || value;
+    }
+    if (type === 'jobRoleType') {
+      return jobRoleTypeFilterData.find((option) => option.value === value)?.label || value;
+    }
+    if (type === 'jobStream') {
+      return jobStreamFilterData.find((option) => option.value === value)?.label || value;
     }
     if (type === 'classification') {
       return classificationFilterData.find((option) => option.value === value)?.label || value;
@@ -175,6 +253,12 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const jobFamilyParams = decodeURIComponent(searchParams.get('job_family_id__in') || '')
       .split(',')
       .filter(Boolean);
+    const jobStreamParams = decodeURIComponent(searchParams.get('job_stream_id__in') || '')
+      .split(',')
+      .filter(Boolean);
+    const jobRoleTypeParams = decodeURIComponent(searchParams.get('job_role_id__in') || '')
+      .split(',')
+      .filter(Boolean);
     const classificationParams = decodeURIComponent(searchParams.get('classification_id__in') || '')
       .split(',')
       .filter(Boolean);
@@ -187,6 +271,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
     const initialSelections = [
       ...jobFamilyParams.map((value) => ({ value, type: 'jobFamily' })),
+      ...jobRoleTypeParams.map((value) => ({ value, type: 'jobRoleType' })),
+      ...jobStreamParams.map((value) => ({ value, type: 'jobStream' })),
       ...classificationParams.map((value) => ({ value, type: 'classification' })),
       // ...careerGroupParams.map((value) => ({ value, type: 'careerGroup' })),
       ...ministriesParams.map((value) => ({ value, type: 'ministry' })),
@@ -200,6 +286,14 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   useEffect(() => {
     const jobFamilyValues = allSelections
       .filter((s) => s.type === 'jobFamily')
+      .map((s) => s.value)
+      .join(',');
+    const jobStreamValues = allSelections
+      .filter((s) => s.type === 'jobStream')
+      .map((s) => s.value)
+      .join(',');
+    const jobRoleTypeValues = allSelections
+      .filter((s) => s.type === 'jobRoleType')
       .map((s) => s.value)
       .join(',');
     const classificationValues = allSelections
@@ -236,11 +330,15 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     if (sortOrderFromURL) newSearchParams.set('sortOrder', sortOrderFromURL.toString());
 
     if (jobFamilyValues) newSearchParams.set('job_family_id__in', jobFamilyValues);
+    if (jobRoleTypeValues) newSearchParams.set('job_role_id__in', jobRoleTypeValues);
+    if (jobStreamValues) newSearchParams.set('job_stream_id__in', jobStreamValues);
     if (classificationValues) newSearchParams.set('classification_id__in', classificationValues);
     // if (careerGroupValues) newSearchParams.set('career_group_id__in', careerGroupValues);
     if (ministryValues) newSearchParams.set('ministry_id__in', ministryValues);
 
     const jobFamilyChanged = newSearchParams.get('job_family_id__in') != searchParams.get('job_family_id__in');
+    const jobStreamChanged = newSearchParams.get('job_stream_id__in') != searchParams.get('job_stream_id__in');
+    const jobRoleTypeChanged = newSearchParams.get('job_role_id__in') != searchParams.get('job_role_id__in');
     const classificationChanged =
       newSearchParams.get('classification_id__in') != searchParams.get('classification_id__in');
 
@@ -248,7 +346,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const ministryChanged = newSearchParams.get('ministry_id__in') != searchParams.get('ministry_id__in');
 
     // If the job family or classification filters have changed, de-select the selected profile
-    if (jobFamilyChanged || classificationChanged || ministryChanged) {
+    if (jobFamilyChanged || classificationChanged || ministryChanged || jobRoleTypeChanged || jobStreamChanged) {
+      newSearchParams.set('page', '1');
       newSearchParams.delete('selectedProfile');
       // console.log('navigating.. B', getBasePath(location.pathname));
       navigate(
@@ -340,18 +439,31 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   //   data-testid="job-profile-search"
   // >
   //   <Col lg={24} xs={24}>
+  console.log('allSelections: ', allSelections);
+
+  const selectedJobFamilyValues = allSelections
+    .filter((selection) => selection.type === 'jobFamily')
+    .map((selection) => `job_family-${selection.value}`);
+
+  const selectedJobStreamValues = allSelections
+    .filter((selection) => selection.type === 'jobStream')
+    .map((selection) => `stream-${selection.value}`);
+
+  const treeSelectValues = [...selectedJobFamilyValues, ...selectedJobStreamValues];
+  console.log('treeSelectValues: ', treeSelectValues);
+
   return (
     <Row
       justify="center"
-      gutter={fullWidth ? 0 : 8}
-      style={{ margin: fullWidth ? '0' : '0 1rem', zIndex: 2, position: 'relative' }}
+      gutter={8}
+      style={{ zIndex: 2, position: 'relative' }}
       role="search"
       data-testid="job-profile-search"
     >
-      <Col lg={fullWidth ? 24 : 15} xs={24}>
+      <Col sm={24} md={24} lg={24} xl={24} xxl={fullWidth ? 24 : 22}>
         <Card style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-          <Row gutter={24} wrap>
-            <Col span={fullWidth ? 10 : 12}>
+          <Row gutter={24}>
+            <Col xl={6} lg={8} md={12} sm={24}>
               <Search
                 defaultValue={searchParams.get('search') ?? undefined}
                 enterButton="Find job profiles"
@@ -360,20 +472,21 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                 allowClear
                 placeholder={searchPlaceHolderText}
                 onSearch={handleSearch}
-                style={{ width: fullWidth ? 500 : 400 }}
+                style={{ width: '100%' }}
+                // style={{ width: fullWidth ? 500 : 400 }}
               />
             </Col>
-            <Col span={fullWidth ? 14 : 12}>
+            <Col xl={18} lg={16} md={12} sm={24}>
               <Row gutter={8} justify="end">
-                <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
+                <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
                   <Select
                     closeMenuOnSelect={false}
                     isClearable={false}
                     backspaceRemovesValue={false}
                     hideSelectedOptions={false}
-                    value={jobFamilyFilterData.filter((jf) =>
+                    value={ministriesFilterData.filter((jf) =>
                       allSelections
-                        .filter((selection) => selection.type === 'jobFamily')
+                        .filter((selection) => selection.type === 'ministry')
                         .map((selection) => selection.value)
                         .includes(jf.value),
                     )}
@@ -386,20 +499,90 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     }}
                     classNamePrefix="react-select"
                     isMulti
-                    placeholder="Job Family"
-                    options={jobFamilyFilterData}
+                    placeholder="Ministries"
+                    options={ministriesFilterData}
                     onChange={(selectedItems) => {
                       const newValues = selectedItems.map((item) => item.value);
                       if (newValues == null) return;
 
                       newValues.forEach((val: any) => {
-                        if (!selectedJobFamily.includes(val)) addSelection(val, 'jobFamily');
+                        if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
                       });
-                      selectedJobFamily.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'jobFamily');
+                      selectedMinistry.forEach((val) => {
+                        if (!newValues.includes(val)) removeSelection(val, 'ministry');
                       });
                     }}
                   ></Select>
+                </Col>
+                <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
+                  <TreeSelect
+                    className={`jobFamilyStreamFilter ${searchValue ? 'search-active' : 'no-search'}`}
+                    value={treeSelectValues}
+                    onSearch={(value) => {
+                      setSearchValue(value);
+                    }}
+                    onChange={(selectedItems) => {
+                      // console.log('ONCHANGE');
+                      // console.log('selectedItems: ', selectedItems);
+
+                      // separate selectedItems into jobFamily and jobStream
+                      const selectedJobFamilies: any[] = [];
+                      const selectedJobStreams: any[] = [];
+
+                      selectedItems.forEach((item: any) => {
+                        if (item.startsWith('job_family-')) {
+                          // Extract the job family ID and store it
+                          selectedJobFamilies.push(item.replace('job_family-', ''));
+                        } else if (item.startsWith('stream-')) {
+                          // Extract the job stream ID and store it
+                          selectedJobStreams.push(item.replace('stream-', ''));
+                        }
+                      });
+
+                      // console.log('tree on change: ', selectedJobFamilies, selectedJobStreams);
+
+                      const selections: { value: any; type: string }[] = [];
+                      const newValues = selectedJobFamilies;
+                      if (newValues != null) {
+                        newValues.forEach((val: any) => {
+                          selections.push({ value: val, type: 'jobFamily' });
+                        });
+                      }
+
+                      // console.log('selectedJobStream: ', selectedJobStream);
+                      const newValues2 = selectedJobStreams;
+                      if (newValues2 != null) {
+                        newValues2.forEach((val: any) => {
+                          selections.push({ value: val, type: 'jobStream' });
+                        });
+                      }
+
+                      // console.log('selections: ', selections);
+
+                      // remove previous settings and set new ones
+                      // get all the unique types from the selections, removing duplicates
+                      const types = ['jobStream', 'jobFamily'];
+
+                      // remove these types from the current selections
+                      const cleanedSelections = allSelections.filter((selection) => !types.includes(selection.type));
+
+                      // selections has value and type
+                      const newSelections = selections.map((item: any) => ({ value: item.value, type: item.type }));
+
+                      // console.log('cleaned, new: ', cleanedSelections, newSelections);
+                      setAllSelections([...cleanedSelections, ...newSelections]);
+                    }}
+                    style={{ width: '200px' }}
+                    treeData={treeData}
+                    treeCheckable={true}
+                    showCheckedStrategy={SHOW_CHILD}
+                    placeholder="Profession and Discipline"
+                    maxTagCount={1}
+                    maxTagPlaceholder="Profession and Discipline"
+                    tagRender={() => {
+                      return <></>;
+                    }}
+                  />
                 </Col>
                 <Col data-testid="Classification-filter" data-cy="Classification-filter">
                   <Select
@@ -438,8 +621,45 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                   ></Select>
                 </Col>
 
+                <Col data-testid="Job role type-filter" data-cy="Job role type-filter">
+                  <Select
+                    closeMenuOnSelect={false}
+                    isClearable={false}
+                    backspaceRemovesValue={false}
+                    hideSelectedOptions={false}
+                    value={jobRoleTypeFilterData.filter((jf) =>
+                      allSelections
+                        .filter((selection) => selection.type === 'jobRoleType')
+                        .map((selection) => selection.value)
+                        .includes(jf.value),
+                    )}
+                    styles={{
+                      container: (css) => ({ ...css, width: '200px' }),
+                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                    }}
+                    components={{
+                      ValueContainer: CustomValueContainer,
+                    }}
+                    classNamePrefix="react-select"
+                    isMulti
+                    placeholder="Role"
+                    options={jobRoleTypeFilterData}
+                    onChange={(selectedItems) => {
+                      const newValues = selectedItems.map((item) => item.value);
+                      if (newValues == null) return;
+
+                      newValues.forEach((val: any) => {
+                        if (!selectedJobRoleType.includes(val)) addSelection(val, 'jobRoleType');
+                      });
+                      selectedJobRoleType.forEach((val) => {
+                        if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
+                      });
+                    }}
+                  ></Select>
+                </Col>
+
                 {/* if filters contains careerGroup, then render it */}
-                {additionalFilters && (
+                {/* {additionalFilters && (
                   <Col data-testid="Career-group-filter" data-cy="Career-group-filter">
                     <Select
                       closeMenuOnSelect={false}
@@ -476,75 +696,38 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                       }}
                     ></Select>
                   </Col>
-                )}
-
-                {additionalFilters && (
-                  <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
-                    <Select
-                      closeMenuOnSelect={false}
-                      isClearable={false}
-                      backspaceRemovesValue={false}
-                      hideSelectedOptions={false}
-                      value={ministriesFilterData.filter((jf) =>
-                        allSelections
-                          .filter((selection) => selection.type === 'ministry')
-                          .map((selection) => selection.value)
-                          .includes(jf.value),
-                      )}
-                      styles={{
-                        container: (css) => ({ ...css, width: '200px' }),
-                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                      }}
-                      components={{
-                        ValueContainer: CustomValueContainer,
-                      }}
-                      classNamePrefix="react-select"
-                      isMulti
-                      placeholder="Ministry"
-                      options={ministriesFilterData}
-                      onChange={(selectedItems) => {
-                        const newValues = selectedItems.map((item) => item.value);
-                        if (newValues == null) return;
-
-                        newValues.forEach((val: any) => {
-                          if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
-                        });
-                        selectedMinistry.forEach((val) => {
-                          if (!newValues.includes(val)) removeSelection(val, 'ministry');
-                        });
-                      }}
-                    ></Select>
-                  </Col>
-                )}
+                )} */}
               </Row>
             </Col>
             {allSelections.length > 0 && (
-              <Col style={{ marginTop: '10px' }}>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    margin: '8px',
-                    marginLeft: 0,
-                    paddingRight: '8px',
-                    borderRight: '2px solid rgba(0, 0, 0, 0.06)',
-                    marginRight: '10px',
-                  }}
-                >
-                  Applied filters
-                </span>
-                <Button
-                  onClick={clearFilters}
-                  type="link"
-                  style={{ padding: '0', fontWeight: 400 }}
-                  data-cy="clear-filters-button"
-                >
-                  Clear all filters
-                </Button>
-              </Col>
+              <Row>
+                <Col span={24} style={{ marginTop: '10px' }}>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      margin: '8px',
+                      marginLeft: 0,
+                      paddingRight: '8px',
+                      borderRight: '2px solid rgba(0, 0, 0, 0.06)',
+                      marginRight: '10px',
+                    }}
+                  >
+                    Applied filters
+                  </span>
+                  <Button
+                    onClick={clearFilters}
+                    type="link"
+                    style={{ padding: '0', fontWeight: 400 }}
+                    data-cy="clear-filters-button"
+                  >
+                    Clear all filters
+                  </Button>
+                </Col>
+              </Row>
             )}
           </Row>
           <Row>
-            <Col>
+            <Col lg={15} xs={24}>
               {allSelections.map((selection) => (
                 <Tag
                   style={{ marginTop: '10px' }}

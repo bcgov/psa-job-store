@@ -19,6 +19,7 @@ import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'reac
 import { ErrorResponse, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
+import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import {
   GetJobProfilesDraftsResponse,
@@ -472,7 +473,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   // // Handler to be called when the mouse leaves a row
   // const handleMouseLeave = () => setHoveredRowKey(null);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <LoadingSpinnerWithMessage />;
 
   return (
     <div className="profilesTable" style={style}>

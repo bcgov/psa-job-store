@@ -2,6 +2,7 @@ import { CopyOutlined, DownloadOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Collapse, Descriptions, Divider, Result, Row, Space, Tabs, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
@@ -382,7 +383,7 @@ export const TotalCompApprovedRequestPage = () => {
   ];
 
   if (!data) {
-    return <div>Loading...</div>;
+    return <LoadingSpinnerWithMessage />;
   }
 
   return (

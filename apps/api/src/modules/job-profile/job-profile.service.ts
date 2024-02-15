@@ -581,6 +581,25 @@ export class JobProfileService {
     return uniqueOrganizations;
   }
 
+  async getJobProfilesClassifications() {
+    const jobProfiles = await this.prisma.jobProfile.findMany({
+      where: { state: 'PUBLISHED' },
+      include: {
+        classifications: {
+          include: {
+            classification: true,
+          },
+        },
+      },
+    });
+
+    // Flatten the array of organizations and deduplicate
+    const allClassifications = jobProfiles.flatMap((profile) => profile.classifications.map((o) => o.classification));
+    const uniqueClassifications = Array.from(new Map(allClassifications.map((org) => [org['id'], org])).values());
+
+    return uniqueClassifications;
+  }
+
   async getNextAvailableNumber(): Promise<number> {
     const maxNumber = await this.prisma.jobProfile.aggregate({
       _max: {

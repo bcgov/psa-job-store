@@ -20,6 +20,13 @@ import {
   IncidentThreadContentType,
   IncidentThreadEntryType,
 } from '../external/models/incident-create.input';
+import {
+  PositionCreateInput,
+  PositionDuration,
+  PositionStatus,
+  PositionType,
+} from '../external/models/position-create.input';
+import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 
@@ -81,6 +88,7 @@ export class PositionRequestApiService {
   constructor(
     private readonly classificationService: ClassificationService,
     private readonly crmService: CrmService,
+    private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -146,6 +154,17 @@ export class PositionRequestApiService {
 
   async submitPositionRequest(id: number) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+
+    const position = await this.createPositionForPositionRequest(id);
+
+    if (position.positionNbr.length > 0) {
+      positionRequest = await this.prisma.positionRequest.update({
+        where: { id },
+        data: {
+          position_number: +position.positionNbr,
+        },
+      });
+    }
 
     // CRM Incident Management
     const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
@@ -288,6 +307,7 @@ export class PositionRequestApiService {
   }
 
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
+    // console.log('getPositionRequest!', userRoles);
     let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
     // If the user does not have the "total-compesation" or "classification" role, the filter will include the requesting user id
@@ -295,7 +315,7 @@ export class PositionRequestApiService {
     if (['classification', 'total-compensation'].some((value) => userRoles.includes(value))) {
       whereCondition = {
         ...whereCondition,
-        NOT: [{ status: { equals: 'DRAFT' } }],
+        // NOT: [{ status: { equals: 'DRAFT' } }],
       };
     } else {
       whereCondition = {
@@ -310,6 +330,8 @@ export class PositionRequestApiService {
         parent_job_profile: true,
       },
     });
+
+    // console.log('positionRequest: ', positionRequest, JSON.stringify(whereCondition));
 
     if (!positionRequest) {
       return null;
@@ -639,14 +661,23 @@ export class PositionRequestApiService {
     return positionRequest;
   }
 
+  async deletePositionRequest(id: number) {
+    const result = await this.prisma.positionRequest.delete({ where: { id } });
+    return result;
+  }
+
   async positionRequestNeedsReview(id: number) {
+    const reasons = [];
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id: id } });
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id: positionRequest.parent_job_profile_id },
     });
 
     // If the Job Profile is denoted as requiring review, it _must_ be reviewed every time
-    if (jobProfile.review_required === true) return true;
+    if (jobProfile.review_required === true) {
+      reasons.push('Job Profile is denoted as requiring review');
+      return { result: true, reasons: reasons };
+    }
 
     // If the job profile is _not_ denoted as requiring review, it must be reviewed _only_ if significant sections have been changed
     const prJobProfile = positionRequest.profile_json as Record<string, any>;
@@ -654,32 +685,50 @@ export class PositionRequestApiService {
     // Find position request job profile signficant sections
     const prJobProfileSignificantSections = {
       accountabilities: prJobProfile.accountabilities
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       education: prJobProfile.education
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       job_experience: prJobProfile.job_experience
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
-      security_screenings: prJobProfile.security_screenings
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+      security_screenings: prJobProfile.security_screenings // all security screenings are significant - there is no is_significant flag
+        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
         .map((obj) => obj.text),
     };
 
     // Find base job profile significant sections
     const jobProfileSignficantSections = {
       accountabilities: (jobProfile.accountabilities as Record<string, any>)
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       education: (jobProfile.education as Record<string, any>)
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
       job_experience: (jobProfile.job_experience as Record<string, any>)
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
-      security_screenings: (jobProfile.security_screenings as Record<string, any>)
-        .filter((obj) => obj.is_significant === true && Object.keys(obj).indexOf('disabled') === -1)
+      security_screenings: (jobProfile.security_screenings as Record<string, any>) // all security screenings are significant - there is no is_significant flag
+        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
         .map((obj) => obj.text),
     };
 
@@ -708,11 +757,27 @@ export class PositionRequestApiService {
       ),
     ];
 
-    return significantSectionChanges.some((value) => value === true);
+    // Collect reasons for changes
+    if (significantSectionChanges.some((value) => value === true)) {
+      if (significantSectionChanges[0]) {
+        reasons.push('Changes in Accountabilities');
+      }
+      if (significantSectionChanges[1]) {
+        reasons.push('Changes in Education');
+      }
+      if (significantSectionChanges[2]) {
+        reasons.push('Changes in Job Experience');
+      }
+      if (significantSectionChanges[3]) {
+        reasons.push('Changes in Security Screenings');
+      }
+    }
+
+    return { result: significantSectionChanges.some((value) => value === true), reasons: reasons };
   }
 
   async createOrUpdateCrmIncidentForPositionRequest(id: number) {
-    const needsReview = await this.positionRequestNeedsReview(id);
+    const needsReview = (await this.positionRequestNeedsReview(id)).result;
 
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
     const classification = await this.classificationService.getClassification({
@@ -794,5 +859,37 @@ export class PositionRequestApiService {
     }
 
     return incident;
+  }
+
+  async createPositionForPositionRequest(id: number) {
+    const needsReview = await this.positionRequestNeedsReview(id);
+
+    const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+    const department = await this.prisma.department.findUnique({
+      select: { organization: { select: { id: true } } },
+      where: { id: positionRequest.department_id },
+    });
+    // const parentJobProfile = await this.prisma.jobProfile.findUnique({
+    //   where: { id: positionRequest.parent_job_profile_id },
+    // });
+
+    const data: PositionCreateInput = {
+      BUSINESS_UNIT: department.organization.id,
+      DEPTID: positionRequest.department_id,
+      JOBCODE: positionRequest.classification_id,
+      REPORTS_TO: positionRequest.reports_to_position_id,
+      POSN_STATUS: needsReview ? PositionStatus.Proposed : PositionStatus.Active,
+      DESCR: positionRequest.title,
+      REG_TEMP: PositionDuration.Regular,
+      FULL_PART_TIME: PositionType.FullTime,
+      // TGB_E_CLASS: `P${parentJobProfile.number}`,
+      // TGB_APPRV_MGR: positionRequest.reports_to_position_id,
+      // TGB_SCRTY_SCRN_REQ: PositionSecurityScreenRequired.Yes,
+      // TGB_SCRTY_SCRN_DT: '01-JAN-2024',
+    };
+
+    const position = await this.peoplesoftService.createPosition(data);
+
+    return position;
   }
 }

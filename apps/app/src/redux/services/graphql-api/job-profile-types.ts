@@ -31,6 +31,10 @@ export interface JobProfilesMinistriesResponse {
   }[];
 }
 
+export interface JobProfilesClassificationsResponse {
+  jobProfilesClassifications: ClassificationModel[];
+}
+
 export interface JobProfilesDraftsMinistriesResponse {
   jobProfilesDraftsMinistries: {
     id: string;
@@ -59,6 +63,10 @@ export interface ContextModel {
 
 export interface GetClassificationsResponse {
   classifications: ClassificationModel[];
+}
+
+export interface GetClassificationResponse {
+  classification: ClassificationModel;
 }
 
 interface JobFamilyDetail {

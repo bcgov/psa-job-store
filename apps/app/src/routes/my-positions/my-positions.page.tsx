@@ -256,7 +256,10 @@ export const MyPositionsPage = () => {
 
   return (
     <>
-      <PageHeader title="My Positions" subTitle="Review the profile before creating a new position" />
+      <PageHeader
+        title="My Positions"
+        subTitle="These are your positions you have actioned. If you'd like to review or access to continue reviewing, please click the Job title of the request."
+      />
 
       <ContentWrapper>
         <Card style={{ marginTop: '1rem' }}>

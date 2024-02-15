@@ -20,7 +20,7 @@ export const behaviouralCompetenciesApi = graphqlApi.injectEndpoints({
         return {
           document: gql`
             query BehaviouralComptencies {
-              behaviouralComptencies(orderBy: { name: asc }, orderBy: { name: asc }) {
+              behaviouralComptencies(orderBy: { name: asc }) {
                 id
                 type
                 category

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from 'react-oidc-context';
 import { Navigate } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../app/common/components/loading.component';
 
 interface RoleGuardProps {
   children: React.ReactNode;
@@ -12,7 +13,7 @@ const RoleGuard: React.FC<RoleGuardProps> = ({ children, requiredRole }) => {
 
   if (auth.isLoading) {
     // Render a loading indicator or any appropriate content while loading
-    return <>Loading...</>;
+    return <LoadingSpinnerWithMessage />;
   }
 
   if (!auth.isAuthenticated) {

@@ -8,16 +8,7 @@ import MyPositionsTable from '../my-positions/components/my-positions-table.comp
 import { PositionRequestsSearch } from './components/position-requests-search.component';
 
 export const TotalCompApprovedRequestsPage = () => {
-  // const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
-  // const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
-
   const [hasData] = useState(true); // todo: set back to false
-
-  // const handleDataAvailability = (isDataAvailable: boolean) => {
-  //   setHasData(isDataAvailable);
-  // };
-
-  // if (!ministriesData || !careerGroupData) return <>Loading..</>;
 
   return (
     <>

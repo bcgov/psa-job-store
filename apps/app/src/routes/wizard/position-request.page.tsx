@@ -1,14 +1,18 @@
 import { ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography } from 'antd';
 import Title from 'antd/es/typography/Title';
-import { useEffect, useState } from 'react';
-import { useBlocker, useParams } from 'react-router-dom';
+import dayjs from 'dayjs';
+import { useEffect, useRef, useState } from 'react';
+import { useBlocker, useNavigate, useParams } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import { useWizardContext } from './components/wizard.provider';
+import './position-request.page.css';
 import { WizardConfirmDetailsPage } from './wizard-confirm-details.page';
 import { WizardEditPage } from './wizard-edit.page';
 import { WizardOrgChartPage } from './wizard-org-chart.page';
@@ -19,18 +23,31 @@ import { WizardPage } from './wizard.page';
 const { Paragraph } = Typography;
 
 export const PositionRequestPage = () => {
-  let mode = 'editable';
-  mode = 'readonly';
+  // let mode = 'editable';
+  // mode = 'readonly';
 
-  mode = 'editable';
+  // mode = 'editable';
 
-  let readonlyMode = 'sentForVerification';
-  readonlyMode = 'reSubmittedForVerification';
-  readonlyMode = 'completed';
-  readonlyMode = 'inQueue';
+  // let readonlyMode = 'sentForVerification';
+  // readonlyMode = 'reSubmittedForVerification';
+  // readonlyMode = 'completed';
+  // readonlyMode = 'inQueue';
 
-  const { setWizardData, setPositionRequestId, setPositionRequestProfileId, setPositionRequestDepartmentId } =
-    useWizardContext();
+  const [mode, setMode] = useState('editable');
+  const [readonlyMode, setReadonlyMode] = useState('');
+  const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
+
+  // console.log('parent mode: ', mode);
+  // console.log('parent readonlyMode: ', readonlyMode);
+
+  const {
+    setWizardData,
+    setPositionRequestId,
+    setPositionRequestProfileId,
+    setPositionRequestDepartmentId,
+    setPositionRequestData,
+  } = useWizardContext();
+
   // console.log('wizardData: ', wizardData);
   const { positionRequestId } = useParams();
 
@@ -47,6 +64,8 @@ export const PositionRequestPage = () => {
 
     if (step != null) setCurrentStep(step);
 
+    if (data) setPositionRequestData(data.positionRequest);
+
     if (data?.positionRequest?.id) {
       setPositionRequestId(data?.positionRequest?.id);
     }
@@ -59,7 +78,14 @@ export const PositionRequestPage = () => {
     if (data?.positionRequest?.department_id) {
       setPositionRequestDepartmentId(data?.positionRequest?.department_id);
     }
-  }, [data, setPositionRequestId, setWizardData, setPositionRequestProfileId, setPositionRequestDepartmentId]);
+  }, [
+    data,
+    setPositionRequestId,
+    setWizardData,
+    setPositionRequestProfileId,
+    setPositionRequestDepartmentId,
+    setPositionRequestData,
+  ]);
 
   const onNext = async () => {
     setCurrentStep(currentStep ? currentStep + 1 : 1);
@@ -69,17 +95,40 @@ export const PositionRequestPage = () => {
     setCurrentStep(currentStep ? currentStep - 1 : 1);
   };
 
+  const setStep = (step: number) => {
+    setCurrentStep(step);
+  };
+
+  const switchParentMode = (mode: string) => {
+    setMode(mode);
+  };
+
+  const switchParentReadonlyMode = (mode: string) => {
+    setReadonlyMode(mode);
+  };
+
+  // get navigate
+  const navigate = useNavigate();
+
   // nav block
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) => currentLocation.pathname !== nextLocation.pathname && currentStep != 5,
-  );
+  const isBlocking = useRef(true);
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    return currentLocation.pathname !== nextLocation.pathname && currentStep != 5 && isBlocking.current;
+  });
+
+  const disableBlockingAndNavigateHome = () => {
+    isBlocking.current = false; // This will disable the blocker
+    navigate('/'); // Replace with the path where the user should be redirected
+  };
 
   const renderStepComponent = () => {
     switch (currentStep) {
       case 0:
         return <WizardOrgChartPage onCreateNewPosition={onNext} />;
       case 1:
-        return <WizardPage onNext={onNext} onBack={onBack} />;
+        return (
+          <WizardPage onNext={onNext} onBack={onBack} disableBlockingAndNavigateHome={disableBlockingAndNavigateHome} />
+        );
       case 2:
         return <WizardEditPage onBack={onBack} onNext={onNext} />;
 
@@ -88,9 +137,17 @@ export const PositionRequestPage = () => {
       case 4:
         return <WizardConfirmDetailsPage onNext={onNext} onBack={onBack} />;
       case 5:
-        return <WizardResultPage />;
+        return (
+          <WizardResultPage
+            onBack={onBack}
+            setStep={setStep}
+            switchParentMode={switchParentMode}
+            switchParentReadonlyMode={switchParentReadonlyMode}
+            setReadOnlySelectedTab={setReadOnlySelectedTab}
+          />
+        );
       default:
-        return <div>Loading or invalid step...</div>;
+        return <LoadingSpinnerWithMessage />;
     }
   };
 
@@ -142,7 +199,9 @@ export const PositionRequestPage = () => {
               <Result
                 icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
                 title="Sent for verification"
-                subTitle="The profile was submitted for review on: " // todo: add date
+                subTitle={`The profile was submitted for review on: ${dayjs(data?.positionRequest?.updated_at).format(
+                  'MMM d, YYYY',
+                )}`}
               />
 
               <Row justify="center" style={{ padding: '0 1rem' }}>
@@ -174,7 +233,7 @@ export const PositionRequestPage = () => {
 
                     <Title level={5}>View all Positions</Title>
                     <Paragraph>View all positions that you have created.</Paragraph>
-                    <Button type="default" onClick={() => {}}>
+                    <Button type="default" onClick={() => navigate('/')}>
                       Go to Dashboard
                     </Button>
                   </Card>
@@ -229,7 +288,7 @@ export const PositionRequestPage = () => {
 
                     <Title level={5}>View all Positions</Title>
                     <Paragraph>View all positions that you have created.</Paragraph>
-                    <Button type="default" onClick={() => {}}>
+                    <Button type="default" onClick={() => navigate('/')}>
                       Go to Dashboard
                     </Button>
                   </Card>
@@ -246,7 +305,7 @@ export const PositionRequestPage = () => {
                 title="Your classification review is in the queue"
                 subTitle="Thank you for your submission. A Classification specialist will reach out to you via email shortly."
                 extra={[
-                  <Button type="primary" key="console" onClick={() => {}}>
+                  <Button type="primary" key="console" onClick={() => navigate('/')}>
                     Go to Dashboard
                   </Button>,
                 ]}
@@ -256,7 +315,7 @@ export const PositionRequestPage = () => {
                   <Card title="Information" bordered={false}>
                     <Descriptions bordered layout="horizontal" column={1}>
                       <Descriptions.Item label="Position number">
-                        123456 <Button type="link">Copy</Button>
+                        {data?.positionRequest.position_number} <Button type="link">Copy</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Job Details">
                         <Button type="link">View</Button> | <Button type="link">Download</Button>
@@ -284,7 +343,7 @@ export const PositionRequestPage = () => {
                 title="Your position has been created."
                 subTitle="Find the information needed for recruitment in the table below."
                 extra={[
-                  <Button type="primary" key="console" onClick={() => {}}>
+                  <Button type="primary" key="console" onClick={() => navigate('/')}>
                     Go to Dashboard
                   </Button>,
                 ]}
@@ -294,7 +353,7 @@ export const PositionRequestPage = () => {
                   <Card title="Information" bordered={false}>
                     <Descriptions bordered layout="horizontal" column={1}>
                       <Descriptions.Item label="Position number">
-                        123456 <Button type="link">Copy</Button>
+                        {data?.positionRequest.position_number} <Button type="link">Copy</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Job Details">
                         <Button type="link">View</Button> | <Button type="link">Download</Button>
@@ -306,7 +365,12 @@ export const PositionRequestPage = () => {
                         <Button type="link">View</Button> | <Button type="link">Download</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Modified job profile">
-                        <Button type="link">View</Button> | <Button type="link">Download</Button>
+                        <Button type="link">View</Button> |{' '}
+                        <Button type="link">
+                          <DownloadJobProfileComponent jobProfile={data?.positionRequest.profile_json}>
+                            Download
+                          </DownloadJobProfileComponent>
+                        </Button>
                       </Descriptions.Item>
                     </Descriptions>
                   </Card>
@@ -325,7 +389,7 @@ export const PositionRequestPage = () => {
         <>
           <ContentWrapper>
             <Tabs
-              defaultActiveKey="1"
+              defaultActiveKey={readOnlySelectedTab}
               items={tabItems}
               tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
             />
@@ -346,7 +410,7 @@ export const PositionRequestPage = () => {
               <p>You can resume the process from "My Positions" page</p>
             </Modal>
           )}
-          {currentStep !== null ? renderStepComponent() : <div>Loading position request information...</div>}
+          {currentStep !== null ? renderStepComponent() : <LoadingSpinnerWithMessage />}
         </>
       )}
     </>
