@@ -20,6 +20,8 @@ export class ClassificationService {
     return this.prisma.classification.findUnique({ ...args });
   }
 
+  // classifications tree data algorithm
+
   async getGroupedClassifications(args: FindManyClassificationArgs): Promise<any> {
     const classifications = await this.prisma.classification.findMany({
       where: {

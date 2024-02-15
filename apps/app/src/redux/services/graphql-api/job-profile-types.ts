@@ -31,6 +31,10 @@ export interface JobProfilesMinistriesResponse {
   }[];
 }
 
+export interface JobProfilesClassificationsResponse {
+  jobProfilesClassifications: ClassificationModel[];
+}
+
 export interface JobProfilesDraftsMinistriesResponse {
   jobProfilesDraftsMinistries: {
     id: string;

@@ -1,6 +1,7 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import {
+  Classification,
   JobProfile,
   JobProfileBehaviouralCompetency,
   JobProfileCreateInput,
@@ -75,6 +76,11 @@ export class JobProfileResolver {
   @Query(() => [Organization], { name: 'jobProfilesMinistries' })
   async getJobProfilesMinistries() {
     return this.jobProfileService.getJobProfilesMinistries();
+  }
+
+  @Query(() => [Classification], { name: 'jobProfilesClassifications' })
+  async getJobProfilesClassifications() {
+    return this.jobProfileService.getJobProfilesClassifications();
   }
 
   @ResolveField(() => JobProfileBehaviouralCompetency)
