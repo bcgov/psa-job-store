@@ -150,7 +150,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
           <PositionProfile
             prefix="Reporting to"
             mode="compact"
-            positionNumber={positionRequestData.reports_to_position_id}
+            positionNumber={positionRequestData?.reports_to_position_id}
           ></PositionProfile>
         </div>
       }
