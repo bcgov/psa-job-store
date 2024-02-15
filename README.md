@@ -1,4 +1,41 @@
-# BC Public Service Agency (PSA) Job Store
+# 🌟 BC Public Service Agency (PSA) Job Store βeta 🌟
+
+![JobStore Beta Screenshot](/screenshot.PNG?raw=true)
+
+Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one solution for navigating and managing your organizational chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
+
+## Features
+
+### 🗺️ Navigate Your Org Chart
+
+- Effortlessly explore your organizational structure with our intuitive navigation system.
+- Visualize the hierarchy and relationships within your organization at a glance.
+
+### 📈 Create & Edit Positions Instantly
+
+- Create New Positions: Add new roles to your organization in real-time, customizing as per your needs.
+
+### 📚 Library of Job Profiles
+
+- Access a comprehensive library of predefined job profiles.
+- Find the perfect match for your organizational needs with ease.
+
+### ✏️ In-Situ Job Profile Editing
+
+- Directly edit job profiles within the platform.
+- Make quick updates and revisions without leaving the app.
+
+### 📨 Classification Review Requests
+
+- Submit position requests for classification review seamlessly.
+- Ensure compliance and accuracy in role classifications.
+
+### 🔄 Integration with PeopleSoft and CRM
+
+- Enjoy smooth integration with PeopleSoft for HR management.
+- Leverage CRM integration for enhanced data utilization and customer relationship management.
+
+## Get Started
 
 ## Running end-to-end tests
 
