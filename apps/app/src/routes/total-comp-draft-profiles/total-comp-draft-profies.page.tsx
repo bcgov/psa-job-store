@@ -32,7 +32,7 @@ export const TotalCompDraftProfilesPage = () => {
         {hasData && (
           <JobProfileSearch
             searchPlaceHolderText={'Search by job title or job store number'}
-            additionalFilters={true}
+            // additionalFilters={true}
             fullWidth={true}
             ministriesData={ministriesData}
             careerGroupData={careerGroupData}
