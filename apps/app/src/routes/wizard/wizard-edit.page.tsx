@@ -41,7 +41,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
     classificationsData,
     setClassificationsData,
     errors,
-    setErrors,
+    // setErrors,
     positionRequestProfileId,
     positionRequestId,
   } = useWizardContext();
@@ -340,6 +340,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
 
     const formData = wizardEditProfileRef.current?.getFormData();
     console.log('formData: ', formData);
+
+    // return;
+
     const transformedData = transformFormData(formData);
     console.log('transformedData: ', transformedData);
 
@@ -467,10 +470,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
               profileData={wizardData}
               id={profileId?.toString()}
               submitText="Review Profile"
-              // submitHandler={onSubmit}
               showBackButton={true}
               receivedClassificationsDataCallback={receivedClassificationsDataCallback}
-              setErrors={setErrors}
+              // setErrors={setErrors}
             ></WizardEditProfile>
           </Col>
         </Row>

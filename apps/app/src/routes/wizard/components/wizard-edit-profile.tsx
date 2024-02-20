@@ -53,14 +53,10 @@ interface WizardEditProfileProps {
   submitText?: string;
   showBackButton?: boolean;
   receivedClassificationsDataCallback?: (data: GetClassificationsResponse) => void;
-  setErrors: (errors: string[]) => void;
 }
 
 const WizardEditProfile = forwardRef(
-  (
-    { id, profileData, config, submitHandler, receivedClassificationsDataCallback, setErrors }: WizardEditProfileProps,
-    ref,
-  ) => {
+  ({ id, profileData, config, submitHandler, receivedClassificationsDataCallback }: WizardEditProfileProps, ref) => {
     const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
       useLazyGetClassificationsQuery();
 
@@ -85,6 +81,7 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { control, reset, handleSubmit, getValues, formState, trigger } = useForm<JobProfileValidationModel>({
       resolver: classValidatorResolver(JobProfileValidationModel),
       mode: 'onChange',
@@ -100,21 +97,21 @@ const WizardEditProfile = forwardRef(
 
     const [form] = Form.useForm();
 
-    useEffect(() => {
-      setErrors(
-        Object.values(formState.errors).map((error: any) => {
-          const message =
-            error.message != null
-              ? error.message
-              : error.root != null
-                ? error.root?.message
-                : error.value != null
-                  ? error.value.message
-                  : 'Error';
-          return message;
-        }),
-      );
-    }, [formState.errors, formState.isValid, formState.isValidating, getValues, setErrors]);
+    // useEffect(() => {
+    //   setErrors(
+    //     Object.values(formState.errors).map((error: any) => {
+    //       const message =
+    //         error.message != null
+    //           ? error.message
+    //           : error.root != null
+    //             ? error.root?.message
+    //             : error.value != null
+    //               ? error.value.message
+    //               : 'Error';
+    //       return message;
+    //     }),
+    //   );
+    // }, [formState.errors, formState.isValid, formState.isValidating, getValues, setErrors]);
 
     // todo: usage of this approach is undesirable, however it fixes various render issues
     // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
@@ -1995,7 +1992,7 @@ const WizardEditProfile = forwardRef(
 
           <Card title="Job title" bordered={false} className="custom-card">
             <Row justify="start">
-              <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+              <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                 <FormItem
                   labelCol={{ span: 24 }}
                   wrapperCol={{ span: 24 }}
@@ -2045,7 +2042,7 @@ const WizardEditProfile = forwardRef(
 
           <Card title="Job overview" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
             <Row justify="start">
-              <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+              <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                 <FormItem
                   labelCol={{ span: 24 }}
                   wrapperCol={{ span: 24 }}
@@ -2091,7 +2088,7 @@ const WizardEditProfile = forwardRef(
 
           <Card title="Program overview" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
             <Row justify="start">
-              <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+              <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                 <FormItem
                   labelCol={{ span: 24 }}
                   wrapperCol={{ span: 24 }}
@@ -2366,7 +2363,7 @@ const WizardEditProfile = forwardRef(
 
               <Card title="Accountabilities" className="custom-card" style={{ marginTop: 16 }}>
                 <Row justify="start">
-                  <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                  <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                     <Alert
                       role="note"
                       style={{ marginBottom: '10px' }}
@@ -2427,7 +2424,7 @@ const WizardEditProfile = forwardRef(
 
               <Card title="Minimum job requirements" className="custom-card" style={{ marginTop: 16 }}>
                 <Row justify="start">
-                  <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                  <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                     <Alert
                       role="note"
                       style={{ marginBottom: '10px' }}
@@ -2681,7 +2678,7 @@ const WizardEditProfile = forwardRef(
 
               <Card title="Behavioural competencies" className="custom-card" style={{ marginTop: 16 }}>
                 <Row justify="start">
-                  <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                  <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                     <>
                       <List
                         style={{ marginTop: '7px' }}
