@@ -1,0 +1,15 @@
+apiVersion: ops.gov.bc.ca/v1alpha1
+kind: SysdigTeam
+metadata:
+  name: f3c07a-sysdigteam
+  namespace: f3c07a-tools
+spec:
+  team:
+    description: The Sysdig Team for the OpenShift Project Set f3c07a
+    users:
+      - name: kaegan.mandryk@gov.bc.ca
+        role: ROLE_TEAM_EDIT
+      - name: alex.struk@gov.bc.ca
+        role: ROLE_TEAM_EDIT
+      - name: sid.mclaughlin@gov.bc.ca
+        role: ROLE_TEAM_EDIT
