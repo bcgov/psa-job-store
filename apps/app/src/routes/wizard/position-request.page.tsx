@@ -130,7 +130,13 @@ export const PositionRequestPage = () => {
           <WizardPage onNext={onNext} onBack={onBack} disableBlockingAndNavigateHome={disableBlockingAndNavigateHome} />
         );
       case 2:
-        return <WizardEditPage onBack={onBack} onNext={onNext} />;
+        return (
+          <WizardEditPage
+            onBack={onBack}
+            onNext={onNext}
+            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+          />
+        );
 
       case 3:
         return <WizardReviewPage onNext={onNext} onBack={onBack} />;

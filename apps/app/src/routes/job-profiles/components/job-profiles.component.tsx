@@ -218,17 +218,19 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
         <Empty
           description={
             <Space direction="vertical" style={{ userSelect: 'none' }}>
-              <Title level={1}>Select a Job Profile</Title>
-              <Text>Nothing is selected</Text>
+              <Title style={{ margin: 0 }} level={1}>
+                Select a job profile
+              </Title>
+              <Text>Choose a profile from the sidebar on the left.</Text>
             </Space>
           }
-          image={<FileTextFilled style={{ fontSize: '60pt' }} />}
+          image={<FileTextFilled style={{ fontSize: '60pt', color: '#52A8FF' }} />}
         />
       </div>
     );
   };
 
-  console.log('jobProfilesLoading || isLoading: ', jobProfilesLoading, isLoading);
+  // console.log('jobProfilesLoading || isLoading: ', jobProfilesLoading, isLoading);
   return (
     <>
       <WizardProvider>

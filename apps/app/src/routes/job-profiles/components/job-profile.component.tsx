@@ -18,13 +18,13 @@ import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
+import '../../../components/app/common/css/custom-descriptions.css';
 import {
   AccountabilitiesModel,
   JobProfileModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import './job-profile.component.css';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -765,7 +765,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <span>
             Job context{' '}
             <Tooltip title="The job context is important to understand as you proceed to create the position. You will be asked prior to approving that you understand the context of the job.">
-              <InfoCircleOutlined style={{ cursor: 'pointer' }} />
+              <InfoCircleOutlined style={{ cursor: 'pointer', fontSize: '0.9rem' }} />
             </Tooltip>
           </span>
         }
@@ -787,7 +787,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       />
 
       <Descriptions
-        className="profileDescriptions"
+        className="customDescriptions"
         title="Job profile"
         aria-hidden="true"
         bordered
@@ -807,7 +807,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
       {showBasicInfo && (
         <Descriptions
-          className="profileDescriptions"
+          className="customDescriptions"
           title="Basic information"
           bordered
           column={24}

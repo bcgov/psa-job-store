@@ -59,12 +59,22 @@ export const JobProfileSearchResults = ({
     }
   };
 
+  const scrollToTop = () => {
+    // todo: this doesn't work, likely because of overflow hidden somewhere
+    // console.log('scrolltop!');
+    // window.scrollTo({
+    //   top: 0,
+    //   behavior: 'smooth', // for a smooth scrolling
+    // });
+  };
+
   const ReplaceLink = ({ to, children, tabIndex }: any) => {
     const navigate = useNavigate();
 
     const handleClick = (event: any) => {
       event.preventDefault(); // Prevent default link behavior
       navigate(to, { replace: true }); // Use replace navigation
+      scrollToTop();
     };
 
     return (

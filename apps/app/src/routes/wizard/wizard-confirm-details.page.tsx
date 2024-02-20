@@ -7,6 +7,7 @@ import debounce from 'lodash.debounce';
 import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import '../../components/app/common/css/custom-form.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
 import { useGetLocationsQuery } from '../../redux/services/graphql-api/location.api';
@@ -19,7 +20,6 @@ import ContentWrapper from '../home/components/content-wrapper.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import { useWizardContext } from './components/wizard.provider';
-import './wizard-confirm-details.page.css';
 
 interface WizardConfirmPageProps {
   onNext?: () => void;

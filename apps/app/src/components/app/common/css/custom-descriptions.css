@@ -1,0 +1,16 @@
+.customDescriptions .ant-descriptions-header{
+    background: white;
+    margin: 0;
+    padding: 1rem;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid rgb(226 228 231);
+    border-bottom: 0;
+}
+
+.customDescriptions .ant-descriptions-view{
+border-radius: 0;
+}
+
+.customDescriptions table{
+    background:white;
+}
