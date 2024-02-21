@@ -92,7 +92,7 @@ To apply new migrations after pulling latest code:
 
 Login to psql pod:
 `oc exec -it  SQL_POD_NAME -- /bin/bash`
-`cd ~`
+`cd cd /pgdata`
 
 Get db info:
 
@@ -103,11 +103,11 @@ Create dump:
 `pg_dump -U USER_NAME DB_NAME > backup.sql`
 
 Exit pod and copy file:
-`oc rsync SQL_POD_NAME:/var/lib/pgsql/backup.sql ~/`
+`oc rsync SQL_POD_NAME:pgdata/backup.sql ~/`
 
 Remove remote backup file:
 
-`oc exec SQL_POD_NAME -- rm /var/lib/pgsql/backup.sql`
+`oc exec SQL_POD_NAME -- rm pgdata/backup.sql`
 
 ## Recursive relationships in schema.prisma
 

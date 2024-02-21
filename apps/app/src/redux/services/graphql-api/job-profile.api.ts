@@ -34,6 +34,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             ) {
               jobProfiles(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
                 id
+                all_reports_to
+                all_organizations
                 streams {
                   stream {
                     id
@@ -72,6 +74,10 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   }
                 }
                 role {
+                  id
+                  name
+                }
+                role_type {
                   id
                   name
                 }

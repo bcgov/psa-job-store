@@ -62,6 +62,7 @@ export class JobProfileService {
             stream: true,
           },
         },
+        role_type: true,
         context: true,
       },
     });

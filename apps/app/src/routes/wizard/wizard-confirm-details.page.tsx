@@ -1,29 +1,47 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Button, Card, Col, Divider, Empty, Form, Input, Modal, Row, Select, Switch, Tooltip, Typography } from 'antd';
+import {
+  Button,
+  Card,
+  Col,
+  Divider,
+  Empty,
+  Form,
+  Input,
+  Menu,
+  Modal,
+  Popover,
+  Row,
+  Select,
+  Switch,
+  Tooltip,
+  Typography,
+} from 'antd';
 import { IsNotEmpty, ValidationOptions, registerDecorator } from 'class-validator';
 import debounce from 'lodash.debounce';
 import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
-import { PageHeader } from '../../components/app/page-header.component';
+import '../../components/app/common/css/custom-form.css';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
 import { useGetLocationsQuery } from '../../redux/services/graphql-api/location.api';
 import {
+  useDeletePositionRequestMutation,
   useGetPositionRequestQuery,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
-import WizardEditControlBar from './components/wizard-edit-control-bar';
+import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
-import './wizard-confirm-details.page.css';
 
 interface WizardConfirmPageProps {
   onNext?: () => void;
   onBack?: () => void;
+  disableBlockingAndNavigateHome: () => void;
 }
 
 function IsTrue(validationOptions?: ValidationOptions) {
@@ -84,7 +102,11 @@ export class WizardConfirmDetailsModel {
 }
 
 // export const WizardReviewPage = () => {
-export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onNext, onBack }) => {
+export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
+  onNext,
+  onBack,
+  disableBlockingAndNavigateHome,
+}) => {
   // const [createJobProfile] = useCreateJobProfileMutation();
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [
@@ -310,368 +332,425 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({ onN
     border: '0',
   };
 
+  const [deletePositionRequest] = useDeletePositionRequestMutation();
+  const deleteRequest = async () => {
+    if (!positionRequestId) return;
+    Modal.confirm({
+      title: 'Delete Position Request',
+      content: 'Do you want to delete the position request?',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: async () => {
+        await deletePositionRequest({ id: positionRequestId });
+        disableBlockingAndNavigateHome();
+      },
+    });
+  };
+  const getMenuContent = () => {
+    return (
+      <Menu>
+        <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
+          <div style={{ padding: '5px 0' }}>
+            Save and quit
+            <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+              Saves your progress. You can access this position request from the 'My Positions' page.
+            </Typography.Text>
+          </div>
+        </Menu.Item>
+        <Menu.Divider />
+        <Menu.ItemGroup key="others" title={<b>Others</b>}>
+          <Menu.Item key="delete" onClick={deleteRequest}>
+            <div style={{ padding: '5px 0' }}>
+              Delete
+              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                Removes this position request from 'My Positions'. This action is irreversible.
+              </Typography.Text>
+            </div>
+          </Menu.Item>
+        </Menu.ItemGroup>
+      </Menu>
+    );
+  };
+
   if (!allLocations) return <LoadingSpinnerWithMessage />;
 
   return (
     <>
-      <PageHeader title="Review and submit" subTitle="Review the profile before creating a new position" />
+      <WizardPageWrapper
+        // title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}
 
-      <Row justify="center" style={{ padding: '0 1rem' }}>
-        <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-          <div style={{ background: 'white' }}>
-            <WizardSteps current={4} xl={24}></WizardSteps>
+        title={
+          <div>
+            <Link to="/">
+              <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+            </Link>
+            Review and submit
           </div>
-        </Col>
-      </Row>
-
-      <ContentWrapper
-      // title="Review and submit"
-      // subTitle="Review the profile before creating a new position"
-      // xxl={14}
-      // xl={18}
+        }
+        subTitle={<div>Review the profile before creating a new position</div>}
+        additionalBreadcrumb={{ title: 'New position' }}
+        // subTitle="Choose a job profile to modify for the new positions"
+        hpad={false}
+        grayBg={false}
+        pageHeaderExtra={[
+          <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
+            <Button icon={<EllipsisOutlined />}></Button>
+          </Popover>,
+          <Button onClick={onBackCallback} key="back">
+            Back
+          </Button>,
+          <Button key="next" type="primary" onClick={showModal}>
+            Save and next
+          </Button>,
+        ]}
       >
-        <Row justify="center">
-          <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-            <WizardEditControlBar onNext={showModal} onBack={onBackCallback} />
+        <WizardSteps current={4}></WizardSteps>
 
-            {/* <Card
-        style={{
-          width: '100%',
-          textAlign: 'center',
-          boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
-          borderRadius: '10px',
-        }}
-      >
-        <ExclamationCircleOutlined style={{ fontSize: '48px', color: '#ccc', marginBottom: '20px' }} />
-        <br></br>
-        <Text type="secondary">We will ask you for some additional information on this page in the future.</Text>
-      </Card> */}
-
-            <Row justify="center">
-              <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-                <Form
-                  layout="vertical"
-                  onFinish={handleSubmit(() => {
-                    // console.log(data);
-                  })}
-                >
-                  <Card title="Confirmation" bordered={false} className="custom-card">
-                    <Row justify="start">
-                      <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-                        <Form.Item
-                          name="confirmation"
-                          validateStatus={errors.confirmation ? 'error' : ''}
-                          help={errors.confirmation?.message}
-                        >
-                          <label style={srOnlyStyle} htmlFor="confirmation">
-                            Confirmation
-                          </label>
-                          <Controller
-                            name="confirmation"
-                            control={control}
-                            render={({ field: { onChange, value } }) => {
-                              return (
-                                <Switch
-                                  checked={value}
-                                  onChange={(newValue) => {
-                                    onChange(newValue);
-                                  }}
-                                />
-                              );
-                            }}
-                          />
-                          <span style={{ marginLeft: '1rem' }}>
-                            I confirm that I have received executive approval (Deputy Minister or delegate) for this new
-                            position.
-                          </span>
-                          {/* {errors.confirmation && <p style={{ color: 'red' }}>{errors.confirmation.message}</p>} */}
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Card>
-
-                  <Card
-                    title="Work location & department"
-                    bordered={false}
-                    className="custom-card"
-                    style={{ marginTop: 16 }}
+        <div
+          style={{
+            overflow: 'hidden',
+            position: 'relative',
+            height: '100%',
+            background: 'rgb(240, 242, 245)',
+            marginLeft: '-1rem',
+            marginRight: '-1rem',
+            marginTop: '-1px',
+            padding: '2rem 1rem',
+          }}
+        >
+          <Row justify="center" gutter={16}>
+            <Col sm={24} md={24} lg={24} xxl={18}>
+              <Row justify="center">
+                <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+                  <Form
+                    layout="vertical"
+                    onFinish={handleSubmit(() => {
+                      // console.log(data);
+                    })}
                   >
-                    <Row justify="start">
-                      <Col xs={24} sm={24} md={24} lg={18} xl={12}>
-                        <Form.Item
-                          name="workLocation"
-                          validateStatus={errors.workLocation ? 'error' : ''}
-                          help={errors.workLocation?.message}
-                        >
-                          <label htmlFor="workLocation">Work location</label>
-                          <Controller
+                    <Card title="Confirmation" bordered={false} className="custom-card">
+                      <Row justify="start">
+                        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+                          <Form.Item
+                            name="confirmation"
+                            validateStatus={errors.confirmation ? 'error' : ''}
+                            help={errors.confirmation?.message}
+                          >
+                            <label style={srOnlyStyle} htmlFor="confirmation">
+                              Confirmation
+                            </label>
+                            <Controller
+                              name="confirmation"
+                              control={control}
+                              render={({ field: { onChange, value } }) => {
+                                return (
+                                  <Switch
+                                    checked={value}
+                                    onChange={(newValue) => {
+                                      onChange(newValue);
+                                    }}
+                                  />
+                                );
+                              }}
+                            />
+                            <span style={{ marginLeft: '1rem' }}>
+                              I confirm that I have received executive approval (Deputy Minister or delegate) for this
+                              new position.
+                            </span>
+                            {/* {errors.confirmation && <p style={{ color: 'red' }}>{errors.confirmation.message}</p>} */}
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </Card>
+
+                    <Card
+                      title="Work location & department"
+                      bordered={false}
+                      className="custom-card"
+                      style={{ marginTop: 16 }}
+                    >
+                      <Row justify="start">
+                        <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                          <Form.Item
                             name="workLocation"
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => {
-                              return (
+                            validateStatus={errors.workLocation ? 'error' : ''}
+                            help={errors.workLocation?.message}
+                          >
+                            <label htmlFor="workLocation">Work location</label>
+                            <Controller
+                              name="workLocation"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => {
+                                return (
+                                  <Select
+                                    onBlur={onBlur}
+                                    value={value}
+                                    onChange={(newValue) => {
+                                      setSelectedLocation(newValue); // Update selected location
+                                      setValue('payListDepartmentId', null); // Clear selected department
+                                      onChange(newValue);
+                                    }}
+                                    placeholder="Select work location"
+                                    disabled={!confirmation}
+                                    showSearch
+                                    filterOption={(input, option) => {
+                                      if (!option) return false;
+                                      return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                                    }}
+                                    options={allLocations?.locations.map((group) => ({
+                                      label: `${group.name} (${group.id} - ${group.departmentCount} departments)`,
+                                      value: group.id,
+                                    }))}
+                                  ></Select>
+                                );
+                              }}
+                            />
+                            {/* {errors.workLocation && <p style={{ color: 'red' }}>{errors.workLocation.message}</p>} */}
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Divider className="hr-reduced-margin" />
+
+                      <Row justify="start">
+                        <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                          <Form.Item
+                            name="payListDepartmentId"
+                            label="Pay list/department ID number"
+                            labelCol={{ className: 'card-label' }}
+                            validateStatus={errors.payListDepartmentId ? 'error' : ''}
+                            help={errors.payListDepartmentId?.message}
+                          >
+                            <Controller
+                              name="payListDepartmentId"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => (
                                 <Select
+                                  onChange={(newValue) => {
+                                    const selectedDept =
+                                      filteredDepartments?.find((dept) => dept.id === newValue)?.name || '';
+                                    setSelectedDepartment(selectedDept); // Update selected department name
+                                    onChange(newValue); // Update the form state
+                                  }}
+                                  showSearch
                                   onBlur={onBlur}
                                   value={value}
-                                  onChange={(newValue) => {
-                                    setSelectedLocation(newValue); // Update selected location
-                                    setValue('payListDepartmentId', null); // Clear selected department
-                                    onChange(newValue);
-                                  }}
-                                  placeholder="Select work location"
-                                  disabled={!confirmation}
-                                  showSearch
                                   filterOption={(input, option) => {
                                     if (!option) return false;
                                     return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
                                   }}
-                                  options={allLocations?.locations.map((group) => ({
-                                    label: `${group.name} (${group.id} - ${group.departmentCount} departments)`,
+                                  options={filteredDepartments?.map((group) => ({
+                                    label: `${group.id}`,
                                     value: group.id,
                                   }))}
+                                  placeholder="Select department"
+                                  disabled={!confirmation}
+                                  notFoundContent={
+                                    <Empty
+                                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                      description={
+                                        <span style={{ color: 'black' }}>
+                                          No departments - please select a location with departments
+                                        </span>
+                                      }
+                                    />
+                                  }
                                 ></Select>
-                              );
-                            }}
-                          />
-                          {/* {errors.workLocation && <p style={{ color: 'red' }}>{errors.workLocation.message}</p>} */}
-                        </Form.Item>
-                      </Col>
-                    </Row>
+                              )}
+                            />
+                            {selectedDepartment && <p>{selectedDepartment}</p>}
+                            {/* {errors.payListDepartmentId && <p style={{ color: 'red' }}>{errors.payListDepartmentId.message}</p>} */}
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </Card>
 
-                    <Divider className="hr-reduced-margin" />
+                    <Card
+                      title="First level excluded manager"
+                      bordered={false}
+                      className="custom-card"
+                      style={{ marginTop: 16 }}
+                    >
+                      <Row justify="start">
+                        <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                          <Form.Item
+                            name="firstLevelExcludedManager"
+                            validateStatus={
+                              (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
+                              (noPositions && !isFetchingPositionProfile) ||
+                              isFetchingPositionProfileError
+                                ? 'error'
+                                : ''
+                            }
+                            // display help only if there is an error and the position profile is not being fetched
 
-                    <Row justify="start">
-                      <Col xs={24} sm={24} md={24} lg={18} xl={12}>
-                        <Form.Item
-                          name="payListDepartmentId"
-                          label="Pay list/department ID number"
-                          labelCol={{ className: 'card-label' }}
-                          validateStatus={errors.payListDepartmentId ? 'error' : ''}
-                          help={errors.payListDepartmentId?.message}
-                        >
-                          <Controller
-                            name="payListDepartmentId"
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                              <Select
-                                onChange={(newValue) => {
-                                  const selectedDept =
-                                    filteredDepartments?.find((dept) => dept.id === newValue)?.name || '';
-                                  setSelectedDepartment(selectedDept); // Update selected department name
-                                  onChange(newValue); // Update the form state
-                                }}
-                                showSearch
-                                onBlur={onBlur}
-                                value={value}
-                                filterOption={(input, option) => {
-                                  if (!option) return false;
-                                  return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                                }}
-                                options={filteredDepartments?.map((group) => ({
-                                  label: `${group.id}`,
-                                  value: group.id,
-                                }))}
-                                placeholder="Select department"
-                                disabled={!confirmation}
-                                notFoundContent={
-                                  <Empty
-                                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                    description={
-                                      <span style={{ color: 'black' }}>
-                                        No departments - please select a location with departments
-                                      </span>
-                                    }
-                                  />
-                                }
-                              ></Select>
+                            help={
+                              (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
+                              (noPositions && !isFetchingPositionProfile) ||
+                              isFetchingPositionProfileError
+                                ? errors.excludedManagerPositionNumber
+                                  ? errors.excludedManagerPositionNumber?.message
+                                  : 'Position not found'
+                                : ''
+                            }
+                          >
+                            <label style={srOnlyStyle} htmlFor="excludedManagerPositionNumber">
+                              First level excluded manager
+                            </label>
+                            <Controller
+                              name="excludedManagerPositionNumber"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <Input
+                                  onBlur={onBlur}
+                                  value={value}
+                                  onChange={(e) => {
+                                    debouncedFetchPositionProfile(e.target.value); // Fetch position profile
+                                    onChange(e); // Update controller state
+                                  }}
+                                  placeholder="Position number"
+                                  disabled={!confirmation}
+                                />
+                              )}
+                            />
+                            {firstActivePosition && !isFetchingPositionProfile && (
+                              <div>
+                                <p>
+                                  {`${firstActivePosition.employeeName} - ${firstActivePosition.ministry}`}
+                                  {additionalPositions > 0 && ` +${additionalPositions}`}
+                                </p>
+                              </div>
                             )}
-                          />
-                          {selectedDepartment && <p>{selectedDepartment}</p>}
-                          {/* {errors.payListDepartmentId && <p style={{ color: 'red' }}>{errors.payListDepartmentId.message}</p>} */}
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Card>
-
-                  <Card
-                    title="First level excluded manager"
-                    bordered={false}
-                    className="custom-card"
-                    style={{ marginTop: 16 }}
-                  >
-                    <Row justify="start">
-                      <Col xs={24} sm={24} md={24} lg={18} xl={12}>
-                        <Form.Item
-                          name="firstLevelExcludedManager"
-                          validateStatus={
-                            (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
-                            (noPositions && !isFetchingPositionProfile) ||
-                            isFetchingPositionProfileError
-                              ? 'error'
-                              : ''
-                          }
-                          // display help only if there is an error and the position profile is not being fetched
-
-                          help={
-                            (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
-                            (noPositions && !isFetchingPositionProfile) ||
-                            isFetchingPositionProfileError
-                              ? errors.excludedManagerPositionNumber
-                                ? errors.excludedManagerPositionNumber?.message
-                                : 'Position not found'
-                              : ''
-                          }
-                        >
-                          <label style={srOnlyStyle} htmlFor="excludedManagerPositionNumber">
-                            First level excluded manager
-                          </label>
-                          <Controller
-                            name="excludedManagerPositionNumber"
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                              <Input
-                                onBlur={onBlur}
-                                value={value}
-                                onChange={(e) => {
-                                  debouncedFetchPositionProfile(e.target.value); // Fetch position profile
-                                  onChange(e); // Update controller state
-                                }}
-                                placeholder="Position number"
-                                disabled={!confirmation}
-                              />
-                            )}
-                          />
-                          {firstActivePosition && !isFetchingPositionProfile && (
-                            <div>
-                              <p>
-                                {`${firstActivePosition.employeeName} - ${firstActivePosition.ministry}`}
-                                {additionalPositions > 0 && ` +${additionalPositions}`}
-                              </p>
-                            </div>
-                          )}
-                          {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
-                          {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
-                          {/* {errors.excludedManagerPositionNumber && !isFetchingPositionProfile && (
+                            {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
+                            {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
+                            {/* {errors.excludedManagerPositionNumber && !isFetchingPositionProfile && (
                       <p style={{ color: 'red' }}>{errors.excludedManagerPositionNumber.message}</p>
                     )} */}
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Card>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </Card>
 
-                  <Card title="Comments" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
-                    <Row justify="start">
-                      <Col xs={24} sm={24} md={24} lg={18} xl={12}>
-                        <Form.Item name="comments">
-                          <label style={srOnlyStyle} htmlFor="comments">
-                            Comments
-                          </label>
-                          <Controller
-                            name="comments"
-                            control={control}
-                            render={({ field }) => {
-                              return (
-                                <>
-                                  <Input.TextArea {...field} autoSize disabled={!confirmation} maxLength={1000} />
-                                  <Typography.Paragraph
-                                    type="secondary"
-                                    style={{ textAlign: 'right', width: '100%', margin: '0' }}
-                                  >
-                                    {(field.value as string).length} / 1000
-                                  </Typography.Paragraph>
-                                </>
-                              );
-                            }}
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Card>
+                    <Card title="Comments" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
+                      <Row justify="start">
+                        <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                          <Form.Item name="comments">
+                            <label style={srOnlyStyle} htmlFor="comments">
+                              Comments
+                            </label>
+                            <Controller
+                              name="comments"
+                              control={control}
+                              render={({ field }) => {
+                                return (
+                                  <>
+                                    <Input.TextArea {...field} autoSize disabled={!confirmation} maxLength={1000} />
+                                    <Typography.Paragraph
+                                      type="secondary"
+                                      style={{ textAlign: 'right', width: '100%', margin: '0' }}
+                                    >
+                                      {(field.value as string).length} / 1000
+                                    </Typography.Paragraph>
+                                  </>
+                                );
+                              }}
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </Card>
+                  </Form>
+                </Col>
+              </Row>
+
+              {/* Other details card */}
+              <Card
+                style={{ marginTop: '1rem' }}
+                title={
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Other Details</span>
+                    <Tooltip title="Information shown here is dependent on the values that you selected in the previous steps.">
+                      <Button type="link">Why can't I make changes?</Button>
+                    </Tooltip>
+                  </div>
+                }
+                bordered={false}
+              >
+                <Form layout="vertical">
+                  <Form.Item name="jobTitle" label="Job title" labelCol={{ className: 'card-label' }} colon={false}>
+                    <div style={{ margin: 0 }}>
+                      {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.value}
+                    </div>
+                  </Form.Item>
+
+                  <Divider className="hr-reduced-margin" />
+
+                  <Form.Item
+                    name="expectedClass"
+                    label="Expected classification level"
+                    labelCol={{ className: 'card-label' }}
+                    colon={false}
+                  >
+                    <div style={{ margin: 0 }}>{wizardData?.classifications?.[0]?.classification?.name ?? ''}</div>
+                  </Form.Item>
+
+                  <Divider className="hr-reduced-margin" />
+
+                  <Form.Item
+                    name="jobTitle"
+                    label="Reporting Manager"
+                    labelCol={{ className: 'card-label' }}
+                    colon={false}
+                  >
+                    <div style={{ margin: 0 }}>
+                      {firstActivePosition2 &&
+                        !isFetchingPositionProfile2 &&
+                        !isFetchingPositionProfileError2 &&
+                        !positionRequestLoadingError && (
+                          <div>
+                            <p
+                              style={{ margin: 0 }}
+                            >{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
+                            <Typography.Paragraph type="secondary">
+                              {`${firstActivePosition2.positionDescription}, ${firstActivePosition2.classification}`}
+                              <br></br>
+                              {`Position No.: ${firstActivePosition2.positionNumber}`}
+                              {additionalPositions2 > 0 && ` +${additionalPositions2}`}
+                            </Typography.Paragraph>
+                          </div>
+                        )}
+                      {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
+                      {(isFetchingPositionProfile2 || positionRequestLoading) && (
+                        <LoadingSpinnerWithMessage mode={'small'} />
+                      )}
+                      {(isFetchingPositionProfileError2 || positionRequestLoadingError) && (
+                        <p>Error loading, please refresh page</p>
+                      )}
+                    </div>
+                  </Form.Item>
+
+                  <Divider className="hr-reduced-margin" />
+
+                  <Form.Item name="jobTitle" label="Type" labelCol={{ className: 'card-label' }} colon={false}>
+                    <div style={{ margin: 0 }}>Full-time, regular</div>
+                  </Form.Item>
+
+                  <Divider className="hr-reduced-margin" />
+
+                  <Form.Item
+                    name="jobTitle"
+                    label="Job Store profile number"
+                    labelCol={{ className: 'card-label' }}
+                    colon={false}
+                  >
+                    <div style={{ margin: 0 }}>{wizardData?.number}</div>
+                  </Form.Item>
                 </Form>
-              </Col>
-            </Row>
-
-            {/* Other details card */}
-            <Card
-              style={{ marginTop: '1rem' }}
-              title={
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Other Details</span>
-                  <Tooltip title="Information shown here is dependent on the values that you selected in the previous steps.">
-                    <Button type="link">Why can't I make changes?</Button>
-                  </Tooltip>
-                </div>
-              }
-              bordered={false}
-            >
-              <Form layout="vertical">
-                <Form.Item name="jobTitle" label="Job title" labelCol={{ className: 'card-label' }} colon={false}>
-                  <div style={{ margin: 0 }}>
-                    {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.value}
-                  </div>
-                </Form.Item>
-
-                <Divider className="hr-reduced-margin" />
-
-                <Form.Item
-                  name="expectedClass"
-                  label="Expected classification level"
-                  labelCol={{ className: 'card-label' }}
-                  colon={false}
-                >
-                  <div style={{ margin: 0 }}>{wizardData?.classifications?.[0]?.classification?.name ?? ''}</div>
-                </Form.Item>
-
-                <Divider className="hr-reduced-margin" />
-
-                <Form.Item
-                  name="jobTitle"
-                  label="Reporting Manager"
-                  labelCol={{ className: 'card-label' }}
-                  colon={false}
-                >
-                  <div style={{ margin: 0 }}>
-                    {firstActivePosition2 && !isFetchingPositionProfile2 && (
-                      <div>
-                        <p
-                          style={{ margin: 0 }}
-                        >{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
-                        <Typography.Paragraph type="secondary">
-                          {`${firstActivePosition2.positionDescription}, ${firstActivePosition2.classification}`}
-                          <br></br>
-                          {`Position No.: ${firstActivePosition2.positionNumber}`}
-                          {additionalPositions2 > 0 && ` +${additionalPositions2}`}
-                        </Typography.Paragraph>
-                      </div>
-                    )}
-                    {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
-                    {(isFetchingPositionProfile2 || positionRequestLoading) && <LoadingSpinnerWithMessage />}
-                    {(isFetchingPositionProfileError2 || positionRequestLoadingError) && (
-                      <p>Error loading, please refresh page</p>
-                    )}
-                  </div>
-                </Form.Item>
-
-                <Divider className="hr-reduced-margin" />
-
-                <Form.Item name="jobTitle" label="Type" labelCol={{ className: 'card-label' }} colon={false}>
-                  <div style={{ margin: 0 }}>Full-time, regular</div>
-                </Form.Item>
-
-                <Divider className="hr-reduced-margin" />
-
-                <Form.Item
-                  name="jobTitle"
-                  label="Job Store profile number"
-                  labelCol={{ className: 'card-label' }}
-                  colon={false}
-                >
-                  <div style={{ margin: 0 }}>{wizardData?.number}</div>
-                </Form.Item>
-              </Form>
-            </Card>
-          </Col>
-        </Row>
-      </ContentWrapper>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </WizardPageWrapper>
     </>
   );
 };

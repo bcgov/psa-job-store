@@ -1,14 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Alert, Button, Col, Descriptions, Form, Input, List, Modal, Row, Tooltip, Typography } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Divider,
+  Form,
+  Input,
+  List,
+  Modal,
+  Row,
+  Tooltip,
+  Typography,
+} from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import Title from 'antd/es/typography/Title';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
+import '../../../components/app/common/css/custom-descriptions.css';
+import '../../../components/app/common/css/custom-form.css';
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
   GetClassificationsResponse,
@@ -38,14 +53,10 @@ interface WizardEditProfileProps {
   submitText?: string;
   showBackButton?: boolean;
   receivedClassificationsDataCallback?: (data: GetClassificationsResponse) => void;
-  setErrors: (errors: string[]) => void;
 }
 
 const WizardEditProfile = forwardRef(
-  (
-    { id, profileData, config, submitHandler, receivedClassificationsDataCallback, setErrors }: WizardEditProfileProps,
-    ref,
-  ) => {
+  ({ id, profileData, config, submitHandler, receivedClassificationsDataCallback }: WizardEditProfileProps, ref) => {
     const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
       useLazyGetClassificationsQuery();
 
@@ -70,6 +81,7 @@ const WizardEditProfile = forwardRef(
       }
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { control, reset, handleSubmit, getValues, formState, trigger } = useForm<JobProfileValidationModel>({
       resolver: classValidatorResolver(JobProfileValidationModel),
       mode: 'onChange',
@@ -84,22 +96,6 @@ const WizardEditProfile = forwardRef(
     }, [data, isLoading, profileData, trigger]);
 
     const [form] = Form.useForm();
-
-    useEffect(() => {
-      setErrors(
-        Object.values(formState.errors).map((error: any) => {
-          const message =
-            error.message != null
-              ? error.message
-              : error.root != null
-                ? error.root?.message
-                : error.value != null
-                  ? error.value.message
-                  : 'Error';
-          return message;
-        }),
-      );
-    }, [formState.errors, formState.isValid, formState.isValidating, getValues, setErrors]);
 
     // todo: usage of this approach is undesirable, however it fixes various render issues
     // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
@@ -144,6 +140,7 @@ const WizardEditProfile = forwardRef(
       setOriginalProvisosFields,
 
       positionRequestId,
+      // errors,
     } = useWizardContext();
 
     // console.log('effectiveData: ', effectiveData);
@@ -705,6 +702,9 @@ const WizardEditProfile = forwardRef(
         // console.log('form.getFieldsValue(): ', form.getFieldsValue());
         return form.getFieldsValue();
       },
+      getFormErrors: () => {
+        return formState.errors;
+      },
     }));
 
     // State to control visibility of the picker
@@ -912,25 +912,6 @@ const WizardEditProfile = forwardRef(
               onChange={handleFieldChange}
             />
           </FormItem>
-
-          {/* <Controller
-            name={`accountabilities.${index}.text`}
-            control={control}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextArea
-                value={value as string}
-                onBlur={onBlur} // notify when input is touched/blur
-                autoSize
-                disabled={field.disabled || field.is_readonly}
-                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                onFocus={() => showReqModal(() => {}, false)}
-                onChange={(event) => {
-                  handleFieldChange(event);
-                  onChange(event);
-                }}
-              />
-            )}
-          /> */}
 
           {field.disabled ? (
             <Button
@@ -1996,16 +1977,30 @@ const WizardEditProfile = forwardRef(
           <FormItem name={`title.isCustom`} control={control} hidden>
             <Input />
           </FormItem>
-          <FormItem
-            labelCol={{ span: 24 }}
-            wrapperCol={{ span: 24 }}
-            name="title.value"
-            control={control}
-            colon={false}
-            label={<span style={titleStyle}>Title</span>}
-          >
-            <Input className={`${isEdited ? 'edited-textarea' : ''}`} onChange={handleFieldChange} />
-          </FormItem>
+
+          <Card title="Job title" bordered={false} className="custom-card">
+            <Row justify="start">
+              <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+                <FormItem
+                  labelCol={{ span: 24 }}
+                  wrapperCol={{ span: 24 }}
+                  name="title.value"
+                  control={control}
+                  colon={false}
+                >
+                  <Input
+                    placeholder="Ex.: Program Assistant"
+                    aria-label="Job Title"
+                    className={`${isEdited ? 'edited-textarea' : ''}`}
+                    onChange={handleFieldChange}
+                  />
+                </FormItem>
+                <label className="sr-only" htmlFor="title.value">
+                  Job title
+                </label>
+              </Col>
+            </Row>
+          </Card>
         </>
       );
     };
@@ -2032,16 +2027,25 @@ const WizardEditProfile = forwardRef(
           <FormItem name={`overview.isCustom`} control={control} hidden>
             <Input />
           </FormItem>
-          <FormItem
-            labelCol={{ span: 24 }}
-            wrapperCol={{ span: 24 }}
-            name="overview.value"
-            control={control}
-            colon={false}
-            label={<span style={titleStyle}>Job overview</span>}
-          >
-            <TextArea autoSize className={`${isEdited ? 'edited-textarea' : ''}`} onChange={handleFieldChange} />
-          </FormItem>
+
+          <Card title="Job overview" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
+            <Row justify="start">
+              <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+                <FormItem
+                  labelCol={{ span: 24 }}
+                  wrapperCol={{ span: 24 }}
+                  name="overview.value"
+                  control={control}
+                  colon={false}
+                >
+                  <TextArea autoSize className={`${isEdited ? 'edited-textarea' : ''}`} onChange={handleFieldChange} />
+                </FormItem>
+                <label className="sr-only" htmlFor="overview.value">
+                  Job overview
+                </label>
+              </Col>
+            </Row>
+          </Card>
         </>
       );
     };
@@ -2070,26 +2074,33 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
-            labelCol={{ span: 24 }}
-            wrapperCol={{ span: 24 }}
-            name="program_overview.value"
-            control={control}
-            colon={false}
-            label={<span style={titleStyle}>Program overview</span>}
-            style={{ marginBottom: 0 }}
-          >
-            <TextArea
-              autoSize
-              className={`${isEdited ? 'edited-textarea' : ''}`}
-              onChange={handleFieldChange}
-              maxLength={320}
-              placeholder="(Optional) Add more details about the program"
-            />
-          </FormItem>
-          <Typography.Paragraph type="secondary" style={{ textAlign: 'right', width: '100%', margin: '0' }}>
-            {(getValues('program_overview.value') as string).length} / 320
-          </Typography.Paragraph>
+          <Card title="Program overview" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
+            <Row justify="start">
+              <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+                <FormItem
+                  labelCol={{ span: 24 }}
+                  wrapperCol={{ span: 24 }}
+                  name="program_overview.value"
+                  control={control}
+                  colon={false}
+                >
+                  <TextArea
+                    autoSize
+                    className={`${isEdited ? 'edited-textarea' : ''}`}
+                    onChange={handleFieldChange}
+                    maxLength={320}
+                    placeholder="(Optional) Add more details about the program"
+                  />
+                </FormItem>
+                <label className="sr-only" htmlFor="program_overview.value">
+                  Program overview
+                </label>
+                <Typography.Paragraph type="secondary" style={{ textAlign: 'right', width: '100%', margin: '0' }}>
+                  {(getValues('program_overview.value') as string).length} / 320
+                </Typography.Paragraph>
+              </Col>
+            </Row>
+          </Card>
         </>
       );
     };
@@ -2138,11 +2149,13 @@ const WizardEditProfile = forwardRef(
       height: 'auto',
       lineHeight: 'inherit',
       marginTop: '5px',
-      marginBottom: '3rem',
+      marginBottom: '1rem',
       display: 'block',
     };
 
     // console.log('effectiveData: ', effectiveData);
+
+    console.log('RENDER');
 
     return (
       <>
@@ -2151,7 +2164,14 @@ const WizardEditProfile = forwardRef(
             <Alert
               type="info"
               showIcon
-              message="Job context"
+              message={
+                <span>
+                  Job context{' '}
+                  <Tooltip title="The job context is important to understand as you proceed to create the position. You will be asked prior to approving that you understand the context of the job.">
+                    <InfoCircleOutlined style={{ cursor: 'pointer', fontSize: '0.9rem' }} />
+                  </Tooltip>
+                </span>
+              }
               description={
                 <p
                   dangerouslySetInnerHTML={{
@@ -2165,6 +2185,7 @@ const WizardEditProfile = forwardRef(
               }
             ></Alert>
             <Descriptions
+              className="customDescriptions"
               style={{ marginTop: '1rem' }}
               title={
                 <div>
@@ -2292,432 +2313,456 @@ const WizardEditProfile = forwardRef(
                 <></>
               )}
 
-              <Row gutter={24}>
-                <Col xl={24}>
-                  {renderTitle(getValues('title'))}
+              {renderTitle(getValues('title'))}
 
-                  {renderProgramOverview(getValues('program_overview'))}
+              {renderProgramOverview(getValues('program_overview'))}
 
-                  {config?.classificationEditable ? (
-                    <></>
-                  ) : (
-                    // todo: allow multiple classificaton editing
-                    // <FormItem name="classification" control={control} label="Classification">
-                    //   <Select {...register('classification')}>
-                    //     {classificationsData?.classifications.map((classification: ClassificationModel) => (
-                    //       <Select.Option value={classification.id} key={classification.id}>
-                    //         {`${classification.code}`}
-                    //       </Select.Option>
-                    //     ))}
-                    //   </Select>
-                    // </FormItem>
-                    <></>
-                  )}
+              {config?.classificationEditable ? (
+                <></>
+              ) : (
+                // todo: allow multiple classificaton editing
+                // <FormItem name="classification" control={control} label="Classification">
+                //   <Select {...register('classification')}>
+                //     {classificationsData?.classifications.map((classification: ClassificationModel) => (
+                //       <Select.Option value={classification.id} key={classification.id}>
+                //         {`${classification.code}`}
+                //       </Select.Option>
+                //     ))}
+                //   </Select>
+                // </FormItem>
+                <></>
+              )}
 
-                  {config?.contextEditable ? (
-                    <FormItem
-                      labelCol={{ span: 24 }}
-                      wrapperCol={{ span: 24 }}
-                      name="context"
-                      control={control}
-                      colon={false}
-                      label={<span style={titleStyle}>Context</span>}
-                    >
-                      <TextArea autoSize />
-                    </FormItem>
-                  ) : (
-                    <></>
-                  )}
-                  {renderOverview(getValues('overview'))}
+              {config?.contextEditable ? (
+                <FormItem
+                  labelCol={{ span: 24 }}
+                  wrapperCol={{ span: 24 }}
+                  name="context"
+                  control={control}
+                  colon={false}
+                  label={<span style={titleStyle}>Context</span>}
+                >
+                  <TextArea autoSize />
+                </FormItem>
+              ) : (
+                <></>
+              )}
+              {renderOverview(getValues('overview'))}
 
-                  <Title level={4} style={titleStyle}>
-                    Accountabilities
-                  </Title>
-
-                  <Alert
-                    role="note"
-                    style={{ marginBottom: '10px', marginTop: '1rem' }}
-                    message={
-                      <>
-                        Choose from the provided list of accountabilities to avoid the review by the classification team
-                        and create your position right away
-                      </>
-                    }
-                    type="warning"
-                    showIcon
-                  />
-
-                  <>
-                    {acc_req_fields.length > 0 && <List dataSource={acc_req_fields} renderItem={renderAccReqFields} />}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        // showReqModal(() => {
-                        handleAccReqAddNew();
-                        setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                        // }, false)
-                      }}
-                    >
-                      Add another accountability
-                    </Button>
-                  </>
-
-                  <Title level={4} style={titleStyle}>
-                    Optional accountabilities
-                  </Title>
-                  <>
-                    {acc_opt_fields.length > 0 && <List dataSource={acc_opt_fields} renderItem={renderOptReqFields} />}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        handleOptReqAddNew();
-                        setRenderKey((prevKey) => prevKey + 1);
-                      }}
-                    >
-                      Add optional accountability
-                    </Button>
-                  </>
-
-                  <Title level={4} style={titleStyle}>
-                    Minimum education requirements
-                  </Title>
-
-                  <Alert
-                    role="note"
-                    style={{ marginBottom: '10px', marginTop: '1rem' }}
-                    message={
-                      <>
-                        Keep the minimum job requirements to avoid the review by the classification team and create your
-                        position right away
-                      </>
-                    }
-                    type="warning"
-                    showIcon
-                  />
-
-                  <Typography.Paragraph type="secondary">
-                    Minimum years of experience are required, and you may add or refine the education requirements (add
-                    a degree or diploma program). These equivalencies are designed to be inclusive of different
-                    backgrounds.
-                  </Typography.Paragraph>
-
-                  <>
-                    {education_fields.length > 0 && (
-                      <List dataSource={education_fields} renderItem={renderMinReqFields} />
-                    )}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        {
-                          // showMinReqModal(() => {
-                          handleMinReqAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
-                          // }, false);
-                        }
-                      }}
-                    >
-                      Add another requirement
-                    </Button>
-                  </>
-
-                  {/* Related experience */}
-
-                  <Title level={4} style={titleStyle}>
-                    Related experience
-                  </Title>
-
-                  {/* <Alert
-                    role="note"
-                    style={{ marginBottom: '10px', marginTop: '1rem' }}
-                    message={
-                      <>
-                        Significant changes to this area <strong>may</strong> trigger a classification review
-                      </>
-                    }
-                    type="warning"
-                    showIcon
-                  /> */}
-
-                  <>
-                    {job_experience_fields.length > 0 && (
-                      <List dataSource={job_experience_fields} renderItem={renderRelWorkFields} />
-                    )}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        {
-                          // showRelWorkModal(() => {
-                          handleRelWorkAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
-                          // }, false);
-                        }
-                      }}
-                    >
-                      Add a related experience
-                    </Button>
-                  </>
-
-                  {/* Professional registration requirements */}
-
-                  <Title level={4} style={titleStyle}>
-                    Professional registration requirements
-                  </Title>
-                  <Typography.Paragraph type="secondary">
-                    Professional registration is required for a number of positions in the BC Public Service. You can
-                    add those requirements here.
-                  </Typography.Paragraph>
-
-                  <>
-                    {professional_registration_fields.length > 0 && (
-                      <List
-                        dataSource={professional_registration_fields}
-                        renderItem={renderProfessionalRegistrationFields}
-                      />
-                    )}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        handleProfessionalRegistrationAddNew();
-                        setRenderKey((prevKey) => prevKey + 1);
-                      }}
-                    >
-                      Add a professional registration requirement
-                    </Button>
-                  </>
-
-                  {/* Preferences */}
-
-                  <Title level={4} style={titleStyle}>
-                    Preferences
-                  </Title>
-
-                  <>
-                    {preferences_fields.length > 0 && (
-                      <List dataSource={preferences_fields} renderItem={renderPreferencesFields} />
-                    )}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        handlePreferencesAddNew();
-                        setRenderKey((prevKey) => prevKey + 1);
-                      }}
-                    >
-                      Add a job preference
-                    </Button>
-                  </>
-
-                  {/* Knowledge, skills and abilities */}
-
-                  <Title level={4} style={titleStyle}>
-                    Knowledge, skills and abilities
-                  </Title>
-
-                  <>
-                    {knowledge_skills_abilities_fields.length > 0 && (
-                      <List
-                        dataSource={knowledge_skills_abilities_fields}
-                        renderItem={renderKnowledgeSkillsAbilitiesFields}
-                      />
-                    )}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        handleKnowledgeSkillsAbilitiesAddNew();
-                        setRenderKey((prevKey) => prevKey + 1);
-                      }}
-                    >
-                      Add a knowledge, skill or ability requirement
-                    </Button>
-                  </>
-
-                  {/* Willingness statements or provisos */}
-
-                  <Title level={4} style={titleStyle}>
-                    Willingness statements or provisos
-                  </Title>
-
-                  <>
-                    {provisos_fields.length > 0 && (
-                      <List dataSource={provisos_fields} renderItem={renderProvisosFields} />
-                    )}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        handleProvisosAddNew();
-                        setRenderKey((prevKey) => prevKey + 1);
-                      }}
-                    >
-                      Add a proviso
-                    </Button>
-                  </>
-
-                  {/* Security screenings */}
-
-                  <Title level={4} style={titleStyle}>
-                    Security screenings
-                  </Title>
-
-                  <>
-                    {security_screenings_fields.length > 0 && (
-                      <List dataSource={security_screenings_fields} renderItem={renderSecurityScreeningsFields} />
-                    )}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        {
-                          // showSecurityScreeningsModal(() => {
-                          handleSecurityScreeningsAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
-                          // }, false);
-                        }
-                      }}
-                    >
-                      Add another security screening
-                    </Button>
-                  </>
-
-                  {/* Optional requirements */}
-
-                  <Title level={4} style={titleStyle}>
-                    Optional requirements
-                  </Title>
-
-                  <>
-                    {optional_requirements_fields.length > 0 && (
-                      <List dataSource={optional_requirements_fields} renderItem={renderOptionalRequirementsFields} />
-                    )}
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      style={addStyle}
-                      onClick={() => {
-                        handleOptionalRequirementsAddNew();
-                        setRenderKey((prevKey) => prevKey + 1);
-                      }}
-                    >
-                      Add an optional requirement
-                    </Button>
-                  </>
-
-                  {/* Behavioural competencies */}
-
-                  <Title level={4} style={titleStyle}>
-                    Behavioural competencies
-                  </Title>
-                  <>
-                    <List
-                      style={{ marginTop: '7px' }}
-                      dataSource={behavioural_competencies_fields}
-                      renderItem={(field, index) => (
-                        <List.Item
-                          style={{
-                            display: 'flex',
-                            alignItems: 'flex-start', // Align items to the top
-                            marginBottom: '0px',
-                            borderBottom: 'none',
-
-                            padding: '5px 0',
-                          }}
-                          key={field.id} // Ensure this is a unique value
-                        >
-                          {/* Display behavioural competency name and description */}
-                          <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
-                            <strong>
-                              {field.behavioural_competency.name}
-                              <IsIndigenousCompetency competency={field.behavioural_competency} />
-                            </strong>
-                            : {field.behavioural_competency.description}
-                          </p>
-
-                          {/* Trash icon/button for deletion */}
-                          <Button
-                            type="text" // No button styling, just the icon
-                            icon={<DeleteOutlined />}
-                            onClick={() => {
-                              behavioural_competencies_remove(index);
-                              setRenderKey((prevKey) => prevKey + 1);
-                            }}
-                            style={{
-                              border: 'none',
-                              padding: 0,
-                              color: '#D9D9D9',
-                            }}
-                          />
-
-                          {/* Hidden fields to submit actual data */}
-                          <FormItem
-                            name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                            control={control}
-                            hidden
-                          >
-                            <Input />
-                          </FormItem>
-                          <FormItem
-                            hidden
-                            name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                            control={control}
-                            style={{ flex: 1, marginRight: '10px' }}
-                          >
-                            <Input placeholder="Name" style={{ width: '100%' }} />
-                          </FormItem>
-                          <FormItem
-                            hidden
-                            name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                            control={control}
-                            style={{ flex: 2, marginRight: '10px' }}
-                          >
-                            <TextArea placeholder="Description" style={{ width: '100%' }} />
-                          </FormItem>
-                        </List.Item>
-                      )}
-                    />
+              <Card title="Accountabilities" className="custom-card" style={{ marginTop: 16 }}>
+                <Row justify="start">
+                  <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                     <Alert
                       role="note"
-                      style={{ marginBottom: '10px', marginTop: '1rem', fontStyle: 'italic' }}
-                      message="* denotes an Indigenous Behavioural Competency"
-                      type="info"
+                      style={{ marginBottom: '10px' }}
+                      message={
+                        <>
+                          Choose from the provided list of accountabilities to avoid the review by the classification
+                          team and create your position right away
+                        </>
+                      }
+                      type="warning"
                       showIcon
                     />
 
-                    {isPickerVisible ? (
-                      <BehaviouralComptencyPicker
-                        onAdd={addBehaviouralCompetency}
-                        onCancel={() => setPickerVisible(false)}
-                        filterIds={behavioural_competencies_fields.map((b) => b.behavioural_competency.id)}
-                        style={{ marginTop: '20px' }}
-                      />
-                    ) : (
+                    <>
+                      {acc_req_fields.length > 0 && (
+                        <List dataSource={acc_req_fields} renderItem={renderAccReqFields} />
+                      )}
                       <Button
                         type="link"
                         icon={<PlusOutlined />}
-                        style={{ ...addStyle, marginTop: '10px' }}
-                        onClick={() => setPickerVisible(true)} // Show picker when "Add" button is clicked
+                        style={addStyle}
+                        onClick={() => {
+                          handleAccReqAddNew();
+                          setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                        }}
                       >
-                        Add a behavioural competency
+                        Add another accountability
                       </Button>
-                    )}
-                  </>
-                </Col>
-              </Row>
-              {/* <WizardControls submitText={submitText} showBackButton={showBackButton} /> */}
+                    </>
+
+                    <Divider className="hr-reduced-margin" />
+
+                    <Form.Item
+                      label="Optional accountabilities"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                    ></Form.Item>
+
+                    <>
+                      {acc_opt_fields.length > 0 && (
+                        <List dataSource={acc_opt_fields} renderItem={renderOptReqFields} />
+                      )}
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        style={addStyle}
+                        onClick={() => {
+                          handleOptReqAddNew();
+                          setRenderKey((prevKey) => prevKey + 1);
+                        }}
+                      >
+                        Add optional accountability
+                      </Button>
+                    </>
+                  </Col>
+                </Row>
+              </Card>
+
+              <Card title="Minimum job requirements" className="custom-card" style={{ marginTop: 16 }}>
+                <Row justify="start">
+                  <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+                    <Alert
+                      role="note"
+                      style={{ marginBottom: '10px' }}
+                      message={
+                        <>
+                          Keep the minimum job requirements to avoid the review by the classification team and create
+                          your position right away
+                        </>
+                      }
+                      type="warning"
+                      showIcon
+                    />
+
+                    <Typography.Paragraph type="secondary">
+                      Minimum years of experience are required, and you may add or refine the education requirements
+                      (add a degree or diploma program). These equivalencies are designed to be inclusive of different
+                      backgrounds.
+                    </Typography.Paragraph>
+
+                    <>
+                      {education_fields.length > 0 && (
+                        <List dataSource={education_fields} renderItem={renderMinReqFields} />
+                      )}
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        style={addStyle}
+                        onClick={() => {
+                          {
+                            // showMinReqModal(() => {
+                            handleMinReqAddNew();
+                            setRenderKey((prevKey) => prevKey + 1);
+                            // }, false);
+                          }
+                        }}
+                      >
+                        Add another requirement
+                      </Button>
+                    </>
+
+                    {/* Related experience */}
+
+                    <Divider className="hr-reduced-margin" />
+
+                    <Form.Item
+                      label="Related experience"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                    ></Form.Item>
+
+                    <>
+                      {job_experience_fields.length > 0 && (
+                        <List dataSource={job_experience_fields} renderItem={renderRelWorkFields} />
+                      )}
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        style={addStyle}
+                        onClick={() => {
+                          {
+                            // showRelWorkModal(() => {
+                            handleRelWorkAddNew();
+                            setRenderKey((prevKey) => prevKey + 1);
+                            // }, false);
+                          }
+                        }}
+                      >
+                        Add a related experience
+                      </Button>
+                    </>
+
+                    {/* Professional registration requirements */}
+
+                    <Divider className="hr-reduced-margin" />
+
+                    <Form.Item
+                      label="Professional registration requirements"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                    ></Form.Item>
+
+                    <Typography.Paragraph type="secondary">
+                      Professional registration is required for a number of positions in the BC Public Service. You can
+                      add those requirements here.
+                    </Typography.Paragraph>
+
+                    <>
+                      {professional_registration_fields.length > 0 && (
+                        <List
+                          dataSource={professional_registration_fields}
+                          renderItem={renderProfessionalRegistrationFields}
+                        />
+                      )}
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        style={addStyle}
+                        onClick={() => {
+                          handleProfessionalRegistrationAddNew();
+                          setRenderKey((prevKey) => prevKey + 1);
+                        }}
+                      >
+                        Add a professional registration requirement
+                      </Button>
+                    </>
+
+                    {/* Preferences */}
+
+                    <Divider className="hr-reduced-margin" />
+
+                    <Form.Item
+                      label="Preferences"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                    ></Form.Item>
+
+                    <>
+                      {preferences_fields.length > 0 && (
+                        <List dataSource={preferences_fields} renderItem={renderPreferencesFields} />
+                      )}
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        style={addStyle}
+                        onClick={() => {
+                          handlePreferencesAddNew();
+                          setRenderKey((prevKey) => prevKey + 1);
+                        }}
+                      >
+                        Add a job preference
+                      </Button>
+                    </>
+
+                    {/* Knowledge, skills and abilities */}
+
+                    <Divider className="hr-reduced-margin" />
+
+                    <Form.Item
+                      label="Knowledge, skills and abilities"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                    ></Form.Item>
+
+                    <>
+                      {knowledge_skills_abilities_fields.length > 0 && (
+                        <List
+                          dataSource={knowledge_skills_abilities_fields}
+                          renderItem={renderKnowledgeSkillsAbilitiesFields}
+                        />
+                      )}
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        style={addStyle}
+                        onClick={() => {
+                          handleKnowledgeSkillsAbilitiesAddNew();
+                          setRenderKey((prevKey) => prevKey + 1);
+                        }}
+                      >
+                        Add a knowledge, skill or ability requirement
+                      </Button>
+                    </>
+
+                    {/* Willingness statements or provisos */}
+
+                    <Divider className="hr-reduced-margin" />
+
+                    <Form.Item
+                      label="Willingness statements or provisos"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                    ></Form.Item>
+
+                    <>
+                      {provisos_fields.length > 0 && (
+                        <List dataSource={provisos_fields} renderItem={renderProvisosFields} />
+                      )}
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        style={addStyle}
+                        onClick={() => {
+                          handleProvisosAddNew();
+                          setRenderKey((prevKey) => prevKey + 1);
+                        }}
+                      >
+                        Add a proviso
+                      </Button>
+                    </>
+
+                    {/* Security screenings */}
+
+                    <Divider className="hr-reduced-margin" />
+
+                    <Form.Item
+                      label="Security screenings"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                    ></Form.Item>
+
+                    <>
+                      {security_screenings_fields.length > 0 && (
+                        <List dataSource={security_screenings_fields} renderItem={renderSecurityScreeningsFields} />
+                      )}
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        style={addStyle}
+                        onClick={() => {
+                          {
+                            // showSecurityScreeningsModal(() => {
+                            handleSecurityScreeningsAddNew();
+                            setRenderKey((prevKey) => prevKey + 1);
+                            // }, false);
+                          }
+                        }}
+                      >
+                        Add another security screening
+                      </Button>
+                    </>
+
+                    {/* Optional requirements */}
+
+                    <Divider className="hr-reduced-margin" />
+
+                    <Form.Item
+                      label="Optional requirements"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                    ></Form.Item>
+
+                    <>
+                      {optional_requirements_fields.length > 0 && (
+                        <List dataSource={optional_requirements_fields} renderItem={renderOptionalRequirementsFields} />
+                      )}
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        style={addStyle}
+                        onClick={() => {
+                          handleOptionalRequirementsAddNew();
+                          setRenderKey((prevKey) => prevKey + 1);
+                        }}
+                      >
+                        Add an optional requirement
+                      </Button>
+                    </>
+                  </Col>
+                </Row>
+              </Card>
+
+              <Card title="Behavioural competencies" className="custom-card" style={{ marginTop: 16 }}>
+                <Row justify="start">
+                  <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+                    <>
+                      <List
+                        style={{ marginTop: '7px' }}
+                        dataSource={behavioural_competencies_fields}
+                        renderItem={(field, index) => (
+                          <List.Item
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start', // Align items to the top
+                              marginBottom: '0px',
+                              borderBottom: 'none',
+
+                              padding: '5px 0',
+                            }}
+                            key={field.id} // Ensure this is a unique value
+                          >
+                            {/* Display behavioural competency name and description */}
+                            <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
+                              <strong>
+                                {field.behavioural_competency.name}
+                                <IsIndigenousCompetency competency={field.behavioural_competency} />
+                              </strong>
+                              : {field.behavioural_competency.description}
+                            </p>
+
+                            {/* Trash icon/button for deletion */}
+                            <Button
+                              type="text" // No button styling, just the icon
+                              icon={<DeleteOutlined />}
+                              onClick={() => {
+                                behavioural_competencies_remove(index);
+                                setRenderKey((prevKey) => prevKey + 1);
+                              }}
+                              style={{
+                                border: 'none',
+                                padding: 0,
+                                color: '#D9D9D9',
+                              }}
+                            />
+
+                            {/* Hidden fields to submit actual data */}
+                            <FormItem
+                              name={`behavioural_competencies.${index}.behavioural_competency.id`}
+                              control={control}
+                              hidden
+                            >
+                              <Input />
+                            </FormItem>
+                            <FormItem
+                              hidden
+                              name={`behavioural_competencies.${index}.behavioural_competency.name`}
+                              control={control}
+                              style={{ flex: 1, marginRight: '10px' }}
+                            >
+                              <Input placeholder="Name" style={{ width: '100%' }} />
+                            </FormItem>
+                            <FormItem
+                              hidden
+                              name={`behavioural_competencies.${index}.behavioural_competency.description`}
+                              control={control}
+                              style={{ flex: 2, marginRight: '10px' }}
+                            >
+                              <TextArea placeholder="Description" style={{ width: '100%' }} />
+                            </FormItem>
+                          </List.Item>
+                        )}
+                      />
+                      <Alert
+                        role="note"
+                        style={{ marginBottom: '10px', fontStyle: 'italic', marginTop: '1rem' }}
+                        message="* denotes an Indigenous Behavioural Competency"
+                        type="info"
+                        showIcon
+                      />
+
+                      {isPickerVisible ? (
+                        <BehaviouralComptencyPicker
+                          onAdd={addBehaviouralCompetency}
+                          onCancel={() => setPickerVisible(false)}
+                          filterIds={behavioural_competencies_fields.map((b) => b.behavioural_competency.id)}
+                          style={{ marginTop: '20px' }}
+                        />
+                      ) : (
+                        <Button
+                          type="link"
+                          icon={<PlusOutlined />}
+                          style={{ ...addStyle, marginTop: '10px' }}
+                          onClick={() => setPickerVisible(true)} // Show picker when "Add" button is clicked
+                        >
+                          Add a behavioural competency
+                        </Button>
+                      )}
+                    </>
+                  </Col>
+                </Row>
+              </Card>
             </Form>
           </Col>
         </Row>
