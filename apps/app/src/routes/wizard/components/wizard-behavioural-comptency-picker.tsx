@@ -77,6 +77,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     // if (!filterIds.includes(competency.id)) {
     group.children.push({
       title: `${competency.name}${competency.type == 'INDIGENOUS' ? '*' : ''}`,
+      titleNoStar: `${competency.name}`,
       value: competency.id,
       description: competency.description,
       key: competency.id,
@@ -115,7 +116,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
         onAdd({
           behavioural_competency: {
             id: parseInt(selectedNode.value),
-            name: selectedNode.title,
+            name: selectedNode.titleNoStar,
             description: selectedNode.description,
           },
         });
