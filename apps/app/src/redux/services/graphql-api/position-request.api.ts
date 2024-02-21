@@ -287,6 +287,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     createPositionRequest: build.mutation<CreatePositionRequestResponse, CreatePositionRequestInput>({
+      invalidatesTags: ['positionRequestsCount'],
       query: (input: CreatePositionRequestInput) => {
         return {
           document: gql`
@@ -355,7 +356,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     deletePositionRequest: build.mutation<void, DeletePositionRequestInput>({
-      invalidatesTags: ['positionRequest'],
+      invalidatesTags: ['positionRequest', 'positionRequestsCount'],
       query: (input: DeletePositionRequestInput) => {
         return {
           document: gql`
@@ -436,6 +437,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     getPositionRequestsCount: build.query<PositionRequestStatusCountsResponse, GetPositionRequestsArgs | void>({
+      providesTags: ['positionRequestsCount'],
       query: (args: GetPositionRequestsArgs = {}) => {
         return {
           document: gql`
