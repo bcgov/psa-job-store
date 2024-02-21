@@ -18,8 +18,8 @@ import {
   VerticalAlign,
   WidthType,
 } from 'docx';
-import hrComponent from './hr.component';
-import logoComponent from './logo.component';
+import BCGovLogo from './bcgov-logo.base64';
+import HorizontalRule from './hr.base64';
 
 interface GenerateJobProfileProps {
   jobProfile: Record<string, any>;
@@ -46,7 +46,7 @@ const createHeading = (text: string, allCaps: boolean = true) =>
     ],
   });
 
-export const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfileProps) => {
+const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfileProps) => {
   console.log('parentJobProfile: ', parentJobProfile);
 
   return new Document({
@@ -122,7 +122,7 @@ export const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJob
                       new Paragraph({
                         children: [
                           new ImageRun({
-                            data: Buffer.from(logoComponent, 'base64'),
+                            data: Buffer.from(BCGovLogo, 'base64'),
                             transformation: {
                               width: 215,
                               height: 45,
@@ -182,7 +182,7 @@ export const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJob
           new Paragraph({
             children: [
               new ImageRun({
-                data: Buffer.from(hrComponent, 'base64'),
+                data: Buffer.from(HorizontalRule, 'base64'),
                 transformation: {
                   width: 727,
                   height: 4,
@@ -705,3 +705,5 @@ export const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJob
     ],
   });
 };
+
+export default generateJobProfile;

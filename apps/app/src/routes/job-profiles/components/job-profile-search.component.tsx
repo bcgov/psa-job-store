@@ -439,7 +439,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   //   data-testid="job-profile-search"
   // >
   //   <Col lg={24} xs={24}>
-  console.log('allSelections: ', allSelections);
+  // console.log('allSelections: ', allSelections);
 
   const selectedJobFamilyValues = allSelections
     .filter((selection) => selection.type === 'jobFamily')
@@ -450,7 +450,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     .map((selection) => `stream-${selection.value}`);
 
   const treeSelectValues = [...selectedJobFamilyValues, ...selectedJobStreamValues];
-  console.log('treeSelectValues: ', treeSelectValues);
+  // console.log('treeSelectValues: ', treeSelectValues);
 
   return (
     <Row
@@ -461,7 +461,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
       data-testid="job-profile-search"
     >
       <Col sm={24} md={24} lg={24} xl={24} xxl={fullWidth ? 24 : 22}>
-        <Card style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+        <Card style={{ marginTop: '1rem', marginBottom: '1rem', borderColor: '#D9D9D9' }} bordered={true}>
           <Row gutter={24}>
             <Col xl={6} lg={8} md={12} sm={24}>
               <Search

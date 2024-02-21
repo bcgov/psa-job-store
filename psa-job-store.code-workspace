@@ -24,6 +24,10 @@
       "path": "apps/app"
     },
     {
+      "name": "packages/common-kit",
+      "path": "packages/common-kit"
+    },
+    {
       "name": "packages/eslint-config-custom",
       "path": "packages/eslint-config-custom"
     },
@@ -72,7 +76,7 @@
       "**/.DS_Store": true,
       "**/Thumbs.db": true,
       "apps": true,
-      "dist": true,
+      "dist": false,
       "packages": true
     },
     "javascript.format.semicolons": "insert",

@@ -129,10 +129,10 @@ describe('JobProfile Component Tests', () => {
     const mockOnUseProfile = jest.fn();
     render(
       <MemoryRouter>
-        <JobProfile profileData={mockProfileData} onUseProfile={mockOnUseProfile} />
+        <JobProfile profileData={mockProfileData} />
       </MemoryRouter>,
     );
-    fireEvent.click(screen.getByText('Use Profile'));
+    fireEvent.click(screen.getByText('Save and next'));
     expect(mockOnUseProfile).toHaveBeenCalled();
   });
 

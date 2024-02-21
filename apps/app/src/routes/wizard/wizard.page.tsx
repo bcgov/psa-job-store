@@ -2,7 +2,7 @@ import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Menu, Modal, Popover, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
@@ -118,7 +118,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this profile from the 'My Positions' page.
+              Saves your progress. You can access this position request from the 'My Positions' page.
             </Typography.Text>
           </div>
         </Menu.Item>
@@ -128,7 +128,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
             <div style={{ padding: '5px 0' }}>
               Delete
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this profile from 'My Positions'. This action is irreversible.
+                Removes this position request from 'My Positions'. This action is irreversible.
               </Typography.Text>
             </div>
           </Menu.Item>
@@ -141,7 +141,9 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
     <WizardPageWrapper
       title={
         <div>
-          <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} onClick={back} />
+          <Link to="/">
+            <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+          </Link>
           New position
         </div>
       }
@@ -171,11 +173,24 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
       ]}
     >
       <WizardSteps current={1}></WizardSteps>
-      <JobProfiles
-        searchParams={searchParams}
-        onSelectProfile={onSelectProfile}
-        onUseProfile={handleSubmit(onSubmit)}
-      />
+      <div
+        style={{
+          overflow: 'hidden',
+          position: 'relative',
+          height: '100%',
+          background: 'rgb(240, 242, 245)',
+          marginLeft: '-1rem',
+          marginRight: '-1rem',
+          marginTop: '-1px',
+          padding: '0 1rem',
+        }}
+      >
+        <JobProfiles
+          searchParams={searchParams}
+          onSelectProfile={onSelectProfile}
+          // onUseProfile={handleSubmit(onSubmit)}
+        />
+      </div>
     </WizardPageWrapper>
   );
 };

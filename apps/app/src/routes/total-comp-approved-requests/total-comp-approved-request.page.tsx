@@ -1,6 +1,6 @@
 import { CopyOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Collapse, Descriptions, Divider, Result, Row, Space, Tabs, Typography } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typography } from 'antd';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/filtered-table.component.css';
@@ -10,7 +10,6 @@ import ContentWrapper from '../home/components/content-wrapper.component';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import WizardEditControlBar from '../wizard/components/wizard-edit-control-bar';
-import { diffLegendContent } from '../wizard/wizard-review.page';
 import '../wizard/wizard-review.page.css';
 import './total-comp-approved-request.page.css';
 const { Text } = Typography;
@@ -147,33 +146,33 @@ export const TotalCompApprovedRequestPage = () => {
   ];
 
   // PROFILE TAB INFO - todo: use wizard-reivew.page.tsx instead, make it configurable
-  const collapseRef = useRef<HTMLDivElement>(null);
+  // const collapseRef = useRef<HTMLDivElement>(null);
 
-  const [hasScrolledPast, setHasScrolledPast] = useState(false);
+  // const [hasScrolledPast, setHasScrolledPast] = useState(false);
 
-  const handleScroll = () => {
-    const layoutScrollContainer = document.querySelector('.ant-layout > div > div') as HTMLElement;
-    if (layoutScrollContainer && collapseRef.current) {
-      const collapseTop = collapseRef.current.getBoundingClientRect().top;
-      const containerTop = layoutScrollContainer.getBoundingClientRect().top;
+  // const handleScroll = () => {
+  //   const layoutScrollContainer = document.querySelector('.ant-layout > div > div') as HTMLElement;
+  //   if (layoutScrollContainer && collapseRef.current) {
+  //     const collapseTop = collapseRef.current.getBoundingClientRect().top;
+  //     const containerTop = layoutScrollContainer.getBoundingClientRect().top;
 
-      // Check if the Collapse top is above the container top
-      setHasScrolledPast(collapseTop < containerTop);
-    }
-  };
+  //     // Check if the Collapse top is above the container top
+  //     setHasScrolledPast(collapseTop < containerTop);
+  //   }
+  // };
 
-  useEffect(() => {
-    const layoutScrollContainer = document.querySelector('.ant-layout > div > div');
-    if (layoutScrollContainer) {
-      layoutScrollContainer.addEventListener('scroll', handleScroll);
-    }
+  // useEffect(() => {
+  //   const layoutScrollContainer = document.querySelector('.ant-layout > div > div');
+  //   if (layoutScrollContainer) {
+  //     layoutScrollContainer.addEventListener('scroll', handleScroll);
+  //   }
 
-    return () => {
-      if (layoutScrollContainer) {
-        layoutScrollContainer.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, []);
+  //   return () => {
+  //     if (layoutScrollContainer) {
+  //       layoutScrollContainer.removeEventListener('scroll', handleScroll);
+  //     }
+  //   };
+  // }, []);
 
   const [showDiff, setShowDiff] = useState(true);
 
@@ -286,7 +285,7 @@ export const TotalCompApprovedRequestPage = () => {
                 showDiff={showDiff}
                 showNext={false}
               />
-              <Collapse
+              {/* <Collapse
                 ref={collapseRef}
                 bordered={false}
                 ghost
@@ -296,7 +295,7 @@ export const TotalCompApprovedRequestPage = () => {
                 <Collapse.Panel key="1" showArrow={false} header="">
                   {diffLegendContent}
                 </Collapse.Panel>
-              </Collapse>
+              </Collapse> */}
               <JobProfile
                 style={{ marginTop: '1rem' }}
                 profileData={data?.positionRequest?.profile_json}

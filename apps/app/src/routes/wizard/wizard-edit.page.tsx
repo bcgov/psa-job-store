@@ -1,5 +1,7 @@
-import { FormInstance, List, Modal } from 'antd';
+import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { Button, Col, FormInstance, List, Menu, Modal, Popover, Row, Typography } from 'antd';
 import { useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   AccountabilitiesModel,
   BehaviouralCompetencies,
@@ -10,9 +12,11 @@ import {
   JobProfileModel,
   Stream,
 } from '../../redux/services/graphql-api/job-profile-types';
-import { useUpdatePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
+import {
+  useDeletePositionRequestMutation,
+  useUpdatePositionRequestMutation,
+} from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
-import WizardEditControlBar from './components/wizard-edit-control-bar';
 import WizardEditProfile from './components/wizard-edit-profile';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
@@ -25,9 +29,10 @@ export interface InputData {
 interface WizardEditPageProps {
   onBack?: () => void;
   onNext?: () => void;
+  disableBlockingAndNavigateHome: () => void;
 }
 
-export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }) => {
+export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, disableBlockingAndNavigateHome }) => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
   const {
@@ -35,8 +40,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
     setWizardData,
     classificationsData,
     setClassificationsData,
-    errors,
-    setErrors,
     positionRequestProfileId,
     positionRequestId,
   } = useWizardContext();
@@ -311,11 +314,26 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
   const wizardEditProfileRef = useRef<{
     submit: () => void;
     getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getFormErrors: () => any;
   }>(null);
 
   // const navigate = useNavigate();
 
   const onNextCallback = async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errors = Object.values(wizardEditProfileRef.current?.getFormErrors()).map((error: any) => {
+      const message =
+        error.message != null
+          ? error.message
+          : error.root != null
+            ? error.root?.message
+            : error.value != null
+              ? error.value.message
+              : 'Error';
+      return message;
+    });
+
     if (errors.length) {
       Modal.error({
         title: 'Errors',
@@ -335,10 +353,12 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
 
     const formData = wizardEditProfileRef.current?.getFormData();
     console.log('formData: ', formData);
+
+    // return;
+
     const transformedData = transformFormData(formData);
     console.log('transformedData: ', transformedData);
 
-    // return;
     setWizardData(transformedData);
 
     try {
@@ -361,27 +381,113 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext }
   };
 
   // console.log('wizardData: ', wizardData);
+
+  // todo: refactor this into WizardPageWrapper component
+
+  const [deletePositionRequest] = useDeletePositionRequestMutation();
+  const deleteRequest = async () => {
+    if (!positionRequestId) return;
+    Modal.confirm({
+      title: 'Delete Position Request',
+      content: 'Do you want to delete the position request?',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: async () => {
+        await deletePositionRequest({ id: positionRequestId });
+        disableBlockingAndNavigateHome();
+      },
+    });
+  };
+
+  const getMenuContent = () => {
+    return (
+      <Menu>
+        <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
+          <div style={{ padding: '5px 0' }}>
+            Save and quit
+            <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+              Saves your progress. You can access this position request from the 'My Positions' page.
+            </Typography.Text>
+          </div>
+        </Menu.Item>
+        <Menu.Divider />
+        <Menu.ItemGroup key="others" title={<b>Others</b>}>
+          <Menu.Item key="delete" onClick={deleteRequest}>
+            <div style={{ padding: '5px 0' }}>
+              Delete
+              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                Removes this position request from 'My Positions'. This action is irreversible.
+              </Typography.Text>
+            </div>
+          </Menu.Item>
+        </Menu.ItemGroup>
+      </Menu>
+    );
+  };
+
   return (
-    <WizardPageWrapper title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}>
-      <WizardSteps current={2} xl={24}></WizardSteps>
-      <WizardEditControlBar
+    <WizardPageWrapper
+      // title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}
+
+      title={
+        <div>
+          <Link to="/">
+            <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+          </Link>
+          Edit profile
+        </div>
+      }
+      subTitle={<div>You may now edit the profile.</div>}
+      additionalBreadcrumb={{ title: 'New position' }}
+      // subTitle="Choose a job profile to modify for the new positions"
+      hpad={false}
+      grayBg={false}
+      pageHeaderExtra={[
+        <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
+          <Button icon={<EllipsisOutlined />}></Button>
+        </Popover>,
+        <Button onClick={onBack} key="back">
+          Back
+        </Button>,
+        <Button key="next" type="primary" onClick={onNextCallback}>
+          Save and next
+        </Button>,
+      ]}
+    >
+      <WizardSteps current={2}></WizardSteps>
+      {/* <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
         onNext={onNextCallback}
         onChooseDifferentProfile={onBack}
         showChooseDifferentProfile={true}
         nextText="Save and Next"
-      />
+      /> */}
 
-      <WizardEditProfile
-        ref={wizardEditProfileRef}
-        profileData={wizardData}
-        id={profileId?.toString()}
-        submitText="Review Profile"
-        // submitHandler={onSubmit}
-        showBackButton={true}
-        receivedClassificationsDataCallback={receivedClassificationsDataCallback}
-        setErrors={setErrors}
-      ></WizardEditProfile>
+      <div
+        style={{
+          overflow: 'hidden',
+          position: 'relative',
+          height: '100%',
+          background: 'rgb(240, 242, 245)',
+          marginLeft: '-1rem',
+          marginRight: '-1rem',
+          marginTop: '-1px',
+          padding: '2rem 1rem',
+        }}
+      >
+        <Row justify="center" gutter={16}>
+          <Col>
+            <WizardEditProfile
+              ref={wizardEditProfileRef}
+              profileData={wizardData}
+              id={profileId?.toString()}
+              submitText="Review Profile"
+              showBackButton={true}
+              receivedClassificationsDataCallback={receivedClassificationsDataCallback}
+            ></WizardEditProfile>
+          </Col>
+        </Row>
+      </div>
     </WizardPageWrapper>
   );
 };
