@@ -920,14 +920,6 @@ export const TotalCompCreateProfilePage = () => {
     name: 'behavioural_competencies',
   });
 
-  const addBehaviouralCompetency = (competency: BehaviouralCompetencyData) => {
-    behavioural_competencies_append(competency);
-    setPickerVisible(false); // Hide picker after adding
-  };
-
-  // State to control visibility of the picker
-  const [isPickerVisible, setPickerVisible] = useState(false);
-
   // Tree-select for report-to relationship
   const { SHOW_CHILD } = TreeSelect;
 
