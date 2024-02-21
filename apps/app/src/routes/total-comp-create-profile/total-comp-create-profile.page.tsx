@@ -39,6 +39,7 @@ import 'react-quill/dist/quill.snow.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import MinistriesSelect from '../../components/app/common/components/ministries-select.component';
+import '../../components/app/common/css/custom-form.css';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import {
@@ -74,7 +75,6 @@ import BehaviouralComptencyPicker, {
   BehaviouralCompetencyData,
 } from '../wizard/components/wizard-behavioural-comptency-picker';
 import ReorderButtons from './components/reorder-buttons';
-import './total-comp-published-profies.page.css';
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -919,14 +919,6 @@ export const TotalCompCreateProfilePage = () => {
     control: profileControl,
     name: 'behavioural_competencies',
   });
-
-  const addBehaviouralCompetency = (competency: BehaviouralCompetencyData) => {
-    behavioural_competencies_append(competency);
-    setPickerVisible(false); // Hide picker after adding
-  };
-
-  // State to control visibility of the picker
-  const [isPickerVisible, setPickerVisible] = useState(false);
 
   // Tree-select for report-to relationship
   const { SHOW_CHILD } = TreeSelect;
@@ -2706,12 +2698,21 @@ export const TotalCompCreateProfilePage = () => {
                 </Card>
 
                 <Card title="Behavioural competencies" style={{ marginTop: 16 }} bordered={false}>
-                  {/* Behavioural competencies */}
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                       <>
+                        <BehaviouralComptencyPicker
+                          onAdd={behavioural_competencies_append}
+                          onRemove={behavioural_competencies_remove}
+                          behavioural_competencies_fields={behavioural_competencies_fields}
+                        />
+                        <Typography.Text type="secondary">
+                          * denotes an Indigenous Behavioural Competency
+                        </Typography.Text>
+
                         <List
                           style={{ marginTop: '7px' }}
+                          locale={{ emptyText: ' ' }}
                           dataSource={behavioural_competencies_fields}
                           renderItem={(field, index) => (
                             <List.Item
@@ -2725,7 +2726,6 @@ export const TotalCompCreateProfilePage = () => {
                               }}
                               key={field.id} // Ensure this is a unique value
                             >
-                              {/* Display behavioural competency name and description */}
                               <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
                                 <strong>
                                   {field.behavioural_competency.name}
@@ -2734,7 +2734,6 @@ export const TotalCompCreateProfilePage = () => {
                                 : {field.behavioural_competency.description}
                               </p>
 
-                              {/* Trash icon/button for deletion */}
                               <Button
                                 type="text" // No button styling, just the icon
                                 icon={<DeleteOutlined />}
@@ -2748,7 +2747,6 @@ export const TotalCompCreateProfilePage = () => {
                                 }}
                               />
 
-                              {/* Hidden fields to submit actual data */}
                               <FormItem
                                 name={`behavioural_competencies.${index}.behavioural_competency.id`}
                                 control={profileControl}
@@ -2775,23 +2773,9 @@ export const TotalCompCreateProfilePage = () => {
                             </List.Item>
                           )}
                         />
-                        <Alert
-                          role="note"
-                          style={{ marginBottom: '10px', marginTop: '1rem', fontStyle: 'italic' }}
-                          message="* denotes an Indigenous Behavioural Competency"
-                          type="info"
-                          showIcon
-                        />
 
-                        {isPickerVisible ? (
-                          <BehaviouralComptencyPicker
-                            onAdd={addBehaviouralCompetency}
-                            onCancel={() => setPickerVisible(false)}
-                            filterIds={behavioural_competencies_fields.map((b) => b.behavioural_competency.id)}
-                            style={{ marginTop: '20px' }}
-                          />
-                        ) : (
-                          <Button
+                        {/* ) : ( */}
+                        {/* <Button
                             type="link"
                             icon={<PlusOutlined />}
                             style={{ marginTop: '10px' }}
@@ -2799,7 +2783,7 @@ export const TotalCompCreateProfilePage = () => {
                           >
                             Add a behavioural competency
                           </Button>
-                        )}
+                        )} */}
                       </>
                     </Col>
                   </Row>

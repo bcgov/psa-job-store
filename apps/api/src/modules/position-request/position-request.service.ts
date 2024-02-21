@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { generateJobProfile } from 'common-kit';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
+import { Packer } from 'docx';
 import GraphQLJSON from 'graphql-type-json';
 import {
   PositionRequestCreateInput,
@@ -791,6 +793,21 @@ export class PositionRequestApiService {
       where: { id: positionRequest.parent_job_profile_id },
     });
 
+    const jobProfileDocument =
+      positionRequest.profile_json != null
+        ? generateJobProfile({
+            jobProfile: positionRequest.profile_json as Record<string, any>,
+            parentJobProfile: parentJobProfile,
+          })
+        : null;
+    const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
+
+    console.log('jobProfileBase64: ', jobProfileBase64);
+
+    // Packer.toBlob(document).then((blob) => {
+    //   saveAs(blob, 'job-profile.docx');
+    // });
+
     const data: IncidentCreateUpdateInput = {
       subject: `Position Number Request - ${classification.code}`,
       primaryContact: { id: contactId },
@@ -847,7 +864,14 @@ export class PositionRequestApiService {
           `,
         },
       ],
-      fileAttachments: [],
+      fileAttachments: [
+        {
+          name: `${positionRequest.title} ${classification.code}`,
+          fileName: `${positionRequest.title} ${classification.code}`,
+          contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          data: jobProfileBase64,
+        },
+      ],
     };
 
     let incident: Record<string, any> = {};

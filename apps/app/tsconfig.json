@@ -1,5 +1,11 @@
 {
   "extends": "tsconfig/vite.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "common-kit": ["../../node_modules/common-kit"]
+    }
+  },
   "include": ["src", "vite.config.ts", "envConfig.ts", "jest.setup.ts", "jest.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

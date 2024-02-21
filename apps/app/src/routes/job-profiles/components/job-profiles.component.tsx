@@ -21,10 +21,10 @@ interface JobProfilesContentProps {
   searchParams: URLSearchParams;
   // searchQuery: string | null;
   onSelectProfile?: (profile: JobProfileModel) => void;
-  onUseProfile?: () => void;
+  // onUseProfile?: () => void;
 }
 
-const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile, onUseProfile }) => {
+const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile }) => {
   const dispatch = useAppDispatch();
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
   const [classificationIdFilter, setClassificationIdFilter] = useState<string | null>(null);
@@ -212,26 +212,29 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
   // console.log('params: ', params, 'searchParams: ', searchParams.toString());
   const renderJobProfile = () => {
     return params.id || searchParams.get('selectedProfile') ? (
-      <JobProfile onUseProfile={onUseProfile} />
+      <JobProfile />
     ) : (
       <div style={{ marginTop: '16rem' }} data-testid="job-profile-empty">
         <Empty
           description={
             <Space direction="vertical" style={{ userSelect: 'none' }}>
-              <Title level={1}>Select a Job Profile</Title>
-              <Text>Nothing is selected</Text>
+              <Title style={{ margin: 0 }} level={1}>
+                Select a job profile
+              </Title>
+              <Text>Choose a profile from the sidebar on the left.</Text>
             </Space>
           }
-          image={<FileTextFilled style={{ fontSize: '60pt' }} />}
+          image={<FileTextFilled style={{ fontSize: '60pt', color: '#52A8FF' }} />}
         />
       </div>
     );
   };
 
+  // console.log('jobProfilesLoading || isLoading: ', jobProfilesLoading, isLoading);
   return (
     <>
       <WizardProvider>
-        <JobProfileSearch />
+        <JobProfileSearch fullWidth={true} />
         <Row justify="center" gutter={16}>
           {screens['xl'] === true ? (
             <>

@@ -18,13 +18,13 @@ import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
+import '../../../components/app/common/css/custom-descriptions.css';
 import {
   AccountabilitiesModel,
   JobProfileModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import WizardEditControlBar from '../../wizard/components/wizard-edit-control-bar';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -36,7 +36,7 @@ interface JobProfileProps {
   showBackToResults?: boolean;
   showDiff?: boolean;
   style?: CSSProperties;
-  onUseProfile?: () => void;
+  // onUseProfile?: () => void;
   showBasicInfo?: boolean;
 }
 
@@ -165,7 +165,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   showBackToResults = true,
   showDiff = false,
   style,
-  onUseProfile,
+  // onUseProfile,
   showBasicInfo = true,
 }) => {
   const [searchParams] = useSearchParams();
@@ -226,6 +226,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       } else if (operation === -1) {
         // Deletion
         style.textDecoration = 'line-through';
+        style.color = 'red';
       }
 
       return (
@@ -268,6 +269,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 style.backgroundColor = 'yellow';
               } else if (operation === -1) {
                 style.textDecoration = 'line-through';
+                style.color = 'red';
               }
 
               return (
@@ -300,7 +302,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         );
       } else if (originalItem && !modifiedItem) {
         comparisonResult.push(
-          <li key={name} style={{ textDecoration: 'line-through' }}>
+          <li key={name} style={{ textDecoration: 'line-through', color: 'red' }}>
             <Text strong>{originalItem.name}</Text> {originalItem.description}
           </li>,
         );
@@ -740,18 +742,32 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       ) : (
         <div />
       )}
-      {onUseProfile ? (
+      {/* {onUseProfile ? (
         <WizardEditControlBar onNext={onUseProfile} nextText="Use Profile" style={{ marginBottom: '1rem' }} />
-      ) : // <Button onClick={() => onUseProfile()} type="primary">
-      //   Use Profile
-      // </Button>
-      null}
+      ) :
+      null} */}
+
+      {effectiveData?.review_required && (
+        <Alert
+          message={<span>Will require verification</span>}
+          description={
+            <span>
+              This profile will need to be verified by the classification team before a position number is generated.
+            </span>
+          }
+          type="warning"
+          showIcon
+          icon={<ExclamationCircleFilled />}
+          style={{ marginBottom: '24px' }}
+        />
+      )}
+
       <Alert
         message={
           <span>
             Job context{' '}
             <Tooltip title="The job context is important to understand as you proceed to create the position. You will be asked prior to approving that you understand the context of the job.">
-              <InfoCircleOutlined style={{ cursor: 'pointer' }} />
+              <InfoCircleOutlined style={{ cursor: 'pointer', fontSize: '0.9rem' }} />
             </Tooltip>
           </span>
         }
@@ -771,7 +787,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         icon={<ExclamationCircleFilled />}
         style={{ marginBottom: '24px' }}
       />
+
       <Descriptions
+        className="customDescriptions"
         title="Job profile"
         aria-hidden="true"
         bordered
@@ -781,14 +799,17 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           fontWeight: 700,
           width: '100px',
           verticalAlign: 'top',
+          background: '#FAFAFA',
         }}
         contentStyle={{
+          background: 'white',
           verticalAlign: 'top',
         }}
       />
 
       {showBasicInfo && (
         <Descriptions
+          className="customDescriptions"
           title="Basic information"
           bordered
           column={24}
@@ -798,8 +819,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             fontWeight: 700,
             width: '100px',
             verticalAlign: 'top',
+            background: '#FAFAFA',
           }}
           contentStyle={{
+            background: 'white',
             verticalAlign: 'top',
           }}
         />
