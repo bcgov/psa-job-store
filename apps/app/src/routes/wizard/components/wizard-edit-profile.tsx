@@ -35,8 +35,7 @@ import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
-import { IsIndigenousCompetency } from './is-indigenous-competency.component';
-import BehaviouralComptencyPicker, { BehaviouralCompetencyData } from './wizard-behavioural-comptency-picker';
+import BehaviouralComptencyPicker from './wizard-behavioural-comptency-picker';
 import './wizard-edit-profile.css';
 import { useWizardContext } from './wizard.provider';
 
@@ -706,16 +705,6 @@ const WizardEditProfile = forwardRef(
         return formState.errors;
       },
     }));
-
-    // State to control visibility of the picker
-    const [isPickerVisible, setPickerVisible] = useState(false);
-
-    // ... other state and handlers for behavioural_competencies_fields ...
-
-    const addBehaviouralCompetency = (competency: BehaviouralCompetencyData) => {
-      behavioural_competencies_append(competency);
-      setPickerVisible(false); // Hide picker after adding
-    };
 
     // FOCUS ALERTS
     // when user focuses on required accountabilities and minimum requirements fields, show an alert once
@@ -2668,8 +2657,16 @@ const WizardEditProfile = forwardRef(
                 <Row justify="start">
                   <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                     <>
+                      <BehaviouralComptencyPicker
+                        onAdd={behavioural_competencies_append}
+                        onRemove={behavioural_competencies_remove}
+                        behavioural_competencies_fields={behavioural_competencies_fields}
+                      />
+                      <Typography.Text type="secondary">* denotes an Indigenous Behavioural Competency</Typography.Text>
+
                       <List
                         style={{ marginTop: '7px' }}
+                        locale={{ emptyText: ' ' }}
                         dataSource={behavioural_competencies_fields}
                         renderItem={(field, index) => (
                           <List.Item
@@ -2687,7 +2684,7 @@ const WizardEditProfile = forwardRef(
                             <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
                               <strong>
                                 {field.behavioural_competency.name}
-                                <IsIndigenousCompetency competency={field.behavioural_competency} />
+                                {/* <IsIndigenousCompetency competency={field.behavioural_competency} /> */}
                               </strong>
                               : {field.behavioural_competency.description}
                             </p>
@@ -2698,7 +2695,7 @@ const WizardEditProfile = forwardRef(
                               icon={<DeleteOutlined />}
                               onClick={() => {
                                 behavioural_competencies_remove(index);
-                                setRenderKey((prevKey) => prevKey + 1);
+                                // setRenderKey((prevKey) => prevKey + 1);
                               }}
                               style={{
                                 border: 'none',
@@ -2734,31 +2731,19 @@ const WizardEditProfile = forwardRef(
                           </List.Item>
                         )}
                       />
-                      <Alert
-                        role="note"
-                        style={{ marginBottom: '10px', fontStyle: 'italic', marginTop: '1rem' }}
-                        message="* denotes an Indigenous Behavioural Competency"
-                        type="info"
-                        showIcon
-                      />
 
-                      {isPickerVisible ? (
-                        <BehaviouralComptencyPicker
-                          onAdd={addBehaviouralCompetency}
-                          onCancel={() => setPickerVisible(false)}
-                          filterIds={behavioural_competencies_fields.map((b) => b.behavioural_competency.id)}
-                          style={{ marginTop: '20px' }}
-                        />
-                      ) : (
-                        <Button
+                      {/* {isPickerVisible ? ( */}
+
+                      {/* ) : ( */}
+                      {/* <Button
                           type="link"
                           icon={<PlusOutlined />}
                           style={{ ...addStyle, marginTop: '10px' }}
                           onClick={() => setPickerVisible(true)} // Show picker when "Add" button is clicked
                         >
                           Add a behavioural competency
-                        </Button>
-                      )}
+                        </Button> */}
+                      {/* )} */}
                     </>
                   </Col>
                 </Row>
