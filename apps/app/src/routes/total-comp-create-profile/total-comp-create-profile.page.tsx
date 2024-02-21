@@ -70,6 +70,7 @@ import { useGetJobRolesQuery } from '../../redux/services/graphql-api/job-role.a
 import { useGetOrganizationsQuery } from '../../redux/services/graphql-api/organization';
 import { FormItem } from '../../utils/FormItem';
 import ContentWrapper from '../home/components/content-wrapper.component';
+import { IsIndigenousCompetency } from '../wizard/components/is-indigenous-competency.component';
 import BehaviouralComptencyPicker, {
   BehaviouralCompetencyData,
 } from '../wizard/components/wizard-behavioural-comptency-picker';
@@ -2728,7 +2729,7 @@ export const TotalCompCreateProfilePage = () => {
                               <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
                                 <strong>
                                   {field.behavioural_competency.name}
-                                  {/* <IsIndigenousCompetency competency={field.behavioural_competency} /> */}
+                                  <IsIndigenousCompetency competency={field.behavioural_competency} />
                                 </strong>
                                 : {field.behavioural_competency.description}
                               </p>
