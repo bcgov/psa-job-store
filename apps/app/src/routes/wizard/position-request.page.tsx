@@ -139,9 +139,21 @@ export const PositionRequestPage = () => {
         );
 
       case 3:
-        return <WizardReviewPage onNext={onNext} onBack={onBack} />;
+        return (
+          <WizardReviewPage
+            onNext={onNext}
+            onBack={onBack}
+            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+          />
+        );
       case 4:
-        return <WizardConfirmDetailsPage onNext={onNext} onBack={onBack} />;
+        return (
+          <WizardConfirmDetailsPage
+            onNext={onNext}
+            onBack={onBack}
+            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+          />
+        );
       case 5:
         return (
           <WizardResultPage
@@ -150,6 +162,7 @@ export const PositionRequestPage = () => {
             switchParentMode={switchParentMode}
             switchParentReadonlyMode={switchParentReadonlyMode}
             setReadOnlySelectedTab={setReadOnlySelectedTab}
+            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
           />
         );
       default:

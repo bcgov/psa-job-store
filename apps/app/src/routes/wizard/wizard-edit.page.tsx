@@ -40,8 +40,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
     setWizardData,
     classificationsData,
     setClassificationsData,
-    errors,
-    // setErrors,
     positionRequestProfileId,
     positionRequestId,
   } = useWizardContext();
@@ -316,11 +314,26 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
   const wizardEditProfileRef = useRef<{
     submit: () => void;
     getFormData: () => ReturnType<FormInstance['getFieldsValue']>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getFormErrors: () => any;
   }>(null);
 
   // const navigate = useNavigate();
 
   const onNextCallback = async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errors = Object.values(wizardEditProfileRef.current?.getFormErrors()).map((error: any) => {
+      const message =
+        error.message != null
+          ? error.message
+          : error.root != null
+            ? error.root?.message
+            : error.value != null
+              ? error.value.message
+              : 'Error';
+      return message;
+    });
+
     if (errors.length) {
       Modal.error({
         title: 'Errors',
@@ -346,7 +359,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
     const transformedData = transformFormData(formData);
     console.log('transformedData: ', transformedData);
 
-    // return;
     setWizardData(transformedData);
 
     try {
@@ -472,7 +484,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
               submitText="Review Profile"
               showBackButton={true}
               receivedClassificationsDataCallback={receivedClassificationsDataCallback}
-              // setErrors={setErrors}
             ></WizardEditProfile>
           </Col>
         </Row>

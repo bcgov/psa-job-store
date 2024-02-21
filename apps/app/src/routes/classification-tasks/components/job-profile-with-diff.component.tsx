@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Col, Collapse, Row } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { Col, Row } from 'antd';
+import { useState } from 'react';
 import { JobProfile } from '../../job-profiles/components/job-profile.component';
 import WizardEditControlBar from '../../wizard/components/wizard-edit-control-bar';
-import { diffLegendContent } from '../../wizard/wizard-review.page';
 
 type JobProfileTabProps = {
   positionRequestData: any;
@@ -17,33 +16,33 @@ export const JobProfileWithDiff = ({ positionRequestData }: JobProfileTabProps) 
   };
 
   // PROFILE TAB INFO - todo: use wizard-reivew.page.tsx instead, make it configurable
-  const collapseRef = useRef<HTMLDivElement>(null);
+  // const collapseRef = useRef<HTMLDivElement>(null);
 
-  const [hasScrolledPast, setHasScrolledPast] = useState(false);
+  // const [hasScrolledPast, setHasScrolledPast] = useState(false);
 
-  const handleScroll = () => {
-    const layoutScrollContainer = document.querySelector('.ant-layout > div > div') as HTMLElement;
-    if (layoutScrollContainer && collapseRef.current) {
-      const collapseTop = collapseRef.current.getBoundingClientRect().top;
-      const containerTop = layoutScrollContainer.getBoundingClientRect().top;
+  // const handleScroll = () => {
+  //   const layoutScrollContainer = document.querySelector('.ant-layout > div > div') as HTMLElement;
+  //   if (layoutScrollContainer && collapseRef.current) {
+  //     const collapseTop = collapseRef.current.getBoundingClientRect().top;
+  //     const containerTop = layoutScrollContainer.getBoundingClientRect().top;
 
-      // Check if the Collapse top is above the container top
-      setHasScrolledPast(collapseTop < containerTop);
-    }
-  };
+  //     // Check if the Collapse top is above the container top
+  //     setHasScrolledPast(collapseTop < containerTop);
+  //   }
+  // };
 
-  useEffect(() => {
-    const layoutScrollContainer = document.querySelector('.ant-layout > div > div');
-    if (layoutScrollContainer) {
-      layoutScrollContainer.addEventListener('scroll', handleScroll);
-    }
+  // useEffect(() => {
+  //   const layoutScrollContainer = document.querySelector('.ant-layout > div > div');
+  //   if (layoutScrollContainer) {
+  //     layoutScrollContainer.addEventListener('scroll', handleScroll);
+  //   }
 
-    return () => {
-      if (layoutScrollContainer) {
-        layoutScrollContainer.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, []);
+  //   return () => {
+  //     if (layoutScrollContainer) {
+  //       layoutScrollContainer.removeEventListener('scroll', handleScroll);
+  //     }
+  //   };
+  // }, []);
 
   return (
     <Row justify="center">
@@ -54,7 +53,7 @@ export const JobProfileWithDiff = ({ positionRequestData }: JobProfileTabProps) 
           showDiff={showDiff}
           showNext={false}
         />
-        <Collapse
+        {/* <Collapse
           ref={collapseRef}
           bordered={false}
           ghost
@@ -64,7 +63,7 @@ export const JobProfileWithDiff = ({ positionRequestData }: JobProfileTabProps) 
           <Collapse.Panel key="1" showArrow={false} header="">
             {diffLegendContent}
           </Collapse.Panel>
-        </Collapse>
+        </Collapse> */}
         <JobProfile
           style={{ marginTop: '1rem' }}
           profileData={positionRequestData?.positionRequest?.profile_json}

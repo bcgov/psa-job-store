@@ -97,22 +97,6 @@ const WizardEditProfile = forwardRef(
 
     const [form] = Form.useForm();
 
-    // useEffect(() => {
-    //   setErrors(
-    //     Object.values(formState.errors).map((error: any) => {
-    //       const message =
-    //         error.message != null
-    //           ? error.message
-    //           : error.root != null
-    //             ? error.root?.message
-    //             : error.value != null
-    //               ? error.value.message
-    //               : 'Error';
-    //       return message;
-    //     }),
-    //   );
-    // }, [formState.errors, formState.isValid, formState.isValidating, getValues, setErrors]);
-
     // todo: usage of this approach is undesirable, however it fixes various render issues
     // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
     // of this state
@@ -156,6 +140,7 @@ const WizardEditProfile = forwardRef(
       setOriginalProvisosFields,
 
       positionRequestId,
+      // errors,
     } = useWizardContext();
 
     // console.log('effectiveData: ', effectiveData);
@@ -716,6 +701,9 @@ const WizardEditProfile = forwardRef(
         // This function could be used to get the current form data
         // console.log('form.getFieldsValue(): ', form.getFieldsValue());
         return form.getFieldsValue();
+      },
+      getFormErrors: () => {
+        return formState.errors;
       },
     }));
 
@@ -2000,9 +1988,6 @@ const WizardEditProfile = forwardRef(
                   control={control}
                   colon={false}
                 >
-                  <label className="sr-only" htmlFor="title.value">
-                    Job title
-                  </label>
                   <Input
                     placeholder="Ex.: Program Assistant"
                     aria-label="Job Title"
@@ -2010,6 +1995,9 @@ const WizardEditProfile = forwardRef(
                     onChange={handleFieldChange}
                   />
                 </FormItem>
+                <label className="sr-only" htmlFor="title.value">
+                  Job title
+                </label>
               </Col>
             </Row>
           </Card>
@@ -2050,11 +2038,11 @@ const WizardEditProfile = forwardRef(
                   control={control}
                   colon={false}
                 >
-                  <label className="sr-only" htmlFor="overview.value">
-                    Job overview
-                  </label>
                   <TextArea autoSize className={`${isEdited ? 'edited-textarea' : ''}`} onChange={handleFieldChange} />
                 </FormItem>
+                <label className="sr-only" htmlFor="overview.value">
+                  Job overview
+                </label>
               </Col>
             </Row>
           </Card>
@@ -2096,9 +2084,6 @@ const WizardEditProfile = forwardRef(
                   control={control}
                   colon={false}
                 >
-                  <label className="sr-only" htmlFor="program_overview.value">
-                    Program overview
-                  </label>
                   <TextArea
                     autoSize
                     className={`${isEdited ? 'edited-textarea' : ''}`}
@@ -2107,6 +2092,9 @@ const WizardEditProfile = forwardRef(
                     placeholder="(Optional) Add more details about the program"
                   />
                 </FormItem>
+                <label className="sr-only" htmlFor="program_overview.value">
+                  Program overview
+                </label>
                 <Typography.Paragraph type="secondary" style={{ textAlign: 'right', width: '100%', margin: '0' }}>
                   {(getValues('program_overview.value') as string).length} / 320
                 </Typography.Paragraph>

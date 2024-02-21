@@ -226,6 +226,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       } else if (operation === -1) {
         // Deletion
         style.textDecoration = 'line-through';
+        style.color = 'red';
       }
 
       return (
@@ -268,6 +269,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 style.backgroundColor = 'yellow';
               } else if (operation === -1) {
                 style.textDecoration = 'line-through';
+                style.color = 'red';
               }
 
               return (
@@ -300,7 +302,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         );
       } else if (originalItem && !modifiedItem) {
         comparisonResult.push(
-          <li key={name} style={{ textDecoration: 'line-through' }}>
+          <li key={name} style={{ textDecoration: 'line-through', color: 'red' }}>
             <Text strong>{originalItem.name}</Text> {originalItem.description}
           </li>,
         );
