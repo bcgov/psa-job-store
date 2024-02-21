@@ -862,31 +862,58 @@ export class PositionRequestApiService {
   }
 
   async createPositionForPositionRequest(id: number) {
-    const needsReview = await this.positionRequestNeedsReview(id);
+    const positionRequestNeedsReview = await this.positionRequestNeedsReview(id);
 
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+    const classification = await this.prisma.classification.findUnique({
+      where: { id: positionRequest.classification_id },
+    });
     const department = await this.prisma.department.findUnique({
       select: { organization: { select: { id: true } } },
       where: { id: positionRequest.department_id },
     });
-    // const parentJobProfile = await this.prisma.jobProfile.findUnique({
-    //   where: { id: positionRequest.parent_job_profile_id },
-    // });
 
-    const data: PositionCreateInput = {
-      BUSINESS_UNIT: department.organization.id,
-      DEPTID: positionRequest.department_id,
-      JOBCODE: positionRequest.classification_id,
-      REPORTS_TO: positionRequest.reports_to_position_id,
-      POSN_STATUS: needsReview ? PositionStatus.Proposed : PositionStatus.Active,
-      DESCR: positionRequest.title,
-      REG_TEMP: PositionDuration.Regular,
-      FULL_PART_TIME: PositionType.FullTime,
-      // TGB_E_CLASS: `P${parentJobProfile.number}`,
-      // TGB_APPRV_MGR: positionRequest.reports_to_position_id,
-      // TGB_SCRTY_SCRN_REQ: PositionSecurityScreenRequired.Yes,
-      // TGB_SCRTY_SCRN_DT: '01-JAN-2024',
-    };
+    let data: PositionCreateInput;
+
+    switch (classification.employee_group_id) {
+      case 'MGT':
+        data = {
+          BUSINESS_UNIT: department.organization.id,
+          DEPTID: positionRequest.department_id,
+          JOBCODE: positionRequest.classification_id,
+          REPORTS_TO: positionRequest.reports_to_position_id,
+          POSN_STATUS: positionRequestNeedsReview ? PositionStatus.Proposed : PositionStatus.Active,
+          DESCR: positionRequest.title,
+          REG_TEMP: PositionDuration.Regular,
+          FULL_PART_TIME: PositionType.FullTime,
+        };
+        break;
+      case 'GEU':
+      case 'OEX':
+      case 'PEA': {
+        const employees = (
+          await this.peoplesoftService.getEmployeesForPositions([
+            positionRequest.additional_info_excluded_mgr_position_number,
+          ])
+        ).get(positionRequest.additional_info_excluded_mgr_position_number);
+        const employeeId = employees.length > 0 ? employees[0].id : null;
+
+        data = {
+          BUSINESS_UNIT: department.organization.id,
+          DEPTID: positionRequest.department_id,
+          JOBCODE: positionRequest.classification_id,
+          REPORTS_TO: positionRequest.reports_to_position_id,
+          POSN_STATUS: positionRequestNeedsReview ? PositionStatus.Proposed : PositionStatus.Active,
+          DESCR: positionRequest.title,
+          REG_TEMP: PositionDuration.Regular,
+          FULL_PART_TIME: PositionType.FullTime,
+          TGB_E_CLASS: `P${(positionRequest.profile_json as Record<string, any>).number}`,
+          TGB_APPRV_MGR: employeeId,
+        };
+
+        break;
+      }
+    }
 
     const position = await this.peoplesoftService.createPosition(data);
 
