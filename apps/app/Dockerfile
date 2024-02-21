@@ -19,6 +19,8 @@ COPY apps/app/package.json ./apps/app/
 RUN npm ci
 COPY tsconfig.json ./
 COPY apps/app ./apps/app
+# build common-kit
+RUN npm -w common-kit run build
 #generates the dist folder for nest to run
 RUN npm -w app run build
 # openshift runs as a different user than what docker builds with
