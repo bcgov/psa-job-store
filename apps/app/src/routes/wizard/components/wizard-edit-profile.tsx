@@ -35,6 +35,7 @@ import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
+import { IsIndigenousCompetency } from './is-indigenous-competency.component';
 import BehaviouralComptencyPicker from './wizard-behavioural-comptency-picker';
 import './wizard-edit-profile.css';
 import { useWizardContext } from './wizard.provider';
@@ -2684,7 +2685,7 @@ const WizardEditProfile = forwardRef(
                             <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
                               <strong>
                                 {field.behavioural_competency.name}
-                                {/* <IsIndigenousCompetency competency={field.behavioural_competency} /> */}
+                                <IsIndigenousCompetency competency={field.behavioural_competency} />
                               </strong>
                               : {field.behavioural_competency.description}
                             </p>
