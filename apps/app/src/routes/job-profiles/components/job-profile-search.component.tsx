@@ -389,6 +389,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const trimmedValue = value.trim();
     // const basePath = getBasePath(location.pathname);
     searchParams.delete('selectedProfile');
+    searchParams.delete('page');
 
     if (trimmedValue.length === 0) {
       searchParams.delete('search');
@@ -396,10 +397,19 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
       searchParams.set('search', trimmedValue);
     }
 
+    // Get the current URL and split the path
+    const currentPath = window.location.pathname;
+    const pathSegments = currentPath.split('/').filter(Boolean);
+
+    // Check if the path follows the pattern '/job-profiles/<id>'
+    let basePath = currentPath;
+    if (pathSegments.length === 2 && pathSegments[0] === 'job-profiles' && !isNaN(parseInt(pathSegments[1], 10))) {
+      basePath = `/${pathSegments[0]}`;
+    }
+
     navigate(
       {
-        // pathname: basePath,
-        // pathname: `/position-request/${positionRequestId}`,
+        pathname: basePath,
         search: searchParams.toString(),
       },
       { replace: true },
@@ -577,7 +587,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     treeCheckable={true}
                     showCheckedStrategy={SHOW_CHILD}
                     placeholder="Profession and Discipline"
-                    maxTagCount={1}
+                    maxTagCount={0}
                     maxTagPlaceholder="Profession and Discipline"
                     tagRender={() => {
                       return <></>;

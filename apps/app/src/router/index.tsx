@@ -130,7 +130,6 @@ export const router = createBrowserRouter([
                 path: ':id',
                 element: <JobProfilesPage />,
                 handle: {
-                  breadcrumb: () => 'Job Profilez',
                   icon: <FileTextOutlined />,
                 },
               },

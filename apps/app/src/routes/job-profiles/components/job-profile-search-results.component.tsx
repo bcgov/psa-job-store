@@ -3,6 +3,7 @@ import { Empty, Pagination, Skeleton, Typography } from 'antd';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileCard } from './job-profile-card.component';
+import './job-profile-search-results.component.css';
 import styles from './job-profile-search-results.module.css';
 
 const { Text } = Typography;
@@ -26,6 +27,8 @@ export const JobProfileSearchResults = ({
   totalResults,
   onPageChange,
 }: JobProfileSearchResultsProps) => {
+  const isTestEnvironment = import.meta.env.VITE_TEST_ENV === 'true';
+
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
@@ -83,6 +86,7 @@ export const JobProfileSearchResults = ({
       </a>
     );
   };
+
   return (
     <div
       style={{ border: '1px solid #D9D9D9', borderRadius: '8px', background: 'white' }}
@@ -127,10 +131,12 @@ export const JobProfileSearchResults = ({
       </ul>
       <Pagination
         data-testid="pagination"
-        // showSizeChanger
+        // have a hidden size changer for testing purposes
+        // className="hideSizeChanger"
+        showSizeChanger={isTestEnvironment}
+        pageSizeOptions={[2, 10]}
         current={currentPage}
         pageSize={pageSize}
-        // pageSizeOptions={[1, 2, 3, 5, 10]}
         total={totalResults}
         onChange={onPageChange}
         style={{ textAlign: 'center', margin: '1rem' }}
