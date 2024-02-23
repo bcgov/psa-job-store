@@ -19,6 +19,7 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
   return (
     <Space
       direction="vertical"
+      data-testid="job-profile-card"
       style={{
         width: '100%',
         cursor: 'pointer',

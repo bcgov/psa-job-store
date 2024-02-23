@@ -12,7 +12,7 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
 
   async validate(payload: string, done: (err, user) => void) {
     // Check if JWT verification should be skipped
-    if (process.env.SKIP_JWT_SIGNATURE_VERIFICATION === 'true') {
+    if (process.env.TEST_ENV === 'true') {
       // Assuming payload is a valid JWT, decode it without verification
       const decoded = decodeJwt(payload) as JwtPayload;
       // console.log('decoded: ', decoded);

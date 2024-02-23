@@ -20,7 +20,7 @@ export class RolesGlobalGuard extends PassportAuthGuard('keycloak') {
     // Allow all requests to the logout endpoint
     // Check if the endpoint allows unauthenticated access
     const allowNoRoles = this.reflector.get<boolean>('allowNoRoles', context.getHandler());
-    const skipVerification = process.env.SKIP_JWT_SIGNATURE_VERIFICATION; // for local development only - allows postman access
+    const skipVerification = process.env.TEST_ENV; // for local development only - allows postman access
     if (allowNoRoles || skipVerification === 'true') {
       return true;
     }

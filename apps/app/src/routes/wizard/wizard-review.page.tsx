@@ -126,63 +126,64 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   };
 
   return (
-    <WizardPageWrapper
-      // title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}
+    <div data-testid="review-changes-page">
+      <WizardPageWrapper
+        // title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}
 
-      title={
-        <div>
-          <Link to="/">
-            <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
-          </Link>
-          Edit profile
-        </div>
-      }
-      subTitle={
-        <div>View the edits you've made to the generic profile. Review to make sure it meets your requirements.</div>
-      }
-      additionalBreadcrumb={{ title: 'New position' }}
-      // subTitle="Choose a job profile to modify for the new positions"
-      hpad={false}
-      grayBg={false}
-      pageHeaderExtra={[
-        <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
-          <Button icon={<EllipsisOutlined />}></Button>
-        </Popover>,
-        <Button onClick={onBackCallback} key="back">
-          Back
-        </Button>,
-        <Button key="next" type="primary" onClick={onNextCallback}>
-          Save and next
-        </Button>,
-      ]}
-    >
-      <WizardSteps current={3}></WizardSteps>
-
-      <div
-        style={{
-          overflow: 'hidden',
-          position: 'relative',
-          height: '100%',
-          background: 'rgb(240, 242, 245)',
-          marginLeft: '-1rem',
-          marginRight: '-1rem',
-          marginTop: '-1px',
-          padding: '2rem 1rem',
-        }}
+        title={
+          <div>
+            <Link to="/">
+              <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+            </Link>
+            Edit profile
+          </div>
+        }
+        subTitle={
+          <div>View the edits you've made to the generic profile. Review to make sure it meets your requirements.</div>
+        }
+        additionalBreadcrumb={{ title: 'New position' }}
+        // subTitle="Choose a job profile to modify for the new positions"
+        hpad={false}
+        grayBg={false}
+        pageHeaderExtra={[
+          <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
+            <Button icon={<EllipsisOutlined />}></Button>
+          </Popover>,
+          <Button onClick={onBackCallback} key="back">
+            Back
+          </Button>,
+          <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button">
+            Save and next
+          </Button>,
+        ]}
       >
-        <Row justify="center" gutter={16}>
-          <Col sm={24} md={24} lg={24} xxl={18}>
-            <Card bodyStyle={{ padding: '0' }}>
-              <WizardEditControlBar
-                style={{ background: 'white' }}
-                onToggleShowDiff={handleToggleShowDiff}
-                showDiffToggle={true}
-                showDiff={showDiff}
-                showNext={false}
-              />
-            </Card>
+        <WizardSteps current={3}></WizardSteps>
 
-            {/* <Collapse
+        <div
+          style={{
+            overflow: 'hidden',
+            position: 'relative',
+            height: '100%',
+            background: 'rgb(240, 242, 245)',
+            marginLeft: '-1rem',
+            marginRight: '-1rem',
+            marginTop: '-1px',
+            padding: '2rem 1rem',
+          }}
+        >
+          <Row justify="center" gutter={16}>
+            <Col sm={24} md={24} lg={24} xxl={18}>
+              <Card bodyStyle={{ padding: '0' }}>
+                <WizardEditControlBar
+                  style={{ background: 'white' }}
+                  onToggleShowDiff={handleToggleShowDiff}
+                  showDiffToggle={true}
+                  showDiff={showDiff}
+                  showNext={false}
+                />
+              </Card>
+
+              {/* <Collapse
         ref={collapseRef}
         bordered={false}
         ghost
@@ -193,17 +194,18 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           {diffLegendContent}
         </Collapse.Panel>
       </Collapse> */}
-            <JobProfile
-              style={{ marginTop: '1rem' }}
-              profileData={wizardData}
-              showBackToResults={false}
-              showDiff={showDiff}
-              id={wizardData?.id.toString()}
-              showBasicInfo={false}
-            />
-          </Col>
-        </Row>
-      </div>
-    </WizardPageWrapper>
+              <JobProfile
+                style={{ marginTop: '1rem' }}
+                profileData={wizardData}
+                showBackToResults={false}
+                showDiff={showDiff}
+                id={wizardData?.id.toString()}
+                showBasicInfo={false}
+              />
+            </Col>
+          </Row>
+        </div>
+      </WizardPageWrapper>
+    </div>
   );
 };

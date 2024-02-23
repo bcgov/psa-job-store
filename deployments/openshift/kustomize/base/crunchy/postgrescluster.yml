@@ -17,17 +17,26 @@ spec:
         - "ReadWriteOnce"
         resources:
           requests:
-            storage: 1Gi  # Adjust the storage size as per your requirement
+            storage: 1.5Gi  # Adjust the storage size as per your requirement
+      sidecars:
+        replicaCertCopy:
+          resources:
+            requests:
+              cpu: "5m"
+              memory: "10Mi" 
+            limits:
+              cpu: "10m" 
+              memory: "20Mi" 
   backups:
     pgbackrest:
       global:
-          repo1-retention-full: "7" # Retain backups for 7 days. All full and incremental after this will be removed.
+          repo1-retention-full: "30" # Retain backups for 30 days. All full and incremental after this will be removed.
           repo1-retention-full-type: time
       repos:
         - name: repo1
           schedules:
             full: "0 2 * * *"
-            incremental: "*/15 * * * *"
+            incremental: "*/60 * * * *"
           volume:
             volumeClaimSpec:
               storageClassName: netapp-file-backup
@@ -35,7 +44,7 @@ spec:
               - "ReadWriteOnce"
               resources:
                 requests:
-                  storage: 2Gi  # Adjust as needed
+                  storage: 20Gi  # Adjust as needed
       repoHost:
         resources:
           requests:
@@ -45,12 +54,22 @@ spec:
             cpu: 50m
             memory: 128Mi
       sidecars:
-        requests:
-          cpu: 1m
-          memory: 64Mi
-        limits:
-          cpu: 50m
-          memory: 128Mi
+        pgbackrest:
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "150Mi" 
+            limits:
+              cpu: "100m" 
+              memory: "256Mi" 
+        pgbackrestConfig:
+          resources:
+            requests:
+              cpu: "5m"
+              memory: "10Mi" 
+            limits:
+              cpu: "10m" 
+              memory: "20Mi" 
   postgresVersion: 15
   # image: 'registry.redhat.io/rhel8/postgresql-15'  # Use Crunchy Data equivalent image
   patroni:
@@ -58,8 +77,9 @@ spec:
       postgresql:
         pg_hba: "host all all 0.0.0.0/0 md5"
         parameters:
-          shared_buffers: 32MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
-          wal_buffers: "64kB" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
+          effective_cache_size: 256MB #helps the PostgreSQL query planner guess how much memory is available for disk caching. For read-heavy workloads, setting this to a higher value (50-75% of total RAM) can be beneficial
+          shared_buffers: 64MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
+          wal_buffers: "3MB" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
           min_wal_size: 32MB
           max_wal_size: 64MB # default is 1GB
           max_slot_wal_keep_size: 128MB # default is -1, allowing unlimited wal growth when replicas fall behind

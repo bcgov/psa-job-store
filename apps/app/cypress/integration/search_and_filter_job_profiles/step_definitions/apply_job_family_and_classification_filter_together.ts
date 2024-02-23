@@ -2,15 +2,23 @@ import { Then, When } from '@badeball/cypress-cucumber-preprocessor';
 
 When('the user selects "Budgeting" from the job family filter', () => {
   const jobFamily = 'Budgeting';
+  const group = 'Finance';
 
-  cy.get('[data-cy="Job Family-filter"]').find('.react-select__input-container').click();
-  cy.get('[data-cy="Job Family-filter"]').find('input').type(jobFamily);
+  // Click the TreeSelect component to open the dropdown
+  cy.get('[data-cy="Job Family-filter"]').find('.ant-select-selector').click();
 
-  cy.get('[data-cy="Job Family-filter"]')
-    .find('.react-select__menu div')
-    .contains(jobFamily)
-    .last() // Selects the last matching element
+  // Wait for the dropdown to be visible
+  cy.get('.ant-select-dropdown').should('be.visible');
+
+  // Click on the expand arrow beside the 'Finance' group
+  cy.get('.ant-select-dropdown')
+    .contains('.ant-select-tree-title', group)
+    .parents('.ant-select-tree-treenode')
+    .find('.ant-select-tree-switcher')
     .click();
+
+  // Now select 'Budgeting' from the 'Finance' group
+  cy.get('.ant-select-dropdown').contains('.ant-select-tree-title', jobFamily).click();
 });
 
 Then(

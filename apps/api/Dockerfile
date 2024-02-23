@@ -52,7 +52,7 @@ WORKDIR /usr/src/apps/api/
 RUN mkdir /.npm
 RUN chgrp -R 0 /.npm && chmod -R g=u /.npm
 
-
+RUN mkdir -p /tmp/log
 # Expose port 4000
 EXPOSE 4000
 

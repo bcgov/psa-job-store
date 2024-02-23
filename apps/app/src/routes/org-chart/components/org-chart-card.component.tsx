@@ -216,7 +216,7 @@ export const OrgChartCard = memo(
             );
           }}
         > */}
-        <div ref={cardRef} className="cardContainer">
+        <div ref={cardRef} className="cardContainer" data-testid={`org-chart-node-${data.id}`}>
           <Card
             size="small"
             style={{ border: '1px solid #A1A1A1', cursor: 'pointer' }}
@@ -293,7 +293,12 @@ export const OrgChartCard = memo(
                   // console.log(data.employees);
 
                   return (
-                    <Button type="default" onClick={createDirectReport} icon={<UserAddOutlined />}>
+                    <Button
+                      type="default"
+                      onClick={createDirectReport}
+                      icon={<UserAddOutlined />}
+                      data-testid="create-direct-report-button"
+                    >
                       Create new direct report
                     </Button>
                   );
