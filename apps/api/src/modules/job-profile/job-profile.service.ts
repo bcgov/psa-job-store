@@ -214,7 +214,7 @@ export class JobProfileService {
   async createOrUpdateJobProfile(data: JobProfileCreateInput, userId: string, id?: number) {
     // todo: catch the "number" constraint failure and process the error on the client appropriately
 
-    const result = this.prisma.jobProfile.upsert({
+    const result = await this.prisma.jobProfile.upsert({
       where: { id: id || -1 },
       create: {
         behavioural_competencies: {
@@ -398,6 +398,8 @@ export class JobProfileService {
         total_comp_create_form_misc: data.total_comp_create_form_misc,
       },
     });
+
+    await this.searchService.updateJobProfileSearchIndex(result.id);
 
     return result;
   }

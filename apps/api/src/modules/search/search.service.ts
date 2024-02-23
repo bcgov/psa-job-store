@@ -1,16 +1,23 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
-type SearchIndex = 'job-profile';
+export enum SearchIndex {
+  JobProfile = 'job-profile',
+}
 
 @Injectable()
 export class SearchService {
-  constructor(private readonly elasticService: ElasticsearchService) {}
+  constructor(
+    private readonly elasticService: ElasticsearchService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   private query(index: SearchIndex, value: string): QueryDslQueryContainer {
     switch (index) {
-      case 'job-profile': {
+      case SearchIndex.JobProfile: {
         return {
           multi_match: {
             query: value,
@@ -26,7 +33,7 @@ export class SearchService {
 
   async searchJobProfiles(value: string) {
     const results = await this.elasticService.search({
-      index: 'job-profile',
+      index: SearchIndex.JobProfile,
       query: {
         bool: {
           should: [
@@ -134,5 +141,56 @@ export class SearchService {
     });
 
     return results.hits.hits.map((h) => +h._id);
+  }
+
+  async updateJobProfileSearchIndex(job_profile_id: number) {
+    const profile = await this.prisma.jobProfile.findUnique({
+      where: { id: job_profile_id },
+      include: { context: true },
+    });
+
+    // If profile doesn't exist, or it is in DRAFT or UNPUBLISHED state, delete it from the search index
+    if (profile == null || ['DRAFT', 'UNPUBLISHED'].includes(profile.state)) {
+      const documentExists = await this.elasticService.exists({
+        index: SearchIndex.JobProfile,
+        id: `${job_profile_id}`,
+      });
+      if (documentExists) await this.elasticService.delete({ index: SearchIndex.JobProfile, id: `${job_profile_id}` });
+      return;
+    }
+
+    // Create/Update search index with latest version of document
+    await this.elasticService.index({
+      index: 'job-profile',
+      id: `${profile.id}`,
+      document: {
+        title: profile.title,
+        number: profile.number,
+        context: profile.context?.description,
+        overview: profile.overview,
+        // requirements: profile.requirements,
+        education: (profile.education as Prisma.JsonObject[]).map((education) => education.text),
+        job_experience: (profile.job_experience as Prisma.JsonObject[]).map((experience) => experience.text),
+
+        accountabilities: (profile.accountabilities as Prisma.JsonObject[]).map(
+          (accountability) => accountability.text,
+        ),
+        behavioural_competencies: (
+          await this.prisma.jobProfileBehaviouralCompetency.findMany({
+            where: {
+              job_profile_id: profile.id,
+            },
+            select: {
+              behavioural_competency: {
+                select: {
+                  name: true,
+                  description: true,
+                },
+              },
+            },
+          })
+        ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
+      },
+    });
   }
 }

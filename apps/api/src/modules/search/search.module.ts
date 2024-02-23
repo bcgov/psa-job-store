@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ElasticsearchModule, ElasticsearchService } from '@nestjs/elasticsearch';
+import { JobProfileState } from '@prisma/client';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
-import { SearchService } from './search.service';
+import { SearchIndex, SearchService } from './search.service';
 
 @Module({
   imports: [
@@ -28,53 +29,25 @@ export class SearchModule {
   constructor(
     private readonly elasticService: ElasticsearchService,
     private readonly prisma: PrismaService,
+    private readonly searchService: SearchService,
   ) {
     (async () => {
       try {
-        const indexExists = await elasticService.indices.exists({ index: 'job-profile' });
+        const indexExists = await elasticService.indices.exists({ index: SearchIndex.JobProfile });
         if (indexExists === true) {
-          await elasticService.indices.delete({ index: 'job-profile' });
+          await elasticService.indices.delete({ index: SearchIndex.JobProfile });
         }
         await elasticService.indices.create({
-          index: 'job-profile',
+          index: SearchIndex.JobProfile,
         });
 
         const jobProfiles = await prisma.jobProfile.findMany({
-          include: {
-            context: true,
-          },
+          select: { id: true },
+          where: { state: { equals: JobProfileState.PUBLISHED } },
         });
 
         for await (const profile of jobProfiles) {
-          await elasticService.index({
-            index: 'job-profile',
-            id: `${profile.id}`,
-            document: {
-              title: profile.title,
-              context: profile.context?.description,
-              overview: profile.overview,
-              // requirements: profile.requirements,
-              education: profile.education,
-              job_experience: profile.job_experience,
-
-              accountabilities: profile.accountabilities,
-              behavioural_competencies: (
-                await prisma.jobProfileBehaviouralCompetency.findMany({
-                  where: {
-                    job_profile_id: profile.id,
-                  },
-                  select: {
-                    behavioural_competency: {
-                      select: {
-                        name: true,
-                        description: true,
-                      },
-                    },
-                  },
-                })
-              ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
-            },
-          });
+          await this.searchService.updateJobProfileSearchIndex(profile.id);
         }
       } catch (error) {
         console.error('ERROR: ', error);
