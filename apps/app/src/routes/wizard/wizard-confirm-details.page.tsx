@@ -375,7 +375,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   if (!allLocations) return <LoadingSpinnerWithMessage />;
 
   return (
-    <>
+    <div data-testid="additional-information-form">
       <WizardPageWrapper
         // title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}
 
@@ -399,7 +399,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           <Button onClick={onBackCallback} key="back">
             Back
           </Button>,
-          <Button key="next" type="primary" onClick={showModal}>
+          <Button key="next" type="primary" onClick={showModal} data-testid="next-button">
             Save and next
           </Button>,
         ]}
@@ -445,6 +445,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               render={({ field: { onChange, value } }) => {
                                 return (
                                   <Switch
+                                    data-testid="confirmation-switch"
                                     checked={value}
                                     onChange={(newValue) => {
                                       onChange(newValue);
@@ -483,6 +484,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               render={({ field: { onChange, onBlur, value } }) => {
                                 return (
                                   <Select
+                                    data-testid="location-select"
                                     onBlur={onBlur}
                                     value={value}
                                     onChange={(newValue) => {
@@ -526,6 +528,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               control={control}
                               render={({ field: { onChange, onBlur, value } }) => (
                                 <Select
+                                  data-testid="department-select"
                                   onChange={(newValue) => {
                                     const selectedDept =
                                       filteredDepartments?.find((dept) => dept.id === newValue)?.name || '';
@@ -602,6 +605,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               control={control}
                               render={({ field: { onChange, onBlur, value } }) => (
                                 <Input
+                                  data-testid="reporting-manager-input"
                                   onBlur={onBlur}
                                   value={value}
                                   onChange={(e) => {
@@ -622,7 +626,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               </div>
                             )}
                             {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
-                            {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
+                            {isFetchingPositionProfile && (
+                              <LoadingSpinnerWithMessage data-testid="loading-spinner" mode="small" />
+                            )}
                             {/* {errors.excludedManagerPositionNumber && !isFetchingPositionProfile && (
                       <p style={{ color: 'red' }}>{errors.excludedManagerPositionNumber.message}</p>
                     )} */}
@@ -751,6 +757,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           </Row>
         </div>
       </WizardPageWrapper>
-    </>
+    </div>
   );
 };

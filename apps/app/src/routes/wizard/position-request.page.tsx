@@ -334,7 +334,8 @@ export const PositionRequestPage = () => {
                   <Card title="Information" bordered={false}>
                     <Descriptions bordered layout="horizontal" column={1}>
                       <Descriptions.Item label="Position number">
-                        {data?.positionRequest.position_number} <Button type="link">Copy</Button>
+                        <span data-testid="position-number">{data?.positionRequest.position_number}</span>{' '}
+                        <Button type="link">Copy</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Job Details">
                         <Button type="link">View</Button> | <Button type="link">Download</Button>
@@ -372,7 +373,8 @@ export const PositionRequestPage = () => {
                   <Card title="Information" bordered={false}>
                     <Descriptions bordered layout="horizontal" column={1}>
                       <Descriptions.Item label="Position number">
-                        {data?.positionRequest.position_number} <Button type="link">Copy</Button>
+                        <span data-testid="position-number">{data?.positionRequest.position_number}</span>{' '}
+                        <Button type="link">Copy</Button>
                       </Descriptions.Item>
                       <Descriptions.Item label="Job Details">
                         <Button type="link">View</Button> | <Button type="link">Download</Button>

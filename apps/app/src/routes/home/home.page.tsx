@@ -98,7 +98,10 @@ export const HomePage = () => {
             </Link>
           }
         >
-          <OrgChartWrapped selectedDepartment={profileData?.profile.department_id ?? null} />
+          <OrgChartWrapped
+            selectedDepartment={profileData?.profile.department_id ?? null}
+            profileHasNoDepartment={profileData?.profile.department_id === null ? true : false}
+          />
         </Card>
       </ContentWrapper>
     </>

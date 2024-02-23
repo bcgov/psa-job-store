@@ -18,6 +18,7 @@ interface OrgChartRendererProps {
   allowSelection?: boolean;
   onNodeSelected?: (nodeId: string) => void;
   onOrgChartLoad?: (orgChartData: OrgChartData) => void;
+  profileHasNoDepartment?: boolean; // If true, the profile has no department (for example new employee)
 }
 
 const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
@@ -29,6 +30,7 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   allowSelection = false,
   onNodeSelected,
   onOrgChartLoad,
+  profileHasNoDepartment = false,
 }) => {
   const [orgChart, setOrgChart] = useState<OrgChartData>(orgChartSnapshot ?? DEFAULT_ORG_CHART);
   const [trigger, { data, isFetching }] = useLazyGetOrgChartQuery();
@@ -55,7 +57,10 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   }, [orgChart, onOrgChartLoad]);
 
   return isFetching ? (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+    <div
+      style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+      data-testid="org-chart-loading"
+    >
       <Spin size="large" />
     </div>
   ) : orgChart.edges.length > 0 ? (
@@ -74,9 +79,11 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
     <Space style={{ height: '100%', width: '100%', justifyContent: 'center' }} align="center">
       <Empty
         description={
-          selectedDepartment == null
-            ? 'Select a department to get started'
-            : 'No positions exist in the selected department'
+          profileHasNoDepartment
+            ? 'You have not been assigned to a department yet. Please select a department from "All Organizations" to get started.'
+            : selectedDepartment == null
+              ? 'Select a department to get started'
+              : 'No positions exist in the selected department'
         }
       />
     </Space>

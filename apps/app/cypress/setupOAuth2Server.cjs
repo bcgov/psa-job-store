@@ -25,6 +25,7 @@ async function startServer() {
       scope: 'xxx', // Scopes
       sid: 'xxxx', // Session ID
       idir_user_guid: '6405580ec713411db9c66bfab4f512cd', // User GUID
+      client_roles: ['hiring-manager'],
       identity_provider: 'xxx', // Identity provider
       idir_username: 'test', // Username
       email_verified: false, // Email verification flag

@@ -284,6 +284,7 @@ export const OrgChart = ({
     () => ({
       'org-chart-card': (nodeProps: any) => (
         <OrgChartCard
+          data-testid="org-chart-node"
           {...nodeProps}
           selectedDepartment={selectedDepartment}
           onCreateNewPosition={onCreateNewPosition}
@@ -388,35 +389,37 @@ export const OrgChart = ({
   }, [nodeAdded, addNodeAttachedToSpecificId, extraNodeInfo]);
 
   return (
-    <ReactFlow
-      nodeTypes={nodeTypes}
-      nodes={nodes}
-      edges={edges}
-      connectionLineType={ConnectionLineType.SmoothStep}
-      fitView
-      elementsSelectable={true}
-      // onSelectionChange={(selectedElements) => {
-      //   console.log('onSelectionChange: ', selectedElements);
-      //   const node = selectedElements.nodes[0];
-      //   if (!node) {
-      //     return;
-      //   }
-      //   setSelectedNode(node);
-      //   highlightPath(node, nodes, edges, true);
-      //   // const tracedNodes = getAllTracedNodes(node, nodes, edges, [], false);
-      //   // console.log('traced nodes: ', tracedNodes);
-      // }}
-      onPaneClick={() => {
-        resetNodeStyles();
-        setSelectedNode(undefined);
-      }}
-    >
-      {/* <Panel position="top-left">
+    <div data-testid="org-chart-container" style={{ height: '100%' }}>
+      <ReactFlow
+        nodeTypes={nodeTypes}
+        nodes={nodes}
+        edges={edges}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        fitView
+        elementsSelectable={true}
+        // onSelectionChange={(selectedElements) => {
+        //   console.log('onSelectionChange: ', selectedElements);
+        //   const node = selectedElements.nodes[0];
+        //   if (!node) {
+        //     return;
+        //   }
+        //   setSelectedNode(node);
+        //   highlightPath(node, nodes, edges, true);
+        //   // const tracedNodes = getAllTracedNodes(node, nodes, edges, [], false);
+        //   // console.log('traced nodes: ', tracedNodes);
+        // }}
+        onPaneClick={() => {
+          resetNodeStyles();
+          setSelectedNode(undefined);
+        }}
+      >
+        {/* <Panel position="top-left">
         <button onClick={() => onLayout('TB')}>vertical layout</button>
         <button onClick={() => onLayout('LR')}>horizontal layout</button>
       </Panel> */}
-      <Controls position="top-right" />
-      <MiniMap pannable zoomable style={{ height: 100, width: 150 }} />
-    </ReactFlow>
+        <Controls position="top-right" />
+        <MiniMap pannable zoomable style={{ height: 100, width: 150 }} />
+      </ReactFlow>
+    </div>
   );
 };

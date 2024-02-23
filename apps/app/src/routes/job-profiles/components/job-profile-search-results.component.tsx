@@ -3,7 +3,6 @@ import { Empty, Pagination, Skeleton, Typography } from 'antd';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileCard } from './job-profile-card.component';
-import './job-profile-search-results.component.css';
 import styles from './job-profile-search-results.module.css';
 
 const { Text } = Typography;

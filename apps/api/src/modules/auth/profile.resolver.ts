@@ -41,7 +41,7 @@ export class ProfileResolver {
     return {
       id: user.id,
       username: user.username,
-      department_id: employee?.DEPTID,
+      department_id: process.env.TEST_ENV === 'true' ? '112-0072' : employee?.DEPTID,
       employee_id: peoplesoftProfileData?.EMPLID,
       organization_id: employee?.BUSINESS_UNIT,
       position_id: employee?.POSITION_NBR,
