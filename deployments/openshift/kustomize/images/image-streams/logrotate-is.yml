@@ -1,0 +1,25 @@
+
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: logrotate
+spec:
+  # lookupPolicy:
+  #   local: true
+  tags:
+    - name: testing
+      from:
+        kind: DockerImage
+        name: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/logrotate:testing
+      importPolicy:
+        scheduled: true
+      referencePolicy:
+        type: Source
+    - name: latest
+      from:
+        kind: DockerImage
+        name: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/logrotate:latest
+      importPolicy:
+        scheduled: true
+      referencePolicy:
+        type: Source

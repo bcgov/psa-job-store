@@ -21,6 +21,7 @@
     "@types/dompurify": "^3.0.5",
     "@types/lodash.debounce": "^4.0.9",
     "antd": "^5.11.2",
+    "axios": "^1.6.2",
     "buffer": "^6.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",

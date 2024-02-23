@@ -61,7 +61,8 @@ COPY /apps/api/package*.json ./apps/api/
 WORKDIR /usr/src/apps/api/
 # generates the prisma client
 RUN npx prisma generate
-
+# build common-kit
+RUN npm -w common-kit run build
 #generates the dist folder for nest to run
 #RUN npm run build
 
