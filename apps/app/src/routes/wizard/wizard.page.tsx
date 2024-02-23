@@ -167,7 +167,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
         <Button onClick={back} key="back">
           Back
         </Button>,
-        <Button key="next" type="primary" disabled={selectedProfileId == null} onClick={handleSubmit(onSubmit)}>
+        <Button
+          key="next"
+          type="primary"
+          disabled={selectedProfileId == null}
+          onClick={handleSubmit(onSubmit)}
+          data-testid="next-button"
+        >
           Save and next
         </Button>,
       ]}

@@ -786,7 +786,15 @@ export class PositionRequestApiService {
       where: { id: positionRequest.classification_id },
     });
     const { metadata } = await this.prisma.user.findUnique({ where: { id: positionRequest.user_id } });
-    const contactId = ((metadata ?? {}) as Record<string, any>).crm.contact_id;
+    const contactId =
+      ((metadata ?? {}) as Record<string, any>).crm?.contact_id ?? (process.env.TEST_ENV === 'true' ? 231166 : null);
+
+    // without contactId we cannot create an incident
+    // this can happen if this is new staff member and they have not been assigned a CRM contact yet
+    if (contactId === null) {
+      throw new Error('CRM Contact ID not found');
+    }
+
     const department = await this.prisma.department.findUnique({ where: { id: positionRequest.department_id } });
     const location = await this.prisma.location.findUnique({ where: { id: department.location_id } });
     const parentJobProfile = await this.prisma.jobProfile.findUnique({

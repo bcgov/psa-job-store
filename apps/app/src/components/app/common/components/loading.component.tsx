@@ -6,13 +6,14 @@ interface LoadingProps {
   mode?: 'normal' | 'small'; // Mode parameter
 }
 
-const LoadingComponent: FC<LoadingProps> = ({ loadingText, mode = 'normal' }) => {
+const LoadingComponent: FC<LoadingProps> = ({ loadingText, mode = 'normal', ...props }) => {
   if (mode === 'small') {
-    return <Spin size="small" />;
+    return <Spin size="small" {...props} />;
   }
 
   return (
     <div
+      {...props}
       style={{
         display: 'flex',
         justifyContent: 'center',

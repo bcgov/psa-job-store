@@ -92,6 +92,7 @@ Cypress.Commands.add('login', () => {
         session_state: 'xxx',
         sid: 'xxx',
         idir_user_guid: 'xxx',
+        client_roles: ['hiring-manager'],
         identity_provider: 'idir',
         idir_username: 'TEST',
         email_verified: false,

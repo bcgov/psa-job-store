@@ -2145,11 +2145,9 @@ const WizardEditProfile = forwardRef(
 
     // console.log('effectiveData: ', effectiveData);
 
-    console.log('RENDER');
-
     return (
       <>
-        <Row gutter={[24, 24]}>
+        <Row data-testid="profile-editing-form" gutter={[24, 24]}>
           <Col xs={24} sm={24} lg={8}>
             <Alert
               type="info"

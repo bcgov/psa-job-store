@@ -39,8 +39,10 @@ Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one soluti
 
 ## Running end-to-end tests
 
-First, ensure that `SKIP_JWT_SIGNATURE_VERIFICATION=true` is set in your `apps/api/.env` file. This disables verification
-step for the JWT token and enables passing of a mock token for authentication.
+First, ensure that `TEST_ENV=true` is set in your `apps/api/.env` file. This disables verification
+step for the JWT token and enables passing of a mock token for authentication and does other API modifications.
+
+Also set `VITE_TEST_ENV=true` in `apps/app/.env` file. This applies minor UI changes to facilitate cypress automation
 
 Run `npm -w app run test-e2e`
 
@@ -77,7 +79,7 @@ If first time, set the baseline migration:
 
 To reset database with migrations:
 
-`prisma migrate reset` - this will reset the schema and apply the migrations in order.
+`npx -w api prisma migrate reset` - this will reset the schema and apply the migrations in order.
 
 Create migration:
 `npx -w api prisma migrate dev --name MIGRATION_NAME`

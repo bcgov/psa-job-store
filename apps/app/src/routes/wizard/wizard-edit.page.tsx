@@ -449,7 +449,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
         <Button onClick={onBack} key="back">
           Back
         </Button>,
-        <Button key="next" type="primary" onClick={onNextCallback}>
+        <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button">
           Save and next
         </Button>,
       ]}
