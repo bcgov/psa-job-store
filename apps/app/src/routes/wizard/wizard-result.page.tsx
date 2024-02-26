@@ -16,7 +16,6 @@ import {
   useGetPositionRequestQuery,
   usePositionNeedsRivewQuery,
   useSubmitPositionRequestMutation,
-  useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
@@ -192,41 +191,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
 
   const navigate = useNavigate();
-  const [updatePositionRequest] = useUpdatePositionRequestMutation();
-
-  const handleSendForReview = async () => {
-    if (positionRequestId) {
-      try {
-        // todo: replace with proper endpoint - this one just flips the status to IN_REVIEW
-
-        const result = await updatePositionRequest({
-          id: positionRequestId,
-          status: 'IN_REVIEW',
-        }).unwrap();
-
-        // const result = await submitPositionRequest({
-        //   id: positionRequestId,
-        // }).unwrap();
-
-        // todo - change check for position_number
-        if (result?.positionRequest.status != 'IN_REVIEW') throw new Error('API failure');
-
-        // if successfull, switch parent to readonly mode and show sent for verification message
-        // switchParentMode, switchParentReadonlyMode
-        switchParentMode && switchParentMode('readonly');
-        switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
-        setReadOnlySelectedTab && setReadOnlySelectedTab('4');
-      } catch (error) {
-        // Handle the error, possibly showing another modal
-        // Modal.error({
-        //   title: 'Error Creating Position',
-        //   content: 'An unknown error occurred', //error.data?.message ||
-        // });
-      }
-    } else {
-      throw Error('Position request not found');
-    }
-  };
 
   const back = () => {
     onBack && onBack();
@@ -440,7 +404,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         verification, once submitted. There are no other steps required, just look for our followup
                         response.
                       </Paragraph>
-                      <Button type="primary" onClick={handleSendForReview}>
+                      <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
                         Submit for verification
                       </Button>
                     </Card>
@@ -492,7 +456,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       <Paragraph>
                         There are changes to the profile which needs to be verified by the classifications team.
                       </Paragraph>
-                      <Button type="primary" onClick={handleSendForReview}>
+                      <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
                         Submit for verification
                       </Button>
                     </Card>
@@ -549,7 +513,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         There are changes to the profile which needs to be reviewed by a specialist in the
                         classifications team.
                       </Paragraph>
-                      <Button type="primary" onClick={handleSendForReview}>
+                      <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
                         Send for classification review
                       </Button>
                     </Card>
