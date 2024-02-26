@@ -27,15 +27,23 @@ Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one soluti
 
 ### 📨 Classification Review Requests
 
-- Submit position requests for classification review seamlessly.
+- Submit position requests for classification review.
 - Ensure compliance and accuracy in role classifications.
 
 ### 🔄 Integration with PeopleSoft and CRM
 
-- Enjoy smooth integration with PeopleSoft for HR management.
-- Leverage CRM integration for enhanced data utilization and customer relationship management.
+- Create positions in PeopleSoft
+- Keep track of position requests in CRM and view status changes inside JobStore
 
 ## Get Started
+
+## Running the project
+
+### Build common-kit
+
+`npm -w common-kit run build`
+
+More instructions coming soon..
 
 ## Running end-to-end tests
 

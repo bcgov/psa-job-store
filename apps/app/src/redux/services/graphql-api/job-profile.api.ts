@@ -14,6 +14,7 @@ import {
   JobProfilesCareerGroupsResponse,
   JobProfilesClassificationsResponse,
   JobProfilesDraftsCareerGroupsResponse,
+  JobProfilesDraftsClassificationsResponse,
   JobProfilesDraftsMinistriesResponse,
   JobProfilesMinistriesResponse,
   NextAvailableJobProfileNumberResponse,
@@ -31,8 +32,22 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               $take: Int
               $skip: Int
               $orderBy: [JobProfileOrderByWithRelationAndSearchRelevanceInput!]
+              $sortByClassificationName: Boolean
+              $sortByJobFamily: Boolean
+              $sortByOrganization: Boolean
+              $sortOrder: String
             ) {
-              jobProfiles(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
+              jobProfiles(
+                search: $search
+                where: $where
+                take: $take
+                skip: $skip
+                orderBy: $orderBy
+                sortByClassificationName: $sortByClassificationName
+                sortOrder: $sortOrder
+                sortByJobFamily: $sortByJobFamily
+                sortByOrganization: $sortByOrganization
+              ) {
                 id
                 all_reports_to
                 all_organizations
@@ -107,6 +122,10 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             skip: args.skip,
             take: args.take,
             orderBy: args.orderBy,
+            sortByClassificationName: args.sortByClassificationName,
+            sortByJobFamily: args.sortByJobFamily,
+            sortByOrganization: args.sortByOrganization,
+            sortOrder: args.sortOrder,
           },
         };
       },
@@ -121,8 +140,22 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               $take: Int
               $skip: Int
               $orderBy: [JobProfileOrderByWithRelationAndSearchRelevanceInput!]
+              $sortByClassificationName: Boolean
+              $sortByJobFamily: Boolean
+              $sortByOrganization: Boolean
+              $sortOrder: String
             ) {
-              jobProfilesDrafts(search: $search, where: $where, take: $take, skip: $skip, orderBy: $orderBy) {
+              jobProfilesDrafts(
+                search: $search
+                where: $where
+                take: $take
+                skip: $skip
+                orderBy: $orderBy
+                sortByClassificationName: $sortByClassificationName
+                sortByJobFamily: $sortByJobFamily
+                sortByOrganization: $sortByOrganization
+                sortOrder: $sortOrder
+              ) {
                 id
                 streams {
                   stream {
@@ -191,6 +224,10 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             skip: args.skip,
             take: args.take,
             orderBy: args.orderBy,
+            sortByClassificationName: args.sortByClassificationName,
+            sortByJobFamily: args.sortByJobFamily,
+            sortByOrganization: args.sortByOrganization,
+            sortOrder: args.sortOrder,
           },
         };
       },
@@ -371,6 +408,23 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getJobProfilesDraftsClassifications: build.query<JobProfilesDraftsClassificationsResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query JobProfilesDraftsClassifications {
+              jobProfilesDraftsClassifications {
+                id
+                code
+                name
+                grade
+                employee_group_id
+              }
+            }
+          `,
+        };
+      },
+    }),
     getJobProfilesDraftsCareerGroups: build.query<JobProfilesDraftsCareerGroupsResponse, void>({
       query: () => {
         return {
@@ -417,6 +471,7 @@ export const {
   useGetJobProfilesDraftsCareerGroupsQuery,
   useGetJobProfilesMinistriesQuery,
   useGetJobProfilesDraftsMinistriesQuery,
+  useGetJobProfilesDraftsClassificationsQuery,
   useLazyGetJobProfileQuery,
   useGetJobProfilesQuery,
   useLazyGetJobProfilesQuery,
