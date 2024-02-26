@@ -113,21 +113,14 @@ export const TotalCompCreateProfilePage = () => {
 
   const [profileJson, setProfileJson] = useState<any>(null);
 
-  console.log('profileJson: ', profileJson);
-  const {
-    data: jobProfileData,
-    isLoading: isLoadingJobProfile,
-    isFetching: isFetchingJobProfile,
-    refetch,
-  } = useGetJobProfileQuery(
+  const { data: jobProfileData, refetch } = useGetJobProfileQuery(
     { id: parseInt(id ?? '') },
     {
       skip: !id,
     },
   );
 
-  const [triggerGetJobProfile, { data: lazyJobProfile, isLoading: isLazyLoading, isFetching: isLazyFetching }] =
-    useLazyGetJobProfileQuery();
+  const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
 
   useEffect(() => {
     if (jobProfileData) {
