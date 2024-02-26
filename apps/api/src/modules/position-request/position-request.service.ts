@@ -470,7 +470,11 @@ export class PositionRequestApiService {
     // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
 
     // Collect all unique classification IDs from the position requests
-    const classificationIds = [...new Set(positionRequests.map((pr) => pr.classification_id))];
+    const classificationIds = [
+      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id != null)),
+    ];
+
+    if (!classificationIds) return [];
 
     // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
