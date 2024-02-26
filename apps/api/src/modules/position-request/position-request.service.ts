@@ -31,6 +31,7 @@ import {
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
+import { convertIncidentStatusToPositionRequestStatus } from './utils/convert-incident-status-to-position-request-status.util';
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -136,24 +137,6 @@ export class PositionRequestApiService {
     });
   }
 
-  convertIncidentStatusToPositionRequestStatus = (incident: Record<string, any>) => {
-    switch (incident.statusWithType.status.id) {
-      case IncidentStatus.Solved:
-      case IncidentStatus.SolvedTraining:
-        return PositionRequestStatus.COMPLETED;
-      case IncidentStatus.Unresolved:
-      case IncidentStatus.Updated:
-        return PositionRequestStatus.IN_REVIEW;
-      case IncidentStatus.WaitingClient:
-        return PositionRequestStatus.ACTION_REQUIRED;
-      case IncidentStatus.WaitingInternal:
-        return PositionRequestStatus.ESCALATED;
-      default:
-        // Don't update status if not covered by the above
-        return null;
-    }
-  };
-
   async submitPositionRequest(id: number) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
@@ -168,14 +151,13 @@ export class PositionRequestApiService {
       });
     }
 
-    // CRM Incident Management
+    // CRM Incident Managements
     const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
-    // console.log('incident: ', incident);
     positionRequest = await this.prisma.positionRequest.update({
       where: { id },
       data: {
         crm_id: incident.id,
-        status: this.convertIncidentStatusToPositionRequestStatus(incident),
+        status: convertIncidentStatusToPositionRequestStatus(incident.statusWithType.status),
       },
     });
 
