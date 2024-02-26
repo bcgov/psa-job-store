@@ -83,6 +83,13 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfilesClassifications();
   }
 
+  @Query(() => [Classification], { name: 'jobProfilesDraftsClassifications' })
+  @Roles('total-compensation')
+  @UseGuards(RoleGuard)
+  async getJobProfilesDraftsClassifications() {
+    return this.jobProfileService.getJobProfilesDraftsClassifications();
+  }
+
   @ResolveField(() => JobProfileBehaviouralCompetency)
   async behavioural_competencies(@Parent() { id }: JobProfile) {
     return this.jobProfileService.getBehaviouralCompetencies(id);
