@@ -861,27 +861,34 @@ export class PositionRequestApiService {
             id: IncidentThreadEntryType.Customer,
           },
           text: `
-          <ul>
-            <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
-            <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
-            <li>What is the pay list/department ID number?    ${positionRequest.department_id}</li>
-            <li>What is the expected classification level?    ${classification.code} (${classification.name})</li>
-            <li>Is this position included or excluded?    Included</li>
-            <li>Is the position full-time or part-time?    Full-time</li>
-            <li>What is the job title?    ${positionRequest.title}</li>
-            <li>Is this a regular or temporary position?    Regular</li>
-            <li>Who is the first level excluded manager for this position?    ${
-              positionRequest.reports_to_position_id
-            }</li>
-            <li>Where is the position location?    ${location.name}</li>
-            <li>Which position number will the position report to?    ${positionRequest.reports_to_position_id}</li>
-            <li>Is a Job Store profile being used? If so, what is the Job Store profile number?    ${
-              parentJobProfile.number
-            }</li>
-            <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
-            <li>Please attach a copy of the job profile you will be using.    Attached</li>
-            <li>Please attach a copy of your Organization Chart that shows the topic position and the job titles, position numbers and classifiction levels, of the supervisor, peer and subordinate positions.    Attached</li>
-          </ul>
+          <div>
+            The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${String(
+              positionRequest.position_number,
+            ).padStart(8, '0')}
+            <br />
+            <ul>
+              <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
+              <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
+              <li>What is the pay list/department ID number?    ${positionRequest.department_id}</li>
+              <li>What is the expected classification level?    ${classification.code} (${classification.name})</li>
+              <li>Is this position included or excluded?    Included</li>
+              <li>Is the position full-time or part-time?    Full-time</li>
+              <li>What is the job title?    ${positionRequest.title}</li>
+              <li>Is this a regular or temporary position?    Regular</li>
+              <li>Who is the first level excluded manager for this position?    ${
+                positionRequest.reports_to_position_id
+              }</li>
+              <li>Where is the position location?    ${location.name}</li>
+              <li>Which position number will the position report to?    ${positionRequest.reports_to_position_id}</li>
+              <li>Is a Job Store profile being used? If so, what is the Job Store profile number?    ${
+                parentJobProfile.number
+              }</li>
+              <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
+              <li>Please attach a copy of the job profile you will be using.    Attached</li>
+              <li>Please attach a copy of your Organization Chart that shows the topic position and the job titles, position numbers and classifiction levels, of the supervisor, peer and subordinate positions.    Attached</li>
+            </ul>
+          </div>
+
           `,
         },
       ],
