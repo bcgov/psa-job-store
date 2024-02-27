@@ -400,27 +400,33 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             dataIndex: 'position_number',
             key: 'position_number',
             render: (text: any, record: any) => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {text}
-                {record.status === 'COMPLETED' && hoveredRowKey === record.id && (
-                  <Button
-                    icon={<CopyOutlined />}
-                    size="small"
-                    style={{
-                      marginLeft: 8,
-                      padding: '0px', // Reduce padding
-                      lineHeight: '1', // Match the line height to the row content
-                      border: 'none', // Remove the border if not needed
-                      background: 'transparent', // Remove background
-                      height: 'fit-content', // Ensure the button only takes up the necessary height
-                    }}
-                    onClick={() => {
-                      copy(text.toString());
-                      message.success('Position number copied!');
-                    }}
-                  />
+              <>
+                {record.status === 'COMPLETED' || mode == 'classification' || mode == 'total-compensation' ? (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {text}
+                    {record.status === 'COMPLETED' && hoveredRowKey === record.id && (
+                      <Button
+                        icon={<CopyOutlined />}
+                        size="small"
+                        style={{
+                          marginLeft: 8,
+                          padding: '0px', // Reduce padding
+                          lineHeight: '1', // Match the line height to the row content
+                          border: 'none', // Remove the border if not needed
+                          background: 'transparent', // Remove background
+                          height: 'fit-content', // Ensure the button only takes up the necessary height
+                        }}
+                        onClick={() => {
+                          copy(text.toString());
+                          message.success('Position number copied!');
+                        }}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <></>
                 )}
-              </div>
+              </>
             ),
           },
         ]
