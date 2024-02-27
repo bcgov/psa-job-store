@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { btoa } from 'buffer';
 import { generateJobProfile } from 'common-kit';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
@@ -31,6 +32,7 @@ import {
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
+import { convertIncidentStatusToPositionRequestStatus } from './utils/convert-incident-status-to-position-request-status.util';
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -136,24 +138,6 @@ export class PositionRequestApiService {
     });
   }
 
-  convertIncidentStatusToPositionRequestStatus = (incident: Record<string, any>) => {
-    switch (incident.statusWithType.status.id) {
-      case IncidentStatus.Solved:
-      case IncidentStatus.SolvedTraining:
-        return PositionRequestStatus.COMPLETED;
-      case IncidentStatus.Unresolved:
-      case IncidentStatus.Updated:
-        return PositionRequestStatus.IN_REVIEW;
-      case IncidentStatus.WaitingClient:
-        return PositionRequestStatus.ACTION_REQUIRED;
-      case IncidentStatus.WaitingInternal:
-        return PositionRequestStatus.ESCALATED;
-      default:
-        // Don't update status if not covered by the above
-        return null;
-    }
-  };
-
   async submitPositionRequest(id: number) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
@@ -168,14 +152,13 @@ export class PositionRequestApiService {
       });
     }
 
-    // CRM Incident Management
+    // CRM Incident Managements
     const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
-    // console.log('incident: ', incident);
     positionRequest = await this.prisma.positionRequest.update({
       where: { id },
       data: {
         crm_id: incident.id,
-        status: this.convertIncidentStatusToPositionRequestStatus(incident),
+        status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
       },
     });
 
@@ -470,7 +453,11 @@ export class PositionRequestApiService {
     // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
 
     // Collect all unique classification IDs from the position requests
-    const classificationIds = [...new Set(positionRequests.map((pr) => pr.classification_id))];
+    const classificationIds = [
+      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id != null)),
+    ];
+
+    if (!classificationIds) return [];
 
     // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
@@ -786,7 +773,15 @@ export class PositionRequestApiService {
       where: { id: positionRequest.classification_id },
     });
     const { metadata } = await this.prisma.user.findUnique({ where: { id: positionRequest.user_id } });
-    const contactId = ((metadata ?? {}) as Record<string, any>).crm.contact_id;
+    const contactId =
+      ((metadata ?? {}) as Record<string, any>).crm?.contact_id ?? (process.env.TEST_ENV === 'true' ? 231166 : null);
+
+    // without contactId we cannot create an incident
+    // this can happen if this is new staff member and they have not been assigned a CRM contact yet
+    if (contactId === null) {
+      throw new Error('CRM Contact ID not found');
+    }
+
     const department = await this.prisma.department.findUnique({ where: { id: positionRequest.department_id } });
     const location = await this.prisma.location.findUnique({ where: { id: department.location_id } });
     const parentJobProfile = await this.prisma.jobProfile.findUnique({
@@ -802,11 +797,8 @@ export class PositionRequestApiService {
         : null;
     const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
 
-    console.log('jobProfileBase64: ', jobProfileBase64);
-
-    // Packer.toBlob(document).then((blob) => {
-    //   saveAs(blob, 'job-profile.docx');
-    // });
+    const orgChartBase64 =
+      positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
 
     const data: IncidentCreateUpdateInput = {
       subject: `Position Number Request - ${classification.code}`,
@@ -870,6 +862,12 @@ export class PositionRequestApiService {
           fileName: `${positionRequest.title} ${classification.code}`,
           contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           data: jobProfileBase64,
+        },
+        {
+          name: `Organization Chart`,
+          fileName: `Organization Chart`,
+          contentType: 'application/json',
+          data: orgChartBase64,
         },
       ],
     };

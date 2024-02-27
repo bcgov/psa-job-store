@@ -9,12 +9,14 @@ import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/
 
 export interface DownloadJobProfileComponentProps {
   jobProfile: Record<string, any> | null;
+  style?: React.CSSProperties;
 }
 
 export const DownloadJobProfileComponent = ({
   children,
   jobProfile,
-}: DownloadJobProfileComponentProps & React.PropsWithChildren) => {
+  style,
+}: DownloadJobProfileComponentProps & React.PropsWithChildren & any) => {
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
   const [parentJobProfile, setParentJobProfile] = useState<Record<string, any> | null>(null);
 
@@ -55,7 +57,13 @@ export const DownloadJobProfileComponent = ({
       <span onClick={generate}>{children}</span>
     )
   ) : (
-    <Button icon={<DownloadOutlined />} loading={isLoading} disabled={parentJobProfile == null} onClick={generate}>
+    <Button
+      style={style}
+      icon={<DownloadOutlined />}
+      loading={isLoading}
+      disabled={parentJobProfile == null}
+      onClick={generate}
+    >
       Download Job Profile
     </Button>
   );

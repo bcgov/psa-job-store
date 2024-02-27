@@ -51,13 +51,13 @@ If you are running the seed on a fresh database, uou can then remote into the ne
 npx -w api prisma db seed
 ```
 
-to apply the seeds to the database. If the database has been previously seeded, you should instead run
+to apply the seeds to the database. If the database has been previously seeded, you should instead run:
 
 ```
-npx -w api prisma db push --force-reset --skip-generate
-
-npx -w api prisma db seed
+npx -w api prisma migrate reset
 ```
+
+The above will delete all data, re-apply migrations and run the seed command
 
 The elasticsearch cluster may also need to be restarted.
 and then restart the nestjs container. This will trigger data population from PeopleSoft, such as departments info. If the nestjs container cannot connect to the elasticsearch service (and elasticsearch has finished initializing), delete the elasticsearch statefulset and recreate it.

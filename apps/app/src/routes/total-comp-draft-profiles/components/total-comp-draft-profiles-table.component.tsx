@@ -13,7 +13,7 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import { SerializedError } from '@reduxjs/toolkit';
-import { Button, Card, Col, Menu, Popover, Row, Table, Tooltip } from 'antd';
+import { Button, Card, Col, Menu, Popover, Result, Row, Table, Tooltip } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
 import { ErrorResponse, Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -81,6 +81,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [sortField, setSortField] = useState(initialSortField);
   const [sortOrder, setSortOrder] = useState(initialSortOrder);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
   const [error, setError] = useState<string | null>(null);
@@ -131,9 +132,9 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       (data && 'jobProfilesDrafts' in data && data.jobProfilesDrafts.length > 0) ||
       (data && 'jobProfiles' in data && data.jobProfiles.length > 0);
     if (onDataAvailable) {
-      onDataAvailable(hasData || false);
+      onDataAvailable(hasData || hasSearched || false);
     }
-  }, [data, onDataAvailable, isLoading]);
+  }, [data, onDataAvailable, isLoading, hasSearched]);
 
   // Check if there was an error fetching data and set the error message
   useEffect(() => {
@@ -170,7 +171,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       render: (text: any, record: any) => <Link to={`/total-compensation/profiles/${record.id}`}>{text}</Link>,
     },
     {
-      sorter: false,
+      sorter: allowSorting,
       defaultSortOrder: getSortOrder('classifications'),
       title: 'Class',
       dataIndex: 'classifications',
@@ -227,7 +228,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       },
     },
     {
-      sorter: false,
+      sorter: allowSorting,
       defaultSortOrder: getSortOrder('organizations'),
       title: 'Ministries',
       dataIndex: 'organizations',
@@ -235,19 +236,25 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       render: (organizations: any[]) => {
         if (organizations.length === 0) {
           return 'All';
+        } else if (organizations.length === 1) {
+          // Directly return the ministry name if there's only one
+          return organizations[0].organization.name;
+        } else {
+          // Sort organizations by name and then create a string with all ministry names
+          const sortedOrganizations = [...organizations].sort((a, b) =>
+            a.organization.name.localeCompare(b.organization.name),
+          );
+          const ministryNames = sortedOrganizations.map((org) => org.organization.name).join(', ');
+
+          return (
+            <span>
+              {organizations.length}{' '}
+              <Tooltip title={ministryNames}>
+                <InfoCircleOutlined />
+              </Tooltip>
+            </span>
+          );
         }
-
-        // Create a string with all ministry names
-        const ministryNames = organizations.map((org) => org.organization.name).join(', ');
-
-        return (
-          <span>
-            {organizations.length}{' '}
-            <Tooltip title={ministryNames}>
-              <InfoCircleOutlined />
-            </Tooltip>
-          </span>
-        );
       },
     },
     {
@@ -278,6 +285,11 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     const jobRoleFilter = searchParams.get('job_role_id__in');
     const classificationFilter = searchParams.get('classification_id__in');
     const jobFamilyFilter = searchParams.get('job_family_id__in');
+    const jobStreamFilter = searchParams.get('job_stream_id__in');
+
+    if (search || organizationFilter || jobRoleFilter || jobFamilyFilter || classificationFilter || jobStreamFilter) {
+      setHasSearched(true);
+    }
     //   setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
 
     // if sortOrder is "ASC" or "DESC" convert to 'ascend' or 'descend' respectively into useSortField variable
@@ -289,24 +301,38 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       useSortOrder = 'descend';
     }
 
-    const sortParams = sortField
-      ? {
-          orderBy: [
-            {
-              [sortField]:
-                sortField === 'job_family'
-                  ? {
-                      name: useSortOrder === 'ascend' ? 'asc' : 'desc',
-                    }
-                  : sortField === 'updated_at'
-                    ? { sort: useSortOrder === 'ascend' ? 'asc' : 'desc' }
-                    : useSortOrder === 'ascend'
+    let sortParams = {};
+
+    // Check if the user is sorting by classification
+    const isSortingByClassification = sortField === 'classifications';
+    const isSortingByJobFamily = sortField === 'jobFamilies';
+    const isSortingByOrganization = sortField === 'organizations';
+
+    if (!isSortingByClassification && !isSortingByJobFamily && !isSortingByOrganization) {
+      sortParams = sortField
+        ? {
+            orderBy: [
+              {
+                [sortField]:
+                  sortField === 'number' || sortField == 'title'
+                    ? useSortOrder === 'ascend'
                       ? 'asc'
-                      : 'desc',
-            },
-          ],
-        }
-      : {};
+                      : 'desc'
+                    : sortField === 'owner'
+                      ? {
+                          name: {
+                            sort: useSortOrder === 'ascend' ? 'asc' : 'desc',
+                            // add nulls handling if required, e.g., nulls: 'first'
+                          },
+                        }
+                      : sortField === 'updated_at'
+                        ? { sort: useSortOrder === 'ascend' ? 'asc' : 'desc' }
+                        : { sort: useSortOrder === 'ascend' ? 'asc' : 'desc' },
+              },
+            ],
+          }
+        : {};
+    }
 
     //   // todo: this code is duplicated in job-profiles.component.tsx
     trigger({
@@ -364,9 +390,25 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
                 },
               ]
             : []),
+          ...(jobStreamFilter !== null
+            ? [
+                {
+                  streams: { some: { streamId: { in: JSON.parse(`[${jobStreamFilter}]`) } } },
+                },
+              ]
+            : []),
         ],
       },
       ...sortParams,
+      sortByClassificationName: isSortingByClassification,
+      sortByJobFamily: isSortingByJobFamily,
+      sortByOrganization: isSortingByOrganization,
+      sortOrder:
+        isSortingByClassification || isSortingByJobFamily || isSortingByOrganization
+          ? useSortOrder === 'ascend'
+            ? 'asc'
+            : 'desc'
+          : null,
       skip: (currentPage - 1) * pageSize,
       take: pageSize,
     });
@@ -523,30 +565,54 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
           footer={showFooter ? renderTableFooter : undefined}
         />
       )}
-      {!isLoading && !hasPositionRequests && !error && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            padding: '2rem',
-            flexGrow: 1, // Expand to take available space
-            background: 'white',
-            marginBottom: '1rem',
-          }}
-        >
-          <img src={EmptyJobPositionGraphic} alt="No positions" />
-          <div>Looks like you’re not working on anything right now.</div>
-          {/* Link button to the orgchart page */}
-          <Link to="/total-compensation/create-profile">
-            <Button type="primary" style={{ marginTop: '1rem' }}>
-              Create new profile
-            </Button>
-          </Link>
-        </div>
-      )}
+      {!isLoading &&
+        !hasPositionRequests &&
+        !error &&
+        (hasSearched ? (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              padding: '2rem',
+              flexGrow: 1, // Expand to take available space
+              background: 'white',
+              marginBottom: '1rem',
+            }}
+          >
+            <Result
+              status="404"
+              title="No search results"
+              subTitle="Sorry, no results returned for your query."
+              // extra={<Button type="primary">Back Home</Button>}
+            />
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              padding: '2rem',
+              flexGrow: 1, // Expand to take available space
+              background: 'white',
+              marginBottom: '1rem',
+            }}
+          >
+            <img src={EmptyJobPositionGraphic} alt="No positions" />
+            <div>Looks like you’re not working on anything right now.</div>
+            {/* Link button to the orgchart page */}
+            <Link to="/total-compensation/create-profile">
+              <Button type="primary" style={{ marginTop: '1rem' }}>
+                Create new profile
+              </Button>
+            </Link>
+          </div>
+        ))}
       {error && (
         <div
           style={{

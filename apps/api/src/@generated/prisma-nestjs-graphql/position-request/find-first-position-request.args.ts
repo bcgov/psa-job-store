@@ -18,7 +18,7 @@ export class FindFirstPositionRequestArgs {
   orderBy?: Array<PositionRequestOrderByWithRelationAndSearchRelevanceInput>;
 
   @Field(() => PositionRequestWhereUniqueInput, { nullable: true })
-  cursor?: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>;
+  cursor?: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>;
 
   @Field(() => Int, { nullable: true })
   take?: number;

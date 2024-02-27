@@ -10,7 +10,7 @@ import { PositionRequestCreateWithoutPaylist_departmentInput } from './position-
 export class PositionRequestUpsertWithWhereUniqueWithoutPaylist_departmentInput {
   @Field(() => PositionRequestWhereUniqueInput, { nullable: false })
   @Type(() => PositionRequestWhereUniqueInput)
-  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>;
 
   @Field(() => PositionRequestUpdateWithoutPaylist_departmentInput, { nullable: false })
   @Type(() => PositionRequestUpdateWithoutPaylist_departmentInput)

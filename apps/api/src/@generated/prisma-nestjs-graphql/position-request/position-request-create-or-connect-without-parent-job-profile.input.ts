@@ -9,7 +9,7 @@ import { PositionRequestCreateWithoutParent_job_profileInput } from './position-
 export class PositionRequestCreateOrConnectWithoutParent_job_profileInput {
   @Field(() => PositionRequestWhereUniqueInput, { nullable: false })
   @Type(() => PositionRequestWhereUniqueInput)
-  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>;
 
   @Field(() => PositionRequestCreateWithoutParent_job_profileInput, { nullable: false })
   @Type(() => PositionRequestCreateWithoutParent_job_profileInput)

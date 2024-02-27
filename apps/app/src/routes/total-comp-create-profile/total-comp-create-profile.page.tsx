@@ -42,6 +42,7 @@ import MinistriesSelect from '../../components/app/common/components/ministries-
 import '../../components/app/common/css/custom-form.css';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import {
   useGetFilteredClassificationsQuery,
   useGetGroupedClassificationsQuery,
@@ -63,6 +64,7 @@ import {
   useCreateOrUpdateJobProfileMutation,
   useGetJobProfileQuery,
   useGetJobProfilesDraftsMinistriesQuery,
+  useLazyGetJobProfileQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
   useLazyIsJobProfileNumberAvailableQuery,
 } from '../../redux/services/graphql-api/job-profile.api';
@@ -109,17 +111,28 @@ export const TotalCompCreateProfilePage = () => {
   const [id, setId] = useState(urlId);
   const navigate = useNavigate();
 
-  const {
-    data: jobProfileData,
-    isLoading: isLoadingJobProfile,
-    isFetching: isFetchingJobProfile,
-    refetch,
-  } = useGetJobProfileQuery(
+  const [profileJson, setProfileJson] = useState<any>(null);
+
+  const { data: jobProfileData, refetch } = useGetJobProfileQuery(
     { id: parseInt(id ?? '') },
     {
       skip: !id,
     },
   );
+
+  const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
+
+  useEffect(() => {
+    if (jobProfileData) {
+      setProfileJson(jobProfileData);
+    }
+  }, [jobProfileData]);
+
+  useEffect(() => {
+    if (lazyJobProfile) {
+      setProfileJson(lazyJobProfile);
+    }
+  }, [lazyJobProfile]);
 
   // Update local state when URL parameter changes
   useEffect(() => {
@@ -1113,7 +1126,7 @@ export const TotalCompCreateProfilePage = () => {
   async function submitJobProfileData(transformedData: CreateJobProfileInput, isPublishing = false) {
     try {
       const response = await createJobProfile(transformedData).unwrap();
-      // console.log('response: ', response);
+      console.log('response: ', response);
       if (!isPublishing) {
         const newId = response.createOrUpdateJobProfile.toString();
         setId(newId);
@@ -1152,7 +1165,7 @@ export const TotalCompCreateProfilePage = () => {
     }
   }
 
-  const save = (isPublishing = false, isUnpublishing = false) => {
+  const getTransofrmedData = (isPublishing = false, isUnpublishing = false) => {
     console.log('save, isPublishing: ', isPublishing);
     const basicDetails = getBasicDetailsValues();
     const profileDetails = getProfileValues();
@@ -1172,19 +1185,27 @@ export const TotalCompCreateProfilePage = () => {
       profileSetValue('state', 'DRAFT');
     }
 
-    console.log('Combined form data:', combinedData);
+    // console.log('Combined form data:', combinedData);
 
     const transformedData = transformFormDataToApiSchema(combinedData);
-    console.log('transformedData: ', transformedData);
-    submitJobProfileData(transformedData);
+    // console.log('transformedData: ', transformedData);
+
+    return transformedData;
   };
 
-  const unpublish = () => {
-    save(false, true);
+  const save = async (isPublishing = false, isUnpublishing = false) => {
+    const transformedData = getTransofrmedData(isPublishing, isUnpublishing);
+    await submitJobProfileData(transformedData, isPublishing);
+    // Refetch job profile data
+    await triggerGetJobProfile({ id: parseInt(id ?? '') });
   };
 
-  const publish = () => {
-    save(true);
+  const unpublish = async () => {
+    await save(false, true);
+  };
+
+  const publish = async () => {
+    await save(true);
   };
 
   const filterTreeData = (data: any, selectedId: any) => {
@@ -2807,7 +2828,13 @@ export const TotalCompCreateProfilePage = () => {
                 <Card title="Save as Draft">
                   <Typography.Text>Save your progress and come back later to make changes.</Typography.Text>
                   <br></br>
-                  <Button type="primary" style={{ marginTop: 16 }} onClick={() => save()}>
+                  <Button
+                    type="primary"
+                    style={{ marginTop: 16 }}
+                    onClick={async () => {
+                      await save();
+                    }}
+                  >
                     Save as Draft
                   </Button>
                 </Card>
@@ -2817,7 +2844,13 @@ export const TotalCompCreateProfilePage = () => {
                 <Card title="Save and publish">
                   <Typography.Text>Save your progress and publish changes.</Typography.Text>
                   <br></br>
-                  <Button type="primary" style={{ marginTop: 16 }} onClick={() => save()}>
+                  <Button
+                    type="primary"
+                    style={{ marginTop: 16 }}
+                    onClick={async () => {
+                      await save();
+                    }}
+                  >
                     Save and publish
                   </Button>
                 </Card>
@@ -2838,14 +2871,19 @@ export const TotalCompCreateProfilePage = () => {
                   </>
                 )}
 
-                {state == 'PUBLISHED' && (
-                  <>
-                    <Typography.Title level={5}>Download job profile</Typography.Title>
-                    <Typography.Text>Download a copy of the job profile.</Typography.Text>
-                    <br></br>
-                    <Button style={{ marginTop: 10 }}>Download job profile</Button>
-                  </>
-                )}
+                <Divider></Divider>
+
+                {/* {state == 'PUBLISHED' && ( */}
+                <>
+                  <Typography.Title level={5}>Download job profile</Typography.Title>
+                  <Typography.Text>Download a copy of the job profile.</Typography.Text>
+                  <br></br>
+                  <DownloadJobProfileComponent
+                    jobProfile={profileJson?.jobProfile}
+                    style={{ marginTop: 10 }}
+                  ></DownloadJobProfileComponent>
+                </>
+                {/* )} */}
 
                 <Divider></Divider>
 
@@ -2905,9 +2943,11 @@ export const TotalCompCreateProfilePage = () => {
   ];
 
   // console.log('isLoadingJobProfile: ', isLoadingJobProfile, isFetchingJobProfile);
+  // console.log('loading: ', isLoadingJobProfile, isFetchingJobProfile, isLazyLoading, isLazyFetching);
+
   if (
     !ministriesData ||
-    (id && (isLoadingJobProfile || isFetchingJobProfile)) ||
+    // (id && (isLoadingJobProfile || isFetchingJobProfile)) ||
     !allMinistriesData ||
     !jobFamiliesData ||
     !jobProfileStreamsData ||
@@ -2928,7 +2968,9 @@ export const TotalCompCreateProfilePage = () => {
         showButton1
         showButton2
         button2Text={state == 'PUBLISHED' ? 'Save and publish' : 'Save as draft'}
-        button2Callback={() => save()}
+        button2Callback={async () => {
+          await save();
+        }}
       />
 
       <ContentWrapper>

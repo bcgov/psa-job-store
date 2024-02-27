@@ -9,7 +9,7 @@ import { PositionRequestCreateWithoutWorkLocationInput } from './position-reques
 export class PositionRequestCreateOrConnectWithoutWorkLocationInput {
   @Field(() => PositionRequestWhereUniqueInput, { nullable: false })
   @Type(() => PositionRequestWhereUniqueInput)
-  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>;
 
   @Field(() => PositionRequestCreateWithoutWorkLocationInput, { nullable: false })
   @Type(() => PositionRequestCreateWithoutWorkLocationInput)

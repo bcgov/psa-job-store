@@ -120,7 +120,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const getMenuContent = (record: any) => {
-    console.log('record: ', record);
+    // console.log('record: ', record);
 
     return (
       <Menu>

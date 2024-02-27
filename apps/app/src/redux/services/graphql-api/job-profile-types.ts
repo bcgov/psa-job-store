@@ -35,6 +35,10 @@ export interface JobProfilesClassificationsResponse {
   jobProfilesClassifications: ClassificationModel[];
 }
 
+export interface JobProfilesDraftsClassificationsResponse {
+  jobProfilesDraftsClassifications: ClassificationModel[];
+}
+
 export interface JobProfilesDraftsMinistriesResponse {
   jobProfilesDraftsMinistries: {
     id: string;
@@ -318,6 +322,10 @@ export interface GetJobProfilesArgs {
   orderBy?: Record<string, any>;
   take?: number;
   skip?: number;
+  sortByClassificationName?: boolean;
+  sortByJobFamily?: boolean;
+  sortByOrganization?: boolean;
+  sortOrder?: string;
 }
 
 export interface GetJobProfilesResponse {

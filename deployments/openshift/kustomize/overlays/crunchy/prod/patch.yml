@@ -1,0 +1,23 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: api-postgres-alpha
+spec:
+  backups:
+    pgbackrest:
+      global:
+          repo1-retention-full: "30" # Retain backups for 30 days. All full and incremental after this will be removed.
+          repo1-retention-full-type: time
+      repos:
+        - name: repo1
+          schedules:
+            full: "0 2 * * *"
+            incremental: "*/30 * * * *"
+          volume:
+            volumeClaimSpec:
+              storageClassName: netapp-file-backup
+              accessModes:
+              - "ReadWriteOnce"
+              resources:
+                requests:
+                  storage: 10Gi  # Adjust as needed

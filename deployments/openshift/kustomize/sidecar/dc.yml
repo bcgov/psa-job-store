@@ -18,7 +18,7 @@ spec:
       - name: sidecar
         image: node:18.17.0
         command: ["node"]
-        args: ["-e", "setInterval(() => console.log('Node.js is running'), 1000 * 60 * 60);"]  # Replace with your application command
+        args: ["-e", "setInterval(() => console.log('Node.js is running'), 1000 * 60 * 60);"]
         ports:
         - containerPort: 3000
           protocol: TCP
@@ -30,5 +30,8 @@ spec:
             name: secrets
         resources:
           requests:
+            cpu: 10m 
+            memory: 50Mi 
+          limits:
             cpu: 50m 
             memory: 100Mi 

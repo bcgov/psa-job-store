@@ -352,12 +352,12 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
     // Create an entry in My Positions
 
     const formData = wizardEditProfileRef.current?.getFormData();
-    console.log('formData: ', formData);
+    // console.log('formData: ', formData);
 
     // return;
 
     const transformedData = transformFormData(formData);
-    console.log('transformedData: ', transformedData);
+    // console.log('transformedData: ', transformedData);
 
     setWizardData(transformedData);
 
@@ -449,7 +449,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
         <Button onClick={onBack} key="back">
           Back
         </Button>,
-        <Button key="next" type="primary" onClick={onNextCallback}>
+        <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button">
           Save and next
         </Button>,
       ]}
