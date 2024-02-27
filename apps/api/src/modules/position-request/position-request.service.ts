@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { btoa } from 'buffer';
@@ -87,6 +87,7 @@ function generateShortId(length: number): string {
 
 @Injectable()
 export class PositionRequestApiService {
+  private readonly logger = new Logger(PositionRequestApiService.name);
   // ...(searchResultIds != null && { id: { in: searchResultIds } }),
 
   constructor(
@@ -141,26 +142,35 @@ export class PositionRequestApiService {
   async submitPositionRequest(id: number) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
-    const position = await this.createPositionForPositionRequest(id);
+    try {
+      if (positionRequest.position_number == null) {
+        const position = await this.createPositionForPositionRequest(id);
+        if (position.positionNbr.length > 0) {
+          positionRequest = await this.prisma.positionRequest.update({
+            where: { id },
+            data: {
+              position_number: +position.positionNbr,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      this.logger.error(error);
+    }
 
-    if (position.positionNbr.length > 0) {
+    try {
+      // CRM Incident Managements
+      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
       positionRequest = await this.prisma.positionRequest.update({
         where: { id },
         data: {
-          position_number: +position.positionNbr,
+          crm_id: incident.id,
+          status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
         },
       });
+    } catch (error) {
+      this.logger.error(error);
     }
-
-    // CRM Incident Managements
-    const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
-    positionRequest = await this.prisma.positionRequest.update({
-      where: { id },
-      data: {
-        crm_id: incident.id,
-        status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
-      },
-    });
 
     return positionRequest;
   }
