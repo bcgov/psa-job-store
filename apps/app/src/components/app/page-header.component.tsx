@@ -23,6 +23,7 @@ export const PageHeader = ({
   button2Text,
   button2Callback,
   showButton2,
+  title,
   ...props
 }: ExtendedPageHeaderProps) => {
   const matches = useMatches();
@@ -66,6 +67,7 @@ export const PageHeader = ({
       breadcrumb={{
         items: breadcrumbs,
       }}
+      title={<h1 style={{ fontWeight: 600, fontSize: '20px', lineHeight: '32px' }}>{title}</h1>}
       {...props}
       style={{ backgroundColor: '#FFF' }}
     />

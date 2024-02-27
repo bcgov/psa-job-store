@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, Col, Descriptions, Row, Typography } from 'antd';
 import { useEffect, useState } from 'react';
+import LoadingComponent from '../../../components/app/common/components/loading.component';
 import { useGetLocationQuery } from '../../../redux/services/graphql-api/location.api';
 import { PositionProfileModel, useGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
+import { formatDateTime } from '../../../utils/Utils';
 
 type ServiceRequestDetailsProps = {
   positionRequestData: any;
@@ -11,15 +13,15 @@ type ServiceRequestDetailsProps = {
 export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ positionRequestData }) => {
   // console.log('positionRequestData: ', positionRequestData);
 
-  const reportsToInfo = useGetPositionProfileQuery({
+  const { data: reportsToInfo, isLoading: reportsToLoading } = useGetPositionProfileQuery({
     positionNumber: positionRequestData?.positionRequest?.reports_to_position_id,
-  })?.data?.positionProfile;
-  const excludedMngInfo = useGetPositionProfileQuery({
+  });
+  const { data: excludedMngInfo, isLoading: excludedLoading } = useGetPositionProfileQuery({
     positionNumber: positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number,
-  })?.data?.positionProfile;
-  const locationInfo = useGetLocationQuery({
+  });
+  const { data: locationInfo, isLoading: locationLoading } = useGetLocationQuery({
     id: positionRequestData?.positionRequest?.additional_info_work_location_id,
-  })?.data?.location;
+  });
 
   // console.log('locationInfo: ', locationInfo);
 
@@ -27,12 +29,12 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
   const [additionalPositions2, setAdditionalPositions2] = useState(0);
 
   useEffect(() => {
-    if (reportsToInfo) {
-      const activePositions = reportsToInfo.filter((p) => p.status === 'Active');
+    if (reportsToInfo?.positionProfile) {
+      const activePositions = reportsToInfo?.positionProfile.filter((p) => p.status === 'Active');
       setFirstActivePosition2(activePositions[0] || null);
 
       // Set state to the number of additional active positions
-      setAdditionalPositions2(reportsToInfo.length - 1);
+      setAdditionalPositions2(reportsToInfo?.positionProfile.length - 1);
     }
   }, [reportsToInfo]);
 
@@ -40,16 +42,15 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
   const [additionalPositions, setAdditionalPositions] = useState(0);
 
   useEffect(() => {
-    if (excludedMngInfo) {
-      const activePositions = excludedMngInfo.filter((p) => p.status === 'Active');
+    if (excludedMngInfo?.positionProfile) {
+      const activePositions = excludedMngInfo?.positionProfile.filter((p) => p.status === 'Active');
       setFirstActivePosition(activePositions[0] || null);
 
       // Set state to the number of additional active positions
-      setAdditionalPositions(excludedMngInfo.length - 1);
+      setAdditionalPositions(excludedMngInfo?.positionProfile.length - 1);
     }
   }, [excludedMngInfo]);
 
-  // console.log('reportsToInfo: ', reportsToInfo);
   const submissionDetailsItems = [
     {
       key: 'submittedBy',
@@ -60,13 +61,13 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'submittedAt',
       label: 'Submitted at',
-      children: <div>{positionRequestData?.positionRequest?.approved_at}</div>,
+      children: <div>{formatDateTime(positionRequestData?.positionRequest?.approved_at)}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'ticketId',
       label: 'CRM service request',
-      children: <div>{positionRequestData?.positionRequest?.crm_id}</div>, // todo: implement
+      children: <div>{positionRequestData?.positionRequest?.crm_id}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -85,15 +86,15 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'positionNumber',
       label: 'Position Number',
-      children: <div>{positionRequestData?.positionRequest?.parent_job_profile?.number}</div>,
+      children: <div>{positionRequestData?.positionRequest?.position_number}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
-    // {
-    //   key: 'positionStatus',
-    //   label: 'Position status',
-    //   children: <div>Proposed</div>, // todo: implement
-    //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-    // },
+    {
+      key: 'positionStatus',
+      label: 'Position status',
+      children: <div>{positionRequestData?.positionRequest?.status === 'COMPLETED' ? 'Completed' : 'Proposed'}</div>,
+      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+    },
   ];
 
   const jobDetailsItems = [
@@ -120,7 +121,8 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'Reports to',
       children: (
         <div>
-          {firstActivePosition2 && (
+          {reportsToLoading && <LoadingComponent mode="small" />}
+          {firstActivePosition2 && reportsToInfo?.positionProfile && reportsToInfo?.positionProfile?.length > 0 && (
             <div>
               <p style={{ margin: 0 }}>{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
               <Typography.Paragraph type="secondary">
@@ -129,6 +131,14 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
                 {`Position No.: ${firstActivePosition2.positionNumber}`}
                 {additionalPositions2 > 0 && ` +${additionalPositions2}`}
               </Typography.Paragraph>
+            </div>
+          )}
+
+          {!firstActivePosition2 && reportsToInfo?.positionProfile && reportsToInfo?.positionProfile?.length == 0 && (
+            <div>
+              <p style={{ margin: 0 }}>
+                Vacant (Position No.: {positionRequestData?.positionRequest?.reports_to_position_id})
+              </p>
             </div>
           )}
         </div>
@@ -140,6 +150,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'First level excluded manager for this position',
       children: (
         <div>
+          {excludedLoading && <LoadingComponent mode="small" />}
           {firstActivePosition && (
             <div>
               <p style={{ margin: 0 }}>{`${firstActivePosition.employeeName}, ${firstActivePosition.ministry}`}</p>
@@ -182,7 +193,12 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'positionLocation',
       label: 'Position location',
-      children: <div>{locationInfo?.name}</div>,
+      children: (
+        <div>
+          {locationLoading && <LoadingComponent mode="small" />}
+          {locationInfo?.location?.name}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
 
