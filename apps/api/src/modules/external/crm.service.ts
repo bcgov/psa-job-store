@@ -96,7 +96,7 @@ export class CrmService {
     for await (const row of rows) {
       const [crm_id, status] = row as [string, string];
       const positionRequest = await this.prisma.positionRequest.findUnique({ where: { crm_id: +crm_id } });
-      const incomingPositionRequestStatus = convertIncidentStatusToPositionRequestStatus(status);
+      const incomingPositionRequestStatus = convertIncidentStatusToPositionRequestStatus(+status);
 
       // Conditionally update the positionRequest.status
       if (positionRequest.status !== incomingPositionRequestStatus) {
@@ -105,7 +105,7 @@ export class CrmService {
         await this.prisma.positionRequest.update({
           where: { crm_id: +crm_id },
           data: {
-            status: convertIncidentStatusToPositionRequestStatus(status),
+            status: incomingPositionRequestStatus,
           },
         });
       }

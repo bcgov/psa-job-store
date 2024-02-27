@@ -158,7 +158,7 @@ export class PositionRequestApiService {
       where: { id },
       data: {
         crm_id: incident.id,
-        status: convertIncidentStatusToPositionRequestStatus(incident.statusWithType.status),
+        status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
       },
     });
 
@@ -799,12 +799,6 @@ export class PositionRequestApiService {
 
     const orgChartBase64 =
       positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
-
-    console.log('jobProfileBase64: ', jobProfileBase64);
-
-    // Packer.toBlob(document).then((blob) => {
-    //   saveAs(blob, 'job-profile.docx');
-    // });
 
     const data: IncidentCreateUpdateInput = {
       subject: `Position Number Request - ${classification.code}`,
