@@ -174,13 +174,15 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
         // if successfull, switch parent to readonly mode and show success message
         // switchParentMode, switchParentReadonlyMode
-        switchParentMode && switchParentMode('readonly');
-        if (result?.submitPositionRequest.status === 'IN_REVIEW') {
-          switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
-        } else {
+        if (result?.submitPositionRequest.status === 'COMPLETED') {
+          switchParentMode && switchParentMode('readonly');
           switchParentReadonlyMode && switchParentReadonlyMode('completed');
+          setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+        } else if (result?.submitPositionRequest.status === 'IN_REVIEW') {
+          switchParentMode && switchParentMode('readonly');
+          switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
+          setReadOnlySelectedTab && setReadOnlySelectedTab('4');
         }
-        setReadOnlySelectedTab && setReadOnlySelectedTab('4');
       } else {
         throw Error('Position request not found');
       }
