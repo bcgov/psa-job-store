@@ -94,20 +94,20 @@ Create migration:
 
 To apply new migrations after pulling latest code:
 
-`npx prisma migrate deploy`
+`npx -w api prisma migrate deploy`
 
-`npx prisma generate`
+`npx -w api prisma generate`
 
 ## Making a database backup to local drive
 
 Login to psql pod:
 `oc exec -it  SQL_POD_NAME -- /bin/bash`
-`cd cd /pgdata`
+`cd /pgdata`
 
 Get db info:
 
 `psql`
-`psql \l`
+`\l`
 
 Create dump:
 `pg_dump -U USER_NAME DB_NAME > backup.sql`

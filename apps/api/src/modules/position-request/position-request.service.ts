@@ -288,6 +288,24 @@ export class PositionRequestApiService {
       classification_code: classificationMap.get(pr.classification_id),
       user_name: userMap.get(pr.user_id),
     }));
+
+    // Check if we need to sort by classification_code
+    const orderByClassificationCode = args.orderBy?.find((o) => o.classification_code);
+    if (orderByClassificationCode) {
+      // Determine the sort direction
+      const sortDirection = orderByClassificationCode.classification_code.sort === 'asc' ? 1 : -1;
+
+      // Sort mergedResults by classification_code
+      mergedResults.sort((a, b) => {
+        if (a.classification_code < b.classification_code) {
+          return -1 * sortDirection;
+        }
+        if (a.classification_code > b.classification_code) {
+          return 1 * sortDirection;
+        }
+        return 0;
+      });
+    }
     return mergedResults; //.reverse();
   }
 
