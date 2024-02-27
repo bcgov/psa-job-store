@@ -65,6 +65,10 @@ export interface GetPositionRequestResponse {
   positionRequest: GetPositionRequestResponseContent;
 }
 
+export interface SubmitPositionRequestResponse {
+  submitPositionRequest: GetPositionRequestResponseContent;
+}
+
 export interface PositionNeedsReviewResponse {
   positionNeedsRivew: PositionNeedsReviewResponseContent;
 }
@@ -322,7 +326,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    submitPositionRequest: build.mutation<GetPositionRequestResponse, SubmitPositionRequestInput>({
+    submitPositionRequest: build.mutation<SubmitPositionRequestResponse, SubmitPositionRequestInput>({
       invalidatesTags: ['positionRequest'],
       query: (input: SubmitPositionRequestInput) => {
         return {

@@ -9,7 +9,7 @@ import { PositionRequestCreateWithoutDepartmentInput } from './position-request-
 export class PositionRequestCreateOrConnectWithoutDepartmentInput {
   @Field(() => PositionRequestWhereUniqueInput, { nullable: false })
   @Type(() => PositionRequestWhereUniqueInput)
-  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>;
 
   @Field(() => PositionRequestCreateWithoutDepartmentInput, { nullable: false })
   @Type(() => PositionRequestCreateWithoutDepartmentInput)

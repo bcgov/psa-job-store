@@ -17,6 +17,9 @@ export class PositionRequestWhereUniqueInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
+  @Field(() => Int, { nullable: true })
+  crm_id?: number;
+
   @Field(() => [PositionRequestWhereInput], { nullable: true })
   AND?: Array<PositionRequestWhereInput>;
 
@@ -25,9 +28,6 @@ export class PositionRequestWhereUniqueInput {
 
   @Field(() => [PositionRequestWhereInput], { nullable: true })
   NOT?: Array<PositionRequestWhereInput>;
-
-  @Field(() => IntFilter, { nullable: true })
-  crm_id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
   crm_assigned_to_account_id?: IntFilter;

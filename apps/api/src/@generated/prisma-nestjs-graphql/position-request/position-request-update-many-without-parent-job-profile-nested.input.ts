@@ -31,19 +31,19 @@ export class PositionRequestUpdateManyWithoutParent_job_profileNestedInput {
 
   @Field(() => [PositionRequestWhereUniqueInput], { nullable: true })
   @Type(() => PositionRequestWhereUniqueInput)
-  set?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>>;
+  set?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>>;
 
   @Field(() => [PositionRequestWhereUniqueInput], { nullable: true })
   @Type(() => PositionRequestWhereUniqueInput)
-  disconnect?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>>;
+  disconnect?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>>;
 
   @Field(() => [PositionRequestWhereUniqueInput], { nullable: true })
   @Type(() => PositionRequestWhereUniqueInput)
-  delete?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>>;
+  delete?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>>;
 
   @Field(() => [PositionRequestWhereUniqueInput], { nullable: true })
   @Type(() => PositionRequestWhereUniqueInput)
-  connect?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>>;
+  connect?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>>;
 
   @Field(() => [PositionRequestUpdateWithWhereUniqueWithoutParent_job_profileInput], { nullable: true })
   @Type(() => PositionRequestUpdateWithWhereUniqueWithoutParent_job_profileInput)

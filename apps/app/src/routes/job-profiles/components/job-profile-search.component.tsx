@@ -4,9 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
-import { useGetJobProfileStreamsQuery } from '../../../redux/services/graphql-api/job-profile-stream';
 import {
-  useGetJobProfilesCareerGroupsQuery,
+  JobProfileStreamModel,
+  useGetJobProfileStreamsQuery,
+} from '../../../redux/services/graphql-api/job-profile-stream';
+import {
   useGetJobProfilesClassificationsQuery,
   useGetJobProfilesMinistriesQuery,
 } from '../../../redux/services/graphql-api/job-profile.api';
@@ -35,7 +37,7 @@ interface JobProfileSearchProps {
   additionalFilters?: boolean;
   fullWidth?: boolean;
   ministriesData?: any;
-  careerGroupData?: any;
+  classificationData?: any;
 }
 
 // Unified state for all selections
@@ -45,11 +47,6 @@ interface Selection {
 }
 
 interface ClassificationOption {
-  value: string;
-  label: string;
-}
-
-interface CareerGroupOption {
   value: string;
   label: string;
 }
@@ -64,7 +61,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // additionalFilters = false,
   fullWidth = false,
   ministriesData = null,
-  careerGroupData = null,
+  classificationData = null,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -87,7 +84,10 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     ],
     [],
   );
-  const classificationData = useGetJobProfilesClassificationsQuery().data?.jobProfilesClassifications;
+
+  if (!classificationData)
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    classificationData = useGetJobProfilesClassificationsQuery().data?.jobProfilesClassifications;
 
   // JOB FAMILIES AND STREAMS TREE VIEW
   const { data: jobFamiliesData } = useGetJobFamiliesQuery();
@@ -122,9 +122,9 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
   // DONE JOB FAMILIES AND STREAMS TREE VIEW
 
-  if (!careerGroupData)
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    careerGroupData = useGetJobProfilesCareerGroupsQuery().data?.jobProfilesCareerGroups;
+  // if (!careerGroupData)
+  //   // eslint-disable-next-line react-hooks/rules-of-hooks
+  //   careerGroupData = useGetJobProfilesCareerGroupsQuery().data?.jobProfilesCareerGroups;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   if (!ministriesData) ministriesData = useGetJobProfilesMinistriesQuery().data?.jobProfilesMinistries;
@@ -135,7 +135,6 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   const [jobStreamFilterData, setJobStreamOptions] = useState<ClassificationOption[]>([]); // holds options for job family filter
   const [jobRoleTypeFilterData, setjobRoleTypeOptions] = useState<ClassificationOption[]>([]);
   // const [professionAndDisciplineFilterData, setProfessionAndDisciplineOptions] = useState<ClassificationOption[]>([]);
-  const [careerGroupFilterData, setCareerGroupOptions] = useState<CareerGroupOption[]>([]);
   const [ministriesFilterData, setMinistriesOptions] = useState<MinistriesOption[]>([]);
 
   const [initialSelectionSet, setInitialSelectionSet] = useState(false); // used to prevent initial selections from being overwritten
@@ -158,7 +157,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // Update the classification Select components when data changes
   useEffect(() => {
     if (classificationData) {
-      const newOptions = classificationData.map((classification) => ({
+      const newOptions = classificationData.map((classification: { name: any; id: any }) => ({
         label: classification.name,
         value: classification.id,
       }));
@@ -177,18 +176,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   }, [ministriesData]);
 
   useEffect(() => {
-    if (careerGroupData) {
-      const newOptions = careerGroupData.map((careerGroupDataItem: { name: any; id: { toString: () => any } }) => ({
-        label: careerGroupDataItem.name,
-        value: careerGroupDataItem.id.toString(),
-      }));
-      setCareerGroupOptions(newOptions);
-    }
-  }, [careerGroupData]);
-
-  useEffect(() => {
     if (jobProfileStreamsData) {
-      const newOptions = jobProfileStreamsData.jobProfileStreams.map((stream) => ({
+      const newOptions = jobProfileStreamsData.jobProfileStreams.map((stream: JobProfileStreamModel) => ({
         label: stream.name,
         value: stream.id.toString(),
       }));
@@ -238,9 +227,6 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     }
     if (type === 'classification') {
       return classificationFilterData.find((option) => option.value === value)?.label || value;
-    }
-    if (type === 'careerGroup') {
-      return careerGroupFilterData.find((option) => option.value === value)?.label || value;
     }
     if (type === 'ministry') {
       return ministriesFilterData.find((option) => option.value === value)?.label || value;

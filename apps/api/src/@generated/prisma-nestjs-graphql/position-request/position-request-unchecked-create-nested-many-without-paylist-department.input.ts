@@ -23,5 +23,5 @@ export class PositionRequestUncheckedCreateNestedManyWithoutPaylist_departmentIn
 
   @Field(() => [PositionRequestWhereUniqueInput], { nullable: true })
   @Type(() => PositionRequestWhereUniqueInput)
-  connect?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>>;
+  connect?: Array<Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>>;
 }

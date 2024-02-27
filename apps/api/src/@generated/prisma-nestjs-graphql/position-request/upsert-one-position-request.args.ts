@@ -10,7 +10,7 @@ import { PositionRequestUpdateInput } from './position-request-update.input';
 export class UpsertOnePositionRequestArgs {
   @Field(() => PositionRequestWhereUniqueInput, { nullable: false })
   @Type(() => PositionRequestWhereUniqueInput)
-  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>;
+  where!: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>;
 
   @Field(() => PositionRequestCreateInput, { nullable: false })
   @Type(() => PositionRequestCreateInput)

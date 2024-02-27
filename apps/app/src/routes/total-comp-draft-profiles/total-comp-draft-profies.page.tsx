@@ -5,7 +5,7 @@ import LoadingSpinnerWithMessage from '../../components/app/common/components/lo
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import {
-  useGetJobProfilesDraftsCareerGroupsQuery,
+  useGetJobProfilesDraftsClassificationsQuery,
   useGetJobProfilesDraftsMinistriesQuery,
 } from '../../redux/services/graphql-api/job-profile.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
@@ -14,7 +14,7 @@ import TotalCompProfilesTable from './components/total-comp-draft-profiles-table
 
 export const TotalCompDraftProfilesPage = () => {
   const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
-  const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
+  const classificationData = useGetJobProfilesDraftsClassificationsQuery().data?.jobProfilesDraftsClassifications;
 
   const [hasData, setHasData] = useState(false);
 
@@ -22,7 +22,8 @@ export const TotalCompDraftProfilesPage = () => {
     setHasData(isDataAvailable);
   };
 
-  if (!ministriesData) return <LoadingSpinnerWithMessage />;
+  console.log('classificationData: ', classificationData);
+  if (!ministriesData || !classificationData) return <LoadingSpinnerWithMessage />;
 
   return (
     <>
@@ -35,7 +36,7 @@ export const TotalCompDraftProfilesPage = () => {
             // additionalFilters={true}
             fullWidth={true}
             ministriesData={ministriesData}
-            careerGroupData={careerGroupData}
+            classificationData={classificationData}
           />
         )}
 

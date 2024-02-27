@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
-import { JobProfileState, JobProfileType, Prisma } from '@prisma/client';
+import { JobProfile, JobProfileState, JobProfileType, Prisma } from '@prisma/client';
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { ClassificationService } from '../classification/classification.service';
@@ -103,8 +103,19 @@ export class JobProfileService {
     return searchConditions;
   }
 
-  async getJobProfilesDrafts({ search, where, ...args }: FindManyJobProfileWithSearch, userId: string) {
-    return await this.getJobProfilesWithSearch(
+  async getJobProfilesDrafts(
+    {
+      search,
+      where,
+      sortByClassificationName,
+      sortByJobFamily,
+      sortByOrganization,
+      sortOrder,
+      ...args
+    }: FindManyJobProfileWithSearch,
+    userId: string,
+  ) {
+    const jobProfiles = await this.getJobProfilesWithSearch(
       search,
       where,
       args,
@@ -113,10 +124,121 @@ export class JobProfileService {
       null,
       this.getDraftSearchConditions(userId, search),
     );
+
+    if (sortByClassificationName) {
+      return this.sortJobProfilesByClassification(jobProfiles, sortOrder);
+    }
+
+    if (sortByJobFamily) {
+      return this.sortJobProfilesByJobFamily(jobProfiles, sortOrder);
+    }
+
+    if (sortByOrganization) {
+      return this.sortJobProfilesByOrganization(jobProfiles, sortOrder);
+    }
+
+    return jobProfiles;
   }
 
-  async getJobProfiles({ search, where, ...args }: FindManyJobProfileWithSearch) {
-    return await this.getJobProfilesWithSearch(search, where, args);
+  async getJobProfiles({
+    search,
+    where,
+    sortByClassificationName,
+    sortByJobFamily,
+    sortByOrganization,
+    sortOrder,
+    ...args
+  }: FindManyJobProfileWithSearch) {
+    const jobProfiles = await this.getJobProfilesWithSearch(search, where, args);
+
+    if (sortByClassificationName) {
+      return this.sortJobProfilesByClassification(jobProfiles, sortOrder);
+    }
+
+    if (sortByJobFamily) {
+      return this.sortJobProfilesByJobFamily(jobProfiles, sortOrder);
+    }
+
+    if (sortByOrganization) {
+      return this.sortJobProfilesByOrganization(jobProfiles, sortOrder);
+    }
+
+    return jobProfiles;
+  }
+
+  private async sortJobProfilesByClassification(jobProfiles: JobProfile[], sortOrder: string): Promise<JobProfile[]> {
+    const firstClassificationNameMap = new Map<number, string>();
+
+    for (const profile of jobProfiles) {
+      const classifications = await this.prisma.jobProfileClassification.findMany({
+        where: { job_profile_id: profile.id },
+        include: { classification: true },
+        orderBy: { classification: { name: 'asc' } }, // Sorting classifications for each profile
+      });
+
+      if (classifications.length > 0) {
+        firstClassificationNameMap.set(profile.id, classifications[0].classification.name);
+      }
+    }
+
+    // Adjust the sorting based on the sortOrder parameter
+    return jobProfiles.sort((a, b) => {
+      const nameA = firstClassificationNameMap.get(a.id) || '';
+      const nameB = firstClassificationNameMap.get(b.id) || '';
+
+      // If sortOrder is 'desc', reverse the comparison order
+      return sortOrder === 'desc' ? nameB.localeCompare(nameA) : nameA.localeCompare(nameB);
+    });
+  }
+
+  private async sortJobProfilesByJobFamily(jobProfiles: JobProfile[], sortOrder: string): Promise<JobProfile[]> {
+    const firstClassificationNameMap = new Map<number, string>();
+
+    for (const profile of jobProfiles) {
+      const classifications = await this.prisma.jobProfileJobFamilyLink.findMany({
+        where: { jobProfileId: profile.id },
+        include: { jobFamily: true },
+        orderBy: { jobFamily: { name: 'asc' } }, // Sorting classifications for each profile
+      });
+
+      if (classifications.length > 0) {
+        firstClassificationNameMap.set(profile.id, classifications[0].jobFamily.name);
+      }
+    }
+
+    // Adjust the sorting based on the sortOrder parameter
+    return jobProfiles.sort((a, b) => {
+      const nameA = firstClassificationNameMap.get(a.id) || '';
+      const nameB = firstClassificationNameMap.get(b.id) || '';
+
+      // If sortOrder is 'desc', reverse the comparison order
+      return sortOrder === 'desc' ? nameB.localeCompare(nameA) : nameA.localeCompare(nameB);
+    });
+  }
+
+  private async sortJobProfilesByOrganization(jobProfiles: JobProfile[], sortOrder: string): Promise<JobProfile[]> {
+    const firstClassificationNameMap = new Map<number, string>();
+
+    for (const profile of jobProfiles) {
+      const classifications = await this.prisma.jobProfileOrganization.findMany({
+        where: { job_profile_id: profile.id },
+        include: { organization: true },
+        orderBy: { organization: { name: 'asc' } }, // Sorting classifications for each profile
+      });
+
+      if (classifications.length > 0) {
+        firstClassificationNameMap.set(profile.id, classifications[0].organization.name);
+      }
+    }
+
+    // Adjust the sorting based on the sortOrder parameter
+    return jobProfiles.sort((a, b) => {
+      const nameA = firstClassificationNameMap.get(a.id) || '';
+      const nameB = firstClassificationNameMap.get(b.id) || '';
+
+      // If sortOrder is 'desc', reverse the comparison order
+      return sortOrder === 'desc' ? nameB.localeCompare(nameA) : nameA.localeCompare(nameB);
+    });
   }
 
   async getJobProfile(id: number) {
@@ -577,11 +699,33 @@ export class JobProfileService {
       },
     });
 
+    // console.log('jobProfiles: ', jobProfiles);
+
     // Flatten the array of organizations and deduplicate
     const allOrganizations = jobProfiles.flatMap((profile) => profile.organizations.map((o) => o.organization));
+    // console.log('allOrganizations: ', allOrganizations);
     const uniqueOrganizations = Array.from(new Map(allOrganizations.map((org) => [org['id'], org])).values());
 
     return uniqueOrganizations;
+  }
+
+  async getJobProfilesDraftsClassifications() {
+    const jobProfiles = await this.prisma.jobProfile.findMany({
+      where: { state: 'DRAFT' },
+      include: {
+        classifications: {
+          include: {
+            classification: true,
+          },
+        },
+      },
+    });
+
+    // Flatten the array of organizations and deduplicate
+    const allClassifications = jobProfiles.flatMap((profile) => profile.classifications.map((o) => o.classification));
+    const uniqueClassifications = Array.from(new Map(allClassifications.map((org) => [org['id'], org])).values());
+
+    return uniqueClassifications;
   }
 
   async getJobProfilesClassifications() {
