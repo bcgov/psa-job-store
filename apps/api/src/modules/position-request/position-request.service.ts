@@ -862,6 +862,10 @@ export class PositionRequestApiService {
           },
           text: `
           <div>
+            <a href="https://jobstore.apps.silver.devops.gov.bc.ca/classification-tasks/${
+              positionRequest.id
+            }">View this position in the Job Store</a>
+            <br />
             The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${String(
               positionRequest.position_number,
             ).padStart(8, '0')}
