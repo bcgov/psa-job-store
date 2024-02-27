@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { btoa } from 'buffer';
 import { generateJobProfile } from 'common-kit';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
@@ -796,6 +797,9 @@ export class PositionRequestApiService {
         : null;
     const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
 
+    const orgChartBase64 =
+      positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
+
     console.log('jobProfileBase64: ', jobProfileBase64);
 
     // Packer.toBlob(document).then((blob) => {
@@ -864,6 +868,12 @@ export class PositionRequestApiService {
           fileName: `${positionRequest.title} ${classification.code}`,
           contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           data: jobProfileBase64,
+        },
+        {
+          name: `Organization Chart`,
+          fileName: `Organization Chart`,
+          contentType: 'application/json',
+          data: orgChartBase64,
         },
       ],
     };

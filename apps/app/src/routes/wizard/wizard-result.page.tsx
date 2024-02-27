@@ -170,7 +170,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
         console.log('submitPositionRequest result: ', result);
         // todo - change check for position_number
-        if (!result?.positionRequest.id) throw new Error('API failure');
+        if (!result?.submitPositionRequest.id) throw new Error('API failure');
 
         // if successfull, switch parent to readonly mode and show success message
         // switchParentMode, switchParentReadonlyMode
