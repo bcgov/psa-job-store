@@ -3,6 +3,7 @@ import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typ
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
@@ -389,7 +390,15 @@ export const TotalCompApprovedRequestPage = () => {
     <>
       <PageHeader
         title="Approved"
-        subTitle={`reporting to Sr. Director, Digital Portfolio, Band 4 in CITZ:EX.`}
+        subTitle={
+          <div>
+            <PositionProfile
+              prefix="Reporting to"
+              mode="compact"
+              positionNumber={data?.positionRequest.reports_to_position_id}
+            ></PositionProfile>
+          </div>
+        }
         additionalBreadcrumb={{ title: data?.positionRequest?.title }}
       />
       <ContentWrapper>

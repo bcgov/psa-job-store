@@ -332,10 +332,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       ? [
           {
             sorter: allowSorting,
-            defaultSortOrder: getSortOrder('crm_ticket'),
+            defaultSortOrder: getSortOrder('crm_id'),
             title: 'CRM service request',
-            dataIndex: 'crm_ticket',
-            key: 'crm_ticket',
+            dataIndex: 'crm_id',
+            key: 'crm_id',
           },
         ]
       : []),
@@ -584,6 +584,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
   // NOTE: DO NOT CHECK OF ISFETCHING HERE, IT WILL BREAK SORTING
   if (isLoading) return <LoadingSpinnerWithMessage />;
+
+  // console.log('data?.positionRequests: ', data?.positionRequests);
 
   return (
     <div style={style}>

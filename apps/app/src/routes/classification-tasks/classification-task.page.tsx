@@ -13,6 +13,7 @@ import TabPane from 'antd/es/tabs/TabPane';
 import { cloneElement } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
@@ -377,7 +378,15 @@ export const ClassificationTaskPage = () => {
         <Col xs={24} lg={21}>
           <PageHeader
             title="Approved"
-            subTitle={`reporting to Sr. Director, Digital Portfolio, Band 4 in CITZ:EX.`}
+            subTitle={
+              <div>
+                <PositionProfile
+                  prefix="Reporting to"
+                  mode="compact"
+                  positionNumber={data?.positionRequest.reports_to_position_id}
+                ></PositionProfile>
+              </div>
+            }
             additionalBreadcrumb={{ title: data?.positionRequest?.title }}
           />
         </Col>

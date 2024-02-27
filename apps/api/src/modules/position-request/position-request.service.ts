@@ -241,6 +241,7 @@ export class PositionRequestApiService {
         parent_job_profile: true,
         approved_at: true,
         submitted_at: true,
+        crm_id: true,
       },
     });
 
