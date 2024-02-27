@@ -2,7 +2,9 @@ import { PositionRequestStatus } from '@prisma/client';
 import { IncidentStatus } from '../../external/models/incident-create.input';
 
 export const convertIncidentStatusToPositionRequestStatus = (status: number | string) => {
-  switch (+status) {
+  const statusAsNumber = +status;
+
+  switch (statusAsNumber) {
     case IncidentStatus.Solved:
     case IncidentStatus.SolvedTraining:
       return PositionRequestStatus.COMPLETED;
