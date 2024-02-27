@@ -58,6 +58,16 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
   try {
     const result = await rawBaseQuery(args, api, extraOptions);
 
+    const isSessionExpired = checkForExpiredSessionError(result);
+    if (isSessionExpired) {
+      if (!sessionStorage.getItem('redirectPath')) {
+        const currentUrl = new URL(window.location.href);
+        const currentPath = currentUrl.pathname + currentUrl.search;
+        sessionStorage.setItem('redirectPath', encodeURIComponent(currentPath));
+      }
+      window.location.href = '/auth/login';
+    }
+
     // Assert the type of 'meta' to be GraphQLResponseMeta
     const meta = result.meta as GraphQLResponseMeta | undefined;
 
@@ -65,6 +75,8 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     if (meta && meta.response && meta.response.errors) {
       // Extract the first error message
       const errorMessage = meta.response.errors[0].message;
+
+      if (errorMessage == 'Unauthorized') return result;
 
       errorToastShown = true;
       // Display an error notification
@@ -76,16 +88,6 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
 
       // Throw a custom error with the extracted message
       throw new Error(errorMessage);
-    }
-
-    const isSessionExpired = checkForExpiredSessionError(result);
-    if (isSessionExpired) {
-      if (!sessionStorage.getItem('redirectPath')) {
-        const currentUrl = new URL(window.location.href);
-        const currentPath = currentUrl.pathname + currentUrl.search;
-        sessionStorage.setItem('redirectPath', encodeURIComponent(currentPath));
-      }
-      window.location.href = '/auth/login';
     }
 
     return result;

@@ -2881,6 +2881,7 @@ export const TotalCompCreateProfilePage = () => {
                   <DownloadJobProfileComponent
                     jobProfile={profileJson?.jobProfile}
                     style={{ marginTop: 10 }}
+                    ignoreAbsentParent={true}
                   ></DownloadJobProfileComponent>
                 </>
                 {/* )} */}

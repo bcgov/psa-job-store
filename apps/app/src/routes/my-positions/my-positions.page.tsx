@@ -360,6 +360,7 @@ export const MyPositionsPage = () => {
           </Row>
         </Card>
 
+        {/* <TotalCompProfilesTable handleTableChangeCallback={handleTableChangeCallback}></TotalCompProfilesTable> */}
         <MyPositionsTable
           style={{ marginTop: '1rem' }}
           handleTableChangeCallback={handleTableChangeCallback}
