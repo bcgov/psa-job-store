@@ -829,6 +829,9 @@ export class PositionRequestApiService {
     const orgChartBase64 =
       positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
 
+    const zeroFilledPositionNumber =
+      positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
+
     const data: IncidentCreateUpdateInput = {
       subject: `TESTING - Position Number Request - ${classification.code}`,
       primaryContact: { id: contactId },
@@ -866,9 +869,7 @@ export class PositionRequestApiService {
               positionRequest.id
             }">View this position in the Job Store</a>
             <br />
-            The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${String(
-              positionRequest.position_number,
-            ).padStart(8, '0')}
+            The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}
             <br />
             <ul>
               <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
@@ -898,14 +899,14 @@ export class PositionRequestApiService {
       ],
       fileAttachments: [
         {
-          name: `${positionRequest.title} ${classification.code}`,
-          fileName: `${positionRequest.title} ${classification.code}`,
+          name: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`.substring(0, 40),
+          fileName: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`,
           contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           data: jobProfileBase64,
         },
         {
-          name: `Organization Chart`,
-          fileName: `Organization Chart`,
+          name: `${zeroFilledPositionNumber} - Organization Chart.json`.substring(0, 40),
+          fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
           contentType: 'application/json',
           data: orgChartBase64,
         },
