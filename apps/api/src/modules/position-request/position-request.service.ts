@@ -869,7 +869,13 @@ export class PositionRequestApiService {
               positionRequest.id
             }">View this position in the Job Store</a>
             <br />
-            The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}
+            <strong>
+            ${
+              positionRequest.position_number != null
+                ? `The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}`
+                : `No position was created for this request`
+            }
+            </strong>
             <br />
             <ul>
               <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
