@@ -5,6 +5,7 @@ import Search from 'antd/es/input/Search';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import '../../components/app/common/css/filtered-table.page.css';
+import '../../components/app/common/css/select-external-tags.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
@@ -268,7 +269,6 @@ export const MyPositionsPage = () => {
               <Search
                 defaultValue={searchParams.get('search') ?? undefined}
                 enterButton="Find positions"
-                aria-label="Search by job title or keyword"
                 onPressEnter={(e) => handleSearch(e.currentTarget.value, null)}
                 allowClear
                 placeholder="Search by job title or submission ID"
@@ -280,6 +280,35 @@ export const MyPositionsPage = () => {
               <Row gutter={8} justify="end">
                 <Col>
                   <Select
+                    aria-label="status filter"
+                    className="external-tag-select"
+                    maxTagCount={0}
+                    tagRender={tagRender}
+                    maxTagPlaceholder="Select status"
+                    mode="multiple"
+                    placeholder="Select status"
+                    value={selectedStatus}
+                    onChange={(selectedValues) => {
+                      const currentValues = selectedStatus;
+
+                      // Determine added values
+                      selectedValues
+                        .filter((value) => !currentValues.includes(value))
+                        .forEach((value) => {
+                          addSelection(value, 'status');
+                        });
+
+                      // Determine removed values
+                      currentValues
+                        .filter((value) => !selectedValues.includes(value))
+                        .forEach((value) => {
+                          removeSelection(value, 'status');
+                        });
+                    }}
+                    options={statusFilterDataMap}
+                    style={{ width: 130 }}
+                  />
+                  {/* <Select
                     tagRender={tagRender}
                     dropdownRender={() => dropdownRender('status')}
                     className="customTagControlled"
@@ -296,10 +325,47 @@ export const MyPositionsPage = () => {
                         if (!newValues.includes(val)) removeSelection(val, 'status');
                       });
                     }}
-                  />
+                  /> */}
                 </Col>
                 <Col>
                   <Select
+                    aria-label="classification filter"
+                    className="external-tag-select"
+                    maxTagCount={0}
+                    tagRender={tagRender}
+                    maxTagPlaceholder="Classification"
+                    mode="multiple"
+                    placeholder="Classification"
+                    value={selectedClassification}
+                    onChange={(newValues) => {
+                      newValues.forEach((val: any) => {
+                        if (!selectedClassification.includes(val)) addSelection(val, 'classification');
+                      });
+                      selectedClassification.forEach((val) => {
+                        if (!newValues.includes(val)) removeSelection(val, 'classification');
+                      });
+
+                      // const currentValues = selectedClassification;
+
+                      // // Determine added values
+                      // selectedValues
+                      //   .filter((value) => !currentValues.includes(value))
+                      //   .forEach((value) => {
+                      //     addSelection(value, 'classification');
+                      //   });
+
+                      // // Determine removed values
+                      // currentValues
+                      //   .filter((value) => !selectedValues.includes(value))
+                      //   .forEach((value) => {
+                      //     removeSelection(value, 'classification');
+                      //   });
+                    }}
+                    options={classificationFilterData}
+                    style={{ width: 130 }}
+                  />
+
+                  {/* <Select
                     tagRender={tagRender}
                     dropdownRender={() => dropdownRender('classification')}
                     className="customTagControlled"
@@ -316,7 +382,7 @@ export const MyPositionsPage = () => {
                         if (!newValues.includes(val)) removeSelection(val, 'classification');
                       });
                     }}
-                  />
+                  /> */}
                 </Col>
               </Row>
             </Col>
@@ -360,7 +426,6 @@ export const MyPositionsPage = () => {
           </Row>
         </Card>
 
-        {/* <TotalCompProfilesTable handleTableChangeCallback={handleTableChangeCallback}></TotalCompProfilesTable> */}
         <MyPositionsTable
           style={{ marginTop: '1rem' }}
           handleTableChangeCallback={handleTableChangeCallback}

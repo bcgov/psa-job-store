@@ -12,9 +12,9 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Col, Menu, Modal, Popover, Result, Row, Space, Table, Tooltip, message } from 'antd';
-import { SortOrder, TableRowSelection } from 'antd/es/table/interface';
+import { SortOrder } from 'antd/es/table/interface';
 import copy from 'copy-to-clipboard';
-import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { CSSProperties, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
@@ -22,7 +22,6 @@ import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import {
-  GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
   useLazyGetPositionRequestsQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
@@ -75,7 +74,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const initialSortField = searchParams.get('sortField');
   const initialSortOrder = searchParams.get('sortOrder');
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRowKeys] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
@@ -130,9 +129,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const handleCopyLink = (record: any) => {
-    // Construct the link you want to copy
-    // Example: const linkToCopy = `https://yourdomain.com/position-request/${record.id}`;
-    const linkToCopy = `https://yourdomain.com/position-request/${record.id}`;
+    // Dynamically construct the link to include the current base URL
+    const linkToCopy = `${window.location.origin}/position-request/${record.id}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     navigator.clipboard
@@ -151,22 +149,24 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     handleVisibleChange(record.id, false);
   };
 
-  const getMenuContent = (record: any) => {
-    // console.log('record: ', record);
-
+  const MenuContent = ({ record }: any) => {
     return (
-      <Menu selectedKeys={selectedKeys}>
+      <Menu selectedKeys={selectedKeys} className={`popover-selector-${record.id}`}>
         {mode == null && (
           <>
             {record.status === 'DRAFT' && (
               <>
-                <Menu.Item key="edit" icon={<EditOutlined />}>
+                <Menu.Item key="edit" icon={<EditOutlined aria-hidden />}>
                   <Link to={`/position-request/${record.id}`}>Edit</Link>
                 </Menu.Item>
-                <Menu.Item key="copy" icon={<LinkOutlined />} onClick={() => handleCopyLink(record)}>
+                <Menu.Item key="copy" icon={<LinkOutlined aria-hidden />} onClick={() => handleCopyLink(record)}>
                   Copy link
                 </Menu.Item>
-                <Menu.Item key="delete" icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(record.id)}>
+                <Menu.Item
+                  key="delete"
+                  icon={<DeleteOutlined aria-hidden />}
+                  onClick={() => showDeleteConfirm(record.id)}
+                >
                   Delete
                 </Menu.Item>
               </>
@@ -174,16 +174,16 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
             {record.status === 'COMPLETED' && (
               <>
-                <Menu.Item key="view" icon={<EyeOutlined />}>
+                <Menu.Item key="view" icon={<EyeOutlined aria-hidden />}>
                   <Link to={`/position-request/${record.id}`}>View</Link>
                 </Menu.Item>
-                <Menu.Item key="download" icon={<FilePdfOutlined />}>
+                <Menu.Item key="download" icon={<FilePdfOutlined aria-hidden />}>
                   Download profile
                 </Menu.Item>
-                <Menu.Item key="copy" icon={<LinkOutlined />} onClick={() => handleCopyLink(record)}>
+                <Menu.Item key="copy" icon={<LinkOutlined aria-hidden />} onClick={() => handleCopyLink(record)}>
                   Copy link
                 </Menu.Item>
-                <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
+                <Menu.Item key="delete" icon={<DeleteOutlined aria-hidden />} disabled>
                   Delete
                 </Menu.Item>
               </>
@@ -191,13 +191,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
             {record.status === 'IN_REVIEW' && (
               <>
-                <Menu.Item key="view" icon={<EyeOutlined />}>
+                <Menu.Item key="view" icon={<EyeOutlined aria-hidden />}>
                   <Link to={`/position-request/${record.id}`}>View</Link>
                 </Menu.Item>
-                <Menu.Item key="copy" icon={<LinkOutlined />} onClick={() => handleCopyLink(record)}>
+                <Menu.Item key="copy" icon={<LinkOutlined aria-hidden />} onClick={() => handleCopyLink(record)}>
                   Copy link
                 </Menu.Item>
-                <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
+                <Menu.Item key="delete" icon={<DeleteOutlined aria-hidden />} disabled>
                   Delete
                 </Menu.Item>
               </>
@@ -207,13 +207,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
         {mode == 'total-compensation' && (
           <>
-            <Menu.Item key="view" icon={<EyeOutlined />}>
+            <Menu.Item key="view" icon={<EyeOutlined aria-hidden />}>
               View
             </Menu.Item>
-            <Menu.Item key="download" icon={<DownloadOutlined />}>
+            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
               Download attachements
             </Menu.Item>
-            <Menu.Item key="copy" icon={<LinkOutlined />} onClick={() => handleCopyLink(record)}>
+            <Menu.Item key="copy" icon={<LinkOutlined aria-hidden />} onClick={() => handleCopyLink(record)}>
               Copy link
             </Menu.Item>
           </>
@@ -221,10 +221,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
         {mode == 'classification' && (
           <>
-            <Menu.Item key="view" icon={<EyeOutlined />}>
+            <Menu.Item key="view" icon={<EyeOutlined aria-hidden />}>
               View
             </Menu.Item>
-            <Menu.Item key="download" icon={<DownloadOutlined />}>
+            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
               Download attachements
             </Menu.Item>
           </>
@@ -242,9 +242,49 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   // Handler to be called when the mouse leaves a row
   const handleMouseLeave = () => setHoveredRowKey(null);
 
+  const ellipsisRefs = useRef<any>({});
+
   const handleVisibleChange = (id: any, isVisible: any) => {
     // Update the visibility based on user interaction
     setPopoverVisible((prevState) => ({ ...prevState, [id]: isVisible }));
+
+    if (!isVisible && ellipsisRefs.current[id]) {
+      ellipsisRefs.current[id].focus();
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      if (event.key === 'Escape') {
+        const keys = Object.keys(popoverVisible);
+        keys.forEach((key) => {
+          if (popoverVisible[key]) {
+            setPopoverVisible((prevState) => ({ ...prevState, [key]: false }));
+            // Focus back on the corresponding ellipsis button
+            if (ellipsisRefs.current[key]) {
+              ellipsisRefs.current[key].focus();
+            }
+          }
+        });
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [popoverVisible]);
+
+  const handlePopoverOpen = (visible: any, recordId: any) => {
+    if (visible) {
+      setTimeout(() => {
+        const popover = document.querySelector(
+          `.popover-selector-${recordId} .ant-menu-item:not(.ant-menu-item-disabled) a`,
+        );
+        if (popover) {
+          const popoverElement = popover as HTMLElement;
+          popoverElement.focus();
+        }
+      }, 100);
+    }
   };
 
   const columns: ColumnTypes[] = [
@@ -400,33 +440,33 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             dataIndex: 'position_number',
             key: 'position_number',
             render: (text: any, record: any) => (
-              <>
-                {record.status === 'COMPLETED' || mode == 'classification' || mode == 'total-compensation' ? (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {text}
-                    {record.status === 'COMPLETED' && hoveredRowKey === record.id && (
-                      <Button
-                        icon={<CopyOutlined />}
-                        size="small"
-                        style={{
-                          marginLeft: 8,
-                          padding: '0px', // Reduce padding
-                          lineHeight: '1', // Match the line height to the row content
-                          border: 'none', // Remove the border if not needed
-                          background: 'transparent', // Remove background
-                          height: 'fit-content', // Ensure the button only takes up the necessary height
-                        }}
-                        onClick={() => {
-                          copy(text.toString());
-                          message.success('Position number copied!');
-                        }}
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span>{text}</span>
+                <span
+                  style={{
+                    visibility:
+                      (record.status === 'COMPLETED' || mode === 'classification' || mode === 'total-compensation') &&
+                      hoveredRowKey === record.id
+                        ? 'visible'
+                        : 'hidden',
+                    marginLeft: 0,
+                  }}
+                >
+                  <Button
+                    icon={<CopyOutlined />}
+                    size="small"
+                    style={{
+                      border: 'none',
+                      padding: 0,
+                      background: 'transparent',
+                    }}
+                    onClick={() => {
+                      copy(text.toString());
+                      message.success('Position number copied!');
+                    }}
+                  />
+                </span>
+              </div>
             ),
           },
         ]
@@ -451,18 +491,28 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
         ]
       : []),
     {
-      title: <SettingOutlined />,
+      title: <SettingOutlined aria-label="actions" />,
       align: 'center',
       key: 'action',
       render: (_text: any, record: any) => (
         <Popover
           open={popoverVisible[record.id]}
-          onOpenChange={(visible) => handleVisibleChange(record.id, visible)}
-          content={getMenuContent(record)}
+          onOpenChange={(visible) => {
+            handleVisibleChange(record.id, visible);
+            handlePopoverOpen(visible, record.id);
+          }}
+          content={
+            <MenuContent
+              record={record}
+              onCopyLink={handleCopyLink}
+              onDeleteConfirm={showDeleteConfirm}
+              selectedKeys={selectedKeys}
+            />
+          } //{getMenuContent(record)}
           trigger="click"
           placement="bottomRight"
         >
-          <EllipsisOutlined />
+          <EllipsisOutlined ref={(el) => (ellipsisRefs.current[record.id] = el)} className={`ellipsis-${record.id}`} />
         </Popover>
       ),
     },
@@ -567,13 +617,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     if (handleTableChangeCallback) handleTableChangeCallback(pagination, _filters, sorter);
   };
 
-  const rowSelection: TableRowSelection<GetPositionRequestResponseContent> = {
-    selectedRowKeys,
-    onChange: (selectedKeys: any) => {
-      setSelectedRowKeys(selectedKeys);
-    },
-  };
-
   useEffect(() => {
     if (fetchError) {
       setError('An error occurred while fetching data.');
@@ -607,7 +650,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                         />
                       </Tooltip>
                     ) : (
-                      topRightComponent || <Button icon={<ReloadOutlined />} onClick={() => updateData()} />
+                      topRightComponent || (
+                        <Button
+                          aria-label="Refresh"
+                          icon={<ReloadOutlined aria-hidden />}
+                          onClick={() => updateData()}
+                        />
+                      )
                     )}
                   </Col>
                 </Row>
@@ -617,7 +666,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
           {hasPositionRequests ? (
             <Table
-              rowSelection={rowSelection}
+              // rowSelection={rowSelection}
               onRow={(record) => {
                 return {
                   onMouseEnter: () => handleMouseEnter(record.id),
@@ -628,17 +677,36 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               columns={columns}
               dataSource={data?.positionRequests}
               rowKey="id"
-              pagination={
-                showPagination
-                  ? {
-                      current: currentPage,
-                      pageSize: pageSize,
-                      total: totalResults,
-                      pageSizeOptions: ['10', '20', '50'],
-                      showSizeChanger: true,
-                    }
-                  : false
-              }
+              pagination={{
+                current: currentPage,
+                pageSize: pageSize,
+                total: totalResults,
+                pageSizeOptions: ['10', '20', '50'],
+                showSizeChanger: showPagination,
+                itemRender: (_current, type, originalElement) => {
+                  // Modifying page doesn't work..
+                  // if (type === 'page') {
+                  //   // Modify the page item to include aria-label directly on the li element
+                  //   return (
+                  //     <li aria-label={`Go to page ${current}`} tabIndex="0">
+                  //       {React.cloneElement(originalElement, {})}
+                  //     </li>
+                  //   );
+                  // }
+                  if (type === 'prev' && React.isValidElement(originalElement)) {
+                    return React.cloneElement(originalElement as React.ReactElement, {
+                      'aria-label': 'Go to previous page',
+                    });
+                  }
+
+                  if (type === 'next' && React.isValidElement(originalElement)) {
+                    return React.cloneElement(originalElement as React.ReactElement, {
+                      'aria-label': 'Go to next page',
+                    });
+                  }
+                  return originalElement;
+                },
+              }}
               onChange={handleTableChange}
               footer={showFooter ? renderTableFooter : undefined}
             />
@@ -682,7 +750,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   >
                     <img src={TasksCompleteGraphic} alt="No positions" />
                     <div>All good! It looks like you don't have any assigned tasks.</div>
-                    <Button type="link" style={{ marginTop: '1rem' }} icon={<ReloadOutlined />} onClick={updateData}>
+                    <Button
+                      type="link"
+                      style={{ marginTop: '1rem' }}
+                      icon={<ReloadOutlined aria-hidden />}
+                      onClick={updateData}
+                    >
                       Refresh
                     </Button>
                   </div>
@@ -732,7 +805,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
         >
           <img src={ErrorGraphic} alt="Error" />
           <div>Oops! We were unable to fetch the details.</div>
-          <Button type="link" style={{ marginTop: '1rem' }} icon={<ReloadOutlined />} onClick={updateData}>
+          <Button type="link" style={{ marginTop: '1rem' }} icon={<ReloadOutlined aria-hidden />} onClick={updateData}>
             Refresh
           </Button>
         </div>

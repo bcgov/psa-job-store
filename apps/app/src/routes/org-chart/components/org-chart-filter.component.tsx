@@ -32,7 +32,7 @@ export const OrgChartFilter = ({ setSelectedDepartment, selectedDepartment, defa
             optionFilterProp="children"
             onSelect={setSelectedDepartment}
             onClear={() => setSelectedDepartment(null)}
-            filterOption={(input, option) => (option?.filterKey ?? '').toLowerCase().includes(input)}
+            filterOption={(input, option) => (option?.filterKey ?? '').toLowerCase().includes(input.toLowerCase())}
             filterSort={(optionA, optionB) =>
               (optionA?.sortKey ?? '').toLowerCase().localeCompare((optionB?.sortKey ?? '').toLowerCase())
             }
