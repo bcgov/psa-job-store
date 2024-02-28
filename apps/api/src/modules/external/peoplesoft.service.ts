@@ -167,9 +167,6 @@ export class PeoplesoftService {
     // Departments rely on organizations which must exist prior to syncing departments
     await this.syncOrganizations();
     await this.syncDepartments();
-
-    // Commented out until the API returns useful data
-    // await this.syncDepartmentClassificationMapping();
   }
 
   async syncOrganizations() {
@@ -286,40 +283,6 @@ export class PeoplesoftService {
     }
 
     this.logger.log(`End syncDepartments @ ${new Date()}`);
-  }
-
-  async syncDepartmentClassificationMapping() {
-    const classificationIds = (
-      await this.prisma.classification.findMany({ select: { id: true }, distinct: ['id'], orderBy: { id: 'asc' } })
-    ).map((o) => o.id);
-
-    const response = await firstValueFrom(
-      this.request({
-        method: RequestMethod.GET,
-        endpoint: Endpoint.DepartmentClassifications,
-        pageSize: 100000,
-        extra: `prompt_uniquepromptname=JOBCODE,DEPTID&prompt_fieldvalue=,&filterfields=A.JOBCODE,B.DEPTID`,
-      }).pipe(
-        map((r) => r.data),
-        retry(3),
-        catchError((err) => {
-          throw new Error(err);
-        }),
-      ),
-    );
-
-    // Filter rows from response to remove any mappings for classifications which don't exist in our system
-    const filteredRows: string[] = (response?.data?.query?.rows ?? []).filter((row) =>
-      classificationIds.includes(row['A.JOBCODE']),
-    );
-
-    // Delete existing mappings
-    await this.prisma.classificationDepartment.deleteMany();
-
-    // Insert new mappings
-    await this.prisma.classificationDepartment.createMany({
-      data: filteredRows.map((row) => ({ classification_id: row['A.JOBCODE'], department_id: row['B.DEPTID'] })),
-    });
   }
 
   async getEmployeesForPositions(positions: string[]) {
