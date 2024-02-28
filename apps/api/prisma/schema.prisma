@@ -28,6 +28,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ScheduledTaskMetadata {
+  task        String    @id
+  frequency   Int? // How often the task should run (in seconds)
+  last_run_at DateTime?
+
+  @@map("scheduled_task_metadata")
+}
+
 enum PositionRequestStatus {
   DRAFT
   IN_REVIEW
