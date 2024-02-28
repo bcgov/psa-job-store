@@ -40,7 +40,6 @@ export class CrmService {
   }
 
   async syncIncidentStatus() {
-    this.logger.log(`Start syncIncidentStatus @ ${new Date()}`);
     // Get position requests which have been submitted, but have not been marked as COMPLETED
     const positionRequests = await this.prisma.positionRequest.findMany({
       where: {
@@ -57,6 +56,8 @@ export class CrmService {
     });
 
     if (positionRequests.length === 0) return;
+
+    this.logger.log(`Start syncIncidentStatus @ ${new Date()}`);
 
     // The following API call returns an object with the structure:
     //
