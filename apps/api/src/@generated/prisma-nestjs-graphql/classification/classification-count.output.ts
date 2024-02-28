@@ -9,7 +9,4 @@ export class ClassificationCount {
 
   @Field(() => Int, { nullable: false })
   reportees?: number;
-
-  @Field(() => Int, { nullable: false })
-  departments?: number;
 }

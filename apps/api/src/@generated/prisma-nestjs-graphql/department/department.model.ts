@@ -3,7 +3,6 @@ import { ObjectType } from '@nestjs/graphql';
 import { Location } from '../location/location.model';
 import { Organization } from '../organization/organization.model';
 import { PositionRequest } from '../position-request/position-request.model';
-import { ClassificationDepartment } from '../classification-department/classification-department.model';
 
 @ObjectType()
 export class Department {
@@ -42,7 +41,4 @@ export class Department {
 
   @Field(() => [PositionRequest], { nullable: true })
   PositionRequestsByPaylistDepartment?: Array<PositionRequest>;
-
-  @Field(() => [ClassificationDepartment], { nullable: true })
-  classifications?: Array<ClassificationDepartment>;
 }
