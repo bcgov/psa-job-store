@@ -19,14 +19,14 @@ jobs:
         continue-on-error: true
         uses: ./.github/actions/stackrox-check
         with:
-          image: 'alexstruk/api:latest'
+          image: ${{secrets.ARTIFACTORY_URL}}'/af3c-gen-docker-local/api:latest'
           central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
           api-token: ${{ secrets.ROX_API_TOKEN }}
       - id: scan
         continue-on-error: true
         uses: ./.github/actions/stackrox-scan
         with:
-          image: 'alexstruk/api:latest'
+          image: ${{secrets.ARTIFACTORY_URL}}'/af3c-gen-docker-local/api:latest'
           central-endpoint: ${{ secrets.ROX_CENTRAL_ENDPOINT }}
           api-token: ${{ secrets.ROX_API_TOKEN }}
       - id: check-api-nestjs-dc
