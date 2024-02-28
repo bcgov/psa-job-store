@@ -1,7 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
@@ -69,7 +68,6 @@ export class PeoplesoftService {
     );
   }
 
-  @Cron('0 0 * * * *')
   async syncClassifications() {
     this.logger.log(`Start syncClassifications @ ${new Date()}`);
 
@@ -127,7 +125,6 @@ export class PeoplesoftService {
     this.logger.log(`End syncClassifications @ ${new Date()}`);
   }
 
-  @Cron('0 0 * * * *')
   async syncLocations() {
     this.logger.log(`Start syncLocations @ ${new Date()}`);
 
@@ -165,7 +162,6 @@ export class PeoplesoftService {
     this.logger.log(`End syncLocations @ ${new Date()}`);
   }
 
-  @Cron('0 0 * * * *')
   async syncOrganizationsAndDepartments() {
     // Use this function instead of calling syncOrganizations, syncDepartments independently
     // Departments rely on organizations which must exist prior to syncing departments
