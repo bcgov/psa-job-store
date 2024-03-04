@@ -13,7 +13,10 @@ import {
 } from '@ant-design/icons';
 import { Button, Card, Col, Menu, Modal, Popover, Result, Row, Space, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
+import { generateJobProfile } from 'common-kit';
 import copy from 'copy-to-clipboard';
+import { Packer } from 'docx';
+import saveAs from 'file-saver';
 import React, { CSSProperties, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
@@ -21,8 +24,10 @@ import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
+import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import {
   useDeletePositionRequestMutation,
+  useLazyGetPositionRequestQuery,
   useLazyGetPositionRequestsQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
@@ -77,7 +82,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const [selectedRowKeys] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [pageSize, setPageSize] = useState(initialPageSize);
+  const [pageSize, setPageSize] = useState(import.meta.env.VITE_TEST_ENV === 'true' ? 2 : initialPageSize);
   const [sortField, setSortField] = useState(initialSortField);
   const [sortOrder, setSortOrder] = useState(initialSortOrder);
   const [hasPositionRequests, setHasPositionRequests] = useState(false);
@@ -96,6 +101,54 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     }
     return undefined;
   };
+
+  // This is for downloading of the job profile
+  const [prTrigger, { data: prData, isLoading: isLoadingPositionRequest }] = useLazyGetPositionRequestQuery();
+  const [jpTrigger, { data: jpData, isLoading: isLoadingJobProfile }] = useLazyGetJobProfilesQuery();
+
+  // Fetch the position request which includes the job profile and potentially a parent job profile ID
+  const fetchJobProfileAndParent = async (id: any) => {
+    prTrigger({ id: +id });
+  };
+
+  const generateAndDownloadDocument = useCallback((jobProfile: any, parentProfile: any) => {
+    const document = generateJobProfile({
+      jobProfile: jobProfile,
+      parentJobProfile: parentProfile,
+    });
+    Packer.toBlob(document).then((blob) => {
+      saveAs(blob, 'job-profile.docx');
+      message.success('Your document is downloading!');
+    });
+  }, []);
+
+  useEffect(() => {
+    // When the position request data is received
+    if (prData && prData.positionRequest) {
+      const { parent_job_profile_id } = prData.positionRequest;
+
+      // If there's a parent job profile ID, fetch the parent job profile
+      if (parent_job_profile_id) {
+        jpTrigger({ where: { id: { equals: parent_job_profile_id } } });
+      }
+      // else {
+      //   // If there's no parent, proceed to generate the document with the current profile data
+      //   generateAndDownloadDocument(profile_json, null);
+      // }
+    }
+  }, [prData, jpData, jpTrigger]);
+
+  useEffect(() => {
+    // When the parent job profile data is received
+    if (jpData && jpData.jobProfiles && jpData.jobProfiles.length > 0) {
+      const parentProfile = jpData.jobProfiles[0];
+
+      if (prData && prData.positionRequest && prData.positionRequest.profile_json) {
+        // Generate and download the document with both job and parent job profiles
+        generateAndDownloadDocument(prData.positionRequest.profile_json, parentProfile);
+      }
+    }
+  }, [jpData, prData, generateAndDownloadDocument]);
 
   // Check if data is available and call the callback function to notify the parent component
   useEffect(() => {
@@ -133,17 +186,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const linkToCopy = `${window.location.origin}/position-request/${record.id}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    navigator.clipboard
-      .writeText(linkToCopy)
-      .then(() => {
-        // Notification to show the link has been copied successfully
-        message.success('Link copied to clipboard!');
-      })
-      .catch((err) => {
-        // Handle any errors here
-        console.error('Failed to copy link: ', err);
-        message.error('Failed to copy link');
-      });
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    message.success('Link copied to clipboard!');
     setSelectedKeys([]);
 
     handleVisibleChange(record.id, false);
@@ -156,13 +200,19 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           <>
             {record.status === 'DRAFT' && (
               <>
-                <Menu.Item key="edit" icon={<EditOutlined aria-hidden />}>
+                <Menu.Item key="edit" icon={<EditOutlined aria-hidden />} data-testid="menu-option-edit">
                   <Link to={`/position-request/${record.id}`}>Edit</Link>
                 </Menu.Item>
-                <Menu.Item key="copy" icon={<LinkOutlined aria-hidden />} onClick={() => handleCopyLink(record)}>
+                <Menu.Item
+                  key="copy"
+                  icon={<LinkOutlined aria-hidden />}
+                  onClick={() => handleCopyLink(record)}
+                  data-testid="menu-option-copy link"
+                >
                   Copy link
                 </Menu.Item>
                 <Menu.Item
+                  data-testid="menu-option-delete"
                   key="delete"
                   icon={<DeleteOutlined aria-hidden />}
                   onClick={() => showDeleteConfirm(record.id)}
@@ -174,13 +224,25 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
             {record.status === 'COMPLETED' && (
               <>
-                <Menu.Item key="view" icon={<EyeOutlined aria-hidden />}>
-                  <Link to={`/position-request/${record.id}`}>View</Link>
+                <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
+                  <Link data-testid="view-link" to={`/position-request/${record.id}`}>
+                    View
+                  </Link>
                 </Menu.Item>
-                <Menu.Item key="download" icon={<FilePdfOutlined aria-hidden />}>
-                  Download profile
+                <Menu.Item
+                  data-testid="menu-option-download"
+                  key="download"
+                  icon={<FilePdfOutlined aria-hidden />}
+                  onClick={() => fetchJobProfileAndParent(record.id)}
+                >
+                  <span>{isLoadingPositionRequest || isLoadingJobProfile ? 'Loading...' : 'Download'}</span>
                 </Menu.Item>
-                <Menu.Item key="copy" icon={<LinkOutlined aria-hidden />} onClick={() => handleCopyLink(record)}>
+                <Menu.Item
+                  key="copy"
+                  icon={<LinkOutlined aria-hidden />}
+                  onClick={() => handleCopyLink(record)}
+                  data-testid="menu-option-copy link"
+                >
                   Copy link
                 </Menu.Item>
                 <Menu.Item key="delete" icon={<DeleteOutlined aria-hidden />} disabled>
@@ -191,10 +253,15 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
             {record.status === 'IN_REVIEW' && (
               <>
-                <Menu.Item key="view" icon={<EyeOutlined aria-hidden />}>
+                <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
                   <Link to={`/position-request/${record.id}`}>View</Link>
                 </Menu.Item>
-                <Menu.Item key="copy" icon={<LinkOutlined aria-hidden />} onClick={() => handleCopyLink(record)}>
+                <Menu.Item
+                  key="copy"
+                  icon={<LinkOutlined aria-hidden />}
+                  onClick={() => handleCopyLink(record)}
+                  data-testid="menu-option-copy link"
+                >
                   Copy link
                 </Menu.Item>
                 <Menu.Item key="delete" icon={<DeleteOutlined aria-hidden />} disabled>
@@ -207,13 +274,18 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
         {mode == 'total-compensation' && (
           <>
-            <Menu.Item key="view" icon={<EyeOutlined aria-hidden />}>
+            <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
               View
             </Menu.Item>
             <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
               Download attachements
             </Menu.Item>
-            <Menu.Item key="copy" icon={<LinkOutlined aria-hidden />} onClick={() => handleCopyLink(record)}>
+            <Menu.Item
+              key="copy"
+              icon={<LinkOutlined aria-hidden />}
+              onClick={() => handleCopyLink(record)}
+              data-testid="menu-option-copy link"
+            >
               Copy link
             </Menu.Item>
           </>
@@ -221,7 +293,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
         {mode == 'classification' && (
           <>
-            <Menu.Item key="view" icon={<EyeOutlined aria-hidden />}>
+            <Menu.Item key="view" data-testid="menu-option-view" icon={<EyeOutlined aria-hidden />}>
               View
             </Menu.Item>
             <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
@@ -289,24 +361,37 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
   const columns: ColumnTypes[] = [
     {
-      title: 'Job Title',
+      title: <span data-testid="job-title-header">Job Title</span>,
       dataIndex: 'title',
       key: 'title',
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
       render: (text: any, record: any) => {
-        if (mode == null) return <Link to={`/position-request/${record.id}`}>{text}</Link>;
+        if (mode == null)
+          return (
+            <Link to={`/position-request/${record.id}`} data-testid={`job-position-${record.id}`}>
+              <div data-testid="job-title">{text}</div>
+            </Link>
+          );
         else if (mode == 'total-compensation') {
-          return <Link to={`/total-compensation/approved-requests/${record.id}`}>{text}</Link>;
+          return (
+            <Link to={`/total-compensation/approved-requests/${record.id}`}>
+              <div data-testid="job-title">{text}</div>
+            </Link>
+          );
         } else if (mode == 'classification') {
-          return <Link to={`/classification-tasks/${record.id}`}>{text}</Link>;
+          return (
+            <Link to={`/classification-tasks/${record.id}`}>
+              <div data-testid="job-title">{text}</div>
+            </Link>
+          );
         }
       },
     },
     ...(mode == null || mode == 'classification'
       ? [
           {
-            title: 'Status',
+            title: <span data-testid="status-header">Status</span>,
             dataIndex: 'status',
             key: 'status',
             sorter: allowSorting,
@@ -350,7 +435,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               return (
                 <Space>
                   <span className={`status-dot`} style={{ backgroundColor: color }} />
-                  {getStatusLabel(status)}
+                  <span data-testid={`status-${status}`}>{getStatusLabel(status)}</span>
                 </Space>
               );
             },
@@ -362,9 +447,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       {
         sorter: allowSorting,
         defaultSortOrder: getSortOrder('classification_code'),
-        title: 'Class',
+        title: <span data-testid="class-header">Class</span>,
         dataIndex: 'classification_code',
         key: 'classification_code',
+        render: (text: string) => <div data-testid={`classification-${text}`}> {text}</div>,
       },
     ],
 
@@ -373,7 +459,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('crm_id'),
-            title: 'CRM service request',
+            title: <span data-testid="crm-service-request-header">CRM service request</span>,
             dataIndex: 'crm_id',
             key: 'crm_id',
           },
@@ -385,7 +471,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('jobStoreId'),
-            title: 'JobStore number',
+            title: <span data-testid="crm-jobstore-number-header">JobStore number</span>,
             dataIndex: 'parent_job_profile',
             key: 'parent_job_profile_number',
             render: (parentJobProfile: any) => (parentJobProfile ? parentJobProfile.number : 'N/A'),
@@ -398,7 +484,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('user_name'),
-            title: 'Submitted by',
+            title: <span data-testid="submitted-by-header">Submitted by</span>,
             dataIndex: 'user_name',
             key: 'user_name',
           },
@@ -410,7 +496,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('submitted_at'),
-            title: 'Submitted at',
+            title: <span data-testid="submitted-at-header">Submitted at</span>,
             dataIndex: 'submitted_at',
             key: 'submitted_at',
             render: (text: string) => formatDateTime(text),
@@ -423,7 +509,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('approved_at'),
-            title: 'Approved at',
+            title: <span data-testid="approved-at-header">Approved at</span>,
             dataIndex: 'approved_at',
             key: 'approved_at',
             render: (text: string) => formatDateTime(text),
@@ -436,7 +522,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('position_number'),
-            title: 'Position #',
+            title: <span data-testid="position-#-header">Position #</span>,
             dataIndex: 'position_number',
             key: 'position_number',
             render: (text: any, record: any) => (
@@ -453,6 +539,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   }}
                 >
                   <Button
+                    data-testid="copy-position-number-button"
                     icon={<CopyOutlined />}
                     size="small"
                     style={{
@@ -461,7 +548,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                       background: 'transparent',
                     }}
                     onClick={() => {
-                      copy(text.toString());
+                      if (import.meta.env.VITE_TEST_ENV !== 'true') copy(text.toString());
                       message.success('Position number copied!');
                     }}
                   />
@@ -474,16 +561,17 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     {
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('submission_id'),
-      title: 'Submission ID',
+      title: <span data-testid="submission-id-header">Submission ID</span>,
       dataIndex: 'submission_id',
       key: 'submission_id',
+      render: (text) => <div data-testid="submission-id">{text}</div>,
     },
     ...(mode == null
       ? [
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('updated_at'),
-            title: 'Modified at',
+            title: <span data-testid="modified-at-header">Modified at</span>,
             dataIndex: 'updated_at',
             key: 'updated_at',
             render: (text: string) => formatDateTime(text),
@@ -605,7 +693,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const newSortField = sorter.field;
     const newSortOrder = sorter.order;
 
-    console.log('sorter: ', JSON.stringify(sorter));
+    // console.log('sorter: ', JSON.stringify(sorter));
 
     setCurrentPage(newPage);
     setPageSize(newPageSize);
@@ -666,6 +754,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
           {hasPositionRequests ? (
             <Table
+              loading={isFetching || isLoading}
               // rowSelection={rowSelection}
               onRow={(record) => {
                 return {
@@ -673,6 +762,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   onMouseLeave: handleMouseLeave,
                 };
               }}
+              rowClassName="job-position-row"
               className="tableWithHeader"
               columns={columns}
               dataSource={data?.positionRequests}

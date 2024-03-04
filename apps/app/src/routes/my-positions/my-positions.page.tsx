@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Button, Card, Checkbox, Col, Row, Select, Tag } from 'antd';
+import { Button, Card, Col, Row, Select, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -80,33 +80,6 @@ export const MyPositionsPage = () => {
 
   const tagRender = () => {
     return <></>;
-  };
-
-  const dropdownRender = (type: any) => {
-    const options = type === 'status' ? statusFilterDataMap : classificationFilterData;
-    const selectedValues = type === 'status' ? selectedStatus : selectedClassification;
-    return (
-      <div>
-        <div style={{ padding: '8px' }}>
-          {options.map((option) => (
-            <div key={option.value} style={{ margin: '5px 0' }}>
-              <Checkbox
-                checked={selectedValues.includes(option.value)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    addSelection(option.value, type);
-                  } else {
-                    removeSelection(option.value, type);
-                  }
-                }}
-              >
-                {option.label}
-              </Checkbox>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
   };
 
   const findLabel = (value: any, type: any) => {
@@ -267,6 +240,7 @@ export const MyPositionsPage = () => {
           <Row gutter={24} wrap>
             <Col span={12}>
               <Search
+                data-testid="search-field"
                 defaultValue={searchParams.get('search') ?? undefined}
                 enterButton="Find positions"
                 onPressEnter={(e) => handleSearch(e.currentTarget.value, null)}
@@ -280,6 +254,7 @@ export const MyPositionsPage = () => {
               <Row gutter={8} justify="end">
                 <Col>
                   <Select
+                    data-testid="status-filter-dropdown"
                     aria-label="status filter"
                     className="external-tag-select"
                     maxTagCount={0}
@@ -308,27 +283,10 @@ export const MyPositionsPage = () => {
                     options={statusFilterDataMap}
                     style={{ width: 130 }}
                   />
-                  {/* <Select
-                    tagRender={tagRender}
-                    dropdownRender={() => dropdownRender('status')}
-                    className="customTagControlled"
-                    placeholder="Status"
-                    options={statusFilterDataMap}
-                    style={{ width: 120 }}
-                    // onChange={setSelectedStatus}
-                    onChange={(newValues) => {
-                      // Add new selections and remove deselected ones
-                      newValues.forEach((val: any) => {
-                        if (!selectedStatus.includes(val)) addSelection(val, 'status');
-                      });
-                      selectedStatus.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'status');
-                      });
-                    }}
-                  /> */}
                 </Col>
                 <Col>
                   <Select
+                    data-testid="classification-filter-dropdown"
                     aria-label="classification filter"
                     className="external-tag-select"
                     maxTagCount={0}
@@ -344,50 +302,15 @@ export const MyPositionsPage = () => {
                       selectedClassification.forEach((val) => {
                         if (!newValues.includes(val)) removeSelection(val, 'classification');
                       });
-
-                      // const currentValues = selectedClassification;
-
-                      // // Determine added values
-                      // selectedValues
-                      //   .filter((value) => !currentValues.includes(value))
-                      //   .forEach((value) => {
-                      //     addSelection(value, 'classification');
-                      //   });
-
-                      // // Determine removed values
-                      // currentValues
-                      //   .filter((value) => !selectedValues.includes(value))
-                      //   .forEach((value) => {
-                      //     removeSelection(value, 'classification');
-                      //   });
                     }}
                     options={classificationFilterData}
                     style={{ width: 130 }}
                   />
-
-                  {/* <Select
-                    tagRender={tagRender}
-                    dropdownRender={() => dropdownRender('classification')}
-                    className="customTagControlled"
-                    placeholder="Classification"
-                    options={classificationFilterData}
-                    style={{ width: 150 }}
-                    // onChange={setSelectedClassification}
-                    onChange={(newValues) => {
-                      // Similar logic as for status
-                      newValues.forEach((val: any) => {
-                        if (!selectedClassification.includes(val)) addSelection(val, 'classification');
-                      });
-                      selectedClassification.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'classification');
-                      });
-                    }}
-                  /> */}
                 </Col>
               </Row>
             </Col>
             {allSelections.length > 0 && (
-              <Col style={{ marginTop: '10px', marginBottom: '10px' }}>
+              <Col style={{ marginTop: '10px', marginBottom: '10px' }} data-testid="filters-section">
                 <span
                   style={{
                     fontWeight: 500,
@@ -401,6 +324,7 @@ export const MyPositionsPage = () => {
                   Applied filters
                 </span>
                 <Button
+                  data-testid="clear-filters-button"
                   onClick={clearFilters}
                   type="link"
                   style={{ padding: '0', fontWeight: 400 }}
@@ -411,19 +335,21 @@ export const MyPositionsPage = () => {
               </Col>
             )}
           </Row>
-          <Row>
-            <Col>
-              {allSelections.map((selection) => (
-                <Tag
-                  key={`${selection.type}-${selection.value}`}
-                  closable
-                  onClose={() => removeSelection(selection.value, selection.type)}
-                >
-                  {findLabel(selection.value, selection.type)}
-                </Tag>
-              ))}
-            </Col>
-          </Row>
+          {allSelections.length > 0 && (
+            <Row data-testid="filters-tags-section">
+              <Col>
+                {allSelections.map((selection) => (
+                  <Tag
+                    key={`${selection.type}-${selection.value}`}
+                    closable
+                    onClose={() => removeSelection(selection.value, selection.type)}
+                  >
+                    {findLabel(selection.value, selection.type)}
+                  </Tag>
+                ))}
+              </Col>
+            </Row>
+          )}
         </Card>
 
         <MyPositionsTable
