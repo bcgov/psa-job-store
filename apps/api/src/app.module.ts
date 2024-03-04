@@ -30,6 +30,7 @@ import { SiteMinderGuidTestApiModule } from './modules/site-minder-guid-test/sit
 import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerFactory } from './utils/logging/logger.factory';
 import { validateAppConfig } from './utils/validate-app-config.util';
+import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobProfileMinimumRequirementsModule,
     AppLogModule,
     SiteMinderGuidTestApiModule,
+    ScheduledTaskModule,
   ],
   controllers: [],
   providers: [

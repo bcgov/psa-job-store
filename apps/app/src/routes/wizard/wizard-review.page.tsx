@@ -139,7 +139,9 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           </div>
         }
         subTitle={
-          <div>View the edits you've made to the generic profile. Review to make sure it meets your requirements.</div>
+          <div data-testid="review-step-subtitle">
+            View the edits you've made to the generic profile. Review to make sure it meets your requirements.
+          </div>
         }
         additionalBreadcrumb={{ title: 'New position' }}
         // subTitle="Choose a job profile to modify for the new positions"

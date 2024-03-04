@@ -9,7 +9,4 @@ export class DepartmentCount {
 
   @Field(() => Int, { nullable: false })
   PositionRequestsByPaylistDepartment?: number;
-
-  @Field(() => Int, { nullable: false })
-  classifications?: number;
 }

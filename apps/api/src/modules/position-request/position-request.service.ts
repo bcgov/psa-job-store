@@ -869,7 +869,13 @@ export class PositionRequestApiService {
               positionRequest.id
             }">View this position in the Job Store</a>
             <br />
-            The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}
+            <strong>
+            ${
+              positionRequest.position_number != null
+                ? `The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}`
+                : `No position was created for this request`
+            }
+            </strong>
             <br />
             <ul>
               <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
@@ -945,7 +951,7 @@ export class PositionRequestApiService {
           DEPTID: positionRequest.department_id,
           JOBCODE: positionRequest.classification_id,
           REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview ? PositionStatus.Proposed : PositionStatus.Active,
+          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
           DESCR: positionRequest.title,
           REG_TEMP: PositionDuration.Regular,
           FULL_PART_TIME: PositionType.FullTime,
@@ -966,7 +972,7 @@ export class PositionRequestApiService {
           DEPTID: positionRequest.department_id,
           JOBCODE: positionRequest.classification_id,
           REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview ? PositionStatus.Proposed : PositionStatus.Active,
+          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
           DESCR: positionRequest.title,
           REG_TEMP: PositionDuration.Regular,
           FULL_PART_TIME: PositionType.FullTime,
