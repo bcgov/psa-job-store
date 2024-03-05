@@ -876,6 +876,15 @@ export class PositionRequestApiService {
                 : `No position was created for this request`
             }
             </strong>
+            ${
+              (positionRequest.additional_info_comments ?? '').length > 0
+                ? `
+            <br />
+            <strong>The following note was added to this position request:</strong>
+            <br />
+            <em>${positionRequest.additional_info_comments}</em>`
+                : ''
+            }
             <br />
             <ul>
               <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
