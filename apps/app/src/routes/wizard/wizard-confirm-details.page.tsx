@@ -518,7 +518,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                         <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                           <Form.Item
                             name="payListDepartmentId"
-                            label="Pay list/department ID number"
+                            label="Department ID"
                             labelCol={{ className: 'card-label' }}
                             validateStatus={errors.payListDepartmentId ? 'error' : ''}
                             help={errors.payListDepartmentId?.message}
