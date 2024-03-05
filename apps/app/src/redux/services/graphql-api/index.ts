@@ -76,6 +76,7 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
       // Extract the first error message
       const errorMessage = meta.response.errors[0].message;
 
+      // if it's unauthorized, do not show the error toast -  the system will handle the redirect to login page
       if (errorMessage == 'Unauthorized') return result;
 
       errorToastShown = true;
@@ -96,8 +97,8 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     if (!errorToastShown)
       notification.error({
         duration: 0,
-        message: 'Unexpected Error',
-        description: 'An unexpected error occurred.',
+        message: 'Unknown Error',
+        description: 'Unknown error has occurred.',
       });
     throw error;
   }

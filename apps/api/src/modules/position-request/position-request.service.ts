@@ -14,6 +14,7 @@ import {
   PositionRequestWhereInput,
   UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
+import { AlexandriaError } from '../../utils/alexandria-error';
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
 import {
@@ -107,7 +108,7 @@ export class PositionRequestApiService {
         return id; // Unique ID found
       }
     }
-    throw new Error('Failed to generate a unique ID');
+    throw AlexandriaError('Failed to generate a unique ID');
   }
 
   async createPositionRequest(data: PositionRequestCreateInput, userId: string) {
@@ -846,7 +847,7 @@ export class PositionRequestApiService {
     // without contactId we cannot create an incident
     // this can happen if this is new staff member and they have not been assigned a CRM contact yet
     if (contactId === null) {
-      throw new Error('CRM Contact ID not found');
+      throw AlexandriaError('CRM Contact ID not found');
     }
 
     const department = await this.prisma.department.findUnique({ where: { id: positionRequest.department_id } });

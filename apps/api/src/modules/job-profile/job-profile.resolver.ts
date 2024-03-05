@@ -8,6 +8,7 @@ import {
   JobProfileReportsTo,
   Organization,
 } from '../../@generated/prisma-nestjs-graphql';
+import { AlexandriaError } from '../../utils/alexandria-error';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AllowNoRoles } from '../auth/guards/role-global.guard';
@@ -113,7 +114,7 @@ export class JobProfileResolver {
       if (error.message.includes('Unique constraint failed on the fields: (`number`)')) {
         // Return a custom error response or throw a custom error
         // Modify this according to how you handle errors in your application
-        throw new Error('A job profile with this number already exists. Please use a different number.');
+        throw AlexandriaError('A job profile with this number already exists. Please use a different number.');
       } else {
         // If the error is not due to the unique constraint, rethrow the error
         throw error;
