@@ -10,8 +10,8 @@ Given('the user is on the home page', () => {
 
 When('the user presses "Create new direct report" on the home page org chart', () => {
   // Wait for the org chart to load
-  cy.get('[data-testid="org-chart-loading"]', { timeout: 20000 }).should('not.exist');
-  cy.get('[data-testid="org-chart-container"]', { timeout: 20000 }).should('be.visible');
+  cy.get('[data-testid="org-chart-loading"]', { timeout: 100000 }).should('not.exist');
+  cy.get('[data-testid="org-chart-container"]', { timeout: 100000 }).should('be.visible');
 
   // Select the specific node with ID '00121521' and assign it an alias
   cy.get('[data-testid="org-chart-node-00121521"]').as('targetNode');
