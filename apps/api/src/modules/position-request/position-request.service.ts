@@ -242,6 +242,7 @@ export class PositionRequestApiService {
         approved_at: true,
         submitted_at: true,
         crm_id: true,
+        shareUUID: true,
       },
     });
 
@@ -308,6 +309,53 @@ export class PositionRequestApiService {
       });
     }
     return mergedResults; //.reverse();
+  }
+
+  async getSharedPositionRequest(shareUUID: string) {
+    // console.log('getPositionRequest!', userRoles);
+    const whereCondition: { shareUUID: { equals: string } } = { shareUUID: { equals: shareUUID } };
+
+    const positionRequest = await this.prisma.positionRequest.findFirstOrThrow({
+      where: whereCondition,
+      include: {
+        parent_job_profile: true,
+      },
+    });
+
+    // console.log('positionRequest: ', positionRequest, JSON.stringify(whereCondition));
+
+    if (!positionRequest) {
+      return null;
+    }
+
+    // TODO: AL-146 - this should not be needed if the foreign key relationship is working properly in schema.prisma
+    // Fetch classification
+
+    const classification =
+      positionRequest.classification_id == null
+        ? null
+        : await this.prisma.classification.findUnique({
+            where: { id: positionRequest.classification_id },
+            select: {
+              code: true, // Assuming 'code' is the field you want from the classification
+            },
+          });
+
+    // Fetch user
+    const user = await this.prisma.user.findUnique({
+      where: { id: positionRequest.user_id },
+      select: {
+        name: true, // Assuming 'name' is the field you want from the user
+        email: true,
+      },
+    });
+
+    return {
+      ...positionRequest,
+      classification_code: classification?.code,
+      user_name: user?.name,
+      email: user?.email,
+    };
   }
 
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {

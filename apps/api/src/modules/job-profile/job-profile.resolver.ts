@@ -10,6 +10,7 @@ import {
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { AllowNoRoles } from '../auth/guards/role-global.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { JobFamilyService } from '../job-family/job-family.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
@@ -57,6 +58,7 @@ export class JobProfileResolver {
   }
 
   @Query(() => JobProfile, { name: 'jobProfile' })
+  @AllowNoRoles() // so that share position request feature can fetch relevant data
   async getJobProfile(@Args('id') id: string) {
     return this.jobProfileService.getJobProfile(+id);
   }
