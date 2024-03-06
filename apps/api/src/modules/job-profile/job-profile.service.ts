@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { JobProfile, JobProfileState, JobProfileType, Prisma } from '@prisma/client';
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
+import { AlexandriaError } from '../../utils/alexandria-error';
 import { ClassificationService } from '../classification/classification.service';
 import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
@@ -568,7 +569,7 @@ export class JobProfileService {
     });
 
     if (!jobProfileToDuplicate) {
-      throw new Error('Job Profile not found');
+      throw AlexandriaError('Job Profile not found');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

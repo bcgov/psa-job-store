@@ -76,6 +76,9 @@ export class PositionRequestOrderByWithRelationAndSearchRelevanceInput {
   updated_at?: keyof typeof SortOrder;
 
   @Field(() => SortOrderInput, { nullable: true })
+  shareUUID?: SortOrderInput;
+
+  @Field(() => SortOrderInput, { nullable: true })
   additional_info_work_location_id?: SortOrderInput;
 
   @Field(() => SortOrderInput, { nullable: true })
