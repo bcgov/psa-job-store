@@ -3,10 +3,14 @@ import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typog
 import Title from 'antd/es/typography/Title';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
-import { useBlocker, useNavigate, useParams } from 'react-router-dom';
+import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
-import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
+import {
+  GetPositionRequestResponseContent,
+  useGetPositionRequestQuery,
+  useGetSharedPositionRequestQuery,
+} from '../../redux/services/graphql-api/position-request.api';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
 import ContentWrapper from '../home/components/content-wrapper.component';
@@ -36,9 +40,8 @@ export const PositionRequestPage = () => {
   const [mode, setMode] = useState('editable');
   const [readonlyMode, setReadonlyMode] = useState('');
   const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
-
-  // console.log('parent mode: ', mode);
-  // console.log('parent readonlyMode: ', readonlyMode);
+  const [unwrappedPositionRequestData, setUnwrappedPositionRequestData] =
+    useState<GetPositionRequestResponseContent | null>(null);
 
   const {
     setWizardData,
@@ -48,38 +51,91 @@ export const PositionRequestPage = () => {
     setPositionRequestData,
   } = useWizardContext();
 
-  // console.log('wizardData: ', wizardData);
   const { positionRequestId } = useParams();
+  const location = useLocation();
 
-  if (!positionRequestId) throw 'No position request provided';
+  // Determine if the current path is a shared URL
+  const isSharedRoute = location.pathname.includes('/position-request/share/');
+  // Use state or other logic to determine which query hook to use
+  // This could be a piece of state that determines which query to run, for example
+  const queryHook = isSharedRoute ? useGetSharedPositionRequestQuery : useGetPositionRequestQuery;
 
-  const { data } = useGetPositionRequestQuery({
-    id: parseInt(positionRequestId),
-  });
+  // Use the determined query hook with the positionRequestId
+  const { data: positionRequestData } = isSharedRoute
+    ? queryHook({ uuid: positionRequestId ?? '' })
+    : queryHook({ id: parseInt(positionRequestId ?? '') });
+
+  useEffect(() => {
+    if (!positionRequestId) throw new Error('No position request provided');
+
+    // Perform actions based on the data or the route
+    if (isSharedRoute) {
+      // If it's a shared route, set modes or perform actions accordingly
+      setMode('readonly');
+    }
+
+    setUnwrappedPositionRequestData(
+      isSharedRoute ? positionRequestData?.sharedPositionRequest ?? null : positionRequestData?.positionRequest ?? null,
+    );
+  }, [
+    positionRequestId,
+    location.pathname,
+    positionRequestData,
+    setWizardData,
+    setPositionRequestId,
+    setPositionRequestProfileId,
+    setPositionRequestDepartmentId,
+    setPositionRequestData,
+    isSharedRoute,
+  ]);
+
+  // const [mode, setMode] = useState('editable');
+  // const [readonlyMode, setReadonlyMode] = useState('');
+  // const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
+
+  // // console.log('parent mode: ', mode);
+  // // console.log('parent readonlyMode: ', readonlyMode);
+
+  // const {
+  //   setWizardData,
+  //   setPositionRequestId,
+  //   setPositionRequestProfileId,
+  //   setPositionRequestDepartmentId,
+  //   setPositionRequestData,
+  // } = useWizardContext();
+
+  // // console.log('wizardData: ', wizardData);
+  // const { positionRequestId } = useParams();
+
+  // if (!positionRequestId) throw 'No position request provided';
+
+  // const { data } = useGetPositionRequestQuery({
+  //   id: parseInt(positionRequestId),
+  // });
 
   const [currentStep, setCurrentStep] = useState<number | null>(null);
 
   useEffect(() => {
-    const step = data?.positionRequest?.step;
+    const step = unwrappedPositionRequestData?.step;
 
     if (step != null) setCurrentStep(step);
 
-    if (data) setPositionRequestData(data.positionRequest);
+    if (unwrappedPositionRequestData) setPositionRequestData(unwrappedPositionRequestData);
 
-    if (data?.positionRequest?.id) {
-      setPositionRequestId(data?.positionRequest?.id);
+    if (unwrappedPositionRequestData?.id) {
+      setPositionRequestId(unwrappedPositionRequestData?.id);
     }
 
-    if (data?.positionRequest?.profile_json) setWizardData(data?.positionRequest?.profile_json);
+    if (unwrappedPositionRequestData?.profile_json) setWizardData(unwrappedPositionRequestData?.profile_json);
 
-    if (data?.positionRequest?.parent_job_profile_id)
-      setPositionRequestProfileId(data?.positionRequest?.parent_job_profile_id);
+    if (unwrappedPositionRequestData?.parent_job_profile_id)
+      setPositionRequestProfileId(unwrappedPositionRequestData?.parent_job_profile_id);
 
-    if (data?.positionRequest?.department_id) {
-      setPositionRequestDepartmentId(data?.positionRequest?.department_id);
+    if (unwrappedPositionRequestData?.department_id) {
+      setPositionRequestDepartmentId(unwrappedPositionRequestData?.department_id);
     }
   }, [
-    data,
+    unwrappedPositionRequestData,
     setPositionRequestId,
     setWizardData,
     setPositionRequestProfileId,
@@ -173,14 +229,18 @@ export const PositionRequestPage = () => {
   // READONLY MODE
 
   let snapshotCopy = { edges: [], nodes: [] };
-  if (data?.positionRequest?.orgchart_json)
-    snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
+  if (unwrappedPositionRequestData?.orgchart_json)
+    snapshotCopy = JSON.parse(JSON.stringify(unwrappedPositionRequestData?.orgchart_json));
 
   const tabItems = [
     {
       key: '1',
       label: 'Job details',
-      children: <ServiceRequestDetails positionRequestData={data}></ServiceRequestDetails>,
+      children: (
+        <ServiceRequestDetails
+          positionRequestData={{ positionRequest: unwrappedPositionRequestData }}
+        ></ServiceRequestDetails>
+      ),
     },
     {
       key: '2',
@@ -188,53 +248,59 @@ export const PositionRequestPage = () => {
       children: (
         <div style={{ overflow: 'hidden', position: 'relative', height: '800px' }}>
           <OrgChartWrapped
-            selectedDepartment={data?.positionRequest?.department_id ?? null}
+            selectedDepartment={unwrappedPositionRequestData?.department_id ?? null}
             orgChartSnapshot={snapshotCopy}
             highlightPositionId={'extraNode'}
             extraNodeInfo={{
               nodeId: 'extraNode',
-              title: data?.positionRequest?.title,
+              title: unwrappedPositionRequestData?.title,
               classification: { code: '', name: '' },
-              status: data?.positionRequest?.status,
-              targetNodeId: data?.positionRequest?.reports_to_position_id?.toString(),
-              submittedBy: data?.positionRequest?.user_name,
+              status: unwrappedPositionRequestData?.status,
+              targetNodeId: unwrappedPositionRequestData?.reports_to_position_id?.toString(),
+              submittedBy: unwrappedPositionRequestData?.user_name,
             }}
           />
         </div>
       ),
     },
-    {
-      key: '3',
-      label: 'Job Profile',
-      children: <JobProfileWithDiff positionRequestData={data} />,
-    },
-    {
-      key: '4',
-      label: 'Actions',
-      children: (
-        <>
-          {readonlyMode === 'sentForVerification' && (
-            <>
-              <Result
-                icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
-                title="Sent for verification"
-                subTitle={`The profile was submitted for review on: ${dayjs(data?.positionRequest?.updated_at).format(
-                  'MMM d, YYYY',
-                )}`}
-              />
+    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json)
+      ? [
+          {
+            key: '3',
+            label: 'Job Profile',
+            children: <JobProfileWithDiff positionRequestData={{ positionRequest: unwrappedPositionRequestData }} />,
+          },
+        ]
+      : []),
+    ...(!isSharedRoute
+      ? [
+          {
+            key: '4',
+            label: 'Actions',
+            children: (
+              <>
+                {readonlyMode === 'sentForVerification' && (
+                  <>
+                    <Result
+                      icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
+                      title="Sent for verification"
+                      subTitle={`The profile was submitted for review on: ${dayjs(
+                        unwrappedPositionRequestData?.updated_at,
+                      ).format('MMM d, YYYY')}`}
+                    />
 
-              <Row justify="center" style={{ padding: '0 1rem' }}>
-                <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-                  <Alert
-                    message="We have received your verification request. We are working on the request and will respond. Depending on the information that needs to be reviewed, we will respond as quickly as possible."
-                    type="info"
-                    showIcon
-                    icon={<ExclamationCircleFilled />}
-                    style={{ marginBottom: '24px' }}
-                  />
+                    <Row justify="center" style={{ padding: '0 1rem' }}>
+                      <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
+                        <Alert
+                          message="We have received your verification request. We are working on the request and will respond. Depending on the information that needs to be reviewed, we will respond as quickly as possible."
+                          type="info"
+                          showIcon
+                          icon={<ExclamationCircleFilled />}
+                          style={{ marginBottom: '24px' }}
+                        />
 
-                  <Card title="Other Actions" bordered={false} style={{ marginBottom: '20rem' }}>
-                    {/* <Title level={5}>Save as Draft</Title>
+                        <Card title="Other Actions" bordered={false} style={{ marginBottom: '20rem' }}>
+                          {/* <Title level={5}>Save as Draft</Title>
               <Paragraph>
                 Let's save your progress and come back later to make changes or get a position number.
               </Paragraph>
@@ -242,7 +308,7 @@ export const PositionRequestPage = () => {
 
               <Divider /> */}
 
-                    {/* <Title level={5}>Allow others to edit</Title>
+                          {/* <Title level={5}>Allow others to edit</Title>
               <Paragraph>
                 Share the URL with people who you would like to collaborate with (IDIR restricted).
               </Paragraph>
@@ -250,46 +316,46 @@ export const PositionRequestPage = () => {
 
               <Divider /> */}
 
-                    <Title level={5}>View all Positions</Title>
-                    <Paragraph>View all positions that you have created.</Paragraph>
-                    <Button type="default" onClick={() => navigate('/')}>
-                      Go to Dashboard
-                    </Button>
-                  </Card>
-                </Col>
-              </Row>
-            </>
-          )}
+                          <Title level={5}>View all Positions</Title>
+                          <Paragraph>View all positions that you have created.</Paragraph>
+                          <Button type="default" onClick={() => navigate('/')}>
+                            Go to Dashboard
+                          </Button>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </>
+                )}
 
-          {readonlyMode === 'reSubmittedForVerification' && (
-            <>
-              <Result
-                icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
-                title="Sent for verification"
-                subTitle="The profile was re-submitted for verification on:" // todo: add date
-              />
+                {readonlyMode === 'reSubmittedForVerification' && (
+                  <>
+                    <Result
+                      icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
+                      title="Sent for verification"
+                      subTitle="The profile was re-submitted for verification on:" // todo: add date
+                    />
 
-              <Row justify="center" style={{ padding: '0 1rem' }}>
-                <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-                  <Alert
-                    message={
-                      <>
-                        <div>Service standards for profile review process submitted via JobStore:</div>
-                        <ul>
-                          <li>
-                            For profiles that need review by analyst or specialist: <b>21 business days</b>
-                          </li>
-                        </ul>
-                      </>
-                    }
-                    type="info"
-                    showIcon
-                    icon={<ExclamationCircleFilled />}
-                    style={{ marginBottom: '24px' }}
-                  />
+                    <Row justify="center" style={{ padding: '0 1rem' }}>
+                      <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
+                        <Alert
+                          message={
+                            <>
+                              <div>Service standards for profile review process submitted via JobStore:</div>
+                              <ul>
+                                <li>
+                                  For profiles that need review by analyst or specialist: <b>21 business days</b>
+                                </li>
+                              </ul>
+                            </>
+                          }
+                          type="info"
+                          showIcon
+                          icon={<ExclamationCircleFilled />}
+                          style={{ marginBottom: '24px' }}
+                        />
 
-                  <Card title="Other Actions" bordered={false} style={{ marginBottom: '20rem' }}>
-                    {/* <Title level={5}>Save as Draft</Title>
+                        <Card title="Other Actions" bordered={false} style={{ marginBottom: '20rem' }}>
+                          {/* <Title level={5}>Save as Draft</Title>
       <Paragraph>
         Let's save your progress and come back later to make changes or get a position number.
       </Paragraph>
@@ -297,7 +363,7 @@ export const PositionRequestPage = () => {
 
       <Divider /> */}
 
-                    {/* <Title level={5}>Allow others to edit</Title>
+                          {/* <Title level={5}>Allow others to edit</Title>
       <Paragraph>
         Share the URL with people who you would like to collaborate with (IDIR restricted).
       </Paragraph>
@@ -305,103 +371,105 @@ export const PositionRequestPage = () => {
 
       <Divider /> */}
 
-                    <Title level={5}>View all Positions</Title>
-                    <Paragraph>View all positions that you have created.</Paragraph>
-                    <Button type="default" onClick={() => navigate('/')}>
-                      Go to Dashboard
-                    </Button>
-                  </Card>
-                </Col>
-              </Row>
-            </>
-          )}
+                          <Title level={5}>View all Positions</Title>
+                          <Paragraph>View all positions that you have created.</Paragraph>
+                          <Button type="default" onClick={() => navigate('/')}>
+                            Go to Dashboard
+                          </Button>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </>
+                )}
 
-          {readonlyMode === 'inQueue' && (
-            <>
-              <Result
-                status="error"
-                icon={<FundFilled></FundFilled>}
-                title="Your classification review is in the queue"
-                subTitle="Thank you for your submission. A Classification specialist will reach out to you via email shortly."
-                extra={[
-                  <Button type="primary" key="console" onClick={() => navigate('/')}>
-                    Go to Dashboard
-                  </Button>,
-                ]}
-              />
-              <Row justify="center" style={{ padding: '0 1rem', marginBottom: '5rem' }}>
-                <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-                  <Card title="Information" bordered={false}>
-                    <Descriptions bordered layout="horizontal" column={1}>
-                      <Descriptions.Item label="Position number">
-                        <span data-testid="position-number">{data?.positionRequest.position_number}</span>{' '}
-                        <Button type="link">Copy</Button>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Job Details">
-                        <Button type="link">View</Button> | <Button type="link">Download</Button>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Organization chart">
-                        <Button type="link">View</Button> | <Button type="link">Download</Button>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Job store job profile">
-                        <Button type="link">View</Button> | <Button type="link">Download</Button>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Modified job profile">
-                        <Button type="link">View</Button> | <Button type="link">Download</Button>
-                      </Descriptions.Item>
-                    </Descriptions>
-                  </Card>
-                </Col>
-              </Row>
-            </>
-          )}
+                {readonlyMode === 'inQueue' && (
+                  <>
+                    <Result
+                      status="error"
+                      icon={<FundFilled></FundFilled>}
+                      title="Your classification review is in the queue"
+                      subTitle="Thank you for your submission. A Classification specialist will reach out to you via email shortly."
+                      extra={[
+                        <Button type="primary" key="console" onClick={() => navigate('/')}>
+                          Go to Dashboard
+                        </Button>,
+                      ]}
+                    />
+                    <Row justify="center" style={{ padding: '0 1rem', marginBottom: '5rem' }}>
+                      <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
+                        <Card title="Information" bordered={false}>
+                          <Descriptions bordered layout="horizontal" column={1}>
+                            <Descriptions.Item label="Position number">
+                              <span data-testid="position-number">{unwrappedPositionRequestData?.position_number}</span>{' '}
+                              <Button type="link">Copy</Button>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Job Details">
+                              <Button type="link">View</Button> | <Button type="link">Download</Button>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Organization chart">
+                              <Button type="link">View</Button> | <Button type="link">Download</Button>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Job store job profile">
+                              <Button type="link">View</Button> | <Button type="link">Download</Button>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Modified job profile">
+                              <Button type="link">View</Button> | <Button type="link">Download</Button>
+                            </Descriptions.Item>
+                          </Descriptions>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </>
+                )}
 
-          {readonlyMode === 'completed' && (
-            <>
-              <Result
-                status="success"
-                title="Your position has been created."
-                subTitle="Find the information needed for recruitment in the table below."
-                extra={[
-                  <Button type="primary" key="console" onClick={() => navigate('/')}>
-                    Go to Dashboard
-                  </Button>,
-                ]}
-              />
-              <Row justify="center" style={{ padding: '0 1rem', marginBottom: '5rem' }}>
-                <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-                  <Card title="Information" bordered={false}>
-                    <Descriptions bordered layout="horizontal" column={1}>
-                      <Descriptions.Item label="Position number">
-                        <span data-testid="position-number">{data?.positionRequest.position_number}</span>{' '}
-                        <Button type="link">Copy</Button>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Job Details">
-                        <Button type="link">View</Button> | <Button type="link">Download</Button>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Organization chart">
-                        <Button type="link">View</Button> | <Button type="link">Download</Button>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Job store job profile">
-                        <Button type="link">View</Button> | <Button type="link">Download</Button>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Modified job profile">
-                        <Button type="link">View</Button> |{' '}
-                        <Button type="link">
-                          <DownloadJobProfileComponent jobProfile={data?.positionRequest.profile_json}>
-                            Download
-                          </DownloadJobProfileComponent>
-                        </Button>
-                      </Descriptions.Item>
-                    </Descriptions>
-                  </Card>
-                </Col>
-              </Row>
-            </>
-          )}
-        </>
-      ),
-    },
+                {readonlyMode === 'completed' && (
+                  <>
+                    <Result
+                      status="success"
+                      title="Your position has been created."
+                      subTitle="Find the information needed for recruitment in the table below."
+                      extra={[
+                        <Button type="primary" key="console" onClick={() => navigate('/')}>
+                          Go to Dashboard
+                        </Button>,
+                      ]}
+                    />
+                    <Row justify="center" style={{ padding: '0 1rem', marginBottom: '5rem' }}>
+                      <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
+                        <Card title="Information" bordered={false}>
+                          <Descriptions bordered layout="horizontal" column={1}>
+                            <Descriptions.Item label="Position number">
+                              <span data-testid="position-number">{unwrappedPositionRequestData?.position_number}</span>{' '}
+                              <Button type="link">Copy</Button>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Job Details">
+                              <Button type="link">View</Button> | <Button type="link">Download</Button>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Organization chart">
+                              <Button type="link">View</Button> | <Button type="link">Download</Button>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Job store job profile">
+                              <Button type="link">View</Button> | <Button type="link">Download</Button>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Modified job profile">
+                              <Button type="link">View</Button> |{' '}
+                              <Button type="link">
+                                <DownloadJobProfileComponent jobProfile={unwrappedPositionRequestData?.profile_json}>
+                                  Download
+                                </DownloadJobProfileComponent>
+                              </Button>
+                            </Descriptions.Item>
+                          </Descriptions>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </>
+                )}
+              </>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -409,11 +477,15 @@ export const PositionRequestPage = () => {
       {mode === 'readonly' && (
         <>
           <ContentWrapper>
-            <Tabs
-              defaultActiveKey={readOnlySelectedTab}
-              items={tabItems}
-              tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
-            />
+            {currentStep !== null ? (
+              <Tabs
+                defaultActiveKey={readOnlySelectedTab}
+                items={tabItems}
+                tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
+              />
+            ) : (
+              <LoadingSpinnerWithMessage />
+            )}
           </ContentWrapper>
         </>
       )}

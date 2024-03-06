@@ -1,4 +1,5 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
+import { AllowNoRoles } from '../auth/guards/role-global.guard';
 import { FindUniquePositionArgs } from './models/find-unique-position.args';
 import { PositionProfile } from './models/position-profile.model';
 import { Position } from './models/position.model';
@@ -27,6 +28,7 @@ export class PositionResolver {
   }
 
   @Query(() => [PositionProfile], { name: 'positionProfile' })
+  @AllowNoRoles() // so that share position request feature can fetch relevant data
   async getPositionProfile(@Args('positionNumber') positionNumber: string) {
     return await this.positionService.getPositionProfile(positionNumber);
   }

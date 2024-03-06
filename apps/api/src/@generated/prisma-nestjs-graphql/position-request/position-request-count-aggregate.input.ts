@@ -70,6 +70,9 @@ export class PositionRequestCountAggregateInput {
   updated_at?: true;
 
   @Field(() => Boolean, { nullable: true })
+  shareUUID?: true;
+
+  @Field(() => Boolean, { nullable: true })
   additional_info_work_location_id?: true;
 
   @Field(() => Boolean, { nullable: true })

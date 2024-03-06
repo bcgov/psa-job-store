@@ -71,6 +71,9 @@ export class PositionRequestCountAggregate {
   updated_at!: number;
 
   @Field(() => Int, { nullable: false })
+  shareUUID!: number;
+
+  @Field(() => Int, { nullable: false })
   additional_info_work_location_id!: number;
 
   @Field(() => Int, { nullable: false })

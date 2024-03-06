@@ -8,6 +8,7 @@ import {
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { AllowNoRoles } from '../auth/guards/role-global.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
@@ -108,6 +109,12 @@ export class PositionRequestApiResolver {
   @Query(() => PositionRequest, { name: 'positionRequest' })
   async getPositionRequest(@CurrentUser() user: Express.User, @Args('id') id: number) {
     return this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
+  }
+
+  @Query(() => PositionRequest, { name: 'sharedPositionRequest' })
+  @AllowNoRoles()
+  async getSharedPositionRequest(@Args('uuid') uuid: string) {
+    return this.positionRequestService.getSharedPositionRequest(uuid);
   }
 
   @Query(() => PositionNeedsReviewResult, { name: 'positionNeedsRivew' })

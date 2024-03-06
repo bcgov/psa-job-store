@@ -62,6 +62,9 @@ export class PositionRequestMaxOrderByAggregateInput {
   updated_at?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  shareUUID?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   additional_info_work_location_id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

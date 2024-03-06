@@ -168,7 +168,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           id: positionRequestId,
         }).unwrap();
 
-        console.log('submitPositionRequest result: ', result);
+        // console.log('submitPositionRequest result: ', result);
         // todo - change check for position_number
         if (!result?.submitPositionRequest.id) throw new Error('API failure');
 

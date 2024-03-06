@@ -151,6 +151,20 @@ export const router = createBrowserRouter([
             ],
           },
           {
+            path: '/position-request/share/:positionRequestId',
+            element: <WizardRoute />,
+            children: [
+              {
+                index: true,
+                element: <PositionRequestPage />,
+                handle: {
+                  breadcrumb: () => 'My positions',
+                  icon: <FileTextOutlined />,
+                },
+              },
+            ],
+          },
+          {
             path: '/total-compensation/profiles',
             element: (
               <RoleGuard requiredRole="total-compensation">
