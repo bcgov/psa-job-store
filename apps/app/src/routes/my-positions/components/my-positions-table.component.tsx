@@ -185,7 +185,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     // console.log('copylink: ', record);
     // shareUUID
     // Dynamically construct the link to include the current base URL
-    const linkToCopy = `${window.location.origin}/position-request/${record.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/position-request/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
