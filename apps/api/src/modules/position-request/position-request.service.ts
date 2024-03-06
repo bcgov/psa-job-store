@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { btoa } from 'buffer';
@@ -88,6 +88,7 @@ function generateShortId(length: number): string {
 
 @Injectable()
 export class PositionRequestApiService {
+  private readonly logger = new Logger(PositionRequestApiService.name);
   // ...(searchResultIds != null && { id: { in: searchResultIds } }),
 
   constructor(
@@ -142,26 +143,35 @@ export class PositionRequestApiService {
   async submitPositionRequest(id: number) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
-    const position = await this.createPositionForPositionRequest(id);
+    try {
+      if (positionRequest.position_number == null) {
+        const position = await this.createPositionForPositionRequest(id);
+        if (position.positionNbr.length > 0) {
+          positionRequest = await this.prisma.positionRequest.update({
+            where: { id },
+            data: {
+              position_number: +position.positionNbr,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      this.logger.error(error);
+    }
 
-    if (position.positionNbr.length > 0) {
+    try {
+      // CRM Incident Managements
+      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
       positionRequest = await this.prisma.positionRequest.update({
         where: { id },
         data: {
-          position_number: +position.positionNbr,
+          crm_id: incident.id,
+          status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
         },
       });
+    } catch (error) {
+      this.logger.error(error);
     }
-
-    // CRM Incident Managements
-    const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
-    positionRequest = await this.prisma.positionRequest.update({
-      where: { id },
-      data: {
-        crm_id: incident.id,
-        status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
-      },
-    });
 
     return positionRequest;
   }
@@ -868,6 +878,9 @@ export class PositionRequestApiService {
     const orgChartBase64 =
       positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
 
+    const zeroFilledPositionNumber =
+      positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
+
     const data: IncidentCreateUpdateInput = {
       subject: `TESTING - Position Number Request - ${classification.code}`,
       primaryContact: { id: contactId },
@@ -900,40 +913,64 @@ export class PositionRequestApiService {
             id: IncidentThreadEntryType.Customer,
           },
           text: `
-          <ul>
-            <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
-            <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
-            <li>What is the pay list/department ID number?    ${positionRequest.department_id}</li>
-            <li>What is the expected classification level?    ${classification.code} (${classification.name})</li>
-            <li>Is this position included or excluded?    Included</li>
-            <li>Is the position full-time or part-time?    Full-time</li>
-            <li>What is the job title?    ${positionRequest.title}</li>
-            <li>Is this a regular or temporary position?    Regular</li>
-            <li>Who is the first level excluded manager for this position?    ${
-              positionRequest.reports_to_position_id
-            }</li>
-            <li>Where is the position location?    ${location.name}</li>
-            <li>Which position number will the position report to?    ${positionRequest.reports_to_position_id}</li>
-            <li>Is a Job Store profile being used? If so, what is the Job Store profile number?    ${
-              parentJobProfile.number
-            }</li>
-            <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
-            <li>Please attach a copy of the job profile you will be using.    Attached</li>
-            <li>Please attach a copy of your Organization Chart that shows the topic position and the job titles, position numbers and classifiction levels, of the supervisor, peer and subordinate positions.    Attached</li>
-          </ul>
+          <div>
+            <a href="https://jobstore.apps.silver.devops.gov.bc.ca/classification-tasks/${
+              positionRequest.id
+            }">View this position in the Job Store</a>
+            <br />
+            <strong>
+            ${
+              positionRequest.position_number != null
+                ? `The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}`
+                : `No position was created for this request`
+            }
+            </strong>
+            ${
+              (positionRequest.additional_info_comments ?? '').length > 0
+                ? `
+            <br />
+            <strong>The following note was added to this position request:</strong>
+            <br />
+            <em>${positionRequest.additional_info_comments}</em>`
+                : ''
+            }
+            <br />
+            <ul>
+              <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
+              <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
+              <li>What is the pay list/department ID number?    ${positionRequest.department_id}</li>
+              <li>What is the expected classification level?    ${classification.code} (${classification.name})</li>
+              <li>Is this position included or excluded?    Included</li>
+              <li>Is the position full-time or part-time?    Full-time</li>
+              <li>What is the job title?    ${positionRequest.title}</li>
+              <li>Is this a regular or temporary position?    Regular</li>
+              <li>Who is the first level excluded manager for this position?    ${
+                positionRequest.reports_to_position_id
+              }</li>
+              <li>Where is the position location?    ${location.name}</li>
+              <li>Which position number will the position report to?    ${positionRequest.reports_to_position_id}</li>
+              <li>Is a Job Store profile being used? If so, what is the Job Store profile number?    ${
+                parentJobProfile.number
+              }</li>
+              <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
+              <li>Please attach a copy of the job profile you will be using.    Attached</li>
+              <li>Please attach a copy of your Organization Chart that shows the topic position and the job titles, position numbers and classifiction levels, of the supervisor, peer and subordinate positions.    Attached</li>
+            </ul>
+          </div>
+
           `,
         },
       ],
       fileAttachments: [
         {
-          name: `${positionRequest.title} ${classification.code}`,
-          fileName: `${positionRequest.title} ${classification.code}`,
+          name: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`.substring(0, 40),
+          fileName: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`,
           contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           data: jobProfileBase64,
         },
         {
-          name: `Organization Chart`,
-          fileName: `Organization Chart`,
+          name: `${zeroFilledPositionNumber} - Organization Chart.json`.substring(0, 40),
+          fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
           contentType: 'application/json',
           data: orgChartBase64,
         },
@@ -972,7 +1009,7 @@ export class PositionRequestApiService {
           DEPTID: positionRequest.department_id,
           JOBCODE: positionRequest.classification_id,
           REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview ? PositionStatus.Proposed : PositionStatus.Active,
+          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
           DESCR: positionRequest.title,
           REG_TEMP: PositionDuration.Regular,
           FULL_PART_TIME: PositionType.FullTime,
@@ -993,7 +1030,7 @@ export class PositionRequestApiService {
           DEPTID: positionRequest.department_id,
           JOBCODE: positionRequest.classification_id,
           REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview ? PositionStatus.Proposed : PositionStatus.Active,
+          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
           DESCR: positionRequest.title,
           REG_TEMP: PositionDuration.Regular,
           FULL_PART_TIME: PositionType.FullTime,

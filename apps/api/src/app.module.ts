@@ -25,6 +25,7 @@ import { JobProfileStreamModule } from './modules/job-profile-stream/job-profile
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
 import { PositionRequestModule } from './modules/position-request/position-request.module';
+import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
 import { SearchModule } from './modules/search/search.module';
 import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerFactory } from './utils/logging/logger.factory';
@@ -60,6 +61,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobProfileScopeModule,
     JobProfileMinimumRequirementsModule,
     AppLogModule,
+    ScheduledTaskModule,
   ],
   controllers: [],
   providers: [

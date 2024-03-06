@@ -1,7 +1,6 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
@@ -18,6 +17,7 @@ enum Endpoint {
 
 @Injectable()
 export class CrmService {
+  private readonly logger = new Logger(CrmService.name);
   private readonly headers: AxiosHeaders;
   private request = (endpoint: Endpoint, extra?: string) =>
     this.httpService.get(`${this.configService.get('CRM_URL')}/${endpoint}${extra != null ? `?${extra}` : ''}`, {
@@ -39,7 +39,6 @@ export class CrmService {
     this.headers.set('OSvC-CREST-Application-Context', this.configService.get('CRM_APPLICATION_CONTEXT'));
   }
 
-  @Cron('0 * * * * *')
   async syncIncidentStatus() {
     // Get position requests which have been submitted, but have not been marked as COMPLETED
     const positionRequests = await this.prisma.positionRequest.findMany({
@@ -57,6 +56,8 @@ export class CrmService {
     });
 
     if (positionRequests.length === 0) return;
+
+    this.logger.log(`Start syncIncidentStatus @ ${new Date()}`);
 
     // The following API call returns an object with the structure:
     //
@@ -110,6 +111,7 @@ export class CrmService {
         });
       }
     }
+    this.logger.log(`End syncIncidentStatus @ ${new Date()}`);
   }
 
   async getAccountId(idir: string): Promise<number | null> {

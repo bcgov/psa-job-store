@@ -1,5 +1,5 @@
 # Use the official Node.js 18 image.
-FROM node:18.17.0 AS base
+FROM node:20.11.1-alpine AS base
 
 # Create and change to the app directory.
 FROM base AS builder
@@ -53,6 +53,7 @@ RUN mkdir /.npm
 RUN chgrp -R 0 /.npm && chmod -R g=u /.npm
 
 RUN mkdir -p /tmp/log
+
 # Expose port 4000
 EXPOSE 4000
 

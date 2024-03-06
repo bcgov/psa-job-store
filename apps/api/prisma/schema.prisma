@@ -28,6 +28,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ScheduledTaskMetadata {
+  task        String    @id
+  frequency   Int? // How often the task should run (in seconds)
+  last_run_at DateTime?
+
+  @@map("scheduled_task_metadata")
+}
+
 enum PositionRequestStatus {
   DRAFT
   IN_REVIEW
@@ -367,20 +375,8 @@ model Classification {
   employee_group EmployeeGroup              @relation(fields: [employee_group_id], references: [id])
   job_profiles   JobProfileClassification[]
   reportees      JobProfileReportsTo[]
-  departments    ClassificationDepartment[]
 
   @@map("classification")
-}
-
-model ClassificationDepartment {
-  classification_id String
-  department_id     String
-
-  classification Classification @relation(fields: [classification_id], references: [id])
-  department     Department     @relation(fields: [department_id], references: [id])
-
-  @@id([classification_id, department_id])
-  @@map("classification_department")
 }
 
 model Department {
@@ -396,8 +392,7 @@ model Department {
   effective_date   DateTime     @db.Date // EFFDT
 
   PositionRequest                     PositionRequest[]
-  PositionRequestsByPaylistDepartment PositionRequest[]          @relation(name: "PositionRequestPaylistDepartment")
-  classifications                     ClassificationDepartment[]
+  PositionRequestsByPaylistDepartment PositionRequest[] @relation(name: "PositionRequestPaylistDepartment")
 
   @@map("department")
 }
