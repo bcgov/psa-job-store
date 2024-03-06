@@ -88,6 +88,9 @@ services:
           cpus: '2.0'
         reservations:
           cpus: '1.0'
+  nginx_rp: #optional, not required for running in dockre. this image must be built seperately 
+    image: nginx_rp
+    container_name: nginx_rp
 networks:
   elastic:
 volumes:

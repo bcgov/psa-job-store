@@ -5,7 +5,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      name: kibana
+      name: nginx-auth-rp
   ingress:
     - {}
   policyTypes:

@@ -1,0 +1,29 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+    name: nginx-auth-rp
+    labels:
+        "app.kubernetes.io/part-of": ek-stack
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: nginx-auth-rp
+    template:
+        metadata:
+            labels:
+                app: nginx-auth-rp
+                name: nginx-auth-rp
+        spec:
+            containers:
+                - name: nginx-auth-rp
+                  image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/nginx-auth-rp:develop-latest
+                  resources:
+                      limits:
+                          cpu: 50m
+                          memory: 100Mi
+                      requests:
+                          cpu: 10m
+                          memory: 50Mi
+                  ports:
+                      - containerPort: 8080
