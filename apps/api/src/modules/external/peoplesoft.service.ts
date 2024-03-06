@@ -372,41 +372,89 @@ export class PeoplesoftService {
   }
 
   async getPositionsForDepartment(department_id: string) {
-    const response = await firstValueFrom(
-      this.request({
-        method: RequestMethod.GET,
-        endpoint: Endpoint.HrScope,
-        pageSize: 0,
-        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR,REPORTS_TO&prompt_fieldvalue=${department_id},,`,
-      }).pipe(
-        map((r) => r.data),
-        retry(3),
-        catchError((err) => {
-          throw new Error(err);
-        }),
+    const responses = await Promise.allSettled([
+      firstValueFrom(
+        this.request({
+          method: RequestMethod.GET,
+          endpoint: Endpoint.HrScope,
+          pageSize: 0,
+          extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=${department_id},`,
+        }).pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
       ),
+      firstValueFrom(
+        this.request({
+          method: RequestMethod.GET,
+          endpoint: Endpoint.HrScope,
+          pageSize: 0,
+          extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR,REPORTS_TO&prompt_fieldvalue=${department_id},,`,
+        }).pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+      ),
+    ]);
+
+    const successfulResponse = responses.find(
+      (response) => response.status === 'fulfilled' && response.value.status === 'success',
     );
 
-    return response;
+    return (
+      successfulResponse.status === 'fulfilled' &&
+      successfulResponse.value.status === 'success' &&
+      successfulResponse.value
+    );
   }
 
   async getPosition(position_id: string) {
-    const response = await firstValueFrom(
-      this.request({
-        method: RequestMethod.GET,
-        endpoint: Endpoint.HrScope,
-        pageSize: 0,
-        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR,REPORTS_TO&prompt_fieldvalue=,${position_id},`,
-      }).pipe(
-        map((r) => r.data),
-        retry(3),
-        catchError((err) => {
-          throw new Error(err);
-        }),
+    const responses = await Promise.allSettled([
+      firstValueFrom(
+        this.request({
+          method: RequestMethod.GET,
+          endpoint: Endpoint.HrScope,
+          pageSize: 0,
+          extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=,${position_id}`,
+        }).pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
       ),
+      firstValueFrom(
+        this.request({
+          method: RequestMethod.GET,
+          endpoint: Endpoint.HrScope,
+          pageSize: 0,
+          extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR,REPORTS_TO&prompt_fieldvalue=,${position_id},`,
+        }).pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+      ),
+    ]);
+
+    const successfulResponse = responses.find(
+      (response) => response.status === 'fulfilled' && response.value.status === 'success',
     );
 
-    return response;
+    return (
+      successfulResponse.status === 'fulfilled' &&
+      successfulResponse.value.status === 'success' &&
+      successfulResponse.value
+    );
   }
 
   async createPosition(data: PositionCreateInput) {
