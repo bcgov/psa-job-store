@@ -74,10 +74,11 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     // Check for GraphQL errors in the meta field
     if (meta && meta.response && meta.response.errors) {
       // Extract the first error message
-      const errorMessage = meta.response.errors[0].message;
+      const errorCode = meta.response.errors[0]?.extensions?.code;
+      const errorMessage = meta.response.errors[0]?.message;
 
       // if it's unauthorized, do not show the error toast -  the system will handle the redirect to login page
-      if (errorMessage == 'Unauthorized') return result;
+      if (errorCode == 'UNAUTHENTICATED') return result;
 
       errorToastShown = true;
       // Display an error notification
