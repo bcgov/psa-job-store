@@ -377,7 +377,7 @@ export class PeoplesoftService {
         method: RequestMethod.GET,
         endpoint: Endpoint.HrScope,
         pageSize: 0,
-        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=${department_id},`,
+        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR,REPORTS_TO&prompt_fieldvalue=${department_id},,`,
       }).pipe(
         map((r) => r.data),
         retry(3),
@@ -396,7 +396,7 @@ export class PeoplesoftService {
         method: RequestMethod.GET,
         endpoint: Endpoint.HrScope,
         pageSize: 0,
-        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=,${position_id}`,
+        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR,REPORTS_TO&prompt_fieldvalue=,${position_id},`,
       }).pipe(
         map((r) => r.data),
         retry(3),
