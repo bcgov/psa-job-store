@@ -324,14 +324,24 @@ export class PositionRequestApiService {
 
   async getSharedPositionRequest(shareUUID: string) {
     // console.log('getPositionRequest!', userRoles);
+    if (!shareUUID || shareUUID === '') {
+      throw AlexandriaError('Invalid share URL');
+    }
+
     const whereCondition: { shareUUID: { equals: string } } = { shareUUID: { equals: shareUUID } };
 
-    const positionRequest = await this.prisma.positionRequest.findFirstOrThrow({
-      where: whereCondition,
-      include: {
-        parent_job_profile: true,
-      },
-    });
+    let positionRequest;
+    try {
+      positionRequest = await this.prisma.positionRequest.findFirstOrThrow({
+        where: whereCondition,
+        include: {
+          parent_job_profile: true,
+        },
+      });
+      // catch findFirstOrThrow error
+    } catch (error) {
+      throw AlexandriaError('Invalid share URL');
+    }
 
     // console.log('positionRequest: ', positionRequest, JSON.stringify(whereCondition));
 
