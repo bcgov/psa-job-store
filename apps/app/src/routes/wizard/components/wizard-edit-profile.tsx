@@ -100,11 +100,11 @@ const WizardEditProfile = forwardRef(
     // todo: usage of this approach is undesirable, however it fixes various render issues
     // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
     // of this state
-    const [renderKey, setRenderKey] = useState(0);
-    useEffect(() => {
-      form.resetFields(); // "form" is needed to use with ref and to get the state. Must do "resetFields"
-      // as part of the render hack. todo: get rid of this if possible
-    }, [renderKey, form]);
+    // const [renderKey, setRenderKey] = useState(0);
+    // useEffect(() => {
+    //   form.resetFields(); // "form" is needed to use with ref and to get the state. Must do "resetFields"
+    //   // as part of the render hack. todo: get rid of this if possible
+    // }, [renderKey, form]);
 
     const {
       originalValuesSet,
@@ -538,7 +538,7 @@ const WizardEditProfile = forwardRef(
           optional_requirements: originalOptionalRequirementsFieldsValue,
         });
       }
-      setRenderKey((prevKey) => prevKey + 1);
+      // setRenderKey((prevKey) => prevKey + 1);
       // console.log('reset!');
     }, [
       effectiveData,
@@ -700,7 +700,8 @@ const WizardEditProfile = forwardRef(
       getFormData: () => {
         // This function could be used to get the current form data
         // console.log('form.getFieldsValue(): ', form.getFieldsValue());
-        return form.getFieldsValue();
+        // return form.getFieldsValue();
+        return getValues();
       },
       getFormErrors: () => {
         return formState.errors;
@@ -914,7 +915,7 @@ const WizardEditProfile = forwardRef(
                 // showReqModal(() => {
                 // acc_req_remove(index);
                 handleAccReqAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                 // }, false)
               }}
             />
@@ -931,7 +932,7 @@ const WizardEditProfile = forwardRef(
                   // showReqModal(() => {
                   // acc_req_remove(index);
                   handleAccReqRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                   // }, false)
                 }}
               />
@@ -1027,7 +1028,7 @@ const WizardEditProfile = forwardRef(
               onClick={() => {
                 // acc_req_remove(index);
                 handleOptReqAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1039,7 +1040,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleOptReqRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1142,7 +1143,7 @@ const WizardEditProfile = forwardRef(
               onClick={() => {
                 // showMinReqModal(() => {
                 handleMinReqAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                 // }, false)
               }}
             />
@@ -1158,7 +1159,7 @@ const WizardEditProfile = forwardRef(
                 onClick={() => {
                   // showMinReqModal(() => {
                   handleMinReqRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                   // }, false)
                 }}
               />
@@ -1263,7 +1264,7 @@ const WizardEditProfile = forwardRef(
               onClick={() => {
                 // showRelWorkModal(() => {
                 handleRelWorkAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                 // }, false)
               }}
             />
@@ -1279,7 +1280,7 @@ const WizardEditProfile = forwardRef(
                 onClick={() => {
                   // showRelWorkModal(() => {
                   handleRelWorkRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                   // }, false)
                 }}
               />
@@ -1386,7 +1387,7 @@ const WizardEditProfile = forwardRef(
               onClick={() => {
                 // showSecurityScreeningsModal(() => {
                 handleSecurityScreeningsAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                 // }, false)
               }}
             />
@@ -1402,7 +1403,7 @@ const WizardEditProfile = forwardRef(
                 onClick={() => {
                   // showSecurityScreeningsModal(() => {
                   handleSecurityScreeningsRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                   // }, false)
                 }}
               />
@@ -1499,7 +1500,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleProfessionalRegistrationAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1511,7 +1512,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleProfessionalRegistrationRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1606,7 +1607,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleOptionalRequirementsAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1618,7 +1619,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleOptionalRequirementsRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1711,7 +1712,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handlePreferencesAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1723,7 +1724,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handlePreferencesRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1821,7 +1822,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleKnowledgeSkillsAbilitiesAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1833,7 +1834,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleKnowledgeSkillsAbilitiesRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1926,7 +1927,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleProvisosAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1938,7 +1939,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleProvisosRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -2123,7 +2124,7 @@ const WizardEditProfile = forwardRef(
       }
     }, [positionProfileData]);
 
-    if (isLoading || renderKey === 0) {
+    if (isLoading) {
       return <LoadingSpinnerWithMessage />;
     }
 
@@ -2217,7 +2218,7 @@ const WizardEditProfile = forwardRef(
           <Col xs={24} sm={24} lg={16}>
             <Form
               form={form}
-              key={renderKey}
+              // key={renderKey}
               onFinish={handleSubmit((data) => {
                 // console.log('onFinish: ', data);
                 submitHandler?.(data);
@@ -2363,7 +2364,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleAccReqAddNew();
-                          setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                          // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                         }}
                       >
                         Add another accountability
@@ -2388,7 +2389,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleOptReqAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add optional accountability
@@ -2432,7 +2433,7 @@ const WizardEditProfile = forwardRef(
                           {
                             // showMinReqModal(() => {
                             handleMinReqAddNew();
-                            setRenderKey((prevKey) => prevKey + 1);
+                            // setRenderKey((prevKey) => prevKey + 1);
                             // }, false);
                           }
                         }}
@@ -2463,7 +2464,7 @@ const WizardEditProfile = forwardRef(
                           {
                             // showRelWorkModal(() => {
                             handleRelWorkAddNew();
-                            setRenderKey((prevKey) => prevKey + 1);
+                            // setRenderKey((prevKey) => prevKey + 1);
                             // }, false);
                           }
                         }}
@@ -2500,7 +2501,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleProfessionalRegistrationAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add a professional registration requirement
@@ -2527,7 +2528,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handlePreferencesAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add a job preference
@@ -2557,7 +2558,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleKnowledgeSkillsAbilitiesAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add a knowledge, skill or ability requirement
@@ -2584,7 +2585,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleProvisosAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add a proviso
@@ -2613,7 +2614,7 @@ const WizardEditProfile = forwardRef(
                           {
                             // showSecurityScreeningsModal(() => {
                             handleSecurityScreeningsAddNew();
-                            setRenderKey((prevKey) => prevKey + 1);
+                            // setRenderKey((prevKey) => prevKey + 1);
                             // }, false);
                           }
                         }}
@@ -2642,7 +2643,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleOptionalRequirementsAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add an optional requirement
