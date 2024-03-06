@@ -85,14 +85,14 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     if (positionRequestLoading || positionNeedsRivewLoading) return;
 
     // if state is draft and position doesn't need review, set mode to readyToCreatePositionNumber
-    if (positionRequestData?.positionRequest.status === 'DRAFT' && !positionNeedsRivew?.positionNeedsRivew.result) {
+    if (positionRequestData?.positionRequest?.status === 'DRAFT' && !positionNeedsRivew?.positionNeedsRivew.result) {
       setMode('readyToCreatePositionNumber');
       return;
     }
 
     // if state is draft and position needs review, set mode to verificationRequired_edits
     // Will show a warning message and a links that take user to the sections that if changes will not require verification
-    if (positionRequestData?.positionRequest.status === 'DRAFT' && positionNeedsRivew?.positionNeedsRivew.result) {
+    if (positionRequestData?.positionRequest?.status === 'DRAFT' && positionNeedsRivew?.positionNeedsRivew.result) {
       setVerificationNeededReasons(positionNeedsRivew.positionNeedsRivew.reasons);
       setMode('verificationRequired_edits');
       return;
@@ -100,7 +100,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
     // if state is COMPLETE, then set parent to readonly mode
     // Will show "Your position has been created" screen
-    if (positionRequestData?.positionRequest.status === 'COMPLETED') {
+    if (positionRequestData?.positionRequest?.status === 'COMPLETED') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('completed');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -108,7 +108,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
 
     // if it's in IN_REVIEW;, set mode to sentForVerification
-    if (positionRequestData?.positionRequest.status === 'IN_REVIEW') {
+    if (positionRequestData?.positionRequest?.status === 'IN_REVIEW') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -116,13 +116,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
 
     // if it's in ACTION_REQUIRED show alternate verification required screen
-    if (positionRequestData?.positionRequest.status === 'ACTION_REQUIRED') {
+    if (positionRequestData?.positionRequest?.status === 'ACTION_REQUIRED') {
       setMode('verificationRequired_retry');
       return;
     }
 
     // if it's in ESCALATED status, show "classification review required" screen
-    if (positionRequestData?.positionRequest.status === 'ESCALATED') {
+    if (positionRequestData?.positionRequest?.status === 'ESCALATED') {
       setMode('classificationReviewRequired');
       return;
     }
