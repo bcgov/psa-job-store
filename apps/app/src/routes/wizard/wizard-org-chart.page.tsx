@@ -41,12 +41,12 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
   const { createNewPosition } = usePosition();
   const next = () => {
     if (selectedDepartment == null) return;
-    console.log(
-      'selectedNode.id, selectedDepartment, orgChartJson: ',
-      selectedNode.id,
-      selectedDepartment,
-      orgChartJsonRef.current,
-    );
+    // console.log(
+    //   'selectedNode.id, selectedDepartment, orgChartJson: ',
+    //   selectedNode.id,
+    //   selectedDepartment,
+    //   orgChartJsonRef.current,
+    // );
     createNewPosition(selectedNode.id, selectedDepartment, orgChartJsonRef.current);
   };
 
