@@ -18,7 +18,7 @@ import {
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -889,20 +889,24 @@ const WizardEditProfile = forwardRef(
           {field.is_readonly && (
             <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
           )}
-          <FormItem
-            hidden={field.is_readonly}
-            name={`accountabilities.${index}.text`}
+
+          <Controller
             control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              // onFocus={() => showReqModal(() => {}, false)}
-              onChange={handleFieldChange}
-            />
-          </FormItem>
+            name={`accountabilities.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
 
           {field.disabled ? (
             <Button
@@ -1006,7 +1010,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`optional_accountabilities.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled || getValues(`optional_accountabilities.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`optional_accountabilities.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1017,7 +1039,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1118,7 +1140,26 @@ const WizardEditProfile = forwardRef(
           {field.is_readonly && (
             <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
           )}
-          <FormItem
+
+          <Controller
+            control={control}
+            name={`education.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled || getValues(`education.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
+
+          {/* <FormItem
             hidden={field.is_readonly}
             name={`education.${index}.text`}
             control={control}
@@ -1131,7 +1172,7 @@ const WizardEditProfile = forwardRef(
               // onFocus={() => showMinReqModal(() => {}, false)}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
 
           {field.disabled ? (
             <Button
@@ -1239,7 +1280,26 @@ const WizardEditProfile = forwardRef(
           {field.is_readonly && (
             <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
           )}
-          <FormItem
+
+          <Controller
+            control={control}
+            name={`job_experience.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled || getValues(`job_experience.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
+
+          {/* <FormItem
             hidden={field.is_readonly}
             name={`job_experience.${index}.text`}
             control={control}
@@ -1252,7 +1312,7 @@ const WizardEditProfile = forwardRef(
               // onFocus={() => showRelWorkModal(() => {}, false)}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
 
           {field.disabled ? (
             <Button
@@ -1362,7 +1422,26 @@ const WizardEditProfile = forwardRef(
           {field.is_readonly && (
             <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
           )}
-          <FormItem
+
+          <Controller
+            control={control}
+            name={`security_screenings.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled || getValues(`security_screenings.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
+
+          {/* <FormItem
             hidden={field.is_readonly}
             name={`security_screenings.${index}.text`}
             control={control}
@@ -1375,7 +1454,7 @@ const WizardEditProfile = forwardRef(
               // onFocus={() => showSecurityScreeningsModal(() => {}, false)}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
 
           {field.disabled ? (
             <Button
@@ -1479,7 +1558,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`professional_registration.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`professional_registration.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1490,7 +1587,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1586,7 +1683,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`optional_requirements.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`optional_requirements.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1597,7 +1712,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1691,7 +1806,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`preferences.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`preferences.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1702,7 +1835,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1801,7 +1934,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`knowledge_skills_abilities.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`knowledge_skills_abilities.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1812,7 +1963,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1906,7 +2057,24 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`provisos.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+          {/* <FormItem
             name={`provisos.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1917,7 +2085,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -2377,6 +2545,7 @@ const WizardEditProfile = forwardRef(
                       label="Optional accountabilities"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2415,6 +2584,13 @@ const WizardEditProfile = forwardRef(
                       showIcon
                     />
 
+                    <Form.Item
+                      label="Education and work experience"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                      colon={false}
+                    ></Form.Item>
+
                     <Typography.Paragraph type="secondary">
                       Minimum years of experience are required, and you may add or refine the education requirements
                       (add a degree or diploma program). These equivalencies are designed to be inclusive of different
@@ -2450,6 +2626,7 @@ const WizardEditProfile = forwardRef(
                       label="Related experience"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2481,6 +2658,7 @@ const WizardEditProfile = forwardRef(
                       label="Professional registration requirements"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <Typography.Paragraph type="secondary">
@@ -2516,6 +2694,7 @@ const WizardEditProfile = forwardRef(
                       label="Preferences"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2543,6 +2722,7 @@ const WizardEditProfile = forwardRef(
                       label="Knowledge, skills and abilities"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2573,6 +2753,7 @@ const WizardEditProfile = forwardRef(
                       label="Willingness statements or provisos"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2600,6 +2781,7 @@ const WizardEditProfile = forwardRef(
                       label="Security screenings"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2631,6 +2813,7 @@ const WizardEditProfile = forwardRef(
                       label="Optional requirements"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>

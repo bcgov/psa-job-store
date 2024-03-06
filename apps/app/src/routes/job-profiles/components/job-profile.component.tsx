@@ -212,7 +212,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
   const compareData = (original: string | undefined, modified: string | undefined): JSX.Element[] => {
     const blank: JSX.Element[] = [];
-    if (!original || !modified) return blank;
+    if (original === undefined || modified === undefined) return blank;
 
     const dmp = new diff_match_patch();
     const diff = dmp.diff_main(original, modified);
@@ -415,7 +415,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       children: <div>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
-    ...(effectiveData?.program_overview &&
+    ...(effectiveData?.program_overview && // if program overview field is present AND it's not empty
     (typeof effectiveData.program_overview === 'string'
       ? effectiveData.program_overview.trim()
       : effectiveData.program_overview.value.trim()) !== ''
