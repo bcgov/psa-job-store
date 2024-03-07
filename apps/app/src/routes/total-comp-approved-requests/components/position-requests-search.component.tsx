@@ -286,7 +286,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
     navigate(
       {
         // pathname: basePath,
-        // pathname: `/position-request/${positionRequestId}`,
+        // pathname: `/my-positions/${positionRequestId}`,
         search: searchParams.toString(),
       },
       { replace: true },

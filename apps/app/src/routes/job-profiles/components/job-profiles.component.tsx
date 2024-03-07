@@ -199,7 +199,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
   };
 
   const getBasePath = (path: string) => {
-    if (positionRequestId) return `/position-request/${positionRequestId}`;
+    if (positionRequestId) return `/my-positions/${positionRequestId}`;
 
     const pathParts = path.split('/');
     // Check if the last part is a number (ID), if so, remove it
