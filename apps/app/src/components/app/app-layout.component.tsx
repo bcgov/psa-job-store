@@ -16,7 +16,7 @@ import {
 import { Button, Layout, Menu, MenuProps } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 import { AppHeader } from './header.component';
 import { SiderNavItem } from './sider-nav/sider-nav-item.component';
@@ -49,7 +49,6 @@ export const AppLayout = () => {
   const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', true);
   const [role, setRole] = useState<string | null>(null);
 
-  const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   // useEffect(() => {
   //   // Initialize or update the selectedKeys based on the current URL
