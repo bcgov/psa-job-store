@@ -86,7 +86,7 @@ export const OrgChartCard = memo(
       // // we are not editing a draft position request (creatign position from dashboard or from org chart page)
       // // console.log('orgChartData: ', orgChartData);
 
-      // if (!location.pathname.startsWith('/position-request/')) {
+      // if (!location.pathname.startsWith('/my-positions/')) {
       //   const positionRequestInput = {
       //     step: 1,
       //     title: 'Untitled',
@@ -97,7 +97,7 @@ export const OrgChartCard = memo(
       //   // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
       //   const resp = await createPositionRequest(positionRequestInput).unwrap();
       //   setPositionRequestId(resp.createPositionRequest);
-      //   navigate(`/position-request/${resp.createPositionRequest}`, { replace: true });
+      //   navigate(`/my-positions/${resp.createPositionRequest}`, { replace: true });
       // } else {
       //   // we are editing a draft position request - update existing position request
       //   if (positionRequestId != null && selectedDepartment != null) {

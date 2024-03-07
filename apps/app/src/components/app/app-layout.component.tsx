@@ -67,20 +67,16 @@ export const AppLayout = () => {
 
   const totalCompensationMenuItems: MenuProps['items'] = [
     getItem('Job Profiles', 'sub1', <FileSearchOutlined style={{ fontSize: '1.25rem' }} />, [
+      getItem(<Link to="/draft-job-profiles">Drafts</Link>, '1', <FileOutlined style={{ fontSize: '1.25rem' }} />),
       getItem(
-        <Link to="/total-compensation/profiles/drafts">Drafts</Link>,
-        '1',
-        <FileOutlined style={{ fontSize: '1.25rem' }} />,
-      ),
-      getItem(
-        <Link to="/total-compensation/profiles/published">Published</Link>,
+        <Link to="/published-job-profiles">Published</Link>,
         '2',
         <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
       ),
     ]),
   ];
   const hiringManagerMenuItems: MenuProps['items'] = [
-    getItem('Hiring Manager', 'sub2', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
+    getItem('Hiring Manager', 'sub1', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
       getItem(
         <Link to="/my-positions/create">Create new position</Link>,
         '3',
@@ -188,25 +184,49 @@ export const AppLayout = () => {
                           {
                             icon: <FileAddFilled style={{ fontSize: '1.25rem', color: '#1677ff' }} />,
                             title: 'Create new profile',
-                            to: '/total-compensation/create-profile',
+                            to: '/draft-job-profiles/create',
                             hideTitle: true,
                           },
                           {
                             icon: <FileOutlined style={{ fontSize: '1.25rem' }} />,
                             title: 'Draft job profiles',
-                            to: '/total-compensation/profiles/drafts',
+                            to: '/draft-job-profiles',
                             hideTitle: true,
                           },
                           {
                             icon: <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
                             title: 'Published job profiles',
-                            to: '/total-compensation/profiles/published',
+                            to: '/published-job-profiles',
                             hideTitle: true,
                           },
                           {
                             icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
                             title: 'Approved requests',
-                            to: '/total-compensation/approved-requests',
+                            to: '/approved-requests',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <PlusCircleFilled style={{ fontSize: '1.25rem' }} />,
+                            title: 'Create new position',
+                            to: '/my-positions/create',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'My organizations',
+                            to: '/org-chart',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'Job profiles',
+                            to: '/job-profiles',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'My positions',
+                            to: '/my-positions',
                             hideTitle: true,
                           },
                         ]}
@@ -214,7 +234,7 @@ export const AppLayout = () => {
                     ) : (
                       <>
                         <div style={{ padding: '10px 10px 2px 10px' }}>
-                          <Link to="/total-compensation/create-profile">
+                          <Link to="/draft-job-profiles/create">
                             <Button
                               type="primary"
                               icon={<FileAddOutlined style={{ fontSize: '1.25rem' }} />}
@@ -238,7 +258,7 @@ export const AppLayout = () => {
                             {
                               icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
                               title: 'Approved Reqs',
-                              to: '/total-compensation/approved-requests',
+                              to: '/approved-requests',
                             },
                           ]}
                         />
