@@ -182,10 +182,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const handleCopyLink = (record: any) => {
-    // console.log('copylink: ', record);
     // shareUUID
     // Dynamically construct the link to include the current base URL
-    const linkToCopy = `${window.location.origin}/position-request/share/${record.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/my-positions/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
@@ -203,7 +202,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'DRAFT' && (
               <>
                 <Menu.Item key="edit" icon={<EditOutlined aria-hidden />} data-testid="menu-option-edit">
-                  <Link to={`/position-request/${record.id}`}>Edit</Link>
+                  <Link to={`/my-positions/${record.id}`}>Edit</Link>
                 </Menu.Item>
                 <Menu.Item
                   key="copy"
@@ -227,7 +226,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'COMPLETED' && (
               <>
                 <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
-                  <Link data-testid="view-link" to={`/position-request/${record.id}`}>
+                  <Link data-testid="view-link" to={`/my-positions/${record.id}`}>
                     View
                   </Link>
                 </Menu.Item>
@@ -256,7 +255,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             {record.status === 'IN_REVIEW' && (
               <>
                 <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
-                  <Link to={`/position-request/${record.id}`}>View</Link>
+                  <Link to={`/my-positions/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item
                   key="copy"
@@ -371,13 +370,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       render: (text: any, record: any) => {
         if (mode == null)
           return (
-            <Link to={`/position-request/${record.id}`} data-testid={`job-position-${record.id}`}>
+            <Link to={`/my-positions/${record.id}`} data-testid={`job-position-${record.id}`}>
               <div data-testid="job-title">{text}</div>
             </Link>
           );
         else if (mode == 'total-compensation') {
           return (
-            <Link to={`/total-compensation/approved-requests/${record.id}`}>
+            <Link to={`/approved-requests/${record.id}`}>
               <div data-testid="job-title">{text}</div>
             </Link>
           );
