@@ -1,20 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { EllipsisOutlined } from '@ant-design/icons';
-import { PageHeader as AntdProPageHeader, BreadcrumbItemRender, PageHeaderProps } from '@ant-design/pro-layout';
+import { PageHeader as AntdProPageHeader, PageHeaderProps } from '@ant-design/pro-layout';
 import { Button } from 'antd';
-import { ReactNode } from 'react';
 import { Link, useLocation, useMatches, useParams } from 'react-router-dom';
 import './page-header.component.css';
 
 // Define the type for your breadcrumb item
 interface BreadcrumbItem {
-  key: string | undefined;
-  icon: ReactNode | undefined;
-  path: string;
-  title: string | undefined;
+  breadcrumbName?: string | undefined;
+  path?: string;
 }
+
 interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
-  additionalBreadcrumb?: { title: string; path: string; icon?: React.ReactNode };
+  additionalBreadcrumb?: { title?: string; path?: string; icon?: React.ReactNode };
   button1Text?: string;
   button1Callback?: () => void;
   showButton1?: boolean;
@@ -38,17 +36,14 @@ export const PageHeader = ({
   const params = useParams<Record<string, string>>();
   const currentPage = useLocation().pathname;
   const segments = currentPage.split('/').filter(Boolean); // Filter out empty segments
-  console.log(currentPage);
-  console.log(segments);
+
   // Check if it's a level 1 subpage (e.g., 'my-positions')
   const hideBreadcrumb = segments.length === 1;
   const breadcrumbs: BreadcrumbItem[] = matches
     .filter((match) => Boolean((match.handle as Record<string, any>)?.breadcrumb))
     .map(
       (match: Record<string, any>): BreadcrumbItem => ({
-        key: match.pathname,
-        icon: match.handle.icon,
-        title: match.handle.breadcrumb(),
+        breadcrumbName: match.handle.breadcrumb(),
         path: Object.values(params).reduce(
           (path, param) => path?.replace(new RegExp('/' + param + '/?'), ''),
           match.pathname,
@@ -62,22 +57,55 @@ export const PageHeader = ({
   // If additionalBreadcrumb is provided, append it to the breadcrumbs array
   if (additionalBreadcrumb) {
     breadcrumbs.push({
-      key: additionalBreadcrumb.path,
-      icon: additionalBreadcrumb.icon,
-      title: additionalBreadcrumb.title,
+      breadcrumbName: additionalBreadcrumb.title,
       path: additionalBreadcrumb.path,
     });
   }
+  // const breadcrumbItemRender = (
+  //   route: {
+  //     breadcrumbName?:
+  //       | string
+  //       | number
+  //       | boolean
+  //       | ReactElement<any, string | JSXElementConstructor<any>>
+  //       | Iterable<ReactNode>
+  //       | null
+  //       | undefined;
+  //   },
+  //   params: any,
+  //   routes: any[],
+  //   paths: any[],
+  // ) => {
+  //   console.log(route);
+  //   console.log(params);
+  //   console.log(routes);
+  //   console.log(paths);
+  //   const last = routes.indexOf(route) === routes.length - 1;
+  //   return last ? <span>{route.breadcrumbName}</span> : <Link to={`#${paths.join('/')}`}>{route.breadcrumbName}</Link>;
+  // };
+  // const itemRender = (item: BreadcrumbItem, any[]) => {
+  //     const { path, title } = item;
 
-  const itemRender: BreadcrumbItemRender<BreadcrumbItem> = (item: BreadcrumbItem) => {
-    const { path, title } = item;
-
-    const isLast = breadcrumbs.indexOf(item) === segmentsLength; //routes.indexOf(route) === routes.length - 1;
+  //     const isLast = breadcrumbs.indexOf(item) === segmentsLength; //routes.indexOf(route) === routes.length - 1;
+  //     return isLast ? (
+  //       <span className="breadcrumb-current">{title}</span>
+  //     ) : (
+  //       <Link className="breadcrumb-link" to={path}>
+  //         {title}
+  //       </Link>
+  //     );
+  //   };
+  const itemRender = (
+    route: Partial<BreadcrumbItem>, // The current route info
+    _params: any, // Params (not used in this case)
+    routes: Partial<BreadcrumbItem>[], // Array of all route items
+  ): React.ReactNode => {
+    const isLast = routes.indexOf(route) === segmentsLength;
     return isLast ? (
-      <span className="breadcrumb-current">{title}</span>
+      <span className="breadcrumb-current">{route.breadcrumbName}</span>
     ) : (
-      <Link className="breadcrumb-link" to={path}>
-        {title}
+      <Link className="breadcrumb-link" to={route.path ?? '/'}>
+        {route.breadcrumbName}
       </Link>
     );
   };
@@ -85,8 +113,12 @@ export const PageHeader = ({
     ? {}
     : {
         breadcrumb: {
-          itemRender: itemRender,
-          items: breadcrumbs,
+          itemRender,
+          items: breadcrumbs.map((breadcrumb) => ({
+            path: breadcrumb.path,
+            breadcrumbName: breadcrumb.breadcrumbName,
+            // Map any additional properties from BreadcrumbItem to the expected structure
+          })),
         },
       };
 
