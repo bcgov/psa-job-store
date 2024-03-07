@@ -16,7 +16,7 @@ import {
 import { Button, Layout, Menu, MenuProps } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 import { AppHeader } from './header.component';
 import { SiderNavItem } from './sider-nav/sider-nav-item.component';
@@ -48,6 +48,21 @@ export const AppLayout = () => {
   const auth = useAuth();
   const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', true);
   const [role, setRole] = useState<string | null>(null);
+
+  const location = useLocation();
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  // useEffect(() => {
+  //   // Initialize or update the selectedKeys based on the current URL
+  //   const path = location.pathname;
+  //   setSelectedKeys([path]);
+  //   // console.log(path);
+  // }, [location.pathname]);
+  // Function to handle menu item click
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    // Update the selectedKeys when a menu item is clicked
+    console.log(e.keyPath);
+    setSelectedKeys([e.key]);
+  };
 
   useEffect(() => {
     // console.log('auth.user: ', auth.user);
@@ -247,25 +262,33 @@ export const AppLayout = () => {
 
                         <Menu
                           style={{ transition: 'width 0.2s ease-out', width: '200px' }}
-                          defaultOpenKeys={['sub1']}
                           mode="inline"
+                          selectedKeys={selectedKeys}
+                          onClick={handleMenuClick}
                           items={totalCompensationMenuItems}
                         />
 
-                        <SiderNav
-                          collapsed={collapsed}
-                          items={[
-                            {
-                              icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
-                              title: 'Approved Reqs',
-                              to: '/approved-requests',
-                            },
-                          ]}
-                        />
+                        <Link to="/approved-requests">
+                          <Menu
+                            style={{ transition: 'width 0.2s ease-out', width: '200px' }}
+                            mode="inline"
+                            selectedKeys={selectedKeys}
+                            onClick={handleMenuClick}
+                          >
+                            <Menu.Item
+                              icon={<CheckCircleOutlined style={{ fontSize: '1.25rem' }} />}
+                              key="/approved-requests"
+                            >
+                              Approved Reqs
+                            </Menu.Item>
+                          </Menu>
+                        </Link>
 
                         <Menu
                           style={{ transition: 'width 0.2s ease-out', width: '200px', marginTop: '10px' }}
                           mode="inline"
+                          selectedKeys={selectedKeys}
+                          onClick={handleMenuClick}
                           items={hiringManagerMenuItems}
                         />
                       </>
