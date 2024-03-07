@@ -76,7 +76,7 @@ export const AppLayout = () => {
     ]),
   ];
   const hiringManagerMenuItems: MenuProps['items'] = [
-    getItem('Hiring Manager', 'sub2', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
+    getItem('Hiring Manager', 'sub1', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
       getItem(
         <Link to="/my-positions/create">Create new position</Link>,
         '3',
@@ -203,6 +203,30 @@ export const AppLayout = () => {
                             icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
                             title: 'Approved requests',
                             to: '/approved-requests',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <PlusCircleFilled style={{ fontSize: '1.25rem' }} />,
+                            title: 'Create new position',
+                            to: '/my-positions/create',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'My organizations',
+                            to: '/org-chart',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'Job profiles',
+                            to: '/job-profiles',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'My positions',
+                            to: '/my-positions',
                             hideTitle: true,
                           },
                         ]}
