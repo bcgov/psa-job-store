@@ -895,6 +895,8 @@ const WizardEditProfile = forwardRef(
             name={`accountabilities.${index}.text`}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextArea
+                // set style to display one if field.is_readonly
+                style={{ display: field.is_readonly ? 'none' : 'block' }}
                 autoSize
                 disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
                 className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
@@ -1146,6 +1148,7 @@ const WizardEditProfile = forwardRef(
             name={`education.${index}.text`}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextArea
+                style={{ display: field.is_readonly ? 'none' : 'block' }}
                 autoSize
                 disabled={field.disabled || getValues(`education.${index}.is_readonly`)}
                 className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
@@ -1286,6 +1289,7 @@ const WizardEditProfile = forwardRef(
             name={`job_experience.${index}.text`}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextArea
+                style={{ display: field.is_readonly ? 'none' : 'block' }}
                 autoSize
                 disabled={field.disabled || getValues(`job_experience.${index}.is_readonly`)}
                 className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
@@ -1428,6 +1432,7 @@ const WizardEditProfile = forwardRef(
             name={`security_screenings.${index}.text`}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextArea
+                style={{ display: field.is_readonly ? 'none' : 'block' }}
                 autoSize
                 disabled={field.disabled || getValues(`security_screenings.${index}.is_readonly`)}
                 className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
