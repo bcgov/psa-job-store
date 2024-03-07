@@ -1163,7 +1163,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       if (!isPublishing) {
         const newId = response.createOrUpdateJobProfile.toString();
         setId(newId);
-        navigate(`/total-compensation/profiles/${newId}`); // Update the URL
+        navigate(`/published-job-profiles/${newId}`); // Update the URL
       }
 
       notification.success({
@@ -2950,10 +2950,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Typography.Title level={5}>View all published profiles</Typography.Title>
                     <Typography.Text>View all published profiles that you have created.</Typography.Text>
                     <br></br>
-                    <Button
-                      style={{ marginTop: 10 }}
-                      onClick={() => navigate('/total-compensation/profiles/published')}
-                    >
+                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/published-job-profiles')}>
                       Go to published profiles
                     </Button>
                   </>
@@ -2964,7 +2961,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Typography.Title level={5}>View all profiles</Typography.Title>
                     <Typography.Text>View all profiles that you have created.</Typography.Text>
                     <br></br>
-                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/total-compensation/profiles/drafts')}>
+                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/draft-job-profiles')}>
                       Go to drafts
                     </Button>
                   </>
