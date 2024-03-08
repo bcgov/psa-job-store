@@ -135,7 +135,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
             <Link to="/">
               <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
             </Link>
-            Edit profile
+            New position
           </div>
         }
         subTitle={
