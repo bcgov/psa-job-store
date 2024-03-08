@@ -220,14 +220,12 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
 
   return (
     <WizardPageWrapper
-      // title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}
-
       title={
         <div>
           <Link to="/">
             <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
-          Edit profile
+          New position
         </div>
       }
       subTitle={<div>You may now edit the profile.</div>}
