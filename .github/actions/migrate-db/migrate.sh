@@ -15,6 +15,7 @@ oc project $NAMESPACE
 #set up port forwarding to access the database
 POD_NAME=$(oc get pod -l name=sidecar -o jsonpath="{.items[0].metadata.name}")
 
+oc exec $POD_NAME -- rm -rf /tmp/prisma
 oc cp ./apps/api/prisma $POD_NAME:/tmp/prisma
 
 oc exec $POD_NAME -- npx prisma migrate deploy --schema=/tmp/prisma/schema.prisma
