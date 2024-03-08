@@ -176,7 +176,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       classification: null as string | null,
       jobRole: null as number | null,
       professions:
-        professionsData?.length == 0 ? ([{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[]) : professionsData,
+        !professionsData || professionsData?.length == 0
+          ? ([{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[])
+          : professionsData,
       role: 1,
       reportToRelationship: [] as string[],
       scopeOfResponsibility: null as number | null,
@@ -1161,8 +1163,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       const response = await createJobProfile(transformedData).unwrap();
       // console.log('response: ', response);
       if (!isPublishing) {
+        // saving as draft
         const newId = response.createOrUpdateJobProfile.toString();
         setId(newId);
+        navigate(`/draft-job-profiles/${newId}`); // Update the URL
+      } else {
+        // saving as published
+        const newId = response.createOrUpdateJobProfile.toString();
         navigate(`/published-job-profiles/${newId}`); // Update the URL
       }
 
