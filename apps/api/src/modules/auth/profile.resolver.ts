@@ -19,10 +19,16 @@ export class ProfileResolver {
     private authService: AuthService,
   ) {}
 
+  @Query(() => LogoutResponse, { name: 'throwError' })
+  @AllowNoRoles()
+  async throwError() {
+    return { success: 1 / 0 };
+  }
+
   @Query(() => LogoutResponse, { name: 'logout' })
   @AllowNoRoles()
   async logout(@CurrentUser() { id: userId }: Express.User) {
-    if (true) await this.authService.logoutUser(userId);
+    await this.authService.logoutUser(userId);
     return { success: true };
   }
 
