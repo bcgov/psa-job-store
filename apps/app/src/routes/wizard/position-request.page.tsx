@@ -55,7 +55,7 @@ export const PositionRequestPage = () => {
   const location = useLocation();
 
   // Determine if the current path is a shared URL
-  const isSharedRoute = location.pathname.includes('/position-request/share/');
+  const isSharedRoute = location.pathname.includes('/my-positions/share/');
   // Use state or other logic to determine which query hook to use
   // This could be a piece of state that determines which query to run, for example
   const queryHook = isSharedRoute ? useGetSharedPositionRequestQuery : useGetPositionRequestQuery;
