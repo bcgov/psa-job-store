@@ -13,6 +13,10 @@ export const loggerFactory = (config: ConfigService) => {
         colorize: true,
       },
     };
+    // transport = {
+    //   target: 'pino/file',
+    //   options: { destination: 'tmp/log/api.log' },
+    // };
   } else {
     // In production, log to a file
     transport = {
