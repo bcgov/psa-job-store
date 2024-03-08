@@ -68,6 +68,9 @@ export class PositionRequestUpdateInput {
   updated_at?: Date | string;
 
   @Field(() => String, { nullable: true })
+  shareUUID?: string;
+
+  @Field(() => String, { nullable: true })
   additional_info_excluded_mgr_position_number?: string;
 
   @Field(() => String, { nullable: true })

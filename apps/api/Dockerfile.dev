@@ -1,5 +1,5 @@
 # Use the official Node.js 18 image.
-FROM node:18.17.0 AS base
+FROM node:20.11.1-alpine AS base
 
 # Create and change to the app directory.
 FROM base AS builder
@@ -73,7 +73,7 @@ RUN npm -w common-kit run build
 
 #For debugging: create and write the contents of start.sh in the container
 
-RUN echo "#!/bin/bash" >> start.sh && \
+RUN echo "#!/bin/sh" >> start.sh && \
     echo "sleep 10" >> start.sh && \
     echo "# push the schema to the database and sync the client" >> start.sh && \
     echo "npx prisma migrate deploy dev" >> start.sh && \

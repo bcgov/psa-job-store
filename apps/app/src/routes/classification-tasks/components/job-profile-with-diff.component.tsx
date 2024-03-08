@@ -46,7 +46,7 @@ export const JobProfileWithDiff = ({ positionRequestData }: JobProfileTabProps) 
 
   return (
     <Row justify="center">
-      <Col xs={24} sm={24} md={24} lg={20} xl={16} style={{ background: '#fff' }}>
+      <Col xs={24} sm={24} md={24} lg={20} xl={16}>
         <WizardEditControlBar
           onToggleShowDiff={handleToggleShowDiff}
           showDiffToggle={true}

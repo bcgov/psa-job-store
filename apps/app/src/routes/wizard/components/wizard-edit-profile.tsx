@@ -18,7 +18,7 @@ import {
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -100,11 +100,11 @@ const WizardEditProfile = forwardRef(
     // todo: usage of this approach is undesirable, however it fixes various render issues
     // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
     // of this state
-    const [renderKey, setRenderKey] = useState(0);
-    useEffect(() => {
-      form.resetFields(); // "form" is needed to use with ref and to get the state. Must do "resetFields"
-      // as part of the render hack. todo: get rid of this if possible
-    }, [renderKey, form]);
+    // const [renderKey, setRenderKey] = useState(0);
+    // useEffect(() => {
+    //   form.resetFields(); // "form" is needed to use with ref and to get the state. Must do "resetFields"
+    //   // as part of the render hack. todo: get rid of this if possible
+    // }, [renderKey, form]);
 
     const {
       originalValuesSet,
@@ -538,7 +538,7 @@ const WizardEditProfile = forwardRef(
           optional_requirements: originalOptionalRequirementsFieldsValue,
         });
       }
-      setRenderKey((prevKey) => prevKey + 1);
+      // setRenderKey((prevKey) => prevKey + 1);
       // console.log('reset!');
     }, [
       effectiveData,
@@ -700,7 +700,8 @@ const WizardEditProfile = forwardRef(
       getFormData: () => {
         // This function could be used to get the current form data
         // console.log('form.getFieldsValue(): ', form.getFieldsValue());
-        return form.getFieldsValue();
+        // return form.getFieldsValue();
+        return getValues();
       },
       getFormErrors: () => {
         return formState.errors;
@@ -888,20 +889,26 @@ const WizardEditProfile = forwardRef(
           {field.is_readonly && (
             <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
           )}
-          <FormItem
-            hidden={field.is_readonly}
-            name={`accountabilities.${index}.text`}
+
+          <Controller
             control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              // onFocus={() => showReqModal(() => {}, false)}
-              onChange={handleFieldChange}
-            />
-          </FormItem>
+            name={`accountabilities.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                // set style to display one if field.is_readonly
+                style={{ display: field.is_readonly ? 'none' : 'block' }}
+                autoSize
+                disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
 
           {field.disabled ? (
             <Button
@@ -914,7 +921,7 @@ const WizardEditProfile = forwardRef(
                 // showReqModal(() => {
                 // acc_req_remove(index);
                 handleAccReqAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                 // }, false)
               }}
             />
@@ -931,7 +938,7 @@ const WizardEditProfile = forwardRef(
                   // showReqModal(() => {
                   // acc_req_remove(index);
                   handleAccReqRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                   // }, false)
                 }}
               />
@@ -1005,7 +1012,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`optional_accountabilities.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled || getValues(`optional_accountabilities.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`optional_accountabilities.${index}.text`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1016,7 +1041,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1027,7 +1052,7 @@ const WizardEditProfile = forwardRef(
               onClick={() => {
                 // acc_req_remove(index);
                 handleOptReqAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1039,7 +1064,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleOptReqRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1117,7 +1142,27 @@ const WizardEditProfile = forwardRef(
           {field.is_readonly && (
             <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
           )}
-          <FormItem
+
+          <Controller
+            control={control}
+            name={`education.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                style={{ display: field.is_readonly ? 'none' : 'block' }}
+                autoSize
+                disabled={field.disabled || getValues(`education.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
+
+          {/* <FormItem
             hidden={field.is_readonly}
             name={`education.${index}.text`}
             control={control}
@@ -1130,7 +1175,7 @@ const WizardEditProfile = forwardRef(
               // onFocus={() => showMinReqModal(() => {}, false)}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
 
           {field.disabled ? (
             <Button
@@ -1142,7 +1187,7 @@ const WizardEditProfile = forwardRef(
               onClick={() => {
                 // showMinReqModal(() => {
                 handleMinReqAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                 // }, false)
               }}
             />
@@ -1158,7 +1203,7 @@ const WizardEditProfile = forwardRef(
                 onClick={() => {
                   // showMinReqModal(() => {
                   handleMinReqRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                   // }, false)
                 }}
               />
@@ -1238,7 +1283,27 @@ const WizardEditProfile = forwardRef(
           {field.is_readonly && (
             <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
           )}
-          <FormItem
+
+          <Controller
+            control={control}
+            name={`job_experience.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                style={{ display: field.is_readonly ? 'none' : 'block' }}
+                autoSize
+                disabled={field.disabled || getValues(`job_experience.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
+
+          {/* <FormItem
             hidden={field.is_readonly}
             name={`job_experience.${index}.text`}
             control={control}
@@ -1251,7 +1316,7 @@ const WizardEditProfile = forwardRef(
               // onFocus={() => showRelWorkModal(() => {}, false)}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
 
           {field.disabled ? (
             <Button
@@ -1263,7 +1328,7 @@ const WizardEditProfile = forwardRef(
               onClick={() => {
                 // showRelWorkModal(() => {
                 handleRelWorkAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                 // }, false)
               }}
             />
@@ -1279,7 +1344,7 @@ const WizardEditProfile = forwardRef(
                 onClick={() => {
                   // showRelWorkModal(() => {
                   handleRelWorkRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                   // }, false)
                 }}
               />
@@ -1361,7 +1426,27 @@ const WizardEditProfile = forwardRef(
           {field.is_readonly && (
             <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
           )}
-          <FormItem
+
+          <Controller
+            control={control}
+            name={`security_screenings.${index}.text`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                style={{ display: field.is_readonly ? 'none' : 'block' }}
+                autoSize
+                disabled={field.disabled || getValues(`security_screenings.${index}.is_readonly`)}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value ? (typeof value === 'string' ? value : value.value) : ''}
+              />
+            )}
+          />
+
+          {/* <FormItem
             hidden={field.is_readonly}
             name={`security_screenings.${index}.text`}
             control={control}
@@ -1374,7 +1459,7 @@ const WizardEditProfile = forwardRef(
               // onFocus={() => showSecurityScreeningsModal(() => {}, false)}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
 
           {field.disabled ? (
             <Button
@@ -1386,7 +1471,7 @@ const WizardEditProfile = forwardRef(
               onClick={() => {
                 // showSecurityScreeningsModal(() => {
                 handleSecurityScreeningsAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                 // }, false)
               }}
             />
@@ -1402,7 +1487,7 @@ const WizardEditProfile = forwardRef(
                 onClick={() => {
                   // showSecurityScreeningsModal(() => {
                   handleSecurityScreeningsRemove(index);
-                  setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                   // }, false)
                 }}
               />
@@ -1478,7 +1563,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`professional_registration.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`professional_registration.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1489,7 +1592,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1499,7 +1602,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleProfessionalRegistrationAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1511,7 +1614,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleProfessionalRegistrationRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1585,7 +1688,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`optional_requirements.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`optional_requirements.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1596,7 +1717,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1606,7 +1727,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleOptionalRequirementsAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1618,7 +1739,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleOptionalRequirementsRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1690,7 +1811,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`preferences.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`preferences.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1701,7 +1840,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1711,7 +1850,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handlePreferencesAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1723,7 +1862,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handlePreferencesRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1800,7 +1939,25 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`knowledge_skills_abilities.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+
+          {/* <FormItem
             name={`knowledge_skills_abilities.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1811,7 +1968,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1821,7 +1978,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleKnowledgeSkillsAbilitiesAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1833,7 +1990,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleKnowledgeSkillsAbilitiesRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -1905,7 +2062,24 @@ const WizardEditProfile = forwardRef(
             <Input />
           </FormItem>
 
-          <FormItem
+          <Controller
+            control={control}
+            name={`provisos.${index}.value`}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextArea
+                autoSize
+                disabled={field.disabled}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                onChange={(event) => {
+                  onChange(event);
+                  handleFieldChange(event); // todo: find a way to eliminate this
+                }}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
+          />
+          {/* <FormItem
             name={`provisos.${index}.value`}
             control={control}
             style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
@@ -1916,7 +2090,7 @@ const WizardEditProfile = forwardRef(
               className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
               onChange={handleFieldChange}
             />
-          </FormItem>
+          </FormItem> */}
           {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
@@ -1926,7 +2100,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleProvisosAddBack(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           ) : (
@@ -1938,7 +2112,7 @@ const WizardEditProfile = forwardRef(
               }}
               onClick={() => {
                 handleProvisosRemove(index);
-                setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
           )}
@@ -2123,7 +2297,7 @@ const WizardEditProfile = forwardRef(
       }
     }, [positionProfileData]);
 
-    if (isLoading || renderKey === 0) {
+    if (isLoading) {
       return <LoadingSpinnerWithMessage />;
     }
 
@@ -2217,7 +2391,7 @@ const WizardEditProfile = forwardRef(
           <Col xs={24} sm={24} lg={16}>
             <Form
               form={form}
-              key={renderKey}
+              // key={renderKey}
               onFinish={handleSubmit((data) => {
                 // console.log('onFinish: ', data);
                 submitHandler?.(data);
@@ -2363,7 +2537,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleAccReqAddNew();
-                          setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                          // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
                         }}
                       >
                         Add another accountability
@@ -2376,6 +2550,7 @@ const WizardEditProfile = forwardRef(
                       label="Optional accountabilities"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2388,7 +2563,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleOptReqAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add optional accountability
@@ -2414,6 +2589,13 @@ const WizardEditProfile = forwardRef(
                       showIcon
                     />
 
+                    <Form.Item
+                      label="Education and work experience"
+                      labelCol={{ className: 'card-label' }}
+                      className="label-only"
+                      colon={false}
+                    ></Form.Item>
+
                     <Typography.Paragraph type="secondary">
                       Minimum years of experience are required, and you may add or refine the education requirements
                       (add a degree or diploma program). These equivalencies are designed to be inclusive of different
@@ -2432,7 +2614,7 @@ const WizardEditProfile = forwardRef(
                           {
                             // showMinReqModal(() => {
                             handleMinReqAddNew();
-                            setRenderKey((prevKey) => prevKey + 1);
+                            // setRenderKey((prevKey) => prevKey + 1);
                             // }, false);
                           }
                         }}
@@ -2449,6 +2631,7 @@ const WizardEditProfile = forwardRef(
                       label="Related experience"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2463,7 +2646,7 @@ const WizardEditProfile = forwardRef(
                           {
                             // showRelWorkModal(() => {
                             handleRelWorkAddNew();
-                            setRenderKey((prevKey) => prevKey + 1);
+                            // setRenderKey((prevKey) => prevKey + 1);
                             // }, false);
                           }
                         }}
@@ -2480,6 +2663,7 @@ const WizardEditProfile = forwardRef(
                       label="Professional registration requirements"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <Typography.Paragraph type="secondary">
@@ -2500,7 +2684,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleProfessionalRegistrationAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add a professional registration requirement
@@ -2515,6 +2699,7 @@ const WizardEditProfile = forwardRef(
                       label="Preferences"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2527,7 +2712,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handlePreferencesAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add a job preference
@@ -2542,6 +2727,7 @@ const WizardEditProfile = forwardRef(
                       label="Knowledge, skills and abilities"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2557,7 +2743,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleKnowledgeSkillsAbilitiesAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add a knowledge, skill or ability requirement
@@ -2572,6 +2758,7 @@ const WizardEditProfile = forwardRef(
                       label="Willingness statements or provisos"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2584,7 +2771,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleProvisosAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add a proviso
@@ -2599,6 +2786,7 @@ const WizardEditProfile = forwardRef(
                       label="Security screenings"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2613,7 +2801,7 @@ const WizardEditProfile = forwardRef(
                           {
                             // showSecurityScreeningsModal(() => {
                             handleSecurityScreeningsAddNew();
-                            setRenderKey((prevKey) => prevKey + 1);
+                            // setRenderKey((prevKey) => prevKey + 1);
                             // }, false);
                           }
                         }}
@@ -2630,6 +2818,7 @@ const WizardEditProfile = forwardRef(
                       label="Optional requirements"
                       labelCol={{ className: 'card-label' }}
                       className="label-only"
+                      colon={false}
                     ></Form.Item>
 
                     <>
@@ -2642,7 +2831,7 @@ const WizardEditProfile = forwardRef(
                         style={addStyle}
                         onClick={() => {
                           handleOptionalRequirementsAddNew();
-                          setRenderKey((prevKey) => prevKey + 1);
+                          // setRenderKey((prevKey) => prevKey + 1);
                         }}
                       >
                         Add an optional requirement

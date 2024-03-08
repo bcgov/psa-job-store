@@ -14,6 +14,7 @@ import {
   PositionRequestWhereInput,
   UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
+import { AlexandriaError } from '../../utils/alexandria-error';
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
 import {
@@ -108,7 +109,7 @@ export class PositionRequestApiService {
         return id; // Unique ID found
       }
     }
-    throw new Error('Failed to generate a unique ID');
+    throw AlexandriaError('Failed to generate a unique ID');
   }
 
   async createPositionRequest(data: PositionRequestCreateInput, userId: string) {
@@ -252,6 +253,7 @@ export class PositionRequestApiService {
         approved_at: true,
         submitted_at: true,
         crm_id: true,
+        shareUUID: true,
       },
     });
 
@@ -318,6 +320,63 @@ export class PositionRequestApiService {
       });
     }
     return mergedResults; //.reverse();
+  }
+
+  async getSharedPositionRequest(shareUUID: string) {
+    // console.log('getPositionRequest!', userRoles);
+    if (!shareUUID || shareUUID === '') {
+      throw AlexandriaError('Invalid share URL');
+    }
+
+    const whereCondition: { shareUUID: { equals: string } } = { shareUUID: { equals: shareUUID } };
+
+    let positionRequest;
+    try {
+      positionRequest = await this.prisma.positionRequest.findFirstOrThrow({
+        where: whereCondition,
+        include: {
+          parent_job_profile: true,
+        },
+      });
+      // catch findFirstOrThrow error
+    } catch (error) {
+      throw AlexandriaError('Invalid share URL');
+    }
+
+    // console.log('positionRequest: ', positionRequest, JSON.stringify(whereCondition));
+
+    if (!positionRequest) {
+      return null;
+    }
+
+    // TODO: AL-146 - this should not be needed if the foreign key relationship is working properly in schema.prisma
+    // Fetch classification
+
+    const classification =
+      positionRequest.classification_id == null
+        ? null
+        : await this.prisma.classification.findUnique({
+            where: { id: positionRequest.classification_id },
+            select: {
+              code: true, // Assuming 'code' is the field you want from the classification
+            },
+          });
+
+    // Fetch user
+    const user = await this.prisma.user.findUnique({
+      where: { id: positionRequest.user_id },
+      select: {
+        name: true, // Assuming 'name' is the field you want from the user
+        email: true,
+      },
+    });
+
+    return {
+      ...positionRequest,
+      classification_code: classification?.code,
+      user_name: user?.name,
+      email: user?.email,
+    };
   }
 
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
@@ -808,7 +867,7 @@ export class PositionRequestApiService {
     // without contactId we cannot create an incident
     // this can happen if this is new staff member and they have not been assigned a CRM contact yet
     if (contactId === null) {
-      throw new Error('CRM Contact ID not found');
+      throw AlexandriaError('CRM Contact ID not found');
     }
 
     const department = await this.prisma.department.findUnique({ where: { id: positionRequest.department_id } });
@@ -869,7 +928,22 @@ export class PositionRequestApiService {
               positionRequest.id
             }">View this position in the Job Store</a>
             <br />
-            The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}
+            <strong>
+            ${
+              positionRequest.position_number != null
+                ? `The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}`
+                : `No position was created for this request`
+            }
+            </strong>
+            ${
+              (positionRequest.additional_info_comments ?? '').length > 0
+                ? `
+            <br />
+            <strong>The following note was added to this position request:</strong>
+            <br />
+            <em>${positionRequest.additional_info_comments}</em>`
+                : ''
+            }
             <br />
             <ul>
               <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
@@ -945,7 +1019,7 @@ export class PositionRequestApiService {
           DEPTID: positionRequest.department_id,
           JOBCODE: positionRequest.classification_id,
           REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview ? PositionStatus.Proposed : PositionStatus.Active,
+          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
           DESCR: positionRequest.title,
           REG_TEMP: PositionDuration.Regular,
           FULL_PART_TIME: PositionType.FullTime,
@@ -966,7 +1040,7 @@ export class PositionRequestApiService {
           DEPTID: positionRequest.department_id,
           JOBCODE: positionRequest.classification_id,
           REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview ? PositionStatus.Proposed : PositionStatus.Active,
+          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
           DESCR: positionRequest.title,
           REG_TEMP: PositionDuration.Regular,
           FULL_PART_TIME: PositionType.FullTime,

@@ -4,7 +4,6 @@ import { LocationUpdateOneRequiredWithoutDepartmentsNestedInput } from '../locat
 import { OrganizationUpdateOneRequiredWithoutDepartmentsNestedInput } from '../organization/organization-update-one-required-without-departments-nested.input';
 import { PositionRequestUpdateManyWithoutDepartmentNestedInput } from '../position-request/position-request-update-many-without-department-nested.input';
 import { PositionRequestUpdateManyWithoutPaylist_departmentNestedInput } from '../position-request/position-request-update-many-without-paylist-department-nested.input';
-import { ClassificationDepartmentUpdateManyWithoutDepartmentNestedInput } from '../classification-department/classification-department-update-many-without-department-nested.input';
 
 @InputType()
 export class DepartmentUpdateInput {
@@ -37,7 +36,4 @@ export class DepartmentUpdateInput {
 
   @Field(() => PositionRequestUpdateManyWithoutPaylist_departmentNestedInput, { nullable: true })
   PositionRequestsByPaylistDepartment?: PositionRequestUpdateManyWithoutPaylist_departmentNestedInput;
-
-  @Field(() => ClassificationDepartmentUpdateManyWithoutDepartmentNestedInput, { nullable: true })
-  classifications?: ClassificationDepartmentUpdateManyWithoutDepartmentNestedInput;
 }

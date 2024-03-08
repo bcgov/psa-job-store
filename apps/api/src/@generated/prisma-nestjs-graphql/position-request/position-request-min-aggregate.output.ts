@@ -63,6 +63,9 @@ export class PositionRequestMinAggregate {
   updated_at?: Date | string;
 
   @Field(() => String, { nullable: true })
+  shareUUID?: string;
+
+  @Field(() => String, { nullable: true })
   additional_info_work_location_id?: string;
 
   @Field(() => String, { nullable: true })

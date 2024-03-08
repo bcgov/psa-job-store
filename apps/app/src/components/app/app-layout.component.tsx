@@ -49,6 +49,20 @@ export const AppLayout = () => {
   const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', true);
   const [role, setRole] = useState<string | null>(null);
 
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  // useEffect(() => {
+  //   // Initialize or update the selectedKeys based on the current URL
+  //   const path = location.pathname;
+  //   setSelectedKeys([path]);
+  //   // console.log(path);
+  // }, [location.pathname]);
+  // Function to handle menu item click
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    // Update the selectedKeys when a menu item is clicked
+    console.log(e.keyPath);
+    setSelectedKeys([e.key]);
+  };
+
   useEffect(() => {
     // console.log('auth.user: ', auth.user);
     const roles = auth.user?.profile['client_roles'];
@@ -67,20 +81,16 @@ export const AppLayout = () => {
 
   const totalCompensationMenuItems: MenuProps['items'] = [
     getItem('Job Profiles', 'sub1', <FileSearchOutlined style={{ fontSize: '1.25rem' }} />, [
+      getItem(<Link to="/draft-job-profiles">Drafts</Link>, '1', <FileOutlined style={{ fontSize: '1.25rem' }} />),
       getItem(
-        <Link to="/total-compensation/profiles/drafts">Drafts</Link>,
-        '1',
-        <FileOutlined style={{ fontSize: '1.25rem' }} />,
-      ),
-      getItem(
-        <Link to="/total-compensation/profiles/published">Published</Link>,
+        <Link to="/published-job-profiles">Published</Link>,
         '2',
         <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
       ),
     ]),
   ];
   const hiringManagerMenuItems: MenuProps['items'] = [
-    getItem('Hiring Manager', 'sub2', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
+    getItem('Hiring Manager', 'sub1', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
       getItem(
         <Link to="/my-positions/create">Create new position</Link>,
         '3',
@@ -188,25 +198,49 @@ export const AppLayout = () => {
                           {
                             icon: <FileAddFilled style={{ fontSize: '1.25rem', color: '#1677ff' }} />,
                             title: 'Create new profile',
-                            to: '/total-compensation/create-profile',
+                            to: '/draft-job-profiles/create',
                             hideTitle: true,
                           },
                           {
                             icon: <FileOutlined style={{ fontSize: '1.25rem' }} />,
                             title: 'Draft job profiles',
-                            to: '/total-compensation/profiles/drafts',
+                            to: '/draft-job-profiles',
                             hideTitle: true,
                           },
                           {
                             icon: <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
                             title: 'Published job profiles',
-                            to: '/total-compensation/profiles/published',
+                            to: '/published-job-profiles',
                             hideTitle: true,
                           },
                           {
                             icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
                             title: 'Approved requests',
-                            to: '/total-compensation/approved-requests',
+                            to: '/approved-requests',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <PlusCircleFilled style={{ fontSize: '1.25rem' }} />,
+                            title: 'Create new position',
+                            to: '/my-positions/create',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'My organizations',
+                            to: '/org-chart',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'Job profiles',
+                            to: '/job-profiles',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
+                            title: 'My positions',
+                            to: '/my-positions',
                             hideTitle: true,
                           },
                         ]}
@@ -214,7 +248,7 @@ export const AppLayout = () => {
                     ) : (
                       <>
                         <div style={{ padding: '10px 10px 2px 10px' }}>
-                          <Link to="/total-compensation/create-profile">
+                          <Link to="/draft-job-profiles/create">
                             <Button
                               type="primary"
                               icon={<FileAddOutlined style={{ fontSize: '1.25rem' }} />}
@@ -227,25 +261,33 @@ export const AppLayout = () => {
 
                         <Menu
                           style={{ transition: 'width 0.2s ease-out', width: '200px' }}
-                          defaultOpenKeys={['sub1']}
                           mode="inline"
+                          selectedKeys={selectedKeys}
+                          onClick={handleMenuClick}
                           items={totalCompensationMenuItems}
                         />
 
-                        <SiderNav
-                          collapsed={collapsed}
-                          items={[
-                            {
-                              icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
-                              title: 'Approved Reqs',
-                              to: '/total-compensation/approved-requests',
-                            },
-                          ]}
-                        />
+                        <Link to="/approved-requests">
+                          <Menu
+                            style={{ transition: 'width 0.2s ease-out', width: '200px' }}
+                            mode="inline"
+                            selectedKeys={selectedKeys}
+                            onClick={handleMenuClick}
+                          >
+                            <Menu.Item
+                              icon={<CheckCircleOutlined style={{ fontSize: '1.25rem' }} />}
+                              key="/approved-requests"
+                            >
+                              Approved Reqs
+                            </Menu.Item>
+                          </Menu>
+                        </Link>
 
                         <Menu
                           style={{ transition: 'width 0.2s ease-out', width: '200px', marginTop: '10px' }}
                           mode="inline"
+                          selectedKeys={selectedKeys}
+                          onClick={handleMenuClick}
                           items={hiringManagerMenuItems}
                         />
                       </>

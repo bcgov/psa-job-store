@@ -11,17 +11,28 @@ type ServiceRequestDetailsProps = {
 };
 
 export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ positionRequestData }) => {
-  // console.log('positionRequestData: ', positionRequestData);
+  // console.log('ServiceRequestDetails positionRequestData: ', positionRequestData);
 
-  const { data: reportsToInfo, isLoading: reportsToLoading } = useGetPositionProfileQuery({
-    positionNumber: positionRequestData?.positionRequest?.reports_to_position_id,
-  });
-  const { data: excludedMngInfo, isLoading: excludedLoading } = useGetPositionProfileQuery({
-    positionNumber: positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number,
-  });
-  const { data: locationInfo, isLoading: locationLoading } = useGetLocationQuery({
-    id: positionRequestData?.positionRequest?.additional_info_work_location_id,
-  });
+  const { data: reportsToInfo, isLoading: reportsToLoading } = useGetPositionProfileQuery(
+    {
+      positionNumber: positionRequestData?.positionRequest?.reports_to_position_id,
+    },
+    { skip: !positionRequestData?.positionRequest?.reports_to_position_id },
+  );
+
+  const { data: excludedMngInfo, isLoading: excludedLoading } = useGetPositionProfileQuery(
+    {
+      positionNumber: positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number,
+    },
+    { skip: !positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number },
+  );
+
+  const { data: locationInfo, isLoading: locationLoading } = useGetLocationQuery(
+    {
+      id: positionRequestData?.positionRequest?.additional_info_work_location_id,
+    },
+    { skip: !positionRequestData?.positionRequest?.additional_info_work_location_id },
+  );
 
   // console.log('locationInfo: ', locationInfo);
 
@@ -168,7 +179,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     },
     {
       key: 'payListDepartmentIdNumber',
-      label: 'Pay list/department ID number',
+      label: 'Department ID',
       children: <div>{positionRequestData?.positionRequest?.department_id}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },

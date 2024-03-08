@@ -76,6 +76,9 @@ export class PositionRequest {
   updated_at!: Date;
 
   @Field(() => String, { nullable: true })
+  shareUUID!: string | null;
+
+  @Field(() => String, { nullable: true })
   additional_info_work_location_id!: string | null;
 
   @Field(() => String, { nullable: true })

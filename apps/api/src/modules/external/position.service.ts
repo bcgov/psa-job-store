@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Classification, Department } from '@prisma/client';
+import { AlexandriaError } from '../../utils/alexandria-error';
 import { ClassificationService } from './classification.service';
 import { DepartmentService } from './department.service';
 import { FindUniquePositionArgs } from './models/find-unique-position.args';
@@ -29,7 +30,7 @@ export class PositionService {
     const rows = result?.data?.query?.rows;
     let position: Position | null = null;
 
-    if (rows.length > 0) {
+    if (rows?.length > 0) {
       const raw = rows[0];
 
       const classification =
@@ -66,6 +67,7 @@ export class PositionService {
 
   async getPositionProfile(positionNumber: string) {
     const positionDetails = await this.getPosition({ where: { id: positionNumber } });
+    if (!positionDetails) throw AlexandriaError(`Position ${positionNumber} not found`);
 
     const employeesForPositions = await this.peoplesoftService.getEmployeesForPositions([positionNumber]);
     const employeesInPosition = employeesForPositions.get(positionNumber) ?? [];

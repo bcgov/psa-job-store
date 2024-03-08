@@ -11,6 +11,7 @@ export interface DownloadJobProfileComponentProps {
   jobProfile: Record<string, any> | null;
   style?: React.CSSProperties;
   ignoreAbsentParent?: boolean;
+  renderTrigger?: (generate: () => void, isLoading: boolean) => React.ReactNode;
 }
 
 export const DownloadJobProfileComponent = ({
@@ -18,6 +19,7 @@ export const DownloadJobProfileComponent = ({
   jobProfile,
   style,
   ignoreAbsentParent = false,
+  renderTrigger,
 }: DownloadJobProfileComponentProps & React.PropsWithChildren & any) => {
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
   const [parentJobProfile, setParentJobProfile] = useState<Record<string, any> | null>(null);
@@ -49,6 +51,11 @@ export const DownloadJobProfileComponent = ({
       });
     }
   };
+
+  // Custom trigger rendering
+  if (renderTrigger) {
+    return <>{renderTrigger(generate, isLoading)}</>;
+  }
 
   return children != null ? (
     isLoading ? (

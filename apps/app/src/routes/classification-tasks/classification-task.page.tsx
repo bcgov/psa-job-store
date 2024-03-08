@@ -288,7 +288,7 @@ export const ClassificationTaskPage = () => {
                           <strong>Download job profile</strong>
                           <p>Attached copy of the job profile that needs review.</p>
                           {/* <Button onClick={handleDownload}>Download job profile</Button> */}
-                          <DownloadJobProfileComponent jobProfile={data?.positionRequest.profile_json} />
+                          <DownloadJobProfileComponent jobProfile={data?.positionRequest?.profile_json} />
                           <Button type="link">View job profile</Button>
                         </div>
                         <Divider />
@@ -347,7 +347,7 @@ export const ClassificationTaskPage = () => {
     {
       label: (
         <div>
-          <DownloadJobProfileComponent jobProfile={data.positionRequest.profile_json}>
+          <DownloadJobProfileComponent jobProfile={data.positionRequest?.profile_json}>
             <>
               Download job profile
               <Text type="secondary" style={{ display: 'block' }}>
@@ -383,7 +383,7 @@ export const ClassificationTaskPage = () => {
                 <PositionProfile
                   prefix="Reporting to"
                   mode="compact"
-                  positionNumber={data?.positionRequest.reports_to_position_id}
+                  positionNumber={data?.positionRequest?.reports_to_position_id}
                 ></PositionProfile>
               </div>
             }

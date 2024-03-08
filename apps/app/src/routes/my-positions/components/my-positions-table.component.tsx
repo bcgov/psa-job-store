@@ -12,18 +12,22 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Col, Menu, Modal, Popover, Result, Row, Space, Table, Tooltip, message } from 'antd';
-import { SortOrder, TableRowSelection } from 'antd/es/table/interface';
+import { SortOrder } from 'antd/es/table/interface';
+import { generateJobProfile } from 'common-kit';
 import copy from 'copy-to-clipboard';
-import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
+import { Packer } from 'docx';
+import saveAs from 'file-saver';
+import React, { CSSProperties, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
+import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import {
-  GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
+  useLazyGetPositionRequestQuery,
   useLazyGetPositionRequestsQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
@@ -75,10 +79,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const initialSortField = searchParams.get('sortField');
   const initialSortOrder = searchParams.get('sortOrder');
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRowKeys] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [pageSize, setPageSize] = useState(initialPageSize);
+  const [pageSize, setPageSize] = useState(import.meta.env.VITE_TEST_ENV === 'true' ? 2 : initialPageSize);
   const [sortField, setSortField] = useState(initialSortField);
   const [sortOrder, setSortOrder] = useState(initialSortOrder);
   const [hasPositionRequests, setHasPositionRequests] = useState(false);
@@ -97,6 +101,54 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     }
     return undefined;
   };
+
+  // This is for downloading of the job profile
+  const [prTrigger, { data: prData, isLoading: isLoadingPositionRequest }] = useLazyGetPositionRequestQuery();
+  const [jpTrigger, { data: jpData, isLoading: isLoadingJobProfile }] = useLazyGetJobProfilesQuery();
+
+  // Fetch the position request which includes the job profile and potentially a parent job profile ID
+  const fetchJobProfileAndParent = async (id: any) => {
+    prTrigger({ id: +id });
+  };
+
+  const generateAndDownloadDocument = useCallback((jobProfile: any, parentProfile: any) => {
+    const document = generateJobProfile({
+      jobProfile: jobProfile,
+      parentJobProfile: parentProfile,
+    });
+    Packer.toBlob(document).then((blob) => {
+      saveAs(blob, 'job-profile.docx');
+      message.success('Your document is downloading!');
+    });
+  }, []);
+
+  useEffect(() => {
+    // When the position request data is received
+    if (prData && prData.positionRequest) {
+      const { parent_job_profile_id } = prData.positionRequest;
+
+      // If there's a parent job profile ID, fetch the parent job profile
+      if (parent_job_profile_id) {
+        jpTrigger({ where: { id: { equals: parent_job_profile_id } } });
+      }
+      // else {
+      //   // If there's no parent, proceed to generate the document with the current profile data
+      //   generateAndDownloadDocument(profile_json, null);
+      // }
+    }
+  }, [prData, jpData, jpTrigger]);
+
+  useEffect(() => {
+    // When the parent job profile data is received
+    if (jpData && jpData.jobProfiles && jpData.jobProfiles.length > 0) {
+      const parentProfile = jpData.jobProfiles[0];
+
+      if (prData && prData.positionRequest && prData.positionRequest.profile_json) {
+        // Generate and download the document with both job and parent job profiles
+        generateAndDownloadDocument(prData.positionRequest.profile_json, parentProfile);
+      }
+    }
+  }, [jpData, prData, generateAndDownloadDocument]);
 
   // Check if data is available and call the callback function to notify the parent component
   useEffect(() => {
@@ -130,43 +182,42 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const handleCopyLink = (record: any) => {
-    // Construct the link you want to copy
-    // Example: const linkToCopy = `https://yourdomain.com/position-request/${record.id}`;
-    const linkToCopy = `https://yourdomain.com/position-request/${record.id}`;
+    // shareUUID
+    // Dynamically construct the link to include the current base URL
+    const linkToCopy = `${window.location.origin}/my-positions/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    navigator.clipboard
-      .writeText(linkToCopy)
-      .then(() => {
-        // Notification to show the link has been copied successfully
-        message.success('Link copied to clipboard!');
-      })
-      .catch((err) => {
-        // Handle any errors here
-        console.error('Failed to copy link: ', err);
-        message.error('Failed to copy link');
-      });
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    message.success('Link copied to clipboard!');
     setSelectedKeys([]);
 
     handleVisibleChange(record.id, false);
   };
 
-  const getMenuContent = (record: any) => {
-    // console.log('record: ', record);
-
+  const MenuContent = ({ record }: any) => {
     return (
-      <Menu selectedKeys={selectedKeys}>
+      <Menu selectedKeys={selectedKeys} className={`popover-selector-${record.id}`}>
         {mode == null && (
           <>
             {record.status === 'DRAFT' && (
               <>
-                <Menu.Item key="edit" icon={<EditOutlined />}>
-                  <Link to={`/position-request/${record.id}`}>Edit</Link>
+                <Menu.Item key="edit" icon={<EditOutlined aria-hidden />} data-testid="menu-option-edit">
+                  <Link to={`/my-positions/${record.id}`}>Edit</Link>
                 </Menu.Item>
-                <Menu.Item key="copy" icon={<LinkOutlined />} onClick={() => handleCopyLink(record)}>
+                <Menu.Item
+                  key="copy"
+                  icon={<LinkOutlined aria-hidden />}
+                  onClick={() => handleCopyLink(record)}
+                  data-testid="menu-option-copy link"
+                >
                   Copy link
                 </Menu.Item>
-                <Menu.Item key="delete" icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(record.id)}>
+                <Menu.Item
+                  data-testid="menu-option-delete"
+                  key="delete"
+                  icon={<DeleteOutlined aria-hidden />}
+                  onClick={() => showDeleteConfirm(record.id)}
+                >
                   Delete
                 </Menu.Item>
               </>
@@ -174,16 +225,28 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
             {record.status === 'COMPLETED' && (
               <>
-                <Menu.Item key="view" icon={<EyeOutlined />}>
-                  <Link to={`/position-request/${record.id}`}>View</Link>
+                <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
+                  <Link data-testid="view-link" to={`/my-positions/${record.id}`}>
+                    View
+                  </Link>
                 </Menu.Item>
-                <Menu.Item key="download" icon={<FilePdfOutlined />}>
-                  Download profile
+                <Menu.Item
+                  data-testid="menu-option-download"
+                  key="download"
+                  icon={<FilePdfOutlined aria-hidden />}
+                  onClick={() => fetchJobProfileAndParent(record.id)}
+                >
+                  <span>{isLoadingPositionRequest || isLoadingJobProfile ? 'Loading...' : 'Download'}</span>
                 </Menu.Item>
-                <Menu.Item key="copy" icon={<LinkOutlined />} onClick={() => handleCopyLink(record)}>
+                <Menu.Item
+                  key="copy"
+                  icon={<LinkOutlined aria-hidden />}
+                  onClick={() => handleCopyLink(record)}
+                  data-testid="menu-option-copy link"
+                >
                   Copy link
                 </Menu.Item>
-                <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
+                <Menu.Item key="delete" icon={<DeleteOutlined aria-hidden />} disabled>
                   Delete
                 </Menu.Item>
               </>
@@ -191,13 +254,18 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
             {record.status === 'IN_REVIEW' && (
               <>
-                <Menu.Item key="view" icon={<EyeOutlined />}>
-                  <Link to={`/position-request/${record.id}`}>View</Link>
+                <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
+                  <Link to={`/my-positions/${record.id}`}>View</Link>
                 </Menu.Item>
-                <Menu.Item key="copy" icon={<LinkOutlined />} onClick={() => handleCopyLink(record)}>
+                <Menu.Item
+                  key="copy"
+                  icon={<LinkOutlined aria-hidden />}
+                  onClick={() => handleCopyLink(record)}
+                  data-testid="menu-option-copy link"
+                >
                   Copy link
                 </Menu.Item>
-                <Menu.Item key="delete" icon={<DeleteOutlined />} disabled>
+                <Menu.Item key="delete" icon={<DeleteOutlined aria-hidden />} disabled>
                   Delete
                 </Menu.Item>
               </>
@@ -207,13 +275,18 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
         {mode == 'total-compensation' && (
           <>
-            <Menu.Item key="view" icon={<EyeOutlined />}>
+            <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
               View
             </Menu.Item>
-            <Menu.Item key="download" icon={<DownloadOutlined />}>
+            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
               Download attachements
             </Menu.Item>
-            <Menu.Item key="copy" icon={<LinkOutlined />} onClick={() => handleCopyLink(record)}>
+            <Menu.Item
+              key="copy"
+              icon={<LinkOutlined aria-hidden />}
+              onClick={() => handleCopyLink(record)}
+              data-testid="menu-option-copy link"
+            >
               Copy link
             </Menu.Item>
           </>
@@ -221,10 +294,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
         {mode == 'classification' && (
           <>
-            <Menu.Item key="view" icon={<EyeOutlined />}>
+            <Menu.Item key="view" data-testid="menu-option-view" icon={<EyeOutlined aria-hidden />}>
               View
             </Menu.Item>
-            <Menu.Item key="download" icon={<DownloadOutlined />}>
+            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
               Download attachements
             </Menu.Item>
           </>
@@ -242,31 +315,84 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   // Handler to be called when the mouse leaves a row
   const handleMouseLeave = () => setHoveredRowKey(null);
 
+  const ellipsisRefs = useRef<any>({});
+
   const handleVisibleChange = (id: any, isVisible: any) => {
     // Update the visibility based on user interaction
     setPopoverVisible((prevState) => ({ ...prevState, [id]: isVisible }));
+
+    if (!isVisible && ellipsisRefs.current[id]) {
+      ellipsisRefs.current[id].focus();
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      if (event.key === 'Escape') {
+        const keys = Object.keys(popoverVisible);
+        keys.forEach((key) => {
+          if (popoverVisible[key]) {
+            setPopoverVisible((prevState) => ({ ...prevState, [key]: false }));
+            // Focus back on the corresponding ellipsis button
+            if (ellipsisRefs.current[key]) {
+              ellipsisRefs.current[key].focus();
+            }
+          }
+        });
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [popoverVisible]);
+
+  const handlePopoverOpen = (visible: any, recordId: any) => {
+    if (visible) {
+      setTimeout(() => {
+        const popover = document.querySelector(
+          `.popover-selector-${recordId} .ant-menu-item:not(.ant-menu-item-disabled) a`,
+        );
+        if (popover) {
+          const popoverElement = popover as HTMLElement;
+          popoverElement.focus();
+        }
+      }, 100);
+    }
   };
 
   const columns: ColumnTypes[] = [
     {
-      title: 'Job Title',
+      title: <span data-testid="job-title-header">Job Title</span>,
       dataIndex: 'title',
       key: 'title',
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
       render: (text: any, record: any) => {
-        if (mode == null) return <Link to={`/position-request/${record.id}`}>{text}</Link>;
+        if (mode == null)
+          return (
+            <Link to={`/my-positions/${record.id}`} data-testid={`job-position-${record.id}`}>
+              <div data-testid="job-title">{text}</div>
+            </Link>
+          );
         else if (mode == 'total-compensation') {
-          return <Link to={`/total-compensation/approved-requests/${record.id}`}>{text}</Link>;
+          return (
+            <Link to={`/approved-requests/${record.id}`}>
+              <div data-testid="job-title">{text}</div>
+            </Link>
+          );
         } else if (mode == 'classification') {
-          return <Link to={`/classification-tasks/${record.id}`}>{text}</Link>;
+          return (
+            <Link to={`/classification-tasks/${record.id}`}>
+              <div data-testid="job-title">{text}</div>
+            </Link>
+          );
         }
       },
     },
     ...(mode == null || mode == 'classification'
       ? [
           {
-            title: 'Status',
+            title: <span data-testid="status-header">Status</span>,
             dataIndex: 'status',
             key: 'status',
             sorter: allowSorting,
@@ -310,7 +436,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               return (
                 <Space>
                   <span className={`status-dot`} style={{ backgroundColor: color }} />
-                  {getStatusLabel(status)}
+                  <span data-testid={`status-${status}`}>{getStatusLabel(status)}</span>
                 </Space>
               );
             },
@@ -322,9 +448,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       {
         sorter: allowSorting,
         defaultSortOrder: getSortOrder('classification_code'),
-        title: 'Class',
+        title: <span data-testid="class-header">Class</span>,
         dataIndex: 'classification_code',
         key: 'classification_code',
+        render: (text: string) => <div data-testid={`classification-${text}`}> {text}</div>,
       },
     ],
 
@@ -333,7 +460,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('crm_id'),
-            title: 'CRM service request',
+            title: <span data-testid="crm-service-request-header">CRM service request</span>,
             dataIndex: 'crm_id',
             key: 'crm_id',
           },
@@ -345,7 +472,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('jobStoreId'),
-            title: 'JobStore number',
+            title: <span data-testid="crm-jobstore-number-header">JobStore number</span>,
             dataIndex: 'parent_job_profile',
             key: 'parent_job_profile_number',
             render: (parentJobProfile: any) => (parentJobProfile ? parentJobProfile.number : 'N/A'),
@@ -358,7 +485,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('user_name'),
-            title: 'Submitted by',
+            title: <span data-testid="submitted-by-header">Submitted by</span>,
             dataIndex: 'user_name',
             key: 'user_name',
           },
@@ -370,7 +497,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('submitted_at'),
-            title: 'Submitted at',
+            title: <span data-testid="submitted-at-header">Submitted at</span>,
             dataIndex: 'submitted_at',
             key: 'submitted_at',
             render: (text: string) => formatDateTime(text),
@@ -383,7 +510,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('approved_at'),
-            title: 'Approved at',
+            title: <span data-testid="approved-at-header">Approved at</span>,
             dataIndex: 'approved_at',
             key: 'approved_at',
             render: (text: string) => formatDateTime(text),
@@ -396,37 +523,38 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('position_number'),
-            title: 'Position #',
+            title: <span data-testid="position-#-header">Position #</span>,
             dataIndex: 'position_number',
             key: 'position_number',
             render: (text: any, record: any) => (
-              <>
-                {record.status === 'COMPLETED' || mode == 'classification' || mode == 'total-compensation' ? (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {text}
-                    {record.status === 'COMPLETED' && hoveredRowKey === record.id && (
-                      <Button
-                        icon={<CopyOutlined />}
-                        size="small"
-                        style={{
-                          marginLeft: 8,
-                          padding: '0px', // Reduce padding
-                          lineHeight: '1', // Match the line height to the row content
-                          border: 'none', // Remove the border if not needed
-                          background: 'transparent', // Remove background
-                          height: 'fit-content', // Ensure the button only takes up the necessary height
-                        }}
-                        onClick={() => {
-                          copy(text.toString());
-                          message.success('Position number copied!');
-                        }}
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span>{text}</span>
+                <span
+                  style={{
+                    visibility:
+                      (record.status === 'COMPLETED' || mode === 'classification' || mode === 'total-compensation') &&
+                      hoveredRowKey === record.id
+                        ? 'visible'
+                        : 'hidden',
+                    marginLeft: 0,
+                  }}
+                >
+                  <Button
+                    data-testid="copy-position-number-button"
+                    icon={<CopyOutlined />}
+                    size="small"
+                    style={{
+                      border: 'none',
+                      padding: 0,
+                      background: 'transparent',
+                    }}
+                    onClick={() => {
+                      if (import.meta.env.VITE_TEST_ENV !== 'true') copy(text.toString());
+                      message.success('Position number copied!');
+                    }}
+                  />
+                </span>
+              </div>
             ),
           },
         ]
@@ -434,16 +562,17 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     {
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('submission_id'),
-      title: 'Submission ID',
+      title: <span data-testid="submission-id-header">Submission ID</span>,
       dataIndex: 'submission_id',
       key: 'submission_id',
+      render: (text) => <div data-testid="submission-id">{text}</div>,
     },
     ...(mode == null
       ? [
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('updated_at'),
-            title: 'Modified at',
+            title: <span data-testid="modified-at-header">Modified at</span>,
             dataIndex: 'updated_at',
             key: 'updated_at',
             render: (text: string) => formatDateTime(text),
@@ -451,18 +580,28 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
         ]
       : []),
     {
-      title: <SettingOutlined />,
+      title: <SettingOutlined aria-label="actions" />,
       align: 'center',
       key: 'action',
       render: (_text: any, record: any) => (
         <Popover
           open={popoverVisible[record.id]}
-          onOpenChange={(visible) => handleVisibleChange(record.id, visible)}
-          content={getMenuContent(record)}
+          onOpenChange={(visible) => {
+            handleVisibleChange(record.id, visible);
+            handlePopoverOpen(visible, record.id);
+          }}
+          content={
+            <MenuContent
+              record={record}
+              onCopyLink={handleCopyLink}
+              onDeleteConfirm={showDeleteConfirm}
+              selectedKeys={selectedKeys}
+            />
+          } //{getMenuContent(record)}
           trigger="click"
           placement="bottomRight"
         >
-          <EllipsisOutlined />
+          <EllipsisOutlined ref={(el) => (ellipsisRefs.current[record.id] = el)} className={`ellipsis-${record.id}`} />
         </Popover>
       ),
     },
@@ -555,7 +694,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const newSortField = sorter.field;
     const newSortOrder = sorter.order;
 
-    console.log('sorter: ', JSON.stringify(sorter));
+    // console.log('sorter: ', JSON.stringify(sorter));
 
     setCurrentPage(newPage);
     setPageSize(newPageSize);
@@ -565,13 +704,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     if (!newSortOrder) setSortField(null);
 
     if (handleTableChangeCallback) handleTableChangeCallback(pagination, _filters, sorter);
-  };
-
-  const rowSelection: TableRowSelection<GetPositionRequestResponseContent> = {
-    selectedRowKeys,
-    onChange: (selectedKeys: any) => {
-      setSelectedRowKeys(selectedKeys);
-    },
   };
 
   useEffect(() => {
@@ -607,7 +739,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                         />
                       </Tooltip>
                     ) : (
-                      topRightComponent || <Button icon={<ReloadOutlined />} onClick={() => updateData()} />
+                      topRightComponent || (
+                        <Button
+                          aria-label="Refresh"
+                          icon={<ReloadOutlined aria-hidden />}
+                          onClick={() => updateData()}
+                        />
+                      )
                     )}
                   </Col>
                 </Row>
@@ -617,28 +755,49 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
           {hasPositionRequests ? (
             <Table
-              rowSelection={rowSelection}
+              loading={isFetching || isLoading}
+              // rowSelection={rowSelection}
               onRow={(record) => {
                 return {
                   onMouseEnter: () => handleMouseEnter(record.id),
                   onMouseLeave: handleMouseLeave,
                 };
               }}
+              rowClassName="job-position-row"
               className="tableWithHeader"
               columns={columns}
               dataSource={data?.positionRequests}
               rowKey="id"
-              pagination={
-                showPagination
-                  ? {
-                      current: currentPage,
-                      pageSize: pageSize,
-                      total: totalResults,
-                      pageSizeOptions: ['10', '20', '50'],
-                      showSizeChanger: true,
-                    }
-                  : false
-              }
+              pagination={{
+                current: currentPage,
+                pageSize: pageSize,
+                total: totalResults,
+                pageSizeOptions: ['10', '20', '50'],
+                showSizeChanger: showPagination,
+                itemRender: (_current, type, originalElement) => {
+                  // Modifying page doesn't work..
+                  // if (type === 'page') {
+                  //   // Modify the page item to include aria-label directly on the li element
+                  //   return (
+                  //     <li aria-label={`Go to page ${current}`} tabIndex="0">
+                  //       {React.cloneElement(originalElement, {})}
+                  //     </li>
+                  //   );
+                  // }
+                  if (type === 'prev' && React.isValidElement(originalElement)) {
+                    return React.cloneElement(originalElement as React.ReactElement, {
+                      'aria-label': 'Go to previous page',
+                    });
+                  }
+
+                  if (type === 'next' && React.isValidElement(originalElement)) {
+                    return React.cloneElement(originalElement as React.ReactElement, {
+                      'aria-label': 'Go to next page',
+                    });
+                  }
+                  return originalElement;
+                },
+              }}
               onChange={handleTableChange}
               footer={showFooter ? renderTableFooter : undefined}
             />
@@ -682,7 +841,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   >
                     <img src={TasksCompleteGraphic} alt="No positions" />
                     <div>All good! It looks like you don't have any assigned tasks.</div>
-                    <Button type="link" style={{ marginTop: '1rem' }} icon={<ReloadOutlined />} onClick={updateData}>
+                    <Button
+                      type="link"
+                      style={{ marginTop: '1rem' }}
+                      icon={<ReloadOutlined aria-hidden />}
+                      onClick={updateData}
+                    >
                       Refresh
                     </Button>
                   </div>
@@ -732,7 +896,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
         >
           <img src={ErrorGraphic} alt="Error" />
           <div>Oops! We were unable to fetch the details.</div>
-          <Button type="link" style={{ marginTop: '1rem' }} icon={<ReloadOutlined />} onClick={updateData}>
+          <Button type="link" style={{ marginTop: '1rem' }} icon={<ReloadOutlined aria-hidden />} onClick={updateData}>
             Refresh
           </Button>
         </div>

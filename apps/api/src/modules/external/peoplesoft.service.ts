@@ -1,7 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
@@ -69,7 +68,6 @@ export class PeoplesoftService {
     );
   }
 
-  @Cron('0 0 * * * *')
   async syncClassifications() {
     this.logger.log(`Start syncClassifications @ ${new Date()}`);
 
@@ -127,7 +125,6 @@ export class PeoplesoftService {
     this.logger.log(`End syncClassifications @ ${new Date()}`);
   }
 
-  @Cron('0 0 * * * *')
   async syncLocations() {
     this.logger.log(`Start syncLocations @ ${new Date()}`);
 
@@ -165,15 +162,11 @@ export class PeoplesoftService {
     this.logger.log(`End syncLocations @ ${new Date()}`);
   }
 
-  @Cron('0 0 * * * *')
   async syncOrganizationsAndDepartments() {
     // Use this function instead of calling syncOrganizations, syncDepartments independently
     // Departments rely on organizations which must exist prior to syncing departments
     await this.syncOrganizations();
     await this.syncDepartments();
-
-    // Commented out until the API returns useful data
-    // await this.syncDepartmentClassificationMapping();
   }
 
   async syncOrganizations() {
@@ -292,40 +285,6 @@ export class PeoplesoftService {
     this.logger.log(`End syncDepartments @ ${new Date()}`);
   }
 
-  async syncDepartmentClassificationMapping() {
-    const classificationIds = (
-      await this.prisma.classification.findMany({ select: { id: true }, distinct: ['id'], orderBy: { id: 'asc' } })
-    ).map((o) => o.id);
-
-    const response = await firstValueFrom(
-      this.request({
-        method: RequestMethod.GET,
-        endpoint: Endpoint.DepartmentClassifications,
-        pageSize: 100000,
-        extra: `prompt_uniquepromptname=JOBCODE,DEPTID&prompt_fieldvalue=,&filterfields=A.JOBCODE,B.DEPTID`,
-      }).pipe(
-        map((r) => r.data),
-        retry(3),
-        catchError((err) => {
-          throw new Error(err);
-        }),
-      ),
-    );
-
-    // Filter rows from response to remove any mappings for classifications which don't exist in our system
-    const filteredRows: string[] = (response?.data?.query?.rows ?? []).filter((row) =>
-      classificationIds.includes(row['A.JOBCODE']),
-    );
-
-    // Delete existing mappings
-    await this.prisma.classificationDepartment.deleteMany();
-
-    // Insert new mappings
-    await this.prisma.classificationDepartment.createMany({
-      data: filteredRows.map((row) => ({ classification_id: row['A.JOBCODE'], department_id: row['B.DEPTID'] })),
-    });
-  }
-
   async getEmployeesForPositions(positions: string[]) {
     const requests: any[] = [];
 
@@ -413,41 +372,89 @@ export class PeoplesoftService {
   }
 
   async getPositionsForDepartment(department_id: string) {
-    const response = await firstValueFrom(
-      this.request({
-        method: RequestMethod.GET,
-        endpoint: Endpoint.HrScope,
-        pageSize: 0,
-        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=${department_id},`,
-      }).pipe(
-        map((r) => r.data),
-        retry(3),
-        catchError((err) => {
-          throw new Error(err);
-        }),
+    const responses = await Promise.allSettled([
+      firstValueFrom(
+        this.request({
+          method: RequestMethod.GET,
+          endpoint: Endpoint.HrScope,
+          pageSize: 0,
+          extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=${department_id},`,
+        }).pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
       ),
+      firstValueFrom(
+        this.request({
+          method: RequestMethod.GET,
+          endpoint: Endpoint.HrScope,
+          pageSize: 0,
+          extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR,REPORTS_TO&prompt_fieldvalue=${department_id},,`,
+        }).pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+      ),
+    ]);
+
+    const successfulResponse = responses.find(
+      (response) => response.status === 'fulfilled' && response.value.status === 'success',
     );
 
-    return response;
+    return (
+      successfulResponse.status === 'fulfilled' &&
+      successfulResponse.value.status === 'success' &&
+      successfulResponse.value
+    );
   }
 
   async getPosition(position_id: string) {
-    const response = await firstValueFrom(
-      this.request({
-        method: RequestMethod.GET,
-        endpoint: Endpoint.HrScope,
-        pageSize: 0,
-        extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=,${position_id}`,
-      }).pipe(
-        map((r) => r.data),
-        retry(3),
-        catchError((err) => {
-          throw new Error(err);
-        }),
+    const responses = await Promise.allSettled([
+      firstValueFrom(
+        this.request({
+          method: RequestMethod.GET,
+          endpoint: Endpoint.HrScope,
+          pageSize: 0,
+          extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR&prompt_fieldvalue=,${position_id}`,
+        }).pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
       ),
+      firstValueFrom(
+        this.request({
+          method: RequestMethod.GET,
+          endpoint: Endpoint.HrScope,
+          pageSize: 0,
+          extra: `prompt_uniquepromptname=DEPTID,POSITION_NBR,REPORTS_TO&prompt_fieldvalue=,${position_id},`,
+        }).pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+      ),
+    ]);
+
+    const successfulResponse = responses.find(
+      (response) => response.status === 'fulfilled' && response.value.status === 'success',
     );
 
-    return response;
+    return (
+      successfulResponse.status === 'fulfilled' &&
+      successfulResponse.value.status === 'success' &&
+      successfulResponse.value
+    );
   }
 
   async createPosition(data: PositionCreateInput) {

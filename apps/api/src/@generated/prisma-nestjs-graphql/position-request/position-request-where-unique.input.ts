@@ -89,6 +89,9 @@ export class PositionRequestWhereUniqueInput {
   @Field(() => DateTimeFilter, { nullable: true })
   updated_at?: DateTimeFilter;
 
+  @Field(() => UuidFilter, { nullable: true })
+  shareUUID?: UuidFilter;
+
   @Field(() => StringFilter, { nullable: true })
   additional_info_work_location_id?: StringFilter;
 
