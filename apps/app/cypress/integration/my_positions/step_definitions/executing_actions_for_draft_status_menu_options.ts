@@ -58,7 +58,7 @@ When('the user selects the {string} option', (action: string) => {
 });
 
 Then('the system should perform the "Edit" action', () => {
-  cy.url().should('match', /\/position-request\/\d+$/);
+  cy.url().should('match', /\/my-positions\/\d+$/);
 });
 
 Then('the system should perform the "Download" action', () => {
@@ -66,7 +66,7 @@ Then('the system should perform the "Download" action', () => {
 });
 
 Then('the system should perform the "View" action', () => {
-  cy.url().should('match', /\/position-request\/\d+$/);
+  cy.url().should('match', /\/my-positions\/\d+$/);
 });
 
 Then('the system should perform the "Copy link" action', () => {

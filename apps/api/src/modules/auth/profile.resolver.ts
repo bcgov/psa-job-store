@@ -22,7 +22,7 @@ export class ProfileResolver {
   @Query(() => LogoutResponse, { name: 'logout' })
   @AllowNoRoles()
   async logout(@CurrentUser() { id: userId }: Express.User) {
-    if (true) await this.authService.logoutUser(userId);
+    await this.authService.logoutUser(userId);
     return { success: true };
   }
 
