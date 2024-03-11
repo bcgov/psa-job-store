@@ -80,6 +80,14 @@ oc create secret docker-registry artifacts-pull-default-hucvei \
 oc secrets link default artifacts-pull-default-hucvei --for=pull
 ```
 
+It is important to note that the imagestreams only refresh from artifactory every 15 minutes, meaning you will have to wait a period of time before it is actually deployed. A way to circumvent this waiting period is to delete and recreate the imagestreams, like so:
+
+```
+oc project f3c07a-tools
+oc delete -k deployments/openshift/kustomize/images/image-streams/
+oc apply -k deployments/openshift/kustomize/images/image-streams/
+```
+
 ## Backups:
 
 Backups are scheduled by the postgres operator using pgbackrest. The schedule is under
