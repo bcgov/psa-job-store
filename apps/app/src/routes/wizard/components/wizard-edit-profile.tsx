@@ -862,11 +862,11 @@ const WizardEditProfile = forwardRef(
         setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.value }));
         trigger();
       };
-
+      console.log(field);
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove accountability ${index + 1}`
@@ -934,10 +934,7 @@ const WizardEditProfile = forwardRef(
                   field.disabled ? handleAccReqAddBack(index) : handleAccReqRemove(index);
                 }}
                 disabled={field.is_readonly}
-                style={{
-                  border: 'none', // Removes the border
-                  padding: 0, // Removes padding
-                }}
+                style={{ marginLeft: '10px' }}
               />
             </Tooltip>
           </List.Item>
@@ -986,9 +983,9 @@ const WizardEditProfile = forwardRef(
       };
 
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove optional accountability ${index + 1}`
@@ -1050,16 +1047,13 @@ const WizardEditProfile = forwardRef(
                   field.disabled ? handleOptReqAddBack(index) : handleOptReqRemove(index);
                 }}
                 disabled={field.is_readonly}
-                style={{
-                  border: 'none', // Removes the border
-                  padding: 0, // Removes padding
-                }}
+                style={{ marginLeft: '10px' }}
               />
             </Tooltip>
 
             {/* {field.disabled ? (
             <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              icon={<PlusOutlined style={{ color: '#000000' }} />}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
@@ -1072,7 +1066,7 @@ const WizardEditProfile = forwardRef(
             />
           ) : (
             <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              icon={<DeleteOutlined style={{ color: '#000000' }} />}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
@@ -1132,9 +1126,9 @@ const WizardEditProfile = forwardRef(
       };
 
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove Education and work experience ${index + 1}`
@@ -1201,16 +1195,13 @@ const WizardEditProfile = forwardRef(
                   field.disabled ? handleMinReqAddBack(index) : handleMinReqRemove(index);
                 }}
                 disabled={field.is_readonly}
-                style={{
-                  border: 'none', // Removes the border
-                  padding: 0, // Removes padding
-                }}
+                style={{ marginLeft: '10px' }}
               />
             </Tooltip>
 
             {/* {field.disabled ? (
             <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              icon={<PlusOutlined style={{ color: '#000000' }} />}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
@@ -1226,11 +1217,8 @@ const WizardEditProfile = forwardRef(
             <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
               <Button
                 disabled={field.is_readonly}
-                icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-                style={{
-                  border: 'none', // Removes the border
-                  padding: 0, // Removes padding
-                }}
+                icon={<DeleteOutlined style={{ color: '#000000' }} />}
+                style={{ marginLeft: '10px' }}
                 onClick={() => {
                   // showMinReqModal(() => {
                   handleMinReqRemove(index);
@@ -1290,9 +1278,9 @@ const WizardEditProfile = forwardRef(
       // console.log('field', JSON.stringify(field));
 
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove related experience ${index + 1}`
@@ -1374,10 +1362,7 @@ const WizardEditProfile = forwardRef(
                   field.disabled ? handleRelWorkAddBack(index) : handleRelWorkRemove(index);
                 }}
                 disabled={field.is_readonly}
-                style={{
-                  border: 'none', // Removes the border
-                  padding: 0, // Removes padding
-                }}
+                style={{ marginLeft: '10px' }}
               />
             </Tooltip>
           </List.Item>
@@ -1435,9 +1420,9 @@ const WizardEditProfile = forwardRef(
       // console.log('field', JSON.stringify(field));
 
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove security screening ${index + 1}`
@@ -1557,9 +1542,9 @@ const WizardEditProfile = forwardRef(
       // console.log('field', JSON.stringify(field));
 
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove professional registration requirement ${index + 1}`
@@ -1622,7 +1607,7 @@ const WizardEditProfile = forwardRef(
 
           {/* {field.disabled ? (
             <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              icon={<PlusOutlined style={{ color: '#000000' }} />}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
@@ -1634,7 +1619,7 @@ const WizardEditProfile = forwardRef(
             />
           ) : (
             <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              icon={<DeleteOutlined style={{ color: '#000000' }} />}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
@@ -1699,9 +1684,9 @@ const WizardEditProfile = forwardRef(
       // console.log('field', JSON.stringify(field));
 
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove optional requirement ${index + 1}`
@@ -1811,9 +1796,9 @@ const WizardEditProfile = forwardRef(
       // console.log('field', JSON.stringify(field)); Job preferences
 
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove job preference ${index + 1}`
@@ -1874,7 +1859,7 @@ const WizardEditProfile = forwardRef(
 
           {/* {field.disabled ? (
             <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              icon={<PlusOutlined style={{ color: '#000000' }} />}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
@@ -1886,7 +1871,7 @@ const WizardEditProfile = forwardRef(
             />
           ) : (
             <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
+              icon={<DeleteOutlined style={{ color: '#000000' }} />}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
@@ -1954,9 +1939,9 @@ const WizardEditProfile = forwardRef(
       // console.log('field', JSON.stringify(field));
 
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove knowledge, skill or ability ${index + 1}`
@@ -2067,9 +2052,9 @@ const WizardEditProfile = forwardRef(
       // console.log('field', JSON.stringify(field)); Willingness statements or provisos
 
       const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#D9D9D9' }} />
+        <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+        <DeleteOutlined style={{ color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove willingness statements or proviso ${index + 1}`
@@ -2935,11 +2920,7 @@ const WizardEditProfile = forwardRef(
                                 behavioural_competencies_remove(index);
                                 // setRenderKey((prevKey) => prevKey + 1);
                               }}
-                              style={{
-                                border: 'none',
-                                padding: 0,
-                                color: '#D9D9D9',
-                              }}
+                              style={{ marginLeft: '10px', border: '1px solid', borderColor: '#d9d9d9' }}
                             />
 
                             {/* Hidden fields to submit actual data */}
