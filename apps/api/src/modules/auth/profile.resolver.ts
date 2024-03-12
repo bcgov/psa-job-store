@@ -1,5 +1,8 @@
+import { Logger } from '@nestjs/common';
 import { Field, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { isEmpty } from 'class-validator';
+import { AlexandriaError } from '../../utils/alexandria-error';
+import { globalLogger } from '../../utils/logging/logger.factory';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -14,15 +17,36 @@ class LogoutResponse {
 
 @Resolver(() => Profile)
 export class ProfileResolver {
+  private readonly logger = new Logger(ProfileResolver.name);
+
   constructor(
     private readonly peoplesoftService: PeoplesoftService,
     private authService: AuthService,
   ) {}
 
+  @Query(() => LogoutResponse, { name: 'throwGraphQLError' })
+  @AllowNoRoles()
+  async throwGraphQLError() {
+    return { success: 1 / 0 };
+  }
+
   @Query(() => LogoutResponse, { name: 'throwError' })
   @AllowNoRoles()
   async throwError() {
-    return { success: 1 / 0 };
+    throw new Error('Test error');
+  }
+
+  @Query(() => LogoutResponse, { name: 'throwAlexandriaError' })
+  @AllowNoRoles()
+  async throwAlexandriaError() {
+    throw AlexandriaError('Test error');
+  }
+
+  @Query(() => LogoutResponse, { name: 'okTestResponse' })
+  @AllowNoRoles()
+  async okTestResponse() {
+    globalLogger.info('Test log');
+    return { success: true };
   }
 
   @Query(() => LogoutResponse, { name: 'logout' })

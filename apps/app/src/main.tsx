@@ -40,6 +40,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ReduxProvider store={store}>
         <ConfigProvider
           theme={{
+            hashed: false,
             components: {
               Layout: {
                 siderBg: '#FFF',

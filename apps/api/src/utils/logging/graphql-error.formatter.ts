@@ -9,11 +9,8 @@ export function formatGraphQLError(error: GraphQLFormattedError): GraphQLFormatt
   // Determine message based on whether the error is a Known Error
   let errorMessage = 'Unknown error has occurred';
 
-  // todo: check this more gracefully - wasn't able to check for type etc, so checking if stack trace contains info
-  // indicating it's an AlexandriaErrorClass
-  const stacktrace = error.extensions?.stacktrace as string[] | undefined;
-  if (stacktrace && stacktrace.some((line) => line.includes('AlexandriaErrorClass:'))) {
-    errorMessage = error.message; // If found, use the original error message
+  if (error.message.startsWith('ALEXANDRIA_ERROR: ')) {
+    errorMessage = error.message.replace('ALEXANDRIA_ERROR: ', '');
   }
 
   // Exclude stacktrace and locations from the error object

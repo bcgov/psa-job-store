@@ -21,6 +21,7 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
+import AccessibleList from '../../../components/app/common/components/accessible-list';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
 import '../../../components/app/common/css/custom-form.css';
@@ -862,89 +863,85 @@ const WizardEditProfile = forwardRef(
         trigger();
       };
 
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove accountability ${index + 1}`
+        : `Remove accountability ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
-        <List.Item
-          key={field.id}
-          style={{
-            textDecoration: field.disabled ? 'line-through' : 'none',
-            display: 'flex',
-            alignItems: 'flex-start',
-            marginBottom: '0px',
-            borderBottom: 'none',
-          }}
-        >
-          <FormItem name={`accountabilities.${index}.disabled`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`accountabilities.${index}.isCustom`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`accountabilities.${index}.is_significant`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`accountabilities.${index}.is_readonly`} control={control} hidden>
-            <Input />
-          </FormItem>
+        <>
+          {/* <div aria-live="polite" className="sr-only">
+            {ariaLabel}
+          </div> */}
+          <List.Item
+            key={field.id}
+            style={{
+              textDecoration: field.disabled ? 'line-through' : 'none',
+              display: 'flex',
+              alignItems: 'flex-start',
+              marginBottom: '0px',
+              borderBottom: 'none',
+            }}
+          >
+            <FormItem name={`accountabilities.${index}.disabled`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`accountabilities.${index}.isCustom`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`accountabilities.${index}.is_significant`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`accountabilities.${index}.is_readonly`} control={control} hidden>
+              <Input />
+            </FormItem>
 
-          {field.is_readonly && (
-            <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
-          )}
-
-          <Controller
-            control={control}
-            name={`accountabilities.${index}.text`}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextArea
-                // set style to display one if field.is_readonly
-                style={{ display: field.is_readonly ? 'none' : 'block' }}
-                autoSize
-                disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
-                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                onChange={(event) => {
-                  onChange(event);
-                  handleFieldChange(event); // todo: find a way to eliminate this
-                }}
-                onBlur={onBlur}
-                value={value ? (typeof value === 'string' ? value : value.value) : ''}
-              />
+            {field.is_readonly && (
+              <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
             )}
-          />
 
-          {field.disabled ? (
-            <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                // showReqModal(() => {
-                // acc_req_remove(index);
-                handleAccReqAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                // }, false)
-              }}
+            <Controller
+              control={control}
+              name={`accountabilities.${index}.text`}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextArea
+                  // set style to display one if field.is_readonly
+                  style={{ display: field.is_readonly ? 'none' : 'block' }}
+                  autoSize
+                  disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
+                  className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                  onChange={(event) => {
+                    onChange(event);
+                    handleFieldChange(event); // todo: find a way to eliminate this
+                  }}
+                  onBlur={onBlur}
+                  value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                />
+              )}
             />
-          ) : (
-            <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+
+            <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
               <Button
+                className="remove-item-btn"
+                icon={icon}
+                aria-label={ariaLabel}
+                onClick={() => {
+                  field.disabled ? handleAccReqAddBack(index) : handleAccReqRemove(index);
+                }}
                 disabled={field.is_readonly}
-                icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
                 style={{
                   border: 'none', // Removes the border
                   padding: 0, // Removes padding
                 }}
-                onClick={() => {
-                  // showReqModal(() => {
-                  // acc_req_remove(index);
-                  handleAccReqRemove(index);
-                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                  // }, false)
-                }}
               />
             </Tooltip>
-          )}
-        </List.Item>
+          </List.Item>
+        </>
       );
     };
 
@@ -988,61 +985,79 @@ const WizardEditProfile = forwardRef(
         setEditedOptReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalOptReqFields[index]?.value }));
       };
 
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove optional accountability ${index + 1}`
+        : `Remove optional accountability ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
-        <List.Item
-          key={field.id}
-          style={{
-            textDecoration: field.disabled ? 'line-through' : 'none',
-            display: 'flex',
-            alignItems: 'flex-start',
-            marginBottom: '0px',
-            borderBottom: 'none',
-          }}
-        >
-          <FormItem name={`optional_accountabilities.${index}.disabled`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`optional_accountabilities.${index}.isCustom`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`optional_accountabilities.${index}.is_significant`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`optional_accountabilities.${index}.is_readonly`} control={control} hidden>
-            <Input />
-          </FormItem>
-
-          <Controller
-            control={control}
-            name={`optional_accountabilities.${index}.text`}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextArea
-                autoSize
-                disabled={field.disabled || getValues(`optional_accountabilities.${index}.is_readonly`)}
-                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                onChange={(event) => {
-                  onChange(event);
-                  handleFieldChange(event); // todo: find a way to eliminate this
-                }}
-                onBlur={onBlur}
-                value={value ? (typeof value === 'string' ? value : value.value) : ''}
-              />
-            )}
-          />
-
-          {/* <FormItem
-            name={`optional_accountabilities.${index}.text`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+        <>
+          {/* <div aria-live="polite" className="sr-only">
+            {ariaLabel}
+          </div> */}
+          <List.Item
+            key={field.id}
+            style={{
+              textDecoration: field.disabled ? 'line-through' : 'none',
+              display: 'flex',
+              alignItems: 'flex-start',
+              marginBottom: '0px',
+              borderBottom: 'none',
+            }}
           >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onChange={handleFieldChange}
+            <FormItem name={`optional_accountabilities.${index}.disabled`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`optional_accountabilities.${index}.isCustom`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`optional_accountabilities.${index}.is_significant`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`optional_accountabilities.${index}.is_readonly`} control={control} hidden>
+              <Input />
+            </FormItem>
+
+            <Controller
+              control={control}
+              name={`optional_accountabilities.${index}.text`}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextArea
+                  autoSize
+                  disabled={field.disabled || getValues(`optional_accountabilities.${index}.is_readonly`)}
+                  className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                  onChange={(event) => {
+                    onChange(event);
+                    handleFieldChange(event); // todo: find a way to eliminate this
+                  }}
+                  onBlur={onBlur}
+                  value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                />
+              )}
             />
-          </FormItem> */}
-          {field.disabled ? (
+
+            <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+              <Button
+                className="remove-item-btn"
+                icon={icon}
+                aria-label={ariaLabel}
+                onClick={() => {
+                  field.disabled ? handleOptReqAddBack(index) : handleOptReqRemove(index);
+                }}
+                disabled={field.is_readonly}
+                style={{
+                  border: 'none', // Removes the border
+                  padding: 0, // Removes padding
+                }}
+              />
+            </Tooltip>
+
+            {/* {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
               style={{
@@ -1067,8 +1082,9 @@ const WizardEditProfile = forwardRef(
                 // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
-          )}
-        </List.Item>
+          )} */}
+          </List.Item>
+        </>
       );
     };
 
@@ -1112,72 +1128,87 @@ const WizardEditProfile = forwardRef(
       const handleFieldChange = (event: any) => {
         const updatedValue = event.target.value;
         setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.value }));
-        trigger();
+        // trigger();
       };
-      // console.log('field', JSON.stringify(field));
+
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove Education and work experience ${index + 1}`
+        : `Remove Education and work experience ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
-        <List.Item
-          key={field.id}
-          style={{
-            textDecoration: field.disabled ? 'line-through' : 'none',
-            display: 'flex',
-            alignItems: 'flex-start',
-            marginBottom: '0px',
-            borderBottom: 'none',
-          }}
-        >
-          <FormItem name={`education.${index}.disabled`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`education.${index}.isCustom`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`education.${index}.is_significant`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`education.${index}.is_readonly`} control={control} hidden>
-            <Input />
-          </FormItem>
-
-          {field.is_readonly && (
-            <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
-          )}
-
-          <Controller
-            control={control}
-            name={`education.${index}.text`}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextArea
-                style={{ display: field.is_readonly ? 'none' : 'block' }}
-                autoSize
-                disabled={field.disabled || getValues(`education.${index}.is_readonly`)}
-                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                onChange={(event) => {
-                  onChange(event);
-                  handleFieldChange(event); // todo: find a way to eliminate this
-                }}
-                onBlur={onBlur}
-                value={value ? (typeof value === 'string' ? value : value.value) : ''}
-              />
-            )}
-          />
-
-          {/* <FormItem
-            hidden={field.is_readonly}
-            name={`education.${index}.text`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
+        <>
+          {/* <div aria-live="polite" className="sr-only">
+            {ariaLabel}
+          </div> */}
+          <List.Item
+            key={field.id}
+            style={{
+              textDecoration: field.disabled ? 'line-through' : 'none',
+              display: 'flex',
+              alignItems: 'flex-start',
+              marginBottom: '0px',
+              borderBottom: 'none',
+            }}
           >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              // onFocus={() => showMinReqModal(() => {}, false)}
-              onChange={handleFieldChange}
-            />
-          </FormItem> */}
+            <FormItem name={`education.${index}.disabled`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`education.${index}.isCustom`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`education.${index}.is_significant`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`education.${index}.is_readonly`} control={control} hidden>
+              <Input />
+            </FormItem>
 
-          {field.disabled ? (
+            {field.is_readonly && (
+              <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
+            )}
+
+            <Controller
+              control={control}
+              name={`education.${index}.text`}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextArea
+                  style={{ display: field.is_readonly ? 'none' : 'block' }}
+                  autoSize
+                  disabled={field.disabled || getValues(`education.${index}.is_readonly`)}
+                  className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                  onChange={(event) => {
+                    onChange(event);
+                    handleFieldChange(event); // todo: find a way to eliminate this
+                  }}
+                  onBlur={onBlur}
+                  value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                />
+              )}
+            />
+
+            <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+              <Button
+                className="remove-item-btn"
+                icon={icon}
+                aria-label={ariaLabel}
+                onClick={() => {
+                  field.disabled ? handleMinReqAddBack(index) : handleMinReqRemove(index);
+                }}
+                disabled={field.is_readonly}
+                style={{
+                  border: 'none', // Removes the border
+                  padding: 0, // Removes padding
+                }}
+              />
+            </Tooltip>
+
+            {/* {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
               style={{
@@ -1208,8 +1239,9 @@ const WizardEditProfile = forwardRef(
                 }}
               />
             </Tooltip>
-          )}
-        </List.Item>
+          )} */}
+          </List.Item>
+        </>
       );
     };
 
@@ -1253,57 +1285,72 @@ const WizardEditProfile = forwardRef(
       const handleFieldChange = (event: any) => {
         const updatedValue = event.target.value;
         setEditedRelWorkFields((prev) => ({ ...prev, [index]: updatedValue !== originalRelWorkFields[index]?.value }));
-        trigger();
+        // trigger();
       };
       // console.log('field', JSON.stringify(field));
+
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove related experience ${index + 1}`
+        : `Remove related experience ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
-        <List.Item
-          key={field.id}
-          style={{
-            textDecoration: field.disabled ? 'line-through' : 'none',
-            display: 'flex',
-            alignItems: 'flex-start',
-            marginBottom: '0px',
-            borderBottom: 'none',
-          }}
-        >
-          <FormItem name={`job_experience.${index}.disabled`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`job_experience.${index}.isCustom`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`job_experience.${index}.is_significant`} control={control} hidden>
-            <Input />
-          </FormItem>
-          <FormItem name={`job_experience.${index}.is_readonly`} control={control} hidden>
-            <Input />
-          </FormItem>
+        <>
+          {/* <div aria-live="polite" className="sr-only">
+            {ariaLabel}
+          </div> */}
+          <List.Item
+            key={field.id}
+            style={{
+              textDecoration: field.disabled ? 'line-through' : 'none',
+              display: 'flex',
+              alignItems: 'flex-start',
+              marginBottom: '0px',
+              borderBottom: 'none',
+            }}
+          >
+            <FormItem name={`job_experience.${index}.disabled`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`job_experience.${index}.isCustom`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`job_experience.${index}.is_significant`} control={control} hidden>
+              <Input />
+            </FormItem>
+            <FormItem name={`job_experience.${index}.is_readonly`} control={control} hidden>
+              <Input />
+            </FormItem>
 
-          {field.is_readonly && (
-            <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
-          )}
-
-          <Controller
-            control={control}
-            name={`job_experience.${index}.text`}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextArea
-                style={{ display: field.is_readonly ? 'none' : 'block' }}
-                autoSize
-                disabled={field.disabled || getValues(`job_experience.${index}.is_readonly`)}
-                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                onChange={(event) => {
-                  onChange(event);
-                  handleFieldChange(event); // todo: find a way to eliminate this
-                }}
-                onBlur={onBlur}
-                value={value ? (typeof value === 'string' ? value : value.value) : ''}
-              />
+            {field.is_readonly && (
+              <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
             )}
-          />
 
-          {/* <FormItem
+            <Controller
+              control={control}
+              name={`job_experience.${index}.text`}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextArea
+                  style={{ display: field.is_readonly ? 'none' : 'block' }}
+                  autoSize
+                  disabled={field.disabled || getValues(`job_experience.${index}.is_readonly`)}
+                  className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                  onChange={(event) => {
+                    onChange(event);
+                    handleFieldChange(event); // todo: find a way to eliminate this
+                  }}
+                  onBlur={onBlur}
+                  value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                />
+              )}
+            />
+
+            {/* <FormItem
             hidden={field.is_readonly}
             name={`job_experience.${index}.text`}
             control={control}
@@ -1318,39 +1365,23 @@ const WizardEditProfile = forwardRef(
             />
           </FormItem> */}
 
-          {field.disabled ? (
-            <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                // showRelWorkModal(() => {
-                handleRelWorkAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                // }, false)
-              }}
-            />
-          ) : (
-            <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+            <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
               <Button
+                className="remove-item-btn"
+                icon={icon}
+                aria-label={ariaLabel}
+                onClick={() => {
+                  field.disabled ? handleRelWorkAddBack(index) : handleRelWorkRemove(index);
+                }}
                 disabled={field.is_readonly}
-                icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
                 style={{
                   border: 'none', // Removes the border
                   padding: 0, // Removes padding
                 }}
-                onClick={() => {
-                  // showRelWorkModal(() => {
-                  handleRelWorkRemove(index);
-                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                  // }, false)
-                }}
               />
             </Tooltip>
-          )}
-        </List.Item>
+          </List.Item>
+        </>
       );
     };
 
@@ -1402,6 +1433,17 @@ const WizardEditProfile = forwardRef(
         trigger();
       };
       // console.log('field', JSON.stringify(field));
+
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove security screening ${index + 1}`
+        : `Remove security screening ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
         <List.Item
           key={field.id}
@@ -1446,53 +1488,21 @@ const WizardEditProfile = forwardRef(
             )}
           />
 
-          {/* <FormItem
-            hidden={field.is_readonly}
-            name={`security_screenings.${index}.text`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              // onFocus={() => showSecurityScreeningsModal(() => {}, false)}
-              onChange={handleFieldChange}
-            />
-          </FormItem> */}
-
-          {field.disabled ? (
+          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              className="remove-item-btn"
+              icon={icon}
+              aria-label={ariaLabel}
+              onClick={() => {
+                field.disabled ? handleSecurityScreeningsAddBack(index) : handleSecurityScreeningsRemove(index);
+              }}
+              disabled={field.is_readonly}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
               }}
-              onClick={() => {
-                // showSecurityScreeningsModal(() => {
-                handleSecurityScreeningsAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                // }, false)
-              }}
             />
-          ) : (
-            <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-              <Button
-                disabled={field.is_readonly}
-                icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-                style={{
-                  border: 'none', // Removes the border
-                  padding: 0, // Removes padding
-                }}
-                onClick={() => {
-                  // showSecurityScreeningsModal(() => {
-                  handleSecurityScreeningsRemove(index);
-                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                  // }, false)
-                }}
-              />
-            </Tooltip>
-          )}
+          </Tooltip>
         </List.Item>
       );
     };
@@ -1545,6 +1555,17 @@ const WizardEditProfile = forwardRef(
         trigger();
       };
       // console.log('field', JSON.stringify(field));
+
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove professional registration requirement ${index + 1}`
+        : `Remove professional registration requirement ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
         <List.Item
           key={field.id}
@@ -1581,19 +1602,25 @@ const WizardEditProfile = forwardRef(
             )}
           />
 
-          {/* <FormItem
-            name={`professional_registration.${index}.value`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onChange={handleFieldChange}
+          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+            <Button
+              className="remove-item-btn"
+              icon={icon}
+              aria-label={ariaLabel}
+              onClick={() => {
+                field.disabled
+                  ? handleProfessionalRegistrationAddBack(index)
+                  : handleProfessionalRegistrationRemove(index);
+              }}
+              disabled={field.is_readonly}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
             />
-          </FormItem> */}
-          {field.disabled ? (
+          </Tooltip>
+
+          {/* {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
               style={{
@@ -1617,7 +1644,7 @@ const WizardEditProfile = forwardRef(
                 // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
-          )}
+          )} */}
         </List.Item>
       );
     };
@@ -1670,6 +1697,17 @@ const WizardEditProfile = forwardRef(
         trigger();
       };
       // console.log('field', JSON.stringify(field));
+
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove optional requirement ${index + 1}`
+        : `Remove optional requirement ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
         <List.Item
           key={field.id}
@@ -1706,43 +1744,21 @@ const WizardEditProfile = forwardRef(
             )}
           />
 
-          {/* <FormItem
-            name={`optional_requirements.${index}.value`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onChange={handleFieldChange}
-            />
-          </FormItem> */}
-          {field.disabled ? (
+          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              className="remove-item-btn"
+              icon={icon}
+              aria-label={ariaLabel}
+              onClick={() => {
+                field.disabled ? handleOptionalRequirementsAddBack(index) : handleOptionalRequirementsRemove(index);
+              }}
+              disabled={field.is_readonly}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
               }}
-              onClick={() => {
-                handleOptionalRequirementsAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
             />
-          ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                handleOptionalRequirementsRemove(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          )}
+          </Tooltip>
         </List.Item>
       );
     };
@@ -1792,7 +1808,18 @@ const WizardEditProfile = forwardRef(
         }));
         trigger();
       };
-      // console.log('field', JSON.stringify(field));
+      // console.log('field', JSON.stringify(field)); Job preferences
+
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove job preference ${index + 1}`
+        : `Remove job preference ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
         <List.Item
           key={field.id}
@@ -1829,19 +1856,23 @@ const WizardEditProfile = forwardRef(
             )}
           />
 
-          {/* <FormItem
-            name={`preferences.${index}.value`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onChange={handleFieldChange}
+          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+            <Button
+              className="remove-item-btn"
+              icon={icon}
+              aria-label={ariaLabel}
+              onClick={() => {
+                field.disabled ? handlePreferencesAddBack(index) : handlePreferencesRemove(index);
+              }}
+              disabled={field.is_readonly}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
             />
-          </FormItem> */}
-          {field.disabled ? (
+          </Tooltip>
+
+          {/* {field.disabled ? (
             <Button
               icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
               style={{
@@ -1865,7 +1896,7 @@ const WizardEditProfile = forwardRef(
                 // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
               }}
             />
-          )}
+          )} */}
         </List.Item>
       );
     };
@@ -1921,6 +1952,17 @@ const WizardEditProfile = forwardRef(
         trigger();
       };
       // console.log('field', JSON.stringify(field));
+
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove knowledge, skill or ability ${index + 1}`
+        : `Remove knowledge, skill or ability ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
         <List.Item
           key={field.id}
@@ -1956,44 +1998,23 @@ const WizardEditProfile = forwardRef(
               />
             )}
           />
-
-          {/* <FormItem
-            name={`knowledge_skills_abilities.${index}.value`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onChange={handleFieldChange}
-            />
-          </FormItem> */}
-          {field.disabled ? (
+          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              className="remove-item-btn"
+              icon={icon}
+              aria-label={ariaLabel}
+              onClick={() => {
+                field.disabled
+                  ? handleKnowledgeSkillsAbilitiesAddBack(index)
+                  : handleKnowledgeSkillsAbilitiesRemove(index);
+              }}
+              disabled={field.is_readonly}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
               }}
-              onClick={() => {
-                handleKnowledgeSkillsAbilitiesAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
             />
-          ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                handleKnowledgeSkillsAbilitiesRemove(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          )}
+          </Tooltip>
         </List.Item>
       );
     };
@@ -2043,7 +2064,18 @@ const WizardEditProfile = forwardRef(
         }));
         trigger();
       };
-      // console.log('field', JSON.stringify(field));
+      // console.log('field', JSON.stringify(field)); Willingness statements or provisos
+
+      const icon = field.disabled ? (
+        <PlusOutlined style={{ color: '#D9D9D9' }} />
+      ) : (
+        <DeleteOutlined style={{ color: '#D9D9D9' }} />
+      );
+      const ariaLabel = field.disabled
+        ? `Undo remove willingness statements or proviso ${index + 1}`
+        : `Remove willingness statements or proviso ${index + 1}`;
+      const tooltipTitle = field.is_readonly ? 'Required' : '';
+
       return (
         <List.Item
           key={field.id}
@@ -2079,43 +2111,21 @@ const WizardEditProfile = forwardRef(
               />
             )}
           />
-          {/* <FormItem
-            name={`provisos.${index}.value`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              onChange={handleFieldChange}
-            />
-          </FormItem> */}
-          {field.disabled ? (
+          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
-              icon={<PlusOutlined style={{ color: '#D9D9D9' }} />}
+              className="remove-item-btn"
+              icon={icon}
+              aria-label={ariaLabel}
+              onClick={() => {
+                field.disabled ? handleProvisosAddBack(index) : handleProvisosRemove(index);
+              }}
+              disabled={field.is_readonly}
               style={{
                 border: 'none', // Removes the border
                 padding: 0, // Removes padding
               }}
-              onClick={() => {
-                handleProvisosAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
             />
-          ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#D9D9D9' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                handleProvisosRemove(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          )}
+          </Tooltip>
         </List.Item>
       );
     };
@@ -2324,6 +2334,7 @@ const WizardEditProfile = forwardRef(
         <Row data-testid="profile-editing-form" gutter={[24, 24]}>
           <Col xs={24} sm={24} lg={8}>
             <Alert
+              role="note"
               type="info"
               showIcon
               message={
@@ -2529,11 +2540,15 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {acc_req_fields.length > 0 && (
-                        <List dataSource={acc_req_fields} renderItem={renderAccReqFields} />
+                        <AccessibleList
+                          dataSource={acc_req_fields}
+                          renderItem={renderAccReqFields}
+                          ariaLabel="Accountabilities"
+                        />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           handleAccReqAddNew();
@@ -2555,11 +2570,15 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {acc_opt_fields.length > 0 && (
-                        <List dataSource={acc_opt_fields} renderItem={renderOptReqFields} />
+                        <AccessibleList
+                          dataSource={acc_opt_fields}
+                          renderItem={renderOptReqFields}
+                          ariaLabel="Optional Accountabilities"
+                        />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           handleOptReqAddNew();
@@ -2604,11 +2623,16 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {education_fields.length > 0 && (
-                        <List dataSource={education_fields} renderItem={renderMinReqFields} />
+                        // <List dataSource={education_fields} renderItem={renderMinReqFields} />
+                        <AccessibleList
+                          dataSource={education_fields}
+                          renderItem={renderMinReqFields}
+                          ariaLabel="Education and work experience"
+                        />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           {
@@ -2619,7 +2643,7 @@ const WizardEditProfile = forwardRef(
                           }
                         }}
                       >
-                        Add another requirement
+                        Add an education or work requirement
                       </Button>
                     </>
 
@@ -2636,11 +2660,15 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {job_experience_fields.length > 0 && (
-                        <List dataSource={job_experience_fields} renderItem={renderRelWorkFields} />
+                        <AccessibleList
+                          dataSource={job_experience_fields}
+                          renderItem={renderRelWorkFields}
+                          ariaLabel="Related experience"
+                        />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           {
@@ -2673,14 +2701,19 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {professional_registration_fields.length > 0 && (
-                        <List
+                        // <List
+                        //   dataSource={professional_registration_fields}
+                        //   renderItem={renderProfessionalRegistrationFields}
+                        // />
+                        <AccessibleList
                           dataSource={professional_registration_fields}
                           renderItem={renderProfessionalRegistrationFields}
+                          ariaLabel="Professional registration requirements"
                         />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           handleProfessionalRegistrationAddNew();
@@ -2704,11 +2737,15 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {preferences_fields.length > 0 && (
-                        <List dataSource={preferences_fields} renderItem={renderPreferencesFields} />
+                        <AccessibleList
+                          dataSource={preferences_fields}
+                          renderItem={renderPreferencesFields}
+                          ariaLabel="Job preferences"
+                        />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           handlePreferencesAddNew();
@@ -2732,14 +2769,15 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {knowledge_skills_abilities_fields.length > 0 && (
-                        <List
+                        <AccessibleList
                           dataSource={knowledge_skills_abilities_fields}
                           renderItem={renderKnowledgeSkillsAbilitiesFields}
+                          ariaLabel="Knowledge, skills and abilities"
                         />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           handleKnowledgeSkillsAbilitiesAddNew();
@@ -2763,11 +2801,15 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {provisos_fields.length > 0 && (
-                        <List dataSource={provisos_fields} renderItem={renderProvisosFields} />
+                        <AccessibleList
+                          dataSource={provisos_fields}
+                          renderItem={renderProvisosFields}
+                          ariaLabel="Willingness statements or provisos"
+                        />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           handleProvisosAddNew();
@@ -2791,11 +2833,15 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {security_screenings_fields.length > 0 && (
-                        <List dataSource={security_screenings_fields} renderItem={renderSecurityScreeningsFields} />
+                        <AccessibleList
+                          dataSource={security_screenings_fields}
+                          renderItem={renderSecurityScreeningsFields}
+                          ariaLabel="Security screenings"
+                        />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           {
@@ -2823,11 +2869,15 @@ const WizardEditProfile = forwardRef(
 
                     <>
                       {optional_requirements_fields.length > 0 && (
-                        <List dataSource={optional_requirements_fields} renderItem={renderOptionalRequirementsFields} />
+                        <AccessibleList
+                          dataSource={optional_requirements_fields}
+                          renderItem={renderOptionalRequirementsFields}
+                          ariaLabel="Optional requirements"
+                        />
                       )}
                       <Button
                         type="link"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined aria-hidden />}
                         style={addStyle}
                         onClick={() => {
                           handleOptionalRequirementsAddNew();

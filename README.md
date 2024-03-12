@@ -123,6 +123,17 @@ Remove remote backup file:
 
 `oc exec SQL_POD_NAME -- rm pgdata/backup.sql`
 
+## To accelerate new image uptake on openshift after publishing
+
+Openshift may take up to 15 minutes to pick a new image from artifactory. There is no way to change this frequency. If needed, as a workaround
+perform these operations to get openshift to pick up the image from artifactory faster:
+
+`oc project xxxx-tools`
+
+`oc delete -k deployments/openshift/kustomize/images/image-streams/`
+
+`oc apply -k deployments/openshift/kustomize/images/image-streams/`
+
 ## Recursive relationships in schema.prisma
 
 To avoid maximum call stack depth for cases where there is recursive relationship in schema.prisma, cast the input object into
