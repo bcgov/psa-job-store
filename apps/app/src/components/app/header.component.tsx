@@ -76,8 +76,7 @@ export const AppHeader = () => {
               <AcessiblePopoverMenu
                 triggerButton={
                   <Button
-                    aria-haspopup="true"
-                    aria-expanded="false"
+                    tabIndex={-1}
                     style={{ background: 'none', border: 'none', fontWeight: '600' }}
                     icon={<UserOutlined style={{ color: 'white' }} aria-hidden />}
                   >
@@ -85,6 +84,7 @@ export const AppHeader = () => {
                   </Button>
                 }
                 content={content}
+                ariaLabel="Open user menu"
               ></AcessiblePopoverMenu>
 
               {/* <Popover content={content} trigger="click">

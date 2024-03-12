@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import { Field, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { isEmpty } from 'class-validator';
 import { AlexandriaError } from '../../utils/alexandria-error';
+import { globalLogger } from '../../utils/logging/logger.factory';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -44,6 +45,7 @@ export class ProfileResolver {
   @Query(() => LogoutResponse, { name: 'okTestResponse' })
   @AllowNoRoles()
   async okTestResponse() {
+    globalLogger.info('Test log');
     return { success: true };
   }
 
