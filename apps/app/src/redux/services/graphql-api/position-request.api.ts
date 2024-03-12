@@ -288,6 +288,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   additional_info_excluded_mgr_position_number
                   additional_info_comments
                   crm_id
+                  shareUUID
               }
           }
           `,
