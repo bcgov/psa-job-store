@@ -236,7 +236,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
 
   return (
     <div style={{ ...style }}>
-      <div style={{ ...style }}>
+      <div id="wbcp" style={{ ...style }}>
         <TreeSelect
           showSearch
           style={{ width: '100%' }}
