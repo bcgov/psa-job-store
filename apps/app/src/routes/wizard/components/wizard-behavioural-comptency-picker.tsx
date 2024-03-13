@@ -263,7 +263,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   // console.log('selectedValues: ', selectedValues);
   return (
     <div style={{ ...style }}>
-      <div style={{ ...style }}>
+      <div id="wbcp" style={{ ...style }}>
         <TreeSelect
           // fieldNames={{ label: 'title', value: 'title', children: 'children' }}
           // onSelect={(value) => console.log('selecting for: ', value)}
