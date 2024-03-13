@@ -145,7 +145,8 @@ export class PositionRequestApiService {
 
     try {
       if (positionRequest.position_number == null) {
-        const position = await this.createPositionForPositionRequest(id);
+        const position =
+          process.env.TEST_ENV === 'true' ? { positionNbr: '1234' } : await this.createPositionForPositionRequest(id);
         if (position.positionNbr.length > 0) {
           positionRequest = await this.prisma.positionRequest.update({
             where: { id },

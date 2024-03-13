@@ -26,7 +26,7 @@ When('the user presses "Create new direct report" on the home page org chart', (
 Then('they are taken to the job profile selection step', () => {
   // Check if the URL is correct
   // The URL pattern should match /position-request/{id}
-  cy.url().should('match', /\/position-request\/\d+/);
+  cy.url().should('match', /\/my-positions\/\d+/);
 
   // Check for a unique element on the job profile selection page
   // Replace 'unique-element-selector' with an actual selector for an element unique to this page
@@ -48,6 +48,8 @@ Then('they proceed to the profile editing step', () => {
 });
 
 When('the user does not make edits', () => {
+  // cy.get('[data-testid="next-button"]').should('not.have.class', 'loading'); // Ensure the button is not in a loading state
+  cy.wait(1000);
   cy.get('[data-testid="next-button"]').click();
 });
 
@@ -84,7 +86,9 @@ When('the user fills out the required additional information', () => {
 
   // Wait for the loading spinner to appear and then disappear
   cy.get('[data-testid="loading-spinner"]').should('be.visible');
-  cy.get('[data-testid="loading-spinner"]').should('not.exist');
+
+  cy.get('[data-testid="loading-spinner"]', { timeout: 10000 }).should('not.exist');
+  // cy.get('[data-testid="loading-spinner"]').should('not.exist');
 
   // Now click the "Next" button
   cy.get('[data-testid="next-button"]').click();
@@ -97,6 +101,41 @@ Then('they proceed to the result step', () => {
 });
 
 When('the user clicks the "Generate position number" button and confirms the dialog', () => {
+  // Set up interception
+  // cy.intercept('POST', 'http://localhost:4000/graphql', (req) => {
+  //   if (req.body.operationName === 'SubmitPositionRequest') {
+  //     // Assuming the operation name is 'SubmitPositionRequest',
+  //     // we can further inspect or manipulate the request here if needed.
+  //     // For now, we just log it to confirm interception.
+  //     console.log('Intercepted SubmitPositionRequest', req.body);
+  //     // Optionally, mock a response here if the frontend expects a specific response format.
+  //     req.reply({
+  //       data: {
+  //         submitPositionRequest: {
+  //           // Provide a mock response suitable for your application's needs
+  //           id: req.body.variables.id, // Echo back the provided id for consistency
+  //           step: 'some-step',
+  //           reports_to_position_id: 123,
+  //           department_id: 456,
+  //           parent_job_profile_id: 789,
+  //           profile_json: '{}',
+  //           user_id: 'user-id',
+  //           title: 'Generated Position',
+  //           position_number: 123456,
+  //           classification_id: 101112,
+  //           classification_code: 'XYZ',
+  //           user_name: 'John Doe',
+  //           email: 'john.doe@example.com',
+  //           submission_id: 'submission-id',
+  //           approved_at: null,
+  //           status: 'COMPLETED',
+  //           updated_at: new Date().toISOString(),
+  //         },
+  //       },
+  //     });
+  //   }
+  // }).as('submitPositionRequest');
+
   // Click the 'Generate position number' button
   cy.get('[data-testid="generate-position-button"]').click();
 

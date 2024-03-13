@@ -66,6 +66,7 @@ const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
       tabIndex={0}
       role="button"
       aria-label={ariaLabel}
+      data-testid="popover-trigger"
     >
       {children}
     </div>
