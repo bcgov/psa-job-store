@@ -377,17 +377,15 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   return (
     <div data-testid="additional-information-form">
       <WizardPageWrapper
-        // title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}
-
         title={
           <div>
             <Link to="/">
               <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
             </Link>
-            Review and submit
+            New position
           </div>
         }
-        subTitle={<div>Review the profile before creating a new position</div>}
+        subTitle={<div>We need a few more pieces of information to action your request for a new position.</div>}
         additionalBreadcrumb={{ title: 'New position' }}
         // subTitle="Choose a job profile to modify for the new positions"
         hpad={false}

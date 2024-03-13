@@ -4,7 +4,7 @@ import React, { CSSProperties, useEffect, useState } from 'react';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
 import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile-types';
-
+import './wizard-behavioural-comptency-picker.css';
 // Utility function to format enum strings to a more readable form
 const formatEnumString = (str: string): string => {
   return str
@@ -236,7 +236,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
 
   return (
     <div style={{ ...style }}>
-      <div style={{ ...style }}>
+      <div id="wbcp" style={{ ...style }}>
         <TreeSelect
           showSearch
           style={{ width: '100%' }}

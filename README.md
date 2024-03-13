@@ -52,6 +52,10 @@ step for the JWT token and enables passing of a mock token for authentication an
 
 Also set `VITE_TEST_ENV=true` in `apps/app/.env` file. This applies minor UI changes to facilitate cypress automation
 
+Ensure that database has been reset to defaults with the special seed for e2e tests:
+
+`npx -w api prisma migrate reset --skip-generate`
+
 Run `npm -w app run test-e2e`
 
 ## Running component tests
@@ -118,6 +122,17 @@ Exit pod and copy file:
 Remove remote backup file:
 
 `oc exec SQL_POD_NAME -- rm pgdata/backup.sql`
+
+## To accelerate new image uptake on openshift after publishing
+
+Openshift may take up to 15 minutes to pick a new image from artifactory. There is no way to change this frequency. If needed, as a workaround
+perform these operations to get openshift to pick up the image from artifactory faster:
+
+`oc project xxxx-tools`
+
+`oc delete -k deployments/openshift/kustomize/images/image-streams/`
+
+`oc apply -k deployments/openshift/kustomize/images/image-streams/`
 
 ## Recursive relationships in schema.prisma
 

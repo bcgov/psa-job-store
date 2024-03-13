@@ -11,17 +11,18 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Modal, Popover, Result, Row, Space, Table, Tooltip, message } from 'antd';
+import { Button, Card, Col, Menu, Modal, Result, Row, Space, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import { generateJobProfile } from 'common-kit';
 import copy from 'copy-to-clipboard';
 import { Packer } from 'docx';
 import saveAs from 'file-saver';
-import React, { CSSProperties, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import React, { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
+import AcessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
@@ -88,7 +89,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const [hasPositionRequests, setHasPositionRequests] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedKeys, setSelectedKeys] = useState([]);
-  const [popoverVisible, setPopoverVisible] = useState<{ [key: string]: boolean }>({});
 
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
 
@@ -182,16 +182,17 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const handleCopyLink = (record: any) => {
+    // shareUUID
     // Dynamically construct the link to include the current base URL
-    const linkToCopy = `${window.location.origin}/position-request/${record.id}`;
+    const linkToCopy = `${window.location.origin}/my-positions/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
     message.success('Link copied to clipboard!');
     setSelectedKeys([]);
-
-    handleVisibleChange(record.id, false);
   };
+
+  const navigate = useNavigate();
 
   const MenuContent = ({ record }: any) => {
     return (
@@ -200,8 +201,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           <>
             {record.status === 'DRAFT' && (
               <>
-                <Menu.Item key="edit" icon={<EditOutlined aria-hidden />} data-testid="menu-option-edit">
-                  <Link to={`/position-request/${record.id}`}>Edit</Link>
+                <Menu.Item
+                  key="edit"
+                  icon={<EditOutlined aria-hidden />}
+                  data-testid="menu-option-edit"
+                  onClick={() => navigate(`/my-positions/${record.id}`)}
+                >
+                  <Link to={`/my-positions/${record.id}`}>Edit</Link>
                 </Menu.Item>
                 <Menu.Item
                   key="copy"
@@ -224,8 +230,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
             {record.status === 'COMPLETED' && (
               <>
-                <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
-                  <Link data-testid="view-link" to={`/position-request/${record.id}`}>
+                <Menu.Item
+                  data-testid="menu-option-view"
+                  key="view"
+                  icon={<EyeOutlined aria-hidden />}
+                  onClick={() => navigate(`/my-positions/${record.id}`)}
+                >
+                  <Link data-testid="view-link" to={`/my-positions/${record.id}`}>
                     View
                   </Link>
                 </Menu.Item>
@@ -253,8 +264,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
             {record.status === 'IN_REVIEW' && (
               <>
-                <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
-                  <Link to={`/position-request/${record.id}`}>View</Link>
+                <Menu.Item
+                  data-testid="menu-option-view"
+                  key="view"
+                  icon={<EyeOutlined aria-hidden />}
+                  onClick={() => navigate(`/my-positions/${record.id}`)}
+                >
+                  <Link to={`/my-positions/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item
                   key="copy"
@@ -274,7 +290,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
         {mode == 'total-compensation' && (
           <>
-            <Menu.Item data-testid="menu-option-view" key="view" icon={<EyeOutlined aria-hidden />}>
+            <Menu.Item
+              data-testid="menu-option-view"
+              key="view"
+              icon={<EyeOutlined aria-hidden />}
+              onClick={() => navigate(`/my-positions/${record.id}`)}
+            >
               View
             </Menu.Item>
             <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
@@ -314,51 +335,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   // Handler to be called when the mouse leaves a row
   const handleMouseLeave = () => setHoveredRowKey(null);
 
-  const ellipsisRefs = useRef<any>({});
-
-  const handleVisibleChange = (id: any, isVisible: any) => {
-    // Update the visibility based on user interaction
-    setPopoverVisible((prevState) => ({ ...prevState, [id]: isVisible }));
-
-    if (!isVisible && ellipsisRefs.current[id]) {
-      ellipsisRefs.current[id].focus();
-    }
-  };
-
-  useEffect(() => {
-    const handleKeyDown = (event: any) => {
-      if (event.key === 'Escape') {
-        const keys = Object.keys(popoverVisible);
-        keys.forEach((key) => {
-          if (popoverVisible[key]) {
-            setPopoverVisible((prevState) => ({ ...prevState, [key]: false }));
-            // Focus back on the corresponding ellipsis button
-            if (ellipsisRefs.current[key]) {
-              ellipsisRefs.current[key].focus();
-            }
-          }
-        });
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [popoverVisible]);
-
-  const handlePopoverOpen = (visible: any, recordId: any) => {
-    if (visible) {
-      setTimeout(() => {
-        const popover = document.querySelector(
-          `.popover-selector-${recordId} .ant-menu-item:not(.ant-menu-item-disabled) a`,
-        );
-        if (popover) {
-          const popoverElement = popover as HTMLElement;
-          popoverElement.focus();
-        }
-      }, 100);
-    }
-  };
-
   const columns: ColumnTypes[] = [
     {
       title: <span data-testid="job-title-header">Job Title</span>,
@@ -369,13 +345,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       render: (text: any, record: any) => {
         if (mode == null)
           return (
-            <Link to={`/position-request/${record.id}`} data-testid={`job-position-${record.id}`}>
+            <Link to={`/my-positions/${record.id}`} data-testid={`job-position-${record.id}`}>
               <div data-testid="job-title">{text}</div>
             </Link>
           );
         else if (mode == 'total-compensation') {
           return (
-            <Link to={`/total-compensation/approved-requests/${record.id}`}>
+            <Link to={`/approved-requests/${record.id}`}>
               <div data-testid="job-title">{text}</div>
             </Link>
           );
@@ -583,25 +559,42 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       align: 'center',
       key: 'action',
       render: (_text: any, record: any) => (
-        <Popover
-          open={popoverVisible[record.id]}
-          onOpenChange={(visible) => {
-            handleVisibleChange(record.id, visible);
-            handlePopoverOpen(visible, record.id);
-          }}
-          content={
-            <MenuContent
-              record={record}
-              onCopyLink={handleCopyLink}
-              onDeleteConfirm={showDeleteConfirm}
-              selectedKeys={selectedKeys}
+        <>
+          <AcessiblePopoverMenu
+            triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
+            content={
+              <MenuContent
+                record={record}
+                onCopyLink={handleCopyLink}
+                onDeleteConfirm={showDeleteConfirm}
+                selectedKeys={selectedKeys}
+              />
+            }
+          ></AcessiblePopoverMenu>
+
+          {/* <Popover
+            open={popoverVisible[record.id]}
+            onOpenChange={(visible) => {
+              handleVisibleChange(record.id, visible);
+              handlePopoverOpen(visible, record.id);
+            }}
+            content={
+              <MenuContent
+                record={record}
+                onCopyLink={handleCopyLink}
+                onDeleteConfirm={showDeleteConfirm}
+                selectedKeys={selectedKeys}
+              />
+            } //{getMenuContent(record)}
+            trigger="click"
+            placement="bottomRight"
+          >
+            <EllipsisOutlined
+              ref={(el) => (ellipsisRefs.current[record.id] = el)}
+              className={`ellipsis-${record.id}`}
             />
-          } //{getMenuContent(record)}
-          trigger="click"
-          placement="bottomRight"
-        >
-          <EllipsisOutlined ref={(el) => (ellipsisRefs.current[record.id] = el)} className={`ellipsis-${record.id}`} />
-        </Popover>
+          </Popover> */}
+        </>
       ),
     },
   ];

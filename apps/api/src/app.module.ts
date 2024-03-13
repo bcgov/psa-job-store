@@ -5,7 +5,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ScheduleModule } from '@nestjs/schedule';
-import { Request } from 'express';
 import { LoggerModule } from 'nestjs-pino';
 import { AppResolver } from './app.resolver';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
@@ -25,12 +24,12 @@ import { JobProfileStreamModule } from './modules/job-profile-stream/job-profile
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
 import { PositionRequestModule } from './modules/position-request/position-request.module';
-import { SearchModule } from './modules/search/search.module';
-import { SiteMinderGuidTestApiModule } from './modules/site-minder-guid-test/siteminder-guid-test.module';
-import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
-import { loggerFactory } from './utils/logging/logger.factory';
-import { validateAppConfig } from './utils/validate-app-config.util';
 import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
+import { SearchModule } from './modules/search/search.module';
+import { apolloPinoLoggingPlugin } from './utils/logging/apolloPinoLoggingPlugin';
+import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
+import { loggerOptions } from './utils/logging/logger.factory';
+import { validateAppConfig } from './utils/validate-app-config.util';
 
 @Module({
   imports: [
@@ -39,12 +38,15 @@ import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.mod
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      plugins: [apolloPinoLoggingPlugin],
       context: ({ req }) => ({ req }) as { req: Request },
-      formatError: formatGraphQLError,
+      formatError: process.env.NODE_ENV == 'development' ? null : formatGraphQLError,
     }),
     LoggerModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: loggerFactory,
+      useFactory: () => ({
+        pinoHttp: loggerOptions,
+      }),
     }),
 
     ScheduleModule.forRoot(),
@@ -62,7 +64,6 @@ import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.mod
     JobProfileScopeModule,
     JobProfileMinimumRequirementsModule,
     AppLogModule,
-    SiteMinderGuidTestApiModule,
     ScheduledTaskModule,
   ],
   controllers: [],

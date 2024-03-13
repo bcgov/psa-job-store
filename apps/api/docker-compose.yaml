@@ -34,9 +34,9 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./src:/usr/src/app/src
+      - ./src:/usr/src/apps/api/src
       - api-nodemodules:/node_modules
-      - ./prisma:/usr/src/app/prisma
+      - ./prisma:/usr/src/apps/api/prisma
   postgres:
     image: postgres:latest
     ports:

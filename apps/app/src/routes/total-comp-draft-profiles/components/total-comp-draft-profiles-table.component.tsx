@@ -116,13 +116,15 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   let data: GetJobProfilesDraftsResponse | GetJobProfilesResponse | undefined;
   let isLoading: boolean;
   let fetchError: ErrorResponse | SerializedError | null | undefined;
-
+  let link: string;
   if (state === 'DRAFT') {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesDraftsQuery();
+    link = '/draft-job-profiles/';
   } else {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesQuery();
+    link = '/published-job-profiles/';
   }
 
   // Check if data is available and call the callback function to notify the parent component
@@ -168,7 +170,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       key: 'title',
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
-      render: (text: any, record: any) => <Link to={`/total-compensation/profiles/${record.id}`}>{text}</Link>,
+      render: (text: any, record: any) => <Link to={`${link}${record.id}`}>{text}</Link>,
     },
     {
       sorter: allowSorting,
@@ -458,7 +460,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     // console.log('duplicate', record);
     const res = await duplicateJobProfile({ jobProfileId: record.id }).unwrap();
     // console.log('res: ', res);
-    navigate(`/total-compensation/profiles/${res.duplicateJobProfile}`);
+    navigate(`${link}${res.duplicateJobProfile}`);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -606,7 +608,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
             <img src={EmptyJobPositionGraphic} alt="No positions" />
             <div>Looks like you’re not working on anything right now.</div>
             {/* Link button to the orgchart page */}
-            <Link to="/total-compensation/create-profile">
+            <Link to="/draft-job-profiles/create">
               <Button type="primary" style={{ marginTop: '1rem' }}>
                 Create new profile
               </Button>

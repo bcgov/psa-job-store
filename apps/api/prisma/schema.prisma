@@ -67,6 +67,7 @@ model PositionRequest {
   approved_at                DateTime               @default(now())
   status                     PositionRequestStatus?
   updated_at                 DateTime               @default(now()) @updatedAt
+  shareUUID                  String?                @default(uuid()) @db.Uuid
 
   // additional information form data
   additional_info_work_location_id             String?

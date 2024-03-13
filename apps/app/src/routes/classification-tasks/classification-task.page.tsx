@@ -7,9 +7,24 @@ import {
   ExclamationCircleFilled,
   LinkOutlined,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Checkbox, Col, Divider, Dropdown, Result, Row, Space, Tabs, Typography } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Checkbox,
+  Col,
+  Divider,
+  Dropdown,
+  Result,
+  Row,
+  Space,
+  Tabs,
+  Typography,
+  message,
+} from 'antd';
 import { MenuProps } from 'antd/es/menu';
 import TabPane from 'antd/es/tabs/TabPane';
+import copy from 'copy-to-clipboard';
 import { cloneElement } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
@@ -45,6 +60,11 @@ export const ClassificationTaskPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
+    const linkToCopy = `${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`;
+
+    // Use the Clipboard API to copy the link to the clipboard
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    message.success('Link copied to clipboard!');
   };
 
   const taskList = [
@@ -288,7 +308,7 @@ export const ClassificationTaskPage = () => {
                           <strong>Download job profile</strong>
                           <p>Attached copy of the job profile that needs review.</p>
                           {/* <Button onClick={handleDownload}>Download job profile</Button> */}
-                          <DownloadJobProfileComponent jobProfile={data?.positionRequest.profile_json} />
+                          <DownloadJobProfileComponent jobProfile={data?.positionRequest?.profile_json} />
                           <Button type="link">View job profile</Button>
                         </div>
                         <Divider />
@@ -306,7 +326,7 @@ export const ClassificationTaskPage = () => {
                           <strong>Invite others to review</strong>
                           <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                           <Space>
-                            <Text>http://pjs-dev.apps.silver.devops.gov.bc.ca/wizard/review/1</Text>
+                            <Text>{`${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`}</Text>
                             <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                               Copy URL
                             </Button>
@@ -347,7 +367,7 @@ export const ClassificationTaskPage = () => {
     {
       label: (
         <div>
-          <DownloadJobProfileComponent jobProfile={data.positionRequest.profile_json}>
+          <DownloadJobProfileComponent jobProfile={data.positionRequest?.profile_json}>
             <>
               Download job profile
               <Text type="secondary" style={{ display: 'block' }}>
@@ -383,7 +403,7 @@ export const ClassificationTaskPage = () => {
                 <PositionProfile
                   prefix="Reporting to"
                   mode="compact"
-                  positionNumber={data?.positionRequest.reports_to_position_id}
+                  positionNumber={data?.positionRequest?.reports_to_position_id}
                 ></PositionProfile>
               </div>
             }

@@ -49,6 +49,7 @@ export interface GetPositionRequestResponseContent {
   approved_at?: string;
   updated_at?: string;
   email?: string;
+  shareUUID?: string;
   parent_job_profile?: {
     number: number;
   };
@@ -62,7 +63,8 @@ export interface GetPositionRequestResponseContent {
 }
 
 export interface GetPositionRequestResponse {
-  positionRequest: GetPositionRequestResponseContent;
+  positionRequest?: GetPositionRequestResponseContent;
+  sharedPositionRequest?: GetPositionRequestResponseContent; // this is for GetSharedPositionRequestResponse
 }
 
 export interface SubmitPositionRequestResponse {
@@ -95,7 +97,8 @@ export interface GetPositionsRequestResponse {
 }
 
 export interface GetPositionRequestArgs {
-  id: number;
+  id?: number;
+  uuid?: string; // this is for GetSharedPositionRequestArgs
 }
 
 export interface CreatePositionRequestResponse {
@@ -224,6 +227,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 status
                 updated_at
                 submitted_at
+                shareUUID
                 parent_job_profile {
                   number
                 }
@@ -258,6 +262,49 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
           document: gql`
             query PositionRequest {
               positionRequest(id: ${args.id}) {
+                  id
+                  step
+                  reports_to_position_id
+                  parent_job_profile_id
+                  profile_json
+                  orgchart_json
+                  user_id
+                  user_name
+                  email
+                  title
+                  position_number
+                  classification_code
+                  submission_id
+                  status
+                  updated_at
+                  submitted_at
+                  department_id
+                  approved_at
+                  parent_job_profile {
+                    number
+                  }
+                  additional_info_work_location_id
+                  additional_info_department_id
+                  additional_info_excluded_mgr_position_number
+                  additional_info_comments
+                  crm_id
+                  shareUUID
+              }
+          }
+          `,
+        };
+      },
+    }),
+    getSharedPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
+      providesTags: ['positionRequest'],
+      // result
+      //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
+      //   : [{ type: 'PositionRequest' as const, id: 'id' }],
+      query: (args: GetPositionRequestArgs) => {
+        return {
+          document: gql`
+            query SharedPositionRequest {
+              sharedPositionRequest(uuid: "${args.uuid}") {
                   id
                   step
                   reports_to_position_id
@@ -497,4 +544,5 @@ export const {
   useGetPositionRequestStatusesQuery,
   useGetPositionRequestSubmittedByQuery,
   usePositionNeedsRivewQuery,
+  useGetSharedPositionRequestQuery,
 } = positionRequestApi;

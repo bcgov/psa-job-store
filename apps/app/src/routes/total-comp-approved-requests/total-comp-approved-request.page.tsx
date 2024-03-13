@@ -395,7 +395,7 @@ export const TotalCompApprovedRequestPage = () => {
             <PositionProfile
               prefix="Reporting to"
               mode="compact"
-              positionNumber={data?.positionRequest.reports_to_position_id}
+              positionNumber={data?.positionRequest?.reports_to_position_id}
             ></PositionProfile>
           </div>
         }
