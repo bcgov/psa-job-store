@@ -40,6 +40,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ReduxProvider store={store}>
         <ConfigProvider
           theme={{
+            // todo: this causes some issues (for example steps component on wizard doesn't render properly), needed to render AccessibleList on dev
             hashed: false,
             components: {
               Layout: {

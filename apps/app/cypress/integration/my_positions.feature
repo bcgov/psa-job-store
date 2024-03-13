@@ -11,6 +11,7 @@ Feature: Manage and Display Position Requests
     Scenario: Search for job positions using keywords
         When the user enters "analyst" into the search field
         And the user clicks the "Find positions" button
+        # Then the GraphQL query for "analyst" positions should be made
         Then job positions containing "analyst" in the title or submission ID should be displayed
 
     Scenario: Filter job positions by status
