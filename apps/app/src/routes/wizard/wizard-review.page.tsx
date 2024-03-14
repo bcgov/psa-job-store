@@ -151,7 +151,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
             <Button icon={<EllipsisOutlined />}></Button>
           </Popover>,
-          <Button onClick={onBackCallback} key="back">
+          <Button onClick={onBackCallback} key="back" data-testid="back-button">
             Back
           </Button>,
           <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button">

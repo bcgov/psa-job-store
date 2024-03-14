@@ -21,6 +21,7 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
+import debounce from 'lodash.debounce';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
@@ -857,12 +858,11 @@ const WizardEditProfile = forwardRef(
     const renderAccReqFields = (field: any, index: number) => {
       const isEdited = editedAccReqFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.value }));
         trigger();
-      };
-      console.log(field);
+      }, 300);
+
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
@@ -902,7 +902,12 @@ const WizardEditProfile = forwardRef(
             </FormItem>
 
             {field.is_readonly && (
-              <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
+              <Typography.Text
+                data-testid={`readonly-accountability-${index}`}
+                style={{ flex: 1, marginRight: '10px' }}
+              >
+                {field.text}
+              </Typography.Text>
             )}
 
             <Controller
@@ -917,13 +922,15 @@ const WizardEditProfile = forwardRef(
                     // id for label
                     id={field.id}
                     // set style to display one if field.is_readonly
+                    data-testid={`accountability-input-${index}`}
                     style={{ display: field.is_readonly ? 'none' : 'block' }}
                     autoSize
                     disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
                     className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                     onChange={(event) => {
                       onChange(event);
-                      handleFieldChange(event); // todo: find a way to eliminate this
+                      const updatedValue = event.target.value;
+                      handleFieldChange(index, updatedValue);
                     }}
                     onBlur={onBlur}
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
@@ -934,6 +941,7 @@ const WizardEditProfile = forwardRef(
 
             <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
               <Button
+                data-testid={field.disabled ? `undo-remove-accountability-${index}` : `remove-accountability-${index}`}
                 className="remove-item-btn"
                 icon={icon}
                 aria-label={ariaLabel}
@@ -984,10 +992,10 @@ const WizardEditProfile = forwardRef(
     const renderOptReqFields = (field: any, index: number) => {
       const isEdited = editedOptReqFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedOptReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalOptReqFields[index]?.value }));
-      };
+        trigger();
+      }, 300);
 
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
@@ -1042,7 +1050,8 @@ const WizardEditProfile = forwardRef(
                     className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                     onChange={(event) => {
                       onChange(event);
-                      handleFieldChange(event); // todo: find a way to eliminate this
+                      const updatedValue = event.target.value;
+                      handleFieldChange(index, updatedValue);
                     }}
                     onBlur={onBlur}
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
@@ -1132,11 +1141,10 @@ const WizardEditProfile = forwardRef(
     const renderMinReqFields = (field: any, index: number) => {
       const isEdited = editedMinReqFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.value }));
-        // trigger();
-      };
+        trigger();
+      }, 300);
 
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
@@ -1177,7 +1185,9 @@ const WizardEditProfile = forwardRef(
             </FormItem>
 
             {field.is_readonly && (
-              <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
+              <Typography.Text data-testid={`readonly-education-${index}`} style={{ flex: 1, marginRight: '10px' }}>
+                {field.text}
+              </Typography.Text>
             )}
 
             <Controller
@@ -1189,6 +1199,7 @@ const WizardEditProfile = forwardRef(
                     Education and work experience {index + 1}
                   </label>
                   <TextArea
+                    data-testid={`education-input-${index}`}
                     id={field.id}
                     style={{ display: field.is_readonly ? 'none' : 'block' }}
                     autoSize
@@ -1196,7 +1207,8 @@ const WizardEditProfile = forwardRef(
                     className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                     onChange={(event) => {
                       onChange(event);
-                      handleFieldChange(event); // todo: find a way to eliminate this
+                      const updatedValue = event.target.value;
+                      handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
                     }}
                     onBlur={onBlur}
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
@@ -1207,6 +1219,7 @@ const WizardEditProfile = forwardRef(
 
             <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
               <Button
+                data-testid={field.disabled ? `undo-remove-education-${index}` : `remove-education-${index}`}
                 className="remove-item-btn"
                 icon={icon}
                 aria-label={ariaLabel}
@@ -1289,11 +1302,11 @@ const WizardEditProfile = forwardRef(
     const renderRelWorkFields = (field: any, index: number) => {
       const isEdited = editedRelWorkFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedRelWorkFields((prev) => ({ ...prev, [index]: updatedValue !== originalRelWorkFields[index]?.value }));
-        // trigger();
-      };
+        trigger();
+      }, 300);
+
       // console.log('field', JSON.stringify(field));
 
       const icon = field.disabled ? (
@@ -1335,7 +1348,12 @@ const WizardEditProfile = forwardRef(
             </FormItem>
 
             {field.is_readonly && (
-              <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
+              <Typography.Text
+                data-testid={`readonly-job-experience-${index}`}
+                style={{ flex: 1, marginRight: '10px' }}
+              >
+                {field.text}
+              </Typography.Text>
             )}
 
             <Controller
@@ -1347,6 +1365,7 @@ const WizardEditProfile = forwardRef(
                     Related experience {index + 1}
                   </label>
                   <TextArea
+                    data-testid={`job-experience-input-${index}`}
                     id={field.id}
                     style={{ display: field.is_readonly ? 'none' : 'block' }}
                     autoSize
@@ -1354,7 +1373,8 @@ const WizardEditProfile = forwardRef(
                     className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                     onChange={(event) => {
                       onChange(event);
-                      handleFieldChange(event); // todo: find a way to eliminate this
+                      const updatedValue = event.target.value;
+                      handleFieldChange(index, updatedValue);
                     }}
                     onBlur={onBlur}
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
@@ -1380,6 +1400,7 @@ const WizardEditProfile = forwardRef(
 
             <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
               <Button
+                data-testid={field.disabled ? `undo-remove-job-experience-${index}` : `remove-job-experience-${index}`}
                 className="remove-item-btn"
                 icon={icon}
                 aria-label={ariaLabel}
@@ -1434,14 +1455,13 @@ const WizardEditProfile = forwardRef(
     const renderSecurityScreeningsFields = (field: any, index: number) => {
       const isEdited = editedSecurityScreeningsFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedSecurityScreeningsFields((prev) => ({
           ...prev,
           [index]: updatedValue !== originalSecurityScreeningsFields[index]?.value,
         }));
         trigger();
-      };
+      }, 300);
       // console.log('field', JSON.stringify(field));
 
       const icon = field.disabled ? (
@@ -1476,7 +1496,12 @@ const WizardEditProfile = forwardRef(
           </FormItem>
 
           {field.is_readonly && (
-            <Typography.Text style={{ flex: 1, marginRight: '10px' }}>{field.text}</Typography.Text>
+            <Typography.Text
+              data-testid={`readonly-security-screening-${index}`}
+              style={{ flex: 1, marginRight: '10px' }}
+            >
+              {field.text}
+            </Typography.Text>
           )}
 
           <Controller
@@ -1488,6 +1513,7 @@ const WizardEditProfile = forwardRef(
                   Security screening {index + 1}
                 </label>
                 <TextArea
+                  data-testid={`security-screening-input-${index}`}
                   id={field.id}
                   style={{ display: field.is_readonly ? 'none' : 'block' }}
                   autoSize
@@ -1495,7 +1521,8 @@ const WizardEditProfile = forwardRef(
                   className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                   onChange={(event) => {
                     onChange(event);
-                    handleFieldChange(event); // todo: find a way to eliminate this
+                    const updatedValue = event.target.value;
+                    handleFieldChange(index, updatedValue);
                   }}
                   onBlur={onBlur}
                   value={value ? (typeof value === 'string' ? value : value.value) : ''}
@@ -1506,6 +1533,9 @@ const WizardEditProfile = forwardRef(
 
           <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
+              data-testid={
+                field.disabled ? `undo-remove-security-screening-${index}` : `remove-security-screening-${index}`
+              }
               className="remove-item-btn"
               icon={icon}
               aria-label={ariaLabel}
@@ -1562,15 +1592,13 @@ const WizardEditProfile = forwardRef(
     const renderProfessionalRegistrationFields = (field: any, index: number) => {
       const isEdited = editedProfessionalRegistrationFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedProfessionalRegistrationFields((prev) => ({
           ...prev,
           [index]: updatedValue !== originalProfessionalRegistrationFields[index]?.value,
         }));
         trigger();
-      };
-      // console.log('field', JSON.stringify(field));
+      }, 300);
 
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
@@ -1609,13 +1637,15 @@ const WizardEditProfile = forwardRef(
                   Professional registration {index + 1}
                 </label>
                 <TextArea
+                  data-testid={`professional-registration-input-${index}`}
                   id={field.id}
                   autoSize
                   disabled={field.disabled}
                   className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                   onChange={(event) => {
                     onChange(event);
-                    handleFieldChange(event); // todo: find a way to eliminate this
+                    const updatedValue = event.target.value;
+                    handleFieldChange(index, updatedValue);
                   }}
                   onBlur={onBlur}
                   value={value}
@@ -1626,6 +1656,11 @@ const WizardEditProfile = forwardRef(
 
           <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
+              data-testid={
+                field.disabled
+                  ? `undo-remove-professional-registration-${index}`
+                  : `remove-professional-registration-${index}`
+              }
               className="remove-item-btn"
               icon={icon}
               aria-label={ariaLabel}
@@ -1710,15 +1745,13 @@ const WizardEditProfile = forwardRef(
     const renderOptionalRequirementsFields = (field: any, index: number) => {
       const isEdited = editedOptionalRequirementsFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedOptionalRequirementsFields((prev) => ({
           ...prev,
           [index]: updatedValue !== originalOptionalRequirementsFields[index]?.value,
         }));
         trigger();
-      };
-      // console.log('field', JSON.stringify(field));
+      }, 300);
 
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
@@ -1757,13 +1790,15 @@ const WizardEditProfile = forwardRef(
                   Optional requirement {index + 1}
                 </label>
                 <TextArea
+                  data-testid={`optional-requirement-input-${index}`}
                   id={field.id}
                   autoSize
                   disabled={field.disabled}
                   className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                   onChange={(event) => {
                     onChange(event);
-                    handleFieldChange(event); // todo: find a way to eliminate this
+                    const updatedValue = event.target.value;
+                    handleFieldChange(index, updatedValue);
                   }}
                   onBlur={onBlur}
                   value={value}
@@ -1774,6 +1809,9 @@ const WizardEditProfile = forwardRef(
 
           <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
+              data-testid={
+                field.disabled ? `undo-remove-optional-requirement-${index}` : `remove-optional-requirement-${index}`
+              }
               className="remove-item-btn"
               icon={icon}
               aria-label={ariaLabel}
@@ -1828,14 +1866,13 @@ const WizardEditProfile = forwardRef(
     const renderPreferencesFields = (field: any, index: number) => {
       const isEdited = editedPreferencesFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedPreferencesFields((prev) => ({
           ...prev,
           [index]: updatedValue !== originalPreferencesFields[index]?.value,
         }));
         trigger();
-      };
+      }, 300);
       // console.log('field', JSON.stringify(field)); Job preferences
 
       const icon = field.disabled ? (
@@ -1875,13 +1912,15 @@ const WizardEditProfile = forwardRef(
                   Job preference {index + 1}
                 </label>
                 <TextArea
+                  data-testid={`preference-input-${index}`}
                   id={field.id}
                   autoSize
                   disabled={field.disabled}
                   className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                   onChange={(event) => {
                     onChange(event);
-                    handleFieldChange(event); // todo: find a way to eliminate this
+                    const updatedValue = event.target.value;
+                    handleFieldChange(index, updatedValue);
                   }}
                   onBlur={onBlur}
                   value={value}
@@ -1892,6 +1931,7 @@ const WizardEditProfile = forwardRef(
 
           <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
+              data-testid={field.disabled ? `undo-remove-preference-${index}` : `remove-preference-${index}`}
               className="remove-item-btn"
               icon={icon}
               aria-label={ariaLabel}
@@ -1977,15 +2017,13 @@ const WizardEditProfile = forwardRef(
     const renderKnowledgeSkillsAbilitiesFields = (field: any, index: number) => {
       const isEdited = editedKnowledgeSkillsAbilitiesFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedKnowledgeSkillsAbilitiesFields((prev) => ({
           ...prev,
           [index]: updatedValue !== originalKnowledgeSkillsAbilitiesFields[index]?.value,
         }));
         trigger();
-      };
-      // console.log('field', JSON.stringify(field));
+      }, 300);
 
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
@@ -2024,13 +2062,15 @@ const WizardEditProfile = forwardRef(
                   Knowledge, skill or ability {index + 1}
                 </label>
                 <TextArea
+                  data-testid={`knowledge-skills-ability-input-${index}`}
                   id={field.id}
                   autoSize
                   disabled={field.disabled}
                   className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                   onChange={(event) => {
                     onChange(event);
-                    handleFieldChange(event); // todo: find a way to eliminate this
+                    const updatedValue = event.target.value;
+                    handleFieldChange(index, updatedValue);
                   }}
                   onBlur={onBlur}
                   value={value}
@@ -2040,6 +2080,11 @@ const WizardEditProfile = forwardRef(
           />
           <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
+              data-testid={
+                field.disabled
+                  ? `undo-remove-knowledge-skills-ability-${index}`
+                  : `remove-knowledge-skills-ability-${index}`
+              }
               className="remove-item-btn"
               icon={icon}
               aria-label={ariaLabel}
@@ -2096,15 +2141,13 @@ const WizardEditProfile = forwardRef(
     const renderProvisosFields = (field: any, index: number) => {
       const isEdited = editedProvisosFields[index] || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
-        const updatedValue = event.target.value;
+      const handleFieldChange = debounce((index, updatedValue) => {
         setEditedProvisosFields((prev) => ({
           ...prev,
           [index]: updatedValue !== originalProvisosFields[index]?.value,
         }));
         trigger();
-      };
-      // console.log('field', JSON.stringify(field)); Willingness statements or provisos
+      }, 300);
 
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
@@ -2143,13 +2186,15 @@ const WizardEditProfile = forwardRef(
                   Willingness statements or proviso {index + 1}
                 </label>
                 <TextArea
+                  data-testid={`proviso-input-${index}`}
                   id={field.id}
                   autoSize
                   disabled={field.disabled}
                   className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                   onChange={(event) => {
                     onChange(event);
-                    handleFieldChange(event); // todo: find a way to eliminate this
+                    const updatedValue = event.target.value;
+                    handleFieldChange(index, updatedValue);
                   }}
                   onBlur={onBlur}
                   value={value}
@@ -2159,6 +2204,7 @@ const WizardEditProfile = forwardRef(
           />
           <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
             <Button
+              data-testid={field.disabled ? `undo-remove-proviso-${index}` : `remove-proviso-${index}`}
               className="remove-item-btn"
               icon={icon}
               aria-label={ariaLabel}
@@ -2210,6 +2256,7 @@ const WizardEditProfile = forwardRef(
                     colon={false}
                   >
                     <Input
+                      data-testid="job-title-input"
                       placeholder="Ex.: Program Assistant"
                       aria-label="Job Title"
                       className={`${isEdited ? 'edited-textarea' : ''}`}
@@ -2262,6 +2309,7 @@ const WizardEditProfile = forwardRef(
                     colon={false}
                   >
                     <TextArea
+                      data-testid="job-overview-input"
                       autoSize
                       className={`${isEdited ? 'edited-textarea' : ''}`}
                       onChange={handleFieldChange}
@@ -2314,6 +2362,7 @@ const WizardEditProfile = forwardRef(
                     colon={false}
                   >
                     <TextArea
+                      data-testid="program-overview-input"
                       autoSize
                       className={`${isEdited ? 'edited-textarea' : ''}`}
                       onChange={handleFieldChange}
@@ -2604,6 +2653,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-accountability-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
@@ -2690,6 +2740,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-education-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
@@ -2726,6 +2777,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-job-experience-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
@@ -2771,6 +2823,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-professional-registration-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
@@ -2803,6 +2856,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-preference-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
@@ -2835,6 +2889,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-knowledge-skills-ability-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
@@ -2867,6 +2922,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-proviso-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
@@ -2899,6 +2955,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-security-screening-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
@@ -2935,6 +2992,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-optional-requirement-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
@@ -2956,11 +3014,13 @@ const WizardEditProfile = forwardRef(
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <>
-                        <BehaviouralComptencyPicker
-                          onAdd={behavioural_competencies_append}
-                          onRemove={behavioural_competencies_remove}
-                          behavioural_competencies_fields={behavioural_competencies_fields}
-                        />
+                        <div data-testid="behavioral-competencies-selector">
+                          <BehaviouralComptencyPicker
+                            onAdd={behavioural_competencies_append}
+                            onRemove={behavioural_competencies_remove}
+                            behavioural_competencies_fields={behavioural_competencies_fields}
+                          />
+                        </div>
                         <Typography.Text type="secondary">
                           * denotes an Indigenous Behavioural Competency
                         </Typography.Text>
@@ -2992,6 +3052,7 @@ const WizardEditProfile = forwardRef(
 
                               {/* Trash icon/button for deletion */}
                               <Button
+                                data-testid={`remove-behavioral-competency-${index}`}
                                 type="text" // No button styling, just the icon
                                 aria-label={`Remove ${field.behavioural_competency.name} behavioural competency`}
                                 icon={<DeleteOutlined aria-hidden />}
