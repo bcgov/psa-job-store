@@ -397,15 +397,18 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'title',
       label: 'Title',
-      children:
-        showDiff && originalData
-          ? compareData(
-              typeof originalData.title === 'string' ? originalData.title : originalData.title.value,
-              typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value,
-            )
-          : typeof effectiveData?.title === 'string'
-            ? effectiveData?.title
-            : effectiveData?.title?.value,
+      children: (
+        <span data-testid="job-title">
+          {showDiff && originalData
+            ? compareData(
+                typeof originalData.title === 'string' ? originalData.title : originalData.title.value,
+                typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value,
+              )
+            : typeof effectiveData?.title === 'string'
+              ? effectiveData?.title
+              : effectiveData?.title?.value}
+        </span>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
 
@@ -423,19 +426,22 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {
             key: 'program_overview',
             label: 'Program Overview',
-            children:
-              showDiff && originalData
-                ? compareData(
-                    typeof originalData.program_overview === 'string'
-                      ? originalData.program_overview
-                      : originalData?.program_overview?.value,
-                    typeof effectiveData?.program_overview === 'string'
-                      ? effectiveData?.program_overview
-                      : effectiveData?.program_overview?.value,
-                  )
-                : typeof effectiveData?.program_overview === 'string'
-                  ? effectiveData?.program_overview
-                  : effectiveData?.program_overview?.value,
+            children: (
+              <span data-testid="program-overview">
+                {showDiff && originalData
+                  ? compareData(
+                      typeof originalData.program_overview === 'string'
+                        ? originalData.program_overview
+                        : originalData?.program_overview?.value,
+                      typeof effectiveData?.program_overview === 'string'
+                        ? effectiveData?.program_overview
+                        : effectiveData?.program_overview?.value,
+                    )
+                  : typeof effectiveData?.program_overview === 'string'
+                    ? effectiveData?.program_overview
+                    : effectiveData?.program_overview?.value}
+              </span>
+            ),
             span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
           },
         ]
@@ -469,15 +475,18 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'overview',
       label: 'Job Overview',
-      children:
-        showDiff && originalData
-          ? compareData(
-              typeof originalData.overview === 'string' ? originalData.overview : originalData?.overview?.value,
-              typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value,
-            )
-          : typeof effectiveData?.overview === 'string'
-            ? effectiveData?.overview
-            : effectiveData?.overview?.value,
+      children: (
+        <span data-testid="job-overview">
+          {showDiff && originalData
+            ? compareData(
+                typeof originalData.overview === 'string' ? originalData.overview : originalData?.overview?.value,
+                typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value,
+              )
+            : typeof effectiveData?.overview === 'string'
+              ? effectiveData?.overview
+              : effectiveData?.overview?.value}
+        </span>
+      ),
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
@@ -487,7 +496,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       children: (
         <>
           {/* Main Accountabilities - is_significant == true */}
-          <ul>
+          <ul data-testid="significant-accountabilities">
             {showDiff && originalData
               ? compareLists(
                   originalData.accountabilities.filter((acc) => acc.is_significant),
@@ -538,7 +547,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       children: (
         <>
           <h4>Education</h4>
-          <ul>
+          <ul data-testid="education">
             {showDiff && originalData
               ? compareLists(originalData.education, effectiveData?.education)
               : effectiveData?.education?.map((requirement, index) => {
@@ -559,7 +568,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {effectiveData?.job_experience && effectiveData?.job_experience.length > 0 && (
             <>
               <h4>Related experience</h4>
-              <ul>
+              <ul data-testid="job-experience">
                 {showDiff && originalData
                   ? compareLists(originalData.job_experience, effectiveData?.job_experience)
                   : effectiveData?.job_experience?.map((requirement, index) => {
@@ -583,7 +592,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             effectiveData?.professional_registration_requirements.length > 0 && (
               <>
                 <h4>Professional registration requirements</h4>
-                <ul>
+                <ul data-testid="professional-registration">
                   {showDiff && originalData
                     ? compareLists(
                         originalData.professional_registration_requirements,
@@ -605,7 +614,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {effectiveData?.preferences && effectiveData?.preferences.length > 0 && (
             <>
               <h4>Preferences</h4>
-              <ul>
+              <ul data-testid="preferences">
                 {showDiff && originalData
                   ? compareLists(originalData.preferences, effectiveData?.preferences)
                   : effectiveData?.preferences?.map((requirement, index) => {
@@ -624,7 +633,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {effectiveData?.knowledge_skills_abilities && effectiveData?.knowledge_skills_abilities.length > 0 && (
             <>
               <h4>Knowledge, skills and abilities</h4>
-              <ul>
+              <ul data-testid="knowledge-skills-abilities">
                 {showDiff && originalData
                   ? compareLists(originalData.knowledge_skills_abilities, effectiveData?.knowledge_skills_abilities)
                   : effectiveData?.knowledge_skills_abilities?.map((requirement, index) => {
@@ -643,7 +652,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {effectiveData?.willingness_statements && effectiveData?.willingness_statements.length > 0 && (
             <>
               <h4>Willingness statements or provisos</h4>
-              <ul>
+              <ul data-testid="provisos">
                 {showDiff && originalData
                   ? compareLists(originalData.willingness_statements, effectiveData?.willingness_statements)
                   : effectiveData?.willingness_statements?.map((requirement, index) => {
@@ -662,7 +671,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {effectiveData?.security_screenings && effectiveData?.security_screenings.length > 0 && (
             <>
               <h4>Security screening</h4>
-              <ul>
+              <ul data-testid="security-screenings">
                 {showDiff && originalData
                   ? compareLists(originalData.security_screenings, effectiveData?.security_screenings)
                   : effectiveData?.security_screenings?.map((requirement, index) => {
@@ -685,7 +694,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {effectiveData?.optional_requirements && effectiveData?.optional_requirements.length > 0 && (
             <>
               <h4>Optional requirements</h4>
-              <ul>
+              <ul data-testid="optional-requirements">
                 {showDiff && originalData
                   ? compareLists(originalData.optional_requirements, effectiveData?.optional_requirements)
                   : effectiveData?.optional_requirements?.map((requirement, index) => {
@@ -709,7 +718,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'behavioural_competencies',
       label: 'Behavioural Competencies',
       children: (
-        <ul>
+        <ul data-testid="behavioural-competencies">
           {showDiff && originalData
             ? compareCompetencies(
                 originalData.behavioural_competencies.map((item) => item.behavioural_competency),
