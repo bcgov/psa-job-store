@@ -1,5 +1,5 @@
 # Use the official Node.js 18 image.
-FROM node:18.17.0 AS base
+FROM node:20.11.1-alpine AS base
 
 # Create and change to the app directory.
 FROM base AS builder
@@ -55,14 +55,14 @@ ENV NODE_ENV "development"
 
 WORKDIR /usr/src
 COPY --from=builder /tmp/build ./
-COPY /apps/api/start.sh ./apps/api/start.sh
 COPY /apps/api/prisma ./apps/api/prisma
 COPY /apps/api/package*.json ./apps/api/
 
 WORKDIR /usr/src/apps/api/
 # generates the prisma client
 RUN npx prisma generate
-
+# build common-kit
+RUN npm -w common-kit run build
 #generates the dist folder for nest to run
 #RUN npm run build
 
@@ -73,11 +73,10 @@ RUN npx prisma generate
 
 #For debugging: create and write the contents of start.sh in the container
 
-RUN rm start.sh
-RUN echo "#!/bin/bash" >> start.sh && \
+RUN echo "#!/bin/sh" >> start.sh && \
     echo "sleep 10" >> start.sh && \
     echo "# push the schema to the database and sync the client" >> start.sh && \
-    echo "npx prisma db push --schema='/usr/src/app/prisma/schema.prisma' " >> start.sh && \
+    echo "npx prisma migrate deploy dev" >> start.sh && \
     echo "" >> start.sh && \
     echo "# Start the application" >> start.sh && \
     echo "npm run start:dev" >> start.sh

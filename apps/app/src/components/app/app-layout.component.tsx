@@ -49,6 +49,20 @@ export const AppLayout = () => {
   const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', true);
   const [role, setRole] = useState<string | null>(null);
 
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  // useEffect(() => {
+  //   // Initialize or update the selectedKeys based on the current URL
+  //   const path = location.pathname;
+  //   setSelectedKeys([path]);
+  //   // console.log(path);
+  // }, [location.pathname]);
+  // Function to handle menu item click
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    // Update the selectedKeys when a menu item is clicked
+    console.log(e.keyPath);
+    setSelectedKeys([e.key]);
+  };
+
   useEffect(() => {
     // console.log('auth.user: ', auth.user);
     const roles = auth.user?.profile['client_roles'];
@@ -56,6 +70,8 @@ export const AppLayout = () => {
       setRole('total-compensation');
     } else if (roles && (roles as string[]).includes('classification')) {
       setRole('classification');
+    } else if (roles && (roles as string[]).includes('hiring-manager')) {
+      setRole('hiring-manager');
     } else {
       setRole('user');
     }
@@ -65,18 +81,47 @@ export const AppLayout = () => {
 
   const totalCompensationMenuItems: MenuProps['items'] = [
     getItem('Job Profiles', 'sub1', <FileSearchOutlined style={{ fontSize: '1.25rem' }} />, [
+      getItem(<Link to="/draft-job-profiles">Drafts</Link>, '1', <FileOutlined style={{ fontSize: '1.25rem' }} />),
       getItem(
-        <Link to="/total-compensation/profiles/drafts">Drafts</Link>,
-        '1',
-        <FileOutlined style={{ fontSize: '1.25rem' }} />,
-      ),
-      getItem(
-        <Link to="/total-compensation/profiles/published">Published</Link>,
+        <Link to="/published-job-profiles">Published</Link>,
         '2',
         <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
       ),
     ]),
   ];
+  const hiringManagerMenuItems: MenuProps['items'] = [
+    getItem('Hiring Manager', 'sub1', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
+      getItem(
+        <Link to="/my-positions/create">Create new position</Link>,
+        '3',
+        <PlusCircleFilled style={{ fontSize: '1.25rem' }} />,
+      ),
+      getItem(
+        <Link to="/org-chart">My organizations</Link>,
+        '5',
+        <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
+      ),
+      getItem(<Link to="/job-profiles">Job profiles</Link>, '6', <FileTextOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(<Link to="/my-positions">My positions</Link>, '7', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
+    ]),
+  ];
+
+  if (role === 'user') {
+    return (
+      <Layout style={{ height: '100vh' }}>
+        <AppHeader></AppHeader>
+        <Layout style={{ height: '100%' }}>
+          <Layout>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
+              <Content style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#FFF', flex: '1 0 auto' }}>
+                <Outlet />
+              </Content>
+            </div>
+          </Layout>
+        </Layout>
+      </Layout>
+    );
+  }
 
   // console.log('role: ', role);
   return (
@@ -85,6 +130,7 @@ export const AppLayout = () => {
       <Layout hasSider style={{ height: '100%' }}>
         {auth.isAuthenticated && (
           <Sider
+            role="navigation"
             collapsible
             collapsed={collapsed}
             collapsedWidth="3.5rem"
@@ -99,12 +145,18 @@ export const AppLayout = () => {
               <div
                 style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', flex: 'auto' }}
               >
-                {role === 'user' && (
+                {role === 'hiring-manager' && (
                   <>
                     {collapsed ? (
                       <SiderNavItem
                         collapsed={collapsed}
-                        icon={<PlusCircleFilled style={{ fontSize: '1.25rem' }} />}
+                        icon={
+                          <PlusCircleFilled
+                            role="button"
+                            aria-label="Create new position"
+                            style={{ fontSize: '1.25rem', color: '#1677ff' }}
+                          />
+                        }
                         key={'Create new position'}
                         title={'Create new position'}
                         to={'/my-positions/create'}
@@ -113,7 +165,9 @@ export const AppLayout = () => {
                     ) : (
                       <div style={{ padding: '10px 10px 2px 10px' }}>
                         <Link to="/my-positions/create">
-                          <Button type="primary">Create new position</Button>
+                          <Button type="primary" tabIndex={-1}>
+                            Create new position
+                          </Button>
                         </Link>
                       </div>
                     )}
@@ -121,23 +175,23 @@ export const AppLayout = () => {
                       collapsed={collapsed}
                       items={[
                         {
-                          icon: <HomeOutlined style={{ fontSize: '1.25rem' }} />,
+                          icon: <HomeOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                           title: 'Home',
                           to: '/',
                         },
                         {
-                          icon: <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
-                          title: 'Org Chart',
+                          icon: <PartitionOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'My organizations',
                           to: '/org-chart',
                         },
                         {
-                          icon: <FileTextOutlined style={{ fontSize: '1.25rem' }} />,
-                          title: 'Job Profiles',
+                          icon: <FileTextOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Job profiles',
                           to: '/job-profiles',
                         },
                         {
-                          icon: <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
-                          title: 'My Positions',
+                          icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'My positions',
                           to: '/my-positions',
                         },
                       ]}
@@ -151,27 +205,51 @@ export const AppLayout = () => {
                         collapsed={collapsed}
                         items={[
                           {
-                            icon: <FileAddFilled style={{ fontSize: '1.25rem', color: '#1677ff' }} />,
+                            icon: <FileAddFilled aria-hidden style={{ fontSize: '1.25rem', color: '#1677ff' }} />,
                             title: 'Create new profile',
-                            to: '/total-compensation/create-profile',
+                            to: '/draft-job-profiles/create',
                             hideTitle: true,
                           },
                           {
-                            icon: <FileOutlined style={{ fontSize: '1.25rem' }} />,
+                            icon: <FileOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                             title: 'Draft job profiles',
-                            to: '/total-compensation/profiles/drafts',
+                            to: '/draft-job-profiles',
                             hideTitle: true,
                           },
                           {
-                            icon: <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
+                            icon: <FileProtectOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                             title: 'Published job profiles',
-                            to: '/total-compensation/profiles/published',
+                            to: '/published-job-profiles',
                             hideTitle: true,
                           },
                           {
-                            icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
+                            icon: <CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                             title: 'Approved requests',
-                            to: '/total-compensation/approved-requests',
+                            to: '/approved-requests',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <PlusCircleFilled aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'Create new position',
+                            to: '/my-positions/create',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <PartitionOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'My organizations',
+                            to: '/org-chart',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <FileTextOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'Job profiles',
+                            to: '/job-profiles',
+                            hideTitle: true,
+                          },
+                          {
+                            icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'My positions',
+                            to: '/my-positions',
                             hideTitle: true,
                           },
                         ]}
@@ -179,10 +257,10 @@ export const AppLayout = () => {
                     ) : (
                       <>
                         <div style={{ padding: '10px 10px 2px 10px' }}>
-                          <Link to="/total-compensation/create-profile">
+                          <Link to="/draft-job-profiles/create">
                             <Button
                               type="primary"
-                              icon={<FileAddOutlined style={{ fontSize: '1.25rem' }} />}
+                              icon={<FileAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />}
                               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
                               Create new profile
@@ -192,20 +270,34 @@ export const AppLayout = () => {
 
                         <Menu
                           style={{ transition: 'width 0.2s ease-out', width: '200px' }}
-                          defaultOpenKeys={['sub1']}
                           mode="inline"
+                          selectedKeys={selectedKeys}
+                          onClick={handleMenuClick}
                           items={totalCompensationMenuItems}
                         />
 
-                        <SiderNav
-                          collapsed={collapsed}
-                          items={[
-                            {
-                              icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
-                              title: 'Approved Reqs',
-                              to: '/total-compensation/approved-requests',
-                            },
-                          ]}
+                        <Link to="/approved-requests">
+                          <Menu
+                            style={{ transition: 'width 0.2s ease-out', width: '200px' }}
+                            mode="inline"
+                            selectedKeys={selectedKeys}
+                            onClick={handleMenuClick}
+                          >
+                            <Menu.Item
+                              icon={<CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />}
+                              key="/approved-requests"
+                            >
+                              Approved Reqs
+                            </Menu.Item>
+                          </Menu>
+                        </Link>
+
+                        <Menu
+                          style={{ transition: 'width 0.2s ease-out', width: '200px', marginTop: '10px' }}
+                          mode="inline"
+                          selectedKeys={selectedKeys}
+                          onClick={handleMenuClick}
+                          items={hiringManagerMenuItems}
                         />
                       </>
                     )}
@@ -217,7 +309,7 @@ export const AppLayout = () => {
                       collapsed={collapsed}
                       items={[
                         {
-                          icon: <CheckCircleOutlined style={{ fontSize: '1.25rem' }} />,
+                          icon: <CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                           title: 'My tasks',
                           to: '/',
                         },
@@ -228,7 +320,8 @@ export const AppLayout = () => {
               </div>
               <div style={{ borderTop: '1px solid #CCC', flexShrink: 0 }}>
                 <Button
-                  icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                  aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+                  icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
                   onClick={() => setCollapsed(!collapsed)}
                   type="link"
                   style={{

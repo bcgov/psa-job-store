@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Space, Typography } from 'antd';
-import { useParams } from 'react-router-dom';
+import { Button, Space, Tooltip, Typography } from 'antd';
+import DOMPurify from 'dompurify';
+import { useSearchParams } from 'react-router-dom';
 import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 
 const { Title, Text, Paragraph } = Typography;
@@ -11,16 +12,20 @@ export interface JobProfileCardProps {
 }
 
 export const JobProfileCard = ({ data }: JobProfileCardProps) => {
-  const params = useParams();
+  const [searchParams] = useSearchParams();
 
-  // console.log('card data: ', data.classifications);
+  // console.log('card data: ', data, searchParams);
+
   return (
     <Space
       direction="vertical"
+      data-testid="job-profile-card"
       style={{
         width: '100%',
         cursor: 'pointer',
-        borderLeft: data.id === +(params.id ?? 0) ? '4px solid #5a7def' : '4px solid transparent',
+        borderLeft:
+          data.id === +(searchParams.get('selectedProfile') ?? 0) ? '4px solid #0070E0' : '4px solid transparent',
+        background: data.id === +(searchParams.get('selectedProfile') ?? 0) ? '#F0F8FF' : 'white',
         padding: '1rem',
       }}
     >
@@ -29,14 +34,40 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       </Title>
       <div>
         <Text type="secondary" data-cy="card-classification">
-          {data.classifications?.map((c) => c.classification.code).join(', ')} | Job Store # {data.number}
+          <b style={{ marginTop: '-0.8rem', marginBottom: '1rem', display: 'block' }}>
+            {data.classifications?.map((c) => c.classification.name).join(', ')}
+          </b>
         </Text>
-        <br />
-        <Text type="secondary">Reports to excluded manager</Text>
+        <Text type="secondary" data-cy="card-info">
+          # {data.number} |{' '}
+          {data.all_organizations ? (
+            <>All ministries</>
+          ) : data.organizations.length > 1 ? (
+            <Tooltip
+              title={data.organizations.map((o) => (
+                <div key={o.organization.name}>{o.organization.name}</div>
+              ))}
+            >
+              {data.organizations.length} Ministries
+            </Tooltip>
+          ) : (
+            data.organizations[0]?.organization.name
+          )}{' '}
+          {data.role_type && <>| {data.role_type.name}</>}
+        </Text>
       </div>
       <div>
         <Text strong>Context: </Text>
-        <Paragraph ellipsis={{ rows: 3 }}>{data.context.description}</Paragraph>
+
+        <Paragraph ellipsis={{ rows: 3 }}>
+          <span
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(
+                typeof data?.context === 'string' ? data.context : data.context.description ?? '',
+              ),
+            }}
+          ></span>
+        </Paragraph>
       </div>
       <div>
         <Text strong>Overview:</Text>

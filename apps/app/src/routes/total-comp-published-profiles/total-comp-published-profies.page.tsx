@@ -3,17 +3,14 @@
 import { useState } from 'react';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
-import {
-  useGetJobProfilesDraftsCareerGroupsQuery,
-  useGetJobProfilesDraftsMinistriesQuery,
-} from '../../redux/services/graphql-api/job-profile.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { JobProfileSearch } from '../job-profiles/components/job-profile-search.component';
 import TotalCompProfilesTable from '../total-comp-draft-profiles/components/total-comp-draft-profiles-table.component';
 
 export const TotalCompPublishedProfilesPage = () => {
-  const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
-  const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
+  // const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
+  // console.log('ministriesData: ', ministriesData);
+  // const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
 
   const [hasData, setHasData] = useState(false);
 
@@ -21,7 +18,7 @@ export const TotalCompPublishedProfilesPage = () => {
     setHasData(isDataAvailable);
   };
 
-  if (!ministriesData) return <>Loading..</>;
+  // if (!ministriesData) return <LoadingSpinnerWithMessage />;
 
   return (
     <>
@@ -31,10 +28,10 @@ export const TotalCompPublishedProfilesPage = () => {
         {hasData && (
           <JobProfileSearch
             searchPlaceHolderText={'Search by job title or job store number'}
-            additionalFilters={true}
+            // additionalFilters={true}
             fullWidth={true}
-            ministriesData={ministriesData}
-            careerGroupData={careerGroupData}
+            // ministriesData={ministriesData}
+            // careerGroupData={careerGroupData}
           />
         )}
 

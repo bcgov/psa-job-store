@@ -1,5 +1,5 @@
 # Use the official Node.js 18 image.
-FROM node:18.17.0 AS base
+FROM node:20.11.1-alpine AS base
 
 # Create and change to the app directory.
 FROM base AS builder
@@ -25,6 +25,8 @@ COPY packages/tsconfig ./tsconfig/
 COPY apps/api ./apps/api
 # generates the prisma client
 RUN npx -w api prisma generate
+# build common-kit
+RUN npm -w common-kit run build
 #generates the dist folder for nest to run
 RUN npm -w api run build
 
@@ -40,7 +42,6 @@ ENV NODE_ENV "production"
 
 WORKDIR /usr/src
 COPY --from=builder /tmp/build ./
-COPY /apps/api/start.sh ./apps/api/start.sh
 COPY /apps/api/prisma ./apps/api/prisma
 COPY /apps/api/package*.json ./apps/api/
 
@@ -51,11 +52,10 @@ WORKDIR /usr/src/apps/api/
 RUN mkdir /.npm
 RUN chgrp -R 0 /.npm && chmod -R g=u /.npm
 
-# Set execute permissions for the start.sh script.
-RUN chmod +x ./start.sh
+RUN mkdir -p /tmp/log
 
 # Expose port 4000
 EXPOSE 4000
 
 # Start the application
-CMD ["./start.sh"]
+CMD ["npm","run","start:prod"]

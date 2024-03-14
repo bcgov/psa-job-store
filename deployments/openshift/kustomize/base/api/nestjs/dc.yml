@@ -31,6 +31,12 @@ spec:
         ports:
         - containerPort: 3000
           protocol: TCP
+        volumeMounts:
+            - name: seed-volume
+              mountPath: /usr/src/apps/api/prisma/seed.ts
+              subPath: seed.ts
+            - name: log-volume
+              mountPath: /tmp/log
         envFrom:
         # - configMapRef:
         #     name: api-configmap
@@ -41,4 +47,43 @@ spec:
             cpu: 100m 
             memory: 500Mi 
           limits:
-            cpu: 200m 
+            cpu: 300m 
+            memory: 750Mi
+      - name: filebeat
+        image: docker.elastic.co/beats/filebeat:7.10.0
+        args: ["-c", "/usr/share/filebeat/filebeat.yml", "-e"]
+        volumeMounts:
+        - name: log-volume
+          mountPath: /tmp/log/
+        - name: filebeat-config
+          mountPath: /usr/share/filebeat/filebeat.yml
+          subPath: filebeat.yml
+        resources:
+          requests:
+            cpu: 10m 
+            memory: 50Mi 
+          limits:
+            cpu: 20m 
+            memory: 100Mi
+      - name: logrotate
+        image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/logrotate:develop-latest  # Specify your logrotate image
+        volumeMounts:
+          - name: log-volume
+            mountPath: /tmp/log  # Ensure this is the same path as in the nestjs-app
+        command: ["/usr/local/bin/logrotate-script.sh"]  # Command to run logrotate
+        resources:
+          requests:
+            cpu: 10m 
+            memory: 50Mi 
+          limits:
+            cpu: 20m 
+            memory: 100Mi
+      volumes:
+      - name: log-volume
+        emptyDir: {}
+      - name: filebeat-config
+        configMap:
+          name: filebeat-configmap
+      - name: seed-volume
+        secret:
+          secretName: seed-secret

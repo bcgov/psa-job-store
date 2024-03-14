@@ -29,3 +29,42 @@ the input box renders at the beginning of the box, instead of after placeholder
     padding: 2px 8px;
     box-sizing: border-box;
 }
+
+/* Makes the tree view styling same as select component - why is it different in the first place?.. */
+.jobFamilyStreamFilter .ant-select-selection-overflow-item-rest, .jobFamilyStreamFilter.no-search .ant-select-selection-overflow-item{
+    /* display:none; */
+    height: 0;
+    width: 0;
+    overflow: visible;
+    color: hsl(0, 0%, 50%) !important;
+}
+
+.jobFamilyStreamFilter.search-active .ant-select-selection-overflow-item-rest{
+    display:none;
+}
+
+.jobFamilyStreamFilter .ant-select-selection-placeholder{
+    color: hsl(0, 0%, 50%) !important;
+}
+
+.jobFamilyStreamFilter  .ant-select-selection-item-content{
+    text-overflow: initial;
+}
+
+.jobFamilyStreamFilter .ant-select-selection-item {
+    width: 100%;
+    position: absolute;
+    top: -14px;
+    padding-left:0px;
+    left: 6px;
+    background: white;
+}
+
+.jobFamilyStreamFilter.ant-select{
+    height:100%;
+}
+
+.jobFamilyStreamFilter .ant-select-selector{
+    border-color: hsl(0, 0%, 80%) !important;
+    border-radius: 4px;
+}

@@ -20,6 +20,8 @@ export class ClassificationService {
     return this.prisma.classification.findUnique({ ...args });
   }
 
+  // classifications tree data algorithm
+
   async getGroupedClassifications(args: FindManyClassificationArgs): Promise<any> {
     const classifications = await this.prisma.classification.findMany({
       where: {
@@ -58,7 +60,9 @@ export class ClassificationService {
     let tree = this.convertToNestedArray(grouped);
     tree = this.unwrapSingleChildGroups(tree);
     tree = this.simplifyStructure(tree);
+    // console.log('tree before sort: ', JSON.stringify(tree));
     tree = this.sortItemsByName(tree);
+    // console.log('tree after sort: ', JSON.stringify(tree));
     return tree;
   }
 
@@ -94,6 +98,7 @@ export class ClassificationService {
 
   private simplifyStructure(nodes) {
     return nodes.map((node) => {
+      // console.log('checking node: ', JSON.stringify(node));
       // Merge the children into items if they exist
       if (node.children) {
         node.items = (node.items || []).concat(this.simplifyStructure(node.children));
@@ -103,10 +108,13 @@ export class ClassificationService {
       // If there's only one item in the node and no nested items within it,
       // return the single item with the groupName of the parent node
       if (node.items && node.items.length === 1 && (!node.items[0].items || node.items[0].items.length === 0)) {
-        return {
+        // console.log('SINGLE');
+        const ret = {
           ...node.items[0],
           groupName: node.groupName,
         };
+        // console.log('ret: ', JSON.stringify(ret));
+        return ret;
       }
 
       // For each item, if it has its own items, recursively simplify them

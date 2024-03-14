@@ -4,6 +4,7 @@ import { LocationWhereInput } from './location-where.input';
 import { StringFilter } from '../prisma/string-filter.input';
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { DepartmentListRelationFilter } from '../department/department-list-relation-filter.input';
+import { PositionRequestListRelationFilter } from '../position-request/position-request-list-relation-filter.input';
 
 @InputType()
 export class LocationWhereUniqueInput {
@@ -36,4 +37,7 @@ export class LocationWhereUniqueInput {
 
   @Field(() => DepartmentListRelationFilter, { nullable: true })
   departments?: DepartmentListRelationFilter;
+
+  @Field(() => PositionRequestListRelationFilter, { nullable: true })
+  positionRequests?: PositionRequestListRelationFilter;
 }

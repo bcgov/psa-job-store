@@ -1,8 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { graphqlRequestBaseQuery } from '@rtk-query/graphql-request-base-query';
+import { notification } from 'antd';
 import { VITE_BACKEND_URL, VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../../../../envConfig';
 import { oidcConfig } from '../../../main';
+
+interface GraphQLError {
+  message: string;
+  extensions?: {
+    code: string;
+  };
+}
+
+interface GraphQLResponseMeta {
+  response: {
+    errors: GraphQLError[];
+    data: any;
+    status: number;
+    headers: {
+      map: Record<string, string>;
+    };
+  };
+}
 
 const rawBaseQuery = graphqlRequestBaseQuery({
   url: `${VITE_BACKEND_URL}/graphql`,
@@ -35,24 +54,59 @@ function checkForExpiredSessionError(response: any) {
 }
 
 const baseQuery = async (args: any, api: any, extraOptions: any) => {
-  const result = await rawBaseQuery(args, api, extraOptions);
+  let errorToastShown = false;
+  try {
+    const result = await rawBaseQuery(args, api, extraOptions);
 
-  const isSessionExpired = checkForExpiredSessionError(result);
-
-  if (isSessionExpired) {
-    if (!sessionStorage.getItem('redirectPath')) {
-      const currentUrl = new URL(window.location.href);
-      const currentPath = currentUrl.pathname + currentUrl.search;
-      sessionStorage.setItem('redirectPath', encodeURIComponent(currentPath));
+    const isSessionExpired = checkForExpiredSessionError(result);
+    if (isSessionExpired) {
+      if (!sessionStorage.getItem('redirectPath')) {
+        const currentUrl = new URL(window.location.href);
+        const currentPath = currentUrl.pathname + currentUrl.search;
+        sessionStorage.setItem('redirectPath', encodeURIComponent(currentPath));
+      }
+      window.location.href = '/auth/login';
     }
-    window.location.href = '/auth/login';
-  }
 
-  return result;
+    // Assert the type of 'meta' to be GraphQLResponseMeta
+    const meta = result.meta as GraphQLResponseMeta | undefined;
+
+    // Check for GraphQL errors in the meta field
+    if (meta && meta.response && meta.response.errors) {
+      // Extract the first error message
+      const errorCode = meta.response.errors[0]?.extensions?.code;
+      const errorMessage = meta.response.errors[0]?.message;
+
+      // if it's unauthorized, do not show the error toast -  the system will handle the redirect to login page
+      if (errorCode == 'UNAUTHENTICATED') return result;
+
+      errorToastShown = true;
+      // Display an error notification
+      notification.error({
+        duration: 0,
+        message: 'Error',
+        description: errorMessage,
+      });
+
+      // Throw a custom error with the extracted message
+      throw new Error(errorMessage);
+    }
+
+    return result;
+  } catch (error) {
+    // Handle any other unexpected errors
+    if (!errorToastShown)
+      notification.error({
+        duration: 0,
+        message: 'Unknown Error',
+        description: 'Unknown error has occurred.',
+      });
+    throw error;
+  }
 };
 
 export const graphqlApi = createApi({
   baseQuery,
-  tagTypes: ['positionRequest', 'jobProfiles'],
+  tagTypes: ['positionRequest', 'positionRequestsCount', 'jobProfiles'],
   endpoints: () => ({}),
 });

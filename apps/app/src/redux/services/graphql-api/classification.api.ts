@@ -37,6 +37,27 @@ export const classificationApi = graphqlApi.injectEndpoints({
                 name
                 code
                 grade
+                employee_group_id
+              }
+            }
+          `,
+        };
+      },
+    }),
+    getFilteredClassifications: build.query<GetClassificationsResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query Classifications {
+              classifications(
+                orderBy: [{ code: asc }, { id: asc }]
+                where: { effective_status: { equals: "Active" }, peoplesoft_id: { equals: "BCSET" } }
+              ) {
+                id
+                name
+                code
+                grade
+                employee_group_id
               }
             }
           `,
@@ -55,6 +76,7 @@ export const classificationApi = graphqlApi.injectEndpoints({
                 }
               ) {
                 groupName
+                id
                 items {
                   id
                   name
@@ -104,5 +126,9 @@ export const classificationApi = graphqlApi.injectEndpoints({
   }),
 });
 
-export const { useGetClassificationsQuery, useLazyGetClassificationsQuery, useGetGroupedClassificationsQuery } =
-  classificationApi;
+export const {
+  useGetClassificationsQuery,
+  useLazyGetClassificationsQuery,
+  useGetGroupedClassificationsQuery,
+  useGetFilteredClassificationsQuery,
+} = classificationApi;

@@ -8,17 +8,18 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
   const { data } = useGetOrganizationsQuery();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const ministriesData = data?.organizations || [];
+  // console.log('ministriesData: ', ministriesData, value);
   // const [selectedMinistries, setSelectedMinistries] = useState([] as number[]);
 
   const handleSelectAll = (checked: any) => {
-    console.log('handleSelectAll');
+    // console.log('handleSelectAll');
     const allIds = ministriesData.map((item) => item.id);
     // setSelectedMinistries(checked ? allIds : []);
     setValue('all_organizations', checked);
     // onChange(checked ? allIds : []);
 
     // Update the 'reportToRelationship' form variable
-    console.log('setting minisries from select all: ', checked ? allIds : []);
+    // console.log('setting minisries from select all: ', checked ? allIds : []);
     setValue('ministries', checked ? allIds : []);
   };
 
@@ -33,7 +34,7 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
       {isMultiSelect && (
         <Checkbox
           onChange={(e) => {
-            console.log('onChange');
+            // console.log('onChange');
             handleSelectAll(e.target.checked);
           }}
           checked={allOrganizations}

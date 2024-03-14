@@ -8,6 +8,7 @@ import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { EnumPositionRequestStatusFilter } from '../prisma/enum-position-request-status-filter.input';
 import { JobProfileRelationFilter } from '../job-profile/job-profile-relation-filter.input';
 import { DepartmentRelationFilter } from '../department/department-relation-filter.input';
+import { LocationRelationFilter } from '../location/location-relation-filter.input';
 
 @InputType()
 export class PositionRequestWhereInput {
@@ -24,6 +25,12 @@ export class PositionRequestWhereInput {
   id?: IntFilter;
 
   @Field(() => IntFilter, { nullable: true })
+  crm_id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
+  crm_assigned_to_account_id?: IntFilter;
+
+  @Field(() => IntFilter, { nullable: true })
   step?: IntFilter;
 
   @Field(() => StringFilter, { nullable: true })
@@ -36,6 +43,9 @@ export class PositionRequestWhereInput {
   parent_job_profile_id?: IntFilter;
 
   @Field(() => JsonFilter, { nullable: true })
+  crm_json?: JsonFilter;
+
+  @Field(() => JsonFilter, { nullable: true })
   profile_json?: JsonFilter;
 
   @Field(() => JsonFilter, { nullable: true })
@@ -43,9 +53,6 @@ export class PositionRequestWhereInput {
 
   @Field(() => UuidFilter, { nullable: true })
   user_id?: UuidFilter;
-
-  @Field(() => UuidFilter, { nullable: true })
-  classificationAssignedTo?: UuidFilter;
 
   @Field(() => StringFilter, { nullable: true })
   title?: StringFilter;
@@ -80,9 +87,30 @@ export class PositionRequestWhereInput {
   @Field(() => DateTimeFilter, { nullable: true })
   updated_at?: DateTimeFilter;
 
+  @Field(() => UuidFilter, { nullable: true })
+  shareUUID?: UuidFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_work_location_id?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_department_id?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_excluded_mgr_position_number?: StringFilter;
+
+  @Field(() => StringFilter, { nullable: true })
+  additional_info_comments?: StringFilter;
+
   @Field(() => JobProfileRelationFilter, { nullable: true })
   parent_job_profile?: JobProfileRelationFilter;
 
   @Field(() => DepartmentRelationFilter, { nullable: true })
   department?: DepartmentRelationFilter;
+
+  @Field(() => LocationRelationFilter, { nullable: true })
+  workLocation?: LocationRelationFilter;
+
+  @Field(() => DepartmentRelationFilter, { nullable: true })
+  paylist_department?: DepartmentRelationFilter;
 }

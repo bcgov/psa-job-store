@@ -47,14 +47,37 @@ export interface GetPositionRequestResponseContent {
   status?: string;
   department_id?: string;
   approved_at?: string;
+  updated_at?: string;
   email?: string;
+  shareUUID?: string;
   parent_job_profile?: {
     number: number;
   };
+
+  additional_info_work_location_id?: string;
+  additional_info_department_id?: string;
+  additional_info_excluded_mgr_position_number?: string;
+  additional_info_comments?: string;
+
+  crm_id?: string;
 }
 
 export interface GetPositionRequestResponse {
-  positionRequest: GetPositionRequestResponseContent;
+  positionRequest?: GetPositionRequestResponseContent;
+  sharedPositionRequest?: GetPositionRequestResponseContent; // this is for GetSharedPositionRequestResponse
+}
+
+export interface SubmitPositionRequestResponse {
+  submitPositionRequest: GetPositionRequestResponseContent;
+}
+
+export interface PositionNeedsReviewResponse {
+  positionNeedsRivew: PositionNeedsReviewResponseContent;
+}
+
+export interface PositionNeedsReviewResponseContent {
+  result: boolean;
+  reasons: string[];
 }
 
 export interface PositionRequestStatusCounts {
@@ -74,7 +97,8 @@ export interface GetPositionsRequestResponse {
 }
 
 export interface GetPositionRequestArgs {
-  id: number;
+  id?: number;
+  uuid?: string; // this is for GetSharedPositionRequestArgs
 }
 
 export interface CreatePositionRequestResponse {
@@ -93,6 +117,19 @@ export interface UpdatePositionRequestInput {
   classification_id?: string;
   submission_id?: string;
   status?: string;
+
+  workLocation?: {
+    connect: {
+      id: string;
+    };
+  };
+  paylist_department?: {
+    connect: {
+      id: string;
+    };
+  };
+  additional_info_excluded_mgr_position_number?: string;
+  additional_info_comments?: string;
   parent_job_profile?: {
     connect: {
       id: number;
@@ -103,6 +140,14 @@ export interface UpdatePositionRequestInput {
       id: string;
     };
   };
+}
+
+export interface SubmitPositionRequestInput {
+  id: number;
+}
+
+export interface DeletePositionRequestInput {
+  id: number;
 }
 
 export interface GetPositionRequestsArgs {
@@ -182,9 +227,11 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 status
                 updated_at
                 submitted_at
+                shareUUID
                 parent_job_profile {
                   number
                 }
+                crm_id
               }
               positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
                 draft
@@ -206,7 +253,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     getPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
-      providesTags: () => ['positionRequest'],
+      providesTags: ['positionRequest'],
       // result
       //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
       //   : [{ type: 'PositionRequest' as const, id: 'id' }],
@@ -236,6 +283,54 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   parent_job_profile {
                     number
                   }
+                  additional_info_work_location_id
+                  additional_info_department_id
+                  additional_info_excluded_mgr_position_number
+                  additional_info_comments
+                  crm_id
+                  shareUUID
+              }
+          }
+          `,
+        };
+      },
+    }),
+    getSharedPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
+      providesTags: ['positionRequest'],
+      // result
+      //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
+      //   : [{ type: 'PositionRequest' as const, id: 'id' }],
+      query: (args: GetPositionRequestArgs) => {
+        return {
+          document: gql`
+            query SharedPositionRequest {
+              sharedPositionRequest(uuid: "${args.uuid}") {
+                  id
+                  step
+                  reports_to_position_id
+                  parent_job_profile_id
+                  profile_json
+                  orgchart_json
+                  user_id
+                  user_name
+                  email
+                  title
+                  position_number
+                  classification_code
+                  submission_id
+                  status
+                  updated_at
+                  submitted_at
+                  department_id
+                  approved_at
+                  parent_job_profile {
+                    number
+                  }
+                  additional_info_work_location_id
+                  additional_info_department_id
+                  additional_info_excluded_mgr_position_number
+                  additional_info_comments
+                  crm_id
               }
           }
           `,
@@ -243,6 +338,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     createPositionRequest: build.mutation<CreatePositionRequestResponse, CreatePositionRequestInput>({
+      invalidatesTags: ['positionRequestsCount'],
       query: (input: CreatePositionRequestInput) => {
         return {
           document: gql`
@@ -273,6 +369,56 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               ...input,
               id: undefined,
             },
+          },
+        };
+      },
+    }),
+    submitPositionRequest: build.mutation<SubmitPositionRequestResponse, SubmitPositionRequestInput>({
+      invalidatesTags: ['positionRequest'],
+      query: (input: SubmitPositionRequestInput) => {
+        return {
+          document: gql`
+            mutation SubmitPositionRequest($id: Int!) {
+              submitPositionRequest(id: $id) {
+                id
+                step
+                reports_to_position_id
+                department_id
+                parent_job_profile_id
+                profile_json
+                user_id
+                title
+                position_number
+                classification_id
+                classification_code
+                user_name
+                email
+                submission_id
+                approved_at
+                status
+                updated_at
+              }
+            }
+          `,
+          variables: {
+            id: input.id,
+          },
+        };
+      },
+    }),
+    deletePositionRequest: build.mutation<void, DeletePositionRequestInput>({
+      invalidatesTags: ['positionRequest', 'positionRequestsCount'],
+      query: (input: DeletePositionRequestInput) => {
+        return {
+          document: gql`
+            mutation DeletePositionRequest($id: Int!) {
+              deletePositionRequest(id: $id) {
+                id
+              }
+            }
+          `,
+          variables: {
+            id: input.id,
           },
         };
       },
@@ -342,6 +488,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     getPositionRequestsCount: build.query<PositionRequestStatusCountsResponse, GetPositionRequestsArgs | void>({
+      providesTags: ['positionRequestsCount'],
       query: (args: GetPositionRequestsArgs = {}) => {
         return {
           document: gql`
@@ -361,6 +508,23 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    positionNeedsRivew: build.query<PositionNeedsReviewResponse, GetPositionRequestArgs>({
+      query: (args: GetPositionRequestArgs) => {
+        return {
+          document: gql`
+            query PositionNeedsRivew {
+              positionNeedsRivew(id: ${args.id}) {
+                result
+                reasons
+              }
+            }
+          `,
+          variables: {
+            id: args.id,
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -372,9 +536,13 @@ export const {
   useLazyGetPositionRequestQuery,
   useCreatePositionRequestMutation,
   useUpdatePositionRequestMutation,
+  useSubmitPositionRequestMutation,
+  useDeletePositionRequestMutation,
   useGetPositionRequestsCountQuery,
   useGetPositionRequestClassificationsQuery,
   useGetPositionRequestJobStoreNumbersQuery,
   useGetPositionRequestStatusesQuery,
   useGetPositionRequestSubmittedByQuery,
+  usePositionNeedsRivewQuery,
+  useGetSharedPositionRequestQuery,
 } = positionRequestApi;

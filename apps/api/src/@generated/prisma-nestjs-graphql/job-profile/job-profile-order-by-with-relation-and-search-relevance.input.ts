@@ -84,6 +84,9 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrder, { nullable: true })
   willingness_statements?: keyof typeof SortOrder;
 
+  @Field(() => SortOrder, { nullable: true })
+  optional_requirements?: keyof typeof SortOrder;
+
   @Field(() => SortOrderInput, { nullable: true })
   security_screenings?: SortOrderInput;
 

@@ -12,6 +12,7 @@ import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/pos
 import { WizardProvider } from '../../wizard/components/wizard.provider';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 import { JobProfileSearch } from './job-profile-search.component';
+import { JobProfile } from './job-profile.component';
 
 const { Text, Title } = Typography;
 const { useBreakpoint } = Grid;
@@ -20,16 +21,15 @@ interface JobProfilesContentProps {
   searchParams: URLSearchParams;
   // searchQuery: string | null;
   onSelectProfile?: (profile: JobProfileModel) => void;
-  onUseProfile?: () => void;
+  // onUseProfile?: () => void;
 }
 
 const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile }) => {
-  // , onUseProfile todo: undo
   const dispatch = useAppDispatch();
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
   const [classificationIdFilter, setClassificationIdFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(2); // Default page size, adjust as needed
+  const [pageSize, setPageSize] = useState(10); // Default page size, adjust as needed
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
   const navigate = useNavigate();
   const { positionRequestId } = useParams();
@@ -74,10 +74,11 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     // Search terms need to be joined with specific syntax, <-> in this case
     // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
     const search = searchParams.get('search');
-    const organizationFilter = searchParams.get('organization_id__in');
+    const organizationFilter = searchParams.get('ministry_id__in');
     const jobRoleFilter = searchParams.get('job_role_id__in');
     const classificationFilter = searchParams.get('classification_id__in');
     const jobFamilyFilter = searchParams.get('job_family_id__in');
+    const jobStreamFilter = searchParams.get('job_stream_id__in');
     setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
 
     trigger({
@@ -100,8 +101,12 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
           ...(organizationFilter != null
             ? [
                 {
-                  organization_id: {
-                    in: JSON.parse(`[${organizationFilter.split(',').map((v) => `"${v}"`)}]`),
+                  organizations: {
+                    some: {
+                      organization_id: {
+                        in: JSON.parse(`[${organizationFilter.split(',').map((v) => `"${v}"`)}]`),
+                      },
+                    },
                   },
                 },
               ]
@@ -132,6 +137,13 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
                   role_id: {
                     in: JSON.parse(`[${jobRoleFilter}]`),
                   },
+                },
+              ]
+            : []),
+          ...(jobStreamFilter !== null
+            ? [
+                {
+                  streams: { some: { streamId: { in: JSON.parse(`[${jobStreamFilter}]`) } } },
                 },
               ]
             : []),
@@ -187,7 +199,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
   };
 
   const getBasePath = (path: string) => {
-    if (positionRequestId) return `/position-request/${positionRequestId}`;
+    if (positionRequestId) return `/my-positions/${positionRequestId}`;
 
     const pathParts = path.split('/');
     // Check if the last part is a number (ID), if so, remove it
@@ -200,28 +212,29 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
   // console.log('params: ', params, 'searchParams: ', searchParams.toString());
   const renderJobProfile = () => {
     return params.id || searchParams.get('selectedProfile') ? (
-      // todo: undo
-      // <JobProfile onUseProfile={onUseProfile} />
-      <div></div>
+      <JobProfile />
     ) : (
       <div style={{ marginTop: '16rem' }} data-testid="job-profile-empty">
         <Empty
           description={
             <Space direction="vertical" style={{ userSelect: 'none' }}>
-              <Title level={1}>Select a Job Profile</Title>
-              <Text>Nothing is selected</Text>
+              <Title style={{ margin: 0 }} level={1}>
+                Select a job profile
+              </Title>
+              <Text>Choose a profile from the sidebar on the left.</Text>
             </Space>
           }
-          image={<FileTextFilled style={{ fontSize: '60pt' }} />}
+          image={<FileTextFilled style={{ fontSize: '60pt', color: '#52A8FF' }} />}
         />
       </div>
     );
   };
 
+  // console.log('jobProfilesLoading || isLoading: ', jobProfilesLoading, isLoading);
   return (
     <>
       <WizardProvider>
-        <JobProfileSearch />
+        <JobProfileSearch fullWidth={true} />
         <Row justify="center" gutter={16}>
           {screens['xl'] === true ? (
             <>

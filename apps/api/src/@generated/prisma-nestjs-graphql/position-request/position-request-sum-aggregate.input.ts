@@ -7,6 +7,12 @@ export class PositionRequestSumAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  crm_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  crm_assigned_to_account_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   step?: true;
 
   @Field(() => Boolean, { nullable: true })

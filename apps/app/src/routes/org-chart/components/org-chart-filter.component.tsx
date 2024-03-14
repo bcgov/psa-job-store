@@ -1,4 +1,4 @@
-import { Col, Row, Select, Space } from 'antd';
+import { Col, Row, Select, Space, Typography } from 'antd';
 import { useGetDepartmentsQuery } from '../../../redux/services/graphql-api/department.api';
 
 interface OrgChartFilterProps {
@@ -27,18 +27,24 @@ export const OrgChartFilter = ({ setSelectedDepartment, selectedDepartment, defa
             allowClear={true}
             loading={isLoading}
             showSearch
-            style={{ width: 200 }}
+            style={{ width: 250 }}
             placeholder="Choose a Department"
             optionFilterProp="children"
             onSelect={setSelectedDepartment}
             onClear={() => setSelectedDepartment(null)}
-            filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input)}
+            filterOption={(input, option) => (option?.filterKey ?? '').toLowerCase().includes(input.toLowerCase())}
             filterSort={(optionA, optionB) =>
-              (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+              (optionA?.sortKey ?? '').toLowerCase().localeCompare((optionB?.sortKey ?? '').toLowerCase())
             }
             options={data?.departments.map((department) => ({
               value: department.id,
-              label: department.name,
+              label: (
+                <span title={`${department.name} (${department.id})`}>
+                  {department.name} <Typography.Text type="secondary">({department.id})</Typography.Text>
+                </span>
+              ),
+              sortKey: department.name.toLowerCase(), // Additional property for sorting
+              filterKey: department.name.toLowerCase() + ' ' + department.id, // Additional property for filtering
             }))}
             value={selectedDepartment}
             defaultValue={defaultValue}

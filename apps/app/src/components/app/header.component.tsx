@@ -1,8 +1,9 @@
 import { LogoutOutlined, QuestionCircleOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Col, Layout, Popover, Row, Typography } from 'antd';
+import { Button, Col, Layout, Menu, Row, Tooltip, Typography } from 'antd';
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { useLazyLogoutQuery } from '../../redux/services/graphql-api/profile.api';
+import AcessiblePopoverMenu from './common/components/accessible-popover-menu';
 import styles from './header.module.css';
 
 const { Header } = Layout;
@@ -35,18 +36,24 @@ export const AppHeader = () => {
   };
 
   const content = (
-    <div>
-      <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
+    // <div>
+    //   <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
+    //     Logout
+    //   </Button>
+    // </div>
+
+    <Menu selectedKeys={[]}>
+      <Menu.Item key="edit" icon={<LogoutOutlined aria-hidden />} data-testid="menu-option-edit" onClick={handleLogout}>
         Logout
-      </Button>
-    </div>
+      </Menu.Item>
+    </Menu>
   );
 
   return (
     <Header className={styles.appHeader}>
-      <Row align="middle" justify="space-between" style={{ width: '100%' }}>
+      <Row align="middle" justify="space-between" style={{ width: '100%' }} role="navigation">
         <Col className={styles.left}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center' }} aria-label="Navigate to homepage">
             <img className={styles.bcLogo} src="/BC_logo.png" alt="BC Logo" />
             <div className={styles.titleContainer}>
               <Text className={styles.titleContent}>Job Store</Text>
@@ -59,25 +66,37 @@ export const AppHeader = () => {
           {auth.isAuthenticated && (
             <div className={styles.headerToolbar}>
               <div className={styles.iconWrapper}>
-                <QuestionCircleOutlined style={{ color: 'white' }} />
+                <a href="#" aria-label="Help - under construction">
+                  <Tooltip title="Help - under construction" trigger={'hover'}>
+                    <QuestionCircleOutlined style={{ color: 'white' }} aria-hidden />
+                  </Tooltip>
+                </a>
               </div>
-              {/* <div className={styles.userContainer}>
-              <UserOutlined style={{ color: 'white' }} />
-              <div className={styles.userTextContainer}>
-                <Text className={styles.userText}>{auth.user?.profile.name}</Text>
-              </div>
-            </div> */}
 
-              <Popover content={content} trigger="click">
+              <AcessiblePopoverMenu
+                triggerButton={
+                  <Button
+                    tabIndex={-1}
+                    style={{ background: 'none', border: 'none', fontWeight: '600' }}
+                    icon={<UserOutlined style={{ color: 'white' }} aria-hidden />}
+                  >
+                    <Text style={{ color: 'white' }}>{auth.user?.profile.name}</Text>
+                  </Button>
+                }
+                content={content}
+                ariaLabel="Open user menu"
+              ></AcessiblePopoverMenu>
+
+              {/* <Popover content={content} trigger="click">
                 <Button
                   aria-haspopup="true"
                   aria-expanded="false"
                   style={{ background: 'none', border: 'none', fontWeight: '600' }}
-                  icon={<UserOutlined style={{ color: 'white' }} />}
+                  icon={<UserOutlined style={{ color: 'white' }} aria-hidden />}
                 >
                   <Text style={{ color: 'white' }}>{auth.user?.profile.name}</Text>
                 </Button>
-              </Popover>
+              </Popover> */}
             </div>
           )}
         </Col>

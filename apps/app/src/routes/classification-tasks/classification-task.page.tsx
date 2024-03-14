@@ -13,8 +13,6 @@ import {
   Card,
   Checkbox,
   Col,
-  Collapse,
-  Descriptions,
   Divider,
   Dropdown,
   Result,
@@ -22,21 +20,24 @@ import {
   Space,
   Tabs,
   Typography,
+  message,
 } from 'antd';
 import { MenuProps } from 'antd/es/menu';
 import TabPane from 'antd/es/tabs/TabPane';
-import { cloneElement, useEffect, useRef, useState } from 'react';
+import copy from 'copy-to-clipboard';
+import { cloneElement } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
-import { JobProfile } from '../job-profiles/components/job-profile.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
-import WizardEditControlBar from '../wizard/components/wizard-edit-control-bar';
-import { diffLegendContent } from '../wizard/wizard-review.page';
 import './classification-tasks.page.css';
+import { JobProfileWithDiff } from './components/job-profile-with-diff.component';
+import { ServiceRequestDetails } from './components/service-request-details.component';
 // import '../wizard/wizard-review.page.css';
 // import './total-comp-approved-request.page.css';
 const { Text, Paragraph } = Typography;
@@ -52,169 +53,6 @@ export const ClassificationTaskPage = () => {
     id: parseInt(positionRequestId),
   });
 
-  const submissionDetailsItems = [
-    {
-      key: 'submittedBy',
-      label: 'Submitted by',
-      children: <div>{data?.positionRequest?.user_name}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-    },
-    {
-      key: 'submittedAt',
-      label: 'Submitted at',
-      children: <div>{data?.positionRequest?.approved_at}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-    },
-    {
-      key: 'ticketId',
-      label: 'CRM service request',
-      children: <div>231213-000737</div>, // todo: implement
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-    },
-    {
-      key: 'submissionId',
-      label: 'Submission ID',
-      children: <div>{data?.positionRequest?.submission_id}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-    },
-
-    // {
-    //   key: 'contactEmail',
-    //   label: 'Contact Email',
-    //   children: <div>{data?.positionRequest?.email}</div>,
-    //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-    // },
-    {
-      key: 'positionNumber',
-      label: 'Position Number',
-      children: <div>{data?.positionRequest?.parent_job_profile?.number}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-    },
-    {
-      key: 'positionStatus',
-      label: 'Position status',
-      children: <div>Proposed</div>, // todo: implement
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-    },
-  ];
-
-  const jobDetailsItems = [
-    {
-      key: 'jobTitle',
-      label: 'Job title',
-      children: <div>{data?.positionRequest?.profile_json?.title?.value}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'expectedClassificationLevel',
-      label: 'Expected classification level',
-      children: <div>{data?.positionRequest?.classification_code}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'jobStoreProfileNumber',
-      label: 'Job Store profile number',
-      children: <div>{data?.positionRequest?.parent_job_profile?.number}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'reportsTo',
-      label: 'Reports to',
-      children: (
-        <div>
-          Hill, Nathan CITZ:EX <br />
-          Sr. Director, Digital Portfolio, Band 4 <br />
-          Position No.: 00012345
-        </div>
-      ),
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'firstLevelExcludedManager',
-      label: 'First level excluded manager for this position',
-      children: (
-        <div>
-          Hill, Nathan CITZ:EX <br />
-          Sr. Director, Digital Portfolio, Band 4 <br />
-          Position No.: 00012345
-        </div>
-      ),
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'payListDepartmentIdNumber',
-      label: 'Pay list/department ID number',
-      children: <div>{data?.positionRequest?.department_id}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'includedOrExcluded',
-      label: 'Included or excluded?',
-      children: <div>Included</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'fullTimeOrPartTime',
-      label: 'Full-time or part-time?',
-      children: <div>Full-time</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'regularOrTemporary',
-      label: 'Regular or temporary?',
-      children: <div>Regular</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'positionLocation',
-      label: 'Position location',
-      children: <div>Victoria</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-
-    {
-      key: 'receivedExecutiveApproval',
-      label: 'Received executive approval (Deputy Minister or delegate)',
-      children: <div>Yes</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-  ];
-
-  // PROFILE TAB INFO - todo: use wizard-reivew.page.tsx instead, make it configurable
-  const collapseRef = useRef<HTMLDivElement>(null);
-
-  const [hasScrolledPast, setHasScrolledPast] = useState(false);
-
-  const handleScroll = () => {
-    const layoutScrollContainer = document.querySelector('.ant-layout > div > div') as HTMLElement;
-    if (layoutScrollContainer && collapseRef.current) {
-      const collapseTop = collapseRef.current.getBoundingClientRect().top;
-      const containerTop = layoutScrollContainer.getBoundingClientRect().top;
-
-      // Check if the Collapse top is above the container top
-      setHasScrolledPast(collapseTop < containerTop);
-    }
-  };
-
-  useEffect(() => {
-    const layoutScrollContainer = document.querySelector('.ant-layout > div > div');
-    if (layoutScrollContainer) {
-      layoutScrollContainer.addEventListener('scroll', handleScroll);
-    }
-
-    return () => {
-      if (layoutScrollContainer) {
-        layoutScrollContainer.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, []);
-
-  const [showDiff, setShowDiff] = useState(true);
-
-  const handleToggleShowDiff = (checked: boolean) => {
-    setShowDiff(checked);
-  };
-
   // END PROFILE TAB INFO
   const handleDownload = () => {
     // Implement download functionality here
@@ -222,6 +60,11 @@ export const ClassificationTaskPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
+    const linkToCopy = `${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`;
+
+    // Use the Clipboard API to copy the link to the clipboard
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    message.success('Link copied to clipboard!');
   };
 
   const taskList = [
@@ -273,8 +116,9 @@ export const ClassificationTaskPage = () => {
     },
     {
       key: '6',
-      title: 'CRM: Assign ticket to the specialist',
-      subtitle: 'Reassign the CRM ticket to the same specialist that will be taking over the classification review.',
+      title: 'CRM: Assign service request to the specialist',
+      subtitle:
+        'Reassign the CRM service request to the same specialist that will be taking over the classification review.',
     },
   ];
 
@@ -319,7 +163,7 @@ export const ClassificationTaskPage = () => {
   const statusDetails = statusIconColorMap[currentStatus as keyof typeof statusIconColorMap];
 
   if (!data) {
-    return <div>Loading...</div>;
+    return <LoadingSpinnerWithMessage />;
   }
 
   // console.log('positionRequest data: ', data?.positionRequest);
@@ -330,78 +174,14 @@ export const ClassificationTaskPage = () => {
     {
       key: '1',
       label: 'Service request details',
-      children: (
-        <Row justify="center">
-          <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-            <Card className="tableHeader" style={{ marginTop: '1rem' }}>
-              <Row gutter={24} wrap>
-                <Col span={12}>
-                  <h2 style={{ marginBottom: 0 }}>Job details</h2>
-                </Col>
-                <Col span={12}>
-                  <Row justify="end">
-                    <Col>{/* controls on the right of header go here */}</Col>
-                  </Row>
-                </Col>
-              </Row>
-            </Card>
-            <Descriptions
-              className="descriptionsWithHeader"
-              bordered
-              column={24}
-              items={jobDetailsItems}
-              style={{ background: '#fff', marginBottom: '1rem' }}
-              labelStyle={{
-                fontWeight: 700,
-                width: '200px',
-                verticalAlign: 'top',
-                background: '#FAFAFA',
-              }}
-              contentStyle={{
-                background: '#fff',
-                verticalAlign: 'top',
-              }}
-            />
-
-            <Card className="tableHeader" style={{ marginTop: '1rem' }}>
-              <Row gutter={24} wrap>
-                <Col span={12}>
-                  <h2 style={{ marginBottom: 0 }}>Submission details</h2>
-                </Col>
-                <Col span={12}>
-                  <Row justify="end">
-                    <Col>{/* controls on the right of header go here */}</Col>
-                  </Row>
-                </Col>
-              </Row>
-            </Card>
-            <Descriptions
-              className="descriptionsWithHeader"
-              bordered
-              column={24}
-              items={submissionDetailsItems}
-              style={{ background: '#fff', marginBottom: '1rem' }}
-              labelStyle={{
-                fontWeight: 700,
-                width: '300px',
-                verticalAlign: 'top',
-                background: '#FAFAFA',
-              }}
-              contentStyle={{
-                background: '#fff',
-                verticalAlign: 'top',
-              }}
-            />
-          </Col>
-        </Row>
-      ),
+      children: <ServiceRequestDetails positionRequestData={data}></ServiceRequestDetails>,
     },
     {
       key: '2',
       label: 'Organization Chart',
       children: (
         <>
-          <div style={{ overflow: 'hidden', position: 'relative', height: '500px' }}>
+          <div style={{ overflow: 'hidden', position: 'relative', height: '800px' }}>
             <OrgChartWrapped
               selectedDepartment={data?.positionRequest?.department_id ?? null}
               orgChartSnapshot={snapshotCopy}
@@ -422,38 +202,7 @@ export const ClassificationTaskPage = () => {
     {
       key: '3',
       label: 'Job Profile',
-      children: (
-        <>
-          <Row justify="center">
-            <Col xs={24} sm={24} md={24} lg={20} xl={16} style={{ background: '#fff' }}>
-              <WizardEditControlBar
-                onToggleShowDiff={handleToggleShowDiff}
-                showDiffToggle={true}
-                showDiff={showDiff}
-                showNext={false}
-              />
-              <Collapse
-                ref={collapseRef}
-                bordered={false}
-                ghost
-                activeKey={showDiff ? ['1'] : []} // Control the active key based on showDiff
-                className={hasScrolledPast ? 'no-animation' : ''}
-              >
-                <Collapse.Panel key="1" showArrow={false} header="">
-                  {diffLegendContent}
-                </Collapse.Panel>
-              </Collapse>
-              <JobProfile
-                style={{ marginTop: '1rem' }}
-                profileData={data?.positionRequest?.profile_json}
-                showBackToResults={false}
-                showDiff={showDiff}
-                id={data?.positionRequest?.parent_job_profile_id?.toString() ?? undefined}
-              />
-            </Col>
-          </Row>
-        </>
-      ),
+      children: <JobProfileWithDiff positionRequestData={data} />,
     },
     {
       key: '4',
@@ -473,8 +222,8 @@ export const ClassificationTaskPage = () => {
                         style={{ marginBottom: '1rem' }}
                         message={
                           <div className="alert-with-link">
-                            To re-open this service request, go to the corresponding CRM ticket and change the state to
-                            'Unresolved'
+                            To re-open this service request, go to the corresponding CRM service request and change the
+                            state to 'Unresolved'
                             <Link to="#" className="alert-extra-link">
                               Learn More
                             </Link>
@@ -490,8 +239,8 @@ export const ClassificationTaskPage = () => {
                         style={{ marginBottom: '1rem' }}
                         message={
                           <div className="alert-with-link">
-                            This service request was processed successfully, go to the corresponding CRM ticket to view
-                            more details.
+                            This service request was processed successfully, go to the corresponding CRM service request
+                            to view more details.
                             <Link to="#" className="alert-extra-link">
                               Learn More
                             </Link>
@@ -559,7 +308,7 @@ export const ClassificationTaskPage = () => {
                           <strong>Download job profile</strong>
                           <p>Attached copy of the job profile that needs review.</p>
                           {/* <Button onClick={handleDownload}>Download job profile</Button> */}
-                          <DownloadJobProfileComponent jobProfile={data?.positionRequest.profile_json} />
+                          <DownloadJobProfileComponent jobProfile={data?.positionRequest?.profile_json} />
                           <Button type="link">View job profile</Button>
                         </div>
                         <Divider />
@@ -577,7 +326,7 @@ export const ClassificationTaskPage = () => {
                           <strong>Invite others to review</strong>
                           <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                           <Space>
-                            <Text>http://pjs-dev.apps.silver.devops.gov.bc.ca/wizard/review/1</Text>
+                            <Text>{`${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`}</Text>
                             <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                               Copy URL
                             </Button>
@@ -618,7 +367,7 @@ export const ClassificationTaskPage = () => {
     {
       label: (
         <div>
-          <DownloadJobProfileComponent jobProfile={data.positionRequest.profile_json}>
+          <DownloadJobProfileComponent jobProfile={data.positionRequest?.profile_json}>
             <>
               Download job profile
               <Text type="secondary" style={{ display: 'block' }}>
@@ -649,7 +398,15 @@ export const ClassificationTaskPage = () => {
         <Col xs={24} lg={21}>
           <PageHeader
             title="Approved"
-            subTitle={`reporting to Sr. Director, Digital Portfolio, Band 4 in CITZ:EX.`}
+            subTitle={
+              <div>
+                <PositionProfile
+                  prefix="Reporting to"
+                  mode="compact"
+                  positionNumber={data?.positionRequest?.reports_to_position_id}
+                ></PositionProfile>
+              </div>
+            }
             additionalBreadcrumb={{ title: data?.positionRequest?.title }}
           />
         </Col>

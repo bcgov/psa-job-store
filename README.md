@@ -1,9 +1,60 @@
-# BC Public Service Agency (PSA) Job Store
+# 🌟 BC Public Service Agency (PSA) Job Store βeta 🌟
+
+![JobStore Beta Screenshot](/screenshot.PNG?raw=true)
+
+Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one solution for navigating and managing your organizational chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
+
+## Features
+
+### 🗺️ Navigate Your Org Chart
+
+- Effortlessly explore your organizational structure with our intuitive navigation system.
+- Visualize the hierarchy and relationships within your organization at a glance.
+
+### 📈 Create & Edit Positions Instantly
+
+- Create New Positions: Add new roles to your organization in real-time, customizing as per your needs.
+
+### 📚 Library of Job Profiles
+
+- Access a comprehensive library of predefined job profiles.
+- Find the perfect match for your organizational needs with ease.
+
+### ✏️ In-Situ Job Profile Editing
+
+- Directly edit job profiles within the platform.
+- Make quick updates and revisions without leaving the app.
+
+### 📨 Classification Review Requests
+
+- Submit position requests for classification review.
+- Ensure compliance and accuracy in role classifications.
+
+### 🔄 Integration with PeopleSoft and CRM
+
+- Create positions in PeopleSoft
+- Keep track of position requests in CRM and view status changes inside JobStore
+
+## Get Started
+
+## Running the project
+
+### Build common-kit
+
+`npm -w common-kit run build`
+
+More instructions coming soon..
 
 ## Running end-to-end tests
 
-First, ensure that `SKIP_JWT_SIGNATURE_VERIFICATION=true` is set in your `apps/api/.env` file. This disables verification
-step for the JWT token and enables passing of a mock token for authentication.
+First, ensure that `TEST_ENV=true` is set in your `apps/api/.env` file. This disables verification
+step for the JWT token and enables passing of a mock token for authentication and does other API modifications.
+
+Also set `VITE_TEST_ENV=true` in `apps/app/.env` file. This applies minor UI changes to facilitate cypress automation
+
+Ensure that database has been reset to defaults with the special seed for e2e tests:
+
+`npx -w api prisma migrate reset --skip-generate`
 
 Run `npm -w app run test-e2e`
 
@@ -21,9 +72,67 @@ Project is also configured to generate reports with `jest-html-reporter`, which 
 
 To update the seed file, run `oc set data secret/seed-secret --from-file=seed.ts`
 
+## To generate new changeset entry
+
+When completing a feature, run
+
+`npx changeset`
+
+in the project root and follow the prompts. This info is going to be automatically included in change log.
+
 ## @generated files and slow commits
 
 To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)
+
+## To apply a db change via db migration
+
+If first time, set the baseline migration:
+`npx -w api prisma migrate resolve --applied 0_init`
+
+To reset database with migrations:
+
+`npx -w api prisma migrate reset` - this will reset the schema and apply the migrations in order.
+
+Create migration:
+`npx -w api prisma migrate dev --name MIGRATION_NAME`
+
+To apply new migrations after pulling latest code:
+
+`npx -w api prisma migrate deploy`
+
+`npx -w api prisma generate`
+
+## Making a database backup to local drive
+
+Login to psql pod:
+`oc exec -it  SQL_POD_NAME -- /bin/bash`
+`cd /pgdata`
+
+Get db info:
+
+`psql`
+`\l`
+
+Create dump:
+`pg_dump -U USER_NAME DB_NAME > backup.sql`
+
+Exit pod and copy file:
+`oc rsync SQL_POD_NAME:pgdata/backup.sql ~/`
+
+Remove remote backup file:
+
+`oc exec SQL_POD_NAME -- rm pgdata/backup.sql`
+
+## To accelerate new image uptake on openshift after publishing
+
+Openshift may take up to 15 minutes to pick a new image from artifactory. There is no way to change this frequency. If needed, as a workaround
+perform these operations to get openshift to pick up the image from artifactory faster:
+
+`oc project xxxx-tools`
+
+`oc delete -k deployments/openshift/kustomize/images/image-streams/`
+
+`oc apply -k deployments/openshift/kustomize/images/image-streams/`
 
 ## Recursive relationships in schema.prisma
 

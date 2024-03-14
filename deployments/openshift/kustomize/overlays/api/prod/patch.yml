@@ -4,16 +4,20 @@ metadata:
   name: nestjs-app
 spec:
   triggers:
+      - type: ConfigChange
       - imageChangeParams:
+          automatic: true
+          containerNames:
+            - nestjs-app
           from:
             kind: ImageStreamTag
             name: api:latest
             namespace: f3c07a-tools
-          type: ImageChange
----
+        type: ImageChange
+---         
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
     name: nestjs-app
 spec:
-  host: pjs-api.digital.gov.bc.ca
+  host: jobstore-api.apps.silver.devops.gov.bc.ca

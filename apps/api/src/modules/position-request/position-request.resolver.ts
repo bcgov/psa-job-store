@@ -8,6 +8,7 @@ import {
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { AllowNoRoles } from '../auth/guards/role-global.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
@@ -15,6 +16,15 @@ import {
   PositionRequestResponse,
   PositionRequestStatusCounts,
 } from './position-request.service';
+
+@ObjectType()
+export class PositionNeedsReviewResult {
+  @Field(() => Boolean)
+  result: boolean;
+
+  @Field(() => [String])
+  reasons: string[];
+}
 
 @ObjectType()
 export class PositionRequestUserClassification {
@@ -67,6 +77,11 @@ export class PositionRequestApiResolver {
     return newPositionRequest.id;
   }
 
+  @Mutation(() => PositionRequest)
+  async submitPositionRequest(@Args('id', { type: () => Int }) id: number) {
+    return this.positionRequestService.submitPositionRequest(id);
+  }
+
   @Mutation(() => PositionRequestResponse)
   async updatePositionRequest(
     @Args('id', { type: () => Int }) id: number,
@@ -96,9 +111,29 @@ export class PositionRequestApiResolver {
     return this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
   }
 
+  @Query(() => PositionRequest, { name: 'sharedPositionRequest' })
+  @AllowNoRoles()
+  async getSharedPositionRequest(@Args('uuid') uuid: string) {
+    return this.positionRequestService.getSharedPositionRequest(uuid);
+  }
+
+  @Query(() => PositionNeedsReviewResult, { name: 'positionNeedsRivew' })
+  async positionNeedsReview(@CurrentUser() user: Express.User, @Args('id') id: number) {
+    const position = await this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
+    if (!position) {
+      return false;
+    }
+    return this.positionRequestService.positionRequestNeedsReview(+id);
+  }
+
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestUserClassifications' })
   async getPositionRequestUserClassifications(@CurrentUser() { id: userId }: Express.User) {
     return this.positionRequestService.getPositionRequestUserClassifications(userId);
+  }
+
+  @Mutation(() => PositionRequestResponse, { name: 'deletePositionRequest' })
+  async deletePositionRequest(@Args('id', { type: () => Int }) id: number) {
+    return this.positionRequestService.deletePositionRequest(id);
   }
 
   @Roles('total-compensation', 'classification')
@@ -108,7 +143,7 @@ export class PositionRequestApiResolver {
     return this.positionRequestService.getPositionRequestClassifications();
   }
 
-  @Roles('total-compensation')
+  @Roles('total-compensation', 'classification')
   @UseGuards(RoleGuard)
   @Query(() => [Int], { name: 'positionRequestJobStoreNumbers' })
   async getPositionRequestJobStoreNumbers() {

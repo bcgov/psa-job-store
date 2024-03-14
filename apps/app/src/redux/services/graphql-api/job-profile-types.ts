@@ -13,12 +13,14 @@ export interface ClassificationModel {
   code: string;
   name: string;
   grade: string;
+  employee_group_id: string;
 }
 
 export interface ClassificationModelWrapped {
   classification: {
     id: string;
     code: string;
+    name: string;
   };
 }
 
@@ -27,6 +29,14 @@ export interface JobProfilesMinistriesResponse {
     id: string;
     name: string;
   }[];
+}
+
+export interface JobProfilesClassificationsResponse {
+  jobProfilesClassifications: ClassificationModel[];
+}
+
+export interface JobProfilesDraftsClassificationsResponse {
+  jobProfilesDraftsClassifications: ClassificationModel[];
 }
 
 export interface JobProfilesDraftsMinistriesResponse {
@@ -57,6 +67,10 @@ export interface ContextModel {
 
 export interface GetClassificationsResponse {
   classifications: ClassificationModel[];
+}
+
+export interface GetClassificationResponse {
+  classification: ClassificationModel;
 }
 
 interface JobFamilyDetail {
@@ -90,11 +104,12 @@ export interface JobProfileModel {
   jobFamilies: JobFamily[];
   title: string | TrackedFieldArrayItem;
   number: number;
-  context: ContextModel;
+  context: ContextModel | string;
   overview: string | TrackedFieldArrayItem;
   type: string;
-  role: { id: number };
-  total_comp_create_form_misc: {
+  role: { id: number; name?: string };
+  updated_at?: string;
+  total_comp_create_form_misc?: {
     employeeGroup: string;
     markAllNonEditable: boolean;
     markAllSignificant: boolean;
@@ -103,22 +118,23 @@ export interface JobProfileModel {
     markAllNonEditableJob_experience: boolean;
     markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;
-    markAllSignificantSec: boolean;
   };
-  role_type: { id: number };
+  role_type: { id: number; name?: string };
   reports_to: ClassificationModelWrapped[];
   organizations: OrganizationsModelWrapped[];
-  scope: { id: number };
+  scope: { id: number; name?: string; description?: string };
   review_required: boolean;
   professions: ProfessionsModel[];
   program_overview: string | TrackedFieldArrayItem;
-  professional_registration_requirements: string[];
-  preferences: string[];
-  knowledge_skills_abilities: string[];
-  willingness_statements: string[];
-  security_screenings: AccountabilitiesModel[];
+  professional_registration_requirements: TrackedFieldArrayItem[];
+  optional_requirements: TrackedFieldArrayItem[];
+  preferences: TrackedFieldArrayItem[];
+  knowledge_skills_abilities: TrackedFieldArrayItem[];
+  willingness_statements: TrackedFieldArrayItem[];
+  security_screenings: SecuritiyScreeningModel[];
   all_organizations: boolean;
   all_reports_to: boolean;
+  state?: string;
 }
 
 export interface ProfessionsModel {
@@ -129,6 +145,7 @@ export interface ProfessionsModel {
 export interface OrganizationsModelWrapped {
   organization: {
     id: string;
+    name?: string;
   };
 }
 
@@ -144,8 +161,21 @@ export interface BehaviouralCompetency {
 
 export interface AccountabilitiesModel {
   text: string | TrackedFieldArrayItem;
-  is_readonly: boolean;
-  is_significant: boolean;
+  is_readonly?: boolean;
+  is_significant?: boolean;
+
+  // HM view
+  isCustom?: boolean;
+  disabled?: boolean;
+}
+
+export interface SecuritiyScreeningModel {
+  text: string | TrackedFieldArrayItem;
+  is_readonly?: boolean;
+
+  // HM view
+  isCustom?: boolean;
+  disabled?: boolean;
 }
 
 export class TrackedFieldArrayItem {
@@ -242,6 +272,7 @@ export interface CreateJobProfileInput {
     education: string[];
     job_experience: string[];
     professional_registration_requirements: string[];
+    optional_requirements: string[];
     preferences: string[];
     knowledge_skills_abilities: string[];
     willingness_statements: string[];
@@ -281,12 +312,20 @@ export interface CreateJobProfileResponse {
   };
 }
 
+export interface DuplicateJobProfileResponse {
+  duplicateJobProfile: number;
+}
+
 export interface GetJobProfilesArgs {
   search?: string;
   where?: Record<string, any>;
   orderBy?: Record<string, any>;
   take?: number;
   skip?: number;
+  sortByClassificationName?: boolean;
+  sortByJobFamily?: boolean;
+  sortByOrganization?: boolean;
+  sortOrder?: string;
 }
 
 export interface GetJobProfilesResponse {

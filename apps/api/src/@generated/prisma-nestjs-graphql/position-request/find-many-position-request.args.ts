@@ -19,7 +19,7 @@ export class FindManyPositionRequestArgs {
   orderBy?: Array<PositionRequestOrderByWithRelationAndSearchRelevanceInput>;
 
   @HideField()
-  cursor?: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id'>;
+  cursor?: Prisma.AtLeast<PositionRequestWhereUniqueInput, 'id' | 'crm_id'>;
 
   @Field(() => Int, { nullable: true })
   take?: number;

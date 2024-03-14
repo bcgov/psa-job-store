@@ -23,6 +23,8 @@ interface Props {
   disableCreateNewPosition?: boolean;
   highlightPositionId?: string;
   extraNodeInfo?: any;
+  allowSelection?: boolean;
+  onNodeSelected?: (node: any) => void;
 }
 
 const dagreGraph = new dagre.graphlib.Graph();
@@ -70,7 +72,9 @@ export const OrgChart = ({
   onCreateNewPosition,
   highlightPositionId,
   disableCreateNewPosition = false,
+  allowSelection = false, // will mark the card as selected if true instead of showing the popover
   extraNodeInfo,
+  onNodeSelected,
 }: Props) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges);
 
@@ -79,6 +83,12 @@ export const OrgChart = ({
   const [nodes, setNodes] = useNodesState(layoutedNodes);
   const [edges, setEdges] = useEdgesState(layoutedEdges);
   const [selectedNode, setSelectedNode] = useState<any>();
+
+  // callback on selectedNode
+
+  useEffect(() => {
+    onNodeSelected && onNodeSelected(selectedNode);
+  }, [selectedNode, onNodeSelected]);
 
   const getIncomers = useCallback((node: Node | Connection | Edge, nodes: any[], edges: any[]) => {
     if (!isNode(node)) {
@@ -274,6 +284,7 @@ export const OrgChart = ({
     () => ({
       'org-chart-card': (nodeProps: any) => (
         <OrgChartCard
+          data-testid="org-chart-node"
           {...nodeProps}
           selectedDepartment={selectedDepartment}
           onCreateNewPosition={onCreateNewPosition}
@@ -283,6 +294,7 @@ export const OrgChart = ({
           incomerIds={incomerIds}
           outgoerIds={outgoerIds}
           disableCreateNewPosition={disableCreateNewPosition}
+          allowSelection={allowSelection}
         />
       ),
     }),
@@ -296,6 +308,7 @@ export const OrgChart = ({
       incomerIds,
       outgoerIds,
       disableCreateNewPosition,
+      allowSelection,
     ],
   );
 
@@ -376,35 +389,37 @@ export const OrgChart = ({
   }, [nodeAdded, addNodeAttachedToSpecificId, extraNodeInfo]);
 
   return (
-    <ReactFlow
-      nodeTypes={nodeTypes}
-      nodes={nodes}
-      edges={edges}
-      connectionLineType={ConnectionLineType.SmoothStep}
-      fitView
-      elementsSelectable={true}
-      // onSelectionChange={(selectedElements) => {
-      //   console.log('onSelectionChange: ', selectedElements);
-      //   const node = selectedElements.nodes[0];
-      //   if (!node) {
-      //     return;
-      //   }
-      //   setSelectedNode(node);
-      //   highlightPath(node, nodes, edges, true);
-      //   // const tracedNodes = getAllTracedNodes(node, nodes, edges, [], false);
-      //   // console.log('traced nodes: ', tracedNodes);
-      // }}
-      onPaneClick={() => {
-        resetNodeStyles();
-        setSelectedNode(undefined);
-      }}
-    >
-      {/* <Panel position="top-left">
+    <div data-testid="org-chart-container" style={{ height: '100%' }}>
+      <ReactFlow
+        nodeTypes={nodeTypes}
+        nodes={nodes}
+        edges={edges}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        fitView
+        elementsSelectable={true}
+        // onSelectionChange={(selectedElements) => {
+        //   console.log('onSelectionChange: ', selectedElements);
+        //   const node = selectedElements.nodes[0];
+        //   if (!node) {
+        //     return;
+        //   }
+        //   setSelectedNode(node);
+        //   highlightPath(node, nodes, edges, true);
+        //   // const tracedNodes = getAllTracedNodes(node, nodes, edges, [], false);
+        //   // console.log('traced nodes: ', tracedNodes);
+        // }}
+        onPaneClick={() => {
+          resetNodeStyles();
+          setSelectedNode(undefined);
+        }}
+      >
+        {/* <Panel position="top-left">
         <button onClick={() => onLayout('TB')}>vertical layout</button>
         <button onClick={() => onLayout('LR')}>horizontal layout</button>
       </Panel> */}
-      <Controls position="top-right" />
-      <MiniMap pannable zoomable style={{ height: 100, width: 150 }} />
-    </ReactFlow>
+        <Controls position="top-right" />
+        <MiniMap pannable zoomable style={{ height: 100, width: 150 }} />
+      </ReactFlow>
+    </div>
   );
 };

@@ -5,10 +5,9 @@
     overflow: auto;
     scrollbar-gutter: stable;
     scrollbar-color: #d4aa70 #e4e4e4;
-  scrollbar-width: thin;
+    scrollbar-width: thin;
     padding: 8px 24px;
-    height: 600px;
-    
+    height: 669px;
 }
 
 .job_profile_search_results_ul li:not(:last-child) {
@@ -30,3 +29,4 @@
     background-color: #c4c4c4;
     background-clip: content-box;
   }
+

@@ -8,6 +8,12 @@ export class PositionRequestAvgOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  crm_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  crm_assigned_to_account_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   step?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })

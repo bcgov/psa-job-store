@@ -5,14 +5,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ScheduleModule } from '@nestjs/schedule';
-import { Request } from 'express';
 import { LoggerModule } from 'nestjs-pino';
-import { v4 as uuidv4 } from 'uuid';
 import { AppResolver } from './app.resolver';
-import { AppConfigDto } from './dtos/app-config.dto';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
+import { AppLogModule } from './modules/app-log/app-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
+import { RolesGlobalGuard } from './modules/auth/guards/role-global.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
@@ -25,8 +24,11 @@ import { JobProfileStreamModule } from './modules/job-profile-stream/job-profile
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
 import { PositionRequestModule } from './modules/position-request/position-request.module';
+import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
 import { SearchModule } from './modules/search/search.module';
-import { SiteMinderGuidTestApiModule } from './modules/site-minder-guid-test/siteminder-guid-test.module';
+import { apolloPinoLoggingPlugin } from './utils/logging/apolloPinoLoggingPlugin';
+import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
+import { loggerOptions } from './utils/logging/logger.factory';
 import { validateAppConfig } from './utils/validate-app-config.util';
 
 @Module({
@@ -36,29 +38,17 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      plugins: [apolloPinoLoggingPlugin],
       context: ({ req }) => ({ req }) as { req: Request },
+      formatError: process.env.NODE_ENV == 'development' ? null : formatGraphQLError,
     }),
     LoggerModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: async (config: ConfigService<AppConfigDto, true>) => {
-        const NODE_ENV = config.get('NODE_ENV');
-
-        return {
-          pinoHttp: {
-            genReqId: (req, res) => {
-              const existingId = req.id ?? req.headers['x-request-id'];
-              if (existingId) return existingId;
-
-              const id = uuidv4();
-              res.setHeader('X-Request-Id', id);
-              return id;
-            },
-            level: NODE_ENV !== 'production' ? 'debug' : 'info',
-            transport: NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
-          },
-        };
-      },
+      useFactory: () => ({
+        pinoHttp: loggerOptions,
+      }),
     }),
+
     ScheduleModule.forRoot(),
     AuthModule,
     PositionRequestModule,
@@ -73,10 +63,19 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobProfileStreamModule,
     JobProfileScopeModule,
     JobProfileMinimumRequirementsModule,
-    SiteMinderGuidTestApiModule,
+    AppLogModule,
+    ScheduledTaskModule,
   ],
   controllers: [],
-  providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
+  providers: [
+    { provide: APP_GUARD, useClass: AuthGuard },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGlobalGuard,
+    },
+    { provide: APP_GUARD, useClass: RoleGuard },
+    AppResolver,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

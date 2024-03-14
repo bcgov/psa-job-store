@@ -71,6 +71,9 @@ export class JobProfileCountAggregate {
   willingness_statements!: number;
 
   @Field(() => Int, { nullable: false })
+  optional_requirements!: number;
+
+  @Field(() => Int, { nullable: false })
   security_screenings!: number;
 
   @Field(() => Int, { nullable: false })

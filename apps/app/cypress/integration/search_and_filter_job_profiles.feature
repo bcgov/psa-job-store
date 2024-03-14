@@ -57,6 +57,7 @@ Feature: Search and Filter Job Profiles
 
   Scenario: Page navigation in job profiles
     Given there are multiple pages of job profiles
+    And the user sets the page size to 2
     When the user navigates to a specific page
     Then the job profiles for that page are displayed
 
@@ -73,12 +74,16 @@ Feature: Search and Filter Job Profiles
     And the details view should be cleared or hidden
 
   Scenario: Reset to first page after applying a search while on the second page
-    Given the user is on the second page of job profiles
-    When the user enters a keyword into the search field
+    Given there are multiple pages of job profiles
+    And the user sets the page size to 2
+    When the user navigates to a specific page
+    And the user enters a keyword into the search field
     And the user clicks the "Search" button
     Then the job profiles for the first page should be displayed
 
   Scenario: Reset to first page after applying a filter while on the second page
-    Given the user is on the second page of job profiles
-    When the user applies a filter
-    Then the job profiles for the first page should be displayed
+    Given there are multiple pages of job profiles
+    And the user sets the page size to 2
+    When the user navigates to a specific page
+    And the user applies a filter
+    Then the job profiles for the first page should be displayed for filtered results

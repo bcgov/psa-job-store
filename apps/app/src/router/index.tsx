@@ -5,6 +5,7 @@ import RoleGuard from '../components/guards/role.guard';
 import { RouteGuard } from '../components/guards/route.guard';
 import { AuthRoute } from '../routes/auth';
 import { LoginPage } from '../routes/auth/login.page';
+import { ClassificationTasksRoute } from '../routes/classification-tasks';
 import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
 import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
 import { HomeRoute } from '../routes/home';
@@ -21,6 +22,7 @@ import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-req
 import { TotalCompCreateProfilePage } from '../routes/total-comp-create-profile/total-comp-create-profile.page';
 import { TotalCompDraftProfilesRoute } from '../routes/total-comp-draft-profiles';
 import { TotalCompDraftProfilesPage } from '../routes/total-comp-draft-profiles/total-comp-draft-profies.page';
+import { TotalCompPublishedProfilesRoute } from '../routes/total-comp-published-profiles';
 import { TotalCompPublishedProfilesPage } from '../routes/total-comp-published-profiles/total-comp-published-profies.page';
 import { UnauthorizedRoute } from '../routes/unauthorized';
 import UnauthorizedPage from '../routes/unauthorized/unauthorized.page';
@@ -69,8 +71,11 @@ export const router = createBrowserRouter([
                     roleComponentMapping={{
                       classification: ClassificationTasksPage,
                       'total-compensation': TotalCompDraftProfilesPage,
-                      user: HomePage,
-                      default: HomePage, // Default component when no roles match
+                      'hiring-manager': HomePage,
+                      user: UnauthorizedPage,
+                      default: UnauthorizedPage,
+
+                      // default: HomePage,
                     }}
                   />
                 ),
@@ -94,6 +99,33 @@ export const router = createBrowserRouter([
                 path: 'create',
                 element: <WizardOrgChartPage />,
               },
+              {
+                path: '/my-positions/:positionRequestId',
+                element: <WizardRoute />,
+                children: [
+                  {
+                    index: true,
+                    element: <PositionRequestPage />,
+                    handle: {
+                      icon: <FileTextOutlined />,
+                    },
+                  },
+                ],
+              },
+              {
+                path: 'share/:positionRequestId',
+                element: <WizardRoute />,
+                children: [
+                  {
+                    index: true,
+                    element: <PositionRequestPage />,
+                    handle: {
+                      breadcrumb: () => 'My positions',
+                      icon: <FileTextOutlined />,
+                    },
+                  },
+                ],
+              },
             ],
           },
 
@@ -101,7 +133,7 @@ export const router = createBrowserRouter([
             path: '/org-chart',
             element: <OrgChartRoute />,
             handle: {
-              breadcrumb: () => 'Org Chart',
+              breadcrumb: () => 'My organizations',
               icon: <PartitionOutlined />,
             },
             children: [
@@ -127,7 +159,6 @@ export const router = createBrowserRouter([
                 path: ':id',
                 element: <JobProfilesPage />,
                 handle: {
-                  breadcrumb: () => 'Job Profilez',
                   icon: <FileTextOutlined />,
                 },
               },
@@ -135,41 +166,62 @@ export const router = createBrowserRouter([
           },
 
           {
-            path: '/position-request/:positionRequestId',
-            element: <WizardRoute />,
-            children: [
-              {
-                index: true,
-                element: <PositionRequestPage />,
-              },
-            ],
-          },
-          {
-            path: '/total-compensation/profiles',
+            path: '/draft-job-profiles',
             element: (
               <RoleGuard requiredRole="total-compensation">
                 <TotalCompDraftProfilesRoute />
               </RoleGuard>
             ),
             handle: {
-              breadcrumb: () => 'Job profiles',
+              breadcrumb: () => 'Draft Job Profiles',
             },
             children: [
               {
-                path: 'drafts',
-                element: <TotalCompDraftProfilesPage />,
+                path: 'create',
+                element: (
+                  <RoleGuard requiredRole="total-compensation">
+                    <TotalCompDraftProfilesRoute />
+                  </RoleGuard>
+                ),
+                children: [
+                  {
+                    index: true,
+                    element: <TotalCompCreateProfilePage />,
+                  },
+                  {
+                    path: ':id',
+                    element: <TotalCompCreateProfilePage />,
+                  },
+                ],
               },
               {
-                path: 'published',
+                path: ':id',
+                element: <TotalCompCreateProfilePage />,
+              },
+              {
+                handle: {
+                  breadcrumb: () => 'Create profile',
+                },
+                index: true,
+                element: <TotalCompDraftProfilesPage />,
+              },
+            ],
+          },
+          {
+            path: '/published-job-profiles',
+            element: (
+              <RoleGuard requiredRole="total-compensation">
+                <TotalCompPublishedProfilesRoute />
+              </RoleGuard>
+            ),
+            handle: {
+              breadcrumb: () => 'Published Job Profiles',
+            },
+            children: [
+              {
+                index: true,
                 element: <TotalCompPublishedProfilesPage />,
               },
-              // {
-              //   handle: {
-              //     breadcrumb: () => 'Create profile',
-              //   },
-              //   path: 'create',
-              //   element: <TotalCompCreateProfilePage />,
-              // },
               {
                 path: ':id',
                 element: <TotalCompCreateProfilePage />,
@@ -177,27 +229,7 @@ export const router = createBrowserRouter([
             ],
           },
           {
-            path: '/total-compensation/create-profile',
-            element: (
-              <RoleGuard requiredRole="total-compensation">
-                <TotalCompDraftProfilesRoute />
-              </RoleGuard>
-            ),
-            handle: {
-              breadcrumb: () => 'Approved requests',
-            },
-            children: [
-              {
-                handle: {
-                  breadcrumb: () => 'Create profile',
-                },
-                index: true,
-                element: <TotalCompCreateProfilePage />,
-              },
-            ],
-          },
-          {
-            path: '/total-compensation/approved-requests',
+            path: '/approved-requests',
             element: (
               <RoleGuard requiredRole="total-compensation">
                 <TotalCompApprovedRequestsRoute />
@@ -219,10 +251,10 @@ export const router = createBrowserRouter([
           },
 
           {
-            path: '/classification-tasks/:positionRequestId',
+            path: '/classification-tasks',
             element: (
               <RoleGuard requiredRole="classification">
-                <TotalCompApprovedRequestsRoute />
+                <ClassificationTasksRoute />
               </RoleGuard>
             ),
             handle: {
@@ -231,6 +263,10 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
+                element: <ClassificationTasksPage />,
+              },
+              {
+                path: ':positionRequestId',
                 element: <ClassificationTaskPage />,
               },
             ],

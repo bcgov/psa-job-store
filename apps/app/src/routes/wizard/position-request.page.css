@@ -1,0 +1,4 @@
+.ant-menu-vertical >.ant-menu-item, .ant-menu .ant-menu-item-group .ant-menu-item-group-list .ant-menu-item{
+    height:auto !important;
+    line-height: normal !important;
+}

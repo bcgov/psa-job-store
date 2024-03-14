@@ -16,14 +16,27 @@ services:
         - KEYCLOAK_CLIENT_ID_PRIVATE=${KEYCLOAK_CLIENT_ID_PRIVATE}
         - KEYCLOAK_CLIENT_ID_PUBLIC=${KEYCLOAK_CLIENT_ID_PUBLIC}
         - KEYCLOAK_REDIRECT_URL=${KEYCLOAK_REDIRECT_URL}
+        - BI_URL=${BI_URL}
+        - BI_USERNAME=${BI_USERNAME}
+        - BI_PASSWORD=${BI_PASSWORD}
+        - ELASTIC_NODE=${ELASTIC_NODE}
+        - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+        - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+        - PEOPLESOFT_URL=${PEOPLESOFT_URL}
+        - PEOPLESOFT_USERNAME=${PEOPLESOFT_USERNAME}
+        - PEOPLESOFT_PASSWORD=${PEOPLESOFT_PASSWORD}
+        - CRM_APPLICATION_CONTEXT=${CRM_APPLICATION_CONTEXT}
+        - CRM_PASSWORD=${CRM_PASSWORD}
+        - CRM_URL=${CRM_URL}
+        - CRM_USERNAME=${CRM_USERNAME}
     ports:
       - 4000:4000
     depends_on:
       - postgres
     volumes:
-      - ./src:/usr/src/app/src
+      - ./src:/usr/src/apps/api/src
       - api-nodemodules:/node_modules
-      - ./prisma:/usr/src/app/prisma
+      - ./prisma:/usr/src/apps/api/prisma
   postgres:
     image: postgres:latest
     ports:

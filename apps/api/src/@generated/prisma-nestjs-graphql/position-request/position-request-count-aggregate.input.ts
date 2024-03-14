@@ -7,6 +7,12 @@ export class PositionRequestCountAggregateInput {
   id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  crm_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  crm_assigned_to_account_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
   step?: true;
 
   @Field(() => Boolean, { nullable: true })
@@ -19,6 +25,9 @@ export class PositionRequestCountAggregateInput {
   parent_job_profile_id?: true;
 
   @Field(() => Boolean, { nullable: true })
+  crm_json?: true;
+
+  @Field(() => Boolean, { nullable: true })
   profile_json?: true;
 
   @Field(() => Boolean, { nullable: true })
@@ -26,9 +35,6 @@ export class PositionRequestCountAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   user_id?: true;
-
-  @Field(() => Boolean, { nullable: true })
-  classificationAssignedTo?: true;
 
   @Field(() => Boolean, { nullable: true })
   title?: true;
@@ -62,6 +68,21 @@ export class PositionRequestCountAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   updated_at?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  shareUUID?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  additional_info_work_location_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  additional_info_department_id?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  additional_info_excluded_mgr_position_number?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  additional_info_comments?: true;
 
   @Field(() => Boolean, { nullable: true })
   _all?: true;

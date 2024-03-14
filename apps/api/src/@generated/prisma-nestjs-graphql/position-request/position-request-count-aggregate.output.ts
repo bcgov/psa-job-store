@@ -8,6 +8,12 @@ export class PositionRequestCountAggregate {
   id!: number;
 
   @Field(() => Int, { nullable: false })
+  crm_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  crm_assigned_to_account_id!: number;
+
+  @Field(() => Int, { nullable: false })
   step!: number;
 
   @Field(() => Int, { nullable: false })
@@ -20,6 +26,9 @@ export class PositionRequestCountAggregate {
   parent_job_profile_id!: number;
 
   @Field(() => Int, { nullable: false })
+  crm_json!: number;
+
+  @Field(() => Int, { nullable: false })
   profile_json!: number;
 
   @Field(() => Int, { nullable: false })
@@ -27,9 +36,6 @@ export class PositionRequestCountAggregate {
 
   @Field(() => Int, { nullable: false })
   user_id!: number;
-
-  @Field(() => Int, { nullable: false })
-  classificationAssignedTo!: number;
 
   @Field(() => Int, { nullable: false })
   title!: number;
@@ -63,6 +69,21 @@ export class PositionRequestCountAggregate {
 
   @Field(() => Int, { nullable: false })
   updated_at!: number;
+
+  @Field(() => Int, { nullable: false })
+  shareUUID!: number;
+
+  @Field(() => Int, { nullable: false })
+  additional_info_work_location_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  additional_info_department_id!: number;
+
+  @Field(() => Int, { nullable: false })
+  additional_info_excluded_mgr_position_number!: number;
+
+  @Field(() => Int, { nullable: false })
+  additional_info_comments!: number;
 
   @Field(() => Int, { nullable: false })
   _all!: number;

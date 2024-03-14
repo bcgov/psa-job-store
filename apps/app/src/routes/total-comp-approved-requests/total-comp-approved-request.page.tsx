@@ -1,7 +1,9 @@
 import { CopyOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Collapse, Descriptions, Divider, Result, Row, Space, Tabs, Typography } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typography } from 'antd';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
@@ -9,7 +11,6 @@ import ContentWrapper from '../home/components/content-wrapper.component';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import WizardEditControlBar from '../wizard/components/wizard-edit-control-bar';
-import { diffLegendContent } from '../wizard/wizard-review.page';
 import '../wizard/wizard-review.page.css';
 import './total-comp-approved-request.page.css';
 const { Text } = Typography;
@@ -103,7 +104,7 @@ export const TotalCompApprovedRequestPage = () => {
     },
     {
       key: 'payListDepartmentIdNumber',
-      label: 'Pay list/department ID number',
+      label: 'Department ID',
       children: <div>{data?.positionRequest?.department_id}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
@@ -146,33 +147,33 @@ export const TotalCompApprovedRequestPage = () => {
   ];
 
   // PROFILE TAB INFO - todo: use wizard-reivew.page.tsx instead, make it configurable
-  const collapseRef = useRef<HTMLDivElement>(null);
+  // const collapseRef = useRef<HTMLDivElement>(null);
 
-  const [hasScrolledPast, setHasScrolledPast] = useState(false);
+  // const [hasScrolledPast, setHasScrolledPast] = useState(false);
 
-  const handleScroll = () => {
-    const layoutScrollContainer = document.querySelector('.ant-layout > div > div') as HTMLElement;
-    if (layoutScrollContainer && collapseRef.current) {
-      const collapseTop = collapseRef.current.getBoundingClientRect().top;
-      const containerTop = layoutScrollContainer.getBoundingClientRect().top;
+  // const handleScroll = () => {
+  //   const layoutScrollContainer = document.querySelector('.ant-layout > div > div') as HTMLElement;
+  //   if (layoutScrollContainer && collapseRef.current) {
+  //     const collapseTop = collapseRef.current.getBoundingClientRect().top;
+  //     const containerTop = layoutScrollContainer.getBoundingClientRect().top;
 
-      // Check if the Collapse top is above the container top
-      setHasScrolledPast(collapseTop < containerTop);
-    }
-  };
+  //     // Check if the Collapse top is above the container top
+  //     setHasScrolledPast(collapseTop < containerTop);
+  //   }
+  // };
 
-  useEffect(() => {
-    const layoutScrollContainer = document.querySelector('.ant-layout > div > div');
-    if (layoutScrollContainer) {
-      layoutScrollContainer.addEventListener('scroll', handleScroll);
-    }
+  // useEffect(() => {
+  //   const layoutScrollContainer = document.querySelector('.ant-layout > div > div');
+  //   if (layoutScrollContainer) {
+  //     layoutScrollContainer.addEventListener('scroll', handleScroll);
+  //   }
 
-    return () => {
-      if (layoutScrollContainer) {
-        layoutScrollContainer.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, []);
+  //   return () => {
+  //     if (layoutScrollContainer) {
+  //       layoutScrollContainer.removeEventListener('scroll', handleScroll);
+  //     }
+  //   };
+  // }, []);
 
   const [showDiff, setShowDiff] = useState(true);
 
@@ -285,7 +286,7 @@ export const TotalCompApprovedRequestPage = () => {
                 showDiff={showDiff}
                 showNext={false}
               />
-              <Collapse
+              {/* <Collapse
                 ref={collapseRef}
                 bordered={false}
                 ghost
@@ -295,7 +296,7 @@ export const TotalCompApprovedRequestPage = () => {
                 <Collapse.Panel key="1" showArrow={false} header="">
                   {diffLegendContent}
                 </Collapse.Panel>
-              </Collapse>
+              </Collapse> */}
               <JobProfile
                 style={{ marginTop: '1rem' }}
                 profileData={data?.positionRequest?.profile_json}
@@ -382,14 +383,22 @@ export const TotalCompApprovedRequestPage = () => {
   ];
 
   if (!data) {
-    return <div>Loading...</div>;
+    return <LoadingSpinnerWithMessage />;
   }
 
   return (
     <>
       <PageHeader
         title="Approved"
-        subTitle={`reporting to Sr. Director, Digital Portfolio, Band 4 in CITZ:EX.`}
+        subTitle={
+          <div>
+            <PositionProfile
+              prefix="Reporting to"
+              mode="compact"
+              positionNumber={data?.positionRequest?.reports_to_position_id}
+            ></PositionProfile>
+          </div>
+        }
         additionalBreadcrumb={{ title: data?.positionRequest?.title }}
       />
       <ContentWrapper>

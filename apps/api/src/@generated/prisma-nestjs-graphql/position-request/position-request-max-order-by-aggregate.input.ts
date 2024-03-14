@@ -8,6 +8,12 @@ export class PositionRequestMaxOrderByAggregateInput {
   id?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
+  crm_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  crm_assigned_to_account_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
   step?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
@@ -21,9 +27,6 @@ export class PositionRequestMaxOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   user_id?: keyof typeof SortOrder;
-
-  @Field(() => SortOrder, { nullable: true })
-  classificationAssignedTo?: keyof typeof SortOrder;
 
   @Field(() => SortOrder, { nullable: true })
   title?: keyof typeof SortOrder;
@@ -57,4 +60,19 @@ export class PositionRequestMaxOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   updated_at?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  shareUUID?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  additional_info_work_location_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  additional_info_department_id?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  additional_info_excluded_mgr_position_number?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  additional_info_comments?: keyof typeof SortOrder;
 }

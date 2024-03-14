@@ -3,6 +3,7 @@ import { InputType } from '@nestjs/graphql';
 import { StringFilter } from '../prisma/string-filter.input';
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { DepartmentListRelationFilter } from '../department/department-list-relation-filter.input';
+import { PositionRequestListRelationFilter } from '../position-request/position-request-list-relation-filter.input';
 
 @InputType()
 export class LocationWhereInput {
@@ -35,4 +36,7 @@ export class LocationWhereInput {
 
   @Field(() => DepartmentListRelationFilter, { nullable: true })
   departments?: DepartmentListRelationFilter;
+
+  @Field(() => PositionRequestListRelationFilter, { nullable: true })
+  positionRequests?: PositionRequestListRelationFilter;
 }

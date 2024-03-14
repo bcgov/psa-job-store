@@ -28,6 +28,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ScheduledTaskMetadata {
+  task        String    @id
+  frequency   Int? // How often the task should run (in seconds)
+  last_run_at DateTime?
+
+  @@map("scheduled_task_metadata")
+}
+
 enum PositionRequestStatus {
   DRAFT
   IN_REVIEW
@@ -37,32 +45,43 @@ enum PositionRequestStatus {
 }
 
 model PositionRequest {
-  id                       Int                    @id @default(autoincrement())
-  step                     Int
-  reports_to_position_id   String
-  department_id            String
-  parent_job_profile_id    Int?
-  profile_json             Json?                  @db.JsonB
-  orgchart_json            Json?                  @db.JsonB
-  user_id                  String?                @db.Uuid
-  classificationAssignedTo String?                @db.Uuid // to whom this position request was assigned to in the CRM - will filter by this field when classificaton user sees their tasks
-  title                    String?
-  position_number          Int?
-  classification_id        String?
-  classification_code      String? // this is just to satisfy type definition, no data is stored here AL-146
-  user_name                String? // this is just to satisfy type definition, no data is stored here AL-146
-  email                    String? // this is just to satisfy type definition, no data is stored here AL-146
-  submission_id            String?
-  submitted_at             DateTime               @default(now())
-  approved_at              DateTime               @default(now())
-  status                   PositionRequestStatus?
-  updated_at               DateTime               @default(now()) @updatedAt
+  id                         Int                    @id @default(autoincrement())
+  crm_id                     Int?                   @unique
+  crm_assigned_to_account_id Int? // CRM account id of the classifications user who is assigned to the incident
+  step                       Int
+  reports_to_position_id     String
+  department_id              String
+  parent_job_profile_id      Int?
+  crm_json                   Json?                  @db.JsonB
+  profile_json               Json?                  @db.JsonB
+  orgchart_json              Json?                  @db.JsonB
+  user_id                    String?                @db.Uuid
+  title                      String?
+  position_number            Int?
+  classification_id          String?
+  classification_code        String? // this is just to satisfy type definition, no data is stored here AL-146
+  user_name                  String? // this is just to satisfy type definition, no data is stored here AL-146
+  email                      String? // this is just to satisfy type definition, no data is stored here AL-146
+  submission_id              String?
+  submitted_at               DateTime               @default(now())
+  approved_at                DateTime               @default(now())
+  status                     PositionRequestStatus?
+  updated_at                 DateTime               @default(now()) @updatedAt
+  shareUUID                  String?                @default(uuid()) @db.Uuid
+
+  // additional information form data
+  additional_info_work_location_id             String?
+  additional_info_department_id                String?
+  additional_info_excluded_mgr_position_number String?
+  additional_info_comments                     String?
 
   // TODO: AL-146
   // user        User       @relation(fields: [user_id], references: [id])
   // classification     Classification @relation(fields: [classification_id], references: [id])
   parent_job_profile JobProfile? @relation(fields: [parent_job_profile_id], references: [id])
   department         Department  @relation(fields: [department_id], references: [id])
+  workLocation       Location?   @relation(fields: [additional_info_work_location_id], references: [id])
+  paylist_department Department? @relation(name: "PositionRequestPaylistDepartment", fields: [additional_info_department_id], references: [id])
 
   @@map("position_request")
 }
@@ -73,6 +92,7 @@ model User {
   email      String?   @unique
   username   String?   @unique
   roles      String[]
+  metadata   Json?     @db.JsonB
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now()) @updatedAt
   deleted_at DateTime?
@@ -121,6 +141,7 @@ model BehaviouralCompetency {
 enum JobProfileState {
   DRAFT
   PUBLISHED
+  UNPUBLISHED
 }
 
 enum JobProfileType {
@@ -165,6 +186,7 @@ model JobProfile {
   preferences                            String[]
   knowledge_skills_abilities             String[]
   willingness_statements                 String[]
+  optional_requirements                  String[]
   security_screenings                    Json?                 @db.JsonB
   reports_to                             JobProfileReportsTo[]
   position_request                       PositionRequest[]
@@ -358,17 +380,19 @@ model Classification {
 }
 
 model Department {
-  id               String            @id // DEPTID
-  location         Location          @relation(fields: [location_id], references: [id])
+  id               String       @id // DEPTID
+  location         Location     @relation(fields: [location_id], references: [id])
   location_id      String
-  organization     Organization      @relation(fields: [organization_id], references: [id])
+  organization     Organization @relation(fields: [organization_id], references: [id])
   organization_id  String
   peoplesoft_id    String // SETID
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS
-  effective_date   DateTime          @db.Date // EFFDT
-  PositionRequest  PositionRequest[]
+  effective_date   DateTime     @db.Date // EFFDT
+
+  PositionRequest                     PositionRequest[]
+  PositionRequestsByPaylistDepartment PositionRequest[] @relation(name: "PositionRequestPaylistDepartment")
 
   @@map("department")
 }
@@ -381,7 +405,8 @@ model Location {
   effective_status String // EFF_STATUS
   effective_date   DateTime @db.Date // EFFDT
 
-  departments Department[]
+  departments      Department[]
+  positionRequests PositionRequest[]
 
   @@map("location")
 }

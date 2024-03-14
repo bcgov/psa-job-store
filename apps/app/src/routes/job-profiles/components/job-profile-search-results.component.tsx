@@ -26,10 +26,12 @@ export const JobProfileSearchResults = ({
   totalResults,
   onPageChange,
 }: JobProfileSearchResultsProps) => {
+  const isTestEnvironment = import.meta.env.VITE_TEST_ENV === 'true';
+
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
-  const isPositionRequestRoute = location.pathname.includes('/position-request/');
+  const isPositionRequestRoute = location.pathname.includes('/my-positions/');
   const { positionRequestId } = useParams<{ positionRequestId?: string }>();
 
   const getBasePath = (path: string) => {
@@ -52,11 +54,20 @@ export const JobProfileSearchResults = ({
     const newSearchParams = new URLSearchParams(searchParams.toString());
     if (positionRequestId) {
       newSearchParams.set('selectedProfile', profileId.toString());
-      return `/position-request/${positionRequestId}?${newSearchParams.toString()}`;
+      return `/my-positions/${positionRequestId}?${newSearchParams.toString()}`;
     } else {
       // If not on the position-request route, use the standard job-profiles path
       return `/job-profiles/${profileId}?${newSearchParams.toString()}`;
     }
+  };
+
+  const scrollToTop = () => {
+    // todo: this doesn't work, likely because of overflow hidden somewhere
+    // console.log('scrolltop!');
+    // window.scrollTo({
+    //   top: 0,
+    //   behavior: 'smooth', // for a smooth scrolling
+    // });
   };
 
   const ReplaceLink = ({ to, children, tabIndex }: any) => {
@@ -65,6 +76,7 @@ export const JobProfileSearchResults = ({
     const handleClick = (event: any) => {
       event.preventDefault(); // Prevent default link behavior
       navigate(to, { replace: true }); // Use replace navigation
+      scrollToTop();
     };
 
     return (
@@ -73,22 +85,28 @@ export const JobProfileSearchResults = ({
       </a>
     );
   };
+
   return (
     <div
-      style={{ border: '1px solid #CCC' }}
+      style={{ border: '1px solid #D9D9D9', borderRadius: '8px', background: 'white' }}
       role="region"
       aria-label="job profiles list"
       data-testid="job-profile-search-results"
     >
-      <div style={{ borderBottom: '1px solid #CCC', padding: '1rem' }}>
+      <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0rem 1rem' }}>
         <h1>
+          <Text style={{ fontSize: '13pt' }}>Job profiles</Text>
+        </h1>
+      </div>
+      <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0.5rem 1rem' }}>
+        <h2>
           <Text style={{ fontSize: '10pt' }}>
             Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of{' '}
             {totalResults} results
           </Text>
-        </h1>
+        </h2>
       </div>
-      <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list">
+      <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list" style={{ padding: '0' }}>
         {isLoading ? (
           <div data-testid="skeleton-loading">
             <Skeleton loading={isLoading} />
@@ -112,10 +130,12 @@ export const JobProfileSearchResults = ({
       </ul>
       <Pagination
         data-testid="pagination"
-        showSizeChanger
+        // have a hidden size changer for testing purposes
+        // className="hideSizeChanger"
+        showSizeChanger={isTestEnvironment}
+        pageSizeOptions={[2, 10]}
         current={currentPage}
         pageSize={pageSize}
-        pageSizeOptions={[1, 2, 3, 5, 10]}
         total={totalResults}
         onChange={onPageChange}
         style={{ textAlign: 'center', margin: '1rem' }}
