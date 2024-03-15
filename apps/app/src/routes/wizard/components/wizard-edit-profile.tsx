@@ -2839,14 +2839,19 @@ const WizardEditProfile = forwardRef(
                       {/* Preferences */}
 
                       <Divider className="hr-reduced-margin" />
-
                       <Form.Item
-                        label="Preferences"
+                        label={
+                          <span>
+                            Preferences{' '}
+                            <Tooltip title="Use this section to add any preferred education or experience  for the position.  This can be helfpul when screening your pool of candidates. It could be an educational certification, or an experience in a certain type of work.">
+                              <InfoCircleOutlined style={{ cursor: 'pointer', fontSize: '0.9rem' }} />
+                            </Tooltip>
+                          </span>
+                        }
                         labelCol={{ className: 'card-label' }}
                         className="label-only"
                         colon={false}
                       ></Form.Item>
-
                       <>
                         {preferences_fields.length > 0 && (
                           <AccessibleList
@@ -2874,7 +2879,14 @@ const WizardEditProfile = forwardRef(
                       <Divider className="hr-reduced-margin" />
 
                       <Form.Item
-                        label="Knowledge, skills and abilities"
+                        label={
+                          <span>
+                            Knowledge, skills and abilities{' '}
+                            <Tooltip title="Use this section to add knowledge, skills and abilities required to perform the work successfully.">
+                              <InfoCircleOutlined style={{ cursor: 'pointer', fontSize: '0.9rem' }} />
+                            </Tooltip>
+                          </span>
+                        }
                         labelCol={{ className: 'card-label' }}
                         className="label-only"
                         colon={false}
@@ -2907,7 +2919,14 @@ const WizardEditProfile = forwardRef(
                       <Divider className="hr-reduced-margin" />
 
                       <Form.Item
-                        label="Willingness statements or provisos"
+                        label={
+                          <span>
+                            Willingness statements or provisos{' '}
+                            <Tooltip title="Use this section to define special requirements of the job to make applicants aware of work environment and other requirements. Examples include requiring travel as part of the job, or willingness to work flexible hours.">
+                              <InfoCircleOutlined style={{ cursor: 'pointer', fontSize: '0.9rem' }} />
+                            </Tooltip>
+                          </span>
+                        }
                         labelCol={{ className: 'card-label' }}
                         className="label-only"
                         colon={false}
