@@ -765,7 +765,9 @@ export class PositionRequestApiService {
       accountabilities: prJobProfile.accountabilities
         .filter(
           (obj) =>
-            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+            (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)) ||
+            ((Object.keys(obj).indexOf('is_significant') === -1 || obj.is_significant === false) &&
+              obj.isCustom === true),
         )
         .map((obj) => obj.text),
       education: prJobProfile.education
