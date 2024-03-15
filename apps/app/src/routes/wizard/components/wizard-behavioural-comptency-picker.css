@@ -1,5 +1,5 @@
 /* wizard-behavioural-comptency-picker.module.css */
-#wbcp > div[class^="ant-tree-select"], [class*=" ant-tree-select"] .ant-select-selection-overflow:after {
+#wbcp > .ant-tree-select .ant-select-selector .ant-select-selection-overflow:after {
     display: inline-block;
     margin-left: 5px;
     line-height: 24px;
@@ -7,9 +7,9 @@
     color: grey;
     content: "Search for compentencies...";
 }
+
 /* Hide the placeholder when the TreeSelect is focused */
-#wbcp > div[class^="ant-tree-select"], [class*=" ant-tree-select"] .ant-select-focused .ant-select-selection-overflow:after,
-.ant-select-open .ant-select-selection-overflow:after {
+#wbcp > .ant-tree-select.ant-select-open .ant-select-selector .ant-select-selection-overflow:after{
     display: inline-block;
     margin-left: 5px;
     line-height: 24px;

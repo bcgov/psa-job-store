@@ -5,6 +5,7 @@ import {
   Alert,
   Button,
   Card,
+  Checkbox,
   Col,
   Descriptions,
   Divider,
@@ -220,7 +221,7 @@ const WizardEditProfile = forwardRef(
         });
 
         // // Set the editedMinReqFields state
-        setEditedOptReqFields(initialEditStatus);
+        // setEditedOptReqFields(initialEditStatus);
 
         const originalMinReqFieldsValue = effectiveData.education?.map((item) => {
           if (typeof item === 'string') {
@@ -987,15 +988,13 @@ const WizardEditProfile = forwardRef(
       acc_opt_append({ value: '', isCustom: true, disabled: false });
     };
 
-    const [editedOptReqFields, setEditedOptReqFields] = useState<{ [key: number]: boolean }>({});
+    // const [editedOptReqFields, setEditedOptReqFields] = useState<{ [key: number]: boolean }>({});
 
     const renderOptReqFields = (field: any, index: number) => {
-      const isEdited = editedOptReqFields[index] || field.isCustom;
-
-      const handleFieldChange = debounce((index, updatedValue) => {
-        setEditedOptReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalOptReqFields[index]?.value }));
-        trigger();
-      }, 300);
+      // const handleFieldChange = debounce((index, updatedValue) => {
+      // setEditedOptReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalOptReqFields[index]?.value }));
+      //   trigger();
+      // }, 300);
 
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
@@ -1006,7 +1005,6 @@ const WizardEditProfile = forwardRef(
         ? `Undo remove optional accountability ${index + 1}`
         : `Remove optional accountability ${index + 1}`;
       const tooltipTitle = field.is_readonly ? 'Required' : '';
-
       return (
         <>
           {/* <div aria-live="polite" className="sr-only">
@@ -1015,7 +1013,6 @@ const WizardEditProfile = forwardRef(
           <List.Item
             key={field.id}
             style={{
-              textDecoration: field.disabled ? 'line-through' : 'none',
               display: 'flex',
               alignItems: 'flex-start',
               marginBottom: '0px',
@@ -1034,7 +1031,30 @@ const WizardEditProfile = forwardRef(
             <FormItem name={`optional_accountabilities.${index}.is_readonly`} control={control} hidden>
               <Input />
             </FormItem>
+            {!field.isCustom && (
+              <>
+                <Checkbox
+                  aria-label={ariaLabel}
+                  checked={!field.disabled}
+                  onChange={() => {
+                    console.log(field.disabled);
+                    field.disabled ? handleOptReqAddBack(index) : handleOptReqRemove(index);
+                  }}
+                  style={{ marginRight: '10px' }}
+                ></Checkbox>
 
+                <Typography.Text
+                  data-testid={`readonly-accountability-${index}`}
+                  style={{
+                    flex: 1,
+                    marginRight: '10px',
+                    color: field.disabled ? 'grey' : '',
+                  }}
+                >
+                  {field.text}
+                </Typography.Text>
+              </>
+            )}
             <Controller
               control={control}
               name={`optional_accountabilities.${index}.text`}
@@ -1046,12 +1066,15 @@ const WizardEditProfile = forwardRef(
                   <TextArea
                     id={field.id}
                     autoSize
+                    style={{
+                      display: field.isCustom ? 'block' : 'none',
+                      'margin-left': field.isCustom ? '20px' : '0',
+                    }}
                     disabled={field.disabled || getValues(`optional_accountabilities.${index}.is_readonly`)}
-                    className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
                     onChange={(event) => {
                       onChange(event);
-                      const updatedValue = event.target.value;
-                      handleFieldChange(index, updatedValue);
+                      // const updatedValue = event.target.value;
+                      // handleFieldChange(index, updatedValue);
                     }}
                     onBlur={onBlur}
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
@@ -1059,46 +1082,20 @@ const WizardEditProfile = forwardRef(
                 </>
               )}
             />
-
-            <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-              <Button
-                className="remove-item-btn"
-                icon={icon}
-                aria-label={ariaLabel}
-                onClick={() => {
-                  field.disabled ? handleOptReqAddBack(index) : handleOptReqRemove(index);
-                }}
-                disabled={field.is_readonly}
-                style={{ marginLeft: '10px' }}
-              />
-            </Tooltip>
-
-            {/* {field.disabled ? (
-            <Button
-              icon={<PlusOutlined style={{ color: '#000000' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                // acc_req_remove(index);
-                handleOptReqAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#000000' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                handleOptReqRemove(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          )} */}
+            {field.isCustom && (
+              <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+                <Button
+                  className="remove-item-btn"
+                  icon={icon}
+                  aria-label={ariaLabel}
+                  onClick={() => {
+                    field.disabled ? handleOptReqAddBack(index) : handleOptReqRemove(index);
+                  }}
+                  disabled={field.is_readonly}
+                  style={{ marginLeft: '10px' }}
+                />
+              </Tooltip>
+            )}
           </List.Item>
         </>
       );
@@ -2674,7 +2671,9 @@ const WizardEditProfile = forwardRef(
                         className="label-only"
                         colon={false}
                       ></Form.Item>
-
+                      <Typography.Paragraph type="secondary">
+                        Choose or add accountabilities. <i> Adding new accountabilities will trigger verification.</i>
+                      </Typography.Paragraph>
                       <>
                         {acc_opt_fields.length > 0 && (
                           <AccessibleList
