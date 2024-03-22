@@ -21,6 +21,12 @@ Feature: Edit Job Profiles
         And the user deletes the newly added accountability "Lead successful deployments"
         And the user adds a new required accountability "Manage project budget"
 
+        # Optional accountabilities
+        Then the user removes the last optional accountability
+        And the user adds a new optional accountability "Conceptual thinking"
+        And the user deletes the newly added optional accountability "Conceptual thinking"
+        And the user adds a new optional accountability "Effective communication"
+
         # Educaiton and work experience
         Then the first job education should not be editable
         And the user removes the last two default job educations
@@ -88,15 +94,21 @@ Feature: Edit Job Profiles
         And the user clicks the "Next" button
         Then they proceed to the review changes step
         And the diff view is turned off
+
+
+        # CHECKING
+
         And the review page should display the updated job title "Project Manager"
         And the review page should display the updated program overview "Program overview updated"
         And the review page should display the updated job overview "Overview updated"
 
-        # CHECKING
-
         # Accountabilities
         And the last accountability should be "Manage project budget"
         And the second last accountability should start with "Provides financial management"
+
+        # # Optional accountabilities
+        And the last optional accountability should be "Effective communication"
+        And the second last optional accountability should start with "Coordinates the preparation"
 
         # Educaiton and work experience
         And the last job education should be "Oversee financial auditing processes"

@@ -40,8 +40,8 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
     if (
       location.pathname.startsWith('/my-positions/create') ||
       location.pathname.startsWith('/org-chart') ||
-      location.pathname.startsWith('/') ||
-      location.pathname == ''
+      location.pathname == '/' || // home page
+      location.pathname == '' // home page
     ) {
       const positionRequestInput = {
         step: 1,

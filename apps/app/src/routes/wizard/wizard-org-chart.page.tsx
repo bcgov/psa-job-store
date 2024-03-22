@@ -19,6 +19,7 @@ interface WizardOrgChartPageProps {
 export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPageProps) => {
   const { positionRequestDepartmentId } = useWizardContext();
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(positionRequestDepartmentId);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { data: profileData } = useGetProfileQuery();
 
@@ -39,15 +40,15 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
   };
 
   const { createNewPosition } = usePosition();
-  const next = () => {
+  const next = async () => {
     if (selectedDepartment == null) return;
-    // console.log(
-    //   'selectedNode.id, selectedDepartment, orgChartJson: ',
-    //   selectedNode.id,
-    //   selectedDepartment,
-    //   orgChartJsonRef.current,
-    // );
-    createNewPosition(selectedNode.id, selectedDepartment, orgChartJsonRef.current);
+    setIsLoading(true);
+    try {
+      await createNewPosition(selectedNode.id, selectedDepartment, orgChartJsonRef.current);
+      onCreateNewPosition?.();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onOrgChartLoad = (orgChartData: any) => {
@@ -76,7 +77,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
       grayBg={false}
       pageHeaderExtra={[
         <Button onClick={() => navigate('/')}>Cancel</Button>,
-        <Button type="primary" disabled={selectedNode == null} onClick={next}>
+        <Button type="primary" disabled={selectedNode == null} onClick={next} loading={isLoading}>
           Next
         </Button>,
       ]}

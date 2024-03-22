@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
+import './accessible-list.css';
 
 interface AccessibleListProps {
   dataSource: any;

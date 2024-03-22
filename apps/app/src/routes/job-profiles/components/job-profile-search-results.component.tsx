@@ -8,7 +8,7 @@ import styles from './job-profile-search-results.module.css';
 const { Text } = Typography;
 
 export interface JobProfileSearchResultsProps {
-  data: GetJobProfilesResponse | undefined;
+  data: GetJobProfilesResponse | undefined | null;
   isLoading: boolean;
   onSelectProfile?: (profile: JobProfileModel) => void;
   currentPage: number;

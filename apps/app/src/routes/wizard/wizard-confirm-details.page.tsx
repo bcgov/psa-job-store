@@ -108,6 +108,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   disableBlockingAndNavigateHome,
 }) => {
   // const [createJobProfile] = useCreateJobProfileMutation();
+  const [isLoading, setIsLoading] = useState(false);
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [
     getPositionProfile,
@@ -231,10 +232,10 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     // A modal appeared with terms
     // User confirmed the terms in the modal by pressing OK
 
-    // Hide the modal
-    const formData = getValues();
+    setIsLoading(true);
 
     try {
+      const formData = getValues();
       if (positionRequestId) {
         await updatePositionRequest({
           id: positionRequestId,
@@ -252,12 +253,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       } else {
         throw Error('Position request not found');
       }
-    } catch (error) {
-      // Handle the error, possibly showing another modal
-      Modal.error({
-        title: 'Error updating position',
-        content: 'An unknown error occurred', //error.data?.message ||
-      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -397,7 +394,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           <Button onClick={onBackCallback} key="back">
             Back
           </Button>,
-          <Button key="next" type="primary" onClick={showModal} data-testid="next-button">
+          <Button key="next" type="primary" onClick={showModal} data-testid="next-button" loading={isLoading}>
             Save and next
           </Button>,
         ]}

@@ -26,20 +26,18 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
 }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { wizardData, positionRequestId } = useWizardContext();
+  const [isLoading, setIsLoading] = useState(false);
 
   const onNextCallback = async () => {
+    setIsLoading(true);
     try {
       if (positionRequestId) {
         await updatePositionRequest({ id: positionRequestId, step: 4 }).unwrap();
         if (onNext) onNext();
         // navigate('/wizard/confirm');
       }
-    } catch (error) {
-      // Handle the error, possibly showing another modal
-      Modal.error({
-        title: 'Error updating position request',
-        content: 'An unknown error occurred', //error.data?.message ||
-      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -154,7 +152,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           <Button onClick={onBackCallback} key="back" data-testid="back-button">
             Back
           </Button>,
-          <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button">
+          <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button" loading={isLoading}>
             Save and next
           </Button>,
         ]}
