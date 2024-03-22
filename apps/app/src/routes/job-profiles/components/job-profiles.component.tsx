@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // JobProfilesContent.jsx
 import { FileTextFilled } from '@ant-design/icons';
 import { Breakpoint, Col, Empty, Grid, Row, Space, Typography } from 'antd';
@@ -5,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch } from '../../../redux/redux.store';
 import { graphqlApi } from '../../../redux/services/graphql-api';
-import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
+import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { useLazyGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
@@ -26,7 +27,8 @@ interface JobProfilesContentProps {
 
 const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelectProfile }) => {
   const dispatch = useAppDispatch();
-  const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
+  const [useData, setUseData] = useState<GetJobProfilesResponse | null>(null);
+  const [trigger, { data, isLoading, isFetching }] = useLazyGetJobProfilesQuery();
   const [classificationIdFilter, setClassificationIdFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10); // Default page size, adjust as needed
@@ -35,7 +37,6 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
   const { positionRequestId } = useParams();
   const params = useParams();
   const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
-  const [jobProfilesLoading, setJobProfilesLoading] = useState<boolean>(false);
 
   /*
     AL-85 Code
@@ -47,24 +48,31 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
 
   const [prTrigger, { data: prData }] = useLazyGetPositionRequestQuery();
   const [pTrigger, { data: pData }] = useLazyGetPositionQuery();
+  const [positionFilteringProcessActive, setPositionFilteringProcessActive] = useState<boolean>(true);
   // TODO: Add useLazyGetPositionQuery(<id>)
 
   useEffect(() => {
+    // If we have a positionRequestId and no position request data, get the position request data
     if (positionRequestId != null && prData == null) {
-      setJobProfilesLoading(true);
       prTrigger({ id: +positionRequestId });
     }
 
+    if (positionRequestId == null) {
+      setPositionFilteringProcessActive(false);
+    }
+
+    // If we have a positionRequestId and prData, get the position data
     const reportsToPositionId = prData?.positionRequest?.reports_to_position_id;
     if (reportsToPositionId != null && pData == null) {
-      setJobProfilesLoading(true);
       dispatch(graphqlApi.util.invalidateTags(['jobProfiles']));
       pTrigger({ where: { id: `${reportsToPositionId}` } });
     }
 
+    // If we have a positionRequestId, prData, and pData, get the classification ID for the position
     const classificationId = pData?.position?.classification_id;
     if (classificationId != null && classificationIdFilter == null) {
-      setJobProfilesLoading(true);
+      setPositionFilteringProcessActive(false);
+      // set classificationIdFilter from the position data to filter job profiles by classification
       setClassificationIdFilter(classificationId);
     }
   }, [positionRequestId, prData, pData, classificationIdFilter, dispatch, pTrigger, prTrigger]);
@@ -79,7 +87,14 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     const classificationFilter = searchParams.get('classification_id__in');
     const jobFamilyFilter = searchParams.get('job_family_id__in');
     const jobStreamFilter = searchParams.get('job_stream_id__in');
+
+    // if it's a change in selectedProfile then do not refetch, just return
+    if (searchParams.get('selectedProfile')) return;
+
     setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
+
+    setUseData(null);
+    if (positionFilteringProcessActive) return;
 
     trigger({
       ...(search != null && { search }),
@@ -152,26 +167,30 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
       skip: (currentPage - 1) * pageSize,
       take: pageSize,
     });
-  }, [searchParams, trigger, currentPage, pageSize, classificationIdFilter]);
+  }, [searchParams, trigger, currentPage, pageSize, classificationIdFilter, positionFilteringProcessActive]);
 
   // Update totalResults based on the response (if applicable)
   useEffect(() => {
-    if (data) {
-      setJobProfilesLoading(false);
-    }
-
-    if (data && data.jobProfilesCount !== undefined) {
-      setTotalResults(data.jobProfilesCount);
+    if (useData && useData.jobProfilesCount !== undefined) {
+      setTotalResults(useData.jobProfilesCount);
     }
     // if search params has selected profile, ensure we call back to parent
     if (searchParams.get('selectedProfile')) {
       const profileId = searchParams.get('selectedProfile');
       if (profileId) {
-        const jobProfile = data?.jobProfiles.find((p) => p.id === parseInt(profileId));
+        const jobProfile = useData?.jobProfiles.find((p: any) => p.id === parseInt(profileId));
         if (jobProfile) onSelectProfile?.(jobProfile);
       }
     }
-  }, [data, onSelectProfile, searchParams]);
+  }, [useData, onSelectProfile, searchParams]);
+
+  useEffect(() => {
+    if (data && !isFetching && !isLoading)
+      setUseData({
+        jobProfiles: data.jobProfiles,
+        jobProfilesCount: data.jobProfilesCount,
+      });
+  }, [data, isFetching, isLoading]);
 
   // const getBasePath = (path: string) => {
   //   const pathParts = path.split('/');
@@ -209,7 +228,6 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     return pathParts.join('/');
   };
 
-  // console.log('params: ', params, 'searchParams: ', searchParams.toString());
   const renderJobProfile = () => {
     return params.id || searchParams.get('selectedProfile') ? (
       <JobProfile />
@@ -230,7 +248,6 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     );
   };
 
-  // console.log('jobProfilesLoading || isLoading: ', jobProfilesLoading, isLoading);
   return (
     <>
       <WizardProvider>
@@ -240,8 +257,9 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
             <>
               <Col span={8}>
                 <JobProfileSearchResults
-                  data={data}
-                  isLoading={jobProfilesLoading || isLoading}
+                  data={useData}
+                  //  jobProfilesLoading || isLoading
+                  isLoading={useData == null || positionFilteringProcessActive}
                   onSelectProfile={onSelectProfile}
                   currentPage={currentPage}
                   pageSize={pageSize}
@@ -255,7 +273,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
             <Col span={24}>{renderJobProfile()}</Col>
           ) : (
             <JobProfileSearchResults
-              data={data}
+              data={useData}
               isLoading={isLoading}
               onSelectProfile={onSelectProfile}
               currentPage={currentPage}

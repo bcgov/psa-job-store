@@ -1068,7 +1068,7 @@ const WizardEditProfile = forwardRef(
                     autoSize
                     style={{
                       display: field.isCustom ? 'block' : 'none',
-                      'margin-left': field.isCustom ? '20px' : '0',
+                      marginLeft: field.isCustom ? '20px' : '0',
                     }}
                     disabled={field.disabled || getValues(`optional_accountabilities.${index}.is_readonly`)}
                     onChange={(event) => {
