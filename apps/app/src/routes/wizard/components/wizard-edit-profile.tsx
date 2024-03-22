@@ -867,7 +867,7 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove accountability ${index + 1}`
@@ -999,11 +999,11 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
-        ? `Undo remove optional accountability ${index + 1}`
-        : `Remove optional accountability ${index + 1}`;
+        ? `Undo remove optional accountability ${index + 1}: ${field.text ?? ''}`
+        : `Remove optional accountability ${index + 1} : ${field.text ?? ''}`;
       const tooltipTitle = field.is_readonly ? 'Required' : '';
       return (
         <>
@@ -1034,6 +1034,8 @@ const WizardEditProfile = forwardRef(
             {!field.isCustom && (
               <>
                 <Checkbox
+                  data-testid={`optional-accountability-checkbox-${index}`}
+                  className="multiline-checkbox"
                   aria-label={ariaLabel}
                   checked={!field.disabled}
                   onChange={() => {
@@ -1041,9 +1043,11 @@ const WizardEditProfile = forwardRef(
                     field.disabled ? handleOptReqAddBack(index) : handleOptReqRemove(index);
                   }}
                   style={{ marginRight: '10px' }}
-                ></Checkbox>
+                >
+                  {field.text}
+                </Checkbox>
 
-                <Typography.Text
+                {/* <Typography.Text
                   data-testid={`readonly-accountability-${index}`}
                   style={{
                     flex: 1,
@@ -1052,7 +1056,7 @@ const WizardEditProfile = forwardRef(
                   }}
                 >
                   {field.text}
-                </Typography.Text>
+                </Typography.Text> */}
               </>
             )}
             <Controller
@@ -1061,11 +1065,12 @@ const WizardEditProfile = forwardRef(
               render={({ field: { onChange, onBlur, value } }) => (
                 <>
                   <label className="sr-only" htmlFor={field.id}>
-                    Optional accountability {index + 1}
+                    Custom optional accountability {index + 1}
                   </label>
                   <TextArea
                     id={field.id}
                     autoSize
+                    data-testid={`optional-accountability-input-${index}`}
                     style={{
                       display: field.isCustom ? 'block' : 'none',
                       marginLeft: field.isCustom ? '20px' : '0',
@@ -1085,6 +1090,7 @@ const WizardEditProfile = forwardRef(
             {field.isCustom && (
               <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
                 <Button
+                  data-testid={`remove-optional-accountability-${index}`}
                   className="remove-item-btn"
                   icon={icon}
                   aria-label={ariaLabel}
@@ -1146,7 +1152,7 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove Education and work experience ${index + 1}`
@@ -1309,7 +1315,7 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove related experience ${index + 1}`
@@ -1464,7 +1470,7 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove security screening ${index + 1}`
@@ -1600,7 +1606,7 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove professional registration requirement ${index + 1}`
@@ -1753,7 +1759,7 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove optional requirement ${index + 1}`
@@ -1875,7 +1881,7 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove job preference ${index + 1}`
@@ -2025,7 +2031,7 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove knowledge, skill or ability ${index + 1}`
@@ -2149,7 +2155,7 @@ const WizardEditProfile = forwardRef(
       const icon = field.disabled ? (
         <PlusOutlined style={{ color: '#000000' }} />
       ) : (
-        <DeleteOutlined style={{ color: '#000000' }} />
+        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
       );
       const ariaLabel = field.disabled
         ? `Undo remove willingness statements or proviso ${index + 1}`
@@ -2683,6 +2689,7 @@ const WizardEditProfile = forwardRef(
                           />
                         )}
                         <Button
+                          data-testid="add-optional-accountability-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}

@@ -36,24 +36,24 @@ Then('the first accountability should not be editable', () => {
 });
 
 When('the user removes last two default accountabilities', () => {
+  cy.get('[data-testid="remove-accountability-6"]').click(); // Adjust index as needed
   cy.get('[data-testid="remove-accountability-7"]').click(); // Adjust index as needed
-  cy.get('[data-testid="remove-accountability-8"]').click(); // Adjust index as needed
 });
 
 // Undos removal of last accountability
 When('the user undos removal of last accountability', () => {
-  cy.get('[data-testid="undo-remove-accountability-8"]').click();
+  cy.get('[data-testid="undo-remove-accountability-7"]').click();
 });
 
 // Adds a new required accountability "Lead successful deployments"
 When('the user adds a new required accountability "Lead successful deployments"', () => {
   cy.get('[data-testid="add-accountability-button"]').click();
-  cy.get('[data-testid="accountability-input-9"]').type('Lead successful deployments');
+  cy.get('[data-testid="accountability-input-8"]').type('Lead successful deployments');
 });
 
 // Deletes the newly added accountability "Lead successful deployments"
 When('the user deletes the newly added accountability "Lead successful deployments"', () => {
-  cy.get('[data-testid="remove-accountability-9"]').click(); // Adjust identifier as needed
+  cy.get('[data-testid="remove-accountability-8"]').click(); // Adjust identifier as needed
   // Now, click the OK button in the confirmation dialog
   cy.contains('button', 'OK').click();
 });
@@ -61,8 +61,26 @@ When('the user deletes the newly added accountability "Lead successful deploymen
 // Adds a new required accountability "Manage project budget"
 When('the user adds a new required accountability "Manage project budget"', () => {
   cy.get('[data-testid="add-accountability-button"]').click();
-  cy.get('[data-testid="accountability-input-9"]').click();
-  cy.get('[data-testid="accountability-input-9"]').type('Manage project budget');
+  cy.get('[data-testid="accountability-input-8"]').click();
+  cy.get('[data-testid="accountability-input-8"]').type('Manage project budget');
+});
+
+// OPTIONAL ACCOUNTABILITIES
+When('the user removes the last optional accountability', () => {
+  // Assuming each accountability has a remove button with a specific data-testid pattern
+  cy.get('[data-testid^="optional-accountability-checkbox-"]').last().click();
+});
+
+When('the user adds a new optional accountability {string}', (accountability: string) => {
+  // Click the add button, enter the text for the new accountability
+  cy.get('[data-testid="add-optional-accountability-button"]').click();
+  cy.get('[data-testid="optional-accountability-input-3"]').type(accountability);
+});
+
+When('the user deletes the newly added optional accountability {string}', (_accountability: string) => {
+  cy.get('[data-testid="remove-optional-accountability-3"]').click(); // Adjust identifier as needed
+  // Now, click the OK button in the confirmation dialog
+  cy.contains('button', 'OK').click();
 });
 
 // EDUCATION
@@ -429,6 +447,15 @@ Then('the second last accountability should start with "Provides financial manag
   cy.get('[data-testid="significant-accountabilities"] > li')
     .eq(-2)
     .should('contain.text', 'Provides financial management');
+});
+
+// Optional Accountibilities checking
+Then('the last optional accountability should be "Effective communication"', () => {
+  cy.get('[data-testid="optional-accountabilities"] > li').last().should('have.text', 'Effective communication');
+});
+
+Then('the second last optional accountability should start with "Coordinates the preparation"', () => {
+  cy.get('[data-testid="optional-accountabilities"] > li').eq(-2).should('contain.text', 'Coordinates the preparation');
 });
 
 // Education and work experience checking

@@ -517,7 +517,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           </ul>
           {/* Optional Accountabilities - is_significant == false */}
           <h4>Optional accountabilities</h4>
-          <ul>
+          <ul data-testid="optional-accountabilities">
             {showDiff && originalData
               ? compareLists(
                   originalData.accountabilities.filter((acc) => !acc.is_significant),
