@@ -131,7 +131,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   }, [selectedLocation, positionProfileData]);
 
   // Filter departments based on selected location
-  const filteredDepartments = departmentsData?.filter((department) => department.location_id === selectedLocation);
+
+  // const filteredDepartments = departmentsData?.filter((department) => department.location_id === selectedLocation);
 
   const [additionalPositions, setAdditionalPositions] = useState(0);
   const [noPositions, setNoPositions] = useState(false);
@@ -460,7 +461,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     </Card>
 
                     <Card
-                      title="Work location & department"
+                      title="Department ID"
+                      // title="Department & work location"
                       bordered={false}
                       className="custom-card"
                       style={{ marginTop: 16 }}
@@ -468,53 +470,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                       <Row justify="start">
                         <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                           <Form.Item
-                            name="workLocation"
-                            validateStatus={errors.workLocation ? 'error' : ''}
-                            help={errors.workLocation?.message}
-                          >
-                            <label htmlFor="workLocation">Work location</label>
-                            <Controller
-                              name="workLocation"
-                              control={control}
-                              render={({ field: { onChange, onBlur, value } }) => {
-                                return (
-                                  <Select
-                                    data-testid="location-select"
-                                    onBlur={onBlur}
-                                    value={value}
-                                    onChange={(newValue) => {
-                                      setSelectedLocation(newValue); // Update selected location
-                                      setValue('payListDepartmentId', null); // Clear selected department
-                                      onChange(newValue);
-                                    }}
-                                    placeholder="Select work location"
-                                    disabled={!confirmation}
-                                    showSearch
-                                    filterOption={(input, option) => {
-                                      if (!option) return false;
-                                      return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                                    }}
-                                    options={allLocations?.locations.map((group) => ({
-                                      label: `${group.name} (${group.id} - ${group.departmentCount} departments)`,
-                                      value: group.id,
-                                    }))}
-                                  ></Select>
-                                );
-                              }}
-                            />
-                            {/* {errors.workLocation && <p style={{ color: 'red' }}>{errors.workLocation.message}</p>} */}
-                          </Form.Item>
-                        </Col>
-                      </Row>
-
-                      <Divider className="hr-reduced-margin" />
-
-                      <Row justify="start">
-                        <Col xs={24} sm={24} md={24} lg={18} xl={12}>
-                          <Form.Item
                             name="payListDepartmentId"
-                            label="Department ID"
-                            labelCol={{ className: 'card-label' }}
+                            // label="Department ID"
+                            // labelCol={{ className: 'card-label' }}
                             validateStatus={errors.payListDepartmentId ? 'error' : ''}
                             help={errors.payListDepartmentId?.message}
                           >
@@ -525,9 +483,10 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                 <Select
                                   data-testid="department-select"
                                   onChange={(newValue) => {
-                                    const selectedDept =
-                                      filteredDepartments?.find((dept) => dept.id === newValue)?.name || '';
-                                    setSelectedDepartment(selectedDept); // Update selected department name
+                                    const selectedDept = departmentsData?.find((dept) => dept.id === newValue);
+                                    setSelectedDepartment(selectedDept?.name || ''); // Update selected department name
+                                    setValue('workLocation', selectedDept?.location_id || null);
+                                    setSelectedLocation(newValue);
                                     onChange(newValue); // Update the form state
                                   }}
                                   showSearch
@@ -537,7 +496,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                     if (!option) return false;
                                     return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
                                   }}
-                                  options={filteredDepartments?.map((group) => ({
+                                  options={departmentsData?.map((group) => ({
                                     label: `${group.id}`,
                                     value: group.id,
                                   }))}
