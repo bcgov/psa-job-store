@@ -389,7 +389,7 @@ export const TotalCompApprovedRequestPage = () => {
   return (
     <>
       <PageHeader
-        title="Approved"
+        title={data?.positionRequest?.title}
         subTitle={
           <div>
             <PositionProfile

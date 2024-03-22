@@ -80,13 +80,17 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
       // if it's unauthorized, do not show the error toast -  the system will handle the redirect to login page
       if (errorCode == 'UNAUTHENTICATED') return result;
 
-      errorToastShown = true;
-      // Display an error notification
-      notification.error({
-        duration: 0,
-        message: 'Error',
-        description: errorMessage,
-      });
+      if (errorMessage.startsWith('ALEXANDRIA_ERROR:')) {
+        errorToastShown = true;
+        const messageParts = errorMessage.split(':');
+        const errorDescription = messageParts[1];
+        notification.error({
+          duration: 0,
+          message: 'Error',
+          description: errorDescription,
+        });
+        throw new Error(errorMessage);
+      }
 
       // Throw a custom error with the extracted message
       throw new Error(errorMessage);
@@ -99,7 +103,7 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
       notification.error({
         duration: 0,
         message: 'Unknown Error',
-        description: 'Unknown error has occurred.',
+        description: 'Unknown error has occurred. We are investigating the issue. Please try again later.',
       });
     throw error;
   }

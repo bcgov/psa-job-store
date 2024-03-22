@@ -41,7 +41,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ConfigProvider
           theme={{
             // todo: this causes some issues (for example steps component on wizard doesn't render properly), needed to render AccessibleList on dev
-            hashed: false,
+            // hashed: false,
             components: {
               Layout: {
                 siderBg: '#FFF',

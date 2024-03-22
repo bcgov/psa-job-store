@@ -397,7 +397,7 @@ export const ClassificationTaskPage = () => {
       <Row align="middle" justify="space-between">
         <Col xs={24} lg={21}>
           <PageHeader
-            title="Approved"
+            title={data?.positionRequest?.title}
             subTitle={
               <div>
                 <PositionProfile
