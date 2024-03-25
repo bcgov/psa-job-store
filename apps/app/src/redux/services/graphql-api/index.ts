@@ -53,6 +53,7 @@ function checkForExpiredSessionError(response: any) {
   return false; // Specific error message not found
 }
 
+let isToastShown = false;
 const baseQuery = async (args: any, api: any, extraOptions: any) => {
   let errorToastShown = false;
   try {
@@ -72,13 +73,15 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     const meta = result.meta as GraphQLResponseMeta | undefined;
 
     // Check for GraphQL errors in the meta field
-    if (meta && meta.response && meta.response.errors) {
+    if (meta && meta.response && meta.response.errors && !isToastShown) {
       // Extract the first error message
       const errorCode = meta.response.errors[0]?.extensions?.code;
       const errorMessage = meta.response.errors[0]?.message;
 
       // if it's unauthorized, do not show the error toast -  the system will handle the redirect to login page
       if (errorCode == 'UNAUTHENTICATED') return result;
+
+      isToastShown = true;
 
       if (errorMessage.startsWith('ALEXANDRIA_ERROR:')) {
         errorToastShown = true;
@@ -88,6 +91,9 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
           duration: 0,
           message: 'Error',
           description: errorDescription,
+          onClose: () => {
+            isToastShown = false; // Reset the flag when the toast is closed
+          },
         });
         throw new Error(errorMessage);
       }
@@ -99,12 +105,17 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     return result;
   } catch (error) {
     // Handle any other unexpected errors
-    if (!errorToastShown)
+    if (!errorToastShown && !isToastShown) {
+      isToastShown = true;
       notification.error({
         duration: 0,
         message: 'Unknown Error',
         description: 'Unknown error has occurred. We are investigating the issue. Please try again later.',
+        onClose: () => {
+          isToastShown = false; // Reset the flag when the toast is closed
+        },
       });
+    }
     throw error;
   }
 };

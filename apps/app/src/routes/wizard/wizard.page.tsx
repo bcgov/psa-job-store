@@ -94,6 +94,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
         id: positionRequestId,
         step: 0,
       }).unwrap();
+    setSearchParams({}, { replace: true });
     if (onBack) onBack();
   };
 
@@ -147,8 +148,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
     <WizardPageWrapper
       title={
         <div>
-          <Link to="/">
-            <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+          <Link to="/" aria-label="Go to dashboard">
+            <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
           New position
         </div>

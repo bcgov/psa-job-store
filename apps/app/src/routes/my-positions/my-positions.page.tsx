@@ -240,6 +240,7 @@ export const MyPositionsPage = () => {
           <Row gutter={24} wrap>
             <Col span={12}>
               <Search
+                aria-label="Search by job title or submission ID"
                 data-testid="search-field"
                 defaultValue={searchParams.get('search') ?? undefined}
                 enterButton="Find positions"

@@ -6,6 +6,9 @@
     display:none !important;
 }
 
+.react-select__placeholder{
+    color: #767676 !important;
+}
 
 /* this applies same style to container as when no items are selected, so that
 the input box renders at the beginning of the box, instead of after placeholder
@@ -36,7 +39,7 @@ the input box renders at the beginning of the box, instead of after placeholder
     height: 0;
     width: 0;
     overflow: visible;
-    color: hsl(0, 0%, 50%) !important;
+    color: #767676 !important;
 }
 
 .jobFamilyStreamFilter.search-active .ant-select-selection-overflow-item-rest{
@@ -44,7 +47,7 @@ the input box renders at the beginning of the box, instead of after placeholder
 }
 
 .jobFamilyStreamFilter .ant-select-selection-placeholder{
-    color: hsl(0, 0%, 50%) !important;
+    color: #767676 !important;
 }
 
 .jobFamilyStreamFilter  .ant-select-selection-item-content{

@@ -9,6 +9,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
 import 'reflect-metadata';
 import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL, VITE_KEYCLOAK_REDIRECT_URL } from '../envConfig';
+import './global.css';
 import { store } from './redux/redux.store';
 import { sendLogToServer } from './redux/services/loggerService';
 import { router } from './router/index';
@@ -46,6 +47,26 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               Layout: {
                 siderBg: '#FFF',
               },
+            },
+            token: {
+              colorLink: '#0057AD',
+              colorPrimary: '#0057AD',
+              // colorTextSecondary: 'red',
+              // colorText: 'red',
+              colorTextTertiary: '#6E6E6E',
+              fontSizeHeading1: 20,
+              fontSizeHeading2: 18,
+              fontSizeHeading3: 16,
+              fontSizeHeading4: 14,
+              fontSizeHeading5: 14,
+
+              lineHeightHeading1: 1.4,
+              lineHeightHeading2: 1.33333,
+              lineHeightHeading3: 1.375,
+              lineHeightHeading4: 1,
+              lineHeightHeading5: 2,
+
+              colorTextPlaceholder: '#6E6E6E',
             },
           }}
         >
