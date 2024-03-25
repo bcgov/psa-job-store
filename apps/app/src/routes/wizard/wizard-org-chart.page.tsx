@@ -70,8 +70,8 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
     <WizardPageWrapper
       title={
         <div>
-          <Link to="/">
-            <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+          <Link to="/" aria-label="Go to dashboard">
+            <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
           New position
         </div>
@@ -105,7 +105,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
         }}
       >
         {isLoadingUserProfile || isFetchingUserProfile ? (
-          <LoadingComponent></LoadingComponent>
+          <LoadingComponent height="100%"></LoadingComponent>
         ) : (
           <OrgChartWrapped
             selectedDepartment={selectedDepartment}

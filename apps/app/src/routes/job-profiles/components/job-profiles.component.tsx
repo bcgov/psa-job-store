@@ -77,6 +77,8 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     }
   }, [positionRequestId, prData, pData, classificationIdFilter, dispatch, pTrigger, prTrigger]);
 
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
+
   useEffect(() => {
     // Use the following for the `search` property.
     // Search terms need to be joined with specific syntax, <-> in this case
@@ -89,12 +91,15 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
     const jobStreamFilter = searchParams.get('job_stream_id__in');
 
     // if it's a change in selectedProfile then do not refetch, just return
-    if (searchParams.get('selectedProfile')) return;
 
     setCurrentPage(parseInt(searchParams.get('page') ?? '1'));
 
-    setUseData(null);
     if (positionFilteringProcessActive) return;
+
+    if (searchParams.get('selectedProfile') && initialFetchDone) return;
+
+    setUseData(null);
+    setInitialFetchDone(true);
 
     trigger({
       ...(search != null && { search }),
@@ -167,7 +172,15 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
       skip: (currentPage - 1) * pageSize,
       take: pageSize,
     });
-  }, [searchParams, trigger, currentPage, pageSize, classificationIdFilter, positionFilteringProcessActive]);
+  }, [
+    searchParams,
+    trigger,
+    currentPage,
+    pageSize,
+    classificationIdFilter,
+    positionFilteringProcessActive,
+    initialFetchDone,
+  ]);
 
   // Update totalResults based on the response (if applicable)
   useEffect(() => {
@@ -267,10 +280,14 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
                   onPageChange={handlePageChange}
                 />{' '}
               </Col>
-              <Col span={16}>{renderJobProfile()}</Col>
+              <Col span={16} role="region" aria-label="Selected job profile contents">
+                {renderJobProfile()}
+              </Col>
             </>
           ) : params.id ? (
-            <Col span={24}>{renderJobProfile()}</Col>
+            <Col span={24} role="region" aria-label="Selected job profile contents">
+              {renderJobProfile()}
+            </Col>
           ) : (
             <JobProfileSearchResults
               data={useData}
