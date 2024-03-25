@@ -16,8 +16,9 @@ export const SiderNavItem = ({ collapsed, icon, title, to, hideTitle }: SiderNav
         <div
           style={{
             cursor: 'pointer',
-            width: '12rem',
-            ...(!isActive && { color: 'black' }),
+            width: '200px',
+            ...(!isActive && { color: 'rgba(0, 0, 0, 0.88)' }),
+            ...(isActive && { backgroundColor: '#F0F8FF' }),
           }}
         >
           <div style={{ padding: '0.625rem 1.125rem' }}>

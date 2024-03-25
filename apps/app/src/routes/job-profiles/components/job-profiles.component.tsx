@@ -242,7 +242,7 @@ const JobProfiles: React.FC<JobProfilesContentProps> = ({ searchParams, onSelect
               <Text>Choose a profile from the sidebar on the left.</Text>
             </Space>
           }
-          image={<FileTextFilled style={{ fontSize: '60pt', color: '#52A8FF' }} />}
+          image={<FileTextFilled style={{ fontSize: '60pt', color: '#0057ad' }} />}
         />
       </div>
     );

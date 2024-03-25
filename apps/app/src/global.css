@@ -1,0 +1,4 @@
+/* makes select and other components placeholder have sufficient contrast for accessibility */
+.placeholder{
+    color: #767676 !important;
+}

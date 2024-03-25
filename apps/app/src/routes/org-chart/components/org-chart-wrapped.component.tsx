@@ -1,7 +1,8 @@
-import { Empty, Space, Spin } from 'antd';
+import { Empty, Space } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { Edge, Node } from 'reactflow';
 
+import LoadingComponent from '../../../components/app/common/components/loading.component';
 import { useLazyGetOrgChartQuery } from '../../../redux/services/graphql-api/org-chart.api';
 import { OrgChart } from './org-chart.component';
 
@@ -33,7 +34,7 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   profileHasNoDepartment = false,
 }) => {
   const [orgChart, setOrgChart] = useState<OrgChartData>(orgChartSnapshot ?? DEFAULT_ORG_CHART);
-  const [trigger, { data, isFetching }] = useLazyGetOrgChartQuery();
+  const [trigger, { data, isFetching, isLoading }] = useLazyGetOrgChartQuery();
 
   // console.log('selectedDepartment: ', selectedDepartment);
 
@@ -56,13 +57,8 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
     onOrgChartLoad?.(orgChart);
   }, [orgChart, onOrgChartLoad]);
 
-  return isFetching ? (
-    <div
-      style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
-      data-testid="org-chart-loading"
-    >
-      <Spin size="large" />
-    </div>
+  return isFetching || isLoading ? (
+    <LoadingComponent data-testid="org-chart-loading" height="100%"></LoadingComponent>
   ) : orgChart.edges.length > 0 ? (
     <OrgChart
       disableCreateNewPosition={orgChartSnapshot != null}
