@@ -29,12 +29,12 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
         padding: '1rem',
       }}
     >
-      <Title level={2} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
+      <Title level={3} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
         {typeof data?.title === 'string' ? data?.title : data?.title?.value}
       </Title>
       <div>
         <Text type="secondary" data-cy="card-classification">
-          <b style={{ marginTop: '-0.8rem', marginBottom: '1rem', display: 'block' }}>
+          <b style={{ marginTop: '-0.8rem', marginBottom: '0.7rem', display: 'block' }}>
             {data.classifications?.map((c) => c.classification.name).join(', ')}
           </b>
         </Text>

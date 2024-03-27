@@ -764,6 +764,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               This profile will need to be verified by the classification team before a position number is generated.
             </span>
           }
+          role="note"
           type="warning"
           showIcon
           icon={<ExclamationCircleFilled />}
@@ -772,6 +773,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       )}
 
       <Alert
+        role="note"
         message={
           <span>
             Job context{' '}
@@ -799,8 +801,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
       <Descriptions
         className="customDescriptions"
-        title="Job profile"
-        aria-hidden="true"
+        title={<h2 style={{ margin: '-7px 0' }}>Job profile</h2>}
         bordered
         column={24}
         items={items}
@@ -819,7 +820,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       {showBasicInfo && (
         <Descriptions
           className="customDescriptions"
-          title="Basic information"
+          title={<h2 style={{ margin: '-7px 0' }}>Basic information</h2>}
           bordered
           column={24}
           items={basicInfoItems}
@@ -847,102 +848,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           whiteSpace: 'nowrap',
           border: 0,
         }}
-      >
-        <section>
-          <h3>Title</h3>
-          <p>{typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value}</p>
-          <h3>Classification</h3>
-          <p>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</p>
-
-          <h3>Job Store #</h3>
-          <p>{effectiveData?.number}</p>
-
-          <h3>Last Updated</h3>
-          <p>{/* last updated info */}</p>
-
-          <h3>Job Context</h3>
-          <p
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(
-                typeof effectiveData?.context === 'string'
-                  ? effectiveData?.context
-                  : effectiveData?.context.description ?? '',
-              ),
-            }}
-          ></p>
-
-          <h3>Job Overview</h3>
-          <p>
-            {typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value}
-          </p>
-          <h3>Required Accountabilities</h3>
-          <ul>
-            {effectiveData?.accountabilities.map((accountability, index) => {
-              // Check if the accountability is a string
-              if (typeof accountability === 'string') {
-                return <li key={index}>{accountability}</li>;
-              }
-
-              // Check if the accountability is an object and not disabled
-              if (accountability.disabled) {
-                return null;
-              }
-              if (accountability.text instanceof TrackedFieldArrayItem) {
-                return <li key={accountability.text.value}>{accountability.text.value}</li>;
-              } else if (typeof accountability.text === 'string') {
-                return <li key={accountability.text}>{accountability.text}</li>;
-              }
-            })}
-          </ul>
-
-          {/* <h3>Optional Accountabilities</h3>
-          <ul>
-            {effectiveData?.accountabilities.optional.map((accountability, index) => {
-              // Check if the accountability is a string
-              if (typeof accountability === 'string') {
-                return <li key={index}>{accountability}</li>;
-              }
-
-              // Check if the accountability is an object and not disabled
-              if (accountability.disabled) {
-                return null;
-              }
-
-              return <li key={accountability.value}>{accountability.value}</li>;
-            })}
-          </ul> */}
-
-          <h3>Minimum Job Requirements</h3>
-          <ul>
-            {effectiveData?.education?.map((requirement, index) => {
-              if (typeof requirement === 'string') {
-                return <li key={index}>{requirement}</li>;
-              }
-
-              if (requirement.disabled) {
-                return null;
-              }
-
-              if (requirement.text instanceof TrackedFieldArrayItem) {
-                return <li key={requirement.text.value}>{requirement.text.value}</li>;
-              } else if (typeof requirement.text === 'string') {
-                return <li key={requirement.text}>{requirement.text}</li>;
-              }
-            })}
-          </ul>
-
-          <h3>Behavioural Competencies</h3>
-          <ul>
-            {(effectiveData?.behavioural_competencies ?? []).map(
-              ({ behavioural_competency: { name, description } }, index) => (
-                <li key={index}>
-                  <Text strong>{name}</Text> {description}
-                </li>
-              ),
-            )}
-          </ul>
-        </section>
-      </div>
+      ></div>
     </div>
   );
 };

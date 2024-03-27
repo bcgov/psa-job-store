@@ -495,6 +495,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     }}
                     classNamePrefix="react-select"
                     isMulti
+                    aria-label="Ministries"
                     placeholder="Ministries"
                     options={ministriesFilterData}
                     onChange={(selectedItems) => {
@@ -573,6 +574,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     treeCheckable={true}
                     showCheckedStrategy={SHOW_CHILD}
                     placeholder="Profession and Discipline"
+                    aria-label="Profession and Discipline"
                     maxTagCount={0}
                     maxTagPlaceholder="Profession and Discipline"
                     tagRender={() => {
@@ -602,6 +604,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     classNamePrefix="react-select"
                     isMulti
                     placeholder="Classification"
+                    aria-label="Classification"
                     options={classificationFilterData}
                     onChange={(selectedItems) => {
                       const newValues = selectedItems.map((item) => item.value);
@@ -639,6 +642,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     classNamePrefix="react-select"
                     isMulti
                     placeholder="Role"
+                    aria-label="Role"
                     options={jobRoleTypeFilterData}
                     onChange={(selectedItems) => {
                       const newValues = selectedItems.map((item) => item.value);

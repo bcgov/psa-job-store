@@ -3,10 +3,11 @@ import { FC } from 'react';
 
 interface LoadingProps {
   loadingText?: string;
+  height?: string;
   mode?: 'normal' | 'small'; // Mode parameter
 }
 
-const LoadingComponent: FC<LoadingProps> = ({ loadingText, mode = 'normal', ...props }) => {
+const LoadingComponent: FC<LoadingProps> = ({ loadingText, mode = 'normal', height = '100vh', ...props }) => {
   if (mode === 'small') {
     return <Spin size="small" {...props} />;
   }
@@ -18,7 +19,7 @@ const LoadingComponent: FC<LoadingProps> = ({ loadingText, mode = 'normal', ...p
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh',
+        height: height,
       }}
     >
       <Spin size="large" />

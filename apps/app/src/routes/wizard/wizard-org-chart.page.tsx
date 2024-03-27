@@ -4,6 +4,7 @@ import { Button } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'reactflow/dist/style.css';
+import LoadingComponent from '../../components/app/common/components/loading.component';
 import { usePosition } from '../../components/app/common/contexts/position.context';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { OrgChartFilter } from '../org-chart/components/org-chart-filter.component';
@@ -21,7 +22,11 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(positionRequestDepartmentId);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: profileData } = useGetProfileQuery();
+  const {
+    data: profileData,
+    isLoading: isLoadingUserProfile,
+    isFetching: isFetchingUserProfile,
+  } = useGetProfileQuery();
 
   // if wizard context has department info (e.g. if user is editing a position request), use that as the default
   // otherwise, use the user's department from their profile
@@ -65,8 +70,8 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
     <WizardPageWrapper
       title={
         <div>
-          <Link to="/">
-            <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+          <Link to="/" aria-label="Go to dashboard">
+            <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
           New position
         </div>
@@ -99,13 +104,17 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
           marginTop: '-1px',
         }}
       >
-        <OrgChartWrapped
-          selectedDepartment={selectedDepartment}
-          onCreateNewPosition={onCreateNewPosition}
-          allowSelection={true}
-          onNodeSelected={onNodeSelected}
-          onOrgChartLoad={onOrgChartLoad}
-        />
+        {isLoadingUserProfile || isFetchingUserProfile ? (
+          <LoadingComponent height="100%"></LoadingComponent>
+        ) : (
+          <OrgChartWrapped
+            selectedDepartment={selectedDepartment}
+            onCreateNewPosition={onCreateNewPosition}
+            allowSelection={true}
+            onNodeSelected={onNodeSelected}
+            onOrgChartLoad={onOrgChartLoad}
+          />
+        )}
       </div>
     </WizardPageWrapper>
   );
