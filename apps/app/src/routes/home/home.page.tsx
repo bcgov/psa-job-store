@@ -42,8 +42,8 @@ export const HomePage = () => {
                   </Text>
                   <div style={{ height: '19px' }}>
                     <PositionProfile
-                      // positionNumber={profileData?.profile.position_id}
-                      positionNumber={'00121521'}
+                      positionNumber={profileData?.profile.position_id}
+                      // positionNumber={'00121521'}
                       mode="compact2"
                       unOccupiedText=""
                       loadingStyle={'skeleton'}

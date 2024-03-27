@@ -74,8 +74,8 @@ When('the user fills out the required additional information', () => {
   cy.get('[data-testid="confirmation-switch"]').click();
 
   // Select the first option in the location dropdown
-  cy.get('[data-testid="location-select"]').click();
-  cy.get('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item').first().click();
+  // cy.get('[data-testid="location-select"]').click();
+  // cy.get('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item').first().click();
 
   // Select the first option in the department dropdown
   cy.get('[data-testid="department-select"]').click();

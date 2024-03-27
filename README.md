@@ -54,7 +54,7 @@ Also set `VITE_TEST_ENV=true` in `apps/app/.env` file. This applies minor UI cha
 
 Ensure that database has been reset to defaults with the special seed for e2e tests:
 
-`npx -w api prisma migrate reset --skip-generate`
+`npx -w api npm run migrate:reset:e2e-test`
 
 Run `npm -w app run test-e2e`
 
