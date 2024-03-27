@@ -223,7 +223,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
 
   return (
     <Row justify="center">
-      <Col xs={24} sm={24} md={24} lg={20} xl={16}>
+      <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={16}>
         <Card className="tableHeader" style={{ marginTop: '1rem' }}>
           <Row gutter={24} wrap>
             <Col span={12}>
@@ -274,7 +274,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
           style={{ background: '#fff', marginBottom: '1rem' }}
           labelStyle={{
             fontWeight: 700,
-            width: '300px',
+            // width: '300px',
             verticalAlign: 'top',
             background: '#FAFAFA',
           }}
