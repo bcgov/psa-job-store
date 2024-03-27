@@ -105,7 +105,7 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'payListDepartmentIdNumber',
       label: 'Department ID',
-      children: <div>{data?.positionRequest?.department_id}</div>,
+      children: <div>{data?.positionRequest?.additional_info_department_id}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -268,7 +268,7 @@ export const TotalCompApprovedRequestPage = () => {
       children: (
         <>
           <div style={{ overflow: 'hidden', position: 'relative', height: '500px' }}>
-            <OrgChartWrapped selectedDepartment={data?.positionRequest?.department_id ?? null} />
+            <OrgChartWrapped selectedDepartment={data?.positionRequest?.additional_info_department_id ?? null} />
           </div>
         </>
       ),

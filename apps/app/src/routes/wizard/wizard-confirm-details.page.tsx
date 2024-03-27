@@ -302,7 +302,10 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       } = positionRequestData.positionRequest;
 
       setValue('workLocation', additional_info_work_location_id || null);
-      setValue('payListDepartmentId', additional_info_department_id || null);
+      setValue(
+        'payListDepartmentId',
+        additional_info_department_id || positionRequestData?.positionRequest?.department_id || null,
+      );
       setValue('excludedManagerPositionNumber', additional_info_excluded_mgr_position_number || '');
       setValue('comments', additional_info_comments || '');
 
@@ -497,7 +500,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                     return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
                                   }}
                                   options={departmentsData?.map((group) => ({
-                                    label: `${group.id}`,
+                                    label: `${group.name + ' ' + group.id}`,
                                     value: group.id,
                                   }))}
                                   placeholder="Select department"
@@ -515,7 +518,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                 ></Select>
                               )}
                             />
-                            {selectedDepartment && <p>{selectedDepartment}</p>}
                             {/* {errors.payListDepartmentId && <p style={{ color: 'red' }}>{errors.payListDepartmentId.message}</p>} */}
                           </Form.Item>
                         </Col>

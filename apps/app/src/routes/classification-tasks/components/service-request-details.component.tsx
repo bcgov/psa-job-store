@@ -180,7 +180,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'payListDepartmentIdNumber',
       label: 'Department ID',
-      children: <div>{positionRequestData?.positionRequest?.department_id}</div>,
+      children: <div>{positionRequestData?.positionRequest?.additional_info_department_id}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
