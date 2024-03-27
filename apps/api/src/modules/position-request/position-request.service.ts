@@ -118,6 +118,7 @@ export class PositionRequestApiService {
     return this.prisma.positionRequest.create({
       data: {
         department: data.department,
+        paylist_department: data.paylist_department,
         step: data.step,
         reports_to_position_id: data.reports_to_position_id,
         profile_json: data.profile_json,
@@ -873,8 +874,10 @@ export class PositionRequestApiService {
       throw AlexandriaError('CRM Contact ID not found');
     }
 
-    const department = await this.prisma.department.findUnique({ where: { id: positionRequest.department_id } });
-    const location = await this.prisma.location.findUnique({ where: { id: department.location_id } });
+    const paylist_department = await this.prisma.department.findUnique({
+      where: { id: positionRequest.additional_info_department_id },
+    });
+    const location = await this.prisma.location.findUnique({ where: { id: paylist_department.location_id } });
     const parentJobProfile = await this.prisma.jobProfile.findUnique({
       where: { id: positionRequest.parent_job_profile_id },
     });
@@ -951,7 +954,7 @@ export class PositionRequestApiService {
             <ul>
               <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
               <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
-              <li>What is the pay list/department ID number?    ${positionRequest.department_id}</li>
+              <li>What is the pay list/department ID number?    ${paylist_department.id}</li>
               <li>What is the expected classification level?    ${classification.code} (${classification.name})</li>
               <li>Is this position included or excluded?    Included</li>
               <li>Is the position full-time or part-time?    Full-time</li>
@@ -1008,9 +1011,9 @@ export class PositionRequestApiService {
     const classification = await this.prisma.classification.findUnique({
       where: { id: positionRequest.classification_id },
     });
-    const department = await this.prisma.department.findUnique({
-      select: { organization: { select: { id: true } } },
-      where: { id: positionRequest.department_id },
+    const paylist_department = await this.prisma.department.findUnique({
+      select: { id: true, organization: { select: { id: true } } },
+      where: { id: positionRequest.additional_info_department_id },
     });
 
     let data: PositionCreateInput;
@@ -1018,8 +1021,8 @@ export class PositionRequestApiService {
     switch (classification.employee_group_id) {
       case 'MGT':
         data = {
-          BUSINESS_UNIT: department.organization.id,
-          DEPTID: positionRequest.department_id,
+          BUSINESS_UNIT: paylist_department.organization.id,
+          DEPTID: paylist_department.id,
           JOBCODE: positionRequest.classification_id,
           REPORTS_TO: positionRequest.reports_to_position_id,
           POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
@@ -1039,8 +1042,8 @@ export class PositionRequestApiService {
         const employeeId = employees.length > 0 ? employees[0].id : null;
 
         data = {
-          BUSINESS_UNIT: department.organization.id,
-          DEPTID: positionRequest.department_id,
+          BUSINESS_UNIT: paylist_department.organization.id,
+          DEPTID: paylist_department.id,
           JOBCODE: positionRequest.classification_id,
           REPORTS_TO: positionRequest.reports_to_position_id,
           POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
