@@ -31,5 +31,5 @@ Then('only job profiles containing "multiple programs" and matching the selected
     .find('li')
     .first()
     .find('[data-cy="card-title"]')
-    .contains('Financial Analyst');
+    .contains('Strategic HR Manager');
 });

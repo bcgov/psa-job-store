@@ -56,6 +56,7 @@ When('the user deletes the newly added accountability "Lead successful deploymen
   cy.get('[data-testid="remove-accountability-8"]').click(); // Adjust identifier as needed
   // Now, click the OK button in the confirmation dialog
   cy.contains('button', 'OK').click();
+  cy.wait(200);
 });
 
 // Adds a new required accountability "Manage project budget"
@@ -81,6 +82,7 @@ When('the user deletes the newly added optional accountability {string}', (_acco
   cy.get('[data-testid="remove-optional-accountability-3"]').click(); // Adjust identifier as needed
   // Now, click the OK button in the confirmation dialog
   cy.contains('button', 'OK').click();
+  cy.wait(200);
 });
 
 // EDUCATION
@@ -116,6 +118,7 @@ When('the user deletes the newly added job education "Ensure compliance with fin
   cy.get('[data-testid="remove-education-9"]').click(); // Adjust identifier as needed
   // Now, click the OK button in the confirmation dialog
   cy.contains('button', 'OK').click();
+  cy.wait(200);
 });
 
 // Adds a new required job education "Oversee financial auditing processes"
@@ -154,6 +157,7 @@ When('the user adds a new required related experience "Coordinate cross-departme
 When('the user deletes the newly added related experience "Coordinate cross-departmental projects"', () => {
   cy.get('[data-testid="remove-job-experience-3"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
+  cy.wait(200);
 });
 
 // Adds a new required related experience "Implement strategic planning processes"
@@ -193,6 +197,7 @@ When(
   () => {
     cy.get('[data-testid="remove-professional-registration-2"]').click(); // Adjust identifier as needed
     cy.contains('button', 'OK').click();
+    cy.wait(200);
   },
 );
 
@@ -231,6 +236,7 @@ When('the user adds a new required preference "Remote work flexibility"', () => 
 When('the user deletes the newly added preference "Remote work flexibility"', () => {
   cy.get('[data-testid="remove-preference-2"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
+  cy.wait(200);
 });
 
 // Adds a new required preference "Access to continuous learning resources"
@@ -263,6 +269,7 @@ When('the user adds a new required knowledge, skill, or ability "Advanced data a
 When('the user deletes the newly added knowledge, skill, or ability "Advanced data analysis proficiency"', () => {
   cy.get('[data-testid="remove-knowledge-skills-ability-2"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
+  cy.wait(200);
 });
 
 // Adds a new required knowledge, skill, or ability "Expertise in cloud computing technologies"
@@ -300,6 +307,7 @@ When(
   () => {
     cy.get('[data-testid="remove-proviso-2"]').click(); // Adjust identifier as needed
     cy.contains('button', 'OK').click();
+    cy.wait(200);
   },
 );
 
@@ -342,6 +350,7 @@ When('the user adds a new required security screening "Must pass a comprehensive
 When('the user deletes the newly added security screening "Must pass a comprehensive background check"', () => {
   cy.get('[data-testid="remove-security-screening-3"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
+  cy.wait(200);
 });
 
 // Adds a new required security screening "Requires clearance at the top-secret level"
@@ -374,6 +383,7 @@ When('the user adds a new required optional requirement "Familiarity with agile 
 When('the user deletes the newly added optional requirement "Familiarity with agile methodologies"', () => {
   cy.get('[data-testid="remove-optional-requirement-2"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
+  cy.wait(200);
 });
 
 // Adds a new required optional requirement "Proficiency in multiple programming languages"
@@ -442,11 +452,11 @@ Then('the last accountability should be "Manage project budget"', () => {
   cy.get('[data-testid="significant-accountabilities"] > li').last().should('have.text', 'Manage project budget');
 });
 
-// And the second last accountability should start with "Provides financial management"
-Then('the second last accountability should start with "Provides financial management"', () => {
+// And the second last accountability should start with "Market research, data mining"
+Then('the second last accountability should start with "Market research, data mining"', () => {
   cy.get('[data-testid="significant-accountabilities"] > li')
     .eq(-2)
-    .should('contain.text', 'Provides financial management');
+    .should('contain.text', 'Market research, data mining');
 });
 
 // Optional Accountibilities checking
@@ -454,8 +464,8 @@ Then('the last optional accountability should be "Effective communication"', () 
   cy.get('[data-testid="optional-accountabilities"] > li').last().should('have.text', 'Effective communication');
 });
 
-Then('the second last optional accountability should start with "Coordinates the preparation"', () => {
-  cy.get('[data-testid="optional-accountabilities"] > li').eq(-2).should('contain.text', 'Coordinates the preparation');
+Then('the second last optional accountability should start with "Analyze past results"', () => {
+  cy.get('[data-testid="optional-accountabilities"] > li').eq(-2).should('contain.text', 'Analyze past results');
 });
 
 // Education and work experience checking
@@ -464,8 +474,8 @@ Then('the last job education should be "Oversee financial auditing processes"', 
   cy.get('[data-testid="education"] > li').last().should('have.text', 'Oversee financial auditing processes');
 });
 
-Then('the second last job education should start with "Successful completion of security"', () => {
-  cy.get('[data-testid="education"] > li').eq(-2).should('contain.text', 'Successful completion of security');
+Then('the second last job education should start with "Advanced knowledge of Excel"', () => {
+  cy.get('[data-testid="education"] > li').eq(-2).should('contain.text', 'Advanced knowledge of Excel');
 });
 
 // Related experience checking

@@ -168,7 +168,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchPositionProfile = useCallback(
     debounce(async (positionNumber: string) => {
-      getPositionProfile({ positionNumber });
+      try {
+        getPositionProfile({ positionNumber });
+      } catch (e) {
+        // handled by isError, prevents showing error toast
+      }
     }, 300),
     [getPositionProfile],
   );

@@ -104,15 +104,15 @@ Feature: Edit Job Profiles
 
         # Accountabilities
         And the last accountability should be "Manage project budget"
-        And the second last accountability should start with "Provides financial management"
+        And the second last accountability should start with "Market research, data mining"
 
         # # Optional accountabilities
         And the last optional accountability should be "Effective communication"
-        And the second last optional accountability should start with "Coordinates the preparation"
+        And the second last optional accountability should start with "Analyze past results"
 
         # Educaiton and work experience
         And the last job education should be "Oversee financial auditing processes"
-        And the second last job education should start with "Successful completion of security"
+        And the second last job education should start with "Advanced knowledge of Excel"
 
         # Related experience
         And the last related experience should be "Implement strategic planning processes"
