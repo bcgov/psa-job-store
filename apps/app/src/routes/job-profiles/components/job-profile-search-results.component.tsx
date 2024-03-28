@@ -102,15 +102,16 @@ export const JobProfileSearchResults = ({
           results
         </Text>
       </div>
-      <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list" style={{ padding: '0' }}>
-        {isLoading ? (
-          <div data-testid="skeleton-loading">
-            <Skeleton loading={isLoading} />
-          </div>
-        ) : data?.jobProfiles.length === 0 ? (
-          <Empty data-testid="empty-state" style={{ margin: '1rem' }} />
-        ) : (
-          (data?.jobProfiles ?? []).map((d) => (
+
+      {isLoading ? (
+        <div data-testid="skeleton-loading">
+          <Skeleton loading={isLoading} />
+        </div>
+      ) : data?.jobProfiles.length === 0 ? (
+        <Empty data-testid="empty-state" style={{ margin: '1rem' }} />
+      ) : (
+        <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list" style={{ padding: '0' }}>
+          {(data?.jobProfiles ?? []).map((d) => (
             <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d)}>
               <ReplaceLink tabIndex={-1} to={getLinkPath(d.id)}>
                 <JobProfileCard
@@ -121,9 +122,9 @@ export const JobProfileSearchResults = ({
                 />
               </ReplaceLink>
             </li>
-          ))
-        )}
-      </ul>
+          ))}
+        </ul>
+      )}
       <Pagination
         data-testid="pagination"
         // have a hidden size changer for testing purposes

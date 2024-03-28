@@ -29,6 +29,6 @@ Then(
       .find('li')
       .first()
       .find('[data-cy="card-title"]')
-      .contains('Strategic HR Manager');
+      .contains('Strategic HR Analyst Manager');
   },
 );
