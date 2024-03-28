@@ -1,16 +1,17 @@
-import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Divider, Row, Space, Typography } from 'antd';
+import { Button, Card, Col, Divider, Row, Space, Typography } from 'antd';
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
+import PositionProfile from '../../components/app/common/components/positionProfile';
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-positions/components/my-positions-table.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import ContentWrapper from './components/content-wrapper.component';
 import HeaderWrapper from './components/header-wrapper.component';
+import { InitialsAvatar } from './components/initials-avatar.component';
 import './home.page.css';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export const HomePage = () => {
   const auth = useAuth();
@@ -24,11 +25,30 @@ export const HomePage = () => {
         <Row justify="space-between" align="bottom">
           <Col>
             <Space direction="vertical">
-              <Title level={4}>Hello,</Title>
               <Space align="center">
-                <Avatar size={64} icon={<UserOutlined />} />
+                <InitialsAvatar name={auth.user?.profile.given_name + ' ' + auth.user?.profile.family_name} />
+                {/* <Avatar size={64} icon={<UserOutlined />} /> */}
                 <div>
-                  <Title level={4}>{auth.user?.profile.name}</Title>
+                  <Text
+                    style={{
+                      fontSize: '20px',
+                      lineHeight: 1.4,
+                      fontWeight: 700,
+                      display: 'block',
+                      marginBottom: '0.5rem',
+                    }}
+                  >
+                    {auth.user?.profile.name}
+                  </Text>
+                  <div style={{ height: '19px' }}>
+                    <PositionProfile
+                      positionNumber={profileData?.profile.position_id}
+                      // positionNumber={'00121521'}
+                      mode="compact2"
+                      unOccupiedText=""
+                      loadingStyle={'skeleton'}
+                    />
+                  </div>
                   {/* <Text type="secondary">HR Manager · Digital Talent & Capacity</Text> */}
                 </div>
               </Space>

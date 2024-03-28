@@ -1,8 +1,9 @@
-import { LogoutOutlined, QuestionCircleOutlined, UserOutlined } from '@ant-design/icons';
+import { LogoutOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Layout, Menu, Row, Tooltip, Typography } from 'antd';
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { useLazyLogoutQuery } from '../../redux/services/graphql-api/profile.api';
+import { InitialsAvatar } from '../../routes/home/components/initials-avatar.component';
 import AcessiblePopoverMenu from './common/components/accessible-popover-menu';
 import styles from './header.module.css';
 
@@ -65,7 +66,7 @@ export const AppHeader = () => {
         <Col className={styles.right}>
           {auth.isAuthenticated && (
             <div className={styles.headerToolbar}>
-              <div className={styles.iconWrapper}>
+              <div className={styles.iconWrapper} style={{ marginTop: '7px' }}>
                 <a href="#" aria-label="Help - under construction">
                   <Tooltip title="Help - under construction" trigger={'hover'}>
                     <QuestionCircleOutlined style={{ color: 'white' }} aria-hidden />
@@ -78,7 +79,16 @@ export const AppHeader = () => {
                   <Button
                     tabIndex={-1}
                     style={{ background: 'none', border: 'none', fontWeight: '600' }}
-                    icon={<UserOutlined style={{ color: 'white' }} aria-hidden />}
+                    icon={
+                      <InitialsAvatar
+                        name={auth.user?.profile.given_name + ' ' + auth.user?.profile.family_name}
+                        size={30}
+                        fontSize="1rem"
+                        lineHeight="1.8rem"
+                      />
+
+                      // <UserOutlined style={{ color: 'white' }} aria-hidden />
+                    }
                   >
                     <Text style={{ color: 'white' }}>{auth.user?.profile.name}</Text>
                   </Button>

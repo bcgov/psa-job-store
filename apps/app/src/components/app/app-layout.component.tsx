@@ -154,7 +154,7 @@ export const AppLayout = () => {
                           <PlusCircleFilled
                             role="button"
                             aria-label="Create new position"
-                            style={{ fontSize: '1.25rem', color: '#1677ff' }}
+                            style={{ fontSize: '1.25rem', color: '#0057ad' }}
                           />
                         }
                         key={'Create new position'}
@@ -163,7 +163,7 @@ export const AppLayout = () => {
                         hideTitle={true}
                       />
                     ) : (
-                      <div style={{ padding: '10px 10px 2px 10px' }}>
+                      <div style={{ textAlign: 'center', padding: '10px 0' }}>
                         <Link to="/my-positions/create">
                           <Button type="primary" tabIndex={-1}>
                             Create new position
@@ -205,7 +205,7 @@ export const AppLayout = () => {
                         collapsed={collapsed}
                         items={[
                           {
-                            icon: <FileAddFilled aria-hidden style={{ fontSize: '1.25rem', color: '#1677ff' }} />,
+                            icon: <FileAddFilled aria-hidden style={{ fontSize: '1.25rem', color: '#0057ad' }} />,
                             title: 'Create new profile',
                             to: '/draft-job-profiles/create',
                             hideTitle: true,

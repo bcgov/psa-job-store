@@ -6,8 +6,8 @@ When('the user views the job profiles list', () => {
 });
 
 Then('they see a list of job profiles', () => {
-  const profile1 = 'Program Assistant';
-  const profile2 = 'PROGRAM ASSISTANT (SUPERVISORY)';
+  const profile1 = 'Data Scientist';
+  const profile2 = 'Project Manager';
 
   // Verify if both job profiles are present in the document
   cy.contains(profile1).should('exist');

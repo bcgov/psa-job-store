@@ -29,6 +29,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
   // const { id } = useParams();
   const { handleSubmit } = useForm<IFormInput>();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedClassificationId, setSelectedClassificationId] = useState<string | undefined>();
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
@@ -38,23 +39,28 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
 
   const onSubmit: SubmitHandler<IFormInput> = async () => {
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
-    if (selectedProfileId) {
-      // navigate(`/wizard/edit/${selectedProfileId}`);
-      if (positionRequestId)
-        await updatePositionRequest({
-          id: positionRequestId,
-          step: 2,
-          profile_json: null,
-          parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
-          classification_id: selectedClassificationId,
-        }).unwrap();
-      setPositionRequestProfileId(parseInt(selectedProfileId));
-      if (onNext) onNext();
-      setSearchParams({}, { replace: true });
-      // navigate(`/org-chart/${reportingPosition}/profiles/edit/${selectedProfileId}`);
-    } else {
-      // Here you can display an error message.
-      alert('Please select a profile before proceeding.');
+    setIsLoading(true);
+    try {
+      if (selectedProfileId) {
+        // navigate(`/wizard/edit/${selectedProfileId}`);
+        if (positionRequestId)
+          await updatePositionRequest({
+            id: positionRequestId,
+            step: 2,
+            profile_json: null,
+            parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
+            classification_id: selectedClassificationId,
+          }).unwrap();
+        setPositionRequestProfileId(parseInt(selectedProfileId));
+        if (onNext) onNext();
+        setSearchParams({}, { replace: true });
+        // navigate(`/org-chart/${reportingPosition}/profiles/edit/${selectedProfileId}`);
+      } else {
+        // Here you can display an error message.
+        alert('Please select a profile before proceeding.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -88,6 +94,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
         id: positionRequestId,
         step: 0,
       }).unwrap();
+    setSearchParams({}, { replace: true });
     if (onBack) onBack();
   };
 
@@ -141,8 +148,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
     <WizardPageWrapper
       title={
         <div>
-          <Link to="/">
-            <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+          <Link to="/" aria-label="Go to dashboard">
+            <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
           New position
         </div>
@@ -173,6 +180,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
           disabled={selectedProfileId == null}
           onClick={handleSubmit(onSubmit)}
           data-testid="next-button"
+          loading={isLoading}
         >
           Save and next
         </Button>,

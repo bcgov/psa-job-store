@@ -8,7 +8,7 @@ import styles from './job-profile-search-results.module.css';
 const { Text } = Typography;
 
 export interface JobProfileSearchResultsProps {
-  data: GetJobProfilesResponse | undefined;
+  data: GetJobProfilesResponse | undefined | null;
   isLoading: boolean;
   onSelectProfile?: (profile: JobProfileModel) => void;
   currentPage: number;
@@ -94,17 +94,13 @@ export const JobProfileSearchResults = ({
       data-testid="job-profile-search-results"
     >
       <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0rem 1rem' }}>
-        <h1>
-          <Text style={{ fontSize: '13pt' }}>Job profiles</Text>
-        </h1>
+        <h2 style={{ margin: '16px 0' }}>Job profiles</h2>
       </div>
       <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0.5rem 1rem' }}>
-        <h2>
-          <Text style={{ fontSize: '10pt' }}>
-            Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of{' '}
-            {totalResults} results
-          </Text>
-        </h2>
+        <Text style={{ fontSize: '14px', display: 'block', padding: '10px 0' }}>
+          Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
+          results
+        </Text>
       </div>
       <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list" style={{ padding: '0' }}>
         {isLoading ? (

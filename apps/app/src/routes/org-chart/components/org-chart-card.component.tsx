@@ -110,6 +110,7 @@ export const OrgChartCard = memo(
       //     }).unwrap();
       //   }
       // }
+      // console.log('createDirectReport, selectedDepartment: ', selectedDepartment, 'orgChartData: ', orgChartData);
       if (selectedDepartment == null) return;
       await createNewPosition(data.id, selectedDepartment, orgChartData);
       if (onCreateNewPosition) onCreateNewPosition();

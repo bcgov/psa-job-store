@@ -39,27 +39,27 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({ current, xl = 14 }) =>
           current={current}
           items={[
             {
-              title: 'Organization chart',
+              title: current == 0 ? <h2>Organization chart</h2> : 'Organization chart',
               description: 'Choose the supervisor',
             },
             {
-              title: 'Choose profile',
+              title: current == 1 ? <h2>Choose profile</h2> : 'Choose profile',
               description: 'Choose the right job profile',
             },
             {
-              title: 'Edit',
+              title: current == 2 ? <h2>Edit</h2> : 'Edit',
               description: 'Make changes if needed',
             },
             {
-              title: 'Review',
+              title: current == 3 ? <h2>Review</h2> : 'Review',
               description: 'Review the job profile',
             },
             {
-              title: 'Additional details',
+              title: current == 4 ? <h2>Additional details</h2> : 'Additional details',
               description: 'Provide additional info',
             },
             {
-              title: 'Actions',
+              title: current == 5 ? <h2>Actions</h2> : 'Actions',
               description: 'Get position number',
             },
           ]}

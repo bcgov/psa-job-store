@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Col, FormInstance, List, Menu, Modal, Popover, Row, Typography } from 'antd';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ClassificationModel,
@@ -39,6 +39,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
     positionRequestProfileId,
     positionRequestId,
   } = useWizardContext();
+  const [isLoading, setIsLoading] = useState(false);
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
   const profileId = positionRequestProfileId;
@@ -142,35 +143,41 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
       });
       return;
     }
-    // Create an entry in My Positions
 
-    const formData = wizardEditProfileRef.current?.getFormData();
-    // console.log('formData: ', formData);
-
-    const transformedData = transformFormData(formData);
-    // console.log('transformedData: ', transformedData);
-
-    // return;
-
-    setWizardData(transformedData);
-
+    setIsLoading(true);
     try {
-      if (positionRequestId)
-        await updatePositionRequest({
-          id: positionRequestId,
-          step: 3,
-          profile_json: transformedData,
-          title: formData.title.value,
-          // classification_code: classification ? classification.code : '',
-        }).unwrap();
-    } catch (error) {
-      // Handle the error, possibly showing another modal
-      Modal.error({
-        title: 'Error updating position',
-        content: 'An unknown error occurred', //error.data?.message ||
-      });
+      // Create an entry in My Positions
+
+      const formData = wizardEditProfileRef.current?.getFormData();
+      // console.log('formData: ', formData);
+
+      const transformedData = transformFormData(formData);
+      // console.log('transformedData: ', transformedData);
+
+      // return;
+
+      setWizardData(transformedData);
+
+      try {
+        if (positionRequestId)
+          await updatePositionRequest({
+            id: positionRequestId,
+            step: 3,
+            profile_json: transformedData,
+            title: formData.title.value,
+            // classification_code: classification ? classification.code : '',
+          }).unwrap();
+      } catch (error) {
+        // Handle the error, possibly showing another modal
+        Modal.error({
+          title: 'Error updating position',
+          content: 'An unknown error occurred', //error.data?.message ||
+        });
+      }
+      if (onNext) onNext();
+    } finally {
+      setIsLoading(false);
     }
-    if (onNext) onNext();
   };
 
   // console.log('wizardData: ', wizardData);
@@ -222,8 +229,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
     <WizardPageWrapper
       title={
         <div>
-          <Link to="/">
-            <ArrowLeftOutlined style={{ color: 'black', marginRight: '1rem' }} />
+          <Link to="/" aria-label="Go to dashboard">
+            <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
           New position
         </div>
@@ -240,7 +247,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
         <Button onClick={onBack} key="back">
           Back
         </Button>,
-        <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button">
+        <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button" loading={isLoading}>
           Save and next
         </Button>,
       ]}

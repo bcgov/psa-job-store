@@ -4,7 +4,7 @@ import React, { CSSProperties, useEffect, useState } from 'react';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
 import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile-types';
-
+import './wizard-behavioural-comptency-picker.css';
 // Utility function to format enum strings to a more readable form
 const formatEnumString = (str: string): string => {
   return str
@@ -38,22 +38,37 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
 
   // Create a mapping of competency ID to the field array index
   const [idToIndexMap, setIdToIndexMap] = useState<{ [key: string]: number }>({});
+  const [titleToIdMap, setTitleToIdMap] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
+    if (!data?.behaviouralComptencies) return;
+
     const map: { [key: string]: number } = {};
+    const _titleToIdMap: { [key: string]: number } = {};
     const initialValues: string[] = [];
     behavioural_competencies_fields.forEach((field, index) => {
       const id = field.behavioural_competency.id;
+      const competency = data?.behaviouralComptencies.find((c) => c.id === id);
       map[id] = index;
-      initialValues.push(id); // Assuming `id` is the value you need to select in TreeSelect
+      const title = `${field.behavioural_competency.name}${competency?.type === 'INDIGENOUS' ? ' (indigenous)' : ''}`;
+      // console.log('type: ', competency.type, field.behavioural_competency, title);
+      _titleToIdMap[title] = id;
+      initialValues.push(title); // Assuming `id` is the value you need to select in TreeSelect
     });
     setIdToIndexMap(map);
+    setTitleToIdMap(_titleToIdMap);
+    // console.log('_titleToIdMap: ', _titleToIdMap);
     setSelectedValues(initialValues); // Set the initial selected values
-  }, [behavioural_competencies_fields]);
+  }, [behavioural_competencies_fields, data]);
 
   // console.log('data: ', data);
   // Convert the fetched data into a tree structure for TreeSelect
+  // console.log('making tree data: ', data?.behaviouralComptencies);
+
   const treeData = data?.behaviouralComptencies.reduce((acc: any, competency) => {
+    // console.log('competency: ', competency);
+    // console.log('acc: ', acc);
+
     // Find or create the group
     let group: {
       title: string;
@@ -62,14 +77,17 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
       isGroup: boolean;
       selectable: boolean;
     } = acc.find((g: any) => g.title === formatEnumString(competency.category));
+    // console.log('group: ', group);
+
     if (!group) {
       group = {
         title: formatEnumString(competency.category),
-        value: competency.category,
+        value: `Category - ${formatEnumString(competency.category)}`,
         children: [],
         isGroup: true,
         selectable: false,
       };
+      // console.log('no group: ', group);
       acc.push(group);
     }
 
@@ -78,7 +96,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     group.children.push({
       title: `${competency.name}${competency.type == 'INDIGENOUS' ? '*' : ''}`,
       titleNoStar: `${competency.name}`,
-      value: competency.id,
+      value: `${competency.name}${competency.type == 'INDIGENOUS' ? ' (indigenous)' : ''}`, //competency.id,
       description: competency.description,
       key: competency.id,
       id: competency.id,
@@ -91,10 +109,11 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   }, []);
 
   const handleSelectionChange = (currentSelectedValues: any) => {
+    // console.log('on change, currentSelectedValues: ', currentSelectedValues);
     // If currentSelectedValues is empty, it means all items have been cleared
     if (currentSelectedValues.length === 0) {
       selectedValues.forEach((value) => {
-        const indexToRemove = idToIndexMap[value];
+        const indexToRemove = idToIndexMap[titleToIdMap[value]];
         if (indexToRemove !== undefined) {
           onRemove(indexToRemove);
         }
@@ -107,15 +126,22 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     const addedValues = currentSelectedValues.filter((value: any) => !selectedValues.includes(value as never));
     const removedValues = selectedValues.filter((value) => !currentSelectedValues.includes(value));
 
+    // console.log('addedValues; ', addedValues);
+
     // Handle added items
     addedValues.forEach((value: any) => {
+      // console.log('adding: ', value);
+
+      // const competency = data?.behaviouralComptencies.find((c) => c.id === competencyId);
       const selectedNode = (treeData as any)
         ?.flatMap((group: any) => group.children)
         .find((child: any) => child.value === value);
+
+      // console.log('competency: ', selectedNode);
       if (selectedNode) {
         onAdd({
           behavioural_competency: {
-            id: parseInt(selectedNode.value),
+            id: parseInt(selectedNode.id),
             name: selectedNode.titleNoStar,
             description: selectedNode.description,
           },
@@ -125,7 +151,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
 
     // Handle removed items
     removedValues.forEach((value) => {
-      const indexToRemove = idToIndexMap[value];
+      const indexToRemove = idToIndexMap[titleToIdMap[value]];
       if (indexToRemove !== undefined) {
         onRemove(indexToRemove);
       }
@@ -234,10 +260,16 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   if (isLoading) return <LoadingSpinnerWithMessage mode="small" />;
   if (error) return <p>An error occurred</p>;
 
+  // console.log('selectedValues: ', selectedValues);
   return (
     <div style={{ ...style }}>
-      <div style={{ ...style }}>
+      <div id="wbcp" style={{ ...style }}>
         <TreeSelect
+          // fieldNames={{ label: 'title', value: 'title', children: 'children' }}
+          // onSelect={(value) => console.log('selecting for: ', value)}
+          // treeNodeLabelProp="title"
+          treeDefaultExpandAll={true}
+          aria-label="Behavioural competencies"
           showSearch
           style={{ width: '100%' }}
           value={selectedValues}

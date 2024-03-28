@@ -1,4 +1,4 @@
-import { Typography } from 'antd';
+import { Skeleton, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import {
   PositionProfileModel,
@@ -7,12 +7,20 @@ import {
 import LoadingSpinnerWithMessage from '../components/loading.component';
 
 interface PositionProfileProps {
-  positionNumber: number | null | undefined;
+  positionNumber: number | string | null | undefined;
   prefix?: string;
-  mode?: 'compact' | 'full';
+  mode?: 'compact' | 'compact2' | 'full';
+  unOccupiedText?: string;
+  loadingStyle?: 'spinner' | 'skeleton';
 }
 
-const PositionProfile: React.FC<PositionProfileProps> = ({ positionNumber, prefix, mode = 'full' }) => {
+const PositionProfile: React.FC<PositionProfileProps> = ({
+  positionNumber,
+  prefix,
+  mode = 'full',
+  loadingStyle = 'spinner',
+  unOccupiedText,
+}) => {
   const [getPositionProfile, { data: positionProfileData, isFetching }] = useLazyGetPositionProfileQuery();
   const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel | null>(null);
   const [additionalPositions, setAdditionalPositions] = useState<number>(0);
@@ -34,7 +42,11 @@ const PositionProfile: React.FC<PositionProfileProps> = ({ positionNumber, prefi
   return (
     <>
       {isFetching ? (
-        <LoadingSpinnerWithMessage mode="small" />
+        loadingStyle == 'spinner' ? (
+          <LoadingSpinnerWithMessage mode="small" />
+        ) : (
+          <Skeleton.Input active={true} size={'small'} />
+        )
       ) : firstActivePosition ? (
         <>
           {mode === 'compact' ? (
@@ -44,6 +56,13 @@ const PositionProfile: React.FC<PositionProfileProps> = ({ positionNumber, prefi
                 {`${firstActivePosition.employeeName}, ${firstActivePosition.ministry}`}
               </p>
             </div>
+          ) : mode === 'compact2' ? (
+            <h1 style={{ fontWeight: 'normal', margin: 0, fontSize: 'initial' }}>
+              <Typography.Text type="secondary">
+                {prefix && `${prefix} `}
+                {`${firstActivePosition.positionDescription} · ${firstActivePosition.departmentName}`}
+              </Typography.Text>
+            </h1>
           ) : (
             <div>
               <p style={{ margin: 0 }}>{`${firstActivePosition.employeeName}, ${firstActivePosition.ministry}`}</p>
@@ -57,7 +76,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({ positionNumber, prefi
           )}
         </>
       ) : (
-        <div>Position {positionNumber} is unoccupied</div>
+        <div>{unOccupiedText === undefined ? `Position ${positionNumber} is unoccupied` : unOccupiedText}</div>
       )}
     </>
   );

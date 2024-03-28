@@ -6,3 +6,8 @@
   .edited-textarea.ant-input {
     background-color: rgba(0, 0, 0, 0.04);
   }
+
+  .multiline-checkbox .ant-checkbox{
+    align-self: flex-start;
+    margin-top: 3px;
+  }

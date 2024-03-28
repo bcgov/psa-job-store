@@ -1,8 +1,8 @@
 import { Then, When } from '@badeball/cypress-cucumber-preprocessor';
 
-When('the user selects a job family from the job family filter', () => {
-  const group = 'Finance';
+When('the user selects "Budgeting" from the job family filter', () => {
   const jobFamily = 'Budgeting';
+  const group = 'Finance';
 
   // Click the TreeSelect component to open the dropdown
   cy.get('[data-cy="Job Family-filter"]').find('.ant-select-selector').click();
@@ -21,6 +21,14 @@ When('the user selects a job family from the job family filter', () => {
   cy.get('.ant-select-dropdown').contains('.ant-select-tree-title', jobFamily).click();
 });
 
-Then('only job profiles classified under that selected job family should be displayed', () => {
-  cy.get('[data-cy="search-results-list"]').find('li').eq(1).find('[data-cy="card-title"]').contains('File Clerk');
-});
+Then(
+  'only job profiles classified under "Budgeting" job family and "Financial Officer R15" classification should be displayed',
+  () => {
+    cy.get('[data-cy="search-results-list"]').find('li').should('have.length', 1);
+    cy.get('[data-cy="search-results-list"]')
+      .find('li')
+      .first()
+      .find('[data-cy="card-title"]')
+      .contains('Strategic HR Manager');
+  },
+);
