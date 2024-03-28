@@ -121,14 +121,14 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const departmentsData = useGetDepartmentsWithLocationQuery().data?.departments;
 
   // State to track selected location
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  // const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
   // State to track selected department
-  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  // const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
 
-  useEffect(() => {
-    setSelectedDepartment(null); // Clear selected department
-  }, [selectedLocation, positionProfileData]);
+  // useEffect(() => {
+  //   setSelectedDepartment(null); // Clear selected department
+  // }, [selectedLocation, positionProfileData]);
 
   // Filter departments based on selected location
 
@@ -216,7 +216,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       });
       return; // Do not open the modal
     }
-
     handleSubmit(
       () => {
         // If the form is valid, show the modal
@@ -224,7 +223,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         handleOk();
       },
       () => {
-        // console.log('form errors: ', errors);
         // Handle form validation errors
         // You might want to log or display these errors
       },
@@ -304,8 +302,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         additional_info_excluded_mgr_position_number,
         additional_info_comments,
       } = positionRequestData.positionRequest;
-
-      setValue('workLocation', additional_info_work_location_id || null);
+      setValue(
+        'workLocation',
+        additional_info_work_location_id ||
+          departmentsData?.find((dept) => dept.id === positionRequestData?.positionRequest?.department_id)
+            ?.location_id ||
+          null,
+      );
       setValue(
         'payListDepartmentId',
         additional_info_department_id || positionRequestData?.positionRequest?.department_id || null,
@@ -322,7 +325,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         setValue('confirmation', true);
       }
     }
-  }, [positionRequestData, setValue]);
+  }, [departmentsData, positionRequestData, setValue]);
 
   const confirmation = watch('confirmation');
 
@@ -491,9 +494,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                   data-testid="department-select"
                                   onChange={(newValue) => {
                                     const selectedDept = departmentsData?.find((dept) => dept.id === newValue);
-                                    setSelectedDepartment(selectedDept?.name || ''); // Update selected department name
+                                    // setSelectedDepartment(selectedDept?.name || ''); // Update selected department name
                                     setValue('workLocation', selectedDept?.location_id || null);
-                                    setSelectedLocation(newValue);
+                                    // setSelectedLocation(newValue);
                                     onChange(newValue); // Update the form state
                                   }}
                                   showSearch

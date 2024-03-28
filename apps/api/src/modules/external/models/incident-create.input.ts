@@ -18,6 +18,7 @@ export enum IncidentThreadContentType {
 }
 
 export enum IncidentThreadEntryType {
+  PrivateNote = 1,
   Customer = 3,
 }
 
@@ -41,6 +42,7 @@ export interface IncidentCreateUpdateInput {
     lookupName: string;
   };
   threads: {
+    contact?: { id: number };
     channel: { id: IncidentThreadChannel };
     contentType: { id: IncidentThreadContentType };
     entryType: { id: IncidentThreadEntryType };

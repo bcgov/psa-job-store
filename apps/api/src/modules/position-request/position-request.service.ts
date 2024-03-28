@@ -926,10 +926,10 @@ export class PositionRequestApiService {
             id: IncidentThreadContentType.TextHtml,
           },
           entryType: {
-            id: IncidentThreadEntryType.Customer,
+            id: IncidentThreadEntryType.PrivateNote,
           },
-          text: `
-          <div>
+          text: `   
+          <div>         
             <a href="https://jobstore.apps.silver.devops.gov.bc.ca/classification-tasks/${
               positionRequest.id
             }">View this position in the Job Store</a>
@@ -940,7 +940,21 @@ export class PositionRequestApiService {
                 ? `The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}`
                 : `No position was created for this request`
             }
-            </strong>
+            </strong> 
+          </div>`,
+        },
+        {
+          channel: {
+            id: IncidentThreadChannel.CSSWeb,
+          },
+          contentType: {
+            id: IncidentThreadContentType.TextHtml,
+          },
+          entryType: {
+            id: IncidentThreadEntryType.Customer,
+          },
+          text: `
+          <div>
             ${
               (positionRequest.additional_info_comments ?? '').length > 0
                 ? `
@@ -995,6 +1009,9 @@ export class PositionRequestApiService {
 
     let incident: Record<string, any> = {};
     if (positionRequest.crm_id === null) {
+      // console.log(JSON.stringify(data));
+
+      this.logger.debug('incident creation ' + JSON.stringify(data));
       incident = await this.crmService.createIncident(data);
     } else {
       await this.crmService.updateIncident(positionRequest.crm_id, data);
