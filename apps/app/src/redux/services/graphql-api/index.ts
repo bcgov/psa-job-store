@@ -56,8 +56,11 @@ function checkForExpiredSessionError(response: any) {
 let isToastShown = false;
 const baseQuery = async (args: any, api: any, extraOptions: any) => {
   let errorToastShown = false;
+  let suppressErrorToast = false;
   try {
     const result = await rawBaseQuery(args, api, extraOptions);
+
+    suppressErrorToast = args.variables?.suppressGlobalError;
 
     const isSessionExpired = checkForExpiredSessionError(result);
     if (isSessionExpired) {
@@ -83,7 +86,7 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
 
       isToastShown = true;
 
-      if (errorMessage.startsWith('ALEXANDRIA_ERROR:')) {
+      if (errorMessage.startsWith('ALEXANDRIA_ERROR:') && !suppressErrorToast) {
         errorToastShown = true;
         const messageParts = errorMessage.split(':');
         const errorDescription = messageParts[1];
@@ -105,7 +108,7 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     return result;
   } catch (error) {
     // Handle any other unexpected errors
-    if (!errorToastShown && !isToastShown) {
+    if (!errorToastShown && !isToastShown && !suppressErrorToast) {
       isToastShown = true;
       notification.error({
         duration: 0,

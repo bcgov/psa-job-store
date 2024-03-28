@@ -10,5 +10,5 @@ Given('the job profiles for the first page should be displayed', () => {
     .find('li')
     .eq(1)
     .find('[data-cy="card-title"]')
-    .contains('Strategic HR Manager');
+    .contains('Strategic HR Analyst Manager');
 });

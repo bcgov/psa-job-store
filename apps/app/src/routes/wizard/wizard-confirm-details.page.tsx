@@ -110,14 +110,19 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   // const [createJobProfile] = useCreateJobProfileMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
+
+  // this is for the first level excluded manager
   const [
     getPositionProfile,
     { data: positionProfileData, isFetching: isFetchingPositionProfile, isError: isFetchingPositionProfileError },
   ] = useLazyGetPositionProfileQuery();
+
+  // this is for the reporting manager
   const [
     getPositionProfile2,
     { data: positionProfileData2, isFetching: isFetchingPositionProfile2, isError: isFetchingPositionProfileError2 },
   ] = useLazyGetPositionProfileQuery();
+
   const departmentsData = useGetDepartmentsWithLocationQuery().data?.departments;
 
   // State to track selected location
@@ -169,7 +174,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const debouncedFetchPositionProfile = useCallback(
     debounce(async (positionNumber: string) => {
       try {
-        getPositionProfile({ positionNumber });
+        getPositionProfile({ positionNumber, suppressGlobalError: true });
       } catch (e) {
         // handled by isError, prevents showing error toast
       }
@@ -194,35 +199,94 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   // get profile info for reporting position from reports_to_position_id using GetPositionProfileQuery and useEffect
   useEffect(() => {
     if (positionRequestData?.positionRequest?.reports_to_position_id) {
-      getPositionProfile2({ positionNumber: positionRequestData.positionRequest.reports_to_position_id.toString() });
+      getPositionProfile2({
+        positionNumber: positionRequestData.positionRequest.reports_to_position_id.toString(),
+        uniqueKey: 'managerProfile',
+      });
     }
   }, [positionRequestData?.positionRequest?.reports_to_position_id, getPositionProfile2]);
 
+  // get profile info for excluded manager from additional_info_excluded_mgr_position_number using GetPositionProfileQuery and useEffect
+  useEffect(() => {
+    async function fetchExcludedManagerProfile() {
+      if (positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number) {
+        try {
+          await getPositionProfile({
+            positionNumber: positionRequestData.positionRequest.additional_info_excluded_mgr_position_number,
+            uniqueKey: 'excludedManagerProfile',
+            suppressGlobalError: true,
+          }).unwrap();
+        } catch (e) {
+          setNoPositions(true);
+        }
+      }
+    }
+    fetchExcludedManagerProfile();
+  }, [positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number, getPositionProfile]);
+
   const { data: allLocations } = useGetLocationsQuery();
 
-  const showModal = async () => {
+  const showModal = async ({ skipValidation = false, updateStep = true } = {}) => {
+    // console.log('showModal', skipValidation, updateStep);
+
     if (isFetchingPositionProfile) return; // Do not show the modal while fetching position profile
 
     // Clear any existing errors on the excludedManagerPositionNumber field
-    clearErrors('excludedManagerPositionNumber');
+    if (!skipValidation) clearErrors('excludedManagerPositionNumber');
 
     // Check if noPositions is true and excludedManagerPositionNumber should be filled
     const formValues = getValues();
-    if (noPositions && formValues.excludedManagerPositionNumber) {
+    // console.log('got values');
+    // console.log(
+    //   '!skipValidation && noPositions && formValues.excludedManagerPositionNumber: ',
+    //   !skipValidation,
+    //   noPositions,
+    //   formValues.excludedManagerPositionNumber,
+    // );
+    if (!skipValidation && noPositions && formValues.excludedManagerPositionNumber) {
       // Set an error on the excludedManagerPositionNumber field
       setError('excludedManagerPositionNumber', {
         type: 'manual',
         message: 'Position not found',
       });
+      // console.log('error, returning');
+      Modal.error({
+        title: 'Error',
+        content: (
+          <div>
+            <p>The form contains errors, please fix them before proceeding.</p>
+          </div>
+        ),
+        onOk() {},
+      });
       return; // Do not open the modal
     }
+
+    // console.log('handlesubmit');
+    if (skipValidation) {
+      // console.log('handleOk 2');
+      await handleOk(updateStep);
+      return false;
+    }
+
     handleSubmit(
       () => {
         // If the form is valid, show the modal
         // setIsModalVisible(true);
-        handleOk();
+        // console.log('handleOk 1');
+        handleOk(updateStep);
       },
       () => {
+        Modal.error({
+          title: 'Error',
+          content: (
+            <div>
+              <p>The form contains errors, please fix them before proceeding.</p>
+            </div>
+          ),
+          onOk() {},
+        });
+        // console.log('form errors: ', errors);
         // Handle form validation errors
         // You might want to log or display these errors
       },
@@ -230,7 +294,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     return false; // Prevents default behavior until validation is passed
   };
 
-  const handleOk = async () => {
+  const handleOk = async (updateStep = true) => {
+    // console.log('handleOK');
+
     // User pressed next on the review screen
     // A modal appeared with terms
     // User confirmed the terms in the modal by pressing OK
@@ -239,10 +305,12 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
     try {
       const formData = getValues();
+      // console.log('formData: ', formData);
       if (positionRequestId) {
+        // console.log('updatePositionRequest');
         await updatePositionRequest({
           id: positionRequestId,
-          step: 5,
+          step: updateStep ? 5 : 4,
           // status: 'COMPLETED',
           // position_number: 123456,
 
@@ -252,7 +320,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           additional_info_excluded_mgr_position_number: formData.excludedManagerPositionNumber,
           additional_info_comments: formData.comments,
         }).unwrap();
-        if (onNext) onNext();
+        if (onNext && updateStep) onNext();
       } else {
         throw Error('Position request not found');
       }
@@ -354,10 +422,16 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       },
     });
   };
+
+  const saveAndQuit = async () => {
+    await showModal({ skipValidation: true, updateStep: false });
+    disableBlockingAndNavigateHome();
+  };
+
   const getMenuContent = () => {
     return (
       <Menu>
-        <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
+        <Menu.Item key="save" onClick={saveAndQuit} data-testid="save-and-quit">
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
@@ -400,12 +474,19 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         grayBg={false}
         pageHeaderExtra={[
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
-            <Button icon={<EllipsisOutlined />}></Button>
+            <Button data-testid="ellipsis-menu" icon={<EllipsisOutlined />}></Button>
           </Popover>,
           <Button onClick={onBackCallback} key="back">
             Back
           </Button>,
-          <Button key="next" type="primary" onClick={showModal} data-testid="next-button" loading={isLoading}>
+          <Button
+            key="next"
+            type="primary"
+            onClick={() => showModal()}
+            data-testid="next-button"
+            loading={isLoading}
+            disabled={isFetchingPositionProfile}
+          >
             Save and next
           </Button>,
         ]}
@@ -451,6 +532,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               render={({ field: { onChange, value } }) => {
                                 return (
                                   <Switch
+                                    checkedChildren="Yes"
                                     data-testid="confirmation-switch"
                                     checked={value}
                                     onChange={(newValue) => {
@@ -613,7 +695,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               render={({ field }) => {
                                 return (
                                   <>
-                                    <Input.TextArea {...field} autoSize disabled={!confirmation} maxLength={1000} />
+                                    <Input.TextArea
+                                      data-testid="comments-input"
+                                      {...field}
+                                      autoSize
+                                      disabled={!confirmation}
+                                      maxLength={1000}
+                                    />
                                     <Typography.Paragraph
                                       type="secondary"
                                       style={{ textAlign: 'right', width: '100%', margin: '0' }}
@@ -645,7 +733,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                 }
                 bordered={false}
               >
-                <Form layout="vertical">
+                <Form layout="vertical" data-testid="job-info">
                   <Form.Item name="jobTitle" label="Job title" labelCol={{ className: 'card-label' }} colon={false}>
                     <div style={{ margin: 0 }}>
                       {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.value}
@@ -676,7 +764,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                         !isFetchingPositionProfile2 &&
                         !isFetchingPositionProfileError2 &&
                         !positionRequestLoadingError && (
-                          <div>
+                          <div data-testid="reporting-manager-info">
                             <p
                               style={{ margin: 0 }}
                             >{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
