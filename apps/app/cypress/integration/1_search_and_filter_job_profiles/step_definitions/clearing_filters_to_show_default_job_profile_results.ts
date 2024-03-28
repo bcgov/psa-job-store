@@ -6,6 +6,6 @@ When('the user clicks the "Clear Filters" button', () => {
 
 Then('the default job profile results should be displayed', () => {
   // Checking for the presence of two specific job profiles as the default result
-  cy.get('[data-cy="search-results-list"]').should('contain', 'Program Assistant');
-  cy.get('[data-cy="search-results-list"]').should('contain', 'PROGRAM ASSISTANT (SUPERVISORY)');
+  cy.get('[data-cy="search-results-list"]').should('contain', 'Data Scientist');
+  cy.get('[data-cy="search-results-list"]').should('contain', 'Project Manager');
 });

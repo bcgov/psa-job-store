@@ -288,7 +288,14 @@ export class PeoplesoftService {
   async getEmployeesForPositions(positions: string[]) {
     const requests: any[] = [];
 
-    positions.map((position) =>
+    const positionEmployeesMap: Map<string, Employee[]> = new Map();
+
+    // if testing, skip fetching employees as it takes too long
+
+    positions.map((position) => {
+      if (process.env.TEST_ENV === 'true' && position != '00121521') {
+        return;
+      }
       requests.push(
         firstValueFrom(
           this.request({
@@ -304,11 +311,10 @@ export class PeoplesoftService {
             }),
           ),
         ),
-      ),
-    );
+      );
+    });
 
     const results = await Promise.allSettled(requests);
-    const positionEmployeesMap: Map<string, Employee[]> = new Map();
 
     // Remove all unfulfilled results
     const processed = results

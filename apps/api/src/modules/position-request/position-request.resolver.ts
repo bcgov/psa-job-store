@@ -150,14 +150,14 @@ export class PositionRequestApiResolver {
     return this.positionRequestService.getPositionRequestJobStoreNumbers();
   }
 
-  @Roles('classification')
+  @Roles('total-compensation', 'classification')
   @UseGuards(RoleGuard)
   @Query(() => [String], { name: 'positionRequestStatuses' })
   async getPositionRequestStatuses() {
     return this.positionRequestService.getPositionRequestStatuses();
   }
 
-  @Roles('classification')
+  @Roles('total-compensation', 'classification')
   @UseGuards(RoleGuard)
   @Query(() => [UserBasicInfo], { name: 'positionRequestSubmittedBy' })
   async getpositionRequestSubmittedBy() {

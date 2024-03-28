@@ -2,4 +2,13 @@
     font-weight: bold;
   }
 
+  .ant-steps-item-finish .ant-steps-item-title, .ant-steps-item-finish .ant-steps-item-description {
+    color: #6E6E6E !important;
+  }
   
+  .custom-steps h2{
+    line-height: 1.5714285714285714 !important;
+    font-size: 16px !important;
+    margin: 0 !important;
+    font-weight: bold;
+  }

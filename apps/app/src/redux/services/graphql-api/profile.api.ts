@@ -7,6 +7,7 @@ export interface ProfileModel {
   department_id?: string;
   employee_id?: string;
   organization_id?: string;
+  position_id?: string;
 }
 
 export interface GetProfileResponse {
@@ -32,6 +33,7 @@ export const profileApi = graphqlApi.injectEndpoints({
                 department_id
                 employee_id
                 organization_id
+                position_id
               }
             }
           `,

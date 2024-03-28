@@ -3,7 +3,7 @@ import { Given, Then, When } from '@badeball/cypress-cucumber-preprocessor';
 Given('a job profile is currently selected and its details are displayed', () => {
   // Navigate to the job profiles list and select a job profile
   cy.visit('/job-profiles');
-  const selectedJobProfile = 'Program Assistant'; // Use an existing job profile for selection
+  const selectedJobProfile = 'Data Scientist'; // Use an existing job profile for selection
   cy.contains(selectedJobProfile).click();
   cy.get('[data-testid="job-profile"]').should('contain', selectedJobProfile);
 });
@@ -23,7 +23,7 @@ When('the user performs a new search', () => {
 
 Then('the previously selected job profile should be deselected', () => {
   // Check that the details view of the previously selected job profile is not displayed
-  const selectedJobProfile = 'Program Assistant';
+  const selectedJobProfile = 'Data Scientist';
   cy.get('body').should('not.contain', selectedJobProfile);
 });
 

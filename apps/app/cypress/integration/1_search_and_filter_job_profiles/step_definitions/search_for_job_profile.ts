@@ -12,5 +12,5 @@ When('the user clicks the "Search" button', () => {
 Then('job profiles containing that keyword in any of the searchable fields should be displayed', () => {
   // Verify that job profiles containing the keyword are displayed
   // Adjust the selector to target the elements that display the job profiles
-  cy.get('[data-testid="job-profile-search-results"]').should('contain', 'analyst');
+  cy.get('[data-testid="job-profile-search-results"]').should('contain', 'Analyst');
 });

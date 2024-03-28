@@ -1,0 +1,17 @@
+/* This is copied from default antd styles */
+/* todo: figure out a way to not do this, it necessary to display list properly in local environment because of 
+         theme hasing (controlled via hashed: false in ConfigProvider)
+*/
+.ant-list-items{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ant-list .ant-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    color: rgba(0, 0, 0, 0.88);
+}

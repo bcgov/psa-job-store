@@ -35,8 +35,14 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
     // we are not editing a draft position request (creatign position from dashboard or from org chart page)
     // console.log('orgChartData: ', orgChartData);
 
-    // we can create a new position from the my-positions org chart view, or directly from the org chart
-    if (location.pathname.startsWith('/my-positions/create') || location.pathname.startsWith('/org-chart')) {
+    // console.log('createNewPosition()', location.pathname);
+    // we can create a new position from the my-positions org chart view, or directly from the org chart, or from home page
+    if (
+      location.pathname.startsWith('/my-positions/create') ||
+      location.pathname.startsWith('/org-chart') ||
+      location.pathname == '/' || // home page
+      location.pathname == '' // home page
+    ) {
       const positionRequestInput = {
         step: 1,
         title: 'Untitled',

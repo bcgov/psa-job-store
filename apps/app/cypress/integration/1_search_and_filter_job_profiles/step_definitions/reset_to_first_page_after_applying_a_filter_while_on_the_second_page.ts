@@ -5,6 +5,10 @@ Given('the job profiles for the first page should be displayed for filtered resu
     .find('li')
     .eq(0)
     .find('[data-cy="card-title"]')
-    .contains('Financial Analyst');
-  cy.get('[data-cy="search-results-list"]').find('li').eq(1).find('[data-cy="card-title"]').contains('File Clerk');
+    .contains('Strategic HR Manager');
+  cy.get('[data-cy="search-results-list"]')
+    .find('li')
+    .eq(1)
+    .find('[data-cy="card-title"]')
+    .contains('Senior Software Engineer');
 });

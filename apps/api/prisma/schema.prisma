@@ -50,7 +50,7 @@ model PositionRequest {
   crm_assigned_to_account_id Int? // CRM account id of the classifications user who is assigned to the incident
   step                       Int
   reports_to_position_id     String
-  department_id              String
+  department_id              String // this is department id that user selected in org chart
   parent_job_profile_id      Int?
   crm_json                   Json?                  @db.JsonB
   profile_json               Json?                  @db.JsonB
@@ -71,7 +71,7 @@ model PositionRequest {
 
   // additional information form data
   additional_info_work_location_id             String?
-  additional_info_department_id                String?
+  additional_info_department_id                String? // this is department id collected from the additional information form
   additional_info_excluded_mgr_position_number String?
   additional_info_comments                     String?
 

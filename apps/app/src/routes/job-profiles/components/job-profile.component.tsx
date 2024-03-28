@@ -327,53 +327,60 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const basicInfoItems: DescriptionsProps['items'] = [
     {
       key: 'number',
-      label: 'Job Store #',
-      children: effectiveData?.number,
+      label: <h3 tabIndex={0}>Job Store #</h3>,
+      children: <span tabIndex={0}>{effectiveData?.number}</span>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'Lastupdated',
-      label: 'Last updated',
-      children: `${dayjs(effectiveData?.updated_at).format('MMM D, YYYY')}`,
+      label: <h3 tabIndex={0}>Last updated</h3>,
+      children: <span tabIndex={0}>{`${dayjs(effectiveData?.updated_at).format('MMM D, YYYY')}`}</span>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
 
     {
       key: 'ministries',
-      label: 'Ministries',
-      children: effectiveData?.all_organizations ? (
-        'All'
-      ) : (
-        <ul>{effectiveData?.organizations.map((org, index) => <li key={index}>{org.organization.name}</li>)}</ul>
+      label: <h3 tabIndex={0}>Ministries</h3>,
+      children: (
+        <span tabIndex={0}>
+          {effectiveData?.all_organizations ? (
+            'All'
+          ) : (
+            <ul>{effectiveData?.organizations.map((org, index) => <li key={index}>{org.organization.name}</li>)}</ul>
+          )}
+        </span>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'Jobrole',
-      label: 'Job role',
-      children: effectiveData?.role?.name,
+      label: <h3 tabIndex={0}>Job role</h3>,
+      children: <span tabIndex={0}>{effectiveData?.role?.name}</span>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'Roletype',
-      label: 'Role type',
-      children: effectiveData?.role_type?.name ? effectiveData?.role_type?.name : 'Unknown',
+      label: <h3 tabIndex={0}>Role type</h3>,
+      children: <span tabIndex={0}>{effectiveData?.role_type?.name ? effectiveData?.role_type?.name : 'Unknown'}</span>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'Scopeofresponsibility',
-      label: 'Scope of responsibility',
-      children:
-        effectiveData?.scope?.name && effectiveData?.scope?.description
-          ? `${effectiveData?.scope?.name} - ${effectiveData?.scope?.description}`
-          : 'Unknown',
+      label: <h3 tabIndex={0}>Scope of responsibility</h3>,
+      children: (
+        <span tabIndex={0}>
+          {effectiveData?.scope?.name && effectiveData?.scope?.description
+            ? `${effectiveData?.scope?.name} - ${effectiveData?.scope?.description}`
+            : 'Unknown'}
+        </span>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'Professionsanddisciplines',
-      label: 'Professions & disciplines',
+      label: <h3 tabIndex={0}>Professions & disciplines</h3>,
       children: (
-        <div>
+        <div tabIndex={0}>
           {effectiveData?.jobFamilies.map((jobFamilyItem) => {
             const jobFamily = jobFamilyItem.jobFamily;
             return (
@@ -396,23 +403,26 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const items: DescriptionsProps['items'] = [
     {
       key: 'title',
-      label: 'Title',
-      children:
-        showDiff && originalData
-          ? compareData(
-              typeof originalData.title === 'string' ? originalData.title : originalData.title.value,
-              typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value,
-            )
-          : typeof effectiveData?.title === 'string'
-            ? effectiveData?.title
-            : effectiveData?.title?.value,
+      label: <h3 tabIndex={0}>Title</h3>,
+      children: (
+        <span data-testid="job-title" tabIndex={0}>
+          {showDiff && originalData
+            ? compareData(
+                typeof originalData.title === 'string' ? originalData.title : originalData.title.value,
+                typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value,
+              )
+            : typeof effectiveData?.title === 'string'
+              ? effectiveData?.title
+              : effectiveData?.title?.value}
+        </span>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
 
     {
       key: 'classification',
-      label: 'Classification',
-      children: <div>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</div>,
+      label: <h3 tabIndex={0}>Classification</h3>,
+      children: <div tabIndex={0}>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     ...(effectiveData?.program_overview && // if program overview field is present AND it's not empty
@@ -422,20 +432,23 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       ? [
           {
             key: 'program_overview',
-            label: 'Program Overview',
-            children:
-              showDiff && originalData
-                ? compareData(
-                    typeof originalData.program_overview === 'string'
-                      ? originalData.program_overview
-                      : originalData?.program_overview?.value,
-                    typeof effectiveData?.program_overview === 'string'
-                      ? effectiveData?.program_overview
-                      : effectiveData?.program_overview?.value,
-                  )
-                : typeof effectiveData?.program_overview === 'string'
-                  ? effectiveData?.program_overview
-                  : effectiveData?.program_overview?.value,
+            label: <span tabIndex={0}>Program Overview</span>,
+            children: (
+              <span data-testid="program-overview" tabIndex={0}>
+                {showDiff && originalData
+                  ? compareData(
+                      typeof originalData.program_overview === 'string'
+                        ? originalData.program_overview
+                        : originalData?.program_overview?.value,
+                      typeof effectiveData?.program_overview === 'string'
+                        ? effectiveData?.program_overview
+                        : effectiveData?.program_overview?.value,
+                    )
+                  : typeof effectiveData?.program_overview === 'string'
+                    ? effectiveData?.program_overview
+                    : effectiveData?.program_overview?.value}
+              </span>
+            ),
             span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
           },
         ]
@@ -468,65 +481,70 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     // },
     {
       key: 'overview',
-      label: 'Job Overview',
-      children:
-        showDiff && originalData
-          ? compareData(
-              typeof originalData.overview === 'string' ? originalData.overview : originalData?.overview?.value,
-              typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value,
-            )
-          : typeof effectiveData?.overview === 'string'
-            ? effectiveData?.overview
-            : effectiveData?.overview?.value,
+      label: <h3 tabIndex={0}>Job Overview</h3>,
+      children: (
+        <span data-testid="job-overview" tabIndex={0}>
+          {showDiff && originalData
+            ? compareData(
+                typeof originalData.overview === 'string' ? originalData.overview : originalData?.overview?.value,
+                typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value,
+              )
+            : typeof effectiveData?.overview === 'string'
+              ? effectiveData?.overview
+              : effectiveData?.overview?.value}
+        </span>
+      ),
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'accountabilities',
-      label: 'Accountabilities',
+      label: <h3 tabIndex={0}>Accountabilities</h3>,
       children: (
         <>
           {/* Main Accountabilities - is_significant == true */}
-          <ul>
-            {showDiff && originalData
-              ? compareLists(
-                  originalData.accountabilities.filter((acc) => acc.is_significant),
-                  effectiveData?.accountabilities.filter((acc) => acc.is_significant),
-                )
-              : effectiveData?.accountabilities
-                  .filter((acc) => acc.is_significant)
-                  .map((accountability, index) => {
-                    if (typeof accountability === 'string' || accountability.disabled) {
-                      return null;
-                    }
-                    if (accountability.text instanceof TrackedFieldArrayItem) {
-                      return <li key={index}>{accountability.text.value}</li>;
-                    } else if (typeof accountability.text === 'string') {
-                      return <li key={index}>{accountability.text}</li>;
-                    }
-                  })}
-          </ul>
-          {/* Optional Accountabilities - is_significant == false */}
-          <h4>Optional accountabilities</h4>
-          <ul>
-            {showDiff && originalData
-              ? compareLists(
-                  originalData.accountabilities.filter((acc) => !acc.is_significant),
-                  effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
-                )
-              : effectiveData?.accountabilities
-                  .filter((acc) => !acc.is_significant)
-                  .map((accountability, index) => {
-                    if (typeof accountability === 'string' || accountability.disabled) {
-                      return null;
-                    }
-                    if (accountability.text instanceof TrackedFieldArrayItem) {
-                      return <li key={index}>{accountability.text.value}</li>;
-                    } else if (typeof accountability.text === 'string') {
-                      return <li key={index}>{accountability.text}</li>;
-                    }
-                  })}
-          </ul>
+          <span tabIndex={0}>
+            <ul data-testid="significant-accountabilities">
+              {showDiff && originalData
+                ? compareLists(
+                    originalData.accountabilities.filter((acc) => acc.is_significant),
+                    effectiveData?.accountabilities.filter((acc) => acc.is_significant),
+                  )
+                : effectiveData?.accountabilities
+                    .filter((acc) => acc.is_significant)
+                    .map((accountability, index) => {
+                      if (typeof accountability === 'string' || accountability.disabled) {
+                        return null;
+                      }
+                      if (accountability.text instanceof TrackedFieldArrayItem) {
+                        return <li key={index}>{accountability.text.value}</li>;
+                      } else if (typeof accountability.text === 'string') {
+                        return <li key={index}>{accountability.text}</li>;
+                      }
+                    })}
+            </ul>
+            {/* Optional Accountabilities - is_significant == false */}
+            <h4>Optional accountabilities</h4>
+            <ul data-testid="optional-accountabilities">
+              {showDiff && originalData
+                ? compareLists(
+                    originalData.accountabilities.filter((acc) => !acc.is_significant),
+                    effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
+                  )
+                : effectiveData?.accountabilities
+                    .filter((acc) => !acc.is_significant)
+                    .map((accountability, index) => {
+                      if (typeof accountability === 'string' || accountability.disabled) {
+                        return null;
+                      }
+                      if (accountability.text instanceof TrackedFieldArrayItem) {
+                        return <li key={index}>{accountability.text.value}</li>;
+                      } else if (typeof accountability.text === 'string') {
+                        return <li key={index}>{accountability.text}</li>;
+                      }
+                    })}
+            </ul>
+          </span>
         </>
       ),
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
@@ -534,62 +552,82 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     },
     {
       key: 'requirements',
-      label: 'Minimum job requirements',
+      label: <h3 tabIndex={0}>Minimum job requirements</h3>,
       children: (
         <>
-          <h4>Education</h4>
-          <ul>
-            {showDiff && originalData
-              ? compareLists(originalData.education, effectiveData?.education)
-              : effectiveData?.education?.map((requirement, index) => {
-                  if (typeof requirement === 'string') {
-                    return <li key={index}>{requirement}</li>;
-                  }
-                  if (requirement.disabled) {
-                    return null;
-                  }
-                  if (requirement.text instanceof TrackedFieldArrayItem) {
-                    return <li key={index}>{requirement.text.value}</li>;
-                  } else if (typeof requirement.text === 'string') {
-                    return <li key={index}>{requirement.text}</li>;
-                  }
-                })}
-          </ul>
+          <span tabIndex={0}>
+            <h4>Education</h4>
+            <ul data-testid="education">
+              {showDiff && originalData
+                ? compareLists(originalData.education, effectiveData?.education)
+                : effectiveData?.education?.map((requirement, index) => {
+                    if (typeof requirement === 'string') {
+                      return <li key={index}>{requirement}</li>;
+                    }
+                    if (requirement.disabled) {
+                      return null;
+                    }
+                    if (requirement.text instanceof TrackedFieldArrayItem) {
+                      return <li key={index}>{requirement.text.value}</li>;
+                    } else if (typeof requirement.text === 'string') {
+                      return <li key={index}>{requirement.text}</li>;
+                    }
+                  })}
+            </ul>
 
-          {effectiveData?.job_experience && effectiveData?.job_experience.length > 0 && (
-            <>
-              <h4>Related experience</h4>
-              <ul>
-                {showDiff && originalData
-                  ? compareLists(originalData.job_experience, effectiveData?.job_experience)
-                  : effectiveData?.job_experience?.map((requirement, index) => {
-                      if (typeof requirement === 'string') {
-                        return <li key={index}>{requirement}</li>;
-                      }
-                      if (requirement.disabled) {
-                        return null;
-                      }
-                      if (requirement.text instanceof TrackedFieldArrayItem) {
-                        return <li key={index}>{requirement.text.value}</li>;
-                      } else if (typeof requirement.text === 'string') {
-                        return <li key={index}>{requirement.text}</li>;
-                      }
-                    })}
-              </ul>
-            </>
-          )}
-
-          {effectiveData?.professional_registration_requirements &&
-            effectiveData?.professional_registration_requirements.length > 0 && (
+            {effectiveData?.job_experience && effectiveData?.job_experience.length > 0 && (
               <>
-                <h4>Professional registration requirements</h4>
-                <ul>
+                <h4>Related experience</h4>
+                <ul data-testid="job-experience">
                   {showDiff && originalData
-                    ? compareLists(
-                        originalData.professional_registration_requirements,
-                        effectiveData?.professional_registration_requirements,
-                      )
-                    : effectiveData?.professional_registration_requirements?.map((requirement, index) => {
+                    ? compareLists(originalData.job_experience, effectiveData?.job_experience)
+                    : effectiveData?.job_experience?.map((requirement, index) => {
+                        if (typeof requirement === 'string') {
+                          return <li key={index}>{requirement}</li>;
+                        }
+                        if (requirement.disabled) {
+                          return null;
+                        }
+                        if (requirement.text instanceof TrackedFieldArrayItem) {
+                          return <li key={index}>{requirement.text.value}</li>;
+                        } else if (typeof requirement.text === 'string') {
+                          return <li key={index}>{requirement.text}</li>;
+                        }
+                      })}
+                </ul>
+              </>
+            )}
+
+            {effectiveData?.professional_registration_requirements &&
+              effectiveData?.professional_registration_requirements.length > 0 && (
+                <>
+                  <h4>Professional registration requirements</h4>
+                  <ul data-testid="professional-registration">
+                    {showDiff && originalData
+                      ? compareLists(
+                          originalData.professional_registration_requirements,
+                          effectiveData?.professional_registration_requirements,
+                        )
+                      : effectiveData?.professional_registration_requirements?.map((requirement, index) => {
+                          if (typeof requirement === 'string') {
+                            return <li key={index}>{requirement}</li>;
+                          }
+                          if (requirement.disabled) {
+                            return null;
+                          }
+                          return <li key={index}>{requirement.value}</li>;
+                        })}
+                  </ul>
+                </>
+              )}
+
+            {effectiveData?.preferences && effectiveData?.preferences.length > 0 && (
+              <>
+                <h4>Preferences</h4>
+                <ul data-testid="preferences">
+                  {showDiff && originalData
+                    ? compareLists(originalData.preferences, effectiveData?.preferences)
+                    : effectiveData?.preferences?.map((requirement, index) => {
                         if (typeof requirement === 'string') {
                           return <li key={index}>{requirement}</li>;
                         }
@@ -602,104 +640,86 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               </>
             )}
 
-          {effectiveData?.preferences && effectiveData?.preferences.length > 0 && (
-            <>
-              <h4>Preferences</h4>
-              <ul>
-                {showDiff && originalData
-                  ? compareLists(originalData.preferences, effectiveData?.preferences)
-                  : effectiveData?.preferences?.map((requirement, index) => {
-                      if (typeof requirement === 'string') {
-                        return <li key={index}>{requirement}</li>;
-                      }
-                      if (requirement.disabled) {
-                        return null;
-                      }
-                      return <li key={index}>{requirement.value}</li>;
-                    })}
-              </ul>
-            </>
-          )}
+            {effectiveData?.knowledge_skills_abilities && effectiveData?.knowledge_skills_abilities.length > 0 && (
+              <>
+                <h4>Knowledge, skills and abilities</h4>
+                <ul data-testid="knowledge-skills-abilities">
+                  {showDiff && originalData
+                    ? compareLists(originalData.knowledge_skills_abilities, effectiveData?.knowledge_skills_abilities)
+                    : effectiveData?.knowledge_skills_abilities?.map((requirement, index) => {
+                        if (typeof requirement === 'string') {
+                          return <li key={index}>{requirement}</li>;
+                        }
+                        if (requirement.disabled) {
+                          return null;
+                        }
+                        return <li key={index}>{requirement.value}</li>;
+                      })}
+                </ul>
+              </>
+            )}
 
-          {effectiveData?.knowledge_skills_abilities && effectiveData?.knowledge_skills_abilities.length > 0 && (
-            <>
-              <h4>Knowledge, skills and abilities</h4>
-              <ul>
-                {showDiff && originalData
-                  ? compareLists(originalData.knowledge_skills_abilities, effectiveData?.knowledge_skills_abilities)
-                  : effectiveData?.knowledge_skills_abilities?.map((requirement, index) => {
-                      if (typeof requirement === 'string') {
-                        return <li key={index}>{requirement}</li>;
-                      }
-                      if (requirement.disabled) {
-                        return null;
-                      }
-                      return <li key={index}>{requirement.value}</li>;
-                    })}
-              </ul>
-            </>
-          )}
+            {effectiveData?.willingness_statements && effectiveData?.willingness_statements.length > 0 && (
+              <>
+                <h4>Willingness statements or provisos</h4>
+                <ul data-testid="provisos">
+                  {showDiff && originalData
+                    ? compareLists(originalData.willingness_statements, effectiveData?.willingness_statements)
+                    : effectiveData?.willingness_statements?.map((requirement, index) => {
+                        if (typeof requirement === 'string') {
+                          return <li key={index}>{requirement}</li>;
+                        }
+                        if (requirement.disabled) {
+                          return null;
+                        }
+                        return <li key={index}>{requirement.value}</li>;
+                      })}
+                </ul>
+              </>
+            )}
 
-          {effectiveData?.willingness_statements && effectiveData?.willingness_statements.length > 0 && (
-            <>
-              <h4>Willingness statements or provisos</h4>
-              <ul>
-                {showDiff && originalData
-                  ? compareLists(originalData.willingness_statements, effectiveData?.willingness_statements)
-                  : effectiveData?.willingness_statements?.map((requirement, index) => {
-                      if (typeof requirement === 'string') {
-                        return <li key={index}>{requirement}</li>;
-                      }
-                      if (requirement.disabled) {
-                        return null;
-                      }
-                      return <li key={index}>{requirement.value}</li>;
-                    })}
-              </ul>
-            </>
-          )}
+            {effectiveData?.security_screenings && effectiveData?.security_screenings.length > 0 && (
+              <>
+                <h4>Security screening</h4>
+                <ul data-testid="security-screenings">
+                  {showDiff && originalData
+                    ? compareLists(originalData.security_screenings, effectiveData?.security_screenings)
+                    : effectiveData?.security_screenings?.map((requirement, index) => {
+                        if (typeof requirement === 'string') {
+                          return <li key={index}>{requirement}</li>;
+                        }
+                        if (requirement.disabled) {
+                          return null;
+                        }
+                        if (requirement.text instanceof TrackedFieldArrayItem) {
+                          return <li key={index}>{requirement.text.value}</li>;
+                        } else if (typeof requirement.text === 'string') {
+                          return <li key={index}>{requirement.text}</li>;
+                        }
+                      })}
+                </ul>
+              </>
+            )}
 
-          {effectiveData?.security_screenings && effectiveData?.security_screenings.length > 0 && (
-            <>
-              <h4>Security screening</h4>
-              <ul>
-                {showDiff && originalData
-                  ? compareLists(originalData.security_screenings, effectiveData?.security_screenings)
-                  : effectiveData?.security_screenings?.map((requirement, index) => {
-                      if (typeof requirement === 'string') {
-                        return <li key={index}>{requirement}</li>;
-                      }
-                      if (requirement.disabled) {
-                        return null;
-                      }
-                      if (requirement.text instanceof TrackedFieldArrayItem) {
-                        return <li key={index}>{requirement.text.value}</li>;
-                      } else if (typeof requirement.text === 'string') {
-                        return <li key={index}>{requirement.text}</li>;
-                      }
-                    })}
-              </ul>
-            </>
-          )}
-
-          {effectiveData?.optional_requirements && effectiveData?.optional_requirements.length > 0 && (
-            <>
-              <h4>Optional requirements</h4>
-              <ul>
-                {showDiff && originalData
-                  ? compareLists(originalData.optional_requirements, effectiveData?.optional_requirements)
-                  : effectiveData?.optional_requirements?.map((requirement, index) => {
-                      if (typeof requirement === 'string') {
-                        return <li key={index}>{requirement}</li>;
-                      }
-                      if (requirement.disabled) {
-                        return null;
-                      }
-                      return <li key={index}>{requirement.value}</li>;
-                    })}
-              </ul>
-            </>
-          )}
+            {effectiveData?.optional_requirements && effectiveData?.optional_requirements.length > 0 && (
+              <>
+                <h4>Optional requirements</h4>
+                <ul data-testid="optional-requirements">
+                  {showDiff && originalData
+                    ? compareLists(originalData.optional_requirements, effectiveData?.optional_requirements)
+                    : effectiveData?.optional_requirements?.map((requirement, index) => {
+                        if (typeof requirement === 'string') {
+                          return <li key={index}>{requirement}</li>;
+                        }
+                        if (requirement.disabled) {
+                          return null;
+                        }
+                        return <li key={index}>{requirement.value}</li>;
+                      })}
+                </ul>
+              </>
+            )}
+          </span>
         </>
       ),
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
@@ -707,24 +727,26 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     },
     {
       key: 'behavioural_competencies',
-      label: 'Behavioural Competencies',
+      label: <h3 tabIndex={0}>Behavioural Competencies</h3>,
       children: (
-        <ul>
-          {showDiff && originalData
-            ? compareCompetencies(
-                originalData.behavioural_competencies.map((item) => item.behavioural_competency),
-                effectiveData?.behavioural_competencies.map((item) => item.behavioural_competency) ?? [],
-              )
-            : (effectiveData?.behavioural_competencies ?? []).map(
-                ({ behavioural_competency: { name, description } }, index) => {
-                  return (
-                    <li key={index}>
-                      <Text strong>{name}</Text> {description}
-                    </li>
-                  );
-                },
-              )}
-        </ul>
+        <span tabIndex={0}>
+          <ul data-testid="behavioural-competencies">
+            {showDiff && originalData
+              ? compareCompetencies(
+                  originalData.behavioural_competencies.map((item) => item.behavioural_competency),
+                  effectiveData?.behavioural_competencies.map((item) => item.behavioural_competency) ?? [],
+                )
+              : (effectiveData?.behavioural_competencies ?? []).map(
+                  ({ behavioural_competency: { name, description } }, index) => {
+                    return (
+                      <li key={index}>
+                        <Text strong>{name}</Text> {description}
+                      </li>
+                    );
+                  },
+                )}
+          </ul>
+        </span>
       ),
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
@@ -755,6 +777,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               This profile will need to be verified by the classification team before a position number is generated.
             </span>
           }
+          role="note"
           type="warning"
           showIcon
           icon={<ExclamationCircleFilled />}
@@ -763,13 +786,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       )}
 
       <Alert
+        role="note"
         message={
-          <span>
+          <h2 style={{ margin: 0, fontSize: '1rem', marginTop: '-0.3rem' }}>
             Job context{' '}
             <Tooltip title="The job context is important to understand as you proceed to create the position. You will be asked prior to approving that you understand the context of the job.">
               <InfoCircleOutlined style={{ cursor: 'pointer', fontSize: '0.9rem' }} />
             </Tooltip>
-          </span>
+          </h2>
         }
         description={
           <span
@@ -790,8 +814,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
       <Descriptions
         className="customDescriptions"
-        title="Job profile"
-        aria-hidden="true"
+        title={<h2 style={{ margin: '-7px 0' }}>Job profile</h2>}
         bordered
         column={24}
         items={items}
@@ -810,7 +833,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       {showBasicInfo && (
         <Descriptions
           className="customDescriptions"
-          title="Basic information"
+          title={<h2 style={{ margin: '-7px 0' }}>Basic information</h2>}
           bordered
           column={24}
           items={basicInfoItems}
@@ -838,102 +861,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           whiteSpace: 'nowrap',
           border: 0,
         }}
-      >
-        <section>
-          <h3>Title</h3>
-          <p>{typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value}</p>
-          <h3>Classification</h3>
-          <p>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</p>
-
-          <h3>Job Store #</h3>
-          <p>{effectiveData?.number}</p>
-
-          <h3>Last Updated</h3>
-          <p>{/* last updated info */}</p>
-
-          <h3>Job Context</h3>
-          <p
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(
-                typeof effectiveData?.context === 'string'
-                  ? effectiveData?.context
-                  : effectiveData?.context.description ?? '',
-              ),
-            }}
-          ></p>
-
-          <h3>Job Overview</h3>
-          <p>
-            {typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value}
-          </p>
-          <h3>Required Accountabilities</h3>
-          <ul>
-            {effectiveData?.accountabilities.map((accountability, index) => {
-              // Check if the accountability is a string
-              if (typeof accountability === 'string') {
-                return <li key={index}>{accountability}</li>;
-              }
-
-              // Check if the accountability is an object and not disabled
-              if (accountability.disabled) {
-                return null;
-              }
-              if (accountability.text instanceof TrackedFieldArrayItem) {
-                return <li key={accountability.text.value}>{accountability.text.value}</li>;
-              } else if (typeof accountability.text === 'string') {
-                return <li key={accountability.text}>{accountability.text}</li>;
-              }
-            })}
-          </ul>
-
-          {/* <h3>Optional Accountabilities</h3>
-          <ul>
-            {effectiveData?.accountabilities.optional.map((accountability, index) => {
-              // Check if the accountability is a string
-              if (typeof accountability === 'string') {
-                return <li key={index}>{accountability}</li>;
-              }
-
-              // Check if the accountability is an object and not disabled
-              if (accountability.disabled) {
-                return null;
-              }
-
-              return <li key={accountability.value}>{accountability.value}</li>;
-            })}
-          </ul> */}
-
-          <h3>Minimum Job Requirements</h3>
-          <ul>
-            {effectiveData?.education?.map((requirement, index) => {
-              if (typeof requirement === 'string') {
-                return <li key={index}>{requirement}</li>;
-              }
-
-              if (requirement.disabled) {
-                return null;
-              }
-
-              if (requirement.text instanceof TrackedFieldArrayItem) {
-                return <li key={requirement.text.value}>{requirement.text.value}</li>;
-              } else if (typeof requirement.text === 'string') {
-                return <li key={requirement.text}>{requirement.text}</li>;
-              }
-            })}
-          </ul>
-
-          <h3>Behavioural Competencies</h3>
-          <ul>
-            {(effectiveData?.behavioural_competencies ?? []).map(
-              ({ behavioural_competency: { name, description } }, index) => (
-                <li key={index}>
-                  <Text strong>{name}</Text> {description}
-                </li>
-              ),
-            )}
-          </ul>
-        </section>
-      </div>
+      ></div>
     </div>
   );
 };
