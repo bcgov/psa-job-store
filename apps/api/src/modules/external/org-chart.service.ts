@@ -23,8 +23,11 @@ export class OrgChartService {
     const classifications = await this.classificationService.getClassifications({});
     const departments = await this.departmentService.getDepartments();
 
-    const positionIds = (result?.data?.query?.rows ?? []).map((row) => row['A.POSITION_NBR']);
-    const employees: Map<string, Employee[]> = await this.peoplesoftService.getEmployeesForPositions(positionIds);
+    const positionsWithIncumbentsIds = (result?.data?.query?.rows ?? [])
+      .filter((row) => row['A.UPDATE_INCUMBENTS'] === 'Y')
+      .map((row) => row['A.POSITION_NBR']);
+    const employees: Map<string, Employee[]> =
+      await this.peoplesoftService.getEmployeesForPositions(positionsWithIncumbentsIds);
 
     // Loop through response and generate the tree for everyone in the _current department_
     (result?.data?.query?.rows ?? []).forEach((position) => {
