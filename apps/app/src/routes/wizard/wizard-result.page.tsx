@@ -377,19 +377,20 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             )}
 
             {mode === 'verificationRequired_edits' && (
-              <ContentWrapper>
+              <ContentWrapper data-testid="verification-warning">
                 <Result icon={<WarningFilled />} title="Verification required" status="warning" />
 
                 <Row justify="center" style={{ padding: '0 1rem' }}>
                   <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
                     <Alert
+                      data-testid="verification-warning-message"
                       message=""
                       description={
                         <span>
                           Some of your amendments to the generic profile require verification. If you would like to
                           revisit some of your amendments, please click these links:
                           {/* loop over reasons */}
-                          <ul style={{ marginTop: '1rem' }}>
+                          <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
                             {verificationNeededReasons.map((reason, index) => (
                               <li key={index}>
                                 <a onClick={() => handleVerificationClick()}>{reason}</a>
