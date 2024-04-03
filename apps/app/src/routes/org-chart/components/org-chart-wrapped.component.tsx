@@ -59,7 +59,7 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   }, [orgChart, onOrgChartLoad]);
 
   return (
-    <div {...props}>
+    <div {...props} style={{ width: '100%', height: '100%' }}>
       {' '}
       {isFetching || isLoading ? (
         <LoadingComponent data-testid="org-chart-loading" height="100%"></LoadingComponent>

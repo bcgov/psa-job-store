@@ -757,7 +757,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                 };
               }}
               rowClassName="job-position-row"
-              className="tableWithHeader"
+              id="job-positions-table"
+              className="tableWithHeader job-positions-table"
               columns={columns}
               dataSource={data?.positionRequests}
               rowKey="id"

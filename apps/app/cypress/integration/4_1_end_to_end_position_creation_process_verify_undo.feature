@@ -1,14 +1,14 @@
-Feature: End-to-End Position Creation Process
+Feature: End-to-End Position Creation Process with Verification warning
 
     As a user,
-    I want to go through the entire process of creating a position with optional edits,
+    I want to go through the entire process of creating a position with edits,
     So that I can ensure all steps function correctly in sequence.
 
     Background:
         Given the user is logged in
         And the user is on the home page
 
-    Scenario Outline: Complete position creation process with optional edits
+    Scenario Outline: Complete position creation process with edits, gets verification warning, and undoes changes
         # Starting the process from the home page
         When the user presses "Create new direct report" on the home page org chart
         Then they are taken to the job profile selection step

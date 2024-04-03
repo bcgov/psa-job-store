@@ -48,8 +48,7 @@ Then('they proceed to the profile editing step', () => {
 });
 
 Then('they proceed to the review changes step', () => {
-  // Check for a unique element on the review changes page
-  // Replace 'unique-element-selector' with an actual selector for an element unique to this page
+  cy.get('[data-testid="next-button"]').click();
   cy.get('[data-testid="review-changes-page"]').should('be.visible');
 });
 
@@ -151,11 +150,13 @@ Then('they see a confirmation screen with the position number', () => {
 When('the user makes edits in significant fields', () => {
   cy.get('[data-testid="remove-accountability-7"]').click();
   cy.get('[data-testid="remove-education-8"]').click();
-  cy.get('[data-testid="remove-job-experience-2"]').click();
+  cy.get('[data-testid="remove-job-experience-1"]').click(); // 2 is non-significant
 });
 
 Then('proceeds to next step', () => {
   // Click the "Next" button
+  cy.wait(500);
+  cy.get('[data-testid="next-button"]', { timeout: 10000 }).should('not.be.disabled');
   cy.get('[data-testid="next-button"]').click();
 });
 
@@ -171,13 +172,17 @@ Then('it contains a warning message with links to the edit form', () => {
     'Some of your amendments to the generic profile require verification.',
   );
 
+  cy.get('[data-testid="verification-warning-message"]').should('contain.text', 'Changes in Accountabilities');
+  cy.get('[data-testid="verification-warning-message"]').should('contain.text', 'Changes in Education');
+  cy.get('[data-testid="verification-warning-message"]').should('contain.text', 'Changes in Job Experience');
+
   // Check for the presence of the edit form link
   cy.get('[data-testid="edit-form-link"]').should('be.visible');
 });
 
 When('the user clicks the link in the warning message', () => {
   // Click the edit form link
-  cy.get('[data-testid="edit-form-link"]').click();
+  cy.get('[data-testid="edit-form-link"]').find('li').first().find('a').click();
 });
 
 Then('they are taken to the edit form', () => {
@@ -188,7 +193,7 @@ Then('they are taken to the edit form', () => {
 When('the user undoes previous significant changes', () => {
   cy.get('[data-testid="undo-remove-accountability-7"]').click();
   cy.get('[data-testid="undo-remove-education-8"]').click();
-  cy.get('[data-testid="undo-remove-job-experience-2"]').click();
+  cy.get('[data-testid="undo-remove-job-experience-1"]').click();
 });
 
 Then('the user sees the screen with "Generate position number button"', () => {

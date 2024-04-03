@@ -411,7 +411,12 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         verification, once submitted. There are no other steps required, just look for our followup
                         response.
                       </Paragraph>
-                      <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
+                      <Button
+                        type="primary"
+                        onClick={handleOk}
+                        loading={submitPositionRequestIsLoading}
+                        data-testid="submit-for-verification-button"
+                      >
                         Submit for verification
                       </Button>
                     </Card>
