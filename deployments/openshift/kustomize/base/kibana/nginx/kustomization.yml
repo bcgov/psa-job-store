@@ -4,4 +4,5 @@ resources:
 - deployment.yml
 - service.yml
 - np.yml
+- cm.yml
 - route.yml

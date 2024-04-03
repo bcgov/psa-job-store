@@ -18,6 +18,7 @@ spec:
             containers:
                 - name: nginx-auth-rp
                   image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/nginx-auth-rp:develop-latest
+                  imagePullPolicy: Always
                   resources:
                       limits:
                           cpu: 50m
@@ -26,4 +27,30 @@ spec:
                           cpu: 10m
                           memory: 50Mi
                   ports:
-                      - containerPort: 8080
+                      - containerPort: 8081
+                  env:
+                  - name: DISCOVERY
+                    valueFrom:
+                      configMapKeyRef:
+                        name: nginx-config
+                        key: DISCOVERY
+                  - name: CLIENT_ID
+                    valueFrom:
+                      secretKeyRef:
+                        name: nginx-secrets
+                        key: CLIENT_ID
+                  - name: CLIENT_SECRET
+                    valueFrom:
+                      secretKeyRef:
+                        name: nginx-secrets
+                        key: CLIENT_SECRET
+                  - name: REFRESH_SESSION_INTERVAL
+                    valueFrom:
+                      configMapKeyRef:
+                        name: nginx-config
+                        key: REFRESH_SESSION_INTERVAL
+                  - name: ACCESS_TOKEN_EXPIRES_IN
+                    valueFrom:
+                      configMapKeyRef:
+                        name: nginx-config
+                        key: ACCESS_TOKEN_EXPIRES_IN

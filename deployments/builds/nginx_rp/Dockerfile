@@ -1,12 +1,19 @@
 # Use OpenResty's Alpine image as a parent image
 FROM openresty/openresty:alpine
 
+# Declare environment variables (optionally set default values)
+ENV DISCOVERY=$KEYCLOAK_REALM_URL
+ENV CLIENT_ID=$KEYCLOAK_CLIENT_ID_PRIVATE
+ENV CLIENT_SECRET=$KEYCLOAK_CLIENT_SECRET
+ENV REFRESH_SESSION_INTERVAL=$REFRESH_SESSION_INTERVAL
+ENV ACCESS_TOKEN_EXPIRES_IN=$ACCESS_TOKEN_EXPIRES_IN
+
 # Set working directory inside the container
 WORKDIR /usr/local/openresty/nginx/conf
 
 RUN apk add openssl
 
-run apk add git
+RUN apk add git
 
 RUN apk add ca-certificates
 
@@ -32,16 +39,15 @@ RUN luarocks install lua-resty-session
 RUN luarocks install lua-resty-jwt
 RUN luarocks install lua-resty-openidc
 
+# install for envsubst
+RUN apk add --no-cache gettext
+
 # Remove default NGINX configuration files
 RUN rm -f /etc/nginx/conf.d/*
 
 COPY nginx.conf /usr/local/openresty/nginx/conf
+COPY nginx.serv.conf /etc/nginx/conf.d/nginx.serv.conf
 
-# Copy your custom NGINX configuration into the container
-COPY nginx.serv.conf /etc/nginx/conf.d/nginx.conf
-# ... (previous steps)
-
-# Create necessary directories and set appropriate permissions
 
 RUN mkdir -p /var/run/openresty \
     && chgrp -R 0 /var/run/openresty \
@@ -59,8 +65,15 @@ RUN mkdir -p /usr/local/openresty/nginx/logs \
     && chgrp -R 0 /usr/local/openresty/nginx/logs \
     && chmod -R g=u /usr/local/openresty/nginx/logs
 
-# Expose port 80
+
+RUN chmod -R g=u /etc/nginx/conf.d/nginx.serv.conf
+RUN touch /etc/nginx/conf.d/nginx.conf
+RUN chmod -R g=u /etc/nginx/conf.d/nginx.conf
+
 EXPOSE 8081
 
-# Start OpenResty (which includes NGINX)
-CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
+
+# Rewrite the conf file with env vars and start the server
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]
