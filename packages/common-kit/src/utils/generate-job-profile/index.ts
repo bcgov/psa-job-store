@@ -268,7 +268,23 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
               }),
             ],
           }),
-
+          // Job Overview
+          createHeading('Program Overview'),
+          new Paragraph({
+            indent: {
+              left: 160,
+              right: 160,
+            },
+            spacing: paragraphSpacing,
+            children: [
+              new TextRun({
+                font: 'Calibri',
+                italics: true,
+                size: '12pt',
+                text: jobProfile.program_overview.value,
+              }),
+            ],
+          }),
           // Job Overview
           createHeading('Job Overview'),
           new Paragraph({
@@ -288,223 +304,267 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
           }),
 
           // Accountabilities
-          createHeading('Accountabilities'),
-          ...jobProfile.accountabilities.map(
-            (obj: Record<string, any>) =>
-              new Paragraph({
-                indent: {
-                  right: 160,
-                },
-                spacing: paragraphSpacing,
-                bullet: {
-                  level: 0,
-                },
-                children: [
-                  new TextRun({
-                    font: 'Calibri',
-                    size: '12pt',
-                    text: obj.text,
-                  }),
-                ],
-              }),
-          ),
+          createHeading('Accountabilities testing'),
+          ...jobProfile.accountabilities
+            .filter((obj: Record<string, any>) => !obj.disabled)
+            .map(
+              (obj: Record<string, any>) =>
+                new Paragraph({
+                  indent: {
+                    right: 160,
+                  },
+                  spacing: paragraphSpacing,
+                  bullet: {
+                    level: 0,
+                  },
+                  children: [
+                    new TextRun({
+                      font: 'Calibri',
+                      size: '12pt',
+                      text: obj.text,
+                    }),
+                  ],
+                }),
+            ),
           createHeading('Job Requirements'),
           ...(jobProfile.education.length > 0
             ? [
                 createHeading('Education and Experience', false),
-                ...jobProfile.education.map(
-                  (obj: Record<string, any>) =>
-                    new Paragraph({
-                      indent: {
-                        right: 160,
-                      },
-                      spacing: paragraphSpacing,
-                      bullet: {
-                        level: 0,
-                      },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj.text,
-                        }),
-                      ],
-                    }),
-                ),
+                ...jobProfile.education
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.text,
+                          }),
+                        ],
+                      }),
+                  ),
               ]
             : []),
           ...(jobProfile.job_experience.length > 0
             ? [
                 createHeading('Related Experience may include', false),
-                ...jobProfile.job_experience.map(
-                  (obj: Record<string, any>) =>
-                    new Paragraph({
-                      indent: {
-                        right: 160,
-                      },
-                      spacing: paragraphSpacing,
-                      bullet: {
-                        level: 0,
-                      },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj.text,
-                        }),
-                      ],
-                    }),
-                ),
+                ...jobProfile.job_experience
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.text,
+                          }),
+                        ],
+                      }),
+                  ),
               ]
             : []),
           ...(jobProfile.professional_registration_requirements.length > 0
             ? [
                 createHeading('Professional Registration Requirements', false),
-                ...jobProfile.professional_registration_requirements.map(
-                  (obj: Record<string, any>) =>
-                    new Paragraph({
-                      indent: {
-                        right: 160,
-                      },
-                      spacing: paragraphSpacing,
-                      bullet: {
-                        level: 0,
-                      },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj.value,
-                        }),
-                      ],
-                    }),
-                ),
+                ...jobProfile.professional_registration_requirements
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.value,
+                          }),
+                        ],
+                      }),
+                  ),
               ]
             : []),
           ...(jobProfile.preferences.length > 0
             ? [
                 createHeading('Preferences', false),
-                ...jobProfile.preferences.map(
-                  (obj: Record<string, any>) =>
-                    new Paragraph({
-                      indent: {
-                        right: 160,
-                      },
-                      spacing: paragraphSpacing,
-                      bullet: {
-                        level: 0,
-                      },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj.value,
-                        }),
-                      ],
-                    }),
-                ),
+                ...jobProfile.preferences
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.value,
+                          }),
+                        ],
+                      }),
+                  ),
               ]
             : []),
           ...(jobProfile.knowledge_skills_abilities.length > 0
             ? [
                 createHeading('Knowledge, Skills and Abilities', false),
-                ...jobProfile.knowledge_skills_abilities.map(
-                  (obj: Record<string, any>) =>
-                    new Paragraph({
-                      indent: {
-                        right: 160,
-                      },
-                      spacing: paragraphSpacing,
-                      bullet: {
-                        level: 0,
-                      },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj.value,
-                        }),
-                      ],
-                    }),
-                ),
+                ...jobProfile.knowledge_skills_abilities
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.value,
+                          }),
+                        ],
+                      }),
+                  ),
               ]
             : []),
           ...(jobProfile.willingness_statements.length > 0
             ? [
                 createHeading('Willingness statements or provisos', false),
-                ...jobProfile.willingness_statements.map(
-                  (obj: Record<string, any>) =>
-                    new Paragraph({
-                      indent: {
-                        right: 160,
-                      },
-                      spacing: paragraphSpacing,
-                      bullet: {
-                        level: 0,
-                      },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj.value,
-                        }),
-                      ],
-                    }),
-                ),
+                ...jobProfile.willingness_statements
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.value,
+                          }),
+                        ],
+                      }),
+                  ),
               ]
             : []),
 
           ...(jobProfile.security_screenings.length > 0
             ? [
                 createHeading('Security Screenings', false),
-                ...jobProfile.security_screenings.map(
-                  (obj: Record<string, any>) =>
-                    new Paragraph({
-                      indent: {
-                        right: 160,
-                      },
-                      spacing: paragraphSpacing,
-                      bullet: {
-                        level: 0,
-                      },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj.text,
-                        }),
-                      ],
-                    }),
-                ),
+                ...jobProfile.security_screenings
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.text,
+                          }),
+                        ],
+                      }),
+                  ),
+              ]
+            : []),
+          ...(jobProfile.optional_requirements.length > 0
+            ? [
+                createHeading('Optional Requirements', false),
+                ...jobProfile.optional_requirements
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.value,
+                          }),
+                        ],
+                      }),
+                  ),
               ]
             : []),
           createHeading('Indigenous Relations and Behavioural Competencies'),
 
-          ...jobProfile.behavioural_competencies.map(
-            (obj: Record<string, any>) =>
-              new Paragraph({
-                indent: {
-                  right: 160,
-                },
-                spacing: paragraphSpacing,
-                bullet: {
-                  level: 0,
-                },
-                children: [
-                  new TextRun({
-                    bold: true,
-                    font: 'Calibri',
-                    size: '12pt',
-                    text: `${obj.behavioural_competency.name} `,
-                  }),
-                  new TextRun({
-                    font: 'Calibri',
-                    size: '12pt',
-                    text: obj.behavioural_competency.description,
-                  }),
-                ],
-              }),
-          ),
+          ...jobProfile.behavioural_competencies
+            .filter((obj: Record<string, any>) => !obj.disabled)
+            .map(
+              (obj: Record<string, any>) =>
+                new Paragraph({
+                  indent: {
+                    right: 160,
+                  },
+                  spacing: paragraphSpacing,
+                  bullet: {
+                    level: 0,
+                  },
+                  children: [
+                    new TextRun({
+                      bold: true,
+                      font: 'Calibri',
+                      size: '12pt',
+                      text: `${obj.behavioural_competency.name} `,
+                    }),
+                    new TextRun({
+                      font: 'Calibri',
+                      size: '12pt',
+                      text: obj.behavioural_competency.description,
+                    }),
+                  ],
+                }),
+            ),
         ],
         footers: {
           default: new Footer({
