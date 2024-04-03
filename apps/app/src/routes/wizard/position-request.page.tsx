@@ -289,7 +289,7 @@ export const PositionRequestPage = () => {
                       ).format('MMM d, YYYY')}`}
                     />
 
-                    <Row justify="center" style={{ padding: '0 1rem' }}>
+                    <Row justify="center" style={{ padding: '0 1rem' }} data-testid="verification-success-message">
                       <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
                         <Alert
                           message="We have received your verification request. We are working on the request and will respond. Depending on the information that needs to be reviewed, we will respond as quickly as possible."

@@ -5,9 +5,9 @@ export interface SiderNavProps {
   items: Omit<SiderNavItemProps, 'collapsed'>[];
 }
 
-export const SiderNav = ({ collapsed, items }: SiderNavProps) => {
+export const SiderNav = ({ collapsed, items, ...props }: SiderNavProps) => {
   return (
-    <div style={{ width: '100%', overflowX: 'clip' }}>
+    <div style={{ width: '100%', overflowX: 'clip' }} {...props}>
       {/* TODO Loop */}
       {items.map(({ icon, title, to, hideTitle }) => (
         <SiderNavItem collapsed={collapsed} icon={icon} key={title} title={title} to={to} hideTitle={hideTitle} />

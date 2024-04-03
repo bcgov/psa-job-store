@@ -145,6 +145,7 @@ export class CrmService {
   }
 
   async createIncident(data: IncidentCreateUpdateInput) {
+    // console.log('createIncident: ', `${this.configService.get('CRM_URL')}/${Endpoint.Incidents}`, data, this.headers);
     const response = await firstValueFrom(
       this.httpService
         .post(`${this.configService.get('CRM_URL')}/${Endpoint.Incidents}`, data, {
@@ -187,6 +188,35 @@ export class CrmService {
     const response = await firstValueFrom(
       this.httpService
         .get(`${this.configService.get('CRM_URL')}/${Endpoint.Incidents}/${id}`, { headers: this.headers })
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
+  async updateIncidentStatus(incidentId: number, newStatus: number) {
+    const updateHeaders = this.headers;
+    updateHeaders.set('X-HTTP-Method-Override', 'PATCH');
+
+    const data = {
+      statusWithType: {
+        status: {
+          id: newStatus,
+        },
+      },
+    };
+
+    const response = await firstValueFrom(
+      this.httpService
+        .post(`${this.configService.get('CRM_URL')}/${Endpoint.Incidents}/${incidentId}`, data, {
+          headers: updateHeaders,
+        })
         .pipe(
           map((r) => r.data),
           retry(3),

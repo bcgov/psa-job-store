@@ -146,6 +146,7 @@ export class PositionRequestApiService {
 
     try {
       if (positionRequest.position_number == null) {
+        // in testmode, we can skip the peoplesoft call to create position
         const position =
           process.env.TEST_ENV === 'true' ? { positionNbr: '1234' } : await this.createPositionForPositionRequest(id);
         if (position.positionNbr.length > 0) {
@@ -1078,5 +1079,9 @@ export class PositionRequestApiService {
     const position = await this.peoplesoftService.createPosition(data);
 
     return position;
+  }
+
+  async updatePositionRequestStatus(id: number, status: number) {
+    return await this.crmService.updateIncidentStatus(id, status);
   }
 }

@@ -59,21 +59,21 @@ export const HomePage = () => {
               <div>
                 <Text>My Positions</Text>
                 <br></br>
-                <Text strong style={{ fontSize: '140%', float: 'right' }}>
+                <Text strong style={{ fontSize: '140%', float: 'right' }} data-testid="total-positions">
                   {total}
                 </Text>
               </div>
               <div>
                 <Text>In Review</Text>
                 <br></br>
-                <Text strong style={{ fontSize: '140%', float: 'right' }}>
+                <Text strong style={{ fontSize: '140%', float: 'right' }} data-testid="in-review-positions">
                   {inReview}
                 </Text>
               </div>
               <div>
                 <Text>Completed</Text>
                 <br></br>
-                <Text strong style={{ fontSize: '140%', float: 'right' }}>
+                <Text strong style={{ fontSize: '140%', float: 'right' }} data-testid="completed-positions">
                   {completed}
                 </Text>
               </div>
@@ -83,6 +83,7 @@ export const HomePage = () => {
       </HeaderWrapper>
       <ContentWrapper>
         <MyPositionsTable
+          data-testid="recent-positions"
           style={{ paddingTop: '1rem' }}
           allowSorting={false}
           showPagination={false}
@@ -119,6 +120,7 @@ export const HomePage = () => {
           }
         >
           <OrgChartWrapped
+            data-testid="org-chart"
             selectedDepartment={profileData?.profile.department_id ?? null}
             profileHasNoDepartment={profileData?.profile.department_id === null ? true : false}
           />
