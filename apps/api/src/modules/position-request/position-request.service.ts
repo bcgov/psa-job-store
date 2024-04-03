@@ -912,7 +912,7 @@ export class PositionRequestApiService {
       },
       // Need to determine usage of this block
       category: {
-        id: 1460,
+        id: 1930,
       },
       severity: {
         lookupName: '4 - Routine',
