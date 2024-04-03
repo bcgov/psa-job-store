@@ -1,0 +1,13 @@
+
+kind: Service
+apiVersion: v1
+metadata:
+    name: nginx-auth-rp
+    labels:
+        "app.kubernetes.io/part-of": ek-stack
+spec:
+    selector:
+        app: nginx-auth-rp
+    ports:
+        - name: http
+          port: 8081

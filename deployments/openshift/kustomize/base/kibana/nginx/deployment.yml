@@ -1,0 +1,56 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+    name: nginx-auth-rp
+    labels:
+        "app.kubernetes.io/part-of": ek-stack
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: nginx-auth-rp
+    template:
+        metadata:
+            labels:
+                app: nginx-auth-rp
+                name: nginx-auth-rp
+        spec:
+            containers:
+                - name: nginx-auth-rp
+                  image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/nginx-auth-rp:develop-latest
+                  imagePullPolicy: Always
+                  resources:
+                      limits:
+                          cpu: 50m
+                          memory: 100Mi
+                      requests:
+                          cpu: 10m
+                          memory: 50Mi
+                  ports:
+                      - containerPort: 8081
+                  env:
+                  - name: DISCOVERY
+                    valueFrom:
+                      configMapKeyRef:
+                        name: nginx-config
+                        key: DISCOVERY
+                  - name: CLIENT_ID
+                    valueFrom:
+                      secretKeyRef:
+                        name: nginx-secrets
+                        key: CLIENT_ID
+                  - name: CLIENT_SECRET
+                    valueFrom:
+                      secretKeyRef:
+                        name: nginx-secrets
+                        key: CLIENT_SECRET
+                  - name: REFRESH_SESSION_INTERVAL
+                    valueFrom:
+                      configMapKeyRef:
+                        name: nginx-config
+                        key: REFRESH_SESSION_INTERVAL
+                  - name: ACCESS_TOKEN_EXPIRES_IN
+                    valueFrom:
+                      configMapKeyRef:
+                        name: nginx-config
+                        key: ACCESS_TOKEN_EXPIRES_IN
