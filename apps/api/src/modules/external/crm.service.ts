@@ -164,7 +164,7 @@ export class CrmService {
   }
 
   async updateIncident(id: number, data: IncidentCreateUpdateInput) {
-    const updateHeaders = this.headers;
+    const updateHeaders = new AxiosHeaders(this.headers);
     updateHeaders.set('X-HTTP-Method-Override', 'PATCH');
 
     const response = await firstValueFrom(
@@ -201,7 +201,7 @@ export class CrmService {
   }
 
   async updateIncidentStatus(incidentId: number, newStatus: number) {
-    const updateHeaders = this.headers;
+    const updateHeaders = new AxiosHeaders(this.headers);
     updateHeaders.set('X-HTTP-Method-Override', 'PATCH');
 
     const data = {
