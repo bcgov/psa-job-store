@@ -69,6 +69,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   tableTitle = 'My Positions',
   mode = null,
   onDataAvailable,
+  ...props
 }) => {
   const [trigger, { data, isLoading, error: fetchError, isFetching }] = useLazyGetPositionRequestsQuery();
   const [deletePositionRequest] = useDeletePositionRequestMutation();
@@ -712,7 +713,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   // console.log('data?.positionRequests: ', data?.positionRequests);
 
   return (
-    <div style={style}>
+    <div style={style} {...props}>
       {error === null ? (
         <>
           <Card className="tableHeader">
@@ -756,7 +757,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                 };
               }}
               rowClassName="job-position-row"
-              className="tableWithHeader"
+              id="job-positions-table"
+              className="tableWithHeader job-positions-table"
               columns={columns}
               dataSource={data?.positionRequests}
               rowKey="id"

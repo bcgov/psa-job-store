@@ -3,4 +3,6 @@ kind: Kustomization
 resources:
 - deployment.yml
 - service.yml
-- ./nginx
+- np.yml
+- cm.yml
+- route.yml

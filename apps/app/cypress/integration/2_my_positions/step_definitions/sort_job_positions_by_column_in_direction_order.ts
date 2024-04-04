@@ -42,7 +42,7 @@ When('the user changes the items per page to 10', () => {
     .contains('div', '10 / page') // Use 'div' if the options are within div elements
     .click();
 
-  cy.get('.ant-table-row').should('have.length', 3);
+  cy.get('.ant-table-row').should('have.length', 4);
   cy.get('.ant-spin-spinning', { timeout: 10000 }).should('not.exist');
 });
 
@@ -51,25 +51,30 @@ Then('job positions are sorted by {string} in {string} order correctly', (column
   let expectedOrder: any[];
 
   if (column === 'Job Title' && direction === 'ascending') {
-    expectedOrder = ['Data Scientist', 'Project Manager', 'Senior Analyst'];
+    expectedOrder = ['Data Scientist', 'Project Manager', 'Project Manager - Additional info step', 'Senior Analyst'];
   } else if (column === 'Job Title' && direction === 'descending') {
-    expectedOrder = ['Senior Analyst', 'Project Manager', 'Data Scientist'];
+    expectedOrder = ['Senior Analyst', 'Project Manager - Additional info step', 'Project Manager', 'Data Scientist'];
   } else if (column === 'Status' && direction === 'ascending') {
-    expectedOrder = ['Senior Analyst', 'Project Manager', 'Data Scientist'];
+    expectedOrder = ['Project Manager - Additional info step', 'Senior Analyst', 'Project Manager', 'Data Scientist'];
   } else if (column === 'Status' && direction === 'descending') {
-    expectedOrder = ['Data Scientist', 'Project Manager', 'Senior Analyst'];
+    expectedOrder = ['Data Scientist', 'Project Manager', 'Project Manager - Additional info step', 'Senior Analyst'];
   } else if (column === 'Class' && direction === 'ascending') {
-    expectedOrder = ['Senior Analyst', 'Project Manager', 'Data Scientist'];
+    expectedOrder = ['Senior Analyst', 'Project Manager', 'Project Manager - Additional info step', 'Data Scientist'];
   } else if (column === 'Class' && direction === 'descending') {
-    expectedOrder = ['Data Scientist', 'Project Manager', 'Senior Analyst'];
+    expectedOrder = ['Data Scientist', 'Project Manager', 'Project Manager - Additional info step', 'Senior Analyst'];
   } else if (column === 'Position #' && direction === 'ascending') {
-    expectedOrder = ['Project Manager', 'Data Scientist', 'Senior Analyst'];
+    expectedOrder = ['Project Manager', 'Data Scientist', 'Project Manager - Additional info step', 'Senior Analyst'];
   } else if (column === 'Position #' && direction === 'descending') {
-    expectedOrder = ['Project Manager', 'Data Scientist', 'Senior Analyst'].reverse();
+    expectedOrder = [
+      'Project Manager',
+      'Data Scientist',
+      'Senior Analyst',
+      'Project Manager - Additional info step',
+    ].reverse();
   } else if (column === 'Submission ID' && direction === 'ascending') {
-    expectedOrder = ['Senior Analyst', 'Project Manager', 'Data Scientist'];
+    expectedOrder = ['Senior Analyst', 'Project Manager', 'Project Manager - Additional info step', 'Data Scientist'];
   } else if (column === 'Submission ID' && direction === 'descending') {
-    expectedOrder = ['Data Scientist', 'Project Manager', 'Senior Analyst'];
+    expectedOrder = ['Data Scientist', 'Project Manager', 'Project Manager - Additional info step', 'Senior Analyst'];
   } else if (column === 'Modified at' && direction === 'ascending') {
     return;
     // expectedOrder = ['Senior Analyst', 'Data Scientist', 'Project Manager', ];

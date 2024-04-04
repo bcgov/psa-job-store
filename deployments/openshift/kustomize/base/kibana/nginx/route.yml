@@ -5,9 +5,9 @@ metadata:
 spec:
   to:
     kind: Service
-    name: kibana
+    name: nginx-auth-rp
   port:
-    targetPort: 5601
+    targetPort: 8081
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect

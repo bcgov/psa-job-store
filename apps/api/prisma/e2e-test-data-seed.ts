@@ -1495,10 +1495,10 @@ async function seed() {
     role_type_id: null,
     state: 'PUBLISHED',
     type: 'CORPORATE',
-    title: 'Strategic HR Manager',
+    title: 'Strategic HR Analyst Manager',
     number: 210,
     overview:
-      'Strategic HR Manager to lead multiple programs for our HR practices and objectives that will provide an employee-oriented, high-performance culture emphasizing empowerment, quality, productivity, and standards.',
+      'Strategic HR Analyst Manager to lead multiple programs for our HR practices and objectives that will provide an employee-oriented, high-performance culture emphasizing empowerment, quality, productivity, and standards.',
     accountabilities: [
       {
         text: 'Develop and implement HR strategies and initiatives aligned with the overall business strategy.',

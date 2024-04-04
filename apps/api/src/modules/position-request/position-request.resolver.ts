@@ -163,4 +163,26 @@ export class PositionRequestApiResolver {
   async getpositionRequestSubmittedBy() {
     return this.positionRequestService.getPositionRequestSubmittedBy();
   }
+
+  @Mutation(() => Boolean)
+  async updatePositionRequestStatus(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('status', { type: () => Int }) status: number,
+    @CurrentUser() user: Express.User,
+  ) {
+    // This is only for e2e testing to simulate classifications changing status of sercie request
+    // check for test node env flag, if not true, return false
+    if (process.env.TEST_ENV !== 'true') {
+      return false;
+    }
+
+    // get CRM service id from position request id from db
+
+    const positionRequest = await this.positionRequestService.getPositionRequest(id, user.id, ['classification']);
+
+    const crmId = positionRequest.crm_id;
+
+    await this.positionRequestService.updatePositionRequestStatus(crmId, status);
+    return true;
+  }
 }

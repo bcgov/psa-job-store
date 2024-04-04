@@ -88,6 +88,22 @@ services:
           cpus: '2.0'
         reservations:
           cpus: '1.0'
+  nginx_rp: #optional, not required for running in dockre. this image must be built seperately
+    env_file:
+      - .env
+    build:
+      context: ../../deployments/builds/nginx_rp/
+      args:
+        - DISCOVERY=${KEYCLOAK_REALM_URL}
+        - CLIENT_ID=${KEYCLOAK_CLIENT_ID_PRIVATE}
+        - CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+        - REFRESH_SESSION_INTERVAL=${REFRESH_SESSION_INTERVAL}
+        - ACCESS_TOKEN_EXPIRES_IN=${ACCESS_TOKEN_EXPIRES_IN}
+    container_name: nginx_rp
+    ports:
+      - '8081:8081'
+    networks:
+      elastic:
 networks:
   elastic:
 volumes:

@@ -32,6 +32,7 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
   onNodeSelected,
   onOrgChartLoad,
   profileHasNoDepartment = false,
+  ...props
 }) => {
   const [orgChart, setOrgChart] = useState<OrgChartData>(orgChartSnapshot ?? DEFAULT_ORG_CHART);
   const [trigger, { data, isFetching, isLoading }] = useLazyGetOrgChartQuery();
@@ -57,32 +58,37 @@ const OrgChartWrapped: React.FC<OrgChartRendererProps> = ({
     onOrgChartLoad?.(orgChart);
   }, [orgChart, onOrgChartLoad]);
 
-  return isFetching || isLoading ? (
-    <LoadingComponent data-testid="org-chart-loading" height="100%"></LoadingComponent>
-  ) : orgChart.edges.length > 0 ? (
-    <OrgChart
-      disableCreateNewPosition={orgChartSnapshot != null}
-      edges={orgChart.edges}
-      nodes={orgChart.nodes}
-      selectedDepartment={selectedDepartment}
-      onCreateNewPosition={onCreateNewPosition}
-      highlightPositionId={highlightPositionId}
-      extraNodeInfo={extraNodeInfo}
-      allowSelection={allowSelection}
-      onNodeSelected={onNodeSelected}
-    />
-  ) : (
-    <Space style={{ height: '100%', width: '100%', justifyContent: 'center' }} align="center">
-      <Empty
-        description={
-          profileHasNoDepartment
-            ? 'You have not been assigned to a department yet. Please select a department from "All Organizations" to get started.'
-            : selectedDepartment == null
-              ? 'Select a department to get started'
-              : 'No positions exist in the selected department'
-        }
-      />
-    </Space>
+  return (
+    <div {...props} style={{ width: '100%', height: '100%' }}>
+      {' '}
+      {isFetching || isLoading ? (
+        <LoadingComponent data-testid="org-chart-loading" height="100%"></LoadingComponent>
+      ) : orgChart.edges.length > 0 ? (
+        <OrgChart
+          disableCreateNewPosition={orgChartSnapshot != null}
+          edges={orgChart.edges}
+          nodes={orgChart.nodes}
+          selectedDepartment={selectedDepartment}
+          onCreateNewPosition={onCreateNewPosition}
+          highlightPositionId={highlightPositionId}
+          extraNodeInfo={extraNodeInfo}
+          allowSelection={allowSelection}
+          onNodeSelected={onNodeSelected}
+        />
+      ) : (
+        <Space style={{ height: '100%', width: '100%', justifyContent: 'center' }} align="center">
+          <Empty
+            description={
+              profileHasNoDepartment
+                ? 'You have not been assigned to a department yet. Please select a department from "All Organizations" to get started.'
+                : selectedDepartment == null
+                  ? 'Select a department to get started'
+                  : 'No positions exist in the selected department'
+            }
+          />
+        </Space>
+      )}
+    </div>
   );
 };
 
