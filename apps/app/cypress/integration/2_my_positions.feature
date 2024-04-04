@@ -53,7 +53,7 @@ Feature: Manage and Display Position Requests
             | Modified at   | descending |
 
     Scenario: User copies the position number
-        When the user hovers over the position row with id "3"
+        When the user hovers over the position row with id "4"
         And the user clicks the copy button next to the position number
         And a success message "Position number copied!" should be displayed
 

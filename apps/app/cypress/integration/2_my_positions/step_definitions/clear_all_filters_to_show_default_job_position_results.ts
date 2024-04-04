@@ -29,5 +29,5 @@ Then('all filters should be cleared and the default job position results should 
   cy.get('[data-testid="filters-section"]').should('not.exist');
   cy.get('[data-testid="filters-tags-section"]').should('not.exist');
 
-  cy.get('.ant-table-footer > div').should('have.text', 'Showing 1-2 of 3 results');
+  cy.get('.ant-table-footer > div').should('have.text', 'Showing 1-2 of 4 results');
 });

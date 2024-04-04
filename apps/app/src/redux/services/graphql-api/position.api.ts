@@ -43,6 +43,8 @@ export interface GetPositionArgs {
 
 export interface GetPositionResponseArgs {
   positionNumber: string;
+  uniqueKey?: string;
+  suppressGlobalError?: boolean;
 }
 
 export const positionApi = graphqlApi.injectEndpoints({
@@ -83,6 +85,8 @@ export const positionApi = graphqlApi.injectEndpoints({
           `,
           variables: {
             positionNumber: args.positionNumber,
+            uniqueKey: args.uniqueKey,
+            suppressGlobalError: args.suppressGlobalError,
           },
         };
       },

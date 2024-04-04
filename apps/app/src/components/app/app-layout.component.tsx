@@ -152,6 +152,7 @@ export const AppLayout = () => {
                         collapsed={collapsed}
                         icon={
                           <PlusCircleFilled
+                            data-testid="create-new-position-btn-collapsed"
                             role="button"
                             aria-label="Create new position"
                             style={{ fontSize: '1.25rem', color: '#0057ad' }}
@@ -165,13 +166,14 @@ export const AppLayout = () => {
                     ) : (
                       <div style={{ textAlign: 'center', padding: '10px 0' }}>
                         <Link to="/my-positions/create">
-                          <Button type="primary" tabIndex={-1}>
+                          <Button type="primary" tabIndex={-1} data-testid="create-new-position-btn-expanded">
                             Create new position
                           </Button>
                         </Link>
                       </div>
                     )}
                     <SiderNav
+                      data-testid="menu-options"
                       collapsed={collapsed}
                       items={[
                         {
@@ -320,6 +322,7 @@ export const AppLayout = () => {
               </div>
               <div style={{ borderTop: '1px solid #CCC', flexShrink: 0 }}>
                 <Button
+                  data-testid="menu-toggle-btn"
                   aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
                   icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
                   onClick={() => setCollapsed(!collapsed)}
