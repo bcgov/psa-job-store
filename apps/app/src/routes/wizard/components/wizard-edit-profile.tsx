@@ -3039,6 +3039,9 @@ const WizardEditProfile = forwardRef(
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <>
+                        <Typography.Text type="secondary">
+                          * denotes an Indigenous Behavioural Competency
+                        </Typography.Text>
                         <div data-testid="behavioral-competencies-selector">
                           <BehaviouralComptencyPicker
                             onAdd={behavioural_competencies_append}
@@ -3046,9 +3049,6 @@ const WizardEditProfile = forwardRef(
                             behavioural_competencies_fields={behavioural_competencies_fields}
                           />
                         </div>
-                        <Typography.Text type="secondary">
-                          * denotes an Indigenous Behavioural Competency
-                        </Typography.Text>
 
                         <List
                           style={{ marginTop: '7px' }}
