@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from 'react';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import ContentWrapper from '../home/components/content-wrapper.component';
@@ -11,11 +10,11 @@ export const TotalCompArchivedProfilesPage = () => {
   // console.log('ministriesData: ', ministriesData);
   // const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
 
-  const [hasData, setHasData] = useState(false);
+  // const [hasData, setHasData] = useState(false);
 
-  const handleDataAvailability = (isDataAvailable: boolean) => {
-    setHasData(isDataAvailable);
-  };
+  // const handleDataAvailability = (isDataAvailable: boolean) => {
+  //   setHasData(isDataAvailable);
+  // };
 
   // if (!ministriesData) return <LoadingSpinnerWithMessage />;
 
@@ -40,7 +39,7 @@ export const TotalCompArchivedProfilesPage = () => {
           itemsPerPage={10}
           tableTitle={'Job profiles'}
           style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', flexGrow: 1 }}
-          onDataAvailable={handleDataAvailability}
+          // onDataAvailable={handleDataAvailability}
         ></TotalCompProfilesTable>
       </ContentWrapper>
     </>
