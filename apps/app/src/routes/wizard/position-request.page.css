@@ -2,3 +2,13 @@
     height:auto !important;
     line-height: normal !important;
 }
+
+.wizard-edit-control-bar {
+    top: 46px;
+}
+
+.ant-tabs .ant-tabs-nav{
+    position: sticky;
+    top: 0;  
+    z-index: 999;
+}
