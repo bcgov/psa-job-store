@@ -580,17 +580,6 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   // // Handler to be called when the mouse leaves a row
   // const handleMouseLeave = () => setHoveredRowKey(null);
 
-  console.log('data: ', data);
-  console.log(
-    'datasource: ',
-    data
-      ? 'jobProfilesDrafts' in data
-        ? data.jobProfilesDrafts
-        : 'jobProfilesArchived' in data
-          ? data.jobProfilesArchived
-          : data.jobProfiles
-      : undefined,
-  );
   if (isLoading) return <LoadingSpinnerWithMessage />;
 
   return (
