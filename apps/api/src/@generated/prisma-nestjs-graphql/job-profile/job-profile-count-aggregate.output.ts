@@ -80,5 +80,8 @@ export class JobProfileCountAggregate {
   total_comp_create_form_misc!: number;
 
   @Field(() => Int, { nullable: false })
+  is_archived!: number;
+
+  @Field(() => Int, { nullable: false })
   _all!: number;
 }

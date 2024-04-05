@@ -87,6 +87,9 @@ export class JobProfileGroupBy {
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc?: any;
 
+  @Field(() => Boolean, { nullable: false })
+  is_archived!: boolean;
+
   @Field(() => JobProfileCountAggregate, { nullable: true })
   _count?: JobProfileCountAggregate;
 

@@ -85,6 +85,9 @@ export class JobProfileOrderByWithAggregationInput {
   @Field(() => SortOrderInput, { nullable: true })
   total_comp_create_form_misc?: SortOrderInput;
 
+  @Field(() => SortOrder, { nullable: true })
+  is_archived?: keyof typeof SortOrder;
+
   @Field(() => JobProfileCountOrderByAggregateInput, { nullable: true })
   _count?: JobProfileCountOrderByAggregateInput;
 

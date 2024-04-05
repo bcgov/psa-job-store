@@ -95,4 +95,7 @@ export class JobProfileScalarWhereInput {
 
   @Field(() => JsonFilter, { nullable: true })
   total_comp_create_form_misc?: JsonFilter;
+
+  @Field(() => BoolFilter, { nullable: true })
+  is_archived?: BoolFilter;
 }

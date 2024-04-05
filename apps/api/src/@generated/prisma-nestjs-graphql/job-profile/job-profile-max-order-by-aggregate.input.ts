@@ -48,4 +48,7 @@ export class JobProfileMaxOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   overview?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  is_archived?: keyof typeof SortOrder;
 }

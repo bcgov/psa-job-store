@@ -79,5 +79,8 @@ export class JobProfileCountAggregateInput {
   total_comp_create_form_misc?: true;
 
   @Field(() => Boolean, { nullable: true })
+  is_archived?: true;
+
+  @Field(() => Boolean, { nullable: true })
   _all?: true;
 }
