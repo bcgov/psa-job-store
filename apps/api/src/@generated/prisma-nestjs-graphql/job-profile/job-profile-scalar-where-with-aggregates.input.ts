@@ -95,4 +95,7 @@ export class JobProfileScalarWhereWithAggregatesInput {
 
   @Field(() => JsonWithAggregatesFilter, { nullable: true })
   total_comp_create_form_misc?: JsonWithAggregatesFilter;
+
+  @Field(() => BoolWithAggregatesFilter, { nullable: true })
+  is_archived?: BoolWithAggregatesFilter;
 }

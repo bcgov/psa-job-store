@@ -94,6 +94,9 @@ export class JobProfile {
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc!: any | null;
 
+  @Field(() => Boolean, { nullable: false, defaultValue: false })
+  is_archived!: boolean;
+
   @Field(() => [JobProfileBehaviouralCompetency], { nullable: true })
   behavioural_competencies?: Array<JobProfileBehaviouralCompetency>;
 

@@ -11,9 +11,10 @@ import {
   LinkOutlined,
   ReloadOutlined,
   SettingOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import { SerializedError } from '@reduxjs/toolkit';
-import { Button, Card, Col, Menu, Popover, Result, Row, Table, Tooltip } from 'antd';
+import { Button, Card, Col, Menu, Modal, Popover, Result, Row, Table, Tooltip } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
 import { ErrorResponse, Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -22,13 +23,17 @@ import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import {
+  GetJobProfilesArchivedResponse,
   GetJobProfilesDraftsResponse,
   GetJobProfilesResponse,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import {
+  useDeleteJobProfileMutation,
   useDuplicateJobProfileMutation,
+  useLazyGetJobProfilesArchivedQuery,
   useLazyGetJobProfilesDraftsQuery,
   useLazyGetJobProfilesQuery,
+  useUnarchiveJobProfileMutation,
 } from '../../../redux/services/graphql-api/job-profile.api';
 import { formatDateTime } from '../../../utils/Utils';
 
@@ -42,6 +47,7 @@ interface MyPositionsTableProps {
   itemsPerPage?: number;
   topRightComponent?: ReactNode;
   tableTitle?: string;
+  is_archived?: boolean;
   state?: string;
   onDataAvailable?: (isDataAvailable: boolean) => void;
 }
@@ -61,6 +67,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   allowSorting = true,
   showPagination = true,
   showFooter = true,
+  is_archived = false,
   style,
   itemsPerPage = 10,
   topRightComponent,
@@ -113,14 +120,20 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   };
 
   let trigger: any;
-  let data: GetJobProfilesDraftsResponse | GetJobProfilesResponse | undefined;
+  let data: GetJobProfilesDraftsResponse | GetJobProfilesResponse | GetJobProfilesArchivedResponse | undefined;
   let isLoading: boolean;
   let fetchError: ErrorResponse | SerializedError | null | undefined;
   let link: string;
   if (state === 'DRAFT') {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesDraftsQuery();
-    link = '/draft-job-profiles/';
+    if (is_archived === false) {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesDraftsQuery();
+      link = '/draft-job-profiles/';
+    } else {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesArchivedQuery();
+      link = '/archived-job-profiles/';
+    }
   } else {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesQuery();
@@ -130,9 +143,12 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   // Check if data is available and call the callback function to notify the parent component
   useEffect(() => {
     if (isLoading) return;
+
     const hasData =
+      (data && 'jobProfilesArchived' in data && data.jobProfilesArchived.length > 0) ||
       (data && 'jobProfilesDrafts' in data && data.jobProfilesDrafts.length > 0) ||
       (data && 'jobProfiles' in data && data.jobProfiles.length > 0);
+
     if (onDataAvailable) {
       onDataAvailable(hasData || hasSearched || false);
     }
@@ -158,6 +174,9 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     if (data && 'jobProfilesDrafts' in data) {
       setTotalResults(data.jobProfilesDraftsCount);
     }
+    if (data && 'jobProfilesArchived' in data) {
+      setTotalResults(data.jobProfilesArchivedCount);
+    }
     if (data && 'jobProfilesCount' in data) {
       setTotalResults(data.jobProfilesCount);
     }
@@ -170,7 +189,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       key: 'title',
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
-      render: (text: any, record: any) => <Link to={`${link}${record.id}`}>{text}</Link>,
+      render: (text: any, record: any) => <Link to={`${link}${record.id}`}>{text?.trim() || 'Untitled'}</Link>,
     },
     {
       sorter: allowSorting,
@@ -421,8 +440,10 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   // Check if the type is GetJobProfilesResponse
   if (data && 'jobProfiles' in data) {
     hasPositionRequests = data.jobProfiles && data.jobProfiles.length > 0;
-  } else {
+  } else if (data && 'jobProfilesDrafts' in data) {
     hasPositionRequests = data?.jobProfilesDrafts && data.jobProfilesDrafts.length > 0;
+  } else if (data && 'jobProfilesArchived' in data) {
+    hasPositionRequests = data?.jobProfilesArchived && data.jobProfilesArchived.length > 0;
   }
 
   const renderTableFooter = () => {
@@ -455,6 +476,9 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const [duplicateJobProfile] = useDuplicateJobProfileMutation();
+  const [deleteJobProfile] = useDeleteJobProfileMutation();
+  const [unarchiveJobProfile] = useUnarchiveJobProfileMutation();
+
   const navigate = useNavigate();
   const duplicate = async (record: any) => {
     // console.log('duplicate', record);
@@ -463,12 +487,41 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     navigate(`${link}${res.duplicateJobProfile}`);
   };
 
+  const deleteDraft = async (record: any) => {
+    Modal.confirm({
+      title: 'Delete Draft',
+      content:
+        'Are you sure you want to delete this draft? If the profile had any Position Requests linked to it, it will be archived instead.',
+      okText: 'Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        await deleteJobProfile({ jobProfileId: record.id }).unwrap();
+        updateData();
+      },
+    });
+  };
+
+  const unarchive = async (record: any) => {
+    Modal.confirm({
+      title: 'Unarchive job profile',
+      content: 'Are you sure you want to unarchive this job profile? It will appear in the drafts section',
+      okText: 'Unarchive',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        await unarchiveJobProfile({ jobProfileId: record.id }).unwrap();
+        updateData();
+      },
+    });
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getMenuContent = (_record: any) => {
     return (
       <Menu>
         <>
-          {state === 'PUBLISHED' ? (
+          {state === 'PUBLISHED' && (
             <>
               <Menu.Item key="view" icon={<EyeOutlined />}>
                 View
@@ -483,7 +536,9 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
                 Copy link
               </Menu.Item>
             </>
-          ) : (
+          )}
+
+          {state === 'DRAFT' && !is_archived && (
             <>
               <Menu.Item key="edit" icon={<EditOutlined />}>
                 Edit
@@ -497,8 +552,16 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
               <Menu.Item key="copy" icon={<LinkOutlined />}>
                 Copy link
               </Menu.Item>
-              <Menu.Item key="delete" icon={<DeleteOutlined />}>
+              <Menu.Item key="delete" icon={<DeleteOutlined />} onClick={() => deleteDraft(_record)}>
                 Delete
+              </Menu.Item>
+            </>
+          )}
+
+          {state === 'DRAFT' && is_archived && (
+            <>
+              <Menu.Item key="publish" icon={<UploadOutlined />} onClick={() => unarchive(_record)}>
+                Unarchive
               </Menu.Item>
             </>
           )}
@@ -517,6 +580,17 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   // // Handler to be called when the mouse leaves a row
   // const handleMouseLeave = () => setHoveredRowKey(null);
 
+  console.log('data: ', data);
+  console.log(
+    'datasource: ',
+    data
+      ? 'jobProfilesDrafts' in data
+        ? data.jobProfilesDrafts
+        : 'jobProfilesArchived' in data
+          ? data.jobProfilesArchived
+          : data.jobProfiles
+      : undefined,
+  );
   if (isLoading) return <LoadingSpinnerWithMessage />;
 
   return (
@@ -550,7 +624,15 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
           // }}
           className="tableWithHeader"
           columns={columns}
-          dataSource={data ? ('jobProfilesDrafts' in data ? data.jobProfilesDrafts : data.jobProfiles) : undefined}
+          dataSource={
+            data
+              ? 'jobProfilesDrafts' in data
+                ? data.jobProfilesDrafts
+                : 'jobProfilesArchived' in data
+                  ? data.jobProfilesArchived
+                  : data.jobProfiles
+              : undefined
+          }
           rowKey="id"
           pagination={
             showPagination
@@ -606,13 +688,21 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
             }}
           >
             <img src={EmptyJobPositionGraphic} alt="No positions" />
-            <div>Looks like you’re not working on anything right now.</div>
-            {/* Link button to the orgchart page */}
-            <Link to="/draft-job-profiles/create">
-              <Button type="primary" style={{ marginTop: '1rem' }}>
-                Create new profile
-              </Button>
-            </Link>
+            {is_archived ? (
+              <>
+                <div>There are no archived profiles.</div>
+              </>
+            ) : (
+              <>
+                <div>Looks like you’re not working on anything right now.</div>
+                {/* Link button to the orgchart page */}
+                <Link to="/draft-job-profiles/create">
+                  <Button type="primary" style={{ marginTop: '1rem' }}>
+                    Create new profile
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         ))}
       {error && (

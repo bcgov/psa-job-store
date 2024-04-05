@@ -26,6 +26,7 @@ export enum JobProfileScalarFieldEnum {
   optional_requirements = 'optional_requirements',
   security_screenings = 'security_screenings',
   total_comp_create_form_misc = 'total_comp_create_form_misc',
+  is_archived = 'is_archived',
 }
 
 registerEnumType(JobProfileScalarFieldEnum, { name: 'JobProfileScalarFieldEnum', description: undefined });

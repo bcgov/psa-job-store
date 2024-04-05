@@ -22,7 +22,6 @@ export const TotalCompDraftProfilesPage = () => {
     setHasData(isDataAvailable);
   };
 
-  console.log('classificationData: ', classificationData);
   if (!ministriesData || !classificationData) return <LoadingSpinnerWithMessage />;
 
   return (

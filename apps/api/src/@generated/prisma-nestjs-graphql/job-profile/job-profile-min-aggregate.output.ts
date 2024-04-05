@@ -50,4 +50,7 @@ export class JobProfileMinAggregate {
 
   @Field(() => String, { nullable: true })
   overview?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: boolean;
 }

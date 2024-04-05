@@ -19,6 +19,7 @@ import { OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
+import { TotalCompArchivedProfilesPage } from '../routes/total-comp-archived-profiles/total-comp-archived-profies.page';
 import { TotalCompCreateProfilePage } from '../routes/total-comp-create-profile/total-comp-create-profile.page';
 import { TotalCompDraftProfilesRoute } from '../routes/total-comp-draft-profiles';
 import { TotalCompDraftProfilesPage } from '../routes/total-comp-draft-profiles/total-comp-draft-profies.page';
@@ -221,6 +222,27 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 element: <TotalCompPublishedProfilesPage />,
+              },
+              {
+                path: ':id',
+                element: <TotalCompCreateProfilePage />,
+              },
+            ],
+          },
+          {
+            path: '/archived-job-profiles',
+            element: (
+              <RoleGuard requiredRole="total-compensation">
+                <TotalCompPublishedProfilesRoute />
+              </RoleGuard>
+            ),
+            handle: {
+              breadcrumb: () => 'Archived Job Profiles',
+            },
+            children: [
+              {
+                index: true,
+                element: <TotalCompArchivedProfilesPage />,
               },
               {
                 path: ':id',

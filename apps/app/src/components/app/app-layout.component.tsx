@@ -6,6 +6,7 @@ import {
   FileProtectOutlined,
   FileSearchOutlined,
   FileTextOutlined,
+  HistoryOutlined,
   HomeOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -86,6 +87,11 @@ export const AppLayout = () => {
         <Link to="/published-job-profiles">Published</Link>,
         '2',
         <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
+      ),
+      getItem(
+        <Link to="/archived-job-profiles">Archived</Link>,
+        '3',
+        <HistoryOutlined style={{ fontSize: '1.25rem' }} />,
       ),
     ]),
   ];
