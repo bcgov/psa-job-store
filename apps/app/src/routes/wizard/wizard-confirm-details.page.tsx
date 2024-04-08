@@ -682,7 +682,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                       </Row>
                     </Card>
 
-                    <Card title="Comments" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
+                    {/* <Card title="Comments" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
                       <Row justify="start">
                         <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                           <Form.Item name="comments">
@@ -715,7 +715,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                           </Form.Item>
                         </Col>
                       </Row>
-                    </Card>
+                    </Card> */}
                   </Form>
                 </Col>
               </Row>

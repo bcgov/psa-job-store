@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
@@ -5,7 +6,7 @@ import {
   ExclamationCircleFilled,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { useEffect, useState } from 'react';
@@ -83,6 +84,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   useEffect(() => {
     // if loading
     if (positionRequestLoading || positionNeedsRivewLoading) return;
+
+    // load comment if prevsiously entered
+    if (positionRequestData?.positionRequest?.additional_info_comments) {
+      setComment(positionRequestData.positionRequest.additional_info_comments);
+    }
 
     // if state is draft and position doesn't need review, set mode to readyToCreatePositionNumber
     if (positionRequestData?.positionRequest?.status === 'DRAFT' && !positionNeedsRivew?.positionNeedsRivew.result) {
@@ -166,6 +172,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
         const result = await submitPositionRequest({
           id: positionRequestId,
+          comment: comment,
         }).unwrap();
 
         // console.log('submitPositionRequest result: ', result);
@@ -244,6 +251,12 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
         </Menu.ItemGroup>
       </Menu>
     );
+  };
+
+  const [comment, setComment] = useState('');
+
+  const handleCommentChange = (e: any) => {
+    setComment(e.target.value);
   };
 
   if (positionRequestLoading || positionNeedsRivewLoading || isFetchingPositionNeedsRivew || isFetchingPositionRequest)
@@ -411,6 +424,37 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         verification, once submitted. There are no other steps required, just look for our followup
                         response.
                       </Paragraph>
+                      <Form.Item name="comments">
+                        <label htmlFor="comments" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                          <b>Comments</b>
+                        </label>
+                        <>
+                          <Input.TextArea
+                            data-testid="comments-input"
+                            autoSize
+                            maxLength={1000}
+                            value={comment}
+                            onChange={handleCommentChange}
+                            placeholder="Add comments"
+                          />
+                          <Row>
+                            <Col span={18}>
+                              <Typography.Paragraph type="secondary" style={{ margin: '0' }}>
+                                (Optional) Add some context related to changes you made. This will help the reviewer
+                                assess your edits.
+                              </Typography.Paragraph>
+                            </Col>
+                            <Col span={6} style={{ textAlign: 'right' }}>
+                              <Typography.Paragraph
+                                type="secondary"
+                                style={{ textAlign: 'right', width: '100%', margin: '0' }}
+                              >
+                                {comment.length} / 1000
+                              </Typography.Paragraph>
+                            </Col>
+                          </Row>
+                        </>
+                      </Form.Item>
                       <Button
                         type="primary"
                         onClick={handleOk}
