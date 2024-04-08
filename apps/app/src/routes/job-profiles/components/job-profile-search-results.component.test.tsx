@@ -377,7 +377,7 @@ describe('JobProfileSearchResults', () => {
     render(
       <MemoryRouter>
         <JobProfileSearchResults
-          data={{ jobProfiles: [], jobProfilesCount: 0 }}
+          data={{ jobProfiles: [], jobProfilesCount: 0, pageNumberForSelectProfile: -1 }}
           isLoading={false}
           currentPage={1}
           pageSize={2}
