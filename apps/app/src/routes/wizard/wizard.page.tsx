@@ -1,8 +1,8 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Menu, Modal, Popover, Typography } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
@@ -25,10 +25,22 @@ interface WizardPageProps {
   disableBlockingAndNavigateHome: () => void;
 }
 
+interface JobProfileSearchResultsRef {
+  handlePageChange: (page: number) => void;
+}
+
 export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableBlockingAndNavigateHome }) => {
   // const { id } = useParams();
+  const page_size = 2;
   const { handleSubmit } = useForm<IFormInput>();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectProfileId, setSelectProfileId] = useState<string | null>(null);
+
+  // stores searchParams for when user navigates back from edit page
+  // used when user presses "cancel" on the "chage profile?" dialog
+  const previousSearchState = useRef('');
+  const jobProfileSearchResultsRef = useRef<JobProfileSearchResultsRef>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [selectedClassificationId, setSelectedClassificationId] = useState<string | undefined>();
 
@@ -36,21 +48,98 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
   const { positionRequestId, positionRequestData } = useWizardContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const { setPositionRequestProfileId } = useWizardContext();
+  const navigate = useNavigate();
+
+  // if positionRequestData.parent_job_profile is not null, change searchParams to include selectedProfile
+  useEffect(() => {
+    if (positionRequestData?.parent_job_profile_id) {
+      // check if searchparams already has selectedProfile
+      if (!searchParams.get('selectedProfile')) {
+        // determine what page we need to switch to
+        setSelectProfileId(positionRequestData.parent_job_profile_id.toString());
+        // setSearchParams({ selectedProfile: positionRequestData.parent_job_profile_id.toString() }, { replace: true });
+      }
+    }
+  }, [positionRequestData, setSearchParams, searchParams]);
+
+  const getBasePath = (path: string) => {
+    if (positionRequestId) return `/my-positions/${positionRequestId}`;
+
+    const pathParts = path.split('/');
+    // Check if the last part is a number (ID), if so, remove it
+    if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
+      pathParts.pop(); // Remove the last part (job profile ID)
+    }
+    return pathParts.join('/');
+  };
 
   const onSubmit: SubmitHandler<IFormInput> = async () => {
+    if (
+      positionRequestData?.parent_job_profile_id &&
+      positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '')
+    ) {
+      Modal.confirm({
+        title: 'Change job profile?',
+        content: (
+          <>
+            <p>
+              Changing the job profile will result in the loss of all profile data and any additional details you've
+              provided.
+            </p>
+            <p>This action is irreversible. Are you sure you wish to proceed?</p>
+          </>
+        ),
+        okText: 'Change job profile',
+        cancelText: 'Cancel',
+        onOk: () => {
+          setWizardData(null); // this ensures that any previous edits are cleared
+          handleNext();
+        },
+        onCancel: () => {
+          // re-select profile on the correct page
+          if (previousSearchState.current && jobProfileSearchResultsRef.current) {
+            const basePath = getBasePath(location.pathname);
+
+            const searchParams = new URLSearchParams(previousSearchState.current);
+            searchParams.set('fetch', 'true');
+            const page = parseInt(searchParams.get('page') || '1', 10);
+            jobProfileSearchResultsRef.current.handlePageChange(page);
+
+            navigate(
+              {
+                pathname: basePath,
+                search: searchParams.toString(),
+              },
+              { replace: true },
+            );
+          }
+        },
+      });
+      return;
+    }
+
+    // user is not changing from previous profile
+    handleNext();
+  };
+
+  const handleNext = async () => {
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
       if (selectedProfileId) {
         // navigate(`/wizard/edit/${selectedProfileId}`);
-        if (positionRequestId)
+        if (positionRequestId) {
           await updatePositionRequest({
             id: positionRequestId,
             step: 2,
-            profile_json: null,
+            // if user selected same profile as before, do not clear profile_json
+            ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
+              profile_json: null,
+            }),
             parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
             classification_id: selectedClassificationId,
           }).unwrap();
+        }
         setPositionRequestProfileId(parseInt(selectedProfileId));
         if (onNext) onNext();
         setSearchParams({}, { replace: true });
@@ -63,7 +152,6 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
       setIsLoading(false);
     }
   };
-
   // useEffect(() => {
   //   if (id) {
   //     setSelectedProfileId(id);
@@ -86,7 +174,6 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
   setReqAlertShown(false);
 
   setOriginalValuesSet(false); // ensures original values get re-set once user navigates to edit page
-  setWizardData(null); // this ensures that any previous edits are cleared
 
   const back = async () => {
     if (positionRequestId)
@@ -99,6 +186,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
   };
 
   const onSelectProfile = (profile: JobProfileModel) => {
+    // if there is a profile already associated with the position request, show a warning
     setSelectedProfileId(profile.id.toString());
     if (profile?.classifications != null) setSelectedClassificationId(profile?.classifications[0].classification.id);
   };
@@ -200,8 +288,12 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
         }}
       >
         <JobProfiles
+          ref={jobProfileSearchResultsRef}
           searchParams={searchParams}
           onSelectProfile={onSelectProfile}
+          page_size={page_size}
+          selectProfileId={selectProfileId}
+          previousSearchState={previousSearchState}
           // onUseProfile={handleSubmit(onSubmit)}
         />
       </div>

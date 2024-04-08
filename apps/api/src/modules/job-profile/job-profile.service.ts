@@ -180,6 +180,49 @@ export class JobProfileService {
 
     return jobProfiles;
   }
+
+  async getPageNumberForSelectProfile({
+    search,
+    where,
+    sortByClassificationName,
+    sortByJobFamily,
+    sortByOrganization,
+    sortOrder,
+    selectProfile,
+    ...args
+  }: FindManyJobProfileWithSearch) {
+    if (selectProfile) {
+      // Fetch all job profiles based on the search and where conditions
+      const allJobProfiles = await this.getJobProfilesWithSearch(search, where, {
+        ...args,
+        take: undefined,
+        skip: undefined,
+      });
+
+      // Sort the job profiles based on the provided sorting parameters
+      const sortedJobProfiles = this.sortJobProfiles(
+        allJobProfiles,
+        sortByClassificationName,
+        sortByJobFamily,
+        sortByOrganization,
+        sortOrder,
+      );
+
+      // Find the index of the selected profile within the sorted job profiles
+
+      const selectedProfileIndex = (sortedJobProfiles as any[]).findIndex(
+        (profile) => profile.id === parseInt(selectProfile),
+      );
+
+      if (selectedProfileIndex !== -1) {
+        // Calculate the page number based on the selected profile index and take value
+        const pageNumber = Math.ceil((selectedProfileIndex + 1) / args.take);
+        return pageNumber;
+      }
+    }
+    return -1;
+  }
+
   async getJobProfiles({
     search,
     where,
@@ -187,10 +230,61 @@ export class JobProfileService {
     sortByJobFamily,
     sortByOrganization,
     sortOrder,
+    selectProfile,
     ...args
   }: FindManyJobProfileWithSearch) {
-    const jobProfiles = await this.getJobProfilesWithSearch(search, where, args);
+    let jobProfiles: any[];
 
+    if (selectProfile) {
+      // Fetch all job profiles based on the search and where conditions
+      const allJobProfiles = await this.getJobProfilesWithSearch(search, where, {
+        ...args,
+        take: undefined,
+        skip: undefined,
+      });
+
+      // Sort the job profiles based on the provided sorting parameters
+      const sortedJobProfiles = this.sortJobProfiles(
+        allJobProfiles,
+        sortByClassificationName,
+        sortByJobFamily,
+        sortByOrganization,
+        sortOrder,
+      );
+
+      // Find the index of the selected profile within the sorted job profiles
+      const selectedProfileIndex = (sortedJobProfiles as any[]).findIndex(
+        (profile) => profile.id === parseInt(selectProfile),
+      );
+
+      if (selectedProfileIndex !== -1) {
+        // Calculate the page number based on the selected profile index and take value
+        const pageNumber = Math.ceil((selectedProfileIndex + 1) / args.take);
+
+        // Calculate the new skip value based on the page number and take value
+        const newSkip = (pageNumber - 1) * args.take;
+
+        // Fetch the job profiles for the calculated page
+        jobProfiles = await this.getJobProfilesWithSearch(search, where, { ...args, skip: newSkip });
+      } else {
+        // If the selected profile is not found, return an empty array
+        jobProfiles = [];
+      }
+    } else {
+      // If selectProfile is not provided, fetch profiles based on the search and where conditions
+      jobProfiles = await this.getJobProfilesWithSearch(search, where, args);
+    }
+
+    return jobProfiles;
+  }
+
+  private sortJobProfiles(
+    jobProfiles: any[],
+    sortByClassificationName: boolean,
+    sortByJobFamily: boolean,
+    sortByOrganization: boolean,
+    sortOrder: string,
+  ) {
     if (sortByClassificationName) {
       return this.sortJobProfilesByClassification(jobProfiles, sortOrder);
     }
@@ -204,6 +298,17 @@ export class JobProfileService {
     }
 
     return jobProfiles;
+  }
+
+  private async getJobProfilesCount(search: string, where: any) {
+    const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+
+    return this.prisma.jobProfile.count({
+      where: {
+        ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        ...where,
+      },
+    });
   }
 
   private async sortJobProfilesByClassification(jobProfiles: JobProfile[], sortOrder: string): Promise<JobProfile[]> {
