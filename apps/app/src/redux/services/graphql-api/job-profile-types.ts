@@ -334,11 +334,13 @@ export interface GetJobProfilesArgs {
   sortByJobFamily?: boolean;
   sortByOrganization?: boolean;
   sortOrder?: string;
+  selectProfile?: string | null | undefined;
 }
 
 export interface GetJobProfilesResponse {
   jobProfiles: JobProfileModel[];
   jobProfilesCount: number;
+  pageNumberForSelectProfile: number;
 }
 
 export interface GetJobProfilesDraftsResponse {
