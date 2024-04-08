@@ -476,7 +476,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
             <Button data-testid="ellipsis-menu" icon={<EllipsisOutlined />}></Button>
           </Popover>,
-          <Button onClick={onBackCallback} key="back">
+          <Button onClick={onBackCallback} key="back" data-testid="back-button">
             Back
           </Button>,
           <Button

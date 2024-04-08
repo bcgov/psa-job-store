@@ -31,7 +31,7 @@ interface JobProfileSearchResultsRef {
 
 export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableBlockingAndNavigateHome }) => {
   // const { id } = useParams();
-  const page_size = 2;
+  const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
   const { handleSubmit } = useForm<IFormInput>();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectProfileId, setSelectProfileId] = useState<string | null>(null);
@@ -81,13 +81,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
       Modal.confirm({
         title: 'Change job profile?',
         content: (
-          <>
+          <div data-testid="change-profile-warning">
             <p>
               Changing the job profile will result in the loss of all profile data and any additional details you've
               provided.
             </p>
             <p>This action is irreversible. Are you sure you wish to proceed?</p>
-          </>
+          </div>
         ),
         okText: 'Change job profile',
         cancelText: 'Cancel',
@@ -259,7 +259,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
         <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
           <Button icon={<EllipsisOutlined />}></Button>
         </Popover>,
-        <Button onClick={back} key="back">
+        <Button onClick={back} key="back" data-testid="back-button">
           Back
         </Button>,
         <Button

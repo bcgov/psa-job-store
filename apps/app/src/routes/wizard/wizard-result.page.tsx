@@ -292,7 +292,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
               <Button icon={<EllipsisOutlined />}></Button>
             </Popover>,
-            <Button onClick={back} key="back">
+            <Button onClick={back} key="back" data-testid="back-button">
               Back
             </Button>,
           ]}

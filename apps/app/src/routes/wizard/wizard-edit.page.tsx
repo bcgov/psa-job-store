@@ -40,6 +40,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
     positionRequestId,
   } = useWizardContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingBack, setIsLoadingBack] = useState(false);
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
   const profileId = positionRequestProfileId;
@@ -114,7 +115,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
 
   // const navigate = useNavigate();
 
-  const onNextCallback = async () => {
+  const saveData = async (action: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errors = Object.values(wizardEditProfileRef.current?.getFormErrors()).map((error: any) => {
       const message =
@@ -144,7 +145,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
       return;
     }
 
-    setIsLoading(true);
+    if (action === 'next') setIsLoading(true);
+    else setIsLoadingBack(true);
+
     try {
       // Create an entry in My Positions
 
@@ -157,12 +160,11 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
       // return;
 
       setWizardData(transformedData);
-
       try {
         if (positionRequestId)
           await updatePositionRequest({
             id: positionRequestId,
-            step: 3,
+            step: action === 'next' ? 3 : 1,
             profile_json: transformedData,
             title: formData.title.value,
             // classification_code: classification ? classification.code : '',
@@ -174,10 +176,27 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
           content: 'An unknown error occurred', //error.data?.message ||
         });
       }
-      if (onNext) onNext();
+
+      if (action === 'next') {
+        if (onNext) onNext();
+      } else {
+        if (onBack) {
+          console.log('onback');
+          onBack();
+        }
+      }
     } finally {
-      setIsLoading(false);
+      if (action === 'next') setIsLoading(false);
+      else setIsLoadingBack(false);
     }
+  };
+
+  const onNextCallback = async () => {
+    await saveData('next');
+  };
+
+  const onBackCallback = async () => {
+    await saveData('back');
   };
 
   // console.log('wizardData: ', wizardData);
@@ -244,7 +263,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
         <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
           <Button icon={<EllipsisOutlined />}></Button>
         </Popover>,
-        <Button onClick={onBack} key="back">
+        <Button onClick={onBackCallback} key="back" data-testid="back-button" loading={isLoadingBack}>
           Back
         </Button>,
         <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button" loading={isLoading}>
