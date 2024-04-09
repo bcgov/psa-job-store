@@ -29,8 +29,8 @@ import '../../components/app/common/css/custom-form.css';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
 import { useGetLocationsQuery } from '../../redux/services/graphql-api/location.api';
 import {
+  GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
-  useGetPositionRequestQuery,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
@@ -42,6 +42,7 @@ interface WizardConfirmPageProps {
   onNext?: () => void;
   onBack?: () => void;
   disableBlockingAndNavigateHome: () => void;
+  positionRequest: GetPositionRequestResponseContent | null;
 }
 
 function IsTrue(validationOptions?: ValidationOptions) {
@@ -106,6 +107,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   onNext,
   onBack,
   disableBlockingAndNavigateHome,
+  positionRequest,
 }) => {
   // const [createJobProfile] = useCreateJobProfileMutation();
   const [isLoading, setIsLoading] = useState(false);
@@ -182,37 +184,37 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     [getPositionProfile],
   );
 
-  const { positionRequestId, wizardData } = useWizardContext();
+  const { positionRequestId, wizardData, positionRequestData } = useWizardContext();
 
   // get position request data
 
-  const {
-    data: positionRequestData,
-    isLoading: positionRequestLoading,
-    isError: positionRequestLoadingError,
-  } = useGetPositionRequestQuery({
-    id: positionRequestId ?? -1,
-  });
+  // const {
+  //   data: positionRequestData,
+  //   isLoading: positionRequestLoading,
+  //   isError: positionRequestLoadingError,
+  // } = useGetPositionRequestQuery({
+  //   id: positionRequestId ?? -1,
+  // });
 
   // console.log('positionRequestData: ', positionRequestData);
 
   // get profile info for reporting position from reports_to_position_id using GetPositionProfileQuery and useEffect
   useEffect(() => {
-    if (positionRequestData?.positionRequest?.reports_to_position_id) {
+    if (positionRequestData?.reports_to_position_id) {
       getPositionProfile2({
-        positionNumber: positionRequestData.positionRequest.reports_to_position_id.toString(),
+        positionNumber: positionRequestData.reports_to_position_id.toString(),
         uniqueKey: 'managerProfile',
       });
     }
-  }, [positionRequestData?.positionRequest?.reports_to_position_id, getPositionProfile2]);
+  }, [positionRequestData?.reports_to_position_id, getPositionProfile2]);
 
   // get profile info for excluded manager from additional_info_excluded_mgr_position_number using GetPositionProfileQuery and useEffect
   useEffect(() => {
     async function fetchExcludedManagerProfile() {
-      if (positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number) {
+      if (positionRequestData?.additional_info_excluded_mgr_position_number) {
         try {
           await getPositionProfile({
-            positionNumber: positionRequestData.positionRequest.additional_info_excluded_mgr_position_number,
+            positionNumber: positionRequestData.additional_info_excluded_mgr_position_number,
             uniqueKey: 'excludedManagerProfile',
             suppressGlobalError: true,
           }).unwrap();
@@ -222,7 +224,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       }
     }
     fetchExcludedManagerProfile();
-  }, [positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number, getPositionProfile]);
+  }, [positionRequestData?.additional_info_excluded_mgr_position_number, getPositionProfile]);
 
   const { data: allLocations } = useGetLocationsQuery();
 
@@ -363,24 +365,20 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   });
 
   useEffect(() => {
-    if (positionRequestData && positionRequestData.positionRequest) {
+    if (positionRequestData) {
       const {
         additional_info_work_location_id,
         additional_info_department_id,
         additional_info_excluded_mgr_position_number,
         additional_info_comments,
-      } = positionRequestData.positionRequest;
+      } = positionRequestData;
       setValue(
         'workLocation',
         additional_info_work_location_id ||
-          departmentsData?.find((dept) => dept.id === positionRequestData?.positionRequest?.department_id)
-            ?.location_id ||
+          departmentsData?.find((dept) => dept.id === positionRequestData?.department_id)?.location_id ||
           null,
       );
-      setValue(
-        'payListDepartmentId',
-        additional_info_department_id || positionRequestData?.positionRequest?.department_id || null,
-      );
+      setValue('payListDepartmentId', additional_info_department_id || positionRequestData?.department_id || null);
       setValue('excludedManagerPositionNumber', additional_info_excluded_mgr_position_number || '');
       setValue('comments', additional_info_comments || '');
 
@@ -464,12 +462,14 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
             <Link to="/" aria-label="Go to dashboard">
               <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
             </Link>
-            New position
+            {positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position'}
           </div>
         }
         subTitle={<div>We need a few more pieces of information to action your request for a new position.</div>}
-        additionalBreadcrumb={{ title: 'New position' }}
-        // subTitle="Choose a job profile to modify for the new positions"
+        additionalBreadcrumb={{
+          title:
+            positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position',
+        }}
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
@@ -760,29 +760,22 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     colon={false}
                   >
                     <div style={{ margin: 0 }}>
-                      {firstActivePosition2 &&
-                        !isFetchingPositionProfile2 &&
-                        !isFetchingPositionProfileError2 &&
-                        !positionRequestLoadingError && (
-                          <div data-testid="reporting-manager-info">
-                            <p
-                              style={{ margin: 0 }}
-                            >{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
-                            <Typography.Paragraph type="secondary">
-                              {`${firstActivePosition2.positionDescription}, ${firstActivePosition2.classification}`}
-                              <br></br>
-                              {`Position No.: ${firstActivePosition2.positionNumber}`}
-                              {additionalPositions2 > 0 && ` +${additionalPositions2}`}
-                            </Typography.Paragraph>
-                          </div>
-                        )}
+                      {firstActivePosition2 && !isFetchingPositionProfile2 && !isFetchingPositionProfileError2 && (
+                        <div data-testid="reporting-manager-info">
+                          <p
+                            style={{ margin: 0 }}
+                          >{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
+                          <Typography.Paragraph type="secondary">
+                            {`${firstActivePosition2.positionDescription}, ${firstActivePosition2.classification}`}
+                            <br></br>
+                            {`Position No.: ${firstActivePosition2.positionNumber}`}
+                            {additionalPositions2 > 0 && ` +${additionalPositions2}`}
+                          </Typography.Paragraph>
+                        </div>
+                      )}
                       {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
-                      {(isFetchingPositionProfile2 || positionRequestLoading) && (
-                        <LoadingSpinnerWithMessage mode={'small'} />
-                      )}
-                      {(isFetchingPositionProfileError2 || positionRequestLoadingError) && (
-                        <p>Error loading, please refresh page</p>
-                      )}
+                      {isFetchingPositionProfile2 && <LoadingSpinnerWithMessage mode={'small'} />}
+                      {isFetchingPositionProfileError2 && <p>Error loading, please refresh page</p>}
                     </div>
                   </Form.Item>
 

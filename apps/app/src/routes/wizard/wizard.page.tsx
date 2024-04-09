@@ -1,11 +1,11 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Menu, Modal, Popover, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
+  GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
@@ -14,26 +14,28 @@ import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';
 
-interface IFormInput {
-  firstName: string;
-  lastName: string;
-}
-
 interface WizardPageProps {
   onBack?: () => void;
   onNext?: () => void;
   disableBlockingAndNavigateHome: () => void;
+  positionRequest: GetPositionRequestResponseContent | null;
 }
 
 interface JobProfileSearchResultsRef {
   handlePageChange: (page: number) => void;
 }
 
-export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableBlockingAndNavigateHome }) => {
+export const WizardPage: React.FC<WizardPageProps> = ({
+  onNext,
+  onBack,
+  disableBlockingAndNavigateHome,
+  positionRequest,
+}) => {
   // const { id } = useParams();
   const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
-  const { handleSubmit } = useForm<IFormInput>();
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileName, setSelectedProfileName] = useState<string | null>(null);
+
   const [selectProfileId, setSelectProfileId] = useState<string | null>(null);
 
   // stores searchParams for when user navigates back from edit page
@@ -73,56 +75,60 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
     return pathParts.join('/');
   };
 
-  const onSubmit: SubmitHandler<IFormInput> = async () => {
+  const onSubmit = async (action = 'next'): Promise<boolean> => {
     if (
       positionRequestData?.parent_job_profile_id &&
       positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '')
     ) {
-      Modal.confirm({
-        title: 'Change job profile?',
-        content: (
-          <div data-testid="change-profile-warning">
-            <p>
-              Changing the job profile will result in the loss of all profile data and any additional details you've
-              provided.
-            </p>
-            <p>This action is irreversible. Are you sure you wish to proceed?</p>
-          </div>
-        ),
-        okText: 'Change job profile',
-        cancelText: 'Cancel',
-        onOk: () => {
-          setWizardData(null); // this ensures that any previous edits are cleared
-          handleNext();
-        },
-        onCancel: () => {
-          // re-select profile on the correct page
-          if (previousSearchState.current && jobProfileSearchResultsRef.current) {
-            const basePath = getBasePath(location.pathname);
+      return new Promise((resolve) => {
+        Modal.confirm({
+          title: 'Change job profile?',
+          content: (
+            <div data-testid="change-profile-warning">
+              <p>
+                Changing the job profile will result in the loss of all profile data and any additional details you've
+                provided.
+              </p>
+              <p>This action is irreversible. Are you sure you wish to proceed?</p>
+            </div>
+          ),
+          okText: 'Change job profile',
+          cancelText: 'Cancel',
+          onOk: () => {
+            setWizardData(null); // this ensures that any previous edits are cleared
+            handleNext(action);
+            resolve(true);
+          },
+          onCancel: () => {
+            // re-select profile on the correct page
+            if (previousSearchState.current && jobProfileSearchResultsRef.current) {
+              const basePath = getBasePath(location.pathname);
 
-            const searchParams = new URLSearchParams(previousSearchState.current);
-            searchParams.set('fetch', 'true');
-            const page = parseInt(searchParams.get('page') || '1', 10);
-            jobProfileSearchResultsRef.current.handlePageChange(page);
+              const searchParams = new URLSearchParams(previousSearchState.current);
+              searchParams.set('fetch', 'true');
+              const page = parseInt(searchParams.get('page') || '1', 10);
+              jobProfileSearchResultsRef.current.handlePageChange(page);
 
-            navigate(
-              {
-                pathname: basePath,
-                search: searchParams.toString(),
-              },
-              { replace: true },
-            );
-          }
-        },
+              navigate(
+                {
+                  pathname: basePath,
+                  search: searchParams.toString(),
+                },
+                { replace: true },
+              );
+            }
+            resolve(false);
+          },
+        });
       });
-      return;
     }
 
     // user is not changing from previous profile
-    handleNext();
+    handleNext(action);
+    return true;
   };
 
-  const handleNext = async () => {
+  const handleNext = async (action = 'next') => {
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
@@ -131,19 +137,23 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
         if (positionRequestId) {
           await updatePositionRequest({
             id: positionRequestId,
-            step: 2,
+            step: action === 'next' ? 2 : 1,
             // if user selected same profile as before, do not clear profile_json
+            // also do not update title to default
             ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
               profile_json: null,
+              title: selectedProfileName ?? undefined,
             }),
             parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
             classification_id: selectedClassificationId,
           }).unwrap();
         }
         setPositionRequestProfileId(parseInt(selectedProfileId));
-        if (onNext) onNext();
-        setSearchParams({}, { replace: true });
-        // navigate(`/org-chart/${reportingPosition}/profiles/edit/${selectedProfileId}`);
+
+        if (action === 'next') {
+          if (onNext) onNext();
+          setSearchParams({}, { replace: true });
+        }
       } else {
         // Here you can display an error message.
         alert('Please select a profile before proceeding.');
@@ -187,6 +197,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
 
   const onSelectProfile = (profile: JobProfileModel) => {
     // if there is a profile already associated with the position request, show a warning
+    setSelectedProfileName(profile.title.toString());
     setSelectedProfileId(profile.id.toString());
     if (profile?.classifications != null) setSelectedClassificationId(profile?.classifications[0].classification.id);
   };
@@ -206,10 +217,15 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
     });
   };
 
+  const saveAndQuit = async () => {
+    const res = await onSubmit('quit');
+    if (res !== false) disableBlockingAndNavigateHome();
+  };
+
   const getMenuContent = () => {
     return (
       <Menu>
-        <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
+        <Menu.Item key="save" onClick={saveAndQuit}>
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
@@ -239,7 +255,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
           <Link to="/" aria-label="Go to dashboard">
             <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
-          New position
+          {positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position'}
         </div>
       }
       subTitle={
@@ -251,8 +267,9 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
           ></PositionProfile>
         </div>
       }
-      additionalBreadcrumb={{ title: 'New position' }}
-      // subTitle="Choose a job profile to modify for the new positions"
+      additionalBreadcrumb={{
+        title: positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position',
+      }}
       hpad={false}
       grayBg={false}
       pageHeaderExtra={[
@@ -266,7 +283,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({ onNext, onBack, disableB
           key="next"
           type="primary"
           disabled={selectedProfileId == null}
-          onClick={handleSubmit(onSubmit)}
+          onClick={() => onSubmit()}
           data-testid="next-button"
           loading={isLoading}
         >

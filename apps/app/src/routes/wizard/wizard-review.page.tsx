@@ -3,6 +3,7 @@ import { Button, Card, Col, Menu, Modal, Popover, Row, Typography } from 'antd';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
@@ -17,12 +18,14 @@ interface WizardReviewPageProps {
   onNext?: () => void;
   onBack?: () => void;
   disableBlockingAndNavigateHome: () => void;
+  positionRequest: GetPositionRequestResponseContent | null;
 }
 
 export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   onNext,
   onBack,
   disableBlockingAndNavigateHome,
+  positionRequest,
 }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { wizardData, positionRequestId } = useWizardContext();
@@ -133,7 +136,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
             <Link to="/" aria-label="Go to dashboard">
               <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
             </Link>
-            New position
+            {positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position'}
           </div>
         }
         subTitle={
@@ -141,8 +144,10 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
             View the edits you've made to the generic profile. Review to make sure it meets your requirements.
           </div>
         }
-        additionalBreadcrumb={{ title: 'New position' }}
-        // subTitle="Choose a job profile to modify for the new positions"
+        additionalBreadcrumb={{
+          title:
+            positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position',
+        }}
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[

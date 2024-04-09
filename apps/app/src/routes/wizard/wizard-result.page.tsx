@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import {
+  GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
   useGetPositionRequestQuery,
   usePositionNeedsRivewQuery,
@@ -30,6 +31,7 @@ interface WizardResultPageProps {
   switchParentReadonlyMode?: (mode: string) => void;
   setReadOnlySelectedTab?: (tab: string) => void;
   disableBlockingAndNavigateHome: () => void;
+  positionRequest: GetPositionRequestResponseContent | null;
 }
 
 export const WizardResultPage: React.FC<WizardResultPageProps> = ({
@@ -39,6 +41,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   switchParentReadonlyMode,
   setReadOnlySelectedTab,
   disableBlockingAndNavigateHome,
+  positionRequest,
 }) => {
   // let mode = 'readyToCreatePositionNumber';
   // mode = 'verificationRequired_edits'; // verification is needed because user made edits to significant sections
@@ -297,7 +300,10 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             </div>
           }
           subTitle={<div>Find out the result of your request</div>}
-          additionalBreadcrumb={{ title: 'New position' }}
+          additionalBreadcrumb={{
+            title:
+              positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position',
+          }}
           // subTitle="Choose a job profile to modify for the new positions"
           hpad={false}
           grayBg={false}
