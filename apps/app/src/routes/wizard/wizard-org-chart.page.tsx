@@ -16,7 +16,7 @@ import { useWizardContext } from './components/wizard.provider';
 
 interface WizardOrgChartPageProps {
   onCreateNewPosition?: () => void;
-  positionRequest: GetPositionRequestResponseContent | null;
+  positionRequest?: GetPositionRequestResponseContent | null;
 }
 
 export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: WizardOrgChartPageProps) => {
