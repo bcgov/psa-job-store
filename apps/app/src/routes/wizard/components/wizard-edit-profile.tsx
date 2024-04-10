@@ -202,7 +202,7 @@ const WizardEditProfile = forwardRef(
                 return {
                   text: item.text,
                   isCustom: item.isCustom,
-                  disabled: item.disabled,
+                  disabled: item.disabled === undefined ? true : item.disabled,
                   is_readonly: item.is_readonly,
                   is_significant: item.is_significant,
                 };
