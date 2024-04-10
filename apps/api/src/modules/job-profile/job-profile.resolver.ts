@@ -29,16 +29,21 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfiles(args);
   }
 
-  @Query(() => [JobProfile], { name: 'jobProfilesDrafts' })
-  @Roles('total-compensation')
-  @UseGuards(RoleGuard)
-  async getJobProfilesDrafts(@CurrentUser() { id: userId }: Express.User, @Args() args?: FindManyJobProfileWithSearch) {
-    return this.jobProfileService.getJobProfilesDrafts(args, userId);
+  @Query(() => Int, { name: 'pageNumberForSelectProfile' })
+  async pageNumberForSelectProfile(@Args() args?: FindManyJobProfileWithSearch) {
+    return await this.jobProfileService.getPageNumberForSelectProfile(args);
   }
 
   @Query(() => Int, { name: 'jobProfilesCount' })
   async jobProfilesCount(@Args() args?: FindManyJobProfileWithSearch) {
     return await this.jobProfileService.getJobProfileCount(args);
+  }
+
+  @Query(() => [JobProfile], { name: 'jobProfilesDrafts' })
+  @Roles('total-compensation')
+  @UseGuards(RoleGuard)
+  async getJobProfilesDrafts(@CurrentUser() { id: userId }: Express.User, @Args() args?: FindManyJobProfileWithSearch) {
+    return this.jobProfileService.getJobProfilesDrafts(args, userId);
   }
 
   @Query(() => Int, { name: 'jobProfilesDraftsCount' })
@@ -49,6 +54,26 @@ export class JobProfileResolver {
     @Args() args?: FindManyJobProfileWithSearch,
   ) {
     return await this.jobProfileService.getJobProfilesDraftsCount(args, userId);
+  }
+
+  @Query(() => [JobProfile], { name: 'jobProfilesArchived' })
+  @Roles('total-compensation')
+  @UseGuards(RoleGuard)
+  async getJobProfilesArchived(
+    @CurrentUser() { id: userId }: Express.User,
+    @Args() args?: FindManyJobProfileWithSearch,
+  ) {
+    return this.jobProfileService.getJobProfilesArchived(args, userId);
+  }
+
+  @Query(() => Int, { name: 'jobProfilesArchivedCount' })
+  @Roles('total-compensation')
+  @UseGuards(RoleGuard)
+  async jobProfilesArchivedCount(
+    @CurrentUser() { id: userId }: Express.User,
+    @Args() args?: FindManyJobProfileWithSearch,
+  ) {
+    return await this.jobProfileService.getJobProfilesArchivedCount(args, userId);
   }
 
   @Query(() => [Organization], { name: 'jobProfilesDraftsMinistries' })
@@ -130,6 +155,26 @@ export class JobProfileResolver {
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
   ) {
     return this.jobProfileService.duplicateJobProfile(jobProfileId, userId);
+  }
+
+  @Mutation(() => Int)
+  @Roles('total-compensation') // Adjust role as per your requirements
+  @UseGuards(RoleGuard)
+  async deleteJobProfile(
+    @CurrentUser() { id: userId }: Express.User,
+    @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
+  ) {
+    return this.jobProfileService.deleteJobProfile(jobProfileId, userId);
+  }
+
+  @Mutation(() => Int)
+  @Roles('total-compensation') // Adjust role as per your requirements
+  @UseGuards(RoleGuard)
+  async unarchiveJobProfile(
+    @CurrentUser() { id: userId }: Express.User,
+    @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
+  ) {
+    return this.jobProfileService.unarchiveJobProfile(jobProfileId, userId);
   }
 
   @ResolveField(() => JobProfileReportsTo)

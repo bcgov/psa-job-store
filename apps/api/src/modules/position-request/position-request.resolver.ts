@@ -78,8 +78,11 @@ export class PositionRequestApiResolver {
   }
 
   @Mutation(() => PositionRequest)
-  async submitPositionRequest(@Args('id', { type: () => Int }) id: number) {
-    return this.positionRequestService.submitPositionRequest(id);
+  async submitPositionRequest(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('comment', { nullable: true }) comment?: string,
+  ) {
+    return this.positionRequestService.submitPositionRequest(id, comment);
   }
 
   @Mutation(() => PositionRequestResponse)

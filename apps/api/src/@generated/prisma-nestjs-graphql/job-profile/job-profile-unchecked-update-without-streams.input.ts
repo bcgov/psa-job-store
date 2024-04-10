@@ -89,6 +89,9 @@ export class JobProfileUncheckedUpdateWithoutStreamsInput {
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc?: any;
 
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: boolean;
+
   @Field(() => JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput;
 

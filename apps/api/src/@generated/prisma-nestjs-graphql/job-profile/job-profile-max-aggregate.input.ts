@@ -47,4 +47,7 @@ export class JobProfileMaxAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   overview?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: true;
 }

@@ -3,12 +3,14 @@ import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Col, FormInstance, List, Menu, Modal, Popover, Row, Typography } from 'antd';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import LoadingComponent from '../../components/app/common/components/loading.component';
 import {
   ClassificationModel,
   GetClassificationsResponse,
   JobProfileModel,
 } from '../../redux/services/graphql-api/job-profile-types';
 import {
+  GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
@@ -26,9 +28,15 @@ interface WizardEditPageProps {
   onBack?: () => void;
   onNext?: () => void;
   disableBlockingAndNavigateHome: () => void;
+  positionRequest: GetPositionRequestResponseContent | null;
 }
 
-export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, disableBlockingAndNavigateHome }) => {
+export const WizardEditPage: React.FC<WizardEditPageProps> = ({
+  onBack,
+  onNext,
+  disableBlockingAndNavigateHome,
+  positionRequest,
+}) => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
   const {
@@ -40,6 +48,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
     positionRequestId,
   } = useWizardContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingBack, setIsLoadingBack] = useState(false);
+  const [saveAndQuitLoading, setSaveAndQuitLoading] = useState(false);
+
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
   const profileId = positionRequestProfileId;
@@ -114,7 +125,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
 
   // const navigate = useNavigate();
 
-  const onNextCallback = async () => {
+  const saveData = async (action: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errors = Object.values(wizardEditProfileRef.current?.getFormErrors()).map((error: any) => {
       const message =
@@ -144,7 +155,10 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
       return;
     }
 
-    setIsLoading(true);
+    if (action === 'next') setIsLoading(true);
+    else if (action == 'back') setIsLoadingBack(true);
+    else setSaveAndQuitLoading(true);
+
     try {
       // Create an entry in My Positions
 
@@ -157,12 +171,11 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
       // return;
 
       setWizardData(transformedData);
-
       try {
         if (positionRequestId)
           await updatePositionRequest({
             id: positionRequestId,
-            step: 3,
+            step: action === 'next' ? 3 : action === 'back' ? 1 : 2,
             profile_json: transformedData,
             title: formData.title.value,
             // classification_code: classification ? classification.code : '',
@@ -173,11 +186,33 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
           title: 'Error updating position',
           content: 'An unknown error occurred', //error.data?.message ||
         });
+        return false;
       }
-      if (onNext) onNext();
+
+      if (action === 'next') {
+        if (onNext) onNext();
+      } else if (action === 'back') {
+        if (onBack) {
+          console.log('onback');
+          onBack();
+        }
+      }
+      return true;
+    } catch (e) {
+      return false;
     } finally {
-      setIsLoading(false);
+      if (action === 'next') setIsLoading(false);
+      else if (action === 'back') setIsLoadingBack(false);
+      else setSaveAndQuitLoading(false);
     }
+  };
+
+  const onNextCallback = async () => {
+    await saveData('next');
+  };
+
+  const onBackCallback = async () => {
+    await saveData('back');
   };
 
   // console.log('wizardData: ', wizardData);
@@ -199,15 +234,31 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
     });
   };
 
+  const saveAndQuit = async () => {
+    // console.log('disableBlockingAndNavigateHome');
+    await saveData('stay');
+    disableBlockingAndNavigateHome();
+  };
+
   const getMenuContent = () => {
     return (
       <Menu>
-        <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
-          <div style={{ padding: '5px 0' }}>
-            Save and quit
-            <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Positions' page.
-            </Typography.Text>
+        <Menu.Item key="save" onClick={saveAndQuit} disabled={saveAndQuitLoading}>
+          <div style={{ position: 'relative' }}>
+            {saveAndQuitLoading && (
+              <div style={{ position: 'absolute', top: '0', height: '100%', width: '100%', background: '#ffffffa8' }}>
+                <div style={{ margin: 'auto', display: 'block', marginTop: '13px', textAlign: 'center' }}>
+                  <LoadingComponent mode="small"></LoadingComponent>
+                </div>
+              </div>
+            )}
+
+            <div style={{ padding: '5px 0' }}>
+              Save and quit
+              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                Saves your progress. You can access this position request from the 'My Positions' page.
+              </Typography.Text>
+            </div>
           </div>
         </Menu.Item>
         <Menu.Divider />
@@ -232,19 +283,20 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({ onBack, onNext, 
           <Link to="/" aria-label="Go to dashboard">
             <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
-          New position
+          {positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position'}
         </div>
       }
       subTitle={<div>You may now edit the profile.</div>}
-      additionalBreadcrumb={{ title: 'New position' }}
-      // subTitle="Choose a job profile to modify for the new positions"
+      additionalBreadcrumb={{
+        title: positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position',
+      }}
       hpad={false}
       grayBg={false}
       pageHeaderExtra={[
         <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
           <Button icon={<EllipsisOutlined />}></Button>
         </Popover>,
-        <Button onClick={onBack} key="back">
+        <Button onClick={onBackCallback} key="back" data-testid="back-button" loading={isLoadingBack}>
           Back
         </Button>,
         <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button" loading={isLoading}>

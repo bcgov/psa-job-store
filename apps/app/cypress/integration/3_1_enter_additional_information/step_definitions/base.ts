@@ -105,6 +105,7 @@ Then('error message to toggle executive approval is visible', () => {
 
 When('the user presses save and quit', () => {
   cy.get('[data-testid="ellipsis-menu"]').click();
+  cy.wait(500); // Wait for the menu to open
   cy.get('[data-testid="save-and-quit"]').click();
 });
 

@@ -141,8 +141,17 @@ export class PositionRequestApiService {
     });
   }
 
-  async submitPositionRequest(id: number) {
+  async submitPositionRequest(id: number, comment: string) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+
+    // ensure comments are saved
+    if (comment != null && comment.length > 0)
+      positionRequest = await this.prisma.positionRequest.update({
+        where: { id },
+        data: {
+          additional_info_comments: comment,
+        },
+      });
 
     try {
       if (positionRequest.position_number == null) {

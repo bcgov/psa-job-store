@@ -110,6 +110,9 @@ export class JobProfileWhereUniqueInput {
   @Field(() => JsonFilter, { nullable: true })
   total_comp_create_form_misc?: JsonFilter;
 
+  @Field(() => BoolFilter, { nullable: true })
+  is_archived?: BoolFilter;
+
   @Field(() => JobProfileBehaviouralCompetencyListRelationFilter, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyListRelationFilter;
 

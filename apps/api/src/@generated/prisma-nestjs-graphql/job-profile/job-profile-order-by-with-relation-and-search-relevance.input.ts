@@ -93,6 +93,9 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrderInput, { nullable: true })
   total_comp_create_form_misc?: SortOrderInput;
 
+  @Field(() => SortOrder, { nullable: true })
+  is_archived?: keyof typeof SortOrder;
+
   @Field(() => JobProfileBehaviouralCompetencyOrderByRelationAggregateInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyOrderByRelationAggregateInput;
 

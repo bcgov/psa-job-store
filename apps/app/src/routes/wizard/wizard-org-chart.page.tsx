@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import 'reactflow/dist/style.css';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import { usePosition } from '../../components/app/common/contexts/position.context';
+import { GetPositionRequestResponseContent } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { OrgChartFilter } from '../org-chart/components/org-chart-filter.component';
 import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
@@ -15,9 +16,10 @@ import { useWizardContext } from './components/wizard.provider';
 
 interface WizardOrgChartPageProps {
   onCreateNewPosition?: () => void;
+  positionRequest?: GetPositionRequestResponseContent | null;
 }
 
-export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPageProps) => {
+export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: WizardOrgChartPageProps) => {
   const { positionRequestDepartmentId } = useWizardContext();
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(positionRequestDepartmentId);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,12 +75,12 @@ export const WizardOrgChartPage = ({ onCreateNewPosition }: WizardOrgChartPagePr
           <Link to="/" aria-label="Go to dashboard">
             <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
-          New position
+          {positionRequest?.title ? positionRequest.title : 'New position'}
         </div>
       }
       subTitle="Here you are able to create a position. Start by clicking the supervisor of the position you would like to create."
       hpad={false}
-      additionalBreadcrumb={{ title: 'New position' }}
+      additionalBreadcrumb={{ title: positionRequest?.title ? positionRequest.title : 'New position' }}
       grayBg={false}
       pageHeaderExtra={[
         <Button onClick={() => navigate('/')}>Cancel</Button>,

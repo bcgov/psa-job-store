@@ -15,4 +15,7 @@ export class FindManyJobProfileWithSearch extends IntersectionType(FindManyJobPr
 
   @Field(() => String, { nullable: true })
   sortOrder?: string;
+
+  @Field(() => String, { nullable: true })
+  selectProfile?: string;
 }

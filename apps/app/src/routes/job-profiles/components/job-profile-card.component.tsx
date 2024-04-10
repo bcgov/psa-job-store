@@ -20,6 +20,7 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
     <Space
       direction="vertical"
       data-testid="job-profile-card"
+      className={data.id === +(searchParams.get('selectedProfile') ?? 0) ? 'testid-selectedProfile' : ''}
       style={{
         width: '100%',
         cursor: 'pointer',

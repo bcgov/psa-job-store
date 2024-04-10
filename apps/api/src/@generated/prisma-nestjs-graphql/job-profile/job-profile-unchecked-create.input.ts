@@ -90,6 +90,9 @@ export class JobProfileUncheckedCreateInput {
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc?: any;
 
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: boolean;
+
   @Field(() => JobProfileBehaviouralCompetencyUncheckedCreateNestedManyWithoutJob_profileInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUncheckedCreateNestedManyWithoutJob_profileInput;
 
