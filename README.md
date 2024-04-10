@@ -123,6 +123,26 @@ Remove remote backup file:
 
 `oc exec SQL_POD_NAME -- rm pgdata/backup.sql`
 
+## To replicate production database to dev/test
+
+Make a backup of production as above first.
+
+Upload backup file to dev/test sql pod:
+
+`oc cp ~/profiles.sql SQL_POD_NAME:/pgdata`
+
+Login to sql, and clear all data:
+
+`psql -d DB_NAME -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`
+
+Import production data:
+
+`psql -U postgres -d api -f backup.sql`
+
+Clear position requests:
+
+`TRUNCATE TABLE position_request;`
+
 ## To accelerate new image uptake on openshift after publishing
 
 Openshift may take up to 15 minutes to pick a new image from artifactory. There is no way to change this frequency. If needed, as a workaround

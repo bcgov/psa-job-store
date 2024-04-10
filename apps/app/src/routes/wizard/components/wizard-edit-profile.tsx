@@ -1032,32 +1032,28 @@ const WizardEditProfile = forwardRef(
               <Input />
             </FormItem>
             {!field.isCustom && (
-              <>
-                <Checkbox
-                  data-testid={`optional-accountability-checkbox-${index}`}
-                  className="multiline-checkbox"
-                  aria-label={ariaLabel}
-                  checked={!field.disabled}
-                  onChange={() => {
-                    console.log(field.disabled);
-                    field.disabled ? handleOptReqAddBack(index) : handleOptReqRemove(index);
-                  }}
-                  style={{ marginRight: '10px' }}
-                >
-                  {field.text}
-                </Checkbox>
-
-                {/* <Typography.Text
-                  data-testid={`readonly-accountability-${index}`}
-                  style={{
-                    flex: 1,
-                    marginRight: '10px',
-                    color: field.disabled ? 'grey' : '',
-                  }}
-                >
-                  {field.text}
-                </Typography.Text> */}
-              </>
+              <Controller
+                control={control}
+                name={`optional_accountabilities.${index}.disabled`}
+                render={({ field: { onChange, value } }) => {
+                  return (
+                    <>
+                      <Checkbox
+                        data-testid={`optional-accountability-checkbox-${index}`}
+                        className="multiline-checkbox"
+                        aria-label={ariaLabel}
+                        checked={!value}
+                        onChange={(e) => {
+                          onChange(!e.target.checked);
+                        }}
+                        style={{ marginRight: '10px' }}
+                      >
+                        {field.text}
+                      </Checkbox>
+                    </>
+                  );
+                }}
+              />
             )}
             <Controller
               control={control}
