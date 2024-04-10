@@ -89,30 +89,6 @@ export const PositionRequestPage = () => {
     isSharedRoute,
   ]);
 
-  // const [mode, setMode] = useState('editable');
-  // const [readonlyMode, setReadonlyMode] = useState('');
-  // const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
-
-  // // console.log('parent mode: ', mode);
-  // // console.log('parent readonlyMode: ', readonlyMode);
-
-  // const {
-  //   setWizardData,
-  //   setPositionRequestId,
-  //   setPositionRequestProfileId,
-  //   setPositionRequestDepartmentId,
-  //   setPositionRequestData,
-  // } = useWizardContext();
-
-  // // console.log('wizardData: ', wizardData);
-  // const { positionRequestId } = useParams();
-
-  // if (!positionRequestId) throw 'No position request provided';
-
-  // const { data } = useGetPositionRequestQuery({
-  //   id: parseInt(positionRequestId),
-  // });
-
   const [currentStep, setCurrentStep] = useState<number | null>(null);
 
   useEffect(() => {
@@ -180,10 +156,15 @@ export const PositionRequestPage = () => {
   const renderStepComponent = () => {
     switch (currentStep) {
       case 0:
-        return <WizardOrgChartPage onCreateNewPosition={onNext} />;
+        return <WizardOrgChartPage onCreateNewPosition={onNext} positionRequest={unwrappedPositionRequestData} />;
       case 1:
         return (
-          <WizardPage onNext={onNext} onBack={onBack} disableBlockingAndNavigateHome={disableBlockingAndNavigateHome} />
+          <WizardPage
+            onNext={onNext}
+            onBack={onBack}
+            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
+          />
         );
       case 2:
         return (
@@ -191,6 +172,7 @@ export const PositionRequestPage = () => {
             onBack={onBack}
             onNext={onNext}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
           />
         );
 
@@ -200,6 +182,7 @@ export const PositionRequestPage = () => {
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
           />
         );
       case 4:
@@ -208,6 +191,7 @@ export const PositionRequestPage = () => {
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
           />
         );
       case 5:
@@ -219,6 +203,7 @@ export const PositionRequestPage = () => {
             switchParentReadonlyMode={switchParentReadonlyMode}
             setReadOnlySelectedTab={setReadOnlySelectedTab}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
           />
         );
       default:
