@@ -202,7 +202,7 @@ const WizardEditProfile = forwardRef(
                 return {
                   text: item.text,
                   isCustom: item.isCustom,
-                  disabled: item.disabled,
+                  disabled: item.disabled === undefined ? true : item.disabled,
                   is_readonly: item.is_readonly,
                   is_significant: item.is_significant,
                 };
@@ -2639,8 +2639,8 @@ const WizardEditProfile = forwardRef(
                         style={{ marginBottom: '10px' }}
                         message={
                           <>
-                            Choose from the provided list of accountabilities to avoid the review by the classification
-                            team and create your position right away
+                            Keep the provided list of accountabilities to avoid the review by the classification team
+                            and create your position right away.
                           </>
                         }
                         type="warning"
