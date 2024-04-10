@@ -333,6 +333,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
     // If the job family or classification filters have changed, de-select the selected profile
     if (jobFamilyChanged || classificationChanged || ministryChanged || jobRoleTypeChanged || jobStreamChanged) {
+      // todo: this causes bug when filters have been applied, profile selected and page reloaded
+      // (view gets reset to first page)
       newSearchParams.set('page', '1');
       newSearchParams.delete('selectedProfile');
       // console.log('navigating.. B', getBasePath(location.pathname));
@@ -402,8 +404,17 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     );
   };
 
+  useEffect(() => {
+    // if searchparams has clear filters flag, do that
+    if (searchParams.get('clearFilters')) {
+      setAllSelections([]);
+      searchParams.delete('clearFilters');
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setAllSelections, setSearchParams]);
+
   const clearFilters = () => {
-    setAllSelections([]);
+    // setAllSelections([]);
 
     // Update the URL parameters
     const newSearchParams = new URLSearchParams();
@@ -414,6 +425,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
 
+    newSearchParams.set('clearFilters', 'true');
     // setSearchParams(newSearchParams);
 
     const basePath = getBasePath(location.pathname);

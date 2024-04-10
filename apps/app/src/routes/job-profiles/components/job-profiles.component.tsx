@@ -2,7 +2,7 @@
 // JobProfilesContent.jsx
 import { FileTextFilled } from '@ant-design/icons';
 import { Breakpoint, Col, Empty, Grid, Row, Space, Typography } from 'antd';
-import { MutableRefObject, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch } from '../../../redux/redux.store';
 import { graphqlApi } from '../../../redux/services/graphql-api';
@@ -90,6 +90,20 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     const [initialFetchDone, setInitialFetchDone] = useState(false);
 
+    const getBasePath = useCallback(
+      (path: string) => {
+        if (positionRequestId) return `/my-positions/${positionRequestId}`;
+
+        const pathParts = path.split('/');
+        // Check if the last part is a number (ID), if so, remove it
+        if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
+          pathParts.pop(); // Remove the last part (job profile ID)
+        }
+        return pathParts.join('/');
+      },
+      [positionRequestId],
+    );
+
     useEffect(() => {
       // Use the following for the `search` property.
       // Search terms need to be joined with specific syntax, <-> in this case
@@ -116,6 +130,28 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       setUseData(null);
       setInitialFetchDone(true);
+
+      const filtersOrSearchApplied =
+        organizationFilter || jobRoleFilter || classificationFilter || jobFamilyFilter || jobStreamFilter || search;
+
+      // use reloaded the page while having fitlers or search applied
+      // however we need to select the profile that was originally selected for this position request
+      // (for case where user pressed "back" from edit page)
+      // - clear filters and search, this will trigger re-run of this function with no filters or search
+      if (!selectProfileIdRan.current && filtersOrSearchApplied && selectProfileId) {
+        const basePath = getBasePath(location.pathname);
+        const searchParams = new URLSearchParams();
+        if (searchParams.get('search')) searchParams.delete('search');
+        searchParams.set('clearFilters', 'true');
+        navigate(
+          {
+            pathname: basePath,
+            search: searchParams.toString(),
+          },
+          { replace: true },
+        );
+        return;
+      }
 
       trigger({
         ...(search != null && { search }),
@@ -200,6 +236,8 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       positionFilteringProcessActive,
       initialFetchDone,
       selectProfileId,
+      getBasePath,
+      navigate,
     ]);
 
     // Update totalResults based on the response (if applicable)
@@ -244,6 +282,8 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             pathname: basePath,
             search: searchParams.toString(),
           });
+
+          // memorize the search state used to display previously selected profile
           if (previousSearchState) previousSearchState.current = searchParams.toString();
         }
 
@@ -278,17 +318,6 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         },
         { replace: true },
       );
-    };
-
-    const getBasePath = (path: string) => {
-      if (positionRequestId) return `/my-positions/${positionRequestId}`;
-
-      const pathParts = path.split('/');
-      // Check if the last part is a number (ID), if so, remove it
-      if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
-        pathParts.pop(); // Remove the last part (job profile ID)
-      }
-      return pathParts.join('/');
     };
 
     const renderJobProfile = () => {

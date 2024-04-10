@@ -56,11 +56,12 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   useEffect(() => {
     if (positionRequestData?.parent_job_profile_id) {
       // check if searchparams already has selectedProfile
-      if (!searchParams.get('selectedProfile')) {
-        // determine what page we need to switch to
-        setSelectProfileId(positionRequestData.parent_job_profile_id.toString());
-        // setSearchParams({ selectedProfile: positionRequestData.parent_job_profile_id.toString() }, { replace: true });
-      }
+      // removed this to make reloading on thepage work after user selected a different profile and reloaded the page
+      // if (!searchParams.get('selectedProfile')) {
+      // determine what page we need to switch to
+      setSelectProfileId(positionRequestData.parent_job_profile_id.toString());
+      // setSearchParams({ selectedProfile: positionRequestData.parent_job_profile_id.toString() }, { replace: true });
+      // }
     }
   }, [positionRequestData, setSearchParams, searchParams]);
 
@@ -105,7 +106,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               const basePath = getBasePath(location.pathname);
 
               const searchParams = new URLSearchParams(previousSearchState.current);
+              if (searchParams.get('search')) searchParams.delete('search');
+
               searchParams.set('fetch', 'true');
+              searchParams.set('clearFilters', 'true');
               const page = parseInt(searchParams.get('page') || '1', 10);
               jobProfileSearchResultsRef.current.handlePageChange(page);
 
