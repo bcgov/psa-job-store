@@ -8,6 +8,7 @@ import { useAppDispatch } from '../../../redux/redux.store';
 import { graphqlApi } from '../../../redux/services/graphql-api';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import { OrganizationModel } from '../../../redux/services/graphql-api/organization';
 import { useLazyGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
 import { WizardProvider } from '../../wizard/components/wizard.provider';
@@ -26,7 +27,7 @@ interface JobProfilesContentProps {
   page_size?: number;
   selectProfileId?: string | null;
   previousSearchState?: MutableRefObject<string>;
-  organizationIdFilter?: string | undefined;
+  organizationFilterExtra?: OrganizationModel;
   positionRequestId?: number;
 }
 
@@ -36,7 +37,7 @@ interface JobProfilesRef {
 
 const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
   (
-    { searchParams, onSelectProfile, selectProfileId, previousSearchState, organizationIdFilter, page_size = 10 },
+    { searchParams, onSelectProfile, selectProfileId, previousSearchState, organizationFilterExtra, page_size = 10 },
     ref,
   ) => {
     const dispatch = useAppDispatch();
@@ -164,8 +165,8 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       // if no user filters applied, we need to return all profiles for this organization AND profiles for all orgs
       // if user did apply filters, then apply those filters only
       let applyOrgFilter = '';
-      if (!organizationFilter && organizationIdFilter) {
-        applyOrgFilter = organizationIdFilter + ',ALL';
+      if (!organizationFilter && organizationFilterExtra) {
+        applyOrgFilter = organizationFilterExtra.id + ',ALL';
       } else if (organizationFilter) {
         applyOrgFilter = organizationFilter;
       }
@@ -255,7 +256,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       selectProfileId,
       getBasePath,
       navigate,
-      organizationIdFilter,
+      organizationFilterExtra,
     ]);
 
     // Update totalResults based on the response (if applicable)
@@ -358,12 +359,18 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       );
     };
 
+    // ministry filter should only contain the ministry in which the position is being created in
+    const ministriesData = organizationFilterExtra && [
+      { id: organizationFilterExtra.id, name: organizationFilterExtra.name },
+    ];
+
     return (
       <>
         <WizardProvider>
           <JobProfileSearch
             fullWidth={true}
             positionRequestId={positionRequestId ? parseInt(positionRequestId) : undefined}
+            ministriesData={ministriesData}
           />
           <Row justify="center" gutter={16}>
             {screens['xl'] === true ? (

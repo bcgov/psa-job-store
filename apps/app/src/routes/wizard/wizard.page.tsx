@@ -2,6 +2,7 @@ import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Menu, Modal, Popover, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import LoadingComponent from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { useGetDepartmentQuery } from '../../redux/services/graphql-api/department.api';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
@@ -257,6 +258,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     );
   };
 
+  if (!departmentData) return <LoadingComponent></LoadingComponent>;
+
   return (
     <WizardPageWrapper
       title={
@@ -321,7 +324,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           selectProfileId={selectProfileId}
           previousSearchState={previousSearchState}
           // this will filter job profiles by organization in which this position is being created in
-          organizationIdFilter={departmentData?.department?.organization_id}
+          organizationFilterExtra={departmentData?.department?.organization}
         />
       </div>
     </WizardPageWrapper>

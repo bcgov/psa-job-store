@@ -1,11 +1,13 @@
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
+import { OrganizationModel } from './organization';
 
 export interface DepartmentModel {
   id: string;
   name: string;
   location_id?: string;
   organization_id?: string;
+  organization?: OrganizationModel;
 }
 
 export interface DepartmentWithLocationModel {
@@ -34,9 +36,12 @@ export const departmentApi = graphqlApi.injectEndpoints({
           document: gql`
             query Department($id: String!) {
               department(where: { id: $id }) {
-                id
-                name
-                organization_id
+                organization {
+                  id
+                  peoplesoft_id
+                  code
+                  name
+                }
               }
             }
           `,
