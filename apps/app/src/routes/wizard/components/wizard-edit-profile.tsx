@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, ExclamationCircleOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import {
   Alert,
@@ -713,108 +713,137 @@ const WizardEditProfile = forwardRef(
 
     // FOCUS ALERTS
     // when user focuses on required accountabilities and minimum requirements fields, show an alert once
-    // const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
-    // const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
-    // const { securityScreeningsAlertShown, setSecurityScreeningsAlertShown } = useWizardContext();
+    const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
+    const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
+    const { securityScreeningsAlertShown, setSecurityScreeningsAlertShown } = useWizardContext();
+    const { reqAlertShown, setReqAlertShown } = useWizardContext();
+    const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
 
-    // const { reqAlertShown, setReqAlertShown } = useWizardContext();
+    // Function to handle focus
+    const showMinReqModal = (action: () => void, showCancel: boolean, isSignificant?: boolean) => {
+      if (!minReqAlertShown && (isSignificant || isSignificant === undefined)) {
+        setMinReqAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to education and work experiences?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
-    // // Function to handle focus
-    // const showMinReqModal = (action: () => void, showCancel: boolean) => {
-    //   if (!minReqAlertShown) {
-    //     setMinReqAlertShown(true);
-    //     Modal.confirm({
-    //       title: 'Attention',
-    //       content: (
-    //         <div role="alert">
-    //           Significant changes to this area <strong>may</strong> trigger a classification review.
-    //         </div>
-    //       ),
-    //       okText: 'Proceed',
-    //       cancelText: 'Cancel',
-    //       onOk: action,
-    //       // The following props are set to style the modal like a warning
-    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-    //       okButtonProps: { style: {} },
-    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-    //       autoFocusButton: null,
-    //     });
-    //   } else {
-    //     action();
-    //   }
-    // };
+    const showRelWorkModal = (action: () => void, showCancel: boolean, isSignificant?: boolean) => {
+      if (!relWorkAlertShown && (isSignificant || isSignificant === undefined)) {
+        setRelWorkAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to related experiences?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
-    // const showRelWorkModal = (action: () => void, showCancel: boolean) => {
-    //   if (!relWorkAlertShown) {
-    //     setRelWorkAlertShown(true);
-    //     Modal.confirm({
-    //       title: 'Attention',
-    //       content: (
-    //         <div role="alert">
-    //           Significant changes to this area <strong>may</strong> trigger a classification review.
-    //         </div>
-    //       ),
-    //       okText: 'Proceed',
-    //       cancelText: 'Cancel',
-    //       onOk: action,
-    //       // The following props are set to style the modal like a warning
-    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-    //       okButtonProps: { style: {} },
-    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-    //       autoFocusButton: null,
-    //     });
-    //   } else {
-    //     action();
-    //   }
-    // };
+    const showSecurityScreeningsModal = (action: () => void, showCancel: boolean, isSignificant?: boolean) => {
+      if (!securityScreeningsAlertShown && (isSignificant || isSignificant === undefined)) {
+        setSecurityScreeningsAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to security screenings?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
-    // const showSecurityScreeningsModal = (action: () => void, showCancel: boolean) => {
-    //   if (!securityScreeningsAlertShown) {
-    //     setSecurityScreeningsAlertShown(true);
-    //     Modal.confirm({
-    //       title: 'Attention',
-    //       content: (
-    //         <div role="alert">
-    //           Significant changes to this area <strong>may</strong> trigger a classification review.
-    //         </div>
-    //       ),
-    //       okText: 'Proceed',
-    //       cancelText: 'Cancel',
-    //       onOk: action,
-    //       // The following props are set to style the modal like a warning
-    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-    //       okButtonProps: { style: {} },
-    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-    //       autoFocusButton: null,
-    //     });
-    //   } else {
-    //     action();
-    //   }
-    // };
+    const showReqModal = (action: () => void, showCancel: boolean) => {
+      if (!reqAlertShown) {
+        setReqAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to accountabilities?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
-    // const showReqModal = (action: () => void, showCancel: boolean) => {
-    //   if (!reqAlertShown) {
-    //     setReqAlertShown(true);
-    //     Modal.confirm({
-    //       title: 'Attention',
-    //       content: (
-    //         <div role="alert">
-    //           Removing required accountabilities <strong>may</strong> trigger a classification review
-    //         </div>
-    //       ),
-    //       okText: 'Proceed',
-    //       cancelText: 'Cancel',
-    //       onOk: action,
-    //       // The following props are set to style the modal like a warning
-    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-    //       okButtonProps: { style: {} },
-    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-    //       autoFocusButton: null,
-    //     });
-    //   } else {
-    //     action();
-    //   }
-    // };
+    const showOptionalAccountabilitiesModal = (action: () => void, showCancel: boolean) => {
+      if (!optionalAccountabilitiesAlertShown) {
+        setOptionalAccountabilitiesAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to optional accountabilities?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
     // DIFF HANDLING
     // Cross out deleted core items, allow ability to add back
@@ -934,6 +963,7 @@ const WizardEditProfile = forwardRef(
                       handleFieldChange(index, updatedValue);
                     }}
                     onBlur={onBlur}
+                    onFocus={() => showReqModal(() => {}, false)}
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
                   />
                 </>
@@ -947,7 +977,9 @@ const WizardEditProfile = forwardRef(
                 icon={icon}
                 aria-label={ariaLabel}
                 onClick={() => {
-                  field.disabled ? handleAccReqAddBack(index) : handleAccReqRemove(index);
+                  showReqModal(() => {
+                    field.disabled ? handleAccReqAddBack(index) : handleAccReqRemove(index);
+                  }, false);
                 }}
                 disabled={field.is_readonly}
                 style={{ marginLeft: '10px' }}
@@ -1209,6 +1241,7 @@ const WizardEditProfile = forwardRef(
                       const updatedValue = event.target.value;
                       handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
                     }}
+                    onFocus={() => showMinReqModal(() => {}, false, field.is_significant)}
                     onBlur={onBlur}
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
                   />
@@ -1223,7 +1256,13 @@ const WizardEditProfile = forwardRef(
                 icon={icon}
                 aria-label={ariaLabel}
                 onClick={() => {
-                  field.disabled ? handleMinReqAddBack(index) : handleMinReqRemove(index);
+                  showMinReqModal(
+                    () => {
+                      field.disabled ? handleMinReqAddBack(index) : handleMinReqRemove(index);
+                    },
+                    false,
+                    field.is_significant,
+                  );
                 }}
                 disabled={field.is_readonly}
                 style={{ marginLeft: '10px' }}
@@ -1375,27 +1414,13 @@ const WizardEditProfile = forwardRef(
                       const updatedValue = event.target.value;
                       handleFieldChange(index, updatedValue);
                     }}
+                    onFocus={() => showRelWorkModal(() => {}, false, field.is_significant)}
                     onBlur={onBlur}
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
                   />
                 </>
               )}
             />
-
-            {/* <FormItem
-            hidden={field.is_readonly}
-            name={`job_experience.${index}.text`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              // onFocus={() => showRelWorkModal(() => {}, false)}
-              onChange={handleFieldChange}
-            />
-          </FormItem> */}
 
             <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
               <Button
@@ -1404,7 +1429,13 @@ const WizardEditProfile = forwardRef(
                 icon={icon}
                 aria-label={ariaLabel}
                 onClick={() => {
-                  field.disabled ? handleRelWorkAddBack(index) : handleRelWorkRemove(index);
+                  showRelWorkModal(
+                    () => {
+                      field.disabled ? handleRelWorkAddBack(index) : handleRelWorkRemove(index);
+                    },
+                    false,
+                    field.is_significant,
+                  );
                 }}
                 disabled={field.is_readonly}
                 style={{ marginLeft: '10px' }}
@@ -1524,6 +1555,7 @@ const WizardEditProfile = forwardRef(
                     handleFieldChange(index, updatedValue);
                   }}
                   onBlur={onBlur}
+                  onFocus={() => showSecurityScreeningsModal(() => {}, false, field.is_significant)}
                   value={value ? (typeof value === 'string' ? value : value.value) : ''}
                 />
               </>
@@ -1539,7 +1571,13 @@ const WizardEditProfile = forwardRef(
               icon={icon}
               aria-label={ariaLabel}
               onClick={() => {
-                field.disabled ? handleSecurityScreeningsAddBack(index) : handleSecurityScreeningsRemove(index);
+                showSecurityScreeningsModal(
+                  () => {
+                    field.disabled ? handleSecurityScreeningsAddBack(index) : handleSecurityScreeningsRemove(index);
+                  },
+                  false,
+                  field.is_significant,
+                );
               }}
               disabled={field.is_readonly}
               style={{
@@ -2657,8 +2695,9 @@ const WizardEditProfile = forwardRef(
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
                           onClick={() => {
-                            handleAccReqAddNew();
-                            // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                            showReqModal(() => {
+                              handleAccReqAddNew();
+                            }, false);
                           }}
                         >
                           Add another accountability
@@ -2690,7 +2729,9 @@ const WizardEditProfile = forwardRef(
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
                           onClick={() => {
-                            handleOptReqAddNew();
+                            showOptionalAccountabilitiesModal(() => {
+                              handleOptReqAddNew();
+                            }, false);
                             // setRenderKey((prevKey) => prevKey + 1);
                           }}
                         >
@@ -2748,10 +2789,9 @@ const WizardEditProfile = forwardRef(
                           style={addStyle}
                           onClick={() => {
                             {
-                              // showMinReqModal(() => {
-                              handleMinReqAddNew();
-                              // setRenderKey((prevKey) => prevKey + 1);
-                              // }, false);
+                              showMinReqModal(() => {
+                                handleMinReqAddNew();
+                              }, false);
                             }
                           }}
                         >
@@ -2785,10 +2825,10 @@ const WizardEditProfile = forwardRef(
                           style={addStyle}
                           onClick={() => {
                             {
-                              // showRelWorkModal(() => {
-                              handleRelWorkAddNew();
-                              // setRenderKey((prevKey) => prevKey + 1);
-                              // }, false);
+                              showRelWorkModal(() => {
+                                handleRelWorkAddNew();
+                                // setRenderKey((prevKey) => prevKey + 1);
+                              }, false);
                             }
                           }}
                         >
@@ -2982,10 +3022,10 @@ const WizardEditProfile = forwardRef(
                           style={addStyle}
                           onClick={() => {
                             {
-                              // showSecurityScreeningsModal(() => {
-                              handleSecurityScreeningsAddNew();
-                              // setRenderKey((prevKey) => prevKey + 1);
-                              // }, false);
+                              showSecurityScreeningsModal(() => {
+                                handleSecurityScreeningsAddNew();
+                                // setRenderKey((prevKey) => prevKey + 1);
+                              }, false);
                             }
                           }}
                         >

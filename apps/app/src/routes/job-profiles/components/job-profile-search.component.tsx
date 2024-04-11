@@ -38,6 +38,7 @@ interface JobProfileSearchProps {
   fullWidth?: boolean;
   ministriesData?: any;
   classificationData?: any;
+  positionRequestId?: number;
 }
 
 // Unified state for all selections
@@ -57,6 +58,7 @@ interface MinistriesOption {
 }
 
 export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
+  positionRequestId,
   searchPlaceHolderText = 'Search by job title or keyword',
   // additionalFilters = false,
   fullWidth = false,
@@ -126,8 +128,9 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   //   // eslint-disable-next-line react-hooks/rules-of-hooks
   //   careerGroupData = useGetJobProfilesCareerGroupsQuery().data?.jobProfilesCareerGroups;
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  if (!ministriesData) ministriesData = useGetJobProfilesMinistriesQuery().data?.jobProfilesMinistries;
+  if (!ministriesData)
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    ministriesData = useGetJobProfilesMinistriesQuery({ positionRequestId }).data?.jobProfilesMinistries;
 
   const [allSelections, setAllSelections] = useState<Selection[]>([]); // holds tags from all filters
   const [classificationFilterData, setClassificationOptions] = useState<ClassificationOption[]>([]); // holds options for classification filter

@@ -3,6 +3,7 @@ import { Button, Menu, Modal, Popover, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PositionProfile from '../../components/app/common/components/positionProfile';
+import { useGetDepartmentQuery } from '../../redux/services/graphql-api/department.api';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
   GetPositionRequestResponseContent,
@@ -51,6 +52,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const { setPositionRequestProfileId } = useWizardContext();
   const navigate = useNavigate();
+
+  // get organization for the department in which the position is being created in
+  // this will be used to filter the profiles to ones that belong to this organization only
+  const { data: departmentData } = useGetDepartmentQuery(positionRequestData?.department_id ?? '');
 
   // if positionRequestData.parent_job_profile is not null, change searchParams to include selectedProfile
   useEffect(() => {
@@ -315,7 +320,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           page_size={page_size}
           selectProfileId={selectProfileId}
           previousSearchState={previousSearchState}
-          // onUseProfile={handleSubmit(onSubmit)}
+          // this will filter job profiles by organization in which this position is being created in
+          organizationIdFilter={departmentData?.department?.organization_id}
         />
       </div>
     </WizardPageWrapper>

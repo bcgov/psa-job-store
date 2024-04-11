@@ -26,6 +26,8 @@ interface JobProfilesContentProps {
   page_size?: number;
   selectProfileId?: string | null;
   previousSearchState?: MutableRefObject<string>;
+  organizationIdFilter?: string | undefined;
+  positionRequestId?: number;
 }
 
 interface JobProfilesRef {
@@ -33,7 +35,10 @@ interface JobProfilesRef {
 }
 
 const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
-  ({ searchParams, onSelectProfile, selectProfileId, previousSearchState, page_size = 10 }, ref) => {
+  (
+    { searchParams, onSelectProfile, selectProfileId, previousSearchState, organizationIdFilter, page_size = 10 },
+    ref,
+  ) => {
     const dispatch = useAppDispatch();
     const [useData, setUseData] = useState<GetJobProfilesResponse | null>(null);
     const [trigger, { data, isLoading, isFetching }] = useLazyGetJobProfilesQuery();
@@ -79,7 +84,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         pTrigger({ where: { id: `${reportsToPositionId}` } });
       }
 
-      // If we have a positionRequestId, prData, and pData, get the classification ID for the position
+      // If we have a positionRequestId, position request data, and position data, get the classification ID for the position
       const classificationId = pData?.position?.classification_id;
       if (classificationId != null && classificationIdFilter == null) {
         setPositionFilteringProcessActive(false);
@@ -153,6 +158,18 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         return;
       }
 
+      // if we are doing organization filtering because user is creating a new position request
+      // in that organization, apply this filter in addition to user applied organization filter
+      //
+      // if no user filters applied, we need to return all profiles for this organization AND profiles for all orgs
+      // if user did apply filters, then apply those filters only
+      let applyOrgFilter = '';
+      if (!organizationFilter && organizationIdFilter) {
+        applyOrgFilter = organizationIdFilter + ',ALL';
+      } else if (organizationFilter) {
+        applyOrgFilter = organizationFilter;
+      }
+
       trigger({
         ...(search != null && { search }),
         where: {
@@ -170,13 +187,13 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                   },
                 ]
               : []),
-            ...(organizationFilter != null
+            ...(applyOrgFilter != ''
               ? [
                   {
                     organizations: {
                       some: {
                         organization_id: {
-                          in: JSON.parse(`[${organizationFilter.split(',').map((v) => `"${v}"`)}]`),
+                          in: JSON.parse(`[${applyOrgFilter.split(',').map((v) => `"${v}"`)}]`),
                         },
                       },
                     },
@@ -238,6 +255,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       selectProfileId,
       getBasePath,
       navigate,
+      organizationIdFilter,
     ]);
 
     // Update totalResults based on the response (if applicable)
@@ -343,7 +361,10 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     return (
       <>
         <WizardProvider>
-          <JobProfileSearch fullWidth={true} />
+          <JobProfileSearch
+            fullWidth={true}
+            positionRequestId={positionRequestId ? parseInt(positionRequestId) : undefined}
+          />
           <Row justify="center" gutter={16}>
             {screens['xl'] === true ? (
               <>
