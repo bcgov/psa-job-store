@@ -73,6 +73,9 @@ interface WizardContextProps {
 
   positionRequestData: GetPositionRequestResponseContent | null;
   setPositionRequestData: React.Dispatch<React.SetStateAction<GetPositionRequestResponseContent | null>>;
+
+  currentSection: string | null;
+  setCurrentSection: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -118,6 +121,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalPreferencesFields, setOriginalPreferencesFields] = useState<any[]>([]);
   const [originalKnowledgeSkillsAbilitiesFields, setOriginalKnowledgeSkillsAbilitiesFields] = useState<any[]>([]);
   const [originalProvisosFields, setOriginalProvisosFields] = useState<any[]>([]);
+  const [currentSection, setCurrentSection] = useState<string | null>(null);
 
   const value = {
     wizardData,
@@ -174,6 +178,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setOriginalProvisosFields,
     positionRequestData,
     setPositionRequestData,
+    currentSection,
+    setCurrentSection,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

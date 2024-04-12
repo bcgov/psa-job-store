@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  ExclamationCircleFilled,
+  InfoCircleOutlined,
+  PlusOutlined,
+  WarningFilled,
+} from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import {
   Alert,
@@ -13,12 +19,13 @@ import {
   Input,
   List,
   Modal,
+  Result,
   Row,
   Tooltip,
   Typography,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { MutableRefObject, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
@@ -34,7 +41,10 @@ import {
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
+import {
+  useGetPositionRequestQuery,
+  usePositionNeedsRivewQuery,
+} from '../../../redux/services/graphql-api/position-request.api';
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
@@ -58,6 +68,17 @@ interface WizardEditProfileProps {
   receivedClassificationsDataCallback?: (data: GetClassificationsResponse) => void;
 }
 
+enum reasons {
+  ACCOUNTABILITIES = 'Changes in Accountabilities',
+  EDUCATION = 'Changes in Education', // Added for demonstration
+  JOB_EXPERIENCE = 'Changes in Job Experience', // Added for demonstration
+  SECURITY_SCREENINGS = 'Changes in Security Screenings', // Added for demonstration
+}
+
+type sectionMap = {
+  [reason in reasons]: MutableRefObject<null>;
+};
+
 const WizardEditProfile = forwardRef(
   ({ id, profileData, config, submitHandler, receivedClassificationsDataCallback }: WizardEditProfileProps, ref) => {
     const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
@@ -66,7 +87,16 @@ const WizardEditProfile = forwardRef(
     const initialData = profileData ?? null;
     const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
     const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
-
+    const acctSection = useRef(null);
+    const educationSection = useRef(null);
+    const workExperienceSection = useRef(null);
+    const securitySection = useRef(null);
+    const sections: sectionMap = {
+      [reasons.ACCOUNTABILITIES]: acctSection,
+      [reasons.EDUCATION]: educationSection, // Adjusted for demonstration
+      [reasons.JOB_EXPERIENCE]: workExperienceSection,
+      [reasons.SECURITY_SCREENINGS]: securitySection, // Adjusted for demonstration
+    };
     useEffect(() => {
       // If profileData exists, use it to set the form state
       if (profileData) {
@@ -89,6 +119,7 @@ const WizardEditProfile = forwardRef(
       resolver: classValidatorResolver(JobProfileValidationModel),
       mode: 'onChange',
     });
+    const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
 
     useEffect(() => {
       if (!profileData && data && !isLoading) {
@@ -144,8 +175,37 @@ const WizardEditProfile = forwardRef(
 
       positionRequestId,
       // errors,
+      currentSection,
+      setCurrentSection,
     } = useWizardContext();
+    const { data: positionNeedsRivew, isLoading: positionNeedsRivewLoading } = usePositionNeedsRivewQuery({
+      id: positionRequestId ?? -1,
+    });
+    useEffect(() => {
+      if (positionNeedsRivew && !positionNeedsRivewLoading) {
+        setVerificationNeededReasons(positionNeedsRivew.positionNeedsRivew.reasons);
+      }
+    }, [positionNeedsRivew, positionNeedsRivewLoading, profileData]);
 
+    const handleSectionScroll = (reason: string) => {
+      for (const key in sections) {
+        if (key === reason) {
+          const section = sections[key as keyof typeof sections];
+          if (section && section.current) {
+            setTimeout(() => {
+              section.current.scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+            break;
+          }
+        }
+      }
+    };
+    useEffect(() => {
+      if (effectiveData && sections && currentSection) {
+        handleSectionScroll(currentSection);
+        setCurrentSection(null);
+      }
+    }, []);
     // console.log('effectiveData: ', effectiveData);
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData) {
@@ -251,7 +311,7 @@ const WizardEditProfile = forwardRef(
           const isEdited = item.text !== originalMinReqFields[index]?.text;
           initialEditStatus[index] = isEdited;
         });
-
+        // }
         // Set the editedMinReqFields state
         setEditedMinReqFields(initialEditStatus);
 
@@ -2439,6 +2499,35 @@ const WizardEditProfile = forwardRef(
 
     return (
       <>
+        {/* {mode === 'verificationRequired_edits' && ( */}
+        <Result icon={<WarningFilled />} title="Verification required" status="warning" />
+        <Row justify="center" style={{ padding: '0 1rem' }}>
+          <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
+            <Alert
+              data-testid="verification-warning-message"
+              message=""
+              description={
+                <span>
+                  Some of your amendments to the generic profile require verification. If you would like to revisit some
+                  of your amendments, please click these links:
+                  {/* loop over reasons */}
+                  <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
+                    {verificationNeededReasons.map((reason, index) => (
+                      <li key={index}>
+                        <a onClick={() => handleSectionScroll(reason)}>{reason}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </span>
+              }
+              type="warning"
+              showIcon
+              icon={<ExclamationCircleFilled />}
+              style={{ marginBottom: '24px' }}
+            />
+          </Col>
+        </Row>{' '}
+        {/* )} */}
         <Row data-testid="profile-editing-form" gutter={[24, 24]}>
           <Col xs={24} sm={24} lg={8} aria-label="Context and job details" role="region">
             <Alert
@@ -2630,8 +2719,8 @@ const WizardEditProfile = forwardRef(
               )}
               {renderOverview(getValues('overview'))}
 
-              <Card title="Accountabilities" className="custom-card" style={{ marginTop: 16 }}>
-                <section aria-label="Accountabilities" role="region">
+              <Card ref={acctSection} title="Accountabilities" className="custom-card" style={{ marginTop: 16 }}>
+                <section id="accountabilties" aria-label="Accountabilities" role="region">
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Alert
@@ -2722,84 +2811,84 @@ const WizardEditProfile = forwardRef(
                         type="warning"
                         showIcon
                       />
+                      <div ref={educationSection}>
+                        <Form.Item
+                          label="Education and work experience"
+                          labelCol={{ className: 'card-label' }}
+                          className="label-only"
+                          colon={false}
+                        ></Form.Item>
 
-                      <Form.Item
-                        label="Education and work experience"
-                        labelCol={{ className: 'card-label' }}
-                        className="label-only"
-                        colon={false}
-                      ></Form.Item>
+                        <Typography.Paragraph type="secondary">
+                          Minimum years of experience are required, and you may add or refine the education requirements
+                          (add a degree or diploma program). These equivalencies are designed to be inclusive of
+                          different backgrounds.
+                        </Typography.Paragraph>
 
-                      <Typography.Paragraph type="secondary">
-                        Minimum years of experience are required, and you may add or refine the education requirements
-                        (add a degree or diploma program). These equivalencies are designed to be inclusive of different
-                        backgrounds.
-                      </Typography.Paragraph>
-
-                      <>
-                        {education_fields.length > 0 && (
-                          // <List dataSource={education_fields} renderItem={renderMinReqFields} />
-                          <AccessibleList
-                            dataSource={education_fields}
-                            renderItem={renderMinReqFields}
-                            ariaLabel="Education and work experience"
-                          />
-                        )}
-                        <Button
-                          data-testid="add-education-button"
-                          type="link"
-                          icon={<PlusOutlined aria-hidden />}
-                          style={addStyle}
-                          onClick={() => {
-                            {
-                              // showMinReqModal(() => {
-                              handleMinReqAddNew();
-                              // setRenderKey((prevKey) => prevKey + 1);
-                              // }, false);
-                            }
-                          }}
-                        >
-                          Add an education or work requirement
-                        </Button>
-                      </>
-
+                        <>
+                          {education_fields.length > 0 && (
+                            // <List dataSource={education_fields} renderItem={renderMinReqFields} />
+                            <AccessibleList
+                              dataSource={education_fields}
+                              renderItem={renderMinReqFields}
+                              ariaLabel="Education and work experience"
+                            />
+                          )}
+                          <Button
+                            data-testid="add-education-button"
+                            type="link"
+                            icon={<PlusOutlined aria-hidden />}
+                            style={addStyle}
+                            onClick={() => {
+                              {
+                                // showMinReqModal(() => {
+                                handleMinReqAddNew();
+                                // setRenderKey((prevKey) => prevKey + 1);
+                                // }, false);
+                              }
+                            }}
+                          >
+                            Add an education or work requirement
+                          </Button>
+                        </>
+                      </div>
                       {/* Related experience */}
 
                       <Divider className="hr-reduced-margin" />
+                      <div ref={workExperienceSection}>
+                        <Form.Item
+                          label="Related experience"
+                          labelCol={{ className: 'card-label' }}
+                          className="label-only"
+                          colon={false}
+                        ></Form.Item>
 
-                      <Form.Item
-                        label="Related experience"
-                        labelCol={{ className: 'card-label' }}
-                        className="label-only"
-                        colon={false}
-                      ></Form.Item>
-
-                      <>
-                        {job_experience_fields.length > 0 && (
-                          <AccessibleList
-                            dataSource={job_experience_fields}
-                            renderItem={renderRelWorkFields}
-                            ariaLabel="Related experience"
-                          />
-                        )}
-                        <Button
-                          data-testid="add-job-experience-button"
-                          type="link"
-                          icon={<PlusOutlined aria-hidden />}
-                          style={addStyle}
-                          onClick={() => {
-                            {
-                              // showRelWorkModal(() => {
-                              handleRelWorkAddNew();
-                              // setRenderKey((prevKey) => prevKey + 1);
-                              // }, false);
-                            }
-                          }}
-                        >
-                          Add a related experience
-                        </Button>
-                      </>
-
+                        <>
+                          {job_experience_fields.length > 0 && (
+                            <AccessibleList
+                              dataSource={job_experience_fields}
+                              renderItem={renderRelWorkFields}
+                              ariaLabel="Related experience"
+                            />
+                          )}
+                          <Button
+                            data-testid="add-job-experience-button"
+                            type="link"
+                            icon={<PlusOutlined aria-hidden />}
+                            style={addStyle}
+                            onClick={() => {
+                              {
+                                // showRelWorkModal(() => {
+                                handleRelWorkAddNew();
+                                // setRenderKey((prevKey) => prevKey + 1);
+                                // }, false);
+                              }
+                            }}
+                          >
+                            Add a related experience
+                          </Button>
+                        </>
+                      </div>
                       {/* Professional registration requirements */}
 
                       <Divider className="hr-reduced-margin" />
@@ -2963,40 +3052,40 @@ const WizardEditProfile = forwardRef(
                       {/* Security screenings */}
 
                       <Divider className="hr-reduced-margin" />
+                      <div ref={securitySection}>
+                        <Form.Item
+                          label="Security screenings"
+                          labelCol={{ className: 'card-label' }}
+                          className="label-only"
+                          colon={false}
+                        ></Form.Item>
 
-                      <Form.Item
-                        label="Security screenings"
-                        labelCol={{ className: 'card-label' }}
-                        className="label-only"
-                        colon={false}
-                      ></Form.Item>
-
-                      <>
-                        {security_screenings_fields.length > 0 && (
-                          <AccessibleList
-                            dataSource={security_screenings_fields}
-                            renderItem={renderSecurityScreeningsFields}
-                            ariaLabel="Security screenings"
-                          />
-                        )}
-                        <Button
-                          data-testid="add-security-screening-button"
-                          type="link"
-                          icon={<PlusOutlined aria-hidden />}
-                          style={addStyle}
-                          onClick={() => {
-                            {
-                              // showSecurityScreeningsModal(() => {
-                              handleSecurityScreeningsAddNew();
-                              // setRenderKey((prevKey) => prevKey + 1);
-                              // }, false);
-                            }
-                          }}
-                        >
-                          Add another security screening
-                        </Button>
-                      </>
-
+                        <>
+                          {security_screenings_fields.length > 0 && (
+                            <AccessibleList
+                              dataSource={security_screenings_fields}
+                              renderItem={renderSecurityScreeningsFields}
+                              ariaLabel="Security screenings"
+                            />
+                          )}
+                          <Button
+                            data-testid="add-security-screening-button"
+                            type="link"
+                            icon={<PlusOutlined aria-hidden />}
+                            style={addStyle}
+                            onClick={() => {
+                              {
+                                // showSecurityScreeningsModal(() => {
+                                handleSecurityScreeningsAddNew();
+                                // setRenderKey((prevKey) => prevKey + 1);
+                                // }, false);
+                              }
+                            }}
+                          >
+                            Add another security screening
+                          </Button>
+                        </>
+                      </div>
                       {/* Optional requirements */}
 
                       <Divider className="hr-reduced-margin" />
