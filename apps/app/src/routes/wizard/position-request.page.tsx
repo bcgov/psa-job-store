@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography } from 'antd';
+import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography, message } from 'antd';
 import Title from 'antd/es/typography/Title';
+import copy from 'copy-to-clipboard';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -151,6 +153,12 @@ export const PositionRequestPage = () => {
   const disableBlockingAndNavigateHome = () => {
     isBlocking.current = false; // This will disable the blocker
     navigate('/'); // Replace with the path where the user should be redirected
+  };
+
+  const handleCopy = (copyData: any) => {
+    // Use the Clipboard API to copy the link to the clipboard
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(copyData);
+    message.success('Link copied to clipboard!');
   };
 
   const renderStepComponent = () => {
@@ -386,9 +394,14 @@ export const PositionRequestPage = () => {
                           <Descriptions bordered layout="horizontal" column={1}>
                             <Descriptions.Item label="Position number">
                               <span data-testid="position-number">{unwrappedPositionRequestData?.position_number}</span>{' '}
-                              <Button type="link">Copy</Button>
+                              <Button
+                                type="link"
+                                onClick={() => handleCopy(unwrappedPositionRequestData?.position_number)}
+                              >
+                                Copy
+                              </Button>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Job Details">
+                            {/* <Descriptions.Item label="Job Details">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item>
                             <Descriptions.Item label="Organization chart">
@@ -399,6 +412,16 @@ export const PositionRequestPage = () => {
                             </Descriptions.Item>
                             <Descriptions.Item label="Modified job profile">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
+                            </Descriptions.Item> */}
+                            <Descriptions.Item label="Job profile">
+                              <Button type="link">View</Button> |{' '}
+                              <Button type="link">
+                                <DownloadJobProfileComponent
+                                  jobProfile={positionRequestData?.positionRequest?.profile_json}
+                                >
+                                  Download
+                                </DownloadJobProfileComponent>
+                              </Button>
                             </Descriptions.Item>
                           </Descriptions>
                         </Card>
@@ -425,9 +448,14 @@ export const PositionRequestPage = () => {
                           <Descriptions bordered layout="horizontal" column={1}>
                             <Descriptions.Item label="Position number">
                               <span data-testid="position-number">{unwrappedPositionRequestData?.position_number}</span>{' '}
-                              <Button type="link">Copy</Button>
+                              <Button
+                                type="link"
+                                onClick={() => handleCopy(unwrappedPositionRequestData?.position_number)}
+                              >
+                                Copy
+                              </Button>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Job Details">
+                            {/* <Descriptions.Item label="Job Details">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item>
                             <Descriptions.Item label="Organization chart">
@@ -435,14 +463,11 @@ export const PositionRequestPage = () => {
                             </Descriptions.Item>
                             <Descriptions.Item label="Job store job profile">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Modified job profile">
-                              <Button type="link">View</Button> |{' '}
-                              <Button type="link">
-                                <DownloadJobProfileComponent jobProfile={unwrappedPositionRequestData?.profile_json}>
-                                  Download
-                                </DownloadJobProfileComponent>
-                              </Button>
+                            </Descriptions.Item> */}
+                            <Descriptions.Item label="Job profile">
+                              <DownloadJobProfileComponent jobProfile={unwrappedPositionRequestData?.profile_json}>
+                                <a href="#">Download</a>
+                              </DownloadJobProfileComponent>
                             </Descriptions.Item>
                           </Descriptions>
                         </Card>

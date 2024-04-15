@@ -3,8 +3,10 @@ import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
 
 export interface OrganizationModel {
-  id: number;
-  name: string;
+  id?: number;
+  peoplesoft_id?: string;
+  code?: string;
+  name?: string;
 }
 
 export interface GetOrganizationsResponse {

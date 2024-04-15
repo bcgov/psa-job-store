@@ -2,12 +2,13 @@
 // JobProfilesContent.jsx
 import { FileTextFilled } from '@ant-design/icons';
 import { Breakpoint, Col, Empty, Grid, Row, Space, Typography } from 'antd';
-import { MutableRefObject, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch } from '../../../redux/redux.store';
 import { graphqlApi } from '../../../redux/services/graphql-api';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import { OrganizationModel } from '../../../redux/services/graphql-api/organization';
 import { useLazyGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
 import { WizardProvider } from '../../wizard/components/wizard.provider';
@@ -26,6 +27,8 @@ interface JobProfilesContentProps {
   page_size?: number;
   selectProfileId?: string | null;
   previousSearchState?: MutableRefObject<string>;
+  organizationFilterExtra?: OrganizationModel;
+  positionRequestId?: number;
 }
 
 interface JobProfilesRef {
@@ -33,7 +36,10 @@ interface JobProfilesRef {
 }
 
 const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
-  ({ searchParams, onSelectProfile, selectProfileId, previousSearchState, page_size = 10 }, ref) => {
+  (
+    { searchParams, onSelectProfile, selectProfileId, previousSearchState, organizationFilterExtra, page_size = 10 },
+    ref,
+  ) => {
     const dispatch = useAppDispatch();
     const [useData, setUseData] = useState<GetJobProfilesResponse | null>(null);
     const [trigger, { data, isLoading, isFetching }] = useLazyGetJobProfilesQuery();
@@ -79,7 +85,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         pTrigger({ where: { id: `${reportsToPositionId}` } });
       }
 
-      // If we have a positionRequestId, prData, and pData, get the classification ID for the position
+      // If we have a positionRequestId, position request data, and position data, get the classification ID for the position
       const classificationId = pData?.position?.classification_id;
       if (classificationId != null && classificationIdFilter == null) {
         setPositionFilteringProcessActive(false);
@@ -89,6 +95,20 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     }, [positionRequestId, prData, pData, classificationIdFilter, dispatch, pTrigger, prTrigger]);
 
     const [initialFetchDone, setInitialFetchDone] = useState(false);
+
+    const getBasePath = useCallback(
+      (path: string) => {
+        if (positionRequestId) return `/my-positions/${positionRequestId}`;
+
+        const pathParts = path.split('/');
+        // Check if the last part is a number (ID), if so, remove it
+        if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
+          pathParts.pop(); // Remove the last part (job profile ID)
+        }
+        return pathParts.join('/');
+      },
+      [positionRequestId],
+    );
 
     useEffect(() => {
       // Use the following for the `search` property.
@@ -117,6 +137,40 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       setUseData(null);
       setInitialFetchDone(true);
 
+      const filtersOrSearchApplied =
+        organizationFilter || jobRoleFilter || classificationFilter || jobFamilyFilter || jobStreamFilter || search;
+
+      // use reloaded the page while having fitlers or search applied
+      // however we need to select the profile that was originally selected for this position request
+      // (for case where user pressed "back" from edit page)
+      // - clear filters and search, this will trigger re-run of this function with no filters or search
+      if (!selectProfileIdRan.current && filtersOrSearchApplied && selectProfileId) {
+        const basePath = getBasePath(location.pathname);
+        const searchParams = new URLSearchParams();
+        if (searchParams.get('search')) searchParams.delete('search');
+        searchParams.set('clearFilters', 'true');
+        navigate(
+          {
+            pathname: basePath,
+            search: searchParams.toString(),
+          },
+          { replace: true },
+        );
+        return;
+      }
+
+      // if we are doing organization filtering because user is creating a new position request
+      // in that organization, apply this filter in addition to user applied organization filter
+      //
+      // if no user filters applied, we need to return all profiles for this organization AND profiles for all orgs
+      // if user did apply filters, then apply those filters only
+      let applyOrgFilter = '';
+      if (!organizationFilter && organizationFilterExtra) {
+        applyOrgFilter = organizationFilterExtra.id + ',ALL';
+      } else if (organizationFilter) {
+        applyOrgFilter = organizationFilter;
+      }
+
       trigger({
         ...(search != null && { search }),
         where: {
@@ -134,13 +188,13 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                   },
                 ]
               : []),
-            ...(organizationFilter != null
+            ...(applyOrgFilter != ''
               ? [
                   {
                     organizations: {
                       some: {
                         organization_id: {
-                          in: JSON.parse(`[${organizationFilter.split(',').map((v) => `"${v}"`)}]`),
+                          in: JSON.parse(`[${applyOrgFilter.split(',').map((v) => `"${v}"`)}]`),
                         },
                       },
                     },
@@ -200,6 +254,9 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       positionFilteringProcessActive,
       initialFetchDone,
       selectProfileId,
+      getBasePath,
+      navigate,
+      organizationFilterExtra,
     ]);
 
     // Update totalResults based on the response (if applicable)
@@ -244,6 +301,8 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             pathname: basePath,
             search: searchParams.toString(),
           });
+
+          // memorize the search state used to display previously selected profile
           if (previousSearchState) previousSearchState.current = searchParams.toString();
         }
 
@@ -280,17 +339,6 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       );
     };
 
-    const getBasePath = (path: string) => {
-      if (positionRequestId) return `/my-positions/${positionRequestId}`;
-
-      const pathParts = path.split('/');
-      // Check if the last part is a number (ID), if so, remove it
-      if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
-        pathParts.pop(); // Remove the last part (job profile ID)
-      }
-      return pathParts.join('/');
-    };
-
     const renderJobProfile = () => {
       return params.id || searchParams.get('selectedProfile') ? (
         <JobProfile />
@@ -311,10 +359,19 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       );
     };
 
+    // ministry filter should only contain the ministry in which the position is being created in
+    const ministriesData = organizationFilterExtra && [
+      { id: organizationFilterExtra.id, name: organizationFilterExtra.name },
+    ];
+
     return (
       <>
         <WizardProvider>
-          <JobProfileSearch fullWidth={true} />
+          <JobProfileSearch
+            fullWidth={true}
+            positionRequestId={positionRequestId ? parseInt(positionRequestId) : undefined}
+            ministriesData={ministriesData}
+          />
           <Row justify="center" gutter={16}>
             {screens['xl'] === true ? (
               <>

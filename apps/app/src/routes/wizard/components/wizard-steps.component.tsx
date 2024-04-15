@@ -5,9 +5,10 @@ import './wizard-steps.component.css';
 interface WizardStepsProps {
   current: number; // Define the current prop as a number
   xl?: number;
+  highlightEdit?: boolean;
 }
 
-export const WizardSteps: React.FC<WizardStepsProps> = ({ current, xl = 14 }) => {
+export const WizardSteps: React.FC<WizardStepsProps> = ({ current, highlightEdit, xl = 14 }) => {
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [stepsDirection, setStepsDirection] = useState<'horizontal' | 'vertical'>('horizontal');
 
@@ -33,7 +34,20 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({ current, xl = 14 }) =>
         <Steps
           responsive={false}
           direction={stepsDirection}
-          progressDot
+          progressDot={(dot, { index }) => {
+            if (index == 2 && highlightEdit)
+              return (
+                <div
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#FA8C16',
+                  }}
+                />
+              );
+            return dot;
+          }}
+          // progressDot
           className="custom-steps"
           style={{ marginBottom: '1rem' }}
           current={current}
