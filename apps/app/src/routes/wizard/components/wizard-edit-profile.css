@@ -1,13 +1,38 @@
-.strikethrough-textarea.ant-input {
-    text-decoration: line-through;
-    background-color: rgba(0, 0, 0, 0.04);
-  }
+
 
   .edited-textarea.ant-input {
+    background-color: rgba(0, 0, 0, 0.00);
+  }
+
+  .strikethrough-textarea.ant-input {
+    text-decoration: line-through;
     background-color: rgba(0, 0, 0, 0.04);
   }
 
   .multiline-checkbox .ant-checkbox{
     align-self: flex-start;
     margin-top: 3px;
+  }
+
+
+
+  .input-container{
+    position: relative;
+    width:100%
+  }
+
+  .edited-field-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: solid #FA8C16;
+    border-width: 2px 2px 2px 5px; /* Adjust the values as needed */
+    pointer-events: none;
+  }
+
+  .ant-input, .ant-select-selector {
+    border-radius: 0 !important;
   }

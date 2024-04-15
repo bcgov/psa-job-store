@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined, ExclamationCircleOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  ExclamationCircleFilled,
+  ExclamationCircleOutlined,
+  InfoCircleOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import {
   Alert,
@@ -18,7 +24,7 @@ import {
   Typography,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
@@ -33,7 +39,7 @@ import {
   JobProfileModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
-import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import { useGetJobProfileQuery, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
@@ -56,58 +62,23 @@ interface WizardEditProfileProps {
   submitText?: string;
   showBackButton?: boolean;
   receivedClassificationsDataCallback?: (data: GetClassificationsResponse) => void;
+  onVerificationRequiredChange?: (verificationRequired: boolean) => void;
 }
 
 const WizardEditProfile = forwardRef(
-  ({ id, profileData, config, submitHandler, receivedClassificationsDataCallback }: WizardEditProfileProps, ref) => {
+  (
+    {
+      id,
+      profileData,
+      config,
+      submitHandler,
+      receivedClassificationsDataCallback,
+      onVerificationRequiredChange,
+    }: WizardEditProfileProps,
+    ref,
+  ) => {
     const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
       useLazyGetClassificationsQuery();
-
-    const initialData = profileData ?? null;
-    const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
-    const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
-
-    useEffect(() => {
-      // If profileData exists, use it to set the form state
-      if (profileData) {
-        setEffectiveData(profileData);
-      } else if (!profileData && id) {
-        // If no profileData is provided and an id exists, fetch the data
-        triggerGetJobProfile({ id: +id });
-      }
-      triggerGetClassificationData(); // get data to populate classification dropdown. Todo: cache this?
-    }, [id, profileData, triggerGetJobProfile, triggerGetClassificationData]);
-
-    useEffect(() => {
-      if (classificationsData && !classificationsDataIsLoading && receivedClassificationsDataCallback) {
-        receivedClassificationsDataCallback(classificationsData);
-      }
-    }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { control, reset, handleSubmit, getValues, formState, trigger } = useForm<JobProfileValidationModel>({
-      resolver: classValidatorResolver(JobProfileValidationModel),
-      mode: 'onChange',
-    });
-
-    useEffect(() => {
-      if (!profileData && data && !isLoading) {
-        // Only set effectiveData from fetched data if profileData is not provided
-        setEffectiveData(data.jobProfile);
-        trigger();
-      }
-    }, [data, isLoading, profileData, trigger]);
-
-    const [form] = Form.useForm();
-
-    // todo: usage of this approach is undesirable, however it fixes various render issues
-    // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
-    // of this state
-    // const [renderKey, setRenderKey] = useState(0);
-    // useEffect(() => {
-    //   form.resetFields(); // "form" is needed to use with ref and to get the state. Must do "resetFields"
-    //   // as part of the render hack. todo: get rid of this if possible
-    // }, [renderKey, form]);
 
     const {
       originalValuesSet,
@@ -143,17 +114,117 @@ const WizardEditProfile = forwardRef(
       setOriginalProvisosFields,
 
       positionRequestId,
+      positionRequestProfileId,
       // errors,
     } = useWizardContext();
 
+    // get original profile data for comparison to the edited state
+    const { data: originalProfileData } = useGetJobProfileQuery({ id: positionRequestProfileId ?? -1 });
+    const initialData = profileData ?? null;
+    const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
+    const [requiresVerification, setRequiresVerification] = useState(false);
+    const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
+
+    const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
+    const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
+    const [editedRelWorkFields, setEditedRelWorkFields] = useState<{ [key: number]: boolean }>({});
+    const [editedSecurityScreeningsFields, setEditedSecurityScreeningsFields] = useState<{ [key: number]: boolean }>(
+      {},
+    );
+
+    useEffect(() => {
+      // If profileData exists, use it to set the form state
+      if (profileData) {
+        setEffectiveData(profileData);
+      } else if (!profileData && id) {
+        // If no profileData is provided and an id exists, fetch the data
+        triggerGetJobProfile({ id: +id });
+      }
+      triggerGetClassificationData(); // get data to populate classification dropdown. Todo: cache this?
+    }, [id, profileData, triggerGetJobProfile, triggerGetClassificationData]);
+
+    useEffect(() => {
+      if (classificationsData && !classificationsDataIsLoading && receivedClassificationsDataCallback) {
+        receivedClassificationsDataCallback(classificationsData);
+      }
+    }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { control, reset, handleSubmit, getValues, formState, trigger } = useForm<JobProfileValidationModel>({
+      resolver: classValidatorResolver(JobProfileValidationModel),
+      mode: 'onChange',
+    });
+
+    useEffect(() => {
+      if (!profileData && data && !isLoading) {
+        // Only set effectiveData from fetched data if profileData is not provided
+        setEffectiveData(data.jobProfile);
+        trigger();
+      }
+    }, [data, isLoading, profileData, trigger]);
+
+    const [form] = Form.useForm();
+
+    const validateVerification = useCallback(() => {
+      // check if the form in its current state would require verification
+
+      // check if any flags are true in editedAccReqFieldsArray
+      const anyReqAccsTrue = Object.values(editedAccReqFields).some((item) => item === true);
+      const anyEducationTrue = Object.values(editedMinReqFields).some((item) => item === true);
+      const anyRelWorkTrue = Object.values(editedRelWorkFields).some((item) => item === true);
+      const anySsecurityScreeningsTrue = Object.values(editedSecurityScreeningsFields).some((item) => item === true);
+
+      const verificationRequired = anyReqAccsTrue || anyEducationTrue || anyRelWorkTrue || anySsecurityScreeningsTrue;
+
+      setRequiresVerification(verificationRequired);
+      onVerificationRequiredChange?.(verificationRequired); // call parent
+    }, [
+      editedAccReqFields,
+      editedMinReqFields,
+      editedRelWorkFields,
+      editedSecurityScreeningsFields,
+      onVerificationRequiredChange,
+    ]);
+
+    useEffect(() => {
+      validateVerification();
+    }, [
+      editedAccReqFields,
+      editedMinReqFields,
+      editedRelWorkFields,
+      editedSecurityScreeningsFields,
+      validateVerification,
+    ]);
+
     // console.log('effectiveData: ', effectiveData);
     useEffect(() => {
-      if (effectiveData && !isLoading && classificationsData) {
+      if (effectiveData && !isLoading && classificationsData && originalProfileData) {
         const classificationIds =
           effectiveData?.classifications?.map((c) => ({ classification: c.classification.id })) ?? [];
 
         // required accountabilities
-        const originalAccReqFieldsValue = effectiveData.accountabilities
+        const initialAccReqFieldsValue = effectiveData.accountabilities
+          .map((item) => {
+            if (typeof item === 'string') {
+              return {
+                text: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              if (item.is_significant)
+                return {
+                  text: item.text,
+                  isCustom: item.isCustom,
+                  disabled: item.disabled,
+                  is_readonly: item.is_readonly,
+                  is_significant: item.is_significant,
+                };
+            }
+          })
+          .filter((item) => item !== undefined);
+
+        const originalAccReqFieldsValue = originalProfileData.jobProfile.accountabilities
           .map((item) => {
             if (typeof item === 'string') {
               return {
@@ -180,16 +251,38 @@ const WizardEditProfile = forwardRef(
         let initialEditStatus: { [key: number]: boolean } = {};
 
         // Iterate over each minimum requirement field and compare with the original value
-        originalAccReqFieldsValue.forEach((item, index) => {
+        initialAccReqFieldsValue.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item?.text !== originalAccReqFields[index]?.text;
+          const isEdited = item?.text !== originalAccReqFieldsValue[index]?.text || item?.disabled === true;
           initialEditStatus[index] = isEdited;
         });
 
         // Set the editedMinReqFields state
         setEditedAccReqFields(initialEditStatus);
 
-        const originalOptReqFieldsValue = effectiveData.accountabilities
+        const originalOptReqFieldsValue = originalProfileData.jobProfile.accountabilities
+          .map((item) => {
+            if (typeof item === 'string') {
+              return {
+                text: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              if (!item.is_significant) {
+                return {
+                  text: item.text,
+                  isCustom: item.isCustom,
+                  disabled: item.disabled === undefined ? true : item.disabled,
+                  is_readonly: item.is_readonly,
+                  is_significant: item.is_significant,
+                };
+              }
+            }
+          })
+          .filter((item) => item !== undefined);
+
+        const initialOptReqFieldsValue = effectiveData.accountabilities
           .map((item) => {
             if (typeof item === 'string') {
               return {
@@ -214,16 +307,34 @@ const WizardEditProfile = forwardRef(
 
         initialEditStatus = {};
         // // Iterate over each minimum requirement field and compare with the original value
-        originalOptReqFieldsValue.forEach((item, index) => {
+        initialOptReqFieldsValue.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item?.text !== originalOptReqFields[index]?.text;
+          const isEdited = item?.text !== originalOptReqFieldsValue[index]?.text;
           initialEditStatus[index] = isEdited;
         });
 
         // // Set the editedMinReqFields state
         // setEditedOptReqFields(initialEditStatus);
 
-        const originalMinReqFieldsValue = effectiveData.education?.map((item) => {
+        const originalMinReqFieldsValue = originalProfileData.jobProfile.education?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              text: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              text: item.text,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+              is_readonly: item.is_readonly,
+              is_significant: item.is_significant,
+            };
+          }
+        });
+
+        const initialMinReqFieldsValue = effectiveData.education?.map((item) => {
           if (typeof item === 'string') {
             return {
               text: item,
@@ -246,9 +357,11 @@ const WizardEditProfile = forwardRef(
         initialEditStatus = {};
 
         // Iterate over each minimum requirement field and compare with the original value
-        originalMinReqFieldsValue?.forEach((item, index) => {
+        initialMinReqFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.text !== originalMinReqFields[index]?.text;
+          const isEdited =
+            item.text !== originalMinReqFieldsValue[index]?.text ||
+            (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
 
@@ -257,7 +370,24 @@ const WizardEditProfile = forwardRef(
 
         // RELATED EXPERIENCE
         initialEditStatus = {};
-        const originalRelWorkFieldsValue = effectiveData.job_experience?.map((item) => {
+        const originalRelWorkFieldsValue = originalProfileData.jobProfile.job_experience?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              text: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              text: item.text,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+              is_readonly: item.is_readonly,
+              is_significant: item.is_significant,
+            };
+          }
+        });
+        const initialRelWorkFieldsValue = effectiveData.job_experience?.map((item) => {
           if (typeof item === 'string') {
             return {
               text: item,
@@ -277,9 +407,11 @@ const WizardEditProfile = forwardRef(
         if (!originalValuesSet) setOriginalRelWorkFields(originalRelWorkFieldsValue);
 
         // Iterate over each related experience field and compare with the original value
-        originalRelWorkFieldsValue?.forEach((item, index) => {
+        initialRelWorkFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.text !== originalRelWorkFields[index]?.text;
+          const isEdited =
+            item.text !== originalRelWorkFieldsValue[index]?.text ||
+            (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
 
@@ -288,7 +420,25 @@ const WizardEditProfile = forwardRef(
 
         // SECURITY SCREENINGS
         initialEditStatus = {};
-        const originalSecurityScreeningsFieldsValue = effectiveData.security_screenings?.map((item) => {
+        const originalSecurityScreeningsFieldsValue = originalProfileData.jobProfile.security_screenings?.map(
+          (item) => {
+            if (typeof item === 'string') {
+              return {
+                text: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              return {
+                text: item.text,
+                isCustom: item.isCustom,
+                disabled: item.disabled,
+                is_readonly: item.is_readonly,
+              };
+            }
+          },
+        );
+        const initialSecurityScreeningsFieldsValue = effectiveData.security_screenings?.map((item) => {
           if (typeof item === 'string') {
             return {
               text: item,
@@ -304,12 +454,14 @@ const WizardEditProfile = forwardRef(
             };
           }
         });
-        if (!originalValuesSet) setOriginalSecurityScreeningsFields(originalSecurityScreeningsFieldsValue);
+        if (!originalValuesSet) {
+          setOriginalSecurityScreeningsFields(originalSecurityScreeningsFieldsValue);
+        }
 
         // Iterate over each security screening field and compare with the original value
-        originalSecurityScreeningsFieldsValue?.forEach((item, index) => {
+        initialSecurityScreeningsFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.text !== originalSecurityScreeningsFields[index]?.text;
+          const isEdited = item.text !== originalSecurityScreeningsFieldsValue[index]?.text || item.disabled === true;
           initialEditStatus[index] = isEdited;
         });
 
@@ -320,7 +472,23 @@ const WizardEditProfile = forwardRef(
         //   originalProfessionalRegistrationFields,
         // setOriginalProfessionalRegistrationFields,
         initialEditStatus = {};
-        const originalProfessionalRegistrationFieldsValue = effectiveData.professional_registration_requirements?.map(
+        const originalProfessionalRegistrationFieldsValue =
+          originalProfileData.jobProfile.professional_registration_requirements?.map((item) => {
+            if (typeof item === 'string') {
+              return {
+                value: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              return {
+                value: item.value,
+                isCustom: item.isCustom,
+                disabled: item.disabled,
+              };
+            }
+          });
+        const initialProfessionalRegistrationFieldsValue = effectiveData.professional_registration_requirements?.map(
           (item) => {
             if (typeof item === 'string') {
               return {
@@ -339,9 +507,9 @@ const WizardEditProfile = forwardRef(
         );
         if (!originalValuesSet) setOriginalProfessionalRegistrationFields(originalProfessionalRegistrationFieldsValue);
 
-        originalProfessionalRegistrationFieldsValue?.forEach((item, index) => {
+        initialProfessionalRegistrationFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalProfessionalRegistrationFields[index]?.value;
+          const isEdited = item.value !== originalProfessionalRegistrationFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -349,7 +517,24 @@ const WizardEditProfile = forwardRef(
 
         // OPTIONAL REQUIREMENTS
         initialEditStatus = {};
-        const originalOptionalRequirementsFieldsValue = effectiveData.optional_requirements?.map((item) => {
+        const originalOptionalRequirementsFieldsValue = originalProfileData.jobProfile.optional_requirements?.map(
+          (item) => {
+            if (typeof item === 'string') {
+              return {
+                value: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              return {
+                value: item.value,
+                isCustom: item.isCustom,
+                disabled: item.disabled,
+              };
+            }
+          },
+        );
+        const initialOptionalRequirementsFieldsValue = effectiveData.optional_requirements?.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -366,9 +551,9 @@ const WizardEditProfile = forwardRef(
         });
         if (!originalValuesSet) setOriginalOptionalRequirementsFields(originalOptionalRequirementsFieldsValue);
 
-        originalOptionalRequirementsFieldsValue?.forEach((item, index) => {
+        initialOptionalRequirementsFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalOptionalRequirementsFields[index]?.value;
+          const isEdited = item.value !== originalOptionalRequirementsFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -378,7 +563,22 @@ const WizardEditProfile = forwardRef(
         // originalPreferencesFields,
         // setOriginalPreferencesFields,
         initialEditStatus = {};
-        const originalPreferencesFieldsValue = effectiveData.preferences?.map((item) => {
+        const originalPreferencesFieldsValue = originalProfileData.jobProfile.preferences?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        const initialPreferencesFieldsValue = effectiveData.preferences?.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -395,9 +595,9 @@ const WizardEditProfile = forwardRef(
         });
         if (!originalValuesSet) setOriginalPreferencesFields(originalPreferencesFieldsValue);
 
-        originalPreferencesFieldsValue?.forEach((item, index) => {
+        initialPreferencesFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalPreferencesFields[index]?.value;
+          const isEdited = item.value !== originalPreferencesFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -407,7 +607,24 @@ const WizardEditProfile = forwardRef(
         // originalKnowledgeSkillsAbilitiesFields,
         // setOriginalKnowledgeSkillsAbilitiesFields,
         initialEditStatus = {};
-        const originalKnowledgeSkillsAbilitiesFieldsValue = effectiveData.knowledge_skills_abilities?.map((item) => {
+        const originalKnowledgeSkillsAbilitiesFieldsValue =
+          originalProfileData.jobProfile.knowledge_skills_abilities?.map((item) => {
+            if (typeof item === 'string') {
+              return {
+                value: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              return {
+                value: item.value,
+                isCustom: item.isCustom,
+                disabled: item.disabled,
+              };
+            }
+          });
+
+        const initialKnowledgeSkillsAbilitiesFieldsValue = effectiveData.knowledge_skills_abilities?.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -424,9 +641,9 @@ const WizardEditProfile = forwardRef(
         });
         if (!originalValuesSet) setOriginalKnowledgeSkillsAbilitiesFields(originalKnowledgeSkillsAbilitiesFieldsValue);
 
-        originalKnowledgeSkillsAbilitiesFieldsValue?.forEach((item, index) => {
+        initialKnowledgeSkillsAbilitiesFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalKnowledgeSkillsAbilitiesFields[index]?.value;
+          const isEdited = item.value !== originalKnowledgeSkillsAbilitiesFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -436,7 +653,23 @@ const WizardEditProfile = forwardRef(
         // originalProvisosFields,
         // setOriginalProvisosFields,
         initialEditStatus = {};
-        const originalProvisosFieldsValue = effectiveData.willingness_statements?.map((item) => {
+        const originalProvisosFieldsValue = originalProfileData.jobProfile.willingness_statements?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+
+        const initialProvisosFieldsValue = effectiveData.willingness_statements?.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -454,9 +687,9 @@ const WizardEditProfile = forwardRef(
         if (!originalValuesSet) setOriginalProvisosFields(originalProvisosFieldsValue);
 
         // Iterate over each proviso field and compare with the original value
-        originalProvisosFieldsValue?.forEach((item, index) => {
+        initialProvisosFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalProvisosFields[index]?.value;
+          const isEdited = item.value !== originalProvisosFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -465,6 +698,19 @@ const WizardEditProfile = forwardRef(
         // TITLE
         // Set the original value for title
         const originalTitleValue =
+          typeof originalProfileData.jobProfile.title === 'string'
+            ? {
+                value: originalProfileData.jobProfile.title,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: originalProfileData.jobProfile.title.value,
+                isCustom: originalProfileData.jobProfile.title.isCustom,
+                disabled: originalProfileData.jobProfile.title.disabled,
+              };
+
+        const initialTitleValue =
           typeof effectiveData.title === 'string'
             ? {
                 value: effectiveData.title,
@@ -477,11 +723,26 @@ const WizardEditProfile = forwardRef(
                 disabled: effectiveData.title.disabled,
               };
 
-        if (!originalValuesSet) setOriginalTitle(originalTitleValue);
+        if (!originalValuesSet) {
+          setOriginalTitle(originalTitleValue);
+        }
         setTitleEdited(originalTitle.value !== originalTitleValue.value);
 
         // OVERVIEW
         const originalOverviewValue =
+          typeof originalProfileData.jobProfile.overview === 'string'
+            ? {
+                value: originalProfileData.jobProfile.overview,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: originalProfileData.jobProfile.overview.value,
+                isCustom: originalProfileData.jobProfile.overview.isCustom,
+                disabled: originalProfileData.jobProfile.overview.disabled,
+              };
+
+        const initialOverviewValue =
           typeof effectiveData.overview === 'string'
             ? {
                 value: effectiveData.overview,
@@ -493,11 +754,25 @@ const WizardEditProfile = forwardRef(
                 isCustom: effectiveData.overview.isCustom,
                 disabled: effectiveData.overview.disabled,
               };
+
         if (!originalValuesSet) setOriginalOverview(originalOverviewValue);
         setOverviewEdited(originalOverview.value !== originalOverviewValue.value);
 
         // PROGRAM OVERVIEW
         const originalProgramOverviewValue =
+          typeof originalProfileData.jobProfile.program_overview === 'string'
+            ? {
+                value: originalProfileData.jobProfile.program_overview,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: originalProfileData.jobProfile.program_overview.value,
+                isCustom: originalProfileData.jobProfile.program_overview.isCustom,
+                disabled: originalProfileData.jobProfile.program_overview.disabled,
+              };
+
+        const initialProgramOverviewValue =
           typeof effectiveData.program_overview === 'string'
             ? {
                 value: effectiveData.program_overview,
@@ -509,40 +784,41 @@ const WizardEditProfile = forwardRef(
                 isCustom: effectiveData.program_overview.isCustom,
                 disabled: effectiveData.program_overview.disabled,
               };
+
         if (!originalValuesSet) setOriginalProgramOverview(originalProgramOverviewValue);
         setProgramOverviewEdited(originalProgramOverviewValue.value !== originalProgramOverviewValue.value);
 
         // DONE FIELDS
         if (!originalValuesSet) setOriginalValuesSet(true);
 
+        validateVerification();
         // console.log('effectiveData?.context?.description: ', effectiveData?.context?.description);
-        // console.log('originalAccReqFieldsValue: ', originalAccReqFieldsValue);
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
-          title: originalTitleValue,
+          title: initialTitleValue,
           context:
             typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description,
-          overview: originalOverviewValue,
-          program_overview: originalProgramOverviewValue,
+          overview: initialOverviewValue,
+          program_overview: initialProgramOverviewValue,
           classifications: classificationIds,
           // array fileds are required to be nested in objects, so wrap string values in {value: item}
-          accountabilities: originalAccReqFieldsValue,
-          optional_accountabilities: originalOptReqFieldsValue,
-          education: originalMinReqFieldsValue,
-          job_experience: originalRelWorkFieldsValue,
-          security_screenings: originalSecurityScreeningsFieldsValue,
+          accountabilities: initialAccReqFieldsValue,
+          optional_accountabilities: initialOptReqFieldsValue,
+          education: initialMinReqFieldsValue,
+          job_experience: initialRelWorkFieldsValue,
+          security_screenings: initialSecurityScreeningsFieldsValue,
           behavioural_competencies: effectiveData?.behavioural_competencies || [],
 
-          professional_registration: originalProfessionalRegistrationFieldsValue,
-          preferences: originalPreferencesFieldsValue,
-          knowledge_skills_abilities: originalKnowledgeSkillsAbilitiesFieldsValue,
-          provisos: originalProvisosFieldsValue,
-          optional_requirements: originalOptionalRequirementsFieldsValue,
+          professional_registration: initialProfessionalRegistrationFieldsValue,
+          preferences: initialPreferencesFieldsValue,
+          knowledge_skills_abilities: initialKnowledgeSkillsAbilitiesFieldsValue,
+          provisos: initialProvisosFieldsValue,
+          optional_requirements: initialOptionalRequirementsFieldsValue,
         });
       }
-      // setRenderKey((prevKey) => prevKey + 1);
-      // console.log('reset!');
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       effectiveData,
       isLoading,
@@ -575,6 +851,7 @@ const WizardEditProfile = forwardRef(
       setOriginalProvisosFields,
       originalOptionalRequirementsFields,
       setOriginalOptionalRequirementsFields,
+      originalProfileData,
     ]);
 
     // Required Accountability Fields
@@ -883,13 +1160,11 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
-    const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
-
     const renderAccReqFields = (field: any, index: number) => {
       const isEdited = editedAccReqFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
-        setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.value }));
+        setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.text }));
         trigger();
       }, 300);
 
@@ -948,24 +1223,33 @@ const WizardEditProfile = forwardRef(
                   <label className="sr-only" htmlFor={field.id}>
                     Accountability {index + 1}
                   </label>
-                  <TextArea
-                    // id for label
-                    id={field.id}
-                    // set style to display one if field.is_readonly
-                    data-testid={`accountability-input-${index}`}
+                  <div
+                    className={`${isEdited ? 'edited-field-container' : ''} input-container`}
                     style={{ display: field.is_readonly ? 'none' : 'block' }}
-                    autoSize
-                    disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
-                    className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                    onChange={(event) => {
-                      onChange(event);
-                      const updatedValue = event.target.value;
-                      handleFieldChange(index, updatedValue);
-                    }}
-                    onBlur={onBlur}
-                    onFocus={() => showReqModal(() => {}, false)}
-                    value={value ? (typeof value === 'string' ? value : value.value) : ''}
-                  />
+                  >
+                    <TextArea
+                      // id for label
+                      id={field.id}
+                      // set style to display one if field.is_readonly
+                      data-testid={`accountability-input-${index}`}
+                      autoSize
+                      disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
+                      className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
+                        isEdited ? 'edited-textarea' : ''
+                      }`}
+                      onChange={(event) => {
+                        onChange(event);
+                        const updatedValue = event.target.value;
+                        handleFieldChange(index, updatedValue);
+                      }}
+                      onBlur={() => {
+                        validateVerification();
+                        onBlur();
+                      }}
+                      onFocus={() => showReqModal(() => {}, false)}
+                      value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                    />
+                  </div>
                 </>
               )}
             />
@@ -979,6 +1263,11 @@ const WizardEditProfile = forwardRef(
                 onClick={() => {
                   showReqModal(() => {
                     field.disabled ? handleAccReqAddBack(index) : handleAccReqRemove(index);
+
+                    setEditedAccReqFields((prev) => ({
+                      ...prev,
+                      [index]: !field.disabled || field.text !== originalAccReqFields[index]?.text,
+                    }));
                   }, false);
                 }}
                 disabled={field.is_readonly}
@@ -1167,13 +1456,11 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
-    const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
-
     const renderMinReqFields = (field: any, index: number) => {
       const isEdited = editedMinReqFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
-        setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.value }));
+        setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.text }));
         trigger();
       }, 300);
 
@@ -1229,22 +1516,33 @@ const WizardEditProfile = forwardRef(
                   <label className="sr-only" htmlFor={field.id}>
                     Education and work experience {index + 1}
                   </label>
-                  <TextArea
-                    data-testid={`education-input-${index}`}
-                    id={field.id}
+
+                  <div
+                    className={`${isEdited ? 'edited-field-container' : ''} input-container`}
                     style={{ display: field.is_readonly ? 'none' : 'block' }}
-                    autoSize
-                    disabled={field.disabled || getValues(`education.${index}.is_readonly`)}
-                    className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                    onChange={(event) => {
-                      onChange(event);
-                      const updatedValue = event.target.value;
-                      handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
-                    }}
-                    onFocus={() => showMinReqModal(() => {}, false, field.is_significant)}
-                    onBlur={onBlur}
-                    value={value ? (typeof value === 'string' ? value : value.value) : ''}
-                  />
+                  >
+                    <TextArea
+                      data-testid={`education-input-${index}`}
+                      id={field.id}
+                      style={{ display: field.is_readonly ? 'none' : 'block' }}
+                      autoSize
+                      disabled={field.disabled || getValues(`education.${index}.is_readonly`)}
+                      className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
+                        isEdited ? 'edited-textarea' : ''
+                      }`}
+                      onChange={(event) => {
+                        onChange(event);
+                        const updatedValue = event.target.value;
+                        if (field.is_significant) handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
+                      }}
+                      onFocus={() => showMinReqModal(() => {}, false, field.is_significant)}
+                      onBlur={() => {
+                        validateVerification();
+                        onBlur();
+                      }}
+                      value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                    />
+                  </div>
                 </>
               )}
             />
@@ -1259,6 +1557,11 @@ const WizardEditProfile = forwardRef(
                   showMinReqModal(
                     () => {
                       field.disabled ? handleMinReqAddBack(index) : handleMinReqRemove(index);
+                      if (field.is_significant)
+                        setEditedMinReqFields((prev) => ({
+                          ...prev,
+                          [index]: !field.disabled || field.text !== originalMinReqFields[index]?.text,
+                        }));
                     },
                     false,
                     field.is_significant,
@@ -1335,13 +1638,11 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
-    const [editedRelWorkFields, setEditedRelWorkFields] = useState<{ [key: number]: boolean }>({});
-
     const renderRelWorkFields = (field: any, index: number) => {
       const isEdited = editedRelWorkFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
-        setEditedRelWorkFields((prev) => ({ ...prev, [index]: updatedValue !== originalRelWorkFields[index]?.value }));
+        setEditedRelWorkFields((prev) => ({ ...prev, [index]: updatedValue !== originalRelWorkFields[index]?.text }));
         trigger();
       }, 300);
 
@@ -1402,22 +1703,33 @@ const WizardEditProfile = forwardRef(
                   <label className="sr-only" htmlFor={field.id}>
                     Related experience {index + 1}
                   </label>
-                  <TextArea
-                    data-testid={`job-experience-input-${index}`}
-                    id={field.id}
+
+                  <div
+                    className={`${isEdited ? 'edited-field-container' : ''} input-container`}
                     style={{ display: field.is_readonly ? 'none' : 'block' }}
-                    autoSize
-                    disabled={field.disabled || getValues(`job_experience.${index}.is_readonly`)}
-                    className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                    onChange={(event) => {
-                      onChange(event);
-                      const updatedValue = event.target.value;
-                      handleFieldChange(index, updatedValue);
-                    }}
-                    onFocus={() => showRelWorkModal(() => {}, false, field.is_significant)}
-                    onBlur={onBlur}
-                    value={value ? (typeof value === 'string' ? value : value.value) : ''}
-                  />
+                  >
+                    <TextArea
+                      data-testid={`job-experience-input-${index}`}
+                      id={field.id}
+                      style={{ display: field.is_readonly ? 'none' : 'block' }}
+                      autoSize
+                      disabled={field.disabled || getValues(`job_experience.${index}.is_readonly`)}
+                      className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
+                        isEdited ? 'edited-textarea' : ''
+                      }`}
+                      onChange={(event) => {
+                        onChange(event);
+                        const updatedValue = event.target.value;
+                        if (field.is_significant) handleFieldChange(index, updatedValue);
+                      }}
+                      onFocus={() => showRelWorkModal(() => {}, false, field.is_significant)}
+                      onBlur={() => {
+                        validateVerification();
+                        onBlur();
+                      }}
+                      value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                    />
+                  </div>
                 </>
               )}
             />
@@ -1432,6 +1744,12 @@ const WizardEditProfile = forwardRef(
                   showRelWorkModal(
                     () => {
                       field.disabled ? handleRelWorkAddBack(index) : handleRelWorkRemove(index);
+
+                      if (field.is_significant)
+                        setEditedRelWorkFields((prev) => ({
+                          ...prev,
+                          [index]: !field.disabled || field.text !== originalRelWorkFields[index]?.text,
+                        }));
                     },
                     false,
                     field.is_significant,
@@ -1478,17 +1796,13 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
-    const [editedSecurityScreeningsFields, setEditedSecurityScreeningsFields] = useState<{ [key: number]: boolean }>(
-      {},
-    );
-
     const renderSecurityScreeningsFields = (field: any, index: number) => {
       const isEdited = editedSecurityScreeningsFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
         setEditedSecurityScreeningsFields((prev) => ({
           ...prev,
-          [index]: updatedValue !== originalSecurityScreeningsFields[index]?.value,
+          [index]: updatedValue !== originalSecurityScreeningsFields[index]?.text,
         }));
         trigger();
       }, 300);
@@ -1542,22 +1856,31 @@ const WizardEditProfile = forwardRef(
                 <label className="sr-only" htmlFor={field.id}>
                   Security screening {index + 1}
                 </label>
-                <TextArea
-                  data-testid={`security-screening-input-${index}`}
-                  id={field.id}
+
+                <div
+                  className={`${isEdited ? 'edited-field-container' : ''} input-container`}
                   style={{ display: field.is_readonly ? 'none' : 'block' }}
-                  autoSize
-                  disabled={field.disabled || getValues(`security_screenings.${index}.is_readonly`)}
-                  className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                  onChange={(event) => {
-                    onChange(event);
-                    const updatedValue = event.target.value;
-                    handleFieldChange(index, updatedValue);
-                  }}
-                  onBlur={onBlur}
-                  onFocus={() => showSecurityScreeningsModal(() => {}, false, field.is_significant)}
-                  value={value ? (typeof value === 'string' ? value : value.value) : ''}
-                />
+                >
+                  <TextArea
+                    data-testid={`security-screening-input-${index}`}
+                    id={field.id}
+                    style={{ display: field.is_readonly ? 'none' : 'block' }}
+                    autoSize
+                    disabled={field.disabled || getValues(`security_screenings.${index}.is_readonly`)}
+                    className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                    onChange={(event) => {
+                      onChange(event);
+                      const updatedValue = event.target.value;
+                      handleFieldChange(index, updatedValue);
+                    }}
+                    onBlur={() => {
+                      validateVerification();
+                      onBlur();
+                    }}
+                    onFocus={() => showSecurityScreeningsModal(() => {}, false, field.is_significant)}
+                    value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                  />
+                </div>
               </>
             )}
           />
@@ -1574,6 +1897,10 @@ const WizardEditProfile = forwardRef(
                 showSecurityScreeningsModal(
                   () => {
                     field.disabled ? handleSecurityScreeningsAddBack(index) : handleSecurityScreeningsRemove(index);
+                    setEditedSecurityScreeningsFields((prev) => ({
+                      ...prev,
+                      [index]: !field.disabled || field.text !== originalSecurityScreeningsFields[index]?.text,
+                    }));
                   },
                   false,
                   field.is_significant,
@@ -2475,6 +2802,31 @@ const WizardEditProfile = forwardRef(
       <>
         <Row data-testid="profile-editing-form" gutter={[24, 24]}>
           <Col xs={24} sm={24} lg={8} aria-label="Context and job details" role="region">
+            {requiresVerification && (
+              <Alert
+                data-testid="verification-warning-message"
+                message=""
+                description={
+                  <span>
+                    Some of your amendments to the generic profile require verification. If you would like to revisit
+                    some of your amendments, please click these links:
+                    {/* loop over reasons */}
+                    {/* <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
+                            {verificationNeededReasons.map((reason, index) => (
+                              <li key={index}>
+                                <a onClick={() => handleVerificationClick()}>{reason}</a>
+                              </li>
+                            ))}
+                          </ul> */}
+                  </span>
+                }
+                type="warning"
+                showIcon
+                icon={<ExclamationCircleFilled />}
+                style={{ marginBottom: '24px' }}
+              />
+            )}
+
             <Alert
               role="note"
               type="info"
@@ -2499,6 +2851,7 @@ const WizardEditProfile = forwardRef(
                 ></p>
               }
             ></Alert>
+
             <Descriptions
               className="customDescriptions"
               style={{ marginTop: '1rem' }}
@@ -2685,8 +3038,8 @@ const WizardEditProfile = forwardRef(
                         {acc_req_fields.length > 0 && (
                           <AccessibleList
                             dataSource={acc_req_fields}
-                            renderItem={renderAccReqFields}
                             ariaLabel="Accountabilities"
+                            renderItem={renderAccReqFields}
                           />
                         )}
                         <Button
