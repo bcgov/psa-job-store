@@ -247,6 +247,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const compareLists = (
     original: (string | TrackedFieldArrayItem | AccountabilitiesModel)[],
     modified: (string | TrackedFieldArrayItem | AccountabilitiesModel)[] | undefined,
+    hideDisabled?: boolean,
   ): JSX.Element[] => {
     const comparisonResult: JSX.Element[] = [];
     if (!modified || !original) return comparisonResult;
@@ -259,11 +260,15 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       const originalItemValue = getItemValue(originalVal);
 
       const modifiedItem = modified[i];
-      let modifiedItemValue = getItemValue(modifiedItem);
-      modifiedItemValue =
-        typeof modifiedItem === 'string' ? modifiedItemValue : modifiedItem?.disabled ? '' : modifiedItemValue || '';
+      const modifiedItemValue =
+        typeof modifiedItem === 'string'
+          ? getItemValue(modifiedItem)
+          : modifiedItem?.disabled
+            ? ''
+            : getItemValue(modifiedItem) || '';
+      const hideItem = typeof modifiedItem !== 'string' && modifiedItem?.disabled && hideDisabled;
 
-      if (originalItemValue || modifiedItemValue) {
+      if ((originalItemValue || modifiedItemValue) && !hideItem) {
         const diff = dmp.diff_main(originalItemValue, modifiedItemValue);
         dmp.diff_cleanupSemantic(diff);
 
@@ -558,6 +563,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 ? compareLists(
                     originalData.accountabilities.filter((acc) => !acc.is_significant),
                     effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
+                    true,
                   )
                 : effectiveData?.accountabilities
                     .filter((acc) => !acc.is_significant)

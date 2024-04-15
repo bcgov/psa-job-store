@@ -176,9 +176,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const debouncedFetchPositionProfile = useCallback(
     debounce(async (positionNumber: string) => {
       try {
+        console.log(positionNumber);
         getPositionProfile({ positionNumber, suppressGlobalError: true });
       } catch (e) {
         // handled by isError, prevents showing error toast
+        console.log(e);
       }
     }, 300),
     [getPositionProfile],
@@ -485,7 +487,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
             onClick={() => showModal()}
             data-testid="next-button"
             loading={isLoading}
-            disabled={isFetchingPositionProfile}
+            disabled={isFetchingPositionProfile || isFetchingPositionProfile2}
           >
             Save and next
           </Button>,
@@ -654,7 +656,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                   onBlur={onBlur}
                                   value={value}
                                   onChange={(e) => {
-                                    debouncedFetchPositionProfile(e.target.value); // Fetch position profile
+                                    if (e.target.value) {
+                                      debouncedFetchPositionProfile(e.target.value); // Fetch position profile
+                                    }
                                     onChange(e); // Update controller state
                                   }}
                                   placeholder="Position number"

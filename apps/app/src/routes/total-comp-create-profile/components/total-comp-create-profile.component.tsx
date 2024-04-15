@@ -2763,14 +2763,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                       <>
+                        <Typography.Text type="secondary">
+                          * denotes an Indigenous Behavioural Competency
+                        </Typography.Text>
                         <BehaviouralComptencyPicker
                           onAdd={behavioural_competencies_append}
                           onRemove={behavioural_competencies_remove}
                           behavioural_competencies_fields={behavioural_competencies_fields}
                         />
-                        <Typography.Text type="secondary">
-                          * denotes an Indigenous Behavioural Competency
-                        </Typography.Text>
 
                         <List
                           style={{ marginTop: '7px' }}
