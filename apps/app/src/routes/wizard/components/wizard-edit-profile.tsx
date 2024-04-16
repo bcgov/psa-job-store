@@ -73,7 +73,7 @@ enum reasons {
 }
 
 type sectionMap = {
-  [reason in reasons]: MutableRefObject<null>;
+  [reason in reasons]: MutableRefObject<null | HTMLDivElement>;
 };
 
 const WizardEditProfile = forwardRef(
@@ -140,10 +140,10 @@ const WizardEditProfile = forwardRef(
     const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
       useLazyGetClassificationsQuery();
 
-    const acctSection = useRef(null);
-    const educationSection = useRef(null);
-    const workExperienceSection = useRef(null);
-    const securitySection = useRef(null);
+    const acctSection = useRef<null | HTMLDivElement>(null);
+    const educationSection = useRef<null | HTMLDivElement>(null);
+    const workExperienceSection = useRef<null | HTMLDivElement>(null);
+    const securitySection = useRef<null | HTMLDivElement>(null);
     const sections: sectionMap = {
       [reasons.ACCOUNTABILITIES]: acctSection,
       [reasons.EDUCATION]: educationSection, // Adjusted for demonstration
@@ -158,7 +158,7 @@ const WizardEditProfile = forwardRef(
           const section = sections[key as keyof typeof sections];
           if (section && section.current) {
             setTimeout(() => {
-              section.current.scrollIntoView({ behavior: 'smooth' });
+              section.current && section.current.scrollIntoView({ behavior: 'smooth' });
             }, 300);
             break;
           }
@@ -2853,11 +2853,8 @@ const WizardEditProfile = forwardRef(
       display: 'block',
     };
 
-    // console.log('effectiveData: ', effectiveData);
-
     return (
       <>
-        {/* {mode === 'verificationRequired_edits' && ( */}
         <Row data-testid="profile-editing-form" gutter={[24, 24]}>
           <Col xs={24} sm={24} lg={8} aria-label="Context and job details" role="region">
             {requiresVerification && (
@@ -2868,11 +2865,10 @@ const WizardEditProfile = forwardRef(
                   <span>
                     Some of your amendments to the generic profile require verification. If you would like to revisit
                     some of your amendments, please click these links:
-                    {/* loop over reasons */}
                     <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
                       {verificationNeededReasons.map((reason, index) => (
                         <li key={index}>
-                          <a onClick={() => handleVerificationClick()}>{reason}</a>
+                          <a onClick={() => handleSectionScroll(reason)}>{reason}</a>
                         </li>
                       ))}
                     </ul>
