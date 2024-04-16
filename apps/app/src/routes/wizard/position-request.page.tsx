@@ -393,10 +393,20 @@ export const PositionRequestPage = () => {
                         <Card title="Information" bordered={false}>
                           <Descriptions bordered layout="horizontal" column={1}>
                             <Descriptions.Item label="Position number">
-                              <span data-testid="position-number">{unwrappedPositionRequestData?.position_number}</span>{' '}
+                              <span data-testid="position-number">
+                                {unwrappedPositionRequestData?.position_number != null
+                                  ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                  : ''}
+                              </span>{' '}
                               <Button
                                 type="link"
-                                onClick={() => handleCopy(unwrappedPositionRequestData?.position_number)}
+                                onClick={() =>
+                                  handleCopy(
+                                    unwrappedPositionRequestData?.position_number != null
+                                      ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                      : '',
+                                  )
+                                }
                               >
                                 Copy
                               </Button>
@@ -447,10 +457,20 @@ export const PositionRequestPage = () => {
                         <Card title="Information" bordered={false}>
                           <Descriptions bordered layout="horizontal" column={1}>
                             <Descriptions.Item label="Position number">
-                              <span data-testid="position-number">{unwrappedPositionRequestData?.position_number}</span>{' '}
+                              <span data-testid="position-number">
+                                {unwrappedPositionRequestData?.position_number
+                                  ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                  : ''}
+                              </span>{' '}
                               <Button
                                 type="link"
-                                onClick={() => handleCopy(unwrappedPositionRequestData?.position_number)}
+                                onClick={() =>
+                                  handleCopy(
+                                    unwrappedPositionRequestData?.position_number
+                                      ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                      : '',
+                                  )
+                                }
                               >
                                 Copy
                               </Button>
