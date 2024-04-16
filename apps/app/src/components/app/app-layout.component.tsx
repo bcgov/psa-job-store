@@ -196,6 +196,11 @@ export const AppLayout = () => {
                           to: '/org-chart',
                         },
                         {
+                          icon: <PartitionOutlined aria-hidden style={{ color: 'orange', fontSize: '1.25rem' }} />,
+                          title: 'Next',
+                          to: '/org-chart-next',
+                        },
+                        {
                           icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                           title: 'Explore job profiles',
                           to: '/job-profiles',
