@@ -556,7 +556,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
             )}
           </Row>
           <Row>
-            <Col>
+            <Col data-testid="filters-tags-section">
               {allSelections.map((selection) => (
                 <Tag
                   style={{ marginTop: '10px' }}

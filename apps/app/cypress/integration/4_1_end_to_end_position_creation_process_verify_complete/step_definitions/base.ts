@@ -152,8 +152,14 @@ Then('they see a confirmation screen with the position number', () => {
 When('the user makes edits in significant fields', () => {
   cy.get('[data-testid="job-title-input"]').clear().type('Verification test');
   cy.get('[data-testid="remove-accountability-7"]').click();
+  cy.get('[data-testid="accountabilities-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
   cy.get('[data-testid="remove-education-8"]').click();
-  cy.get('[data-testid="remove-job-experience-1"]').click(); // 2 is non-significant
+  cy.get('[data-testid="education-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
+  cy.get('[data-testid="remove-job-experience-1"]').click();
+  cy.get('[data-testid="experience-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
 });
 
 Then('proceeds to next step', () => {
