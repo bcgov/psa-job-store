@@ -502,36 +502,40 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             title: <span data-testid="position-#-header">Position #</span>,
             dataIndex: 'position_number',
             key: 'position_number',
-            render: (text: any, record: any) => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span>{text}</span>
-                <span
-                  style={{
-                    visibility:
-                      (record.status === 'COMPLETED' || mode === 'classification' || mode === 'total-compensation') &&
-                      hoveredRowKey === record.id
-                        ? 'visible'
-                        : 'hidden',
-                    marginLeft: 0,
-                  }}
-                >
-                  <Button
-                    data-testid="copy-position-number-button"
-                    icon={<CopyOutlined />}
-                    size="small"
+            render: (value: number | undefined, record: any) => {
+              const valueString = value != null ? `${value}`.padStart(8, '0') : '';
+
+              return (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span>{valueString}</span>
+                  <span
                     style={{
-                      border: 'none',
-                      padding: 0,
-                      background: 'transparent',
+                      visibility:
+                        (record.status === 'COMPLETED' || mode === 'classification' || mode === 'total-compensation') &&
+                        hoveredRowKey === record.id
+                          ? 'visible'
+                          : 'hidden',
+                      marginLeft: 0,
                     }}
-                    onClick={() => {
-                      if (import.meta.env.VITE_TEST_ENV !== 'true') copy(text.toString());
-                      message.success('Position number copied!');
-                    }}
-                  />
-                </span>
-              </div>
-            ),
+                  >
+                    <Button
+                      data-testid="copy-position-number-button"
+                      icon={<CopyOutlined />}
+                      size="small"
+                      style={{
+                        border: 'none',
+                        padding: 0,
+                        background: 'transparent',
+                      }}
+                      onClick={() => {
+                        if (import.meta.env.VITE_TEST_ENV !== 'true') copy(valueString);
+                        message.success('Position number copied!');
+                      }}
+                    />
+                  </span>
+                </div>
+              );
+            },
           },
         ]
       : []),
