@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Card, Col, Input, Row, Tag, TreeSelect } from 'antd';
+import { CloseCircleFilled } from '@ant-design/icons';
+import { Button, Card, Col, Input, Row, Tag, Tooltip, TreeSelect } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
@@ -90,6 +91,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   if (!classificationData)
     // eslint-disable-next-line react-hooks/rules-of-hooks
     classificationData = useGetJobProfilesClassificationsQuery().data?.jobProfilesClassifications;
+
+  const [searchText, setSearchText] = useState('');
 
   // JOB FAMILIES AND STREAMS TREE VIEW
   const { data: jobFamiliesData } = useGetJobFamiliesQuery();
@@ -480,10 +483,28 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                 enterButton="Find job profiles"
                 aria-label={searchPlaceHolderText}
                 onPressEnter={(e) => handleSearch(e.currentTarget.value)}
-                allowClear
+                // allowClear
                 placeholder={searchPlaceHolderText}
                 onSearch={handleSearch}
                 style={{ width: '100%' }}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                }}
+                value={searchText}
+                onBlur={() => {
+                  handleSearch(searchText);
+                }}
+                suffix={
+                  <Tooltip placement="top" title={'Clear search'}>
+                    <CloseCircleFilled
+                      style={{ fontSize: '0.8rem', color: '#bfbfbf', display: searchText == '' ? 'none' : 'block' }}
+                      onClick={() => {
+                        setSearchText('');
+                        handleSearch('');
+                      }}
+                    />
+                  </Tooltip>
+                }
                 // style={{ width: fullWidth ? 500 : 400 }}
               />
             </Col>
