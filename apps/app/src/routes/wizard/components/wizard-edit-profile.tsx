@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   DeleteOutlined,
@@ -218,16 +219,31 @@ const WizardEditProfile = forwardRef(
 
     const [form] = Form.useForm();
 
+    //     // Optional Accountability Fields
+    const {
+      fields: acc_opt_fields,
+      append: acc_opt_append,
+      remove: acc_opt_remove,
+      update: acc_opt_update,
+    } = useFieldArray({
+      control,
+      name: 'optional_accountabilities',
+    });
+
     const validateVerification = useCallback(() => {
       // check if the form in its current state would require verification
 
       // check if any flags are true in editedAccReqFieldsArray
       const anyReqAccsTrue = Object.values(editedAccReqFields).some((item) => item === true);
+
+      // acc_opt_fields is an array of objects, check if any of items have isCustom == true
+      const anyOptionalAccsTrue = Object.values(acc_opt_fields).some((item) => (item as any).isCustom === true);
+
       const anyEducationTrue = Object.values(editedMinReqFields).some((item) => item === true);
       const anyRelWorkTrue = Object.values(editedRelWorkFields).some((item) => item === true);
       const anySsecurityScreeningsTrue = Object.values(editedSecurityScreeningsFields).some((item) => item === true);
       const verificationReasons = [];
-      anyReqAccsTrue && verificationReasons.push(reasons.ACCOUNTABILITIES);
+      (anyReqAccsTrue || anyOptionalAccsTrue) && verificationReasons.push(reasons.ACCOUNTABILITIES);
       anyEducationTrue && verificationReasons.push(reasons.EDUCATION);
       anyRelWorkTrue && verificationReasons.push(reasons.JOB_EXPERIENCE);
       anySsecurityScreeningsTrue && verificationReasons.push(reasons.SECURITY_SCREENINGS);
@@ -241,6 +257,7 @@ const WizardEditProfile = forwardRef(
       editedRelWorkFields,
       editedSecurityScreeningsFields,
       onVerificationRequiredChange,
+      acc_opt_fields,
     ]);
 
     useEffect(() => {
@@ -923,17 +940,6 @@ const WizardEditProfile = forwardRef(
       name: 'accountabilities',
     });
 
-    //     // Optional Accountability Fields
-    const {
-      fields: acc_opt_fields,
-      append: acc_opt_append,
-      remove: acc_opt_remove,
-      update: acc_opt_update,
-    } = useFieldArray({
-      control,
-      name: 'optional_accountabilities',
-    });
-
     const {
       fields: education_fields,
       append: education_append,
@@ -1054,13 +1060,13 @@ const WizardEditProfile = forwardRef(
     const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
 
     // Function to handle focus
-    const showMinReqModal = (action: () => void, showCancel: boolean, isSignificant?: boolean) => {
+    const showMinReqModal = (action: () => void, _showCancel: boolean, isSignificant?: boolean) => {
       if (!minReqAlertShown && (isSignificant || isSignificant === undefined)) {
         setMinReqAlertShown(true);
         Modal.confirm({
           title: 'Do you want to make changes to education and work experiences?',
           content: (
-            <div role="alert">
+            <div role="alert" data-testid="education-warning">
               Amendments to the generic profile will require verification. If you would like to continue to make
               changes, please click proceed.
             </div>
@@ -1071,7 +1077,7 @@ const WizardEditProfile = forwardRef(
           // The following props are set to style the modal like a warning
           icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
           okButtonProps: { style: {} },
-          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          // cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
           autoFocusButton: null,
         });
       } else {
@@ -1079,13 +1085,13 @@ const WizardEditProfile = forwardRef(
       }
     };
 
-    const showRelWorkModal = (action: () => void, showCancel: boolean, isSignificant?: boolean) => {
+    const showRelWorkModal = (action: () => void, _showCancel: boolean, isSignificant?: boolean) => {
       if (!relWorkAlertShown && (isSignificant || isSignificant === undefined)) {
         setRelWorkAlertShown(true);
         Modal.confirm({
           title: 'Do you want to make changes to related experiences?',
           content: (
-            <div role="alert">
+            <div role="alert" data-testid="experience-warning">
               Amendments to the generic profile will require verification. If you would like to continue to make
               changes, please click proceed.
             </div>
@@ -1096,7 +1102,7 @@ const WizardEditProfile = forwardRef(
           // The following props are set to style the modal like a warning
           icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
           okButtonProps: { style: {} },
-          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          // cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
           autoFocusButton: null,
         });
       } else {
@@ -1104,13 +1110,13 @@ const WizardEditProfile = forwardRef(
       }
     };
 
-    const showSecurityScreeningsModal = (action: () => void, showCancel: boolean, isSignificant?: boolean) => {
+    const showSecurityScreeningsModal = (action: () => void, _showCancel: boolean, isSignificant?: boolean) => {
       if (!securityScreeningsAlertShown && (isSignificant || isSignificant === undefined)) {
         setSecurityScreeningsAlertShown(true);
         Modal.confirm({
           title: 'Do you want to make changes to security screenings?',
           content: (
-            <div role="alert">
+            <div role="alert" data-testid="security-warning">
               Amendments to the generic profile will require verification. If you would like to continue to make
               changes, please click proceed.
             </div>
@@ -1121,7 +1127,7 @@ const WizardEditProfile = forwardRef(
           // The following props are set to style the modal like a warning
           icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
           okButtonProps: { style: {} },
-          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          // cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
           autoFocusButton: null,
         });
       } else {
@@ -1129,13 +1135,13 @@ const WizardEditProfile = forwardRef(
       }
     };
 
-    const showReqModal = (action: () => void, showCancel: boolean) => {
+    const showReqModal = (action: () => void, _showCancel: boolean) => {
       if (!reqAlertShown) {
         setReqAlertShown(true);
         Modal.confirm({
           title: 'Do you want to make changes to accountabilities?',
           content: (
-            <div role="alert">
+            <div role="alert" data-testid="accountabilities-warning">
               Amendments to the generic profile will require verification. If you would like to continue to make
               changes, please click proceed.
             </div>
@@ -1146,7 +1152,7 @@ const WizardEditProfile = forwardRef(
           // The following props are set to style the modal like a warning
           icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
           okButtonProps: { style: {} },
-          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          // cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
           autoFocusButton: null,
         });
       } else {
@@ -1154,13 +1160,13 @@ const WizardEditProfile = forwardRef(
       }
     };
 
-    const showOptionalAccountabilitiesModal = (action: () => void, showCancel: boolean) => {
+    const showOptionalAccountabilitiesModal = (action: () => void, _showCancel: boolean) => {
       if (!optionalAccountabilitiesAlertShown) {
         setOptionalAccountabilitiesAlertShown(true);
         Modal.confirm({
           title: 'Do you want to make changes to optional accountabilities?',
           content: (
-            <div role="alert">
+            <div role="alert" data-testid="optional-accountabilities-warning">
               Amendments to the generic profile will require verification. If you would like to continue to make
               changes, please click proceed.
             </div>
@@ -1171,7 +1177,7 @@ const WizardEditProfile = forwardRef(
           // The following props are set to style the modal like a warning
           icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
           okButtonProps: { style: {} },
-          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+          // cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
           autoFocusButton: null,
         });
       } else {
@@ -1364,6 +1370,7 @@ const WizardEditProfile = forwardRef(
     // Function to handle adding a new field
     const handleOptReqAddNew = () => {
       acc_opt_append({ value: '', isCustom: true, disabled: false });
+      trigger();
     };
 
     // const [editedOptReqFields, setEditedOptReqFields] = useState<{ [key: number]: boolean }>({});
@@ -1441,23 +1448,51 @@ const WizardEditProfile = forwardRef(
                   <label className="sr-only" htmlFor={field.id}>
                     Custom optional accountability {index + 1}
                   </label>
-                  <TextArea
-                    id={field.id}
-                    autoSize
-                    data-testid={`optional-accountability-input-${index}`}
-                    style={{
-                      display: field.isCustom ? 'block' : 'none',
-                      marginLeft: field.isCustom ? '20px' : '0',
-                    }}
-                    disabled={field.disabled || getValues(`optional_accountabilities.${index}.is_readonly`)}
-                    onChange={(event) => {
-                      onChange(event);
-                      // const updatedValue = event.target.value;
-                      // handleFieldChange(index, updatedValue);
-                    }}
-                    onBlur={onBlur}
-                    value={value ? (typeof value === 'string' ? value : value.value) : ''}
-                  />
+                  {field.isCustom ? (
+                    <div className={`edited-field-container input-container`}>
+                      <TextArea
+                        id={field.id}
+                        autoSize
+                        data-testid={`optional-accountability-input-${index}`}
+                        style={{
+                          display: field.isCustom ? 'block' : 'none',
+                        }}
+                        className="edited-textarea"
+                        disabled={field.disabled || getValues(`optional_accountabilities.${index}.is_readonly`)}
+                        onChange={(event) => {
+                          onChange(event);
+                          // const updatedValue = event.target.value;
+                          // handleFieldChange(index, updatedValue);
+                        }}
+                        onBlur={() => {
+                          validateVerification();
+                          onBlur();
+                        }}
+                        value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                      />
+                    </div>
+                  ) : (
+                    <TextArea
+                      id={field.id}
+                      autoSize
+                      data-testid={`optional-accountability-input-${index}`}
+                      style={{
+                        display: field.isCustom ? 'block' : 'none',
+                        marginLeft: field.isCustom ? '20px' : '0',
+                      }}
+                      disabled={field.disabled || getValues(`optional_accountabilities.${index}.is_readonly`)}
+                      onChange={(event) => {
+                        onChange(event);
+                        // const updatedValue = event.target.value;
+                        // handleFieldChange(index, updatedValue);
+                      }}
+                      onBlur={() => {
+                        validateVerification();
+                        onBlur();
+                      }}
+                      value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                    />
+                  )}
                 </>
               )}
             />
@@ -1628,36 +1663,6 @@ const WizardEditProfile = forwardRef(
                 style={{ marginLeft: '10px' }}
               />
             </Tooltip>
-
-            {/* {field.disabled ? (
-            <Button
-              icon={<PlusOutlined style={{ color: '#000000' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                // showMinReqModal(() => {
-                handleMinReqAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                // }, false)
-              }}
-            />
-          ) : (
-            <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-              <Button
-                disabled={field.is_readonly}
-                icon={<DeleteOutlined style={{ color: '#000000' }} />}
-                style={{ marginLeft: '10px' }}
-                onClick={() => {
-                  // showMinReqModal(() => {
-                  handleMinReqRemove(index);
-                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-                  // }, false)
-                }}
-              />
-            </Tooltip>
-          )} */}
           </List.Item>
         </>
       );
@@ -3199,33 +3204,6 @@ const WizardEditProfile = forwardRef(
                                 showMinReqModal(() => {
                                   handleMinReqAddNew();
                                 }, false);
-                              }
-                            }}
-                          >
-                            Add an education or work requirement
-                          </Button>
-                        </>
-
-                        <>
-                          {education_fields.length > 0 && (
-                            // <List dataSource={education_fields} renderItem={renderMinReqFields} />
-                            <AccessibleList
-                              dataSource={education_fields}
-                              renderItem={renderMinReqFields}
-                              ariaLabel="Education and work experience"
-                            />
-                          )}
-                          <Button
-                            data-testid="add-education-button"
-                            type="link"
-                            icon={<PlusOutlined aria-hidden />}
-                            style={addStyle}
-                            onClick={() => {
-                              {
-                                // showMinReqModal(() => {
-                                handleMinReqAddNew();
-                                // setRenderKey((prevKey) => prevKey + 1);
-                                // }, false);
                               }
                             }}
                           >

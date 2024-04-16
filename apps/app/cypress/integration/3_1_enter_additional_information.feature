@@ -27,7 +27,6 @@ Feature: Form Editability Based on Approval Toggle
         Then an error message prompts the user to enter the value
 
         When the user enters excluded manager position number
-        # And the user enters comments
 
         Then information about job title, expected classification level, reporting manager, type, and job store profile number is displayed
 
