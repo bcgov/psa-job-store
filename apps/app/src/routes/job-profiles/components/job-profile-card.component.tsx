@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Space, Tooltip, Typography } from 'antd';
 import DOMPurify from 'dompurify';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 
 const { Title, Text, Paragraph } = Typography;
@@ -15,18 +15,19 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
   const [searchParams] = useSearchParams();
 
   // console.log('card data: ', data, searchParams);
+  let { id } = useParams();
+  if (!id) id = searchParams.get('selectedProfile') ?? '';
 
   return (
     <Space
       direction="vertical"
       data-testid="job-profile-card"
-      className={data.id === +(searchParams.get('selectedProfile') ?? 0) ? 'testid-selectedProfile' : ''}
+      className={data.id === +id ? 'testid-selectedProfile' : ''}
       style={{
         width: '100%',
         cursor: 'pointer',
-        borderLeft:
-          data.id === +(searchParams.get('selectedProfile') ?? 0) ? '4px solid #0070E0' : '4px solid transparent',
-        background: data.id === +(searchParams.get('selectedProfile') ?? 0) ? '#F0F8FF' : 'white',
+        borderLeft: data.id === +id ? '4px solid #0070E0' : '4px solid transparent',
+        background: data.id === +id ? '#F0F8FF' : 'white',
         padding: '1rem',
       }}
     >

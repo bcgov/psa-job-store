@@ -11,3 +11,7 @@ Then('the details of the selected job profile are displayed', () => {
     cy.contains('th', 'Title').next('td').should('contain', jobProfile);
   });
 });
+
+Then('the new job profile should be selected', () => {
+  cy.get('.testid-selectedProfile').should('exist');
+});
