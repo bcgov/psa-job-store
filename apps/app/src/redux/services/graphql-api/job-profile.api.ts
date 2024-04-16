@@ -511,17 +511,19 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    getJobProfilesMinistries: build.query<JobProfilesMinistriesResponse, void>({
-      query: () => {
+    getJobProfilesMinistries: build.query<JobProfilesMinistriesResponse, { positionRequestId?: number }>({
+      query: (args) => {
+        const { positionRequestId } = args;
         return {
           document: gql`
-            query JobProfilesMinistries {
-              jobProfilesMinistries {
+            query JobProfilesMinistries($positionRequestId: Int) {
+              jobProfilesMinistries(positionRequestId: $positionRequestId) {
                 id
                 name
               }
             }
           `,
+          variables: { positionRequestId },
         };
       },
     }),

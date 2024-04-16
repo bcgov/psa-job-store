@@ -25,6 +25,9 @@ interface WizardContextProps {
   reqAlertShown: boolean;
   setReqAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 
+  optionalAccountabilitiesAlertShown: boolean;
+  setOptionalAccountabilitiesAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
   relWorkAlertShown: boolean;
   setRelWorkAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -97,6 +100,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [classificationsData, setClassificationsData] = useState<GetClassificationsResponse | null>(null);
   const [minReqAlertShown, setMinReqAlertShown] = useState<boolean>(false);
   const [reqAlertShown, setReqAlertShown] = useState<boolean>(false);
+  const [optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown] = useState<boolean>(false);
   const [originalValuesSet, setOriginalValuesSet] = useState<boolean>(false);
   const [originalAccReqFields, setOriginalAccReqFields] = useState<any[]>([]);
   const [originalOptReqFields, setOriginalOptReqFields] = useState<any[]>([]);
@@ -145,6 +149,9 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
 
     reqAlertShown,
     setReqAlertShown,
+    optionalAccountabilitiesAlertShown,
+    setOptionalAccountabilitiesAlertShown,
+
     originalValuesSet,
     setOriginalValuesSet,
     originalAccReqFields,

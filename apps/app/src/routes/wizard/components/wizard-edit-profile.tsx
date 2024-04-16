@@ -2,9 +2,9 @@
 import {
   DeleteOutlined,
   ExclamationCircleFilled,
+  ExclamationCircleOutlined,
   InfoCircleOutlined,
   PlusOutlined,
-  WarningFilled,
 } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import {
@@ -19,13 +19,12 @@ import {
   Input,
   List,
   Modal,
-  Result,
   Row,
   Tooltip,
   Typography,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { MutableRefObject, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
@@ -40,11 +39,8 @@ import {
   JobProfileModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
-import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import {
-  useGetPositionRequestQuery,
-  usePositionNeedsRivewQuery,
-} from '../../../redux/services/graphql-api/position-request.api';
+import { useGetJobProfileQuery, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
@@ -66,6 +62,7 @@ interface WizardEditProfileProps {
   submitText?: string;
   showBackButton?: boolean;
   receivedClassificationsDataCallback?: (data: GetClassificationsResponse) => void;
+  onVerificationRequiredChange?: (verificationRequired: boolean) => void;
 }
 
 enum reasons {
@@ -80,57 +77,17 @@ type sectionMap = {
 };
 
 const WizardEditProfile = forwardRef(
-  ({ id, profileData, config, submitHandler, receivedClassificationsDataCallback }: WizardEditProfileProps, ref) => {
-    const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
-      useLazyGetClassificationsQuery();
-
-    const initialData = profileData ?? null;
-    const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
-    const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
-    const acctSection = useRef(null);
-    const educationSection = useRef(null);
-    const workExperienceSection = useRef(null);
-    const securitySection = useRef(null);
-    const sections: sectionMap = {
-      [reasons.ACCOUNTABILITIES]: acctSection,
-      [reasons.EDUCATION]: educationSection, // Adjusted for demonstration
-      [reasons.JOB_EXPERIENCE]: workExperienceSection,
-      [reasons.SECURITY_SCREENINGS]: securitySection, // Adjusted for demonstration
-    };
-    useEffect(() => {
-      // If profileData exists, use it to set the form state
-      if (profileData) {
-        setEffectiveData(profileData);
-      } else if (!profileData && id) {
-        // If no profileData is provided and an id exists, fetch the data
-        triggerGetJobProfile({ id: +id });
-      }
-      triggerGetClassificationData(); // get data to populate classification dropdown. Todo: cache this?
-    }, [id, profileData, triggerGetJobProfile, triggerGetClassificationData]);
-
-    useEffect(() => {
-      if (classificationsData && !classificationsDataIsLoading && receivedClassificationsDataCallback) {
-        receivedClassificationsDataCallback(classificationsData);
-      }
-    }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { control, reset, handleSubmit, getValues, formState, trigger } = useForm<JobProfileValidationModel>({
-      resolver: classValidatorResolver(JobProfileValidationModel),
-      mode: 'onChange',
-    });
-    const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
-
-    useEffect(() => {
-      if (!profileData && data && !isLoading) {
-        // Only set effectiveData from fetched data if profileData is not provided
-        setEffectiveData(data.jobProfile);
-        trigger();
-      }
-    }, [data, isLoading, profileData, trigger]);
-
-    const [form] = Form.useForm();
-
+  (
+    {
+      id,
+      profileData,
+      config,
+      submitHandler,
+      receivedClassificationsDataCallback,
+      onVerificationRequiredChange,
+    }: WizardEditProfileProps,
+    ref,
+  ) => {
     // todo: usage of this approach is undesirable, however it fixes various render issues
     // that appear to be linked with the custom FormItem component. Ideally eliminate the usage
     // of this state
@@ -174,18 +131,26 @@ const WizardEditProfile = forwardRef(
       setOriginalProvisosFields,
 
       positionRequestId,
+      positionRequestProfileId,
       // errors,
       currentSection,
       setCurrentSection,
     } = useWizardContext();
-    const { data: positionNeedsRivew, isLoading: positionNeedsRivewLoading } = usePositionNeedsRivewQuery({
-      id: positionRequestId ?? -1,
-    });
-    useEffect(() => {
-      if (positionNeedsRivew && !positionNeedsRivewLoading) {
-        setVerificationNeededReasons(positionNeedsRivew.positionNeedsRivew.reasons);
-      }
-    }, [positionNeedsRivew, positionNeedsRivewLoading, profileData]);
+
+    const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataIsLoading }] =
+      useLazyGetClassificationsQuery();
+
+    const acctSection = useRef(null);
+    const educationSection = useRef(null);
+    const workExperienceSection = useRef(null);
+    const securitySection = useRef(null);
+    const sections: sectionMap = {
+      [reasons.ACCOUNTABILITIES]: acctSection,
+      [reasons.EDUCATION]: educationSection, // Adjusted for demonstration
+      [reasons.JOB_EXPERIENCE]: workExperienceSection,
+      [reasons.SECURITY_SCREENINGS]: securitySection, // Adjusted for demonstration
+    };
+    const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
 
     const handleSectionScroll = (reason: string) => {
       for (const key in sections) {
@@ -206,14 +171,117 @@ const WizardEditProfile = forwardRef(
         setCurrentSection(null);
       }
     }, []);
+    // get original profile data for comparison to the edited state
+    const { data: originalProfileData } = useGetJobProfileQuery({ id: positionRequestProfileId ?? -1 });
+    const initialData = profileData ?? null;
+    const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
+    const [requiresVerification, setRequiresVerification] = useState(false);
+    const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
+
+    const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
+    const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
+    const [editedRelWorkFields, setEditedRelWorkFields] = useState<{ [key: number]: boolean }>({});
+    const [editedSecurityScreeningsFields, setEditedSecurityScreeningsFields] = useState<{ [key: number]: boolean }>(
+      {},
+    );
+
+    useEffect(() => {
+      // If profileData exists, use it to set the form state
+      if (profileData) {
+        setEffectiveData(profileData);
+      } else if (!profileData && id) {
+        // If no profileData is provided and an id exists, fetch the data
+        triggerGetJobProfile({ id: +id });
+      }
+      triggerGetClassificationData(); // get data to populate classification dropdown. Todo: cache this?
+    }, [id, profileData, triggerGetJobProfile, triggerGetClassificationData]);
+
+    useEffect(() => {
+      if (classificationsData && !classificationsDataIsLoading && receivedClassificationsDataCallback) {
+        receivedClassificationsDataCallback(classificationsData);
+      }
+    }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { control, reset, handleSubmit, getValues, formState, trigger } = useForm<JobProfileValidationModel>({
+      resolver: classValidatorResolver(JobProfileValidationModel),
+      mode: 'onChange',
+    });
+
+    useEffect(() => {
+      if (!profileData && data && !isLoading) {
+        // Only set effectiveData from fetched data if profileData is not provided
+        setEffectiveData(data.jobProfile);
+        trigger();
+      }
+    }, [data, isLoading, profileData, trigger]);
+
+    const [form] = Form.useForm();
+
+    const validateVerification = useCallback(() => {
+      // check if the form in its current state would require verification
+
+      // check if any flags are true in editedAccReqFieldsArray
+      const anyReqAccsTrue = Object.values(editedAccReqFields).some((item) => item === true);
+      const anyEducationTrue = Object.values(editedMinReqFields).some((item) => item === true);
+      const anyRelWorkTrue = Object.values(editedRelWorkFields).some((item) => item === true);
+      const anySsecurityScreeningsTrue = Object.values(editedSecurityScreeningsFields).some((item) => item === true);
+      const verificationReasons = [];
+      anyReqAccsTrue && verificationReasons.push(reasons.ACCOUNTABILITIES);
+      anyEducationTrue && verificationReasons.push(reasons.EDUCATION);
+      anyRelWorkTrue && verificationReasons.push(reasons.JOB_EXPERIENCE);
+      anySsecurityScreeningsTrue && verificationReasons.push(reasons.SECURITY_SCREENINGS);
+      const verificationRequired = verificationReasons.length > 0;
+      setVerificationNeededReasons(verificationReasons);
+      setRequiresVerification(verificationRequired);
+      onVerificationRequiredChange?.(verificationRequired); // call parent
+    }, [
+      editedAccReqFields,
+      editedMinReqFields,
+      editedRelWorkFields,
+      editedSecurityScreeningsFields,
+      onVerificationRequiredChange,
+    ]);
+
+    useEffect(() => {
+      validateVerification();
+    }, [
+      editedAccReqFields,
+      editedMinReqFields,
+      editedRelWorkFields,
+      editedSecurityScreeningsFields,
+      validateVerification,
+    ]);
+
     // console.log('effectiveData: ', effectiveData);
     useEffect(() => {
-      if (effectiveData && !isLoading && classificationsData) {
+      if (effectiveData && !isLoading && classificationsData && originalProfileData) {
         const classificationIds =
           effectiveData?.classifications?.map((c) => ({ classification: c.classification.id })) ?? [];
 
         // required accountabilities
-        const originalAccReqFieldsValue = effectiveData.accountabilities
+        const initialAccReqFieldsValue = effectiveData.accountabilities
+          .map((item) => {
+            if (typeof item === 'string') {
+              return {
+                text: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              if (item.is_significant)
+                return {
+                  text: item.text,
+                  isCustom: item.isCustom,
+                  disabled: item.disabled,
+                  is_readonly: item.is_readonly,
+                  is_significant: item.is_significant,
+                };
+            }
+          })
+          .filter((item) => item !== undefined);
+
+        const originalAccReqFieldsValue = originalProfileData.jobProfile.accountabilities
           .map((item) => {
             if (typeof item === 'string') {
               return {
@@ -240,16 +308,38 @@ const WizardEditProfile = forwardRef(
         let initialEditStatus: { [key: number]: boolean } = {};
 
         // Iterate over each minimum requirement field and compare with the original value
-        originalAccReqFieldsValue.forEach((item, index) => {
+        initialAccReqFieldsValue.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item?.text !== originalAccReqFields[index]?.text;
+          const isEdited = item?.text !== originalAccReqFieldsValue[index]?.text || item?.disabled === true;
           initialEditStatus[index] = isEdited;
         });
 
         // Set the editedMinReqFields state
         setEditedAccReqFields(initialEditStatus);
 
-        const originalOptReqFieldsValue = effectiveData.accountabilities
+        const originalOptReqFieldsValue = originalProfileData.jobProfile.accountabilities
+          .map((item) => {
+            if (typeof item === 'string') {
+              return {
+                text: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              if (!item.is_significant) {
+                return {
+                  text: item.text,
+                  isCustom: item.isCustom,
+                  disabled: item.disabled === undefined ? true : item.disabled,
+                  is_readonly: item.is_readonly,
+                  is_significant: item.is_significant,
+                };
+              }
+            }
+          })
+          .filter((item) => item !== undefined);
+
+        const initialOptReqFieldsValue = effectiveData.accountabilities
           .map((item) => {
             if (typeof item === 'string') {
               return {
@@ -274,16 +364,34 @@ const WizardEditProfile = forwardRef(
 
         initialEditStatus = {};
         // // Iterate over each minimum requirement field and compare with the original value
-        originalOptReqFieldsValue.forEach((item, index) => {
+        initialOptReqFieldsValue.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item?.text !== originalOptReqFields[index]?.text;
+          const isEdited = item?.text !== originalOptReqFieldsValue[index]?.text;
           initialEditStatus[index] = isEdited;
         });
 
         // // Set the editedMinReqFields state
         // setEditedOptReqFields(initialEditStatus);
 
-        const originalMinReqFieldsValue = effectiveData.education?.map((item) => {
+        const originalMinReqFieldsValue = originalProfileData.jobProfile.education?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              text: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              text: item.text,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+              is_readonly: item.is_readonly,
+              is_significant: item.is_significant,
+            };
+          }
+        });
+
+        const initialMinReqFieldsValue = effectiveData.education?.map((item) => {
           if (typeof item === 'string') {
             return {
               text: item,
@@ -306,9 +414,11 @@ const WizardEditProfile = forwardRef(
         initialEditStatus = {};
 
         // Iterate over each minimum requirement field and compare with the original value
-        originalMinReqFieldsValue?.forEach((item, index) => {
+        initialMinReqFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.text !== originalMinReqFields[index]?.text;
+          const isEdited =
+            item.text !== originalMinReqFieldsValue[index]?.text ||
+            (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
         // }
@@ -317,7 +427,24 @@ const WizardEditProfile = forwardRef(
 
         // RELATED EXPERIENCE
         initialEditStatus = {};
-        const originalRelWorkFieldsValue = effectiveData.job_experience?.map((item) => {
+        const originalRelWorkFieldsValue = originalProfileData.jobProfile.job_experience?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              text: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              text: item.text,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+              is_readonly: item.is_readonly,
+              is_significant: item.is_significant,
+            };
+          }
+        });
+        const initialRelWorkFieldsValue = effectiveData.job_experience?.map((item) => {
           if (typeof item === 'string') {
             return {
               text: item,
@@ -337,9 +464,11 @@ const WizardEditProfile = forwardRef(
         if (!originalValuesSet) setOriginalRelWorkFields(originalRelWorkFieldsValue);
 
         // Iterate over each related experience field and compare with the original value
-        originalRelWorkFieldsValue?.forEach((item, index) => {
+        initialRelWorkFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.text !== originalRelWorkFields[index]?.text;
+          const isEdited =
+            item.text !== originalRelWorkFieldsValue[index]?.text ||
+            (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
 
@@ -348,7 +477,25 @@ const WizardEditProfile = forwardRef(
 
         // SECURITY SCREENINGS
         initialEditStatus = {};
-        const originalSecurityScreeningsFieldsValue = effectiveData.security_screenings?.map((item) => {
+        const originalSecurityScreeningsFieldsValue = originalProfileData.jobProfile.security_screenings?.map(
+          (item) => {
+            if (typeof item === 'string') {
+              return {
+                text: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              return {
+                text: item.text,
+                isCustom: item.isCustom,
+                disabled: item.disabled,
+                is_readonly: item.is_readonly,
+              };
+            }
+          },
+        );
+        const initialSecurityScreeningsFieldsValue = effectiveData.security_screenings?.map((item) => {
           if (typeof item === 'string') {
             return {
               text: item,
@@ -364,12 +511,14 @@ const WizardEditProfile = forwardRef(
             };
           }
         });
-        if (!originalValuesSet) setOriginalSecurityScreeningsFields(originalSecurityScreeningsFieldsValue);
+        if (!originalValuesSet) {
+          setOriginalSecurityScreeningsFields(originalSecurityScreeningsFieldsValue);
+        }
 
         // Iterate over each security screening field and compare with the original value
-        originalSecurityScreeningsFieldsValue?.forEach((item, index) => {
+        initialSecurityScreeningsFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.text !== originalSecurityScreeningsFields[index]?.text;
+          const isEdited = item.text !== originalSecurityScreeningsFieldsValue[index]?.text || item.disabled === true;
           initialEditStatus[index] = isEdited;
         });
 
@@ -380,7 +529,23 @@ const WizardEditProfile = forwardRef(
         //   originalProfessionalRegistrationFields,
         // setOriginalProfessionalRegistrationFields,
         initialEditStatus = {};
-        const originalProfessionalRegistrationFieldsValue = effectiveData.professional_registration_requirements?.map(
+        const originalProfessionalRegistrationFieldsValue =
+          originalProfileData.jobProfile.professional_registration_requirements?.map((item) => {
+            if (typeof item === 'string') {
+              return {
+                value: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              return {
+                value: item.value,
+                isCustom: item.isCustom,
+                disabled: item.disabled,
+              };
+            }
+          });
+        const initialProfessionalRegistrationFieldsValue = effectiveData.professional_registration_requirements?.map(
           (item) => {
             if (typeof item === 'string') {
               return {
@@ -399,9 +564,9 @@ const WizardEditProfile = forwardRef(
         );
         if (!originalValuesSet) setOriginalProfessionalRegistrationFields(originalProfessionalRegistrationFieldsValue);
 
-        originalProfessionalRegistrationFieldsValue?.forEach((item, index) => {
+        initialProfessionalRegistrationFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalProfessionalRegistrationFields[index]?.value;
+          const isEdited = item.value !== originalProfessionalRegistrationFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -409,7 +574,24 @@ const WizardEditProfile = forwardRef(
 
         // OPTIONAL REQUIREMENTS
         initialEditStatus = {};
-        const originalOptionalRequirementsFieldsValue = effectiveData.optional_requirements?.map((item) => {
+        const originalOptionalRequirementsFieldsValue = originalProfileData.jobProfile.optional_requirements?.map(
+          (item) => {
+            if (typeof item === 'string') {
+              return {
+                value: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              return {
+                value: item.value,
+                isCustom: item.isCustom,
+                disabled: item.disabled,
+              };
+            }
+          },
+        );
+        const initialOptionalRequirementsFieldsValue = effectiveData.optional_requirements?.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -426,9 +608,9 @@ const WizardEditProfile = forwardRef(
         });
         if (!originalValuesSet) setOriginalOptionalRequirementsFields(originalOptionalRequirementsFieldsValue);
 
-        originalOptionalRequirementsFieldsValue?.forEach((item, index) => {
+        initialOptionalRequirementsFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalOptionalRequirementsFields[index]?.value;
+          const isEdited = item.value !== originalOptionalRequirementsFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -438,7 +620,22 @@ const WizardEditProfile = forwardRef(
         // originalPreferencesFields,
         // setOriginalPreferencesFields,
         initialEditStatus = {};
-        const originalPreferencesFieldsValue = effectiveData.preferences?.map((item) => {
+        const originalPreferencesFieldsValue = originalProfileData.jobProfile.preferences?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+        const initialPreferencesFieldsValue = effectiveData.preferences?.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -455,9 +652,9 @@ const WizardEditProfile = forwardRef(
         });
         if (!originalValuesSet) setOriginalPreferencesFields(originalPreferencesFieldsValue);
 
-        originalPreferencesFieldsValue?.forEach((item, index) => {
+        initialPreferencesFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalPreferencesFields[index]?.value;
+          const isEdited = item.value !== originalPreferencesFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -467,7 +664,24 @@ const WizardEditProfile = forwardRef(
         // originalKnowledgeSkillsAbilitiesFields,
         // setOriginalKnowledgeSkillsAbilitiesFields,
         initialEditStatus = {};
-        const originalKnowledgeSkillsAbilitiesFieldsValue = effectiveData.knowledge_skills_abilities?.map((item) => {
+        const originalKnowledgeSkillsAbilitiesFieldsValue =
+          originalProfileData.jobProfile.knowledge_skills_abilities?.map((item) => {
+            if (typeof item === 'string') {
+              return {
+                value: item,
+                isCustom: false,
+                disabled: false,
+              };
+            } else {
+              return {
+                value: item.value,
+                isCustom: item.isCustom,
+                disabled: item.disabled,
+              };
+            }
+          });
+
+        const initialKnowledgeSkillsAbilitiesFieldsValue = effectiveData.knowledge_skills_abilities?.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -484,9 +698,9 @@ const WizardEditProfile = forwardRef(
         });
         if (!originalValuesSet) setOriginalKnowledgeSkillsAbilitiesFields(originalKnowledgeSkillsAbilitiesFieldsValue);
 
-        originalKnowledgeSkillsAbilitiesFieldsValue?.forEach((item, index) => {
+        initialKnowledgeSkillsAbilitiesFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalKnowledgeSkillsAbilitiesFields[index]?.value;
+          const isEdited = item.value !== originalKnowledgeSkillsAbilitiesFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -496,7 +710,23 @@ const WizardEditProfile = forwardRef(
         // originalProvisosFields,
         // setOriginalProvisosFields,
         initialEditStatus = {};
-        const originalProvisosFieldsValue = effectiveData.willingness_statements?.map((item) => {
+        const originalProvisosFieldsValue = originalProfileData.jobProfile.willingness_statements?.map((item) => {
+          if (typeof item === 'string') {
+            return {
+              value: item,
+              isCustom: false,
+              disabled: false,
+            };
+          } else {
+            return {
+              value: item.value,
+              isCustom: item.isCustom,
+              disabled: item.disabled,
+            };
+          }
+        });
+
+        const initialProvisosFieldsValue = effectiveData.willingness_statements?.map((item) => {
           if (typeof item === 'string') {
             return {
               value: item,
@@ -514,9 +744,9 @@ const WizardEditProfile = forwardRef(
         if (!originalValuesSet) setOriginalProvisosFields(originalProvisosFieldsValue);
 
         // Iterate over each proviso field and compare with the original value
-        originalProvisosFieldsValue?.forEach((item, index) => {
+        initialProvisosFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
-          const isEdited = item.value !== originalProvisosFields[index]?.value;
+          const isEdited = item.value !== originalProvisosFieldsValue[index]?.value;
           initialEditStatus[index] = isEdited;
         });
 
@@ -525,6 +755,19 @@ const WizardEditProfile = forwardRef(
         // TITLE
         // Set the original value for title
         const originalTitleValue =
+          typeof originalProfileData.jobProfile.title === 'string'
+            ? {
+                value: originalProfileData.jobProfile.title,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: originalProfileData.jobProfile.title.value,
+                isCustom: originalProfileData.jobProfile.title.isCustom,
+                disabled: originalProfileData.jobProfile.title.disabled,
+              };
+
+        const initialTitleValue =
           typeof effectiveData.title === 'string'
             ? {
                 value: effectiveData.title,
@@ -537,11 +780,26 @@ const WizardEditProfile = forwardRef(
                 disabled: effectiveData.title.disabled,
               };
 
-        if (!originalValuesSet) setOriginalTitle(originalTitleValue);
+        if (!originalValuesSet) {
+          setOriginalTitle(originalTitleValue);
+        }
         setTitleEdited(originalTitle.value !== originalTitleValue.value);
 
         // OVERVIEW
         const originalOverviewValue =
+          typeof originalProfileData.jobProfile.overview === 'string'
+            ? {
+                value: originalProfileData.jobProfile.overview,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: originalProfileData.jobProfile.overview.value,
+                isCustom: originalProfileData.jobProfile.overview.isCustom,
+                disabled: originalProfileData.jobProfile.overview.disabled,
+              };
+
+        const initialOverviewValue =
           typeof effectiveData.overview === 'string'
             ? {
                 value: effectiveData.overview,
@@ -553,11 +811,25 @@ const WizardEditProfile = forwardRef(
                 isCustom: effectiveData.overview.isCustom,
                 disabled: effectiveData.overview.disabled,
               };
+
         if (!originalValuesSet) setOriginalOverview(originalOverviewValue);
         setOverviewEdited(originalOverview.value !== originalOverviewValue.value);
 
         // PROGRAM OVERVIEW
         const originalProgramOverviewValue =
+          typeof originalProfileData.jobProfile.program_overview === 'string'
+            ? {
+                value: originalProfileData.jobProfile.program_overview,
+                isCustom: false,
+                disabled: false,
+              }
+            : {
+                value: originalProfileData.jobProfile.program_overview.value,
+                isCustom: originalProfileData.jobProfile.program_overview.isCustom,
+                disabled: originalProfileData.jobProfile.program_overview.disabled,
+              };
+
+        const initialProgramOverviewValue =
           typeof effectiveData.program_overview === 'string'
             ? {
                 value: effectiveData.program_overview,
@@ -569,40 +841,41 @@ const WizardEditProfile = forwardRef(
                 isCustom: effectiveData.program_overview.isCustom,
                 disabled: effectiveData.program_overview.disabled,
               };
+
         if (!originalValuesSet) setOriginalProgramOverview(originalProgramOverviewValue);
         setProgramOverviewEdited(originalProgramOverviewValue.value !== originalProgramOverviewValue.value);
 
         // DONE FIELDS
         if (!originalValuesSet) setOriginalValuesSet(true);
 
+        validateVerification();
         // console.log('effectiveData?.context?.description: ', effectiveData?.context?.description);
-        // console.log('originalAccReqFieldsValue: ', originalAccReqFieldsValue);
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
-          title: originalTitleValue,
+          title: initialTitleValue,
           context:
             typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description,
-          overview: originalOverviewValue,
-          program_overview: originalProgramOverviewValue,
+          overview: initialOverviewValue,
+          program_overview: initialProgramOverviewValue,
           classifications: classificationIds,
           // array fileds are required to be nested in objects, so wrap string values in {value: item}
-          accountabilities: originalAccReqFieldsValue,
-          optional_accountabilities: originalOptReqFieldsValue,
-          education: originalMinReqFieldsValue,
-          job_experience: originalRelWorkFieldsValue,
-          security_screenings: originalSecurityScreeningsFieldsValue,
+          accountabilities: initialAccReqFieldsValue,
+          optional_accountabilities: initialOptReqFieldsValue,
+          education: initialMinReqFieldsValue,
+          job_experience: initialRelWorkFieldsValue,
+          security_screenings: initialSecurityScreeningsFieldsValue,
           behavioural_competencies: effectiveData?.behavioural_competencies || [],
 
-          professional_registration: originalProfessionalRegistrationFieldsValue,
-          preferences: originalPreferencesFieldsValue,
-          knowledge_skills_abilities: originalKnowledgeSkillsAbilitiesFieldsValue,
-          provisos: originalProvisosFieldsValue,
-          optional_requirements: originalOptionalRequirementsFieldsValue,
+          professional_registration: initialProfessionalRegistrationFieldsValue,
+          preferences: initialPreferencesFieldsValue,
+          knowledge_skills_abilities: initialKnowledgeSkillsAbilitiesFieldsValue,
+          provisos: initialProvisosFieldsValue,
+          optional_requirements: initialOptionalRequirementsFieldsValue,
         });
       }
-      // setRenderKey((prevKey) => prevKey + 1);
-      // console.log('reset!');
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       effectiveData,
       isLoading,
@@ -635,6 +908,7 @@ const WizardEditProfile = forwardRef(
       setOriginalProvisosFields,
       originalOptionalRequirementsFields,
       setOriginalOptionalRequirementsFields,
+      originalProfileData,
     ]);
 
     // Required Accountability Fields
@@ -773,108 +1047,137 @@ const WizardEditProfile = forwardRef(
 
     // FOCUS ALERTS
     // when user focuses on required accountabilities and minimum requirements fields, show an alert once
-    // const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
-    // const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
-    // const { securityScreeningsAlertShown, setSecurityScreeningsAlertShown } = useWizardContext();
+    const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
+    const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
+    const { securityScreeningsAlertShown, setSecurityScreeningsAlertShown } = useWizardContext();
+    const { reqAlertShown, setReqAlertShown } = useWizardContext();
+    const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
 
-    // const { reqAlertShown, setReqAlertShown } = useWizardContext();
+    // Function to handle focus
+    const showMinReqModal = (action: () => void, showCancel: boolean, isSignificant?: boolean) => {
+      if (!minReqAlertShown && (isSignificant || isSignificant === undefined)) {
+        setMinReqAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to education and work experiences?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
-    // // Function to handle focus
-    // const showMinReqModal = (action: () => void, showCancel: boolean) => {
-    //   if (!minReqAlertShown) {
-    //     setMinReqAlertShown(true);
-    //     Modal.confirm({
-    //       title: 'Attention',
-    //       content: (
-    //         <div role="alert">
-    //           Significant changes to this area <strong>may</strong> trigger a classification review.
-    //         </div>
-    //       ),
-    //       okText: 'Proceed',
-    //       cancelText: 'Cancel',
-    //       onOk: action,
-    //       // The following props are set to style the modal like a warning
-    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-    //       okButtonProps: { style: {} },
-    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-    //       autoFocusButton: null,
-    //     });
-    //   } else {
-    //     action();
-    //   }
-    // };
+    const showRelWorkModal = (action: () => void, showCancel: boolean, isSignificant?: boolean) => {
+      if (!relWorkAlertShown && (isSignificant || isSignificant === undefined)) {
+        setRelWorkAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to related experiences?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
-    // const showRelWorkModal = (action: () => void, showCancel: boolean) => {
-    //   if (!relWorkAlertShown) {
-    //     setRelWorkAlertShown(true);
-    //     Modal.confirm({
-    //       title: 'Attention',
-    //       content: (
-    //         <div role="alert">
-    //           Significant changes to this area <strong>may</strong> trigger a classification review.
-    //         </div>
-    //       ),
-    //       okText: 'Proceed',
-    //       cancelText: 'Cancel',
-    //       onOk: action,
-    //       // The following props are set to style the modal like a warning
-    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-    //       okButtonProps: { style: {} },
-    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-    //       autoFocusButton: null,
-    //     });
-    //   } else {
-    //     action();
-    //   }
-    // };
+    const showSecurityScreeningsModal = (action: () => void, showCancel: boolean, isSignificant?: boolean) => {
+      if (!securityScreeningsAlertShown && (isSignificant || isSignificant === undefined)) {
+        setSecurityScreeningsAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to security screenings?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
-    // const showSecurityScreeningsModal = (action: () => void, showCancel: boolean) => {
-    //   if (!securityScreeningsAlertShown) {
-    //     setSecurityScreeningsAlertShown(true);
-    //     Modal.confirm({
-    //       title: 'Attention',
-    //       content: (
-    //         <div role="alert">
-    //           Significant changes to this area <strong>may</strong> trigger a classification review.
-    //         </div>
-    //       ),
-    //       okText: 'Proceed',
-    //       cancelText: 'Cancel',
-    //       onOk: action,
-    //       // The following props are set to style the modal like a warning
-    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-    //       okButtonProps: { style: {} },
-    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-    //       autoFocusButton: null,
-    //     });
-    //   } else {
-    //     action();
-    //   }
-    // };
+    const showReqModal = (action: () => void, showCancel: boolean) => {
+      if (!reqAlertShown) {
+        setReqAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to accountabilities?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
-    // const showReqModal = (action: () => void, showCancel: boolean) => {
-    //   if (!reqAlertShown) {
-    //     setReqAlertShown(true);
-    //     Modal.confirm({
-    //       title: 'Attention',
-    //       content: (
-    //         <div role="alert">
-    //           Removing required accountabilities <strong>may</strong> trigger a classification review
-    //         </div>
-    //       ),
-    //       okText: 'Proceed',
-    //       cancelText: 'Cancel',
-    //       onOk: action,
-    //       // The following props are set to style the modal like a warning
-    //       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-    //       okButtonProps: { style: {} },
-    //       cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-    //       autoFocusButton: null,
-    //     });
-    //   } else {
-    //     action();
-    //   }
-    // };
+    const showOptionalAccountabilitiesModal = (action: () => void, showCancel: boolean) => {
+      if (!optionalAccountabilitiesAlertShown) {
+        setOptionalAccountabilitiesAlertShown(true);
+        Modal.confirm({
+          title: 'Do you want to make changes to optional accountabilities?',
+          content: (
+            <div role="alert">
+              Amendments to the generic profile will require verification. If you would like to continue to make
+              changes, please click proceed.
+            </div>
+          ),
+          okText: 'Proceed',
+          cancelText: 'Cancel',
+          onOk: action,
+          // The following props are set to style the modal like a warning
+          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+          okButtonProps: { style: {} },
+          cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
+          autoFocusButton: null,
+        });
+      } else {
+        action();
+      }
+    };
 
     // DIFF HANDLING
     // Cross out deleted core items, allow ability to add back
@@ -914,13 +1217,11 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
-    const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
-
     const renderAccReqFields = (field: any, index: number) => {
       const isEdited = editedAccReqFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
-        setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.value }));
+        setEditedAccReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalAccReqFields[index]?.text }));
         trigger();
       }, 300);
 
@@ -979,23 +1280,33 @@ const WizardEditProfile = forwardRef(
                   <label className="sr-only" htmlFor={field.id}>
                     Accountability {index + 1}
                   </label>
-                  <TextArea
-                    // id for label
-                    id={field.id}
-                    // set style to display one if field.is_readonly
-                    data-testid={`accountability-input-${index}`}
+                  <div
+                    className={`${isEdited ? 'edited-field-container' : ''} input-container`}
                     style={{ display: field.is_readonly ? 'none' : 'block' }}
-                    autoSize
-                    disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
-                    className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                    onChange={(event) => {
-                      onChange(event);
-                      const updatedValue = event.target.value;
-                      handleFieldChange(index, updatedValue);
-                    }}
-                    onBlur={onBlur}
-                    value={value ? (typeof value === 'string' ? value : value.value) : ''}
-                  />
+                  >
+                    <TextArea
+                      // id for label
+                      id={field.id}
+                      // set style to display one if field.is_readonly
+                      data-testid={`accountability-input-${index}`}
+                      autoSize
+                      disabled={field.disabled || getValues(`accountabilities.${index}.is_readonly`)}
+                      className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
+                        isEdited ? 'edited-textarea' : ''
+                      }`}
+                      onChange={(event) => {
+                        onChange(event);
+                        const updatedValue = event.target.value;
+                        handleFieldChange(index, updatedValue);
+                      }}
+                      onBlur={() => {
+                        validateVerification();
+                        onBlur();
+                      }}
+                      onFocus={() => showReqModal(() => {}, false)}
+                      value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                    />
+                  </div>
                 </>
               )}
             />
@@ -1007,7 +1318,14 @@ const WizardEditProfile = forwardRef(
                 icon={icon}
                 aria-label={ariaLabel}
                 onClick={() => {
-                  field.disabled ? handleAccReqAddBack(index) : handleAccReqRemove(index);
+                  showReqModal(() => {
+                    field.disabled ? handleAccReqAddBack(index) : handleAccReqRemove(index);
+
+                    setEditedAccReqFields((prev) => ({
+                      ...prev,
+                      [index]: !field.disabled || field.text !== originalAccReqFields[index]?.text,
+                    }));
+                  }, false);
                 }}
                 disabled={field.is_readonly}
                 style={{ marginLeft: '10px' }}
@@ -1092,32 +1410,28 @@ const WizardEditProfile = forwardRef(
               <Input />
             </FormItem>
             {!field.isCustom && (
-              <>
-                <Checkbox
-                  data-testid={`optional-accountability-checkbox-${index}`}
-                  className="multiline-checkbox"
-                  aria-label={ariaLabel}
-                  checked={!field.disabled}
-                  onChange={() => {
-                    console.log(field.disabled);
-                    field.disabled ? handleOptReqAddBack(index) : handleOptReqRemove(index);
-                  }}
-                  style={{ marginRight: '10px' }}
-                >
-                  {field.text}
-                </Checkbox>
-
-                {/* <Typography.Text
-                  data-testid={`readonly-accountability-${index}`}
-                  style={{
-                    flex: 1,
-                    marginRight: '10px',
-                    color: field.disabled ? 'grey' : '',
-                  }}
-                >
-                  {field.text}
-                </Typography.Text> */}
-              </>
+              <Controller
+                control={control}
+                name={`optional_accountabilities.${index}.disabled`}
+                render={({ field: { onChange, value } }) => {
+                  return (
+                    <>
+                      <Checkbox
+                        data-testid={`optional-accountability-checkbox-${index}`}
+                        className="multiline-checkbox"
+                        aria-label={ariaLabel}
+                        checked={!value}
+                        onChange={(e) => {
+                          onChange(!e.target.checked);
+                        }}
+                        style={{ marginRight: '10px' }}
+                      >
+                        {field.text}
+                      </Checkbox>
+                    </>
+                  );
+                }}
+              />
             )}
             <Controller
               control={control}
@@ -1199,13 +1513,11 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
-    const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
-
     const renderMinReqFields = (field: any, index: number) => {
       const isEdited = editedMinReqFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
-        setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.value }));
+        setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.text }));
         trigger();
       }, 300);
 
@@ -1261,21 +1573,33 @@ const WizardEditProfile = forwardRef(
                   <label className="sr-only" htmlFor={field.id}>
                     Education and work experience {index + 1}
                   </label>
-                  <TextArea
-                    data-testid={`education-input-${index}`}
-                    id={field.id}
+
+                  <div
+                    className={`${isEdited ? 'edited-field-container' : ''} input-container`}
                     style={{ display: field.is_readonly ? 'none' : 'block' }}
-                    autoSize
-                    disabled={field.disabled || getValues(`education.${index}.is_readonly`)}
-                    className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                    onChange={(event) => {
-                      onChange(event);
-                      const updatedValue = event.target.value;
-                      handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
-                    }}
-                    onBlur={onBlur}
-                    value={value ? (typeof value === 'string' ? value : value.value) : ''}
-                  />
+                  >
+                    <TextArea
+                      data-testid={`education-input-${index}`}
+                      id={field.id}
+                      style={{ display: field.is_readonly ? 'none' : 'block' }}
+                      autoSize
+                      disabled={field.disabled || getValues(`education.${index}.is_readonly`)}
+                      className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
+                        isEdited ? 'edited-textarea' : ''
+                      }`}
+                      onChange={(event) => {
+                        onChange(event);
+                        const updatedValue = event.target.value;
+                        if (field.is_significant) handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
+                      }}
+                      onFocus={() => showMinReqModal(() => {}, false, field.is_significant)}
+                      onBlur={() => {
+                        validateVerification();
+                        onBlur();
+                      }}
+                      value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                    />
+                  </div>
                 </>
               )}
             />
@@ -1287,7 +1611,18 @@ const WizardEditProfile = forwardRef(
                 icon={icon}
                 aria-label={ariaLabel}
                 onClick={() => {
-                  field.disabled ? handleMinReqAddBack(index) : handleMinReqRemove(index);
+                  showMinReqModal(
+                    () => {
+                      field.disabled ? handleMinReqAddBack(index) : handleMinReqRemove(index);
+                      if (field.is_significant)
+                        setEditedMinReqFields((prev) => ({
+                          ...prev,
+                          [index]: !field.disabled || field.text !== originalMinReqFields[index]?.text,
+                        }));
+                    },
+                    false,
+                    field.is_significant,
+                  );
                 }}
                 disabled={field.is_readonly}
                 style={{ marginLeft: '10px' }}
@@ -1360,13 +1695,11 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
-    const [editedRelWorkFields, setEditedRelWorkFields] = useState<{ [key: number]: boolean }>({});
-
     const renderRelWorkFields = (field: any, index: number) => {
       const isEdited = editedRelWorkFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
-        setEditedRelWorkFields((prev) => ({ ...prev, [index]: updatedValue !== originalRelWorkFields[index]?.value }));
+        setEditedRelWorkFields((prev) => ({ ...prev, [index]: updatedValue !== originalRelWorkFields[index]?.text }));
         trigger();
       }, 300);
 
@@ -1427,39 +1760,36 @@ const WizardEditProfile = forwardRef(
                   <label className="sr-only" htmlFor={field.id}>
                     Related experience {index + 1}
                   </label>
-                  <TextArea
-                    data-testid={`job-experience-input-${index}`}
-                    id={field.id}
+
+                  <div
+                    className={`${isEdited ? 'edited-field-container' : ''} input-container`}
                     style={{ display: field.is_readonly ? 'none' : 'block' }}
-                    autoSize
-                    disabled={field.disabled || getValues(`job_experience.${index}.is_readonly`)}
-                    className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                    onChange={(event) => {
-                      onChange(event);
-                      const updatedValue = event.target.value;
-                      handleFieldChange(index, updatedValue);
-                    }}
-                    onBlur={onBlur}
-                    value={value ? (typeof value === 'string' ? value : value.value) : ''}
-                  />
+                  >
+                    <TextArea
+                      data-testid={`job-experience-input-${index}`}
+                      id={field.id}
+                      style={{ display: field.is_readonly ? 'none' : 'block' }}
+                      autoSize
+                      disabled={field.disabled || getValues(`job_experience.${index}.is_readonly`)}
+                      className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
+                        isEdited ? 'edited-textarea' : ''
+                      }`}
+                      onChange={(event) => {
+                        onChange(event);
+                        const updatedValue = event.target.value;
+                        if (field.is_significant) handleFieldChange(index, updatedValue);
+                      }}
+                      onFocus={() => showRelWorkModal(() => {}, false, field.is_significant)}
+                      onBlur={() => {
+                        validateVerification();
+                        onBlur();
+                      }}
+                      value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                    />
+                  </div>
                 </>
               )}
             />
-
-            {/* <FormItem
-            hidden={field.is_readonly}
-            name={`job_experience.${index}.text`}
-            control={control}
-            style={{ flex: 1, marginRight: '10px', marginBottom: '0px' }}
-          >
-            <TextArea
-              autoSize
-              disabled={field.disabled}
-              className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-              // onFocus={() => showRelWorkModal(() => {}, false)}
-              onChange={handleFieldChange}
-            />
-          </FormItem> */}
 
             <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
               <Button
@@ -1468,7 +1798,19 @@ const WizardEditProfile = forwardRef(
                 icon={icon}
                 aria-label={ariaLabel}
                 onClick={() => {
-                  field.disabled ? handleRelWorkAddBack(index) : handleRelWorkRemove(index);
+                  showRelWorkModal(
+                    () => {
+                      field.disabled ? handleRelWorkAddBack(index) : handleRelWorkRemove(index);
+
+                      if (field.is_significant)
+                        setEditedRelWorkFields((prev) => ({
+                          ...prev,
+                          [index]: !field.disabled || field.text !== originalRelWorkFields[index]?.text,
+                        }));
+                    },
+                    false,
+                    field.is_significant,
+                  );
                 }}
                 disabled={field.is_readonly}
                 style={{ marginLeft: '10px' }}
@@ -1511,17 +1853,13 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
-    const [editedSecurityScreeningsFields, setEditedSecurityScreeningsFields] = useState<{ [key: number]: boolean }>(
-      {},
-    );
-
     const renderSecurityScreeningsFields = (field: any, index: number) => {
       const isEdited = editedSecurityScreeningsFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
         setEditedSecurityScreeningsFields((prev) => ({
           ...prev,
-          [index]: updatedValue !== originalSecurityScreeningsFields[index]?.value,
+          [index]: updatedValue !== originalSecurityScreeningsFields[index]?.text,
         }));
         trigger();
       }, 300);
@@ -1575,21 +1913,31 @@ const WizardEditProfile = forwardRef(
                 <label className="sr-only" htmlFor={field.id}>
                   Security screening {index + 1}
                 </label>
-                <TextArea
-                  data-testid={`security-screening-input-${index}`}
-                  id={field.id}
+
+                <div
+                  className={`${isEdited ? 'edited-field-container' : ''} input-container`}
                   style={{ display: field.is_readonly ? 'none' : 'block' }}
-                  autoSize
-                  disabled={field.disabled || getValues(`security_screenings.${index}.is_readonly`)}
-                  className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
-                  onChange={(event) => {
-                    onChange(event);
-                    const updatedValue = event.target.value;
-                    handleFieldChange(index, updatedValue);
-                  }}
-                  onBlur={onBlur}
-                  value={value ? (typeof value === 'string' ? value : value.value) : ''}
-                />
+                >
+                  <TextArea
+                    data-testid={`security-screening-input-${index}`}
+                    id={field.id}
+                    style={{ display: field.is_readonly ? 'none' : 'block' }}
+                    autoSize
+                    disabled={field.disabled || getValues(`security_screenings.${index}.is_readonly`)}
+                    className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                    onChange={(event) => {
+                      onChange(event);
+                      const updatedValue = event.target.value;
+                      handleFieldChange(index, updatedValue);
+                    }}
+                    onBlur={() => {
+                      validateVerification();
+                      onBlur();
+                    }}
+                    onFocus={() => showSecurityScreeningsModal(() => {}, false, field.is_significant)}
+                    value={value ? (typeof value === 'string' ? value : value.value) : ''}
+                  />
+                </div>
               </>
             )}
           />
@@ -1603,7 +1951,17 @@ const WizardEditProfile = forwardRef(
               icon={icon}
               aria-label={ariaLabel}
               onClick={() => {
-                field.disabled ? handleSecurityScreeningsAddBack(index) : handleSecurityScreeningsRemove(index);
+                showSecurityScreeningsModal(
+                  () => {
+                    field.disabled ? handleSecurityScreeningsAddBack(index) : handleSecurityScreeningsRemove(index);
+                    setEditedSecurityScreeningsFields((prev) => ({
+                      ...prev,
+                      [index]: !field.disabled || field.text !== originalSecurityScreeningsFields[index]?.text,
+                    }));
+                  },
+                  false,
+                  field.is_significant,
+                );
               }}
               disabled={field.is_readonly}
               style={{
@@ -2500,36 +2858,33 @@ const WizardEditProfile = forwardRef(
     return (
       <>
         {/* {mode === 'verificationRequired_edits' && ( */}
-        <Result icon={<WarningFilled />} title="Verification required" status="warning" />
-        <Row justify="center" style={{ padding: '0 1rem' }}>
-          <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-            <Alert
-              data-testid="verification-warning-message"
-              message=""
-              description={
-                <span>
-                  Some of your amendments to the generic profile require verification. If you would like to revisit some
-                  of your amendments, please click these links:
-                  {/* loop over reasons */}
-                  <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
-                    {verificationNeededReasons.map((reason, index) => (
-                      <li key={index}>
-                        <a onClick={() => handleSectionScroll(reason)}>{reason}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </span>
-              }
-              type="warning"
-              showIcon
-              icon={<ExclamationCircleFilled />}
-              style={{ marginBottom: '24px' }}
-            />
-          </Col>
-        </Row>{' '}
-        {/* )} */}
         <Row data-testid="profile-editing-form" gutter={[24, 24]}>
           <Col xs={24} sm={24} lg={8} aria-label="Context and job details" role="region">
+            {requiresVerification && (
+              <Alert
+                data-testid="verification-warning-message"
+                message=""
+                description={
+                  <span>
+                    Some of your amendments to the generic profile require verification. If you would like to revisit
+                    some of your amendments, please click these links:
+                    {/* loop over reasons */}
+                    <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
+                      {verificationNeededReasons.map((reason, index) => (
+                        <li key={index}>
+                          <a onClick={() => handleVerificationClick()}>{reason}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </span>
+                }
+                type="warning"
+                showIcon
+                icon={<ExclamationCircleFilled />}
+                style={{ marginBottom: '24px' }}
+              />
+            )}
+
             <Alert
               role="note"
               type="info"
@@ -2554,6 +2909,7 @@ const WizardEditProfile = forwardRef(
                 ></p>
               }
             ></Alert>
+
             <Descriptions
               className="customDescriptions"
               style={{ marginTop: '1rem' }}
@@ -2740,8 +3096,8 @@ const WizardEditProfile = forwardRef(
                         {acc_req_fields.length > 0 && (
                           <AccessibleList
                             dataSource={acc_req_fields}
-                            renderItem={renderAccReqFields}
                             ariaLabel="Accountabilities"
+                            renderItem={renderAccReqFields}
                           />
                         )}
                         <Button
@@ -2750,8 +3106,9 @@ const WizardEditProfile = forwardRef(
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
                           onClick={() => {
-                            handleAccReqAddNew();
-                            // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                            showReqModal(() => {
+                              handleAccReqAddNew();
+                            }, false);
                           }}
                         >
                           Add another accountability
@@ -2783,7 +3140,9 @@ const WizardEditProfile = forwardRef(
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
                           onClick={() => {
-                            handleOptReqAddNew();
+                            showOptionalAccountabilitiesModal(() => {
+                              handleOptReqAddNew();
+                            }, false);
                             // setRenderKey((prevKey) => prevKey + 1);
                           }}
                         >
@@ -2841,6 +3200,32 @@ const WizardEditProfile = forwardRef(
                             style={addStyle}
                             onClick={() => {
                               {
+                                showMinReqModal(() => {
+                                  handleMinReqAddNew();
+                                }, false);
+                              }
+                            }}
+                          >
+                            Add an education or work requirement
+                          </Button>
+                        </>
+
+                        <>
+                          {education_fields.length > 0 && (
+                            // <List dataSource={education_fields} renderItem={renderMinReqFields} />
+                            <AccessibleList
+                              dataSource={education_fields}
+                              renderItem={renderMinReqFields}
+                              ariaLabel="Education and work experience"
+                            />
+                          )}
+                          <Button
+                            data-testid="add-education-button"
+                            type="link"
+                            icon={<PlusOutlined aria-hidden />}
+                            style={addStyle}
+                            onClick={() => {
+                              {
                                 // showMinReqModal(() => {
                                 handleMinReqAddNew();
                                 // setRenderKey((prevKey) => prevKey + 1);
@@ -2878,10 +3263,10 @@ const WizardEditProfile = forwardRef(
                             style={addStyle}
                             onClick={() => {
                               {
-                                // showRelWorkModal(() => {
-                                handleRelWorkAddNew();
-                                // setRenderKey((prevKey) => prevKey + 1);
-                                // }, false);
+                                showRelWorkModal(() => {
+                                  handleRelWorkAddNew();
+                                  // setRenderKey((prevKey) => prevKey + 1);
+                                }, false);
                               }
                             }}
                           >
@@ -3059,7 +3444,6 @@ const WizardEditProfile = forwardRef(
                           className="label-only"
                           colon={false}
                         ></Form.Item>
-
                         <>
                           {security_screenings_fields.length > 0 && (
                             <AccessibleList
@@ -3075,10 +3459,10 @@ const WizardEditProfile = forwardRef(
                             style={addStyle}
                             onClick={() => {
                               {
-                                // showSecurityScreeningsModal(() => {
-                                handleSecurityScreeningsAddNew();
-                                // setRenderKey((prevKey) => prevKey + 1);
-                                // }, false);
+                                showSecurityScreeningsModal(() => {
+                                  handleSecurityScreeningsAddNew();
+                                  // setRenderKey((prevKey) => prevKey + 1);
+                                }, false);
                               }
                             }}
                           >
