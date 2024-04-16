@@ -22,8 +22,10 @@ Feature: Edit Job Profiles
         And the user adds a new required accountability "Manage project budget"
 
         # Optional accountabilities
-        Then the user removes the last optional accountability
-        And the user adds a new optional accountability "Conceptual thinking"
+        Then all optional accountabilities should be unchecked initially
+        And the user checks all optional accountabilities
+        And the user removes the last optional accountability
+        And the user adds a new optional accountability "Conceptual thinking" for first time
         And the user deletes the newly added optional accountability "Conceptual thinking"
         And the user adds a new optional accountability "Effective communication"
 

@@ -19,7 +19,6 @@ When('the user toggles the approval switch on', () => {
 Then('all form fields are disabled', () => {
   cy.get('[data-testid="department-select"]').should('have.class', 'ant-select-disabled');
   cy.get('[data-testid="reporting-manager-input"]').should('be.disabled');
-  cy.get('[data-testid="comments-input"]').should('be.disabled');
 });
 
 When('the user attempts to proceed to next step', () => {
@@ -38,7 +37,6 @@ When('the user dismisses the error message', () => {
 Then('all form fields become enabled', () => {
   cy.get('[data-testid="department-select"]').should('not.have.class', 'ant-select-disabled');
   cy.get('[data-testid="reporting-manager-input"]').should('not.be.disabled');
-  cy.get('[data-testid="comments-input"]').should('not.be.disabled');
 });
 
 Then('a default department is already selected in the dropdown', () => {
@@ -66,10 +64,6 @@ When('the user tries to proceed without entering a first level excluded manager'
 
 Then('an error message prompts the user to enter the value', () => {
   cy.contains('First level excluded manager position number is required').should('be.visible');
-});
-
-When('the user enters comments', () => {
-  cy.get('[data-testid="comments-input"]').type('Some comments');
 });
 
 When('the user enters excluded manager position number', () => {
@@ -115,8 +109,6 @@ When('the user returns to the additional info form page', () => {
 
 Then('the previously entered data is displayed on the form', () => {
   cy.get('[data-testid="confirmation-switch"]').should('have.class', 'ant-switch-checked');
-  cy.get('[data-testid="comments-input"]').should('have.value', 'Some comments');
-
   cy.get('[data-testid="department-select"] .ant-select-selection-item').should(
     'contain.text',
     'Dir, Rural Health 026-4312',
