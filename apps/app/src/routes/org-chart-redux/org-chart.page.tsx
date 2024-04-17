@@ -12,6 +12,10 @@ export const OrgChartPage = () => {
   const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
 
   useEffect(() => {
+    console.log('profileDataIsFetching: ', profileDataIsFetching);
+  }, [profileDataIsFetching]);
+
+  useEffect(() => {
     setDepartmentId(profileData?.profile.department_id);
   }, [profileData?.profile.department_id]);
 
@@ -25,6 +29,7 @@ export const OrgChartPage = () => {
             setDepartmentId={setDepartmentId}
             departmentId={departmentId}
             departmentIdIsLoading={profileDataIsFetching}
+            targetId="00134581"
           />
         </Col>
       </Row>
