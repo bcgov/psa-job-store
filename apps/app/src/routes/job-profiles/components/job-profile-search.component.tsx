@@ -92,7 +92,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     // eslint-disable-next-line react-hooks/rules-of-hooks
     classificationData = useGetJobProfilesClassificationsQuery().data?.jobProfilesClassifications;
 
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState(searchParams.get('search') || '');
 
   // JOB FAMILIES AND STREAMS TREE VIEW
   const { data: jobFamiliesData } = useGetJobFamiliesQuery();
@@ -275,7 +275,11 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     }
   }, [searchParams, initialSelectionSet, setInitialSelectionSet]);
 
+  // user updated filters, now update the search params to reflect that
   useEffect(() => {
+    if (!initialSelectionSet) return;
+
+    // get filters from allSelections (these are the tags that are displayed on the page)
     const jobFamilyValues = allSelections
       .filter((s) => s.type === 'jobFamily')
       .map((s) => s.value)
@@ -313,6 +317,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const sortFieldFromURL = searchParams.get('sortField');
     const sortOrderFromURL = searchParams.get('sortOrder');
 
+    // construct new url params
     // Update URL parameters if needed
     if (selectedProfileFromUrl) newSearchParams.set('selectedProfile', selectedProfileFromUrl);
     if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
@@ -339,8 +344,6 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
     // If the job family or classification filters have changed, de-select the selected profile
     if (jobFamilyChanged || classificationChanged || ministryChanged || jobRoleTypeChanged || jobStreamChanged) {
-      // todo: this causes bug when filters have been applied, profile selected and page reloaded
-      // (view gets reset to first page)
       newSearchParams.set('page', '1');
       newSearchParams.delete('selectedProfile');
       // console.log('navigating.. B', getBasePath(location.pathname));
@@ -364,7 +367,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
         );
       }
     }
-  }, [allSelections, searchParams, setSearchParams, location.pathname, navigate, getBasePath]);
+  }, [allSelections, initialSelectionSet, searchParams, setSearchParams, location.pathname, navigate, getBasePath]); //]);
 
   // Add a new tag from any of the filters
   const addSelection = (value: any, type: any) => {
@@ -479,7 +482,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
           <Row gutter={24}>
             <Col xl={6} lg={8} md={12} sm={24}>
               <Search
-                defaultValue={searchParams.get('search') ?? undefined}
+                // defaultValue={searchParams.get('search') ?? undefined}
                 enterButton="Find job profiles"
                 aria-label={searchPlaceHolderText}
                 onPressEnter={(e) => handleSearch(e.currentTarget.value)}
@@ -762,7 +765,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
               </Row>
             )}
           </Row>
-          <Row>
+          <Row data-testid="filters-tags-section">
             <Col lg={15} xs={24}>
               {allSelections.map((selection) => (
                 <Tag
