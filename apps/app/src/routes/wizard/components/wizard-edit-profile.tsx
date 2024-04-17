@@ -1252,7 +1252,7 @@ const WizardEditProfile = forwardRef(
 
     // Function to handle adding a new field
     const handleOptReqAddNew = () => {
-      acc_opt_append({ value: '', isCustom: true, disabled: false });
+      acc_opt_append({ text: '', isCustom: true, disabled: false });
       trigger();
     };
 
