@@ -1069,6 +1069,7 @@ const WizardEditProfile = forwardRef(
           content: 'This action cannot be undone.',
           onOk: () => {
             // If confirmed, remove the item
+            setEditedAccReqFields((prev) => ({ ...prev, [index]: false }));
             acc_req_remove(index);
           },
         });
@@ -1089,6 +1090,7 @@ const WizardEditProfile = forwardRef(
     const handleAccReqAddNew = () => {
       // adding as significant here because it needs to be sorted into regular accountabilities
       // instead of optional
+      setEditedAccReqFields((prev) => ({ ...prev, [acc_req_fields.length]: true }));
       acc_req_append({ text: '', isCustom: true, disabled: false, is_significant: true });
       trigger();
     };
@@ -1410,6 +1412,7 @@ const WizardEditProfile = forwardRef(
           onOk: () => {
             // If confirmed, remove the item
             education_remove(index);
+            setEditedMinReqFields((prev) => ({ ...prev, [index]: false }));
           },
         });
       } else {
@@ -1427,6 +1430,7 @@ const WizardEditProfile = forwardRef(
 
     // Function to handle adding a new field
     const handleMinReqAddNew = () => {
+      setEditedMinReqFields((prev) => ({ ...prev, [education_fields.length]: true }));
       education_append({ text: '', isCustom: true, disabled: false });
       trigger();
     };
@@ -1553,7 +1557,7 @@ const WizardEditProfile = forwardRef(
                   'Do you want to make changes to education and work experiences?',
                   reqAlertShown,
                   setReqAlertShown,
-                  () => handleAccReqRemove(index),
+                  () => handleMinReqRemove(index),
                   true,
                 )
               }
@@ -1603,6 +1607,7 @@ const WizardEditProfile = forwardRef(
           content: 'This action cannot be undone.',
           onOk: () => {
             // If confirmed, remove the item
+            setEditedRelWorkFields((prev) => ({ ...prev, [index]: true }));
             job_experience_remove(index);
           },
         });
@@ -1621,6 +1626,7 @@ const WizardEditProfile = forwardRef(
 
     // Function to handle adding a new field
     const handleRelWorkAddNew = () => {
+      setEditedRelWorkFields((prev) => ({ ...prev, [job_experience_fields.length]: true }));
       job_experience_append({ text: '', isCustom: true, disabled: false });
       trigger();
     };
@@ -1750,7 +1756,7 @@ const WizardEditProfile = forwardRef(
                   'Do you want to make changes to related experiences?',
                   reqAlertShown,
                   setReqAlertShown,
-                  () => handleAccReqRemove(index),
+                  () => handleRelWorkRemove(index),
                   true,
                 )
               }
@@ -1770,6 +1776,7 @@ const WizardEditProfile = forwardRef(
           content: 'This action cannot be undone.',
           onOk: () => {
             // If confirmed, remove the item
+            setEditedSecurityScreeningsFields((prev) => ({ ...prev, [index]: false }));
             security_screenings_remove(index);
           },
         });
@@ -1788,6 +1795,7 @@ const WizardEditProfile = forwardRef(
 
     // Function to handle adding a new field
     const handleSecurityScreeningsAddNew = () => {
+      setEditedSecurityScreeningsFields((prev) => ({ ...prev, [security_screenings_fields.length]: true }));
       security_screenings_append({ text: '', isCustom: true, disabled: false });
       trigger();
     };
@@ -1800,7 +1808,7 @@ const WizardEditProfile = forwardRef(
       const currentValues: TrackedFieldArrayItem[] = getValues('job_experience') as TrackedFieldArrayItem[];
       currentValues[index].value = originalSecurityScreeningsFields[index]?.value;
       // acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
-      job_experience_update(index, {
+      security_screenings_update(index, {
         text: originalSecurityScreeningsFields[index]?.text,
         disabled: false,
         is_readonly: originalSecurityScreeningsFields[index]?.is_readonly,
@@ -1914,7 +1922,7 @@ const WizardEditProfile = forwardRef(
                 'Do you want to make changes to security screenings?',
                 securityScreeningsAlertShown,
                 setSecurityScreeningsAlertShown,
-                () => {},
+                () => handleSecurityScreeningsRemove(index),
                 true,
                 field.is_significant,
               )

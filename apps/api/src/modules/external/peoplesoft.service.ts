@@ -293,9 +293,6 @@ export class PeoplesoftService {
     // if testing, skip fetching employees as it takes too long
 
     positions.map((position) => {
-      if (process.env.TEST_ENV === 'true' && position != '00121521') {
-        return;
-      }
       requests.push(
         firstValueFrom(
           this.request({
