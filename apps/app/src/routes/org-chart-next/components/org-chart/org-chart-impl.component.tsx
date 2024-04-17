@@ -5,6 +5,7 @@ import { Elements } from '../../interfaces/elements.interface';
 
 interface OrgChartImplProps {
   onPaneClick: ((event: React.MouseEvent<Element, MouseEvent>) => void) | undefined;
+  onNodeClick?: ((event: React.MouseEvent, node: Node) => void) | undefined;
   setIsDirty: React.Dispatch<React.SetStateAction<boolean>>;
   elements: Elements;
   isDirty: boolean;

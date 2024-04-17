@@ -25,6 +25,7 @@ export const OrgChartPage = () => {
             departmentId={departmentId}
             departmentIdIsLoading={profileDataIsFetching}
             type={OrgChartType.DYNAMIC}
+            targetId={profileData?.profile.position_id}
           />
         </Col>
       </Row>

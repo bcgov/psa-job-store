@@ -17,9 +17,15 @@ export interface DynamicOrgChartProps {
   setDepartmentId: React.Dispatch<React.SetStateAction<string | undefined>>;
   departmentId: string | undefined;
   departmentIdIsLoading?: boolean;
+  targetId?: string | undefined;
 }
 
-export const DynamicOrgChart = ({ setDepartmentId, departmentId, departmentIdIsLoading }: DynamicOrgChartProps) => {
+export const DynamicOrgChart = ({
+  setDepartmentId,
+  departmentId,
+  departmentIdIsLoading,
+  targetId,
+}: DynamicOrgChartProps) => {
   const [elements, setElements] = useState<Elements>(initialElements);
   const [getOrgChart, { currentData: orgChartData, isFetching: orgChartDataIsFetching }] = useLazyGetOrgChartQuery();
   const [isDirty, setIsDirty] = useState<boolean>(false);
@@ -59,7 +65,13 @@ export const DynamicOrgChart = ({ setDepartmentId, departmentId, departmentIdIsL
     if (orgChartData?.orgChart != null) {
       setIsDirty(false);
 
-      const { edges, nodes } = autolayout(orgChartData?.orgChart);
+      const { edges, nodes } = styleElements(
+        autolayout(orgChartData?.orgChart),
+        searchResultNodes,
+        selectedNodes,
+        searchTerm,
+        targetId,
+      );
       setElements({ edges: [...edges], nodes: [...nodes] });
     }
   }, [orgChartData?.orgChart]);
@@ -74,7 +86,7 @@ export const DynamicOrgChart = ({ setDepartmentId, departmentId, departmentIdIsL
       setIsDirty(true);
     }
 
-    const { edges, nodes } = styleElements(elements, searchResultNodes, selectedNodes, searchTerm);
+    const { edges, nodes } = styleElements(elements, searchResultNodes, selectedNodes, searchTerm, undefined);
     setElements({ edges, nodes });
   }, [searchResultNodes, selectedNodes, searchTerm]);
 
@@ -86,7 +98,6 @@ export const DynamicOrgChart = ({ setDepartmentId, departmentId, departmentIdIsL
         setSearchResultNodes([]);
       }
 
-      console.log('changedNodes ', changedNodes);
       setSelectedNodes(changedNodes);
     },
   });

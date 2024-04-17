@@ -7,6 +7,7 @@ export const styleElements = (
   searchResultNodes: Node[],
   selectedNodes: Node[],
   searchTerm: string | undefined,
+  targetId: string | undefined,
 ) => {
   const { edges, nodes } = JSON.parse(JSON.stringify(elements)) as Elements;
 
@@ -27,7 +28,7 @@ export const styleElements = (
         isAdjacent: false,
         isSearchResult: false,
       };
-      node.selected = false;
+      node.selected = node.id === targetId;
       node.style = {
         ...node.style,
         opacity: 1,
