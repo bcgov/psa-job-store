@@ -61,4 +61,4 @@ export const orgChartApi = graphqlApi.injectEndpoints({
   }),
 });
 
-export const { useLazyGetOrgChartQuery } = orgChartApi;
+export const { useGetOrgChartQuery, useLazyGetOrgChartQuery } = orgChartApi;

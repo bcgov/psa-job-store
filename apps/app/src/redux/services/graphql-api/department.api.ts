@@ -16,6 +16,12 @@ export interface DepartmentWithLocationModel {
   location_id: string;
 }
 
+export interface DepartmentWithOrganizationModel {
+  id: string;
+  organization_id: number;
+  name: string;
+}
+
 export interface GetDepartmentsResponse {
   departments: DepartmentModel[];
 }
@@ -26,6 +32,10 @@ export interface GetDepartmentResponse {
 
 export interface GetDepartmentsWithLocationResponse {
   departments: DepartmentWithLocationModel[];
+}
+
+export interface GetDepartmentsWithOrganizationResponse {
+  departments: DepartmentWithOrganizationModel[];
 }
 
 export const departmentApi = graphqlApi.injectEndpoints({
@@ -78,6 +88,21 @@ export const departmentApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getDepartmentsWithOrganization: build.query<GetDepartmentsWithOrganizationResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query Departments {
+              departments {
+                id
+                organization_id
+                name
+              }
+            }
+          `,
+        };
+      },
+    }),
   }),
 });
 
@@ -86,6 +111,8 @@ export const {
   useLazyGetDepartmentsQuery,
   useGetDepartmentsWithLocationQuery,
   useLazyGetDepartmentsWithLocationQuery,
+  useGetDepartmentsWithOrganizationQuery,
+  useLazyGetDepartmentsWithOrganizationQuery,
   useGetDepartmentQuery,
   useLazyGetDepartmentQuery,
 } = departmentApi;
