@@ -33,8 +33,10 @@ Feature: End-to-End Position Creation Process with Verification warning
         Then they see a verification warning window
 
         # Submitting the position for verification
-        When the user presses "Submit for verification"
+        When the user enters comments into the comment box
+        And the user presses "Submit for verification"
         Then they see a success message
+        And position request contains the comment
 
         When user navigates to My Positions page
         Then they see the new position in the list with "In Review" status

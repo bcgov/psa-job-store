@@ -1194,6 +1194,8 @@ const WizardEditProfile = forwardRef(
                           setReqAlertShown,
                           () => {},
                           true,
+                          undefined,
+                          'accountabilities-warning',
                         )
                       }
                       value={value ? (typeof value === 'string' ? value : value.value) : ''}
@@ -1209,6 +1211,7 @@ const WizardEditProfile = forwardRef(
               isCustom={field.isCustom}
               isEdited={editedAccReqFields[index]}
               ariaLabel={ariaLabel}
+              testId="accountability"
               handleReset={handleAccReqReset}
               handleAddBack={handleAccReqAddBack}
               handleRemove={handleAccReqRemove}
@@ -1219,6 +1222,8 @@ const WizardEditProfile = forwardRef(
                   setReqAlertShown,
                   () => handleAccReqRemove(index),
                   true,
+                  undefined,
+                  'accountabilities-warning',
                 )
               }
             ></ContextOptions>
@@ -1529,6 +1534,7 @@ const WizardEditProfile = forwardRef(
                           () => {},
                           true,
                           field.is_significant,
+                          'education-warning',
                         )
                       }
                       onBlur={() => {
@@ -1552,6 +1558,7 @@ const WizardEditProfile = forwardRef(
               handleReset={handleMinReqReset}
               handleAddBack={handleMinReqAddBack}
               handleRemove={handleMinReqRemove}
+              testId="education"
               confirmRemoveModal={() =>
                 WizardModal(
                   'Do you want to make changes to education and work experiences?',
@@ -1559,6 +1566,8 @@ const WizardEditProfile = forwardRef(
                   setReqAlertShown,
                   () => handleMinReqRemove(index),
                   true,
+                  undefined,
+                  'education-warning',
                 )
               }
             ></ContextOptions>
@@ -1728,6 +1737,7 @@ const WizardEditProfile = forwardRef(
                           () => {},
                           true,
                           field.is_significant,
+                          'experience-warning',
                         )
                       }
                       onBlur={() => {
@@ -1748,6 +1758,7 @@ const WizardEditProfile = forwardRef(
               isCustom={field.isCustom}
               isEdited={editedRelWorkFields[index]}
               ariaLabel={ariaLabel}
+              testId="job-experience"
               handleReset={handleRelWorkReset}
               handleAddBack={handleRelWorkAddBack}
               handleRemove={handleRelWorkRemove}
@@ -1758,6 +1769,8 @@ const WizardEditProfile = forwardRef(
                   setReqAlertShown,
                   () => handleRelWorkRemove(index),
                   true,
+                  undefined,
+                  'experience-warning',
                 )
               }
             ></ContextOptions>
@@ -1899,6 +1912,7 @@ const WizardEditProfile = forwardRef(
                         () => {},
                         true,
                         field.is_significant,
+                        'security-warning',
                       )
                     }
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
@@ -1914,6 +1928,7 @@ const WizardEditProfile = forwardRef(
             isCustom={field.isCustom}
             isEdited={editedSecurityScreeningsFields[index]}
             ariaLabel={ariaLabel}
+            testId="security-screening"
             handleReset={handleSecurityScreeningsReset}
             handleAddBack={handleSecurityScreeningsAddBack}
             handleRemove={handleSecurityScreeningsRemove}
@@ -1925,6 +1940,7 @@ const WizardEditProfile = forwardRef(
                 () => handleSecurityScreeningsRemove(index),
                 true,
                 field.is_significant,
+                'security-warning',
               )
             }
           ></ContextOptions>
@@ -3068,6 +3084,8 @@ const WizardEditProfile = forwardRef(
                                 handleAccReqAddNew();
                               },
                               true,
+                              undefined,
+                              'accountabilities-warning',
                             );
                           }}
                         >
@@ -3108,6 +3126,8 @@ const WizardEditProfile = forwardRef(
                                 handleOptReqAddNew();
                               },
                               true,
+                              undefined,
+                              'accountabilities-warning',
                             );
                             // setRenderKey((prevKey) => prevKey + 1);
                           }}
@@ -3174,6 +3194,8 @@ const WizardEditProfile = forwardRef(
                                     handleMinReqAddNew();
                                   },
                                   true,
+                                  undefined,
+                                  'education-warning',
                                 );
                               }
                             }}
@@ -3216,6 +3238,8 @@ const WizardEditProfile = forwardRef(
                                     handleRelWorkAddNew();
                                   },
                                   true,
+                                  undefined,
+                                  'experience-warning',
                                 );
                               }
                             }}
@@ -3417,6 +3441,7 @@ const WizardEditProfile = forwardRef(
                                 },
                                 true,
                                 true,
+                                'security-warning',
                               );
                             }}
                           >
