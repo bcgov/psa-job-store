@@ -56,8 +56,6 @@ export const DynamicOrgChart = ({ setDepartmentId, departmentId, departmentIdIsL
   }, [isDirty]);
 
   useEffect(() => {
-    console.log('orgChatData?.orgChart: ', orgChartData);
-
     if (orgChartData?.orgChart != null) {
       setIsDirty(false);
 

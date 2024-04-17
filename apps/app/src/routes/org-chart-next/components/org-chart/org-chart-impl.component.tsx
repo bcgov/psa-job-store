@@ -26,20 +26,12 @@ export const OrgChartImpl = ({ onPaneClick, elements, isDirty }: OrgChartImplPro
     const searchResultNodes = nodes.filter((node) => node.data.isSearchResult === true);
     const selectedNodes = nodes.filter((node) => node.selected === true);
 
-    console.log('focusedNodes: ', focusedNodes);
-    console.log('searchResultNodes: ', searchResultNodes);
-    console.log('selectedNodes: ', selectedNodes);
-
     if (searchResultNodes.length > 0) {
-      console.log('A');
       fitView({ duration: 800, nodes: searchResultNodes });
     } else if (selectedNodes.length > 0) {
-      console.log('B');
       fitView({ duration: 800, nodes: [...selectedNodes, ...focusedNodes] });
     } else {
-      console.log('C');
       if (isDirty === false) {
-        console.log('D');
         // Only zoom out to fit all nodes if isDirty === false
         fitView({ duration: 800, nodes });
       }

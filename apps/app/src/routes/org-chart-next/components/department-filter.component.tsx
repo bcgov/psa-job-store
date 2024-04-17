@@ -20,8 +20,6 @@ export const DepartmentFilter = ({ setDepartmentId, departmentId, loading }: Dep
     const ministries = ministryData?.organizations || [];
     const departments = departmentData?.departments || [];
 
-    console.log('departments: ', departments);
-
     if (ministries.length > 0 && departments.length > 0) {
       const treeData = ministries.map((ministry) => ({
         children: departments
@@ -42,8 +40,6 @@ export const DepartmentFilter = ({ setDepartmentId, departmentId, loading }: Dep
         selectable: false,
         value: `ministry-${ministry.id}`,
       }));
-
-      console.log('treeData: ', treeData);
 
       setTreeData(treeData);
     }
