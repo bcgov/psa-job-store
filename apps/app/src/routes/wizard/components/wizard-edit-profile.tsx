@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  DeleteOutlined,
-  ExclamationCircleFilled,
-  ExclamationCircleOutlined,
-  InfoCircleOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
+import { DeleteOutlined, ExclamationCircleFilled, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import {
   Alert,
@@ -45,7 +39,9 @@ import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
+import { ContextOptions } from './context-options.component';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
+import { WizardModal } from './modal.component';
 import BehaviouralComptencyPicker from './wizard-behavioural-comptency-picker';
 import './wizard-edit-profile.css';
 import { useWizardContext } from './wizard.provider';
@@ -1059,132 +1055,6 @@ const WizardEditProfile = forwardRef(
     const { reqAlertShown, setReqAlertShown } = useWizardContext();
     const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
 
-    // Function to handle focus
-    const showMinReqModal = (action: () => void, _showCancel: boolean, isSignificant?: boolean) => {
-      if (!minReqAlertShown && (isSignificant || isSignificant === undefined)) {
-        setMinReqAlertShown(true);
-        Modal.confirm({
-          title: 'Do you want to make changes to education and work experiences?',
-          content: (
-            <div role="alert" data-testid="education-warning">
-              Amendments to the generic profile will require verification. If you would like to continue to make
-              changes, please click proceed.
-            </div>
-          ),
-          okText: 'Proceed',
-          cancelText: 'Cancel',
-          onOk: action,
-          // The following props are set to style the modal like a warning
-          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-          okButtonProps: { style: {} },
-          // cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
-          autoFocusButton: null,
-        });
-      } else {
-        action();
-      }
-    };
-
-    const showRelWorkModal = (action: () => void, _showCancel: boolean, isSignificant?: boolean) => {
-      if (!relWorkAlertShown && (isSignificant || isSignificant === undefined)) {
-        setRelWorkAlertShown(true);
-        Modal.confirm({
-          title: 'Do you want to make changes to related experiences?',
-          content: (
-            <div role="alert" data-testid="experience-warning">
-              Amendments to the generic profile will require verification. If you would like to continue to make
-              changes, please click proceed.
-            </div>
-          ),
-          okText: 'Proceed',
-          cancelText: 'Cancel',
-          onOk: action,
-          // The following props are set to style the modal like a warning
-          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-          okButtonProps: { style: {} },
-          // cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
-          autoFocusButton: null,
-        });
-      } else {
-        action();
-      }
-    };
-
-    const showSecurityScreeningsModal = (action: () => void, _showCancel: boolean, isSignificant?: boolean) => {
-      if (!securityScreeningsAlertShown && (isSignificant || isSignificant === undefined)) {
-        setSecurityScreeningsAlertShown(true);
-        Modal.confirm({
-          title: 'Do you want to make changes to security screenings?',
-          content: (
-            <div role="alert" data-testid="security-warning">
-              Amendments to the generic profile will require verification. If you would like to continue to make
-              changes, please click proceed.
-            </div>
-          ),
-          okText: 'Proceed',
-          cancelText: 'Cancel',
-          onOk: action,
-          // The following props are set to style the modal like a warning
-          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-          okButtonProps: { style: {} },
-          // cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
-          autoFocusButton: null,
-        });
-      } else {
-        action();
-      }
-    };
-
-    const showReqModal = (action: () => void, _showCancel: boolean) => {
-      if (!reqAlertShown) {
-        setReqAlertShown(true);
-        Modal.confirm({
-          title: 'Do you want to make changes to accountabilities?',
-          content: (
-            <div role="alert" data-testid="accountabilities-warning">
-              Amendments to the generic profile will require verification. If you would like to continue to make
-              changes, please click proceed.
-            </div>
-          ),
-          okText: 'Proceed',
-          cancelText: 'Cancel',
-          onOk: action,
-          // The following props are set to style the modal like a warning
-          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-          okButtonProps: { style: {} },
-          // cancelButtonProps: { style: showCancel ? {} : { display: 'inline-block' } },
-          autoFocusButton: null,
-        });
-      } else {
-        action();
-      }
-    };
-
-    const showOptionalAccountabilitiesModal = (action: () => void, _showCancel: boolean) => {
-      if (!optionalAccountabilitiesAlertShown) {
-        setOptionalAccountabilitiesAlertShown(true);
-        Modal.confirm({
-          title: 'Do you want to make changes to optional accountabilities?',
-          content: (
-            <div role="alert" data-testid="optional-accountabilities-warning">
-              Amendments to the generic profile will require verification. If you would like to continue to make
-              changes, please click proceed.
-            </div>
-          ),
-          okText: 'Proceed',
-          cancelText: 'Cancel',
-          onOk: action,
-          // The following props are set to style the modal like a warning
-          icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-          okButtonProps: { style: {} },
-          // cancelButtonProps: { style: showCancel ? {} : { display: 'none' } },
-          autoFocusButton: null,
-        });
-      } else {
-        action();
-      }
-    };
-
     // DIFF HANDLING
     // Cross out deleted core items, allow ability to add back
     // Show fields that were edited
@@ -1223,6 +1093,19 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
+    const handleAccReqReset = (index: number) => {
+      setEditedAccReqFields((prev) => ({ ...prev, [index]: originalAccReqFields[index]?.value }));
+      const currentValues: TrackedFieldArrayItem[] = getValues('accountabilities') as TrackedFieldArrayItem[];
+      currentValues[index].value = originalAccReqFields[index]?.value;
+      // acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      acc_req_update(index, {
+        text: originalAccReqFields[index]?.text,
+        disabled: false,
+        is_readonly: originalAccReqFields[index]?.is_readonly,
+        is_significant: originalAccReqFields[index]?.is_significant,
+      });
+    };
+
     const renderAccReqFields = (field: any, index: number) => {
       const isEdited = editedAccReqFields[index] || field.isCustom;
 
@@ -1231,16 +1114,9 @@ const WizardEditProfile = forwardRef(
         trigger();
       }, 300);
 
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove accountability ${index + 1}`
         : `Remove accountability ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
-
       return (
         <>
           {/* <div aria-live="polite" className="sr-only">
@@ -1309,34 +1185,41 @@ const WizardEditProfile = forwardRef(
                         validateVerification();
                         onBlur();
                       }}
-                      onFocus={() => showReqModal(() => {}, false)}
+                      onFocus={() =>
+                        WizardModal(
+                          'Do you want to make changes to accountabilities?',
+                          reqAlertShown,
+                          setReqAlertShown,
+                          () => {},
+                          true,
+                        )
+                      }
                       value={value ? (typeof value === 'string' ? value : value.value) : ''}
                     />
                   </div>
                 </>
               )}
             />
-
-            <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-              <Button
-                data-testid={field.disabled ? `undo-remove-accountability-${index}` : `remove-accountability-${index}`}
-                className="remove-item-btn"
-                icon={icon}
-                aria-label={ariaLabel}
-                onClick={() => {
-                  showReqModal(() => {
-                    field.disabled ? handleAccReqAddBack(index) : handleAccReqRemove(index);
-
-                    setEditedAccReqFields((prev) => ({
-                      ...prev,
-                      [index]: !field.disabled || field.text !== originalAccReqFields[index]?.text,
-                    }));
-                  }, false);
-                }}
-                disabled={field.is_readonly}
-                style={{ marginLeft: '10px' }}
-              />
-            </Tooltip>
+            <ContextOptions
+              index={index}
+              isReadonly={field.is_readonly}
+              isDisabled={field.disabled}
+              isCustom={field.isCustom}
+              isEdited={editedAccReqFields[index]}
+              ariaLabel={ariaLabel}
+              handleReset={handleAccReqReset}
+              handleAddBack={handleAccReqAddBack}
+              handleRemove={handleAccReqRemove}
+              confirmRemoveModal={() =>
+                WizardModal(
+                  'Do you want to make changes to accountabilities?',
+                  reqAlertShown,
+                  setReqAlertShown,
+                  () => handleAccReqRemove(index),
+                  true,
+                )
+              }
+            ></ContextOptions>
           </List.Item>
         </>
       );
@@ -1548,6 +1431,19 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
+    const handleMinReqReset = (index: number) => {
+      setEditedMinReqFields((prev) => ({ ...prev, [index]: originalMinReqFields[index]?.value }));
+      const currentValues: TrackedFieldArrayItem[] = getValues('education') as TrackedFieldArrayItem[];
+      currentValues[index].value = originalMinReqFields[index]?.value;
+      // acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      education_update(index, {
+        text: originalAccReqFields[index]?.text,
+        disabled: false,
+        is_readonly: originalAccReqFields[index]?.is_readonly,
+        is_significant: originalAccReqFields[index]?.is_significant,
+      });
+    };
+
     const renderMinReqFields = (field: any, index: number) => {
       const isEdited = editedMinReqFields[index] || field.isCustom;
 
@@ -1556,15 +1452,9 @@ const WizardEditProfile = forwardRef(
         trigger();
       }, 300);
 
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove Education and work experience ${index + 1}`
         : `Remove Education and work experience ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
 
       return (
         <>
@@ -1627,7 +1517,16 @@ const WizardEditProfile = forwardRef(
                         const updatedValue = event.target.value;
                         if (field.is_significant) handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
                       }}
-                      onFocus={() => showMinReqModal(() => {}, false, field.is_significant)}
+                      onFocus={() =>
+                        WizardModal(
+                          'Do you want to make changes to education and work experiences?',
+                          minReqAlertShown,
+                          setMinReqAlertShown,
+                          () => {},
+                          true,
+                          field.is_significant,
+                        )
+                      }
                       onBlur={() => {
                         validateVerification();
                         onBlur();
@@ -1639,30 +1538,56 @@ const WizardEditProfile = forwardRef(
               )}
             />
 
-            <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
+            <ContextOptions
+              index={index}
+              isReadonly={field.is_readonly}
+              isDisabled={field.disabled}
+              isCustom={field.isCustom}
+              isEdited={editedMinReqFields[index]}
+              ariaLabel={ariaLabel}
+              handleReset={handleMinReqReset}
+              handleAddBack={handleMinReqAddBack}
+              handleRemove={handleMinReqRemove}
+              confirmRemoveModal={() =>
+                WizardModal(
+                  'Do you want to make changes to education and work experiences?',
+                  reqAlertShown,
+                  setReqAlertShown,
+                  () => handleAccReqRemove(index),
+                  true,
+                )
+              }
+            ></ContextOptions>
+
+            {/* {field.disabled ? (
+            <Button
+              icon={<PlusOutlined style={{ color: '#000000' }} />}
+              style={{
+                border: 'none', // Removes the border
+                padding: 0, // Removes padding
+              }}
+              onClick={() => {
+                // showMinReqModal(() => {
+                handleMinReqAddBack(index);
+                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                // }, false)
+              }}
+            />
+          ) : (
+            <Tooltip title="Required" overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
               <Button
-                data-testid={field.disabled ? `undo-remove-education-${index}` : `remove-education-${index}`}
-                className="remove-item-btn"
-                icon={icon}
-                aria-label={ariaLabel}
-                onClick={() => {
-                  showMinReqModal(
-                    () => {
-                      field.disabled ? handleMinReqAddBack(index) : handleMinReqRemove(index);
-                      if (field.is_significant)
-                        setEditedMinReqFields((prev) => ({
-                          ...prev,
-                          [index]: !field.disabled || field.text !== originalMinReqFields[index]?.text,
-                        }));
-                    },
-                    false,
-                    field.is_significant,
-                  );
-                }}
                 disabled={field.is_readonly}
+                icon={<DeleteOutlined style={{ color: '#000000' }} />}
                 style={{ marginLeft: '10px' }}
+                onClick={() => {
+                  // showMinReqModal(() => {
+                  handleMinReqRemove(index);
+                  // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
+                  // }, false)
+                }}
               />
             </Tooltip>
+          )} */}
           </List.Item>
         </>
       );
@@ -1700,6 +1625,19 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
+    const handleRelWorkReset = (index: number) => {
+      setEditedRelWorkFields((prev) => ({ ...prev, [index]: originalRelWorkFields[index]?.value }));
+      const currentValues: TrackedFieldArrayItem[] = getValues('job_experience') as TrackedFieldArrayItem[];
+      currentValues[index].value = originalRelWorkFields[index]?.value;
+      // acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      job_experience_update(index, {
+        text: originalRelWorkFields[index]?.text,
+        disabled: false,
+        is_readonly: originalRelWorkFields[index]?.is_readonly,
+        is_significant: originalRelWorkFields[index]?.is_significant,
+      });
+    };
+
     const renderRelWorkFields = (field: any, index: number) => {
       const isEdited = editedRelWorkFields[index] || field.isCustom;
 
@@ -1708,17 +1646,9 @@ const WizardEditProfile = forwardRef(
         trigger();
       }, 300);
 
-      // console.log('field', JSON.stringify(field));
-
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove related experience ${index + 1}`
         : `Remove related experience ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
 
       return (
         <>
@@ -1784,7 +1714,16 @@ const WizardEditProfile = forwardRef(
                         const updatedValue = event.target.value;
                         if (field.is_significant) handleFieldChange(index, updatedValue);
                       }}
-                      onFocus={() => showRelWorkModal(() => {}, false, field.is_significant)}
+                      onFocus={() =>
+                        WizardModal(
+                          'Do you want to make changes to related experiences?',
+                          relWorkAlertShown,
+                          setRelWorkAlertShown,
+                          () => {},
+                          true,
+                          field.is_significant,
+                        )
+                      }
                       onBlur={() => {
                         validateVerification();
                         onBlur();
@@ -1796,31 +1735,26 @@ const WizardEditProfile = forwardRef(
               )}
             />
 
-            <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-              <Button
-                data-testid={field.disabled ? `undo-remove-job-experience-${index}` : `remove-job-experience-${index}`}
-                className="remove-item-btn"
-                icon={icon}
-                aria-label={ariaLabel}
-                onClick={() => {
-                  showRelWorkModal(
-                    () => {
-                      field.disabled ? handleRelWorkAddBack(index) : handleRelWorkRemove(index);
-
-                      if (field.is_significant)
-                        setEditedRelWorkFields((prev) => ({
-                          ...prev,
-                          [index]: !field.disabled || field.text !== originalRelWorkFields[index]?.text,
-                        }));
-                    },
-                    false,
-                    field.is_significant,
-                  );
-                }}
-                disabled={field.is_readonly}
-                style={{ marginLeft: '10px' }}
-              />
-            </Tooltip>
+            <ContextOptions
+              index={index}
+              isReadonly={field.is_readonly}
+              isDisabled={field.disabled}
+              isCustom={field.isCustom}
+              isEdited={editedRelWorkFields[index]}
+              ariaLabel={ariaLabel}
+              handleReset={handleRelWorkReset}
+              handleAddBack={handleRelWorkAddBack}
+              handleRemove={handleRelWorkRemove}
+              confirmRemoveModal={() =>
+                WizardModal(
+                  'Do you want to make changes to related experiences?',
+                  reqAlertShown,
+                  setReqAlertShown,
+                  () => handleAccReqRemove(index),
+                  true,
+                )
+              }
+            ></ContextOptions>
           </List.Item>
         </>
       );
@@ -1858,6 +1792,22 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
+    const handleSecurityScreeningsReset = (index: number) => {
+      setEditedSecurityScreeningsFields((prev) => ({
+        ...prev,
+        [index]: originalSecurityScreeningsFields[index]?.value,
+      }));
+      const currentValues: TrackedFieldArrayItem[] = getValues('job_experience') as TrackedFieldArrayItem[];
+      currentValues[index].value = originalSecurityScreeningsFields[index]?.value;
+      // acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+      job_experience_update(index, {
+        text: originalSecurityScreeningsFields[index]?.text,
+        disabled: false,
+        is_readonly: originalSecurityScreeningsFields[index]?.is_readonly,
+        is_significant: originalSecurityScreeningsFields[index]?.is_significant,
+      });
+    };
+
     const renderSecurityScreeningsFields = (field: any, index: number) => {
       const isEdited = editedSecurityScreeningsFields[index] || field.isCustom;
 
@@ -1870,15 +1820,9 @@ const WizardEditProfile = forwardRef(
       }, 300);
       // console.log('field', JSON.stringify(field));
 
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove security screening ${index + 1}`
         : `Remove security screening ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
 
       return (
         <List.Item
@@ -1939,42 +1883,43 @@ const WizardEditProfile = forwardRef(
                       validateVerification();
                       onBlur();
                     }}
-                    onFocus={() => showSecurityScreeningsModal(() => {}, false, field.is_significant)}
+                    onFocus={() =>
+                      WizardModal(
+                        'Do you want to make changes to security screenings?',
+                        securityScreeningsAlertShown,
+                        setSecurityScreeningsAlertShown,
+                        () => {},
+                        true,
+                        field.is_significant,
+                      )
+                    }
                     value={value ? (typeof value === 'string' ? value : value.value) : ''}
                   />
                 </div>
               </>
             )}
           />
-
-          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-            <Button
-              data-testid={
-                field.disabled ? `undo-remove-security-screening-${index}` : `remove-security-screening-${index}`
-              }
-              className="remove-item-btn"
-              icon={icon}
-              aria-label={ariaLabel}
-              onClick={() => {
-                showSecurityScreeningsModal(
-                  () => {
-                    field.disabled ? handleSecurityScreeningsAddBack(index) : handleSecurityScreeningsRemove(index);
-                    setEditedSecurityScreeningsFields((prev) => ({
-                      ...prev,
-                      [index]: !field.disabled || field.text !== originalSecurityScreeningsFields[index]?.text,
-                    }));
-                  },
-                  false,
-                  field.is_significant,
-                );
-              }}
-              disabled={field.is_readonly}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-            />
-          </Tooltip>
+          <ContextOptions
+            index={index}
+            isReadonly={field.is_readonly}
+            isDisabled={field.disabled}
+            isCustom={field.isCustom}
+            isEdited={editedSecurityScreeningsFields[index]}
+            ariaLabel={ariaLabel}
+            handleReset={handleSecurityScreeningsReset}
+            handleAddBack={handleSecurityScreeningsAddBack}
+            handleRemove={handleSecurityScreeningsRemove}
+            confirmRemoveModal={() =>
+              WizardModal(
+                'Do you want to make changes to security screenings?',
+                securityScreeningsAlertShown,
+                setSecurityScreeningsAlertShown,
+                () => {},
+                true,
+                field.is_significant,
+              )
+            }
+          ></ContextOptions>
         </List.Item>
       );
     };
@@ -3107,9 +3052,15 @@ const WizardEditProfile = forwardRef(
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
                           onClick={() => {
-                            showReqModal(() => {
-                              handleAccReqAddNew();
-                            }, false);
+                            WizardModal(
+                              'Do you want to make changes to accountabilities?',
+                              reqAlertShown,
+                              setReqAlertShown,
+                              () => {
+                                handleAccReqAddNew();
+                              },
+                              true,
+                            );
                           }}
                         >
                           Add another accountability
@@ -3141,9 +3092,15 @@ const WizardEditProfile = forwardRef(
                           icon={<PlusOutlined aria-hidden />}
                           style={addStyle}
                           onClick={() => {
-                            showOptionalAccountabilitiesModal(() => {
-                              handleOptReqAddNew();
-                            }, false);
+                            WizardModal(
+                              'Do you want to make changes to optional accountabilities?',
+                              optionalAccountabilitiesAlertShown,
+                              setOptionalAccountabilitiesAlertShown,
+                              () => {
+                                handleOptReqAddNew();
+                              },
+                              true,
+                            );
                             // setRenderKey((prevKey) => prevKey + 1);
                           }}
                         >
@@ -3201,9 +3158,15 @@ const WizardEditProfile = forwardRef(
                             style={addStyle}
                             onClick={() => {
                               {
-                                showMinReqModal(() => {
-                                  handleMinReqAddNew();
-                                }, false);
+                                WizardModal(
+                                  'Do you want to make changes to education and work experiences?',
+                                  minReqAlertShown,
+                                  setMinReqAlertShown,
+                                  () => {
+                                    handleMinReqAddNew();
+                                  },
+                                  true,
+                                );
                               }
                             }}
                           >
@@ -3237,10 +3200,15 @@ const WizardEditProfile = forwardRef(
                             style={addStyle}
                             onClick={() => {
                               {
-                                showRelWorkModal(() => {
-                                  handleRelWorkAddNew();
-                                  // setRenderKey((prevKey) => prevKey + 1);
-                                }, false);
+                                WizardModal(
+                                  'Do you want to make changes to related experiences?',
+                                  relWorkAlertShown,
+                                  setRelWorkAlertShown,
+                                  () => {
+                                    handleRelWorkAddNew();
+                                  },
+                                  true,
+                                );
                               }
                             }}
                           >
@@ -3432,12 +3400,16 @@ const WizardEditProfile = forwardRef(
                             icon={<PlusOutlined aria-hidden />}
                             style={addStyle}
                             onClick={() => {
-                              {
-                                showSecurityScreeningsModal(() => {
+                              WizardModal(
+                                'Do you want to make changes to security screenings?',
+                                securityScreeningsAlertShown,
+                                setSecurityScreeningsAlertShown,
+                                () => {
                                   handleSecurityScreeningsAddNew();
-                                  // setRenderKey((prevKey) => prevKey + 1);
-                                }, false);
-                              }
+                                },
+                                true,
+                                true,
+                              );
                             }}
                           >
                             Add another security screening
