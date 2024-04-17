@@ -17,6 +17,8 @@ import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartRoute as OrgChartNextRoute } from '../routes/org-chart-next';
 import { OrgChartPage as OrgChartNextPage } from '../routes/org-chart-next/org-chart.page';
+import { OrgChartRoute as OrgChartReduxRoute } from '../routes/org-chart-redux';
+import { OrgChartPage as OrgChartReduxPage } from '../routes/org-chart-redux/org-chart.page';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
@@ -156,6 +158,20 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 element: <OrgChartNextPage />,
+              },
+            ],
+          },
+          {
+            path: '/org-chart-redux',
+            element: <OrgChartReduxRoute />,
+            handle: {
+              breadcrumb: () => 'My organizations',
+              icon: <PartitionOutlined />,
+            },
+            children: [
+              {
+                index: true,
+                element: <OrgChartReduxPage />,
               },
             ],
           },
