@@ -8,13 +8,14 @@ export const WizardModal = (
   action: () => void,
   showCancel: boolean,
   isSignificant?: boolean,
+  dataTestId?: string,
 ) => {
   if (!alertShown && (isSignificant || isSignificant === undefined)) {
     setShown(true);
     Modal.confirm({
       title: title,
       content: (
-        <div role="alert">
+        <div role="alert" data-testid={dataTestId}>
           Amendments to the generic profile will require verification. If you would like to continue to make changes,
           please click proceed.
         </div>

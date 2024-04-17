@@ -16,6 +16,7 @@ interface ContextOptionsProps {
   isCustom: boolean;
   isEdited: boolean;
   ariaLabel: string;
+  testId: string;
   handleReset: (index: number) => void;
   handleAddBack: (index: number) => void;
   handleRemove: (index: number) => void;
@@ -29,6 +30,7 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
   isCustom,
   isEdited,
   ariaLabel,
+  testId,
   handleReset,
   handleAddBack,
   handleRemove,
@@ -59,7 +61,6 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
   };
 
   const doAction = (key: string) => {
-    console.log('clicked', key);
     switch (key) {
       case 'reset':
         //resetField
@@ -67,7 +68,6 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
         // trigger();
         break;
       case 'add':
-        console.log('add');
         handleAddBack(index);
         break;
       case 'remove':
@@ -99,7 +99,7 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
         >
           <Tooltip title={tooltipTitle} overlayStyle={!isReadonly ? { display: 'none' } : undefined}>
             <Button
-              data-testid={isDisabled ? `undo-remove-accountability-${index}` : `remove-accountability-${index}`}
+              data-testid={isDisabled ? `undo-remove-${testId}-${index}` : `remove-${testId}-${index}`}
               aria-label={ariaLabel}
               icon={<EllipsisOutlined />}
               disabled={isReadonly}
@@ -112,7 +112,7 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
   ) : (
     <Tooltip title={tooltipTitle} overlayStyle={!isReadonly ? { display: 'none' } : undefined}>
       <Button
-        data-testid={isDisabled ? `undo-remove-accountability-${index}` : `remove-accountability-${index}`}
+        data-testid={isDisabled ? `undo-remove-${testId}-${index}` : `remove-${testId}-${index}`}
         className="remove-item-btn"
         icon={icon}
         aria-label={ariaLabel}
