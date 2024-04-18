@@ -11,6 +11,6 @@ export class DepartmentService {
   }
 
   async getDepartment(args?: FindUniqueDepartmentArgs) {
-    return this.prisma.department.findUnique({ ...args });
+    return this.prisma.department.findUnique({ ...args, include: { location: true, organization: true } });
   }
 }

@@ -1039,6 +1039,7 @@ async function seed() {
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
     all_organizations: true,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1136,7 +1137,8 @@ async function seed() {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: false,
+    all_organizations: true,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1238,7 +1240,8 @@ async function seed() {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: false,
+    all_organizations: true,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1370,7 +1373,8 @@ async function seed() {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: false,
+    all_organizations: true,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1488,7 +1492,8 @@ async function seed() {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: false,
+    all_organizations: true,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1621,7 +1626,8 @@ async function seed() {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: false,
+    all_organizations: true,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1752,13 +1758,15 @@ async function seed() {
     program_overview: '',
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: false,
+    all_organizations: true,
     scope_id: null,
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
     type: 'CORPORATE',
     title: 'Financial Analyst',
+    is_archived: false,
+
     number: 247,
     overview:
       'Detail-oriented Financial Analyst to provide analysis of financial data, forecast future trends, and advise on investment decisions.',
@@ -2426,17 +2434,17 @@ async function seed() {
     });
   }
 
-  await prisma.jobProfileOrganization.createMany({
-    data: [
-      { job_profile_id: profile194.id, organization_id: 'BC000' },
-      { job_profile_id: profile200.id, organization_id: 'BC002' },
-      { job_profile_id: profile208.id, organization_id: 'BC003' },
-      { job_profile_id: profile210.id, organization_id: 'BC004' },
-      { job_profile_id: profile212.id, organization_id: 'BC000' },
-      { job_profile_id: profile247.id, organization_id: 'BC002' },
-      { job_profile_id: profile247.id, organization_id: 'BC003' },
-    ],
-  });
+  // await prisma.jobProfileOrganization.createMany({
+  //   data: [
+  //     { job_profile_id: profile194.id, organization_id: 'BC000' },
+  //     { job_profile_id: profile200.id, organization_id: 'BC002' },
+  //     { job_profile_id: profile208.id, organization_id: 'BC003' },
+  //     { job_profile_id: profile210.id, organization_id: 'BC004' },
+  //     { job_profile_id: profile212.id, organization_id: 'BC000' },
+  //     { job_profile_id: profile247.id, organization_id: 'BC002' },
+  //     { job_profile_id: profile247.id, organization_id: 'BC003' },
+  //   ],
+  // });
 
   await prisma.location.createMany({
     data: [
@@ -2910,7 +2918,7 @@ async function seed() {
             },
           ],
           program_overview: { value: '', disabled: false, isCustom: false },
-          all_organizations: false,
+          all_organizations: true,
           security_screenings: [],
           optional_requirements: [],
           willingness_statements: [],
@@ -3311,7 +3319,7 @@ async function seed() {
             },
           ],
           program_overview: { value: '', disabled: false, isCustom: false },
-          all_organizations: false,
+          all_organizations: true,
           security_screenings: [],
           optional_requirements: [],
           willingness_statements: [],
@@ -3712,7 +3720,7 @@ async function seed() {
             },
           ],
           program_overview: { value: '', disabled: false, isCustom: false },
-          all_organizations: false,
+          all_organizations: true,
           security_screenings: [],
           optional_requirements: [],
           willingness_statements: [],

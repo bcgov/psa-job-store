@@ -37,6 +37,7 @@ import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redu
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
+import './wizard-confirm-details.page.css';
 
 interface WizardConfirmPageProps {
   onNext?: () => void;
@@ -731,7 +732,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>Other Details</span>
                     <Tooltip title="Information shown here is dependent on the values that you selected in the previous steps.">
-                      <Button type="link">Why can't I make changes?</Button>
+                      <Button id="changes" type="link">
+                        Why can't I make changes?
+                      </Button>
                     </Tooltip>
                   </div>
                 }

@@ -102,8 +102,10 @@ export class JobProfileResolver {
   // }
 
   @Query(() => [Organization], { name: 'jobProfilesMinistries' })
-  async getJobProfilesMinistries() {
-    return this.jobProfileService.getJobProfilesMinistries();
+  async getJobProfilesMinistries(
+    @Args('positionRequestId', { type: () => Int, nullable: true }) positionRequestId?: number,
+  ) {
+    return this.jobProfileService.getJobProfilesMinistries(positionRequestId);
   }
 
   @Query(() => [Classification], { name: 'jobProfilesClassifications' })

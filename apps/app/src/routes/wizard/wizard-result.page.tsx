@@ -26,7 +26,7 @@ import { useWizardContext } from './components/wizard.provider';
 
 interface WizardResultPageProps {
   onBack?: () => void;
-  setStep?: (step: number) => void;
+  setStep?: (step: number, reason: string) => void;
   switchParentMode?: (mode: string) => void;
   switchParentReadonlyMode?: (mode: string) => void;
   setReadOnlySelectedTab?: (tab: string) => void;
@@ -54,7 +54,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   const [mode, setMode] = useState('');
   const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
-  const { positionRequestId } = useWizardContext();
+  const { positionRequestId, setCurrentSection } = useWizardContext();
 
   const {
     data: positionRequestData,
@@ -212,8 +212,9 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     onBack && onBack();
   };
 
-  const handleVerificationClick = () => {
-    setStep && setStep(2);
+  const handleVerificationClick = (reason: string) => {
+    setStep && setStep(2, reason);
+    setCurrentSection(reason);
   };
 
   const [deletePositionRequest] = useDeletePositionRequestMutation();
@@ -412,7 +413,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                           <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
                             {verificationNeededReasons.map((reason, index) => (
                               <li key={index}>
-                                <a onClick={() => handleVerificationClick()}>{reason}</a>
+                                <a onClick={() => handleVerificationClick(reason)}>{reason}</a>
                               </li>
                             ))}
                           </ul>

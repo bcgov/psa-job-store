@@ -36,8 +36,10 @@ Then('the first accountability should not be editable', () => {
 });
 
 When('the user removes last two default accountabilities', () => {
-  cy.get('[data-testid="remove-accountability-6"]').click(); // Adjust index as needed
-  cy.get('[data-testid="remove-accountability-7"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-accountability-6"]').click();
+  cy.get('[data-testid="accountabilities-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
+  cy.get('[data-testid="remove-accountability-7"]').click();
 });
 
 // Undos removal of last accountability
@@ -67,9 +69,31 @@ When('the user adds a new required accountability "Manage project budget"', () =
 });
 
 // OPTIONAL ACCOUNTABILITIES
+When('all optional accountabilities should be unchecked initially', () => {
+  // Assuming each accountability has a checkbox with a specific data-testid pattern
+  cy.get('[data-testid^="optional-accountability-checkbox-"]').each(($el) => {
+    expect($el).not.to.be.checked;
+  });
+});
+
+When('the user checks all optional accountabilities', () => {
+  // Assuming each accountability has a checkbox with a specific data-testid pattern
+  cy.get('[data-testid^="optional-accountability-checkbox-"]').each(($el) => {
+    cy.wrap($el).check();
+  });
+});
+
 When('the user removes the last optional accountability', () => {
   // Assuming each accountability has a remove button with a specific data-testid pattern
   cy.get('[data-testid^="optional-accountability-checkbox-"]').last().click();
+});
+
+When('the user adds a new optional accountability {string} for first time', (accountability: string) => {
+  // Click the add button, enter the text for the new accountability
+  cy.get('[data-testid="add-optional-accountability-button"]').click();
+  cy.get('[data-testid="optional-accountabilities-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
+  cy.get('[data-testid="optional-accountability-input-3"]').type(accountability);
 });
 
 When('the user adds a new optional accountability {string}', (accountability: string) => {
@@ -99,6 +123,8 @@ Then('the first job education should not be editable', () => {
 // Removes the last two default job educations
 When('the user removes the last two default job educations', () => {
   cy.get('[data-testid="remove-education-7"]').click(); // Adjust index as needed
+  cy.get('[data-testid="education-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
   cy.get('[data-testid="remove-education-8"]').click(); // Adjust index as needed
 });
 
@@ -139,6 +165,8 @@ Then('the first related experience should not be editable', () => {
 // Removes the last two default related experiences
 When('the user removes the last two default related experiences', () => {
   cy.get('[data-testid="remove-job-experience-1"]').click(); // Adjust index as needed
+  cy.get('[data-testid="experience-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
   cy.get('[data-testid="remove-job-experience-2"]').click(); // Adjust index as needed
 });
 
@@ -332,6 +360,8 @@ Then('the first security screening should not be editable', () => {
 // Removes the last two default security screenings
 When('the user removes the last two default security screenings', () => {
   cy.get('[data-testid="remove-security-screening-1"]').click(); // Adjust index as needed
+  cy.get('[data-testid="security-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
   cy.get('[data-testid="remove-security-screening-2"]').click(); // Adjust index as needed
 });
 
