@@ -430,7 +430,7 @@ const WizardEditProfile = forwardRef(
         initialMinReqFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
           const isEdited =
-            item.text !== originalMinReqFieldsValue[index]?.text ||
+            (item.text !== originalMinReqFieldsValue[index]?.text && item.is_significant == true) ||
             (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
@@ -480,7 +480,7 @@ const WizardEditProfile = forwardRef(
         initialRelWorkFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
           const isEdited =
-            item.text !== originalRelWorkFieldsValue[index]?.text ||
+            (item.text !== originalRelWorkFieldsValue[index]?.text && item.is_significant == true) ||
             (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
