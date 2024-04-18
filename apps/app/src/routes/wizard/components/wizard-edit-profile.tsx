@@ -1562,8 +1562,8 @@ const WizardEditProfile = forwardRef(
               confirmRemoveModal={() =>
                 WizardModal(
                   'Do you want to make changes to education and work experiences?',
-                  reqAlertShown,
-                  setReqAlertShown,
+                  minReqAlertShown,
+                  setMinReqAlertShown,
                   () => handleMinReqRemove(index),
                   true,
                   undefined,
@@ -1765,8 +1765,8 @@ const WizardEditProfile = forwardRef(
               confirmRemoveModal={() =>
                 WizardModal(
                   'Do you want to make changes to related experiences?',
-                  reqAlertShown,
-                  setReqAlertShown,
+                  relWorkAlertShown,
+                  setRelWorkAlertShown,
                   () => handleRelWorkRemove(index),
                   true,
                   undefined,
