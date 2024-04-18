@@ -276,6 +276,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
             prefix="Reporting to"
             mode="compact"
             positionNumber={positionRequestData?.reports_to_position_id}
+            orgChartData={positionRequestData?.orgchart_json}
           ></PositionProfile>
         </div>
       }

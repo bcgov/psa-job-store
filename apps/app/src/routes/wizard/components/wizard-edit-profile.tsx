@@ -26,6 +26,7 @@ import DOMPurify from 'dompurify';
 import debounce from 'lodash.debounce';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
+import PositionProfile from '../../../components/app/common/components/positionProfile';
 import '../../../components/app/common/css/custom-descriptions.css';
 import '../../../components/app/common/css/custom-form.css';
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
@@ -2901,7 +2902,11 @@ const WizardEditProfile = forwardRef(
                 {effectiveData?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
-                {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
+                <PositionProfile
+                  positionNumber={positionRequestData?.positionRequest?.reports_to_position_id?.toString()}
+                  orgChartData={positionRequestData?.positionRequest?.orgchart_json}
+                ></PositionProfile>
+                {/* {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
                 {firstActivePosition && !isFetchingPositionProfile && (
                   <div>
                     <p
@@ -2917,7 +2922,7 @@ const WizardEditProfile = forwardRef(
                 )}
                 {!firstActivePosition && !isFetchingPositionProfile && (
                   <div>Position {positionRequestData?.positionRequest?.reports_to_position_id} is unoccupied</div>
-                )}
+                )} */}
               </Descriptions.Item>
               <Descriptions.Item label="Job Store #">{effectiveData?.number}</Descriptions.Item>
             </Descriptions>
