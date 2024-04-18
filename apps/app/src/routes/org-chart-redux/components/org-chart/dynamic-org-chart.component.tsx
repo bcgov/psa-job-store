@@ -1,6 +1,6 @@
 import { Col, Row, Space } from 'antd';
 import Fuse from 'fuse.js';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -24,14 +24,16 @@ import { PositionSearch } from '../position-search.component';
 
 export interface DynamicOrgChartProps {
   type: OrgChartType.DYNAMIC;
-  setDepartmentId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  departmentId: string | undefined;
+  setDepartmentId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
+  onSelectedNodeIdsChange?: (ids: string[], elements: Elements) => void;
+  departmentId: string | null | undefined;
   departmentIdIsLoading?: boolean;
   targetId?: string | undefined;
 }
 
 export const DynamicOrgChart = ({
   setDepartmentId,
+  onSelectedNodeIdsChange,
   departmentId,
   departmentIdIsLoading,
   targetId,
@@ -45,6 +47,8 @@ export const DynamicOrgChart = ({
   const { fitView } = useReactFlow();
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
+
+  const getSearchResults = useCallback(() => nodes.filter((node) => node.data.isSearchResult === true), [nodes]);
 
   useEffect(() => {
     setIsDirty(false);
@@ -75,6 +79,10 @@ export const DynamicOrgChart = ({
       }),
     [elements.nodes],
   );
+
+  useEffect(() => {
+    if (onSelectedNodeIdsChange) onSelectedNodeIdsChange(selectedNodeIds, { edges, nodes });
+  }, [onSelectedNodeIdsChange, edges, nodes, selectedNodeIds]);
 
   useEffect(() => {
     const { edges, nodes } = JSON.parse(JSON.stringify(elements));
@@ -203,7 +211,7 @@ export const DynamicOrgChart = ({
             <PositionSearch
               setSearchTerm={setSearchTerm}
               disabled={departmentId == null || departmentIdIsLoading}
-              searchResults={elements.nodes.filter((node: Node) => node.selected === true)}
+              searchResults={getSearchResults()}
               searchTerm={searchTerm}
             />
           </Space>

@@ -6,8 +6,8 @@ import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/or
 const { Text } = Typography;
 
 interface DepartmentFilterProps {
-  setDepartmentId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  departmentId: string | undefined;
+  setDepartmentId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
+  departmentId: string | null | undefined;
   loading?: boolean;
 }
 

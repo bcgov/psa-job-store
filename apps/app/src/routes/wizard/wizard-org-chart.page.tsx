@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'reactflow/dist/style.css';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import { usePosition } from '../../components/app/common/contexts/position.context';
 import { GetPositionRequestResponseContent } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
-import { OrgChartFilter } from '../org-chart/components/org-chart-filter.component';
-import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
+import { OrgChart } from '../org-chart-redux/components/org-chart';
+import { initialElements } from '../org-chart-redux/constants/initial-elements.constant';
+import { OrgChartType } from '../org-chart-redux/enums/org-chart-type.enum';
+import { Elements } from '../org-chart-redux/interfaces/elements.interface';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';
@@ -21,7 +23,7 @@ interface WizardOrgChartPageProps {
 
 export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: WizardOrgChartPageProps) => {
   const { positionRequestDepartmentId } = useWizardContext();
-  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(positionRequestDepartmentId);
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null | undefined>(positionRequestDepartmentId);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -40,34 +42,26 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
 
   const navigate = useNavigate();
 
-  const [selectedNode, setSelectedNode] = useState<any | null>(null);
-  const orgChartJsonRef = useRef(null);
-  const onNodeSelected = (node: any) => {
-    setSelectedNode(node);
-  };
+  const [selectedPositionId, setSelectedPositionId] = useState<string | null | undefined>(undefined);
+  const [orgChartData, setOrgChartData] = useState<Elements>(initialElements);
+
+  const nextButtonIsDisabled = useCallback(() => {
+    const matches = orgChartData.nodes.filter((node) => node.id === selectedPositionId);
+    return matches.length > 0 ? matches[0].data.employees.length === 0 : true;
+  }, [selectedPositionId, orgChartData.nodes]);
 
   const { createNewPosition } = usePosition();
   const next = async () => {
-    if (selectedDepartment == null) return;
+    if (selectedDepartment == null || selectedPositionId == null) return;
     setIsLoading(true);
     try {
-      await createNewPosition(selectedNode.id, selectedDepartment, orgChartJsonRef.current);
+      await createNewPosition(selectedPositionId as any, selectedDepartment, orgChartData);
       onCreateNewPosition?.();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const onOrgChartLoad = (orgChartData: any) => {
-    // console.log('setting orgchart json: ', orgChartData);
-    // console.log('A:', JSON.stringify(orgChartData));
-    // console.log('B:', JSON.stringify(orgChartJson));
-    orgChartJsonRef.current = orgChartData;
-  };
-
-  // state for selected node
-
-  // console.log('positionRequestDepartmentId from wizard org chart page: ', positionRequestDepartmentId);
   return (
     <WizardPageWrapper
       title={
@@ -86,17 +80,12 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
       grayBg={false}
       pageHeaderExtra={[
         <Button onClick={() => navigate('/')}>Cancel</Button>,
-        <Button type="primary" disabled={selectedNode == null} onClick={next} loading={isLoading}>
+        <Button type="primary" disabled={nextButtonIsDisabled()} onClick={next} loading={isLoading}>
           Next
         </Button>,
       ]}
     >
       <WizardSteps current={0}></WizardSteps>
-      <OrgChartFilter
-        setSelectedDepartment={setSelectedDepartment}
-        selectedDepartment={selectedDepartment}
-        defaultValue={positionRequestDepartmentId}
-      />
       <div
         style={{
           overflow: 'hidden',
@@ -111,12 +100,16 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
         {isLoadingUserProfile || isFetchingUserProfile ? (
           <LoadingComponent height="100%"></LoadingComponent>
         ) : (
-          <OrgChartWrapped
-            selectedDepartment={selectedDepartment}
-            onCreateNewPosition={onCreateNewPosition}
-            allowSelection={true}
-            onNodeSelected={onNodeSelected}
-            onOrgChartLoad={onOrgChartLoad}
+          <OrgChart
+            type={OrgChartType.DYNAMIC}
+            setDepartmentId={setSelectedDepartment}
+            onSelectedNodeIdsChange={(ids, elements) => {
+              setSelectedPositionId(ids.length > 0 ? ids[0] : undefined);
+              setOrgChartData(elements);
+            }}
+            departmentId={selectedDepartment}
+            departmentIdIsLoading={isFetchingUserProfile}
+            targetId={profileData?.profile.position_id}
           />
         )}
       </div>

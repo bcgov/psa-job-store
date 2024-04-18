@@ -6,7 +6,7 @@ export interface PositionSearchProps {
   setSearchTerm: React.Dispatch<React.SetStateAction<string | undefined>>;
   disabled?: boolean;
   searchTerm?: string | undefined;
-  searchResults: Node[];
+  searchResults: (() => Node[]) | Node[];
 }
 
 export const PositionSearch = ({
