@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { OrgChart } from './components/org-chart';
+import { OrgChartContext } from './enums/org-chart-context.enum';
 import { OrgChartType } from './enums/org-chart-type.enum';
 
 const { Content } = Layout;
 
 export const OrgChartPage = () => {
-  const [departmentId, setDepartmentId] = useState<string | undefined>(undefined);
+  const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
   const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export const OrgChartPage = () => {
         <Col style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
           <OrgChart
             type={OrgChartType.DYNAMIC}
+            context={OrgChartContext.DEFAULT}
             setDepartmentId={setDepartmentId}
             departmentId={departmentId}
             departmentIdIsLoading={profileDataIsFetching}

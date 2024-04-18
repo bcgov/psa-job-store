@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'reactflow/dist/style.css';
@@ -10,6 +10,7 @@ import { GetPositionRequestResponseContent } from '../../redux/services/graphql-
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { OrgChart } from '../org-chart-redux/components/org-chart';
 import { initialElements } from '../org-chart-redux/constants/initial-elements.constant';
+import { OrgChartContext } from '../org-chart-redux/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart-redux/enums/org-chart-type.enum';
 import { Elements } from '../org-chart-redux/interfaces/elements.interface';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -25,6 +26,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
   const { positionRequestDepartmentId } = useWizardContext();
   const [selectedDepartment, setSelectedDepartment] = useState<string | null | undefined>(positionRequestDepartmentId);
   const [isLoading, setIsLoading] = useState(false);
+  const [nextButtonTooltipTitle, setNextButtonTooltipTitle] = useState<string>('');
 
   const {
     data: profileData,
@@ -47,8 +49,28 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
 
   const nextButtonIsDisabled = useCallback(() => {
     const matches = orgChartData.nodes.filter((node) => node.id === selectedPositionId);
+
     return matches.length > 0 ? matches[0].data.employees.length === 0 : true;
   }, [selectedPositionId, orgChartData.nodes]);
+
+  useEffect(() => {
+    const selectedNodes = orgChartData.nodes.filter((node) => node.id === selectedPositionId);
+
+    if (selectedNodes.length === 0) {
+      setNextButtonTooltipTitle('Select a supervisor position to continue');
+    } else {
+      const positionIsVacant = selectedNodes[0].data.employees.length === 0;
+      setNextButtonTooltipTitle(
+        positionIsVacant ? "You can't create a new position which reports to a vacant position." : '',
+      );
+    }
+
+    // if (nextButtonIsDisabled() === true) {
+    //   setNextButtonTooltipTitle("You can't create a new position which reports to a vacant position.");
+    // } else {
+    //   setNextButtonTooltipTitle('');
+    // }
+  }, [nextButtonIsDisabled, orgChartData.nodes, selectedPositionId]);
 
   const { createNewPosition } = usePosition();
   const next = async () => {
@@ -80,9 +102,11 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
       grayBg={false}
       pageHeaderExtra={[
         <Button onClick={() => navigate('/')}>Cancel</Button>,
-        <Button type="primary" disabled={nextButtonIsDisabled()} onClick={next} loading={isLoading}>
-          Next
-        </Button>,
+        <Tooltip title={nextButtonTooltipTitle}>
+          <Button type="primary" disabled={nextButtonIsDisabled()} onClick={next} loading={isLoading}>
+            Next
+          </Button>
+        </Tooltip>,
       ]}
     >
       <WizardSteps current={0}></WizardSteps>
@@ -102,6 +126,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
         ) : (
           <OrgChart
             type={OrgChartType.DYNAMIC}
+            context={OrgChartContext.WIZARD}
             setDepartmentId={setSelectedDepartment}
             onSelectedNodeIdsChange={(ids, elements) => {
               setSelectedPositionId(ids.length > 0 ? ids[0] : undefined);

@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { UserAddOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Flex, Row, Tooltip, Typography } from 'antd';
+import { CheckCircleFilled, UserAddOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Row, Tooltip, Typography } from 'antd';
 import { CSSProperties } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { Handle, NodeProps, Position } from 'reactflow';
+import { OrgChartContext } from '../enums/org-chart-context.enum';
+import { OrgChartType } from '../enums/org-chart-type.enum';
+import './org-chart-node.component.css';
 
 const { Top, Bottom } = Position;
 const { Text } = Typography;
@@ -41,14 +44,21 @@ const renderPositionNumber = (roles: string[], positionData: Record<string, any>
   }
 };
 
+export interface OrgChartNodeProps extends NodeProps {
+  orgChartType: OrgChartType;
+  orgChartContext?: OrgChartContext;
+}
+
 export const OrgChartNode = ({
   data,
   isConnectable,
   selected,
   sourcePosition = Bottom,
   targetPosition = Top,
+  orgChartType,
+  orgChartContext,
   ...rest
-}: NodeProps) => {
+}: OrgChartNodeProps) => {
   const auth = useAuth();
   const positionIsVacant = data.employees.length === 0;
 
@@ -59,6 +69,32 @@ export const OrgChartNode = ({
       <Handle type="target" position={targetPosition} isConnectable={isConnectable} />
       <div>
         <Card
+          actions={
+            selected && orgChartType === OrgChartType.DYNAMIC
+              ? orgChartContext === OrgChartContext.DEFAULT
+                ? [
+                    <Tooltip
+                      title={
+                        positionIsVacant
+                          ? "You can't create a new position which reports to a vacant position."
+                          : undefined
+                      }
+                    >
+                      <Button
+                        // onClick={createDirectReport}
+                        disabled={positionIsVacant}
+                        icon={<UserAddOutlined />}
+                        data-testid="create-direct-report-button"
+                        style={{ borderRadius: 0, border: 'none', width: '100%' }}
+                        type="default"
+                      >
+                        Create new direct report
+                      </Button>
+                    </Tooltip>,
+                  ]
+                : undefined
+              : undefined
+          }
           title={data.title}
           extra={
             <Text strong style={{ ...((selected === true || data.isSearchResult === true) && { color: '#FFF' }) }}>
@@ -115,26 +151,19 @@ export const OrgChartNode = ({
             <Col style={{ flexShrink: 0 }}>{renderPositionNumber(roles, data)}</Col>
           </Row>
         </Card>
-        {selected && (
-          <div style={{ marginTop: '0.25rem' }}>
-            <Flex justify="space-between" gap="small" style={{ width: '100%' }}>
-              <Tooltip
-                title={
-                  positionIsVacant ? "You can't create a new position which reports to a vacant position." : undefined
-                }
-              >
-                <Button
-                  // onClick={createDirectReport}
-                  disabled={positionIsVacant}
-                  icon={<UserAddOutlined />}
-                  data-testid="create-direct-report-button"
-                  style={{ width: '100%' }}
-                  type="default"
-                >
-                  Create new direct report
-                </Button>
-              </Tooltip>
-            </Flex>
+        {selected && orgChartType === OrgChartType.DYNAMIC && orgChartContext === OrgChartContext.WIZARD && (
+          <div
+            style={{
+              background: '#F3F3F3',
+              border: '1px solid #52C41A',
+              borderRadius: '0.25rem',
+              margin: '0.25rem 0 0 0',
+              padding: '0.25rem',
+              textAlign: 'center',
+              width: '100%',
+            }}
+          >
+            <CheckCircleFilled style={{ color: '#52C41A' }} /> Selected
           </div>
         )}
       </div>
