@@ -91,7 +91,6 @@ export const DynamicOrgChart = ({
 
       // For the ID search, don't include positions where position_status === 'PROPOSED'
       const approvedPositionNodes = debouncedElements.nodes.filter((node) => node.data.position_status === 'Approved');
-      console.log('approvedPositionNodes: ', approvedPositionNodes);
       const idSearch = new Fuse(approvedPositionNodes, {
         keys: ['id'],
         includeMatches: true,
