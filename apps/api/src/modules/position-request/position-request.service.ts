@@ -182,6 +182,7 @@ export class PositionRequestApiService {
               ...node.data,
               isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
               isExcludedManager: node.id === excludedManagerId,
+              isNewPosition: false, // Clear previous positions marked as new
               isSupervisor: node.id === supervisorId,
             };
           });
@@ -812,18 +813,13 @@ export class PositionRequestApiService {
       const orgChart = positionRequest.orgchart_json;
 
       if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
-        // Remove existing node with role: 'first_level_excluded_manager'
-        const updatedNodes = (orgChart.nodes as any[]).filter(
-          (node) => node.data?.role !== 'first_level_excluded_manager',
-        );
+        // Remove existing node with isExcludedManager = true
+        const updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.isExcludedManager !== true);
 
         const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
           const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
           const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
-          return (
-            sourceNode?.data?.role !== 'first_level_excluded_manager' &&
-            targetNode?.data?.role !== 'first_level_excluded_manager'
-          );
+          return sourceNode?.data?.isExcludedManager !== true && targetNode?.data?.isExcludedManager !== true;
         });
 
         const isExcludedManagerInOrgChart = (orgChart.nodes as any[]).some(
@@ -855,7 +851,7 @@ export class PositionRequestApiService {
                 data: {
                   id: updateData.additional_info_excluded_mgr_position_number,
                   title: employeeInfo[0].positionDescription,
-                  role: 'first_level_excluded_manager',
+                  isExcludedManager: true,
                   employees: employeeInfo.map((employee) => ({
                     id: employee.employeeId,
                     name: employee.employeeName,
