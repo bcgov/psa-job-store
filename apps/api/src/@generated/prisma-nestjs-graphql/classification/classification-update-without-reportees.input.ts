@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { EmployeeGroupUpdateOneRequiredWithoutClassificationsNestedInput } from '../employee-group/employee-group-update-one-required-without-classifications-nested.input';
 import { JobProfileClassificationUpdateManyWithoutClassificationNestedInput } from '../job-profile-classification/job-profile-classification-update-many-without-classification-nested.input';
 

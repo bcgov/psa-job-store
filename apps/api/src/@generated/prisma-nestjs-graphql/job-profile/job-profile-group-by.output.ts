@@ -1,14 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileState } from '../prisma/job-profile-state.enum';
 import { JobProfileType } from '../prisma/job-profile-type.enum';
-import { GraphQLJSON } from 'graphql-type-json';
-import { JobProfileCountAggregate } from './job-profile-count-aggregate.output';
 import { JobProfileAvgAggregate } from './job-profile-avg-aggregate.output';
-import { JobProfileSumAggregate } from './job-profile-sum-aggregate.output';
-import { JobProfileMinAggregate } from './job-profile-min-aggregate.output';
+import { JobProfileCountAggregate } from './job-profile-count-aggregate.output';
 import { JobProfileMaxAggregate } from './job-profile-max-aggregate.output';
+import { JobProfileMinAggregate } from './job-profile-min-aggregate.output';
+import { JobProfileSumAggregate } from './job-profile-sum-aggregate.output';
 
 @ObjectType()
 export class JobProfileGroupBy {
@@ -86,6 +84,9 @@ export class JobProfileGroupBy {
 
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc?: any;
+
+  @Field(() => Boolean, { nullable: false })
+  is_archived!: boolean;
 
   @Field(() => JobProfileCountAggregate, { nullable: true })
   _count?: JobProfileCountAggregate;

@@ -1,6 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class JobProfileCountAggregate {
@@ -78,6 +76,9 @@ export class JobProfileCountAggregate {
 
   @Field(() => Int, { nullable: false })
   total_comp_create_form_misc!: number;
+
+  @Field(() => Int, { nullable: false })
+  is_archived!: number;
 
   @Field(() => Int, { nullable: false })
   _all!: number;

@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileOrganizationCreateWithoutOrganizationInput } from './job-profile-organization-create-without-organization.input';
-import { Type } from 'class-transformer';
-import { JobProfileOrganizationCreateOrConnectWithoutOrganizationInput } from './job-profile-organization-create-or-connect-without-organization.input';
-import { JobProfileOrganizationUpsertWithWhereUniqueWithoutOrganizationInput } from './job-profile-organization-upsert-with-where-unique-without-organization.input';
-import { JobProfileOrganizationCreateManyOrganizationInputEnvelope } from './job-profile-organization-create-many-organization-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileOrganizationWhereUniqueInput } from './job-profile-organization-where-unique.input';
-import { JobProfileOrganizationUpdateWithWhereUniqueWithoutOrganizationInput } from './job-profile-organization-update-with-where-unique-without-organization.input';
-import { JobProfileOrganizationUpdateManyWithWhereWithoutOrganizationInput } from './job-profile-organization-update-many-with-where-without-organization.input';
+import { Type } from 'class-transformer';
+import { JobProfileOrganizationCreateManyOrganizationInputEnvelope } from './job-profile-organization-create-many-organization-input-envelope.input';
+import { JobProfileOrganizationCreateOrConnectWithoutOrganizationInput } from './job-profile-organization-create-or-connect-without-organization.input';
+import { JobProfileOrganizationCreateWithoutOrganizationInput } from './job-profile-organization-create-without-organization.input';
 import { JobProfileOrganizationScalarWhereInput } from './job-profile-organization-scalar-where.input';
+import { JobProfileOrganizationUpdateManyWithWhereWithoutOrganizationInput } from './job-profile-organization-update-many-with-where-without-organization.input';
+import { JobProfileOrganizationUpdateWithWhereUniqueWithoutOrganizationInput } from './job-profile-organization-update-with-where-unique-without-organization.input';
+import { JobProfileOrganizationUpsertWithWhereUniqueWithoutOrganizationInput } from './job-profile-organization-upsert-with-where-unique-without-organization.input';
+import { JobProfileOrganizationWhereUniqueInput } from './job-profile-organization-where-unique.input';
 
 @InputType()
 export class JobProfileOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput {

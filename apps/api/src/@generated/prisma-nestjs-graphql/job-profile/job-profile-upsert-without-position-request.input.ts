@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileUpdateWithoutPosition_requestInput } from './job-profile-update-without-position-request.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { JobProfileCreateWithoutPosition_requestInput } from './job-profile-create-without-position-request.input';
+import { JobProfileUpdateWithoutPosition_requestInput } from './job-profile-update-without-position-request.input';
 import { JobProfileWhereInput } from './job-profile-where.input';
 
 @InputType()

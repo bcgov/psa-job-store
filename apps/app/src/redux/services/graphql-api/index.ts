@@ -50,6 +50,10 @@ function checkForExpiredSessionError(response: any) {
       }
     }
   }
+
+  if (response?.error?.message && response.error.message.includes('UNAUTHENTICATED')) {
+    return true;
+  }
   return false; // Specific error message not found
 }
 
@@ -63,6 +67,7 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     suppressErrorToast = args.variables?.suppressGlobalError;
 
     const isSessionExpired = checkForExpiredSessionError(result);
+
     if (isSessionExpired) {
       if (!sessionStorage.getItem('redirectPath')) {
         const currentUrl = new URL(window.location.href);
@@ -125,6 +130,6 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
 
 export const graphqlApi = createApi({
   baseQuery,
-  tagTypes: ['positionRequest', 'positionRequestsCount', 'jobProfiles'],
+  tagTypes: ['positionRequest', 'positionRequestsCount', 'jobProfiles', 'getOrgChart'],
   endpoints: () => ({}),
 });

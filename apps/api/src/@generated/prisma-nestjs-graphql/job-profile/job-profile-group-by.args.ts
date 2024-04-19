@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileWhereInput } from './job-profile-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileAvgAggregateInput } from './job-profile-avg-aggregate.input';
+import { JobProfileCountAggregateInput } from './job-profile-count-aggregate.input';
+import { JobProfileMaxAggregateInput } from './job-profile-max-aggregate.input';
+import { JobProfileMinAggregateInput } from './job-profile-min-aggregate.input';
 import { JobProfileOrderByWithAggregationInput } from './job-profile-order-by-with-aggregation.input';
 import { JobProfileScalarFieldEnum } from './job-profile-scalar-field.enum';
 import { JobProfileScalarWhereWithAggregatesInput } from './job-profile-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { JobProfileCountAggregateInput } from './job-profile-count-aggregate.input';
-import { JobProfileAvgAggregateInput } from './job-profile-avg-aggregate.input';
 import { JobProfileSumAggregateInput } from './job-profile-sum-aggregate.input';
-import { JobProfileMinAggregateInput } from './job-profile-min-aggregate.input';
-import { JobProfileMaxAggregateInput } from './job-profile-max-aggregate.input';
+import { JobProfileWhereInput } from './job-profile-where.input';
 
 @ArgsType()
 export class JobProfileGroupByArgs {

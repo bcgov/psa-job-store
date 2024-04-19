@@ -1,20 +1,18 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileState } from '../prisma/job-profile-state.enum';
-import { JobProfileType } from '../prisma/job-profile-type.enum';
-import { Int } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-update-many-without-job-profile-nested.input';
 import { JobProfileClassificationUpdateManyWithoutJob_profileNestedInput } from '../job-profile-classification/job-profile-classification-update-many-without-job-profile-nested.input';
-import { JobProfileOrganizationUpdateManyWithoutJob_profileNestedInput } from '../job-profile-organization/job-profile-organization-update-many-without-job-profile-nested.input';
 import { JobProfileContextUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-update-one-without-job-profile-nested.input';
+import { JobProfileJobFamilyLinkUpdateManyWithoutJobProfileNestedInput } from '../job-profile-job-family-link/job-profile-job-family-link-update-many-without-job-profile-nested.input';
+import { JobProfileOrganizationUpdateManyWithoutJob_profileNestedInput } from '../job-profile-organization/job-profile-organization-update-many-without-job-profile-nested.input';
+import { JobProfileReportsToUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-update-many-without-job-profile-nested.input';
 import { JobProfileRoleTypeUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-role-type/job-profile-role-type-update-one-without-job-profiles-nested.input';
 import { JobProfileScopeUpdateOneWithoutJob_profilesNestedInput } from '../job-profile-scope/job-profile-scope-update-one-without-job-profiles-nested.input';
-import { UserUpdateOneWithoutJobProfileNestedInput } from '../user/user-update-one-without-job-profile-nested.input';
-import { JobProfileJobFamilyLinkUpdateManyWithoutJobProfileNestedInput } from '../job-profile-job-family-link/job-profile-job-family-link-update-many-without-job-profile-nested.input';
 import { JobProfileStreamLinkUpdateManyWithoutJobProfileNestedInput } from '../job-profile-stream-link/job-profile-stream-link-update-many-without-job-profile-nested.input';
-import { JobProfileReportsToUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-update-many-without-job-profile-nested.input';
 import { PositionRequestUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-update-many-without-parent-job-profile-nested.input';
+import { JobProfileState } from '../prisma/job-profile-state.enum';
+import { JobProfileType } from '../prisma/job-profile-type.enum';
+import { UserUpdateOneWithoutJobProfileNestedInput } from '../user/user-update-one-without-job-profile-nested.input';
 
 @InputType()
 export class JobProfileUpdateWithoutRoleInput {
@@ -77,6 +75,9 @@ export class JobProfileUpdateWithoutRoleInput {
 
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc?: any;
+
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: boolean;
 
   @Field(() => JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUpdateManyWithoutJob_profileNestedInput;

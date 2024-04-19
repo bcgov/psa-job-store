@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { EmployeeGroup } from '../employee-group/employee-group.model';
 import { JobProfileClassification } from '../job-profile-classification/job-profile-classification.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';

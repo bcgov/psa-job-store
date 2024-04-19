@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileContextWhereInput } from './job-profile-context-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { JobProfileContextUpdateWithoutJob_profileInput } from './job-profile-context-update-without-job-profile.input';
+import { JobProfileContextWhereInput } from './job-profile-context-where.input';
 
 @InputType()
 export class JobProfileContextUpdateToOneWithWhereWithoutJob_profileInput {

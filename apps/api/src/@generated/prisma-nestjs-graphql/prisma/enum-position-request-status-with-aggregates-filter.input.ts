@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { PositionRequestStatus } from './position-request-status.enum';
-import { IntFilter } from './int-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { EnumPositionRequestStatusFilter } from './enum-position-request-status-filter.input';
+import { IntFilter } from './int-filter.input';
+import { PositionRequestStatus } from './position-request-status.enum';
 
 @InputType()
 export class EnumPositionRequestStatusWithAggregatesFilter {

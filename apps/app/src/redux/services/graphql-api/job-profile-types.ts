@@ -316,6 +316,14 @@ export interface DuplicateJobProfileResponse {
   duplicateJobProfile: number;
 }
 
+export interface DeleteJobProfileResponse {
+  deleteJobProfile: number;
+}
+
+export interface UnarchiveJobProfileResponse {
+  deleteJobProfile: number;
+}
+
 export interface GetJobProfilesArgs {
   search?: string;
   where?: Record<string, any>;
@@ -326,16 +334,23 @@ export interface GetJobProfilesArgs {
   sortByJobFamily?: boolean;
   sortByOrganization?: boolean;
   sortOrder?: string;
+  selectProfile?: string | null | undefined;
 }
 
 export interface GetJobProfilesResponse {
   jobProfiles: JobProfileModel[];
   jobProfilesCount: number;
+  pageNumberForSelectProfile: number;
 }
 
 export interface GetJobProfilesDraftsResponse {
   jobProfilesDrafts: JobProfileModel[];
   jobProfilesDraftsCount: number;
+}
+
+export interface GetJobProfilesArchivedResponse {
+  jobProfilesArchived: JobProfileModel[];
+  jobProfilesArchivedCount: number;
 }
 
 export interface GetJobProfileArgs {

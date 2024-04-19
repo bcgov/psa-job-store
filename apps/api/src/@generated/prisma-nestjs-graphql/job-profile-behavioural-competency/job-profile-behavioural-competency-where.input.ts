@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { IntFilter } from '../prisma/int-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { BehaviouralCompetencyRelationFilter } from '../behavioural-competency/behavioural-competency-relation-filter.input';
 import { JobProfileRelationFilter } from '../job-profile/job-profile-relation-filter.input';
+import { IntFilter } from '../prisma/int-filter.input';
 
 @InputType()
 export class JobProfileBehaviouralCompetencyWhereInput {

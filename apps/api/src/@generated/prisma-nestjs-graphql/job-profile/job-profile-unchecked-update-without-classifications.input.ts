@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfileState } from '../prisma/job-profile-state.enum';
-import { JobProfileType } from '../prisma/job-profile-type.enum';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-unchecked-update-many-without-job-profile-nested.input';
-import { JobProfileOrganizationUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-organization/job-profile-organization-unchecked-update-many-without-job-profile-nested.input';
 import { JobProfileContextUncheckedUpdateOneWithoutJob_profileNestedInput } from '../job-profile-context/job-profile-context-unchecked-update-one-without-job-profile-nested.input';
 import { JobProfileJobFamilyLinkUncheckedUpdateManyWithoutJobProfileNestedInput } from '../job-profile-job-family-link/job-profile-job-family-link-unchecked-update-many-without-job-profile-nested.input';
-import { JobProfileStreamLinkUncheckedUpdateManyWithoutJobProfileNestedInput } from '../job-profile-stream-link/job-profile-stream-link-unchecked-update-many-without-job-profile-nested.input';
+import { JobProfileOrganizationUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-organization/job-profile-organization-unchecked-update-many-without-job-profile-nested.input';
 import { JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput } from '../job-profile-reports-to/job-profile-reports-to-unchecked-update-many-without-job-profile-nested.input';
+import { JobProfileStreamLinkUncheckedUpdateManyWithoutJobProfileNestedInput } from '../job-profile-stream-link/job-profile-stream-link-unchecked-update-many-without-job-profile-nested.input';
 import { PositionRequestUncheckedUpdateManyWithoutParent_job_profileNestedInput } from '../position-request/position-request-unchecked-update-many-without-parent-job-profile-nested.input';
+import { JobProfileState } from '../prisma/job-profile-state.enum';
+import { JobProfileType } from '../prisma/job-profile-type.enum';
 
 @InputType()
 export class JobProfileUncheckedUpdateWithoutClassificationsInput {
@@ -88,6 +86,9 @@ export class JobProfileUncheckedUpdateWithoutClassificationsInput {
 
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc?: any;
+
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: boolean;
 
   @Field(() => JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput;

@@ -47,6 +47,7 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
           <Space direction="horizontal">
             <span>Show changes:</span>
             <Switch
+              aria-label="Toggle show changes"
               data-testid="toggleDiffSwitch"
               checked={showDiff}
               checkedChildren="On"
@@ -81,7 +82,7 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
               <>
                 <p style={{ margin: 0 }}>
                   <b>Changes legend: </b>
-                  <span style={{ textDecoration: 'line-through', color: 'red' }}>Strikethrough</span> means removed
+                  <span style={{ textDecoration: 'line-through', color: '#A8071A' }}>Strikethrough</span> means removed
                   text. <span style={{ backgroundColor: 'yellow' }}>Highlighted text</span> means added text.
                 </p>
               </>

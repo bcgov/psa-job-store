@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileStreamLinkCreateManyInput } from './job-profile-stream-link-create-many.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileStreamLinkCreateManyInput } from './job-profile-stream-link-create-many.input';
 
 @ArgsType()
 export class CreateManyJobProfileStreamLinkArgs {

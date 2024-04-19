@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileMinimumRequirementsUpdateManyMutationInput } from './job-profile-minimum-requirements-update-many-mutation.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileMinimumRequirementsUpdateManyMutationInput } from './job-profile-minimum-requirements-update-many-mutation.input';
 import { JobProfileMinimumRequirementsWhereInput } from './job-profile-minimum-requirements-where.input';
 
 @ArgsType()

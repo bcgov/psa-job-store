@@ -1,14 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { DepartmentWhereInput } from './department-where.input';
-import { Type } from 'class-transformer';
-import { DepartmentOrderByWithRelationAndSearchRelevanceInput } from './department-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { DepartmentWhereUniqueInput } from './department-where-unique.input';
-import { Int } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
 import { DepartmentCountAggregateInput } from './department-count-aggregate.input';
-import { DepartmentMinAggregateInput } from './department-min-aggregate.input';
 import { DepartmentMaxAggregateInput } from './department-max-aggregate.input';
+import { DepartmentMinAggregateInput } from './department-min-aggregate.input';
+import { DepartmentOrderByWithRelationAndSearchRelevanceInput } from './department-order-by-with-relation-and-search-relevance.input';
+import { DepartmentWhereUniqueInput } from './department-where-unique.input';
+import { DepartmentWhereInput } from './department-where.input';
 
 @ArgsType()
 export class DepartmentAggregateArgs {

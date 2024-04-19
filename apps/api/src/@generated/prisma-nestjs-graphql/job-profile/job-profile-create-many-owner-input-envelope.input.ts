@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileCreateManyOwnerInput } from './job-profile-create-many-owner.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileCreateManyOwnerInput } from './job-profile-create-many-owner.input';
 
 @InputType()
 export class JobProfileCreateManyOwnerInputEnvelope {

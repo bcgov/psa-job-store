@@ -14,11 +14,12 @@ import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
 import { MyPositionsRoute } from '../routes/my-positions';
 import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
-import { OrgChartRoute } from '../routes/org-chart';
-import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { OrgChartRoute as OrgChartOldRoute, OrgChartRoute } from '../routes/org-chart';
+import { OrgChartPage as OrgChartOldPage, OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
+import { TotalCompArchivedProfilesPage } from '../routes/total-comp-archived-profiles/total-comp-archived-profies.page';
 import { TotalCompCreateProfilePage } from '../routes/total-comp-create-profile/total-comp-create-profile.page';
 import { TotalCompDraftProfilesRoute } from '../routes/total-comp-draft-profiles';
 import { TotalCompDraftProfilesPage } from '../routes/total-comp-draft-profiles/total-comp-draft-profies.page';
@@ -128,7 +129,6 @@ export const router = createBrowserRouter([
               },
             ],
           },
-
           {
             path: '/org-chart',
             element: <OrgChartRoute />,
@@ -140,6 +140,20 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 element: <OrgChartPage />,
+              },
+            ],
+          },
+          {
+            path: '/org-chart-old',
+            element: <OrgChartOldRoute />,
+            handle: {
+              breadcrumb: () => 'My organizations',
+              icon: <PartitionOutlined />,
+            },
+            children: [
+              {
+                index: true,
+                element: <OrgChartOldPage />,
               },
             ],
           },
@@ -221,6 +235,27 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 element: <TotalCompPublishedProfilesPage />,
+              },
+              {
+                path: ':id',
+                element: <TotalCompCreateProfilePage />,
+              },
+            ],
+          },
+          {
+            path: '/archived-job-profiles',
+            element: (
+              <RoleGuard requiredRole="total-compensation">
+                <TotalCompPublishedProfilesRoute />
+              </RoleGuard>
+            ),
+            handle: {
+              breadcrumb: () => 'Archived Job Profiles',
+            },
+            children: [
+              {
+                index: true,
+                element: <TotalCompArchivedProfilesPage />,
               },
               {
                 path: ':id',

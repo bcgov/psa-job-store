@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { PositionRequestWhereInput } from './position-request-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { PositionRequestAvgAggregateInput } from './position-request-avg-aggregate.input';
+import { PositionRequestCountAggregateInput } from './position-request-count-aggregate.input';
+import { PositionRequestMaxAggregateInput } from './position-request-max-aggregate.input';
+import { PositionRequestMinAggregateInput } from './position-request-min-aggregate.input';
 import { PositionRequestOrderByWithAggregationInput } from './position-request-order-by-with-aggregation.input';
 import { PositionRequestScalarFieldEnum } from './position-request-scalar-field.enum';
 import { PositionRequestScalarWhereWithAggregatesInput } from './position-request-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { PositionRequestCountAggregateInput } from './position-request-count-aggregate.input';
-import { PositionRequestAvgAggregateInput } from './position-request-avg-aggregate.input';
 import { PositionRequestSumAggregateInput } from './position-request-sum-aggregate.input';
-import { PositionRequestMinAggregateInput } from './position-request-min-aggregate.input';
-import { PositionRequestMaxAggregateInput } from './position-request-max-aggregate.input';
+import { PositionRequestWhereInput } from './position-request-where.input';
 
 @ArgsType()
 export class PositionRequestGroupByArgs {

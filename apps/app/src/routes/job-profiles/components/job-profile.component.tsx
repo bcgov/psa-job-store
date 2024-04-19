@@ -25,6 +25,7 @@ import {
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import './job-profile.component.css';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -220,18 +221,24 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
     return diff.map(([operation, text], index) => {
       const style: React.CSSProperties = {};
+      let screenReaderText = '';
       if (operation === 1) {
         // Insertion
         style.backgroundColor = 'yellow';
+        screenReaderText = ` Added: ${text}. End added. `;
       } else if (operation === -1) {
         // Deletion
         style.textDecoration = 'line-through';
-        style.color = 'red';
+        style.color = '#A8071A';
+        screenReaderText = ` Deleted: ${text}. End deleted. `;
+      } else {
+        screenReaderText = text;
       }
 
       return (
         <span key={index} style={style}>
-          {text}
+          <span className="sr-only">&nbsp;{screenReaderText}</span>
+          <span aria-hidden>{text}</span>
         </span>
       );
     });
@@ -240,9 +247,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const compareLists = (
     original: (string | TrackedFieldArrayItem | AccountabilitiesModel)[],
     modified: (string | TrackedFieldArrayItem | AccountabilitiesModel)[] | undefined,
+    hideDisabled?: boolean,
   ): JSX.Element[] => {
     const comparisonResult: JSX.Element[] = [];
-    // console.log('compareLists: ', original, modified);
     if (!modified || !original) return comparisonResult;
 
     const maxLength = Math.max(original.length, modified.length);
@@ -253,11 +260,15 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       const originalItemValue = getItemValue(originalVal);
 
       const modifiedItem = modified[i];
-      let modifiedItemValue = getItemValue(modifiedItem);
-      modifiedItemValue =
-        typeof modifiedItem === 'string' ? modifiedItemValue : modifiedItem?.disabled ? '' : modifiedItemValue || '';
+      const modifiedItemValue =
+        typeof modifiedItem === 'string'
+          ? getItemValue(modifiedItem)
+          : modifiedItem?.disabled
+            ? ''
+            : getItemValue(modifiedItem) || '';
+      const hideItem = typeof modifiedItem !== 'string' && modifiedItem?.disabled && hideDisabled;
 
-      if (originalItemValue || modifiedItemValue) {
+      if ((originalItemValue || modifiedItemValue) && !hideItem) {
         const diff = dmp.diff_main(originalItemValue, modifiedItemValue);
         dmp.diff_cleanupSemantic(diff);
 
@@ -265,16 +276,22 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <li key={i}>
             {diff.map(([operation, text], index) => {
               const style: React.CSSProperties = {};
+              let screenReaderText = '';
               if (operation === 1) {
                 style.backgroundColor = 'yellow';
+                screenReaderText = ` Added: ${text}. End added. `;
               } else if (operation === -1) {
                 style.textDecoration = 'line-through';
-                style.color = 'red';
+                style.color = '#A8071A';
+                screenReaderText = ` Deleted: ${text}. End deleted.`;
+              } else {
+                screenReaderText = text;
               }
 
               return (
                 <span key={index} style={style}>
-                  {text}
+                  <span className="sr-only">&nbsp;{screenReaderText}</span>
+                  <span aria-hidden>{text}</span>
                 </span>
               );
             })}
@@ -302,14 +319,30 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         );
       } else if (originalItem && !modifiedItem) {
         comparisonResult.push(
-          <li key={name} style={{ textDecoration: 'line-through', color: 'red' }}>
-            <Text strong>{originalItem.name}</Text> {originalItem.description}
+          <li key={name}>
+            <span className="sr-only">
+              &nbsp;Deleted: {originalItem.name}. {originalItem.description} End deleted.
+            </span>
+            <Text strong style={{ textDecoration: 'line-through', color: '#A8071A' }} aria-hidden>
+              {originalItem.name}
+            </Text>{' '}
+            <span style={{ textDecoration: 'line-through', color: '#A8071A' }} aria-hidden>
+              {originalItem.description}
+            </span>
           </li>,
         );
       } else if (!originalItem && modifiedItem) {
         comparisonResult.push(
-          <li key={name} style={{ backgroundColor: 'yellow' }}>
-            <Text strong>{modifiedItem.name}</Text> {modifiedItem.description}
+          <li key={name}>
+            <span className="sr-only">
+              &nbsp;Added: {modifiedItem.name}. {modifiedItem.description} End added.
+            </span>
+            <Text strong style={{ backgroundColor: 'yellow' }} aria-hidden>
+              {modifiedItem.name}
+            </Text>{' '}
+            <span style={{ backgroundColor: 'yellow' }} aria-hidden>
+              {modifiedItem.description}
+            </span>
           </li>,
         );
       }
@@ -530,6 +563,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 ? compareLists(
                     originalData.accountabilities.filter((acc) => !acc.is_significant),
                     effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
+                    true,
                   )
                 : effectiveData?.accountabilities
                     .filter((acc) => !acc.is_significant)

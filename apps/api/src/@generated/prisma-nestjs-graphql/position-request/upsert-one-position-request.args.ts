@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
 import { Type } from 'class-transformer';
 import { PositionRequestCreateInput } from './position-request-create.input';
 import { PositionRequestUpdateInput } from './position-request-update.input';
+import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
 
 @ArgsType()
 export class UpsertOnePositionRequestArgs {

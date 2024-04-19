@@ -25,23 +25,26 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/custom-form.css';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
 import { useGetLocationsQuery } from '../../redux/services/graphql-api/location.api';
 import {
+  GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
-  useGetPositionRequestQuery,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
+import './wizard-confirm-details.page.css';
 
 interface WizardConfirmPageProps {
   onNext?: () => void;
   onBack?: () => void;
   disableBlockingAndNavigateHome: () => void;
+  positionRequest: GetPositionRequestResponseContent | null;
 }
 
 function IsTrue(validationOptions?: ValidationOptions) {
@@ -106,6 +109,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   onNext,
   onBack,
   disableBlockingAndNavigateHome,
+  positionRequest,
 }) => {
   // const [createJobProfile] = useCreateJobProfileMutation();
   const [isLoading, setIsLoading] = useState(false);
@@ -115,12 +119,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const [
     getPositionProfile,
     { data: positionProfileData, isFetching: isFetchingPositionProfile, isError: isFetchingPositionProfileError },
-  ] = useLazyGetPositionProfileQuery();
-
-  // this is for the reporting manager
-  const [
-    getPositionProfile2,
-    { data: positionProfileData2, isFetching: isFetchingPositionProfile2, isError: isFetchingPositionProfileError2 },
   ] = useLazyGetPositionProfileQuery();
 
   const departmentsData = useGetDepartmentsWithLocationQuery().data?.departments;
@@ -142,8 +140,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const [additionalPositions, setAdditionalPositions] = useState(0);
   const [noPositions, setNoPositions] = useState(false);
   const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel>();
-  const [firstActivePosition2, setFirstActivePosition2] = useState<PositionProfileModel>();
-  const [additionalPositions2, setAdditionalPositions2] = useState(0);
 
   useEffect(() => {
     if (positionProfileData && positionProfileData.positionProfile) {
@@ -160,59 +156,41 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     }
   }, [positionProfileData]);
 
-  useEffect(() => {
-    if (positionProfileData2 && positionProfileData2.positionProfile) {
-      const activePositions = positionProfileData2.positionProfile.filter((p) => p.status === 'Active');
-      setFirstActivePosition2(activePositions[0] || null);
-
-      // Set state to the number of additional active positions
-      setAdditionalPositions2(positionProfileData2.positionProfile.length - 1);
-    }
-  }, [positionProfileData2]);
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchPositionProfile = useCallback(
     debounce(async (positionNumber: string) => {
       try {
+        console.log(positionNumber);
         getPositionProfile({ positionNumber, suppressGlobalError: true });
       } catch (e) {
         // handled by isError, prevents showing error toast
+        console.log(e);
       }
     }, 300),
     [getPositionProfile],
   );
 
-  const { positionRequestId, wizardData } = useWizardContext();
+  const { positionRequestId, wizardData, positionRequestData } = useWizardContext();
 
   // get position request data
 
-  const {
-    data: positionRequestData,
-    isLoading: positionRequestLoading,
-    isError: positionRequestLoadingError,
-  } = useGetPositionRequestQuery({
-    id: positionRequestId ?? -1,
-  });
+  // const {
+  //   data: positionRequestData,
+  //   isLoading: positionRequestLoading,
+  //   isError: positionRequestLoadingError,
+  // } = useGetPositionRequestQuery({
+  //   id: positionRequestId ?? -1,
+  // });
 
   // console.log('positionRequestData: ', positionRequestData);
-
-  // get profile info for reporting position from reports_to_position_id using GetPositionProfileQuery and useEffect
-  useEffect(() => {
-    if (positionRequestData?.positionRequest?.reports_to_position_id) {
-      getPositionProfile2({
-        positionNumber: positionRequestData.positionRequest.reports_to_position_id.toString(),
-        uniqueKey: 'managerProfile',
-      });
-    }
-  }, [positionRequestData?.positionRequest?.reports_to_position_id, getPositionProfile2]);
 
   // get profile info for excluded manager from additional_info_excluded_mgr_position_number using GetPositionProfileQuery and useEffect
   useEffect(() => {
     async function fetchExcludedManagerProfile() {
-      if (positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number) {
+      if (positionRequestData?.additional_info_excluded_mgr_position_number) {
         try {
           await getPositionProfile({
-            positionNumber: positionRequestData.positionRequest.additional_info_excluded_mgr_position_number,
+            positionNumber: positionRequestData.additional_info_excluded_mgr_position_number,
             uniqueKey: 'excludedManagerProfile',
             suppressGlobalError: true,
           }).unwrap();
@@ -222,7 +200,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       }
     }
     fetchExcludedManagerProfile();
-  }, [positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number, getPositionProfile]);
+  }, [positionRequestData?.additional_info_excluded_mgr_position_number, getPositionProfile]);
 
   const { data: allLocations } = useGetLocationsQuery();
 
@@ -363,24 +341,20 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   });
 
   useEffect(() => {
-    if (positionRequestData && positionRequestData.positionRequest) {
+    if (positionRequestData) {
       const {
         additional_info_work_location_id,
         additional_info_department_id,
         additional_info_excluded_mgr_position_number,
         additional_info_comments,
-      } = positionRequestData.positionRequest;
+      } = positionRequestData;
       setValue(
         'workLocation',
         additional_info_work_location_id ||
-          departmentsData?.find((dept) => dept.id === positionRequestData?.positionRequest?.department_id)
-            ?.location_id ||
+          departmentsData?.find((dept) => dept.id === positionRequestData?.department_id)?.location_id ||
           null,
       );
-      setValue(
-        'payListDepartmentId',
-        additional_info_department_id || positionRequestData?.positionRequest?.department_id || null,
-      );
+      setValue('payListDepartmentId', additional_info_department_id || positionRequestData?.department_id || null);
       setValue('excludedManagerPositionNumber', additional_info_excluded_mgr_position_number || '');
       setValue('comments', additional_info_comments || '');
 
@@ -464,19 +438,21 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
             <Link to="/" aria-label="Go to dashboard">
               <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
             </Link>
-            New position
+            {positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position'}
           </div>
         }
         subTitle={<div>We need a few more pieces of information to action your request for a new position.</div>}
-        additionalBreadcrumb={{ title: 'New position' }}
-        // subTitle="Choose a job profile to modify for the new positions"
+        additionalBreadcrumb={{
+          title:
+            positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position',
+        }}
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
             <Button data-testid="ellipsis-menu" icon={<EllipsisOutlined />}></Button>
           </Popover>,
-          <Button onClick={onBackCallback} key="back">
+          <Button onClick={onBackCallback} key="back" data-testid="back-button">
             Back
           </Button>,
           <Button
@@ -654,7 +630,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                   onBlur={onBlur}
                                   value={value}
                                   onChange={(e) => {
-                                    debouncedFetchPositionProfile(e.target.value); // Fetch position profile
+                                    if (e.target.value) {
+                                      debouncedFetchPositionProfile(e.target.value); // Fetch position profile
+                                    }
                                     onChange(e); // Update controller state
                                   }}
                                   placeholder="Position number"
@@ -682,7 +660,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                       </Row>
                     </Card>
 
-                    <Card title="Comments" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
+                    {/* <Card title="Comments" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
                       <Row justify="start">
                         <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                           <Form.Item name="comments">
@@ -715,7 +693,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                           </Form.Item>
                         </Col>
                       </Row>
-                    </Card>
+                    </Card> */}
                   </Form>
                 </Col>
               </Row>
@@ -727,7 +705,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>Other Details</span>
                     <Tooltip title="Information shown here is dependent on the values that you selected in the previous steps.">
-                      <Button type="link">Why can't I make changes?</Button>
+                      <Button id="changes" type="link">
+                        Why can't I make changes?
+                      </Button>
                     </Tooltip>
                   </div>
                 }
@@ -759,31 +739,29 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     labelCol={{ className: 'card-label' }}
                     colon={false}
                   >
-                    <div style={{ margin: 0 }}>
-                      {firstActivePosition2 &&
-                        !isFetchingPositionProfile2 &&
-                        !isFetchingPositionProfileError2 &&
-                        !positionRequestLoadingError && (
-                          <div data-testid="reporting-manager-info">
-                            <p
-                              style={{ margin: 0 }}
-                            >{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
-                            <Typography.Paragraph type="secondary">
-                              {`${firstActivePosition2.positionDescription}, ${firstActivePosition2.classification}`}
-                              <br></br>
-                              {`Position No.: ${firstActivePosition2.positionNumber}`}
-                              {additionalPositions2 > 0 && ` +${additionalPositions2}`}
-                            </Typography.Paragraph>
-                          </div>
-                        )}
-                      {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
-                      {(isFetchingPositionProfile2 || positionRequestLoading) && (
-                        <LoadingSpinnerWithMessage mode={'small'} />
-                      )}
-                      {(isFetchingPositionProfileError2 || positionRequestLoadingError) && (
-                        <p>Error loading, please refresh page</p>
-                      )}
+                    <div data-testid="reporting-manager-info">
+                      <PositionProfile
+                        positionNumber={positionRequestData?.reports_to_position_id}
+                        orgChartData={positionRequestData?.orgchart_json}
+                      ></PositionProfile>
                     </div>
+                    {/* <div style={{ margin: 0 }}>
+                      {firstActivePosition2 && !isFetchingPositionProfile2 && !isFetchingPositionProfileError2 && (
+                        <div data-testid="reporting-manager-info">
+                          <p
+                            style={{ margin: 0 }}
+                          >{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
+                          <Typography.Paragraph type="secondary">
+                            {`${firstActivePosition2.positionDescription}, ${firstActivePosition2.classification}`}
+                            <br></br>
+                            {`Position No.: ${firstActivePosition2.positionNumber}`}
+                            {additionalPositions2 > 0 && ` +${additionalPositions2}`}
+                          </Typography.Paragraph>
+                        </div>
+                      )}
+                      {isFetchingPositionProfile2 && <LoadingSpinnerWithMessage mode={'small'} />}
+                      {isFetchingPositionProfileError2 && <p>Error loading, please refresh page</p>}
+                    </div> */}
                   </Form.Item>
 
                   <Divider className="hr-reduced-margin" />

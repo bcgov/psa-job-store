@@ -1,19 +1,18 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { SortOrder } from '../prisma/sort-order.enum';
-import { SortOrderInput } from '../prisma/sort-order.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileBehaviouralCompetencyOrderByRelationAggregateInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-order-by-relation-aggregate.input';
 import { JobProfileClassificationOrderByRelationAggregateInput } from '../job-profile-classification/job-profile-classification-order-by-relation-aggregate.input';
-import { JobProfileOrganizationOrderByRelationAggregateInput } from '../job-profile-organization/job-profile-organization-order-by-relation-aggregate.input';
 import { JobProfileContextOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-context/job-profile-context-order-by-with-relation-and-search-relevance.input';
-import { JobProfileRoleOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-role/job-profile-role-order-by-with-relation-and-search-relevance.input';
-import { JobProfileRoleTypeOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-role-type/job-profile-role-type-order-by-with-relation-and-search-relevance.input';
-import { JobProfileScopeOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-scope/job-profile-scope-order-by-with-relation-and-search-relevance.input';
-import { UserOrderByWithRelationAndSearchRelevanceInput } from '../user/user-order-by-with-relation-and-search-relevance.input';
 import { JobProfileJobFamilyLinkOrderByRelationAggregateInput } from '../job-profile-job-family-link/job-profile-job-family-link-order-by-relation-aggregate.input';
-import { JobProfileStreamLinkOrderByRelationAggregateInput } from '../job-profile-stream-link/job-profile-stream-link-order-by-relation-aggregate.input';
+import { JobProfileOrganizationOrderByRelationAggregateInput } from '../job-profile-organization/job-profile-organization-order-by-relation-aggregate.input';
 import { JobProfileReportsToOrderByRelationAggregateInput } from '../job-profile-reports-to/job-profile-reports-to-order-by-relation-aggregate.input';
+import { JobProfileRoleTypeOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-role-type/job-profile-role-type-order-by-with-relation-and-search-relevance.input';
+import { JobProfileRoleOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-role/job-profile-role-order-by-with-relation-and-search-relevance.input';
+import { JobProfileScopeOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-scope/job-profile-scope-order-by-with-relation-and-search-relevance.input';
+import { JobProfileStreamLinkOrderByRelationAggregateInput } from '../job-profile-stream-link/job-profile-stream-link-order-by-relation-aggregate.input';
 import { PositionRequestOrderByRelationAggregateInput } from '../position-request/position-request-order-by-relation-aggregate.input';
+import { SortOrder } from '../prisma/sort-order.enum';
+import { SortOrderInput } from '../prisma/sort-order.input';
+import { UserOrderByWithRelationAndSearchRelevanceInput } from '../user/user-order-by-with-relation-and-search-relevance.input';
 import { JobProfileOrderByRelevanceInput } from './job-profile-order-by-relevance.input';
 
 @InputType()
@@ -92,6 +91,9 @@ export class JobProfileOrderByWithRelationAndSearchRelevanceInput {
 
   @Field(() => SortOrderInput, { nullable: true })
   total_comp_create_form_misc?: SortOrderInput;
+
+  @Field(() => SortOrder, { nullable: true })
+  is_archived?: keyof typeof SortOrder;
 
   @Field(() => JobProfileBehaviouralCompetencyOrderByRelationAggregateInput, { nullable: true })
   behavioural_competencies?: JobProfileBehaviouralCompetencyOrderByRelationAggregateInput;

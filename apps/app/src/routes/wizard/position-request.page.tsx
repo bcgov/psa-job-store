@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography } from 'antd';
+import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography, message } from 'antd';
 import Title from 'antd/es/typography/Title';
+import copy from 'copy-to-clipboard';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -14,7 +16,8 @@ import {
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
 import ContentWrapper from '../home/components/content-wrapper.component';
-import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
+import { OrgChart } from '../org-chart/components/org-chart';
+import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { useWizardContext } from './components/wizard.provider';
 import './position-request.page.css';
 import { WizardConfirmDetailsPage } from './wizard-confirm-details.page';
@@ -89,30 +92,6 @@ export const PositionRequestPage = () => {
     isSharedRoute,
   ]);
 
-  // const [mode, setMode] = useState('editable');
-  // const [readonlyMode, setReadonlyMode] = useState('');
-  // const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
-
-  // // console.log('parent mode: ', mode);
-  // // console.log('parent readonlyMode: ', readonlyMode);
-
-  // const {
-  //   setWizardData,
-  //   setPositionRequestId,
-  //   setPositionRequestProfileId,
-  //   setPositionRequestDepartmentId,
-  //   setPositionRequestData,
-  // } = useWizardContext();
-
-  // // console.log('wizardData: ', wizardData);
-  // const { positionRequestId } = useParams();
-
-  // if (!positionRequestId) throw 'No position request provided';
-
-  // const { data } = useGetPositionRequestQuery({
-  //   id: parseInt(positionRequestId),
-  // });
-
   const [currentStep, setCurrentStep] = useState<number | null>(null);
 
   useEffect(() => {
@@ -177,13 +156,24 @@ export const PositionRequestPage = () => {
     navigate('/'); // Replace with the path where the user should be redirected
   };
 
+  const handleCopy = (copyData: any) => {
+    // Use the Clipboard API to copy the link to the clipboard
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(copyData);
+    message.success('Link copied to clipboard!');
+  };
+
   const renderStepComponent = () => {
     switch (currentStep) {
       case 0:
-        return <WizardOrgChartPage onCreateNewPosition={onNext} />;
+        return <WizardOrgChartPage onCreateNewPosition={onNext} positionRequest={unwrappedPositionRequestData} />;
       case 1:
         return (
-          <WizardPage onNext={onNext} onBack={onBack} disableBlockingAndNavigateHome={disableBlockingAndNavigateHome} />
+          <WizardPage
+            onNext={onNext}
+            onBack={onBack}
+            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
+          />
         );
       case 2:
         return (
@@ -191,6 +181,7 @@ export const PositionRequestPage = () => {
             onBack={onBack}
             onNext={onNext}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
           />
         );
 
@@ -200,6 +191,7 @@ export const PositionRequestPage = () => {
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
           />
         );
       case 4:
@@ -208,6 +200,7 @@ export const PositionRequestPage = () => {
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
           />
         );
       case 5:
@@ -219,6 +212,7 @@ export const PositionRequestPage = () => {
             switchParentReadonlyMode={switchParentReadonlyMode}
             setReadOnlySelectedTab={setReadOnlySelectedTab}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={unwrappedPositionRequestData}
           />
         );
       default:
@@ -246,19 +240,11 @@ export const PositionRequestPage = () => {
       key: '2',
       label: 'Organization Chart',
       children: (
-        <div style={{ overflow: 'hidden', position: 'relative', height: '800px' }}>
-          <OrgChartWrapped
-            selectedDepartment={unwrappedPositionRequestData?.department_id ?? null}
-            orgChartSnapshot={snapshotCopy}
-            highlightPositionId={'extraNode'}
-            extraNodeInfo={{
-              nodeId: 'extraNode',
-              title: unwrappedPositionRequestData?.title,
-              classification: { code: '', name: '' },
-              status: unwrappedPositionRequestData?.status,
-              targetNodeId: unwrappedPositionRequestData?.reports_to_position_id?.toString(),
-              submittedBy: unwrappedPositionRequestData?.user_name,
-            }}
+        <div style={{ height: '100%' }}>
+          <OrgChart
+            type={OrgChartType.READONLY}
+            departmentId={unwrappedPositionRequestData?.department_id ?? ''}
+            elements={snapshotCopy}
           />
         </div>
       ),
@@ -400,10 +386,25 @@ export const PositionRequestPage = () => {
                         <Card title="Information" bordered={false}>
                           <Descriptions bordered layout="horizontal" column={1}>
                             <Descriptions.Item label="Position number">
-                              <span data-testid="position-number">{unwrappedPositionRequestData?.position_number}</span>{' '}
-                              <Button type="link">Copy</Button>
+                              <span data-testid="position-number">
+                                {unwrappedPositionRequestData?.position_number != null
+                                  ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                  : ''}
+                              </span>{' '}
+                              <Button
+                                type="link"
+                                onClick={() =>
+                                  handleCopy(
+                                    unwrappedPositionRequestData?.position_number != null
+                                      ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                      : '',
+                                  )
+                                }
+                              >
+                                Copy
+                              </Button>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Job Details">
+                            {/* <Descriptions.Item label="Job Details">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item>
                             <Descriptions.Item label="Organization chart">
@@ -414,6 +415,16 @@ export const PositionRequestPage = () => {
                             </Descriptions.Item>
                             <Descriptions.Item label="Modified job profile">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
+                            </Descriptions.Item> */}
+                            <Descriptions.Item label="Job profile">
+                              <Button type="link">View</Button> |{' '}
+                              <Button type="link">
+                                <DownloadJobProfileComponent
+                                  jobProfile={positionRequestData?.positionRequest?.profile_json}
+                                >
+                                  Download
+                                </DownloadJobProfileComponent>
+                              </Button>
                             </Descriptions.Item>
                           </Descriptions>
                         </Card>
@@ -439,10 +450,25 @@ export const PositionRequestPage = () => {
                         <Card title="Information" bordered={false}>
                           <Descriptions bordered layout="horizontal" column={1}>
                             <Descriptions.Item label="Position number">
-                              <span data-testid="position-number">{unwrappedPositionRequestData?.position_number}</span>{' '}
-                              <Button type="link">Copy</Button>
+                              <span data-testid="position-number">
+                                {unwrappedPositionRequestData?.position_number
+                                  ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                  : ''}
+                              </span>{' '}
+                              <Button
+                                type="link"
+                                onClick={() =>
+                                  handleCopy(
+                                    unwrappedPositionRequestData?.position_number
+                                      ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                      : '',
+                                  )
+                                }
+                              >
+                                Copy
+                              </Button>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Job Details">
+                            {/* <Descriptions.Item label="Job Details">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item>
                             <Descriptions.Item label="Organization chart">
@@ -450,14 +476,11 @@ export const PositionRequestPage = () => {
                             </Descriptions.Item>
                             <Descriptions.Item label="Job store job profile">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Modified job profile">
-                              <Button type="link">View</Button> |{' '}
-                              <Button type="link">
-                                <DownloadJobProfileComponent jobProfile={unwrappedPositionRequestData?.profile_json}>
-                                  Download
-                                </DownloadJobProfileComponent>
-                              </Button>
+                            </Descriptions.Item> */}
+                            <Descriptions.Item label="Job profile">
+                              <DownloadJobProfileComponent jobProfile={unwrappedPositionRequestData?.profile_json}>
+                                <a href="#">Download</a>
+                              </DownloadJobProfileComponent>
                             </Descriptions.Item>
                           </Descriptions>
                         </Card>

@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileMinimumRequirementsWhereInput } from './job-profile-minimum-requirements-where.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileMinimumRequirementsWhereInput } from './job-profile-minimum-requirements-where.input';
 
 @ArgsType()
 export class DeleteManyJobProfileMinimumRequirementsArgs {

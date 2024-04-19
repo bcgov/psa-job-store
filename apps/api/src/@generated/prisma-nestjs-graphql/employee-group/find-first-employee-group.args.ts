@@ -1,12 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { EmployeeGroupWhereInput } from './employee-group-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { EmployeeGroupOrderByWithRelationAndSearchRelevanceInput } from './employee-group-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { EmployeeGroupWhereUniqueInput } from './employee-group-where-unique.input';
-import { Int } from '@nestjs/graphql';
 import { EmployeeGroupScalarFieldEnum } from './employee-group-scalar-field.enum';
+import { EmployeeGroupWhereUniqueInput } from './employee-group-where-unique.input';
+import { EmployeeGroupWhereInput } from './employee-group-where.input';
 
 @ArgsType()
 export class FindFirstEmployeeGroupArgs {

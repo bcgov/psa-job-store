@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class JobProfileMaxAggregateInput {
@@ -47,4 +46,7 @@ export class JobProfileMaxAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   overview?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: true;
 }

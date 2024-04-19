@@ -192,6 +192,8 @@ model JobProfile {
   position_request                       PositionRequest[]
   total_comp_create_form_misc            Json? // stores e.x. state of checkbox for markAllNonEditable for accountabilities
 
+  is_archived Boolean @default(false) // When total comp puts profile to draft, then deletes it AND it's linked to PositionRequests
+
   @@map("job_profile")
 }
 

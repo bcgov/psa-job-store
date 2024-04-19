@@ -1,6 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { BehaviouralCompetency } from '../behavioural-competency/behavioural-competency.model';
 import { JobProfile } from '../job-profile/job-profile.model';
 

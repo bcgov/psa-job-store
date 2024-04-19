@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ScheduledTaskMetadataUpdateManyMutationInput } from './scheduled-task-metadata-update-many-mutation.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { ScheduledTaskMetadataUpdateManyMutationInput } from './scheduled-task-metadata-update-many-mutation.input';
 import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
 
 @ArgsType()

@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileJobFamilyLinkWhereInput } from './job-profile-job-family-link-where.input';
 
 @InputType()

@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { LocationUpdateInput } from './location-update.input';
-import { Type } from 'class-transformer';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { LocationUpdateInput } from './location-update.input';
 import { LocationWhereUniqueInput } from './location-where-unique.input';
 
 @ArgsType()

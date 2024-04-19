@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class JobProfileCountAggregateInput {
@@ -77,6 +76,9 @@ export class JobProfileCountAggregateInput {
 
   @Field(() => Boolean, { nullable: true })
   total_comp_create_form_misc?: true;
+
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: true;
 
   @Field(() => Boolean, { nullable: true })
   _all?: true;

@@ -1,14 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { OrganizationWhereInput } from './organization-where.input';
-import { Type } from 'class-transformer';
-import { OrganizationOrderByWithRelationAndSearchRelevanceInput } from './organization-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { OrganizationWhereUniqueInput } from './organization-where-unique.input';
-import { Int } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
 import { OrganizationCountAggregateInput } from './organization-count-aggregate.input';
-import { OrganizationMinAggregateInput } from './organization-min-aggregate.input';
 import { OrganizationMaxAggregateInput } from './organization-max-aggregate.input';
+import { OrganizationMinAggregateInput } from './organization-min-aggregate.input';
+import { OrganizationOrderByWithRelationAndSearchRelevanceInput } from './organization-order-by-with-relation-and-search-relevance.input';
+import { OrganizationWhereUniqueInput } from './organization-where-unique.input';
+import { OrganizationWhereInput } from './organization-where.input';
 
 @ArgsType()
 export class OrganizationAggregateArgs {

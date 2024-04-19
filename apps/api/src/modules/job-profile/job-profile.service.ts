@@ -23,6 +23,7 @@ export class JobProfileService {
     state: string = 'PUBLISHED',
     owner_id?: string,
     searchConditions?: any,
+    include_archived = false,
   ) {
     // if searchConditions were provided, do a "dumb" search instead of elastic search
     let searchResultIds = null;
@@ -30,6 +31,7 @@ export class JobProfileService {
 
     return this.prisma.jobProfile.findMany({
       where: {
+        is_archived: include_archived,
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         ...(owner_id != null && { owner_id }),
         ...(searchConditions != null && searchConditions),
@@ -141,16 +143,28 @@ export class JobProfileService {
     return jobProfiles;
   }
 
-  async getJobProfiles({
-    search,
-    where,
-    sortByClassificationName,
-    sortByJobFamily,
-    sortByOrganization,
-    sortOrder,
-    ...args
-  }: FindManyJobProfileWithSearch) {
-    const jobProfiles = await this.getJobProfilesWithSearch(search, where, args);
+  async getJobProfilesArchived(
+    {
+      search,
+      where,
+      sortByClassificationName,
+      sortByJobFamily,
+      sortByOrganization,
+      sortOrder,
+      ...args
+    }: FindManyJobProfileWithSearch,
+    userId: string,
+  ) {
+    const jobProfiles = await this.getJobProfilesWithSearch(
+      search,
+      where,
+      args,
+      'DRAFT',
+      // userId,
+      null,
+      this.getDraftSearchConditions(userId, search),
+      true,
+    );
 
     if (sortByClassificationName) {
       return this.sortJobProfilesByClassification(jobProfiles, sortOrder);
@@ -165,6 +179,181 @@ export class JobProfileService {
     }
 
     return jobProfiles;
+  }
+
+  async getPageNumberForSelectProfile({
+    search,
+    where,
+    sortByClassificationName,
+    sortByJobFamily,
+    sortByOrganization,
+    sortOrder,
+    selectProfile,
+    ...args
+  }: FindManyJobProfileWithSearch) {
+    if (selectProfile) {
+      // Fetch all job profiles based on the search and where conditions
+      const allJobProfiles = await this.getJobProfilesWithSearch(search, this.transofrmWhereForAllOrgs(where), {
+        ...args,
+        take: undefined,
+        skip: undefined,
+      });
+
+      // Sort the job profiles based on the provided sorting parameters
+      const sortedJobProfiles = this.sortJobProfiles(
+        allJobProfiles,
+        sortByClassificationName,
+        sortByJobFamily,
+        sortByOrganization,
+        sortOrder,
+      );
+
+      // Find the index of the selected profile within the sorted job profiles
+
+      const selectedProfileIndex = (sortedJobProfiles as any[]).findIndex(
+        (profile) => profile.id === parseInt(selectProfile),
+      );
+
+      if (selectedProfileIndex !== -1) {
+        // Calculate the page number based on the selected profile index and take value
+        const pageNumber = Math.ceil((selectedProfileIndex + 1) / args.take);
+        return pageNumber;
+      }
+    }
+    return -1;
+  }
+
+  private transofrmWhereForAllOrgs(where: any) {
+    // example of where:
+    // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"organizations":{"some":{"organization_id":{"in":["BC026","ALL"]}}}}]}
+    // Check if "ALL" is present in the organization_id array
+    const hasAllOrganization = where?.AND?.some(
+      (condition) => condition.organizations?.some?.organization_id?.in?.includes('ALL'),
+    );
+
+    // Modify the where query if "ALL" is present
+    // Transform above where statement by including all_organizations: true by transforming into this:
+    // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"OR":[{"all_organizations":{"equals":true}},{"organizations":{"some":{"organization_id":{"in":["BC026"]}}}}]}]}
+    if (hasAllOrganization) {
+      where.AND = where.AND.map((condition) => {
+        if (condition.organizations?.some?.organization_id?.in?.includes('ALL')) {
+          const organizationIdIn = condition.organizations.some.organization_id.in.filter((id) => id !== 'ALL');
+          const updatedCondition = {
+            ...condition,
+            OR: [
+              { all_organizations: { equals: true } },
+              {
+                organizations: {
+                  some: {
+                    organization_id: {
+                      in: organizationIdIn,
+                    },
+                  },
+                },
+              },
+            ],
+          };
+          delete updatedCondition.organizations;
+          return updatedCondition;
+        }
+        return condition;
+      });
+    }
+
+    return where;
+  }
+
+  async getJobProfiles({
+    search,
+    where,
+    sortByClassificationName,
+    sortByJobFamily,
+    sortByOrganization,
+    sortOrder,
+    selectProfile,
+    ...args
+  }: FindManyJobProfileWithSearch) {
+    let jobProfiles: any[];
+
+    where = this.transofrmWhereForAllOrgs(where);
+
+    // if we are selecting a specific profile, we need to adjust page
+    // used for when user presses back from the edit page and we need to select previously selected profile
+    // on correct page
+    if (selectProfile) {
+      // Fetch all job profiles based on the search and where conditions
+      const allJobProfiles = await this.getJobProfilesWithSearch(search, where, {
+        ...args,
+        take: undefined,
+        skip: undefined,
+      });
+
+      // Sort the job profiles based on the provided sorting parameters
+      const sortedJobProfiles = this.sortJobProfiles(
+        allJobProfiles,
+        sortByClassificationName,
+        sortByJobFamily,
+        sortByOrganization,
+        sortOrder,
+      );
+
+      // Find the index of the selected profile within the sorted job profiles
+      const selectedProfileIndex = (sortedJobProfiles as any[]).findIndex(
+        (profile) => profile.id === parseInt(selectProfile),
+      );
+
+      if (selectedProfileIndex !== -1) {
+        // Calculate the page number based on the selected profile index and take value
+        const pageNumber = Math.ceil((selectedProfileIndex + 1) / args.take);
+
+        // Calculate the new skip value based on the page number and take value
+        const newSkip = (pageNumber - 1) * args.take;
+
+        // Fetch the job profiles for the calculated page
+        jobProfiles = await this.getJobProfilesWithSearch(search, where, { ...args, skip: newSkip });
+      } else {
+        // If the selected profile is not found, return an empty array
+        jobProfiles = [];
+      }
+    } else {
+      // If selectProfile is not provided, fetch profiles based on the search and where conditions
+      jobProfiles = await this.getJobProfilesWithSearch(search, where, args);
+    }
+
+    return jobProfiles;
+  }
+
+  private sortJobProfiles(
+    jobProfiles: any[],
+    sortByClassificationName: boolean,
+    sortByJobFamily: boolean,
+    sortByOrganization: boolean,
+    sortOrder: string,
+  ) {
+    if (sortByClassificationName) {
+      return this.sortJobProfilesByClassification(jobProfiles, sortOrder);
+    }
+
+    if (sortByJobFamily) {
+      return this.sortJobProfilesByJobFamily(jobProfiles, sortOrder);
+    }
+
+    if (sortByOrganization) {
+      return this.sortJobProfilesByOrganization(jobProfiles, sortOrder);
+    }
+
+    return jobProfiles;
+  }
+
+  private async getJobProfilesCount(search: string, where: any) {
+    const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+
+    return this.prisma.jobProfile.count({
+      where: {
+        ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        ...where,
+      },
+    });
   }
 
   private async sortJobProfilesByClassification(jobProfiles: JobProfile[], sortOrder: string): Promise<JobProfile[]> {
@@ -282,7 +471,7 @@ export class JobProfileService {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
-        ...where,
+        ...this.transofrmWhereForAllOrgs(where),
       },
     });
   }
@@ -293,6 +482,24 @@ export class JobProfileService {
 
     return await this.prisma.jobProfile.count({
       where: {
+        is_archived: false,
+        ...searchConditions,
+        // ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        // stream: { notIn: ['USER'] },
+        // owner_id: userId,
+        state: 'DRAFT',
+        ...where,
+      },
+    });
+  }
+
+  async getJobProfilesArchivedCount({ search, where }: FindManyJobProfileWithSearch, userId: string) {
+    // const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+    const searchConditions = this.getDraftSearchConditions(userId, search);
+
+    return await this.prisma.jobProfile.count({
+      where: {
+        is_archived: true,
         ...searchConditions,
         // ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
@@ -306,6 +513,7 @@ export class JobProfileService {
   async getJobProfilesDraftsMinistries(userId: string) {
     const jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
+        is_archived: false,
         state: 'DRAFT',
         // owner_id: userId
       },
@@ -634,6 +842,86 @@ export class JobProfileService {
     return newJobProfile.id;
   }
 
+  async unarchiveJobProfile(jobProfileId: number, userId: string): Promise<number> {
+    const jobProfile = await this.prisma.jobProfile.findUnique({
+      where: { id: jobProfileId },
+    });
+
+    if (!jobProfile) {
+      throw AlexandriaError('Job Profile not found');
+    }
+
+    if (!jobProfile.is_archived) {
+      throw AlexandriaError('Job Profile is not archived');
+    }
+
+    await this.prisma.jobProfile.update({
+      where: { id: jobProfileId },
+      data: {
+        is_archived: false,
+      },
+    });
+
+    return jobProfileId;
+  }
+
+  async deleteJobProfile(jobProfileId: number, userId: string): Promise<number> {
+    const jobProfile = await this.prisma.jobProfile.findUnique({
+      where: { id: jobProfileId },
+      include: {
+        position_request: true,
+      },
+    });
+
+    if (!jobProfile) {
+      throw AlexandriaError('Job Profile not found');
+    }
+
+    if (jobProfile.state !== JobProfileState.DRAFT) {
+      throw AlexandriaError('Only job profiles in DRAFT state can be deleted');
+    }
+
+    if (jobProfile.position_request.length > 0) {
+      // If the job profile has links to PositionRequests, mark it as archived
+      await this.prisma.jobProfile.update({
+        where: { id: jobProfileId },
+        data: {
+          is_archived: true,
+        },
+      });
+    } else {
+      // If the job profile does not have links to PositionRequests, delete it along with related entities
+      await this.prisma.$transaction([
+        this.prisma.jobProfileBehaviouralCompetency.deleteMany({
+          where: { job_profile_id: jobProfileId },
+        }),
+        this.prisma.jobProfileClassification.deleteMany({
+          where: { job_profile_id: jobProfileId },
+        }),
+        this.prisma.jobProfileOrganization.deleteMany({
+          where: { job_profile_id: jobProfileId },
+        }),
+        this.prisma.jobProfileJobFamilyLink.deleteMany({
+          where: { jobProfileId: jobProfileId },
+        }),
+        this.prisma.jobProfileStreamLink.deleteMany({
+          where: { jobProfileId: jobProfileId },
+        }),
+        this.prisma.jobProfileContext.deleteMany({
+          where: { job_profile_id: jobProfileId },
+        }),
+        this.prisma.jobProfileReportsTo.deleteMany({
+          where: { job_profile_id: jobProfileId },
+        }),
+        this.prisma.jobProfile.delete({
+          where: { id: jobProfileId },
+        }),
+      ]);
+    }
+
+    return jobProfileId;
+  }
+
   async getReportsTo(job_profile_id: number) {
     return this.prisma.jobProfileReportsTo.findMany({
       where: { job_profile_id },
@@ -688,7 +976,30 @@ export class JobProfileService {
     return null;
   }
 
-  async getJobProfilesMinistries() {
+  async getJobProfilesMinistries(positionRequestId?: number) {
+    // if position request id is included, we need to construct a where statement that filters
+    // job profiles for that position request
+    if (positionRequestId) {
+      // todo: see comment below
+      // const positionRequest = await this.prisma.positionRequest.findUnique({
+      //   where: { id: positionRequestId },
+      // });
+      // // ger organization in which this position is being created
+      // const department = await this.prisma.department.findUnique({
+      //   where: { id: positionRequest.department_id },
+      // });
+      // const organization = await this.prisma.organization.findUnique({
+      //   where: { id: department.organization_id },
+      // });
+      // // find classification for the position to which the new position will report to
+      // const r = positionRequest.reports_to_position_id;
+      // // todo: would need to call peoplesoft API here,
+      // // need to do this for all filters, so is not efficient
+      // // find a way to save classification info somewhere?
+      // // generate a statement like this:
+      // // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"organizations":{"some":{"organization_id":{"in":["BC026","ALL"]}}}}]}
+    }
+
     const jobProfiles = await this.prisma.jobProfile.findMany({
       where: { state: 'PUBLISHED' },
       select: {
@@ -712,7 +1023,10 @@ export class JobProfileService {
 
   async getJobProfilesDraftsClassifications() {
     const jobProfiles = await this.prisma.jobProfile.findMany({
-      where: { state: 'DRAFT' },
+      where: {
+        is_archived: false,
+        state: 'DRAFT',
+      },
       include: {
         classifications: {
           include: {

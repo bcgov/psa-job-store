@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { JobProfileStreamLinkCountAggregate } from './job-profile-stream-link-count-aggregate.output';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { JobProfileStreamLinkAvgAggregate } from './job-profile-stream-link-avg-aggregate.output';
-import { JobProfileStreamLinkSumAggregate } from './job-profile-stream-link-sum-aggregate.output';
-import { JobProfileStreamLinkMinAggregate } from './job-profile-stream-link-min-aggregate.output';
+import { JobProfileStreamLinkCountAggregate } from './job-profile-stream-link-count-aggregate.output';
 import { JobProfileStreamLinkMaxAggregate } from './job-profile-stream-link-max-aggregate.output';
+import { JobProfileStreamLinkMinAggregate } from './job-profile-stream-link-min-aggregate.output';
+import { JobProfileStreamLinkSumAggregate } from './job-profile-stream-link-sum-aggregate.output';
 
 @ObjectType()
 export class AggregateJobProfileStreamLink {

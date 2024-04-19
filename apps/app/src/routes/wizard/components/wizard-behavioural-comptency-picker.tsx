@@ -274,7 +274,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
           style={{ width: '100%' }}
           value={selectedValues}
           dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-          placeholder="Please select"
+          placeholder=""
           allowClear
           multiple
           // treeCheckable

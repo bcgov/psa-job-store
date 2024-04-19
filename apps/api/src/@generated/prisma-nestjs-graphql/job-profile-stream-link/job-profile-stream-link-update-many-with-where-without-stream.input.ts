@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileStreamLinkScalarWhereInput } from './job-profile-stream-link-scalar-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileStreamLinkScalarWhereInput } from './job-profile-stream-link-scalar-where.input';
 import { JobProfileStreamLinkUncheckedUpdateManyWithoutStreamInput } from './job-profile-stream-link-unchecked-update-many-without-stream.input';
 
 @InputType()

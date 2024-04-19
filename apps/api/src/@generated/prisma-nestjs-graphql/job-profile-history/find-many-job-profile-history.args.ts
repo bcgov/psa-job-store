@@ -1,13 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileHistoryWhereInput } from './job-profile-history-where.input';
+import { ArgsType, Field, HideField, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { JobProfileHistoryOrderByWithRelationAndSearchRelevanceInput } from './job-profile-history-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { JobProfileHistoryWhereUniqueInput } from './job-profile-history-where-unique.input';
-import { HideField } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
 import { JobProfileHistoryScalarFieldEnum } from './job-profile-history-scalar-field.enum';
+import { JobProfileHistoryWhereUniqueInput } from './job-profile-history-where-unique.input';
+import { JobProfileHistoryWhereInput } from './job-profile-history-where.input';
 
 @ArgsType()
 export class FindManyJobProfileHistoryArgs {

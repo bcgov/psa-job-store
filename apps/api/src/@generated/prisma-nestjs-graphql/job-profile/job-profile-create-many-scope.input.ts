@@ -1,9 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileState } from '../prisma/job-profile-state.enum';
 import { JobProfileType } from '../prisma/job-profile-type.enum';
-import { GraphQLJSON } from 'graphql-type-json';
 
 @InputType()
 export class JobProfileCreateManyScopeInput {
@@ -78,4 +76,7 @@ export class JobProfileCreateManyScopeInput {
 
   @Field(() => GraphQLJSON, { nullable: true })
   total_comp_create_form_misc?: any;
+
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: boolean;
 }

@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentWhereInput } from './department-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { DepartmentUpdateWithoutPositionRequestsByPaylistDepartmentInput } from './department-update-without-position-requests-by-paylist-department.input';
+import { DepartmentWhereInput } from './department-where.input';
 
 @InputType()
 export class DepartmentUpdateToOneWithWhereWithoutPositionRequestsByPaylistDepartmentInput {

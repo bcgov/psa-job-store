@@ -1,6 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { JobProfileState } from '../prisma/job-profile-state.enum';
 import { JobProfileType } from '../prisma/job-profile-type.enum';
 
@@ -50,4 +48,7 @@ export class JobProfileMaxAggregate {
 
   @Field(() => String, { nullable: true })
   overview?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  is_archived?: boolean;
 }

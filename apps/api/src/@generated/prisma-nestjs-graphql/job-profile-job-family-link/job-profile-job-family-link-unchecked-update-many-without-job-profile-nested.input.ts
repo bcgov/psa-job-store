@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileJobFamilyLinkCreateWithoutJobProfileInput } from './job-profile-job-family-link-create-without-job-profile.input';
-import { Type } from 'class-transformer';
-import { JobProfileJobFamilyLinkCreateOrConnectWithoutJobProfileInput } from './job-profile-job-family-link-create-or-connect-without-job-profile.input';
-import { JobProfileJobFamilyLinkUpsertWithWhereUniqueWithoutJobProfileInput } from './job-profile-job-family-link-upsert-with-where-unique-without-job-profile.input';
-import { JobProfileJobFamilyLinkCreateManyJobProfileInputEnvelope } from './job-profile-job-family-link-create-many-job-profile-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileJobFamilyLinkWhereUniqueInput } from './job-profile-job-family-link-where-unique.input';
-import { JobProfileJobFamilyLinkUpdateWithWhereUniqueWithoutJobProfileInput } from './job-profile-job-family-link-update-with-where-unique-without-job-profile.input';
-import { JobProfileJobFamilyLinkUpdateManyWithWhereWithoutJobProfileInput } from './job-profile-job-family-link-update-many-with-where-without-job-profile.input';
+import { Type } from 'class-transformer';
+import { JobProfileJobFamilyLinkCreateManyJobProfileInputEnvelope } from './job-profile-job-family-link-create-many-job-profile-input-envelope.input';
+import { JobProfileJobFamilyLinkCreateOrConnectWithoutJobProfileInput } from './job-profile-job-family-link-create-or-connect-without-job-profile.input';
+import { JobProfileJobFamilyLinkCreateWithoutJobProfileInput } from './job-profile-job-family-link-create-without-job-profile.input';
 import { JobProfileJobFamilyLinkScalarWhereInput } from './job-profile-job-family-link-scalar-where.input';
+import { JobProfileJobFamilyLinkUpdateManyWithWhereWithoutJobProfileInput } from './job-profile-job-family-link-update-many-with-where-without-job-profile.input';
+import { JobProfileJobFamilyLinkUpdateWithWhereUniqueWithoutJobProfileInput } from './job-profile-job-family-link-update-with-where-unique-without-job-profile.input';
+import { JobProfileJobFamilyLinkUpsertWithWhereUniqueWithoutJobProfileInput } from './job-profile-job-family-link-upsert-with-where-unique-without-job-profile.input';
+import { JobProfileJobFamilyLinkWhereUniqueInput } from './job-profile-job-family-link-where-unique.input';
 
 @InputType()
 export class JobProfileJobFamilyLinkUncheckedUpdateManyWithoutJobProfileNestedInput {

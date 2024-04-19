@@ -639,7 +639,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       const allOrganizationsValue = jobProfileData.jobProfile.all_organizations;
       if (allOrganizationsValue) {
         // If 'all_organizations' is true, set 'ministries' to all possible values
-        const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
+        const allValues = allMinistriesData?.organizations?.map((m) => m?.id?.toString() ?? '') || [];
         setValue('ministries', allValues);
       } else {
         // If 'all_organizations' is false, set 'ministries' to specific values
@@ -687,7 +687,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       );
     } else {
       // no profile data - select all ministries as that's the default setting
-      const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
+      const allValues = allMinistriesData?.organizations?.map((m) => m?.id?.toString() ?? '') || [];
       setValue('ministries', allValues);
     }
   }, [
@@ -703,7 +703,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   // Update local state when URL parameter changes
   useEffect(() => {
     if (!urlId) {
-      const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
+      const allValues = allMinistriesData?.organizations?.map((m) => m?.id?.toString() ?? '') || [];
       setValue('ministries', allValues);
     }
   }, [urlId, setValue, allMinistriesData]);
@@ -2763,14 +2763,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={12} md={12} lg={12} xl={12}>
                       <>
+                        <Typography.Text type="secondary">
+                          * denotes an Indigenous Behavioural Competency
+                        </Typography.Text>
                         <BehaviouralComptencyPicker
                           onAdd={behavioural_competencies_append}
                           onRemove={behavioural_competencies_remove}
                           behavioural_competencies_fields={behavioural_competencies_fields}
                         />
-                        <Typography.Text type="secondary">
-                          * denotes an Indigenous Behavioural Competency
-                        </Typography.Text>
 
                         <List
                           style={{ marginTop: '7px' }}

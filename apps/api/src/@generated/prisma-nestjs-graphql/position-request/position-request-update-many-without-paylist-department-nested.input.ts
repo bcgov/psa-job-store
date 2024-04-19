@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { PositionRequestCreateWithoutPaylist_departmentInput } from './position-request-create-without-paylist-department.input';
-import { Type } from 'class-transformer';
-import { PositionRequestCreateOrConnectWithoutPaylist_departmentInput } from './position-request-create-or-connect-without-paylist-department.input';
-import { PositionRequestUpsertWithWhereUniqueWithoutPaylist_departmentInput } from './position-request-upsert-with-where-unique-without-paylist-department.input';
-import { PositionRequestCreateManyPaylist_departmentInputEnvelope } from './position-request-create-many-paylist-department-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
-import { PositionRequestUpdateWithWhereUniqueWithoutPaylist_departmentInput } from './position-request-update-with-where-unique-without-paylist-department.input';
-import { PositionRequestUpdateManyWithWhereWithoutPaylist_departmentInput } from './position-request-update-many-with-where-without-paylist-department.input';
+import { Type } from 'class-transformer';
+import { PositionRequestCreateManyPaylist_departmentInputEnvelope } from './position-request-create-many-paylist-department-input-envelope.input';
+import { PositionRequestCreateOrConnectWithoutPaylist_departmentInput } from './position-request-create-or-connect-without-paylist-department.input';
+import { PositionRequestCreateWithoutPaylist_departmentInput } from './position-request-create-without-paylist-department.input';
 import { PositionRequestScalarWhereInput } from './position-request-scalar-where.input';
+import { PositionRequestUpdateManyWithWhereWithoutPaylist_departmentInput } from './position-request-update-many-with-where-without-paylist-department.input';
+import { PositionRequestUpdateWithWhereUniqueWithoutPaylist_departmentInput } from './position-request-update-with-where-unique-without-paylist-department.input';
+import { PositionRequestUpsertWithWhereUniqueWithoutPaylist_departmentInput } from './position-request-upsert-with-where-unique-without-paylist-department.input';
+import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
 
 @InputType()
 export class PositionRequestUpdateManyWithoutPaylist_departmentNestedInput {

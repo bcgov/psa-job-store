@@ -144,6 +144,7 @@ export interface UpdatePositionRequestInput {
 
 export interface SubmitPositionRequestInput {
   id: number;
+  comment?: string;
 }
 
 export interface DeletePositionRequestInput {
@@ -378,8 +379,8 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (input: SubmitPositionRequestInput) => {
         return {
           document: gql`
-            mutation SubmitPositionRequest($id: Int!) {
-              submitPositionRequest(id: $id) {
+            mutation SubmitPositionRequest($id: Int!, $comment: String) {
+              submitPositionRequest(id: $id, comment: $comment) {
                 id
                 step
                 reports_to_position_id
@@ -402,6 +403,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
           `,
           variables: {
             id: input.id,
+            comment: input.comment,
           },
         };
       },

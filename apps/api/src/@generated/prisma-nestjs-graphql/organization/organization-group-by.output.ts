@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { OrganizationCountAggregate } from './organization-count-aggregate.output';
-import { OrganizationMinAggregate } from './organization-min-aggregate.output';
 import { OrganizationMaxAggregate } from './organization-max-aggregate.output';
+import { OrganizationMinAggregate } from './organization-min-aggregate.output';
 
 @ObjectType()
 export class OrganizationGroupBy {
