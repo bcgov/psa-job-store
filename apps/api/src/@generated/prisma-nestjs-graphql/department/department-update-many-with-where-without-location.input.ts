@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentScalarWhereInput } from './department-scalar-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { DepartmentScalarWhereInput } from './department-scalar-where.input';
 import { DepartmentUpdateManyMutationInput } from './department-update-many-mutation.input';
 
 @InputType()

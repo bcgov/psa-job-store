@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileState } from './job-profile-state.enum';
-import { IntFilter } from './int-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { EnumJobProfileStateFilter } from './enum-job-profile-state-filter.input';
+import { IntFilter } from './int-filter.input';
+import { JobProfileState } from './job-profile-state.enum';
 
 @InputType()
 export class EnumJobProfileStateWithAggregatesFilter {

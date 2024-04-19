@@ -1,9 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileContextWhereUniqueInput } from './job-profile-context-where-unique.input';
 import { Type } from 'class-transformer';
 import { JobProfileContextCreateWithoutJob_profileInput } from './job-profile-context-create-without-job-profile.input';
+import { JobProfileContextWhereUniqueInput } from './job-profile-context-where-unique.input';
 
 @InputType()
 export class JobProfileContextCreateOrConnectWithoutJob_profileInput {

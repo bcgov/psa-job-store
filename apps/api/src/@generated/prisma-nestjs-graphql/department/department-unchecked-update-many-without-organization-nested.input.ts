@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentCreateWithoutOrganizationInput } from './department-create-without-organization.input';
-import { Type } from 'class-transformer';
-import { DepartmentCreateOrConnectWithoutOrganizationInput } from './department-create-or-connect-without-organization.input';
-import { DepartmentUpsertWithWhereUniqueWithoutOrganizationInput } from './department-upsert-with-where-unique-without-organization.input';
-import { DepartmentCreateManyOrganizationInputEnvelope } from './department-create-many-organization-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { DepartmentWhereUniqueInput } from './department-where-unique.input';
-import { DepartmentUpdateWithWhereUniqueWithoutOrganizationInput } from './department-update-with-where-unique-without-organization.input';
-import { DepartmentUpdateManyWithWhereWithoutOrganizationInput } from './department-update-many-with-where-without-organization.input';
+import { Type } from 'class-transformer';
+import { DepartmentCreateManyOrganizationInputEnvelope } from './department-create-many-organization-input-envelope.input';
+import { DepartmentCreateOrConnectWithoutOrganizationInput } from './department-create-or-connect-without-organization.input';
+import { DepartmentCreateWithoutOrganizationInput } from './department-create-without-organization.input';
 import { DepartmentScalarWhereInput } from './department-scalar-where.input';
+import { DepartmentUpdateManyWithWhereWithoutOrganizationInput } from './department-update-many-with-where-without-organization.input';
+import { DepartmentUpdateWithWhereUniqueWithoutOrganizationInput } from './department-update-with-where-unique-without-organization.input';
+import { DepartmentUpsertWithWhereUniqueWithoutOrganizationInput } from './department-upsert-with-where-unique-without-organization.input';
+import { DepartmentWhereUniqueInput } from './department-where-unique.input';
 
 @InputType()
 export class DepartmentUncheckedUpdateManyWithoutOrganizationNestedInput {

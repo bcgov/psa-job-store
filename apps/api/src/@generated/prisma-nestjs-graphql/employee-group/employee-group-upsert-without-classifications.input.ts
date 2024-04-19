@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { EmployeeGroupUpdateWithoutClassificationsInput } from './employee-group-update-without-classifications.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { EmployeeGroupCreateWithoutClassificationsInput } from './employee-group-create-without-classifications.input';
+import { EmployeeGroupUpdateWithoutClassificationsInput } from './employee-group-update-without-classifications.input';
 import { EmployeeGroupWhereInput } from './employee-group-where.input';
 
 @InputType()

@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileReportsToUpdateInput } from './job-profile-reports-to-update.input';
-import { Type } from 'class-transformer';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { JobProfileReportsToUpdateInput } from './job-profile-reports-to-update.input';
 import { JobProfileReportsToWhereUniqueInput } from './job-profile-reports-to-where-unique.input';
 
 @ArgsType()

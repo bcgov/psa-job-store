@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileReportsToCreateWithoutJob_profileInput } from './job-profile-reports-to-create-without-job-profile.input';
-import { Type } from 'class-transformer';
-import { JobProfileReportsToCreateOrConnectWithoutJob_profileInput } from './job-profile-reports-to-create-or-connect-without-job-profile.input';
-import { JobProfileReportsToUpsertWithWhereUniqueWithoutJob_profileInput } from './job-profile-reports-to-upsert-with-where-unique-without-job-profile.input';
-import { JobProfileReportsToCreateManyJob_profileInputEnvelope } from './job-profile-reports-to-create-many-job-profile-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileReportsToWhereUniqueInput } from './job-profile-reports-to-where-unique.input';
-import { JobProfileReportsToUpdateWithWhereUniqueWithoutJob_profileInput } from './job-profile-reports-to-update-with-where-unique-without-job-profile.input';
-import { JobProfileReportsToUpdateManyWithWhereWithoutJob_profileInput } from './job-profile-reports-to-update-many-with-where-without-job-profile.input';
+import { Type } from 'class-transformer';
+import { JobProfileReportsToCreateManyJob_profileInputEnvelope } from './job-profile-reports-to-create-many-job-profile-input-envelope.input';
+import { JobProfileReportsToCreateOrConnectWithoutJob_profileInput } from './job-profile-reports-to-create-or-connect-without-job-profile.input';
+import { JobProfileReportsToCreateWithoutJob_profileInput } from './job-profile-reports-to-create-without-job-profile.input';
 import { JobProfileReportsToScalarWhereInput } from './job-profile-reports-to-scalar-where.input';
+import { JobProfileReportsToUpdateManyWithWhereWithoutJob_profileInput } from './job-profile-reports-to-update-many-with-where-without-job-profile.input';
+import { JobProfileReportsToUpdateWithWhereUniqueWithoutJob_profileInput } from './job-profile-reports-to-update-with-where-unique-without-job-profile.input';
+import { JobProfileReportsToUpsertWithWhereUniqueWithoutJob_profileInput } from './job-profile-reports-to-upsert-with-where-unique-without-job-profile.input';
+import { JobProfileReportsToWhereUniqueInput } from './job-profile-reports-to-where-unique.input';
 
 @InputType()
 export class JobProfileReportsToUncheckedUpdateManyWithoutJob_profileNestedInput {

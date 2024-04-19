@@ -1,14 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ClassificationWhereInput } from './classification-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { ClassificationCountAggregateInput } from './classification-count-aggregate.input';
+import { ClassificationMaxAggregateInput } from './classification-max-aggregate.input';
+import { ClassificationMinAggregateInput } from './classification-min-aggregate.input';
 import { ClassificationOrderByWithAggregationInput } from './classification-order-by-with-aggregation.input';
 import { ClassificationScalarFieldEnum } from './classification-scalar-field.enum';
 import { ClassificationScalarWhereWithAggregatesInput } from './classification-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { ClassificationCountAggregateInput } from './classification-count-aggregate.input';
-import { ClassificationMinAggregateInput } from './classification-min-aggregate.input';
-import { ClassificationMaxAggregateInput } from './classification-max-aggregate.input';
+import { ClassificationWhereInput } from './classification-where.input';
 
 @ArgsType()
 export class ClassificationGroupByArgs {

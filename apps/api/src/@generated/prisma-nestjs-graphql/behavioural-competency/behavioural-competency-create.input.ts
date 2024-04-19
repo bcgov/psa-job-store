@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { BehaviouralCompetencyType } from '../prisma/behavioural-competency-type.enum';
-import { BehaviouralCompetencyCategory } from '../prisma/behavioural-competency-category.enum';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileBehaviouralCompetencyCreateNestedManyWithoutBehavioural_competencyInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-create-nested-many-without-behavioural-competency.input';
+import { BehaviouralCompetencyCategory } from '../prisma/behavioural-competency-category.enum';
+import { BehaviouralCompetencyType } from '../prisma/behavioural-competency-type.enum';
 
 @InputType()
 export class BehaviouralCompetencyCreateInput {

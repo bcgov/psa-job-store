@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileScalarWhereInput } from './job-profile-scalar-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileScalarWhereInput } from './job-profile-scalar-where.input';
 import { JobProfileUpdateManyMutationInput } from './job-profile-update-many-mutation.input';
 
 @InputType()

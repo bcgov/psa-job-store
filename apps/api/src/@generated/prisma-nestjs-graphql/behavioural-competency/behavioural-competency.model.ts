@@ -1,9 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { BehaviouralCompetencyType } from '../prisma/behavioural-competency-type.enum';
-import { BehaviouralCompetencyCategory } from '../prisma/behavioural-competency-category.enum';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
+import { BehaviouralCompetencyCategory } from '../prisma/behavioural-competency-category.enum';
+import { BehaviouralCompetencyType } from '../prisma/behavioural-competency-type.enum';
 
 @ObjectType()
 export class BehaviouralCompetency {

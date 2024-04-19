@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileScopeWhereUniqueInput } from './job-profile-scope-where-unique.input';
 import { Type } from 'class-transformer';
+import { JobProfileScopeWhereUniqueInput } from './job-profile-scope-where-unique.input';
 
 @ArgsType()
 export class FindUniqueJobProfileScopeOrThrowArgs {

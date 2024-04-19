@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileStreamWhereInput } from './job-profile-stream-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { JobProfileStreamUpdateWithoutJobProfilesInput } from './job-profile-stream-update-without-job-profiles.input';
+import { JobProfileStreamWhereInput } from './job-profile-stream-where.input';
 
 @InputType()
 export class JobProfileStreamUpdateToOneWithWhereWithoutJobProfilesInput {

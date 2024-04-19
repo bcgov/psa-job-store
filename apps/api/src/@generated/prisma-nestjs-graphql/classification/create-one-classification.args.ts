@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ClassificationCreateInput } from './classification-create.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { ClassificationCreateInput } from './classification-create.input';
 
 @ArgsType()
 export class CreateOneClassificationArgs {

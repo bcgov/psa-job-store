@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileClassificationWhereInput } from './job-profile-classification-where.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileClassificationWhereInput } from './job-profile-classification-where.input';
 
 @ArgsType()
 export class DeleteManyJobProfileClassificationArgs {

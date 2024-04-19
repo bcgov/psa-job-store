@@ -1,14 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { LocationWhereInput } from './location-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { LocationCountAggregateInput } from './location-count-aggregate.input';
+import { LocationMaxAggregateInput } from './location-max-aggregate.input';
+import { LocationMinAggregateInput } from './location-min-aggregate.input';
 import { LocationOrderByWithAggregationInput } from './location-order-by-with-aggregation.input';
 import { LocationScalarFieldEnum } from './location-scalar-field.enum';
 import { LocationScalarWhereWithAggregatesInput } from './location-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { LocationCountAggregateInput } from './location-count-aggregate.input';
-import { LocationMinAggregateInput } from './location-min-aggregate.input';
-import { LocationMaxAggregateInput } from './location-max-aggregate.input';
+import { LocationWhereInput } from './location-where.input';
 
 @ArgsType()
 export class LocationGroupByArgs {

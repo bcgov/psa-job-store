@@ -1,12 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileReportsToWhereInput } from './job-profile-reports-to-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { JobProfileReportsToOrderByWithRelationAndSearchRelevanceInput } from './job-profile-reports-to-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { JobProfileReportsToWhereUniqueInput } from './job-profile-reports-to-where-unique.input';
-import { Int } from '@nestjs/graphql';
 import { JobProfileReportsToScalarFieldEnum } from './job-profile-reports-to-scalar-field.enum';
+import { JobProfileReportsToWhereUniqueInput } from './job-profile-reports-to-where-unique.input';
+import { JobProfileReportsToWhereInput } from './job-profile-reports-to-where.input';
 
 @ArgsType()
 export class FindFirstJobProfileReportsToArgs {

@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { LocationUpdateManyMutationInput } from './location-update-many-mutation.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { LocationUpdateManyMutationInput } from './location-update-many-mutation.input';
 import { LocationWhereInput } from './location-where.input';
 
 @ArgsType()

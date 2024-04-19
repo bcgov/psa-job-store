@@ -7,10 +7,24 @@ export interface OrganizationModel {
   peoplesoft_id?: string;
   code?: string;
   name?: string;
+  departments?: DepartmentModel[];
+}
+
+export interface DepartmentModel {
+  id?: number;
+  name?: string;
 }
 
 export interface GetOrganizationsResponse {
   organizations: OrganizationModel[];
+}
+
+export interface GetOrganizationResponse {
+  organization: OrganizationModel | null;
+}
+
+export interface GetOrganizationArgs {
+  id: string;
 }
 
 export const organizationApi = graphqlApi.injectEndpoints({
@@ -29,7 +43,31 @@ export const organizationApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getOrganization: build.query<GetOrganizationResponse, GetOrganizationArgs>({
+      query: ({ id }) => {
+        return {
+          document: gql`
+            query GetOrganization($id: String!) {
+              organization(where: { id: $id }) {
+                id
+                name
+                departments {
+                  id
+                  name
+                }
+              }
+            }
+          `,
+          variables: { id },
+        };
+      },
+    }),
   }),
 });
 
-export const { useGetOrganizationsQuery, useLazyGetOrganizationsQuery } = organizationApi;
+export const {
+  useGetOrganizationsQuery,
+  useLazyGetOrganizationsQuery,
+  useGetOrganizationQuery,
+  useLazyGetOrganizationQuery,
+} = organizationApi;

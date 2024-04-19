@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { OrganizationCreateManyInput } from './organization-create-many.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { OrganizationCreateManyInput } from './organization-create-many.input';
 
 @ArgsType()
 export class CreateManyOrganizationArgs {

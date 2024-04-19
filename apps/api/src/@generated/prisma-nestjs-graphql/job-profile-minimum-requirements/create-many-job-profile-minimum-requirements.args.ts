@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileMinimumRequirementsCreateManyInput } from './job-profile-minimum-requirements-create-many.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileMinimumRequirementsCreateManyInput } from './job-profile-minimum-requirements-create-many.input';
 
 @ArgsType()
 export class CreateManyJobProfileMinimumRequirementsArgs {

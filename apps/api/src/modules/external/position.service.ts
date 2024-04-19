@@ -4,6 +4,7 @@ import { AlexandriaError } from '../../utils/alexandria-error';
 import { ClassificationService } from './classification.service';
 import { DepartmentService } from './department.service';
 import { FindUniquePositionArgs } from './models/find-unique-position.args';
+import { PositionProfile } from './models/position-profile.model';
 import { Position } from './models/position.model';
 import { OrganizationService } from './organization.service';
 import { PeoplesoftService } from './peoplesoft.service';
@@ -65,7 +66,7 @@ export class PositionService {
     return position;
   }
 
-  async getPositionProfile(positionNumber: string) {
+  async getPositionProfile(positionNumber: string, extraInfo = false): Promise<PositionProfile[]> {
     const positionDetails = await this.getPosition({ where: { id: positionNumber } });
     if (!positionDetails) throw AlexandriaError(`Position ${positionNumber} not found`);
 
@@ -81,11 +82,16 @@ export class PositionService {
           positionNumber: positionNumber,
           positionDescription: positionDetails.title,
           departmentName: positionDetails.department.name,
-          // employeeId: employeeDetail.EMPLID,
-          employeeName: employeeDetail.NAME_DISPLAY,
+          employeeName: employeeDetail?.NAME_DISPLAY ?? '',
           classification: positionDetails.classification.name,
           ministry: positionDetails.organization.name,
           status: employee.status,
+
+          employeeId: extraInfo ? employeeDetail?.EMPLID ?? '' : '',
+          departmentId: extraInfo ? positionDetails.department_id : '',
+          organizationId: extraInfo ? positionDetails.organization_id : '',
+          classificationId: extraInfo ? positionDetails.classification_id : '',
+          classificationCode: extraInfo ? positionDetails.classification.code : '',
         };
       }),
     );

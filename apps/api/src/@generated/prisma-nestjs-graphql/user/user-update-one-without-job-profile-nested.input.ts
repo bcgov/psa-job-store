@@ -1,13 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { UserCreateWithoutJobProfileInput } from './user-create-without-job-profile.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { UserCreateOrConnectWithoutJobProfileInput } from './user-create-or-connect-without-job-profile.input';
-import { UserUpsertWithoutJobProfileInput } from './user-upsert-without-job-profile.input';
-import { UserWhereInput } from './user-where.input';
-import { Prisma } from '@prisma/client';
-import { UserWhereUniqueInput } from './user-where-unique.input';
+import { UserCreateWithoutJobProfileInput } from './user-create-without-job-profile.input';
 import { UserUpdateToOneWithWhereWithoutJobProfileInput } from './user-update-to-one-with-where-without-job-profile.input';
+import { UserUpsertWithoutJobProfileInput } from './user-upsert-without-job-profile.input';
+import { UserWhereUniqueInput } from './user-where-unique.input';
+import { UserWhereInput } from './user-where.input';
 
 @InputType()
 export class UserUpdateOneWithoutJobProfileNestedInput {

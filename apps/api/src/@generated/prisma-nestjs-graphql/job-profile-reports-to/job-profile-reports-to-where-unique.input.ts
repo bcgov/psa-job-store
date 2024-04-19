@@ -1,11 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileReportsToClassification_idJob_profile_idCompoundUniqueInput } from './job-profile-reports-to-classification-id-job-profile-id-compound-unique.input';
-import { JobProfileReportsToWhereInput } from './job-profile-reports-to-where.input';
-import { StringFilter } from '../prisma/string-filter.input';
-import { IntFilter } from '../prisma/int-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { ClassificationRelationFilter } from '../classification/classification-relation-filter.input';
 import { JobProfileRelationFilter } from '../job-profile/job-profile-relation-filter.input';
+import { IntFilter } from '../prisma/int-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
+import { JobProfileReportsToClassification_idJob_profile_idCompoundUniqueInput } from './job-profile-reports-to-classification-id-job-profile-id-compound-unique.input';
+import { JobProfileReportsToWhereInput } from './job-profile-reports-to-where.input';
 
 @InputType()
 export class JobProfileReportsToWhereUniqueInput {

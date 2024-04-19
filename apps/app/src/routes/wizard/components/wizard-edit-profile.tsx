@@ -26,17 +26,18 @@ import DOMPurify from 'dompurify';
 import debounce from 'lodash.debounce';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
+import PositionProfile from '../../../components/app/common/components/positionProfile';
 import '../../../components/app/common/css/custom-descriptions.css';
 import '../../../components/app/common/css/custom-form.css';
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
+  AccountabilitiesModel,
   GetClassificationsResponse,
   JobProfileModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useGetJobProfileQuery, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
-import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { ContextOptions } from './context-options.component';
@@ -126,7 +127,8 @@ const WizardEditProfile = forwardRef(
       setOriginalKnowledgeSkillsAbilitiesFields,
       originalProvisosFields,
       setOriginalProvisosFields,
-
+      originalBehaviouralCompetenciesFields,
+      setOriginalBehaviouralCompetenciesFields,
       positionRequestId,
       positionRequestProfileId,
       // errors,
@@ -167,6 +169,7 @@ const WizardEditProfile = forwardRef(
         handleSectionScroll(currentSection);
         setCurrentSection(null);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     // get original profile data for comparison to the edited state
     const { data: originalProfileData } = useGetJobProfileQuery({ id: positionRequestProfileId ?? -1 });
@@ -430,7 +433,7 @@ const WizardEditProfile = forwardRef(
         initialMinReqFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
           const isEdited =
-            item.text !== originalMinReqFieldsValue[index]?.text ||
+            (item.text !== originalMinReqFieldsValue[index]?.text && item.is_significant == true) ||
             (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
@@ -480,7 +483,7 @@ const WizardEditProfile = forwardRef(
         initialRelWorkFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
           const isEdited =
-            item.text !== originalRelWorkFieldsValue[index]?.text ||
+            (item.text !== originalRelWorkFieldsValue[index]?.text && item.is_significant == true) ||
             (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
@@ -765,6 +768,8 @@ const WizardEditProfile = forwardRef(
 
         setEditedProvisosFields(initialEditStatus);
 
+        if (!originalValuesSet)
+          setOriginalBehaviouralCompetenciesFields(originalProfileData.jobProfile.behavioural_competencies);
         // TITLE
         // Set the original value for title
         const originalTitleValue =
@@ -1020,6 +1025,7 @@ const WizardEditProfile = forwardRef(
       fields: behavioural_competencies_fields,
       append: behavioural_competencies_append,
       remove: behavioural_competencies_remove,
+      replace: behavioural_competencies_replace,
     } = useFieldArray({
       control,
       name: 'behavioural_competencies',
@@ -1075,6 +1081,7 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
+        setEditedAccReqFields((prev) => ({ ...prev, [index]: true }));
         acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
         trigger();
       }
@@ -1083,6 +1090,10 @@ const WizardEditProfile = forwardRef(
     // Function to add back a removed field
     const handleAccReqAddBack = (index: number) => {
       const currentValues = getValues('accountabilities');
+      setEditedAccReqFields((prev) => ({
+        ...prev,
+        [index]: (currentValues[index] as AccountabilitiesModel)?.text !== originalAccReqFields[index]?.text,
+      }));
       acc_req_update(index, { ...currentValues[index], disabled: false });
     };
 
@@ -1096,7 +1107,7 @@ const WizardEditProfile = forwardRef(
     };
 
     const handleAccReqReset = (index: number) => {
-      setEditedAccReqFields((prev) => ({ ...prev, [index]: originalAccReqFields[index]?.value }));
+      setEditedAccReqFields((prev) => ({ ...prev, [index]: false }));
       const currentValues: TrackedFieldArrayItem[] = getValues('accountabilities') as TrackedFieldArrayItem[];
       currentValues[index].value = originalAccReqFields[index]?.value;
       // acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
@@ -1422,6 +1433,7 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
+        setEditedMinReqFields((prev) => ({ ...prev, [index]: true }));
         education_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
@@ -1430,6 +1442,10 @@ const WizardEditProfile = forwardRef(
     // Function to add back a removed field
     const handleMinReqAddBack = (index: number) => {
       const currentValues = getValues('education');
+      setEditedMinReqFields((prev) => ({
+        ...prev,
+        [index]: (currentValues[index] as AccountabilitiesModel)?.text !== originalMinReqFields[index]?.text,
+      }));
       education_update(index, { ...currentValues[index], disabled: false });
     };
 
@@ -1441,7 +1457,7 @@ const WizardEditProfile = forwardRef(
     };
 
     const handleMinReqReset = (index: number) => {
-      setEditedMinReqFields((prev) => ({ ...prev, [index]: originalMinReqFields[index]?.value }));
+      setEditedMinReqFields((prev) => ({ ...prev, [index]: false }));
       const currentValues: TrackedFieldArrayItem[] = getValues('education') as TrackedFieldArrayItem[];
       currentValues[index].value = originalMinReqFields[index]?.value;
       // acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
@@ -1562,8 +1578,8 @@ const WizardEditProfile = forwardRef(
               confirmRemoveModal={() =>
                 WizardModal(
                   'Do you want to make changes to education and work experiences?',
-                  reqAlertShown,
-                  setReqAlertShown,
+                  minReqAlertShown,
+                  setMinReqAlertShown,
                   () => handleMinReqRemove(index),
                   true,
                   undefined,
@@ -1616,12 +1632,13 @@ const WizardEditProfile = forwardRef(
           content: 'This action cannot be undone.',
           onOk: () => {
             // If confirmed, remove the item
-            setEditedRelWorkFields((prev) => ({ ...prev, [index]: true }));
+            setEditedRelWorkFields((prev) => ({ ...prev, [index]: false }));
             job_experience_remove(index);
           },
         });
       } else {
         // If it's an original field, mark as disabled
+        setEditedRelWorkFields((prev) => ({ ...prev, [index]: true }));
         job_experience_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
@@ -1630,6 +1647,10 @@ const WizardEditProfile = forwardRef(
     // Function to add back a removed field
     const handleRelWorkAddBack = (index: number) => {
       const currentValues = getValues('job_experience');
+      setEditedRelWorkFields((prev) => ({
+        ...prev,
+        [index]: (currentValues[index] as AccountabilitiesModel)?.text !== originalRelWorkFields[index]?.text,
+      }));
       job_experience_update(index, { ...currentValues[index], disabled: false });
     };
 
@@ -1641,7 +1662,7 @@ const WizardEditProfile = forwardRef(
     };
 
     const handleRelWorkReset = (index: number) => {
-      setEditedRelWorkFields((prev) => ({ ...prev, [index]: originalRelWorkFields[index]?.value }));
+      setEditedRelWorkFields((prev) => ({ ...prev, [index]: false }));
       const currentValues: TrackedFieldArrayItem[] = getValues('job_experience') as TrackedFieldArrayItem[];
       currentValues[index].value = originalRelWorkFields[index]?.value;
       // acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
@@ -1765,8 +1786,8 @@ const WizardEditProfile = forwardRef(
               confirmRemoveModal={() =>
                 WizardModal(
                   'Do you want to make changes to related experiences?',
-                  reqAlertShown,
-                  setReqAlertShown,
+                  relWorkAlertShown,
+                  setRelWorkAlertShown,
                   () => handleRelWorkRemove(index),
                   true,
                   undefined,
@@ -1795,6 +1816,7 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
+        setEditedSecurityScreeningsFields((prev) => ({ ...prev, [index]: true }));
         security_screenings_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
@@ -1803,6 +1825,12 @@ const WizardEditProfile = forwardRef(
     // Function to add back a removed field
     const handleSecurityScreeningsAddBack = (index: number) => {
       const currentValues = getValues('security_screenings');
+      // adding back - if it's equal to original, set to false
+      setEditedSecurityScreeningsFields((prev) => ({
+        ...prev,
+        [index]:
+          (currentValues[index] as AccountabilitiesModel)?.text !== originalSecurityScreeningsFields[index]?.text,
+      }));
       security_screenings_update(index, { ...currentValues[index], disabled: false });
     };
 
@@ -1816,7 +1844,7 @@ const WizardEditProfile = forwardRef(
     const handleSecurityScreeningsReset = (index: number) => {
       setEditedSecurityScreeningsFields((prev) => ({
         ...prev,
-        [index]: originalSecurityScreeningsFields[index]?.value,
+        [index]: false,
       }));
       const currentValues: TrackedFieldArrayItem[] = getValues('job_experience') as TrackedFieldArrayItem[];
       currentValues[index].value = originalSecurityScreeningsFields[index]?.value;
@@ -1980,6 +2008,19 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
+    const handleProfessionalRegistrationReset = (index: number) => {
+      setEditedProfessionalRegistrationFields((prev) => ({
+        ...prev,
+        [index]: false,
+      }));
+      const currentValues: TrackedFieldArrayItem[] = getValues('professional_registration') as TrackedFieldArrayItem[];
+      currentValues[index].value = originalProfessionalRegistrationFields[index]?.value;
+      professional_registration_update(index, {
+        value: originalProfessionalRegistrationFields[index]?.value,
+        disabled: false,
+      });
+    };
+
     const [editedProfessionalRegistrationFields, setEditedProfessionalRegistrationFields] = useState<{
       [key: number]: boolean;
     }>({});
@@ -1995,15 +2036,9 @@ const WizardEditProfile = forwardRef(
         trigger();
       }, 300);
 
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove professional registration requirement ${index + 1}`
         : `Remove professional registration requirement ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
 
       return (
         <List.Item
@@ -2049,54 +2084,18 @@ const WizardEditProfile = forwardRef(
             )}
           />
 
-          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-            <Button
-              data-testid={
-                field.disabled
-                  ? `undo-remove-professional-registration-${index}`
-                  : `remove-professional-registration-${index}`
-              }
-              className="remove-item-btn"
-              icon={icon}
-              aria-label={ariaLabel}
-              onClick={() => {
-                field.disabled
-                  ? handleProfessionalRegistrationAddBack(index)
-                  : handleProfessionalRegistrationRemove(index);
-              }}
-              disabled={field.is_readonly}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-            />
-          </Tooltip>
-
-          {/* {field.disabled ? (
-            <Button
-              icon={<PlusOutlined style={{ color: '#000000' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                handleProfessionalRegistrationAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#000000' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                handleProfessionalRegistrationRemove(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          )} */}
+          <ContextOptions
+            index={index}
+            isReadonly={field.is_readonly}
+            isDisabled={field.disabled}
+            isCustom={field.isCustom}
+            isEdited={editedProfessionalRegistrationFields[index]}
+            ariaLabel={ariaLabel}
+            testId="professional-registration"
+            handleReset={handleProfessionalRegistrationReset}
+            handleAddBack={handleProfessionalRegistrationAddBack}
+            handleRemove={handleProfessionalRegistrationRemove}
+          ></ContextOptions>
         </List.Item>
       );
     };
@@ -2133,6 +2132,19 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
+    const handleOptionalRequirementsReset = (index: number) => {
+      setEditedOptionalRequirementsFields((prev) => ({
+        ...prev,
+        [index]: false,
+      }));
+      const currentValues: TrackedFieldArrayItem[] = getValues('optional_requirements') as TrackedFieldArrayItem[];
+      currentValues[index].value = originalOptionalRequirementsFields[index]?.value;
+      optional_requirements_update(index, {
+        value: originalOptionalRequirementsFields[index]?.value,
+        disabled: false,
+      });
+    };
+
     const [editedOptionalRequirementsFields, setEditedOptionalRequirementsFields] = useState<{
       [key: number]: boolean;
     }>({});
@@ -2148,15 +2160,9 @@ const WizardEditProfile = forwardRef(
         trigger();
       }, 300);
 
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove optional requirement ${index + 1}`
         : `Remove optional requirement ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
 
       return (
         <List.Item
@@ -2201,25 +2207,18 @@ const WizardEditProfile = forwardRef(
               </>
             )}
           />
-
-          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-            <Button
-              data-testid={
-                field.disabled ? `undo-remove-optional-requirement-${index}` : `remove-optional-requirement-${index}`
-              }
-              className="remove-item-btn"
-              icon={icon}
-              aria-label={ariaLabel}
-              onClick={() => {
-                field.disabled ? handleOptionalRequirementsAddBack(index) : handleOptionalRequirementsRemove(index);
-              }}
-              disabled={field.is_readonly}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-            />
-          </Tooltip>
+          <ContextOptions
+            index={index}
+            isReadonly={field.is_readonly}
+            isDisabled={field.disabled}
+            isCustom={field.isCustom}
+            isEdited={editedOptionalRequirementsFields[index]}
+            ariaLabel={ariaLabel}
+            testId="optional-requirement"
+            handleReset={handleOptionalRequirementsReset}
+            handleAddBack={handleOptionalRequirementsAddBack}
+            handleRemove={handleOptionalRequirementsRemove}
+          ></ContextOptions>
         </List.Item>
       );
     };
@@ -2270,15 +2269,9 @@ const WizardEditProfile = forwardRef(
       }, 300);
       // console.log('field', JSON.stringify(field)); Job preferences
 
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove job preference ${index + 1}`
         : `Remove job preference ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
 
       return (
         <List.Item
@@ -2324,48 +2317,18 @@ const WizardEditProfile = forwardRef(
             )}
           />
 
-          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-            <Button
-              data-testid={field.disabled ? `undo-remove-preference-${index}` : `remove-preference-${index}`}
-              className="remove-item-btn"
-              icon={icon}
-              aria-label={ariaLabel}
-              onClick={() => {
-                field.disabled ? handlePreferencesAddBack(index) : handlePreferencesRemove(index);
-              }}
-              disabled={field.is_readonly}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-            />
-          </Tooltip>
-
-          {/* {field.disabled ? (
-            <Button
-              icon={<PlusOutlined style={{ color: '#000000' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                handlePreferencesAddBack(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          ) : (
-            <Button
-              icon={<DeleteOutlined style={{ color: '#000000' }} />}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-              onClick={() => {
-                handlePreferencesRemove(index);
-                // setRenderKey((prevKey) => prevKey + 1); // Fixes issue where deleting item doesn't render properly
-              }}
-            />
-          )} */}
+          <ContextOptions
+            index={index}
+            isReadonly={field.is_readonly}
+            isDisabled={field.disabled}
+            isCustom={field.isCustom}
+            isEdited={editedPreferencesFields[index]}
+            ariaLabel={ariaLabel}
+            testId="preference"
+            handleReset={handleOptionalRequirementsReset}
+            handleAddBack={handlePreferencesAddBack}
+            handleRemove={handlePreferencesRemove}
+          ></ContextOptions>
         </List.Item>
       );
     };
@@ -2405,6 +2368,19 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
+    const handleKnowledgeSkillsAbilitiesReset = (index: number) => {
+      setEditedKnowledgeSkillsAbilitiesFields((prev) => ({
+        ...prev,
+        [index]: false,
+      }));
+      const currentValues: TrackedFieldArrayItem[] = getValues('knowledge_skills_abilities') as TrackedFieldArrayItem[];
+      currentValues[index].value = originalKnowledgeSkillsAbilitiesFields[index]?.value;
+      knowledge_skills_abilities_update(index, {
+        value: originalKnowledgeSkillsAbilitiesFields[index]?.value,
+        disabled: false,
+      });
+    };
+
     const [editedKnowledgeSkillsAbilitiesFields, setEditedKnowledgeSkillsAbilitiesFields] = useState<{
       [key: number]: boolean;
     }>({});
@@ -2420,15 +2396,9 @@ const WizardEditProfile = forwardRef(
         trigger();
       }, 300);
 
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove knowledge, skill or ability ${index + 1}`
         : `Remove knowledge, skill or ability ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
 
       return (
         <List.Item
@@ -2473,28 +2443,19 @@ const WizardEditProfile = forwardRef(
               </>
             )}
           />
-          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-            <Button
-              data-testid={
-                field.disabled
-                  ? `undo-remove-knowledge-skills-ability-${index}`
-                  : `remove-knowledge-skills-ability-${index}`
-              }
-              className="remove-item-btn"
-              icon={icon}
-              aria-label={ariaLabel}
-              onClick={() => {
-                field.disabled
-                  ? handleKnowledgeSkillsAbilitiesAddBack(index)
-                  : handleKnowledgeSkillsAbilitiesRemove(index);
-              }}
-              disabled={field.is_readonly}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-            />
-          </Tooltip>
+
+          <ContextOptions
+            index={index}
+            isReadonly={field.is_readonly}
+            isDisabled={field.disabled}
+            isCustom={field.isCustom}
+            isEdited={editedKnowledgeSkillsAbilitiesFields[index]}
+            ariaLabel={ariaLabel}
+            testId="knowledge-skills-ability"
+            handleReset={handleKnowledgeSkillsAbilitiesReset}
+            handleAddBack={handleKnowledgeSkillsAbilitiesAddBack}
+            handleRemove={handleKnowledgeSkillsAbilitiesRemove}
+          ></ContextOptions>
         </List.Item>
       );
     };
@@ -2531,6 +2492,16 @@ const WizardEditProfile = forwardRef(
       trigger();
     };
 
+    const handleProvisosReset = (index: number) => {
+      setEditedProvisosFields((prev) => ({ ...prev, [index]: false }));
+      const currentValues: TrackedFieldArrayItem[] = getValues('provisos') as TrackedFieldArrayItem[];
+      currentValues[index].value = originalProvisosFields[index]?.value;
+      provisos_update(index, {
+        value: originalProvisosFields[index]?.value,
+        disabled: false,
+      });
+    };
+
     const [editedProvisosFields, setEditedProvisosFields] = useState<{ [key: number]: boolean }>({});
 
     const renderProvisosFields = (field: any, index: number) => {
@@ -2544,15 +2515,9 @@ const WizardEditProfile = forwardRef(
         trigger();
       }, 300);
 
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove willingness statements or proviso ${index + 1}`
         : `Remove willingness statements or proviso ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
 
       return (
         <List.Item
@@ -2597,22 +2562,19 @@ const WizardEditProfile = forwardRef(
               </>
             )}
           />
-          <Tooltip title={tooltipTitle} overlayStyle={!field.is_readonly ? { display: 'none' } : undefined}>
-            <Button
-              data-testid={field.disabled ? `undo-remove-proviso-${index}` : `remove-proviso-${index}`}
-              className="remove-item-btn"
-              icon={icon}
-              aria-label={ariaLabel}
-              onClick={() => {
-                field.disabled ? handleProvisosAddBack(index) : handleProvisosRemove(index);
-              }}
-              disabled={field.is_readonly}
-              style={{
-                border: 'none', // Removes the border
-                padding: 0, // Removes padding
-              }}
-            />
-          </Tooltip>
+
+          <ContextOptions
+            index={index}
+            isReadonly={field.is_readonly}
+            isDisabled={field.disabled}
+            isCustom={field.isCustom}
+            isEdited={editedProvisosFields[index]}
+            ariaLabel={ariaLabel}
+            testId="proviso"
+            handleReset={handleProvisosReset}
+            handleAddBack={handleProvisosAddBack}
+            handleRemove={handleProvisosRemove}
+          ></ContextOptions>
         </List.Item>
       );
     };
@@ -2781,31 +2743,9 @@ const WizardEditProfile = forwardRef(
 
     // DIFFS DONE
 
-    const [getPositionProfile, { data: positionProfileData, isFetching: isFetchingPositionProfile }] =
-      useLazyGetPositionProfileQuery();
-
     const { data: positionRequestData } = useGetPositionRequestQuery({
       id: positionRequestId ? positionRequestId : -1,
     });
-
-    useEffect(() => {
-      if (positionRequestData?.positionRequest?.reports_to_position_id) {
-        getPositionProfile({ positionNumber: positionRequestData.positionRequest.reports_to_position_id.toString() });
-      }
-    }, [positionRequestData, getPositionProfile]);
-
-    const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel>();
-    const [additionalPositions, setAdditionalPositions] = useState(0);
-
-    useEffect(() => {
-      if (positionProfileData && positionProfileData.positionProfile) {
-        const activePositions = positionProfileData.positionProfile.filter((p) => p.status === 'Active');
-        setFirstActivePosition(activePositions[0] || null);
-
-        // Set state to the number of additional active positions
-        setAdditionalPositions(positionProfileData.positionProfile.length - 1);
-      }
-    }, [positionProfileData]);
 
     if (isLoading) {
       return <LoadingSpinnerWithMessage />;
@@ -2901,7 +2841,11 @@ const WizardEditProfile = forwardRef(
                 {effectiveData?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
-                {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
+                <PositionProfile
+                  positionNumber={positionRequestData?.positionRequest?.reports_to_position_id?.toString()}
+                  orgChartData={positionRequestData?.positionRequest?.orgchart_json}
+                ></PositionProfile>
+                {/* {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
                 {firstActivePosition && !isFetchingPositionProfile && (
                   <div>
                     <p
@@ -2917,7 +2861,7 @@ const WizardEditProfile = forwardRef(
                 )}
                 {!firstActivePosition && !isFetchingPositionProfile && (
                   <div>Position {positionRequestData?.positionRequest?.reports_to_position_id} is unoccupied</div>
-                )}
+                )} */}
               </Descriptions.Item>
               <Descriptions.Item label="Job Store #">{effectiveData?.number}</Descriptions.Item>
             </Descriptions>
@@ -3127,7 +3071,7 @@ const WizardEditProfile = forwardRef(
                               },
                               true,
                               undefined,
-                              'accountabilities-warning',
+                              'optional-accountabilities-warning',
                             );
                             // setRenderKey((prevKey) => prevKey + 1);
                           }}
@@ -3486,7 +3430,47 @@ const WizardEditProfile = forwardRef(
                 </section>
               </Card>
 
-              <Card title="Behavioural competencies" className="custom-card" style={{ marginTop: 16 }}>
+              <Card
+                title={
+                  <Row justify="start">
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+                      Behavioural competencies
+                      <Button
+                        data-testid={`reset-behavioral-competencies`}
+                        type="link" // No button styling, just the icon
+                        aria-label={`Reset all changes`}
+                        onClick={() => {
+                          behavioural_competencies_replace(originalBehaviouralCompetenciesFields);
+                        }}
+                        style={{ float: 'right' }}
+                      >
+                        Reset all changes
+                      </Button>
+                    </Col>
+                  </Row>
+                }
+                className="custom-card"
+                style={{ marginTop: 16 }}
+              >
+                {' '}
+                <Divider className="hr-reduced-margin" />
+                <Row justify="start">
+                  <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+                    <label
+                      style={{
+                        position: 'relative',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        maxWidth: '100%',
+                        height: '32px',
+                        fontWeight: 500,
+                      }}
+                      title="Add behavioural competencies"
+                    >
+                      Add behavioural competencies
+                    </label>
+                  </Col>
+                </Row>
                 <section aria-label="Behavioural competencies" role="region">
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
@@ -3537,7 +3521,12 @@ const WizardEditProfile = forwardRef(
                                   behavioural_competencies_remove(index);
                                   // setRenderKey((prevKey) => prevKey + 1);
                                 }}
-                                style={{ marginLeft: '10px', border: '1px solid', borderColor: '#d9d9d9' }}
+                                style={{
+                                  display: behavioural_competencies_fields.length < 4 ? 'none' : 'block',
+                                  marginLeft: '10px',
+                                  border: '1px solid',
+                                  borderColor: '#d9d9d9',
+                                }}
                               />
 
                               {/* Hidden fields to submit actual data */}

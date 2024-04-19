@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { PositionRequestUpdateInput } from './position-request-update.input';
-import { Type } from 'class-transformer';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { PositionRequestUpdateInput } from './position-request-update.input';
 import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
 
 @ArgsType()

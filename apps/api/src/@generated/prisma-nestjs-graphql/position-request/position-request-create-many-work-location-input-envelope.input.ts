@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { PositionRequestCreateManyWorkLocationInput } from './position-request-create-many-work-location.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { PositionRequestCreateManyWorkLocationInput } from './position-request-create-many-work-location.input';
 
 @InputType()
 export class PositionRequestCreateManyWorkLocationInputEnvelope {

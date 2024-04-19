@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileContextCreateInput } from './job-profile-context-create.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileContextCreateInput } from './job-profile-context-create.input';
 
 @ArgsType()
 export class CreateOneJobProfileContextArgs {

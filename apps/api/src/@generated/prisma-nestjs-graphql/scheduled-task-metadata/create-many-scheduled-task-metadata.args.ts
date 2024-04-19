@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ScheduledTaskMetadataCreateManyInput } from './scheduled-task-metadata-create-many.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { ScheduledTaskMetadataCreateManyInput } from './scheduled-task-metadata-create-many.input';
 
 @ArgsType()
 export class CreateManyScheduledTaskMetadataArgs {

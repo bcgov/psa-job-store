@@ -1,8 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { Organization } from '../organization/organization.model';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { JobProfile } from '../job-profile/job-profile.model';
+import { Organization } from '../organization/organization.model';
 
 @ObjectType()
 export class JobProfileOrganization {

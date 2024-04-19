@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileMinimumRequirementsWhereInput } from './job-profile-minimum-requirements-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileMinimumRequirementsAvgAggregateInput } from './job-profile-minimum-requirements-avg-aggregate.input';
+import { JobProfileMinimumRequirementsCountAggregateInput } from './job-profile-minimum-requirements-count-aggregate.input';
+import { JobProfileMinimumRequirementsMaxAggregateInput } from './job-profile-minimum-requirements-max-aggregate.input';
+import { JobProfileMinimumRequirementsMinAggregateInput } from './job-profile-minimum-requirements-min-aggregate.input';
 import { JobProfileMinimumRequirementsOrderByWithAggregationInput } from './job-profile-minimum-requirements-order-by-with-aggregation.input';
 import { JobProfileMinimumRequirementsScalarFieldEnum } from './job-profile-minimum-requirements-scalar-field.enum';
 import { JobProfileMinimumRequirementsScalarWhereWithAggregatesInput } from './job-profile-minimum-requirements-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { JobProfileMinimumRequirementsCountAggregateInput } from './job-profile-minimum-requirements-count-aggregate.input';
-import { JobProfileMinimumRequirementsAvgAggregateInput } from './job-profile-minimum-requirements-avg-aggregate.input';
 import { JobProfileMinimumRequirementsSumAggregateInput } from './job-profile-minimum-requirements-sum-aggregate.input';
-import { JobProfileMinimumRequirementsMinAggregateInput } from './job-profile-minimum-requirements-min-aggregate.input';
-import { JobProfileMinimumRequirementsMaxAggregateInput } from './job-profile-minimum-requirements-max-aggregate.input';
+import { JobProfileMinimumRequirementsWhereInput } from './job-profile-minimum-requirements-where.input';
 
 @ArgsType()
 export class JobProfileMinimumRequirementsGroupByArgs {

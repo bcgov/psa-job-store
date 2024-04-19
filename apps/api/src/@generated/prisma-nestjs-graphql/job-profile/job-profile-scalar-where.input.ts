@@ -1,14 +1,13 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { IntFilter } from '../prisma/int-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { BoolFilter } from '../prisma/bool-filter.input';
+import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { EnumJobProfileStateFilter } from '../prisma/enum-job-profile-state-filter.input';
 import { EnumJobProfileTypeFilter } from '../prisma/enum-job-profile-type-filter.input';
-import { DateTimeFilter } from '../prisma/date-time-filter.input';
-import { UuidFilter } from '../prisma/uuid-filter.input';
-import { StringFilter } from '../prisma/string-filter.input';
+import { IntFilter } from '../prisma/int-filter.input';
 import { JsonFilter } from '../prisma/json-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
 import { StringListFilter } from '../prisma/string-list-filter.input';
+import { UuidFilter } from '../prisma/uuid-filter.input';
 
 @InputType()
 export class JobProfileScalarWhereInput {
