@@ -34,10 +34,10 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
   const nodeTypes = useMemo(() => {
     return {
       'org-chart-card': ({ ...nodeProps }: NodeProps) => (
-        <OrgChartNode {...nodeProps} orgChartType={type} isConnectable={false} />
+        <OrgChartNode {...nodeProps} isConnectable={false} orgChartData={{ edges, nodes }} orgChartType={type} />
       ),
     };
-  }, [type]);
+  }, [edges, nodes, type]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
@@ -63,7 +63,7 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
       <ReactFlow
         edges={edges}
         fitView
-        minZoom={0.1}
+        minZoom={0}
         nodeTypes={nodeTypes}
         nodes={nodes}
         nodesConnectable={false}

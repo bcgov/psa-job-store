@@ -275,7 +275,7 @@ export const DynamicOrgChart = ({
           }}
           edges={edges}
           elevateEdgesOnSelect
-          minZoom={0.1}
+          minZoom={0}
           nodeTypes={nodeTypes}
           nodes={nodes}
           nodesConnectable={false}
