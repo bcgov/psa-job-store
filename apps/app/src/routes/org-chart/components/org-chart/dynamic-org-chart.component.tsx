@@ -233,13 +233,13 @@ export const DynamicOrgChart = ({
         <OrgChartNode
           {...nodeProps}
           isConnectable={false}
-          orgChartData={{ edges, nodes }}
+          orgChartData={{ edges: elements.edges, nodes: elements.nodes }}
           orgChartContext={props.context}
           orgChartType={type}
         />
       ),
     };
-  }, [props.context, edges, nodes, type]);
+  }, [props.context, elements, type]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
