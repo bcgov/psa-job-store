@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CheckCircleFilled, UserAddOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Row, Tag, Tooltip, Typography } from 'antd';
+import { CheckCircleFilled } from '@ant-design/icons';
+import { Card, Col, Row, Tag, Tooltip, Typography } from 'antd';
 import { CSSProperties } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { Handle, NodeProps, Position } from 'reactflow';
 import { OrgChartContext } from '../enums/org-chart-context.enum';
 import { OrgChartType } from '../enums/org-chart-type.enum';
+import { Elements } from '../interfaces/elements.interface';
+import { CreatePositionButton } from './create-position-button.component';
 import './org-chart-node.component.css';
 
 const { Top, Bottom } = Position;
@@ -45,8 +47,9 @@ const renderPositionNumber = (roles: string[], positionData: Record<string, any>
 };
 
 export interface OrgChartNodeProps extends NodeProps {
-  orgChartType: OrgChartType;
   orgChartContext?: OrgChartContext;
+  orgChartData: Elements;
+  orgChartType: OrgChartType;
 }
 
 export const OrgChartNode = ({
@@ -55,8 +58,9 @@ export const OrgChartNode = ({
   selected,
   sourcePosition = Bottom,
   targetPosition = Top,
-  orgChartType,
   orgChartContext,
+  orgChartData,
+  orgChartType,
   ...rest
 }: OrgChartNodeProps) => {
   const auth = useAuth();
@@ -73,24 +77,12 @@ export const OrgChartNode = ({
             selected && orgChartType === OrgChartType.DYNAMIC
               ? orgChartContext === OrgChartContext.DEFAULT
                 ? [
-                    <Tooltip
-                      title={
-                        positionIsVacant
-                          ? "You can't create a new position which reports to a vacant position."
-                          : undefined
-                      }
-                    >
-                      <Button
-                        // onClick={createDirectReport}
-                        disabled={positionIsVacant}
-                        icon={<UserAddOutlined />}
-                        data-testid="create-direct-report-button"
-                        style={{ borderRadius: 0, border: 'none', width: '100%' }}
-                        type="default"
-                      >
-                        Create new direct report
-                      </Button>
-                    </Tooltip>,
+                    <CreatePositionButton
+                      departmentId={data.department?.id}
+                      elements={orgChartData}
+                      positionIsVacant={positionIsVacant}
+                      supervisorId={data.id}
+                    />,
                   ]
                 : undefined
               : undefined

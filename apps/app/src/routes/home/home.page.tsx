@@ -7,6 +7,7 @@ import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-a
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-positions/components/my-positions-table.component';
 import { OrgChart } from '../org-chart-redux/components/org-chart';
+import { OrgChartContext } from '../org-chart-redux/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart-redux/enums/org-chart-type.enum';
 import ContentWrapper from './components/content-wrapper.component';
 import HeaderWrapper from './components/header-wrapper.component';
@@ -21,7 +22,7 @@ export const HomePage = () => {
   const { total = 0, completed = 0, inReview = 0 } = positionsCountData?.positionRequestsCount || {};
   const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
 
-  const [departmentId, setDepartmentId] = useState<string | undefined>(undefined);
+  const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
     setDepartmentId(profileData?.profile.department_id);
@@ -136,6 +137,7 @@ export const HomePage = () => {
             <OrgChart
               data-testid="org-chart"
               type={OrgChartType.DYNAMIC}
+              context={OrgChartContext.DEFAULT}
               setDepartmentId={setDepartmentId}
               departmentId={departmentId}
               departmentIdIsLoading={profileDataIsFetching}

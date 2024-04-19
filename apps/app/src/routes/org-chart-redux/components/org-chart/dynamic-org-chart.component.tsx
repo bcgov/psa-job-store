@@ -231,10 +231,16 @@ export const DynamicOrgChart = ({
   const nodeTypes = useMemo(() => {
     return {
       'org-chart-card': ({ ...nodeProps }: NodeProps) => (
-        <OrgChartNode {...nodeProps} orgChartType={type} orgChartContext={props.context} isConnectable={false} />
+        <OrgChartNode
+          {...nodeProps}
+          isConnectable={false}
+          orgChartData={{ edges, nodes }}
+          orgChartContext={props.context}
+          orgChartType={type}
+        />
       ),
     };
-  }, [props.context, type]);
+  }, [props.context, edges, nodes, type]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
