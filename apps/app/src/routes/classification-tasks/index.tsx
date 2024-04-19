@@ -3,10 +3,8 @@ import { PositionProvider } from '../../components/app/common/contexts/position.
 
 export const ClassificationTasksRoute = () => {
   return (
-    <div>
-      <PositionProvider>
-        <Outlet />
-      </PositionProvider>
-    </div>
+    <PositionProvider>
+      <Outlet />
+    </PositionProvider>
   );
 };

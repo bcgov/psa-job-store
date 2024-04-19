@@ -34,7 +34,8 @@ import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
-import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
+import { OrgChart } from '../org-chart-redux/components/org-chart';
+import { OrgChartType } from '../org-chart-redux/enums/org-chart-type.enum';
 import './classification-tasks.page.css';
 import { JobProfileWithDiff } from './components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from './components/service-request-details.component';
@@ -180,23 +181,11 @@ export const ClassificationTaskPage = () => {
       key: '2',
       label: 'Organization Chart',
       children: (
-        <>
-          <div style={{ overflow: 'hidden', position: 'relative', height: '800px' }}>
-            <OrgChartWrapped
-              selectedDepartment={data?.positionRequest?.department_id ?? null}
-              orgChartSnapshot={snapshotCopy}
-              highlightPositionId={'extraNode'}
-              extraNodeInfo={{
-                nodeId: 'extraNode',
-                title: data?.positionRequest?.title,
-                classification: { code: '', name: '' },
-                status: data?.positionRequest?.status,
-                targetNodeId: data?.positionRequest?.reports_to_position_id?.toString(),
-                submittedBy: data?.positionRequest?.user_name,
-              }}
-            />
-          </div>
-        </>
+        <OrgChart
+          type={OrgChartType.READONLY}
+          departmentId={data.positionRequest?.department_id ?? ''}
+          elements={snapshotCopy}
+        />
       ),
     },
     {
@@ -432,7 +421,6 @@ export const ClassificationTaskPage = () => {
           tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
         />
       </ContentWrapper>
-      {/* subTitle={positionRequest.title} */}
     </>
   );
 };
