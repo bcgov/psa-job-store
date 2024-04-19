@@ -72,7 +72,6 @@ export const DynamicOrgChart = ({
 
     if (departmentId == null) {
       setElements(initialElements);
-      getOrgChart('', false);
     } else {
       getOrgChart(departmentId, false);
     }
@@ -83,7 +82,7 @@ export const DynamicOrgChart = ({
       const elements = autolayout(orgChartData?.orgChart);
       setElements(JSON.parse(JSON.stringify(elements)));
     }
-  }, [orgChartData?.orgChart]);
+  }, [orgChartData?.orgChart, orgChartDataIsFetching]);
 
   const search = useCallback(
     (searchTerm: string | undefined) => {
