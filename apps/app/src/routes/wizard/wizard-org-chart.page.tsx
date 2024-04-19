@@ -8,11 +8,11 @@ import LoadingComponent from '../../components/app/common/components/loading.com
 import { usePosition } from '../../components/app/common/contexts/position.context';
 import { GetPositionRequestResponseContent } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
-import { OrgChart } from '../org-chart-redux/components/org-chart';
-import { initialElements } from '../org-chart-redux/constants/initial-elements.constant';
-import { OrgChartContext } from '../org-chart-redux/enums/org-chart-context.enum';
-import { OrgChartType } from '../org-chart-redux/enums/org-chart-type.enum';
-import { Elements } from '../org-chart-redux/interfaces/elements.interface';
+import { OrgChart } from '../org-chart/components/org-chart';
+import { initialElements } from '../org-chart/constants/initial-elements.constant';
+import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
+import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
+import { Elements } from '../org-chart/interfaces/elements.interface';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';

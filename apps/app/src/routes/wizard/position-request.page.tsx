@@ -16,8 +16,8 @@ import {
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
 import ContentWrapper from '../home/components/content-wrapper.component';
-import { OrgChart } from '../org-chart-redux/components/org-chart';
-import { OrgChartType } from '../org-chart-redux/enums/org-chart-type.enum';
+import { OrgChart } from '../org-chart/components/org-chart';
+import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { useWizardContext } from './components/wizard.provider';
 import './position-request.page.css';
 import { WizardConfirmDetailsPage } from './wizard-confirm-details.page';

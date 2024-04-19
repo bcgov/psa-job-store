@@ -6,9 +6,9 @@ import PositionProfile from '../../components/app/common/components/positionProf
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-positions/components/my-positions-table.component';
-import { OrgChart } from '../org-chart-redux/components/org-chart';
-import { OrgChartContext } from '../org-chart-redux/enums/org-chart-context.enum';
-import { OrgChartType } from '../org-chart-redux/enums/org-chart-type.enum';
+import { OrgChart } from '../org-chart/components/org-chart';
+import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
+import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import ContentWrapper from './components/content-wrapper.component';
 import HeaderWrapper from './components/header-wrapper.component';
 import { InitialsAvatar } from './components/initials-avatar.component';
