@@ -14,12 +14,10 @@ import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
 import { MyPositionsRoute } from '../routes/my-positions';
 import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
-import { OrgChartRoute } from '../routes/org-chart';
-import { OrgChartRoute as OrgChartNextRoute } from '../routes/org-chart-next';
-import { OrgChartPage as OrgChartNextPage } from '../routes/org-chart-next/org-chart.page';
-import { OrgChartRoute as OrgChartReduxRoute } from '../routes/org-chart-redux';
-import { OrgChartPage as OrgChartReduxPage } from '../routes/org-chart-redux/org-chart.page';
-import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { OrgChartRoute as OrgChartOldRoute } from '../routes/org-chart';
+import { OrgChartRoute } from '../routes/org-chart-redux';
+import { OrgChartPage } from '../routes/org-chart-redux/org-chart.page';
+import { OrgChartPage as OrgChartOldPage } from '../routes/org-chart/org-chart.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
@@ -148,8 +146,8 @@ export const router = createBrowserRouter([
             ],
           },
           {
-            path: '/org-chart-next',
-            element: <OrgChartNextRoute />,
+            path: '/org-chart-old',
+            element: <OrgChartOldRoute />,
             handle: {
               breadcrumb: () => 'My organizations',
               icon: <PartitionOutlined />,
@@ -157,21 +155,7 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <OrgChartNextPage />,
-              },
-            ],
-          },
-          {
-            path: '/org-chart-redux',
-            element: <OrgChartReduxRoute />,
-            handle: {
-              breadcrumb: () => 'My organizations',
-              icon: <PartitionOutlined />,
-            },
-            children: [
-              {
-                index: true,
-                element: <OrgChartReduxPage />,
+                element: <OrgChartOldPage />,
               },
             ],
           },

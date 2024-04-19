@@ -1,4 +1,5 @@
 import { Col, Row, Space } from 'antd';
+import { autolayout } from 'common-kit';
 import Fuse from 'fuse.js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
@@ -15,7 +16,6 @@ import ReactFlow, {
 } from 'reactflow';
 import { useDebounce } from 'usehooks-ts';
 import { useLazyGetOrgChartQuery } from '../../../../redux/services/graphql-api/org-chart.api';
-import { autolayout } from '../../../org-chart-next/utils/autolayout.util';
 import { initialElements } from '../../constants/initial-elements.constant';
 import { OrgChartContext } from '../../enums/org-chart-context.enum';
 import { OrgChartType } from '../../enums/org-chart-type.enum';

@@ -22,7 +22,10 @@ export const OrgChartPage = () => {
 
   return (
     <Content style={{ backgroundColor: '#FFF', display: 'flex', flex: '1 0 auto', flexDirection: 'column' }}>
-      <PageHeader title="Org Chart @ Redux" />
+      <PageHeader
+        title="My organizations"
+        subTitle="You are viewing the current organization structure for your base work area. To begin,  click the supervisor of the new position you would like to create."
+      />
       <Row justify="center" style={{ backgroundColor: '#F0F2F5', flex: 'auto' }}>
         <Col style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
           <OrgChart
