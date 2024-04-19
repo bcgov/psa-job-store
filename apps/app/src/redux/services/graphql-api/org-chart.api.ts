@@ -31,6 +31,7 @@ export const orgChartApi = graphqlApi.injectEndpoints({
                 data {
                   id
                   title
+                  position_status
                   classification {
                     id
                     code

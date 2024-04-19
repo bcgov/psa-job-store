@@ -39,8 +39,7 @@ const renderPositionNumber = (roles: string[], positionData: Record<string, any>
     if (positionData.position_status === 'Approved') {
       return positionData.id;
     } else {
-      // return <em>Pending approval</em>;
-      return positionData.id;
+      return <em>Pending approval</em>;
     }
   }
 };

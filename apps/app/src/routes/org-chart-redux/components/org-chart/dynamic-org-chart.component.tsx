@@ -85,14 +85,32 @@ export const DynamicOrgChart = ({
     }
   }, [orgChartData?.orgChart]);
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(debouncedElements.nodes, {
-        keys: ['id', 'data.title', 'data.employees.name'],
+  const search = useCallback(
+    (searchTerm: string | undefined) => {
+      if (searchTerm == null) return [];
+
+      // For the ID search, don't include positions where position_status === 'PROPOSED'
+      const approvedPositionNodes = debouncedElements.nodes.filter((node) => node.data.position_status === 'Approved');
+      console.log('approvedPositionNodes: ', approvedPositionNodes);
+      const idSearch = new Fuse(approvedPositionNodes, {
+        keys: ['id'],
+        includeMatches: true,
+        includeScore: true,
+        threshold: 0,
+      });
+
+      const stringSearch = new Fuse(debouncedElements.nodes, {
+        keys: ['data.title', 'data.employees.name'],
         includeMatches: true,
         includeScore: true,
         threshold: 0.25,
-      }),
+      });
+
+      const idResults = idSearch.search(searchTerm);
+      const stringResults = stringSearch.search(searchTerm);
+
+      return [...idResults.map((r) => r.item), ...stringResults.map((r) => r.item)].flatMap((node) => node.id);
+    },
     [debouncedElements.nodes],
   );
 
@@ -155,12 +173,7 @@ export const DynamicOrgChart = ({
         };
       });
     } else if (searchTerm && searchTerm.length > 0 && selectedNodeIds.length === 0) {
-      const searchResultIds = searchTerm
-        ? fuse
-            .search(searchTerm)
-            .map((result) => result.item)
-            .flatMap((node) => node.id)
-        : [];
+      const searchResultIds = search(searchTerm);
 
       edges.forEach((edge: Edge) => {
         edge.animated = false;
