@@ -37,7 +37,6 @@ import {
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useGetJobProfileQuery, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
-import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { ContextOptions } from './context-options.component';
@@ -2782,31 +2781,9 @@ const WizardEditProfile = forwardRef(
 
     // DIFFS DONE
 
-    const [getPositionProfile, { data: positionProfileData, isFetching: isFetchingPositionProfile }] =
-      useLazyGetPositionProfileQuery();
-
     const { data: positionRequestData } = useGetPositionRequestQuery({
       id: positionRequestId ? positionRequestId : -1,
     });
-
-    useEffect(() => {
-      if (positionRequestData?.positionRequest?.reports_to_position_id) {
-        getPositionProfile({ positionNumber: positionRequestData.positionRequest.reports_to_position_id.toString() });
-      }
-    }, [positionRequestData, getPositionProfile]);
-
-    const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel>();
-    const [additionalPositions, setAdditionalPositions] = useState(0);
-
-    useEffect(() => {
-      if (positionProfileData && positionProfileData.positionProfile) {
-        const activePositions = positionProfileData.positionProfile.filter((p) => p.status === 'Active');
-        setFirstActivePosition(activePositions[0] || null);
-
-        // Set state to the number of additional active positions
-        setAdditionalPositions(positionProfileData.positionProfile.length - 1);
-      }
-    }, [positionProfileData]);
 
     if (isLoading) {
       return <LoadingSpinnerWithMessage />;
