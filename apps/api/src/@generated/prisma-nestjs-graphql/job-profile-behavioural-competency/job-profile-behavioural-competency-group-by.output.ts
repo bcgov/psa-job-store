@@ -1,11 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfileBehaviouralCompetencyCountAggregate } from './job-profile-behavioural-competency-count-aggregate.output';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { JobProfileBehaviouralCompetencyAvgAggregate } from './job-profile-behavioural-competency-avg-aggregate.output';
-import { JobProfileBehaviouralCompetencySumAggregate } from './job-profile-behavioural-competency-sum-aggregate.output';
-import { JobProfileBehaviouralCompetencyMinAggregate } from './job-profile-behavioural-competency-min-aggregate.output';
+import { JobProfileBehaviouralCompetencyCountAggregate } from './job-profile-behavioural-competency-count-aggregate.output';
 import { JobProfileBehaviouralCompetencyMaxAggregate } from './job-profile-behavioural-competency-max-aggregate.output';
+import { JobProfileBehaviouralCompetencyMinAggregate } from './job-profile-behavioural-competency-min-aggregate.output';
+import { JobProfileBehaviouralCompetencySumAggregate } from './job-profile-behavioural-competency-sum-aggregate.output';
 
 @ObjectType()
 export class JobProfileBehaviouralCompetencyGroupBy {

@@ -134,7 +134,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
             }}
             departmentId={selectedDepartment}
             departmentIdIsLoading={isFetchingUserProfile}
-            targetId={profileData?.profile.position_id}
+            targetId={selectedPositionId ?? profileData?.profile.position_id}
           />
         )}
       </div>

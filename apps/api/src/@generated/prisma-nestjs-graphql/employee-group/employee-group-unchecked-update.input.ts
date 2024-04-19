@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { ClassificationUncheckedUpdateManyWithoutEmployee_groupNestedInput } from '../classification/classification-unchecked-update-many-without-employee-group-nested.input';
 
 @InputType()

@@ -1,8 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfile } from '../job-profile/job-profile.model';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { JobProfileJobFamily } from '../job-profile-job-family/job-profile-job-family.model';
+import { JobProfile } from '../job-profile/job-profile.model';
 
 @ObjectType()
 export class JobProfileJobFamilyLink {

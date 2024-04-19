@@ -1,12 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileJobFamilyLinkWhereInput } from './job-profile-job-family-link-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { JobProfileJobFamilyLinkOrderByWithRelationAndSearchRelevanceInput } from './job-profile-job-family-link-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { JobProfileJobFamilyLinkWhereUniqueInput } from './job-profile-job-family-link-where-unique.input';
-import { Int } from '@nestjs/graphql';
 import { JobProfileJobFamilyLinkScalarFieldEnum } from './job-profile-job-family-link-scalar-field.enum';
+import { JobProfileJobFamilyLinkWhereUniqueInput } from './job-profile-job-family-link-where-unique.input';
+import { JobProfileJobFamilyLinkWhereInput } from './job-profile-job-family-link-where.input';
 
 @ArgsType()
 export class FindFirstJobProfileJobFamilyLinkOrThrowArgs {

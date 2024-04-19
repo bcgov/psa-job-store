@@ -1,11 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { IntFilter } from '../prisma/int-filter.input';
-import { StringFilter } from '../prisma/string-filter.input';
-import { JsonFilter } from '../prisma/json-filter.input';
-import { UuidFilter } from '../prisma/uuid-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { EnumPositionRequestStatusFilter } from '../prisma/enum-position-request-status-filter.input';
+import { IntFilter } from '../prisma/int-filter.input';
+import { JsonFilter } from '../prisma/json-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
+import { UuidFilter } from '../prisma/uuid-filter.input';
 
 @InputType()
 export class PositionRequestScalarWhereInput {

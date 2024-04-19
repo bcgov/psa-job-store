@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileMinimumRequirementsWhereUniqueInput } from './job-profile-minimum-requirements-where-unique.input';
 import { Type } from 'class-transformer';
 import { JobProfileMinimumRequirementsCreateInput } from './job-profile-minimum-requirements-create.input';
 import { JobProfileMinimumRequirementsUpdateInput } from './job-profile-minimum-requirements-update.input';
+import { JobProfileMinimumRequirementsWhereUniqueInput } from './job-profile-minimum-requirements-where-unique.input';
 
 @ArgsType()
 export class UpsertOneJobProfileMinimumRequirementsArgs {

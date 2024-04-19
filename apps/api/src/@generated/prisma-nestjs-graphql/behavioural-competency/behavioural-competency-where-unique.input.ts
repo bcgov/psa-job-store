@@ -1,11 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { BehaviouralCompetencyWhereInput } from './behavioural-competency-where.input';
-import { EnumBehaviouralCompetencyTypeFilter } from '../prisma/enum-behavioural-competency-type-filter.input';
-import { EnumBehaviouralCompetencyCategoryFilter } from '../prisma/enum-behavioural-competency-category-filter.input';
-import { StringFilter } from '../prisma/string-filter.input';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { JobProfileBehaviouralCompetencyListRelationFilter } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-list-relation-filter.input';
+import { EnumBehaviouralCompetencyCategoryFilter } from '../prisma/enum-behavioural-competency-category-filter.input';
+import { EnumBehaviouralCompetencyTypeFilter } from '../prisma/enum-behavioural-competency-type-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
+import { BehaviouralCompetencyWhereInput } from './behavioural-competency-where.input';
 
 @InputType()
 export class BehaviouralCompetencyWhereUniqueInput {

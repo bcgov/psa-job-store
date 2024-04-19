@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
+import { DateTimeWithAggregatesFilter } from '../prisma/date-time-with-aggregates-filter.input';
 import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.input';
 import { JsonWithAggregatesFilter } from '../prisma/json-with-aggregates-filter.input';
-import { DateTimeWithAggregatesFilter } from '../prisma/date-time-with-aggregates-filter.input';
 
 @InputType()
 export class JobProfileHistoryScalarWhereWithAggregatesInput {

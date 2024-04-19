@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileJobFamilyCreateNestedOneWithoutJobProfileStreamInput } from '../job-profile-job-family/job-profile-job-family-create-nested-one-without-job-profile-stream.input';
 import { JobProfileStreamLinkCreateNestedManyWithoutStreamInput } from '../job-profile-stream-link/job-profile-stream-link-create-nested-many-without-stream.input';
 

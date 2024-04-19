@@ -1,14 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { EmployeeGroupWhereInput } from './employee-group-where.input';
-import { Type } from 'class-transformer';
-import { EmployeeGroupOrderByWithRelationAndSearchRelevanceInput } from './employee-group-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { EmployeeGroupWhereUniqueInput } from './employee-group-where-unique.input';
-import { Int } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
 import { EmployeeGroupCountAggregateInput } from './employee-group-count-aggregate.input';
-import { EmployeeGroupMinAggregateInput } from './employee-group-min-aggregate.input';
 import { EmployeeGroupMaxAggregateInput } from './employee-group-max-aggregate.input';
+import { EmployeeGroupMinAggregateInput } from './employee-group-min-aggregate.input';
+import { EmployeeGroupOrderByWithRelationAndSearchRelevanceInput } from './employee-group-order-by-with-relation-and-search-relevance.input';
+import { EmployeeGroupWhereUniqueInput } from './employee-group-where-unique.input';
+import { EmployeeGroupWhereInput } from './employee-group-where.input';
 
 @ArgsType()
 export class EmployeeGroupAggregateArgs {

@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileClassificationUncheckedUpdateManyInput } from './job-profile-classification-unchecked-update-many.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileClassificationUncheckedUpdateManyInput } from './job-profile-classification-unchecked-update-many.input';
 import { JobProfileClassificationWhereInput } from './job-profile-classification-where.input';
 
 @ArgsType()

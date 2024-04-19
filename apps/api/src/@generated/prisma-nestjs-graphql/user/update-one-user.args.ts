@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { UserUpdateInput } from './user-update.input';
-import { Type } from 'class-transformer';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { UserUpdateInput } from './user-update.input';
 import { UserWhereUniqueInput } from './user-where-unique.input';
 
 @ArgsType()

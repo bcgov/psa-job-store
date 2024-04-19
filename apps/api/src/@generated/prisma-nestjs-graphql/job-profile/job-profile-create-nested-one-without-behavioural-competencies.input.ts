@@ -1,9 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileCreateWithoutBehavioural_competenciesInput } from './job-profile-create-without-behavioural-competencies.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { JobProfileCreateOrConnectWithoutBehavioural_competenciesInput } from './job-profile-create-or-connect-without-behavioural-competencies.input';
-import { Prisma } from '@prisma/client';
+import { JobProfileCreateWithoutBehavioural_competenciesInput } from './job-profile-create-without-behavioural-competencies.input';
 import { JobProfileWhereUniqueInput } from './job-profile-where-unique.input';
 
 @InputType()

@@ -1,12 +1,11 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { OrganizationCreateWithoutJobProfileOrganizationInput } from './organization-create-without-job-profile-organization.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { OrganizationCreateOrConnectWithoutJobProfileOrganizationInput } from './organization-create-or-connect-without-job-profile-organization.input';
-import { OrganizationUpsertWithoutJobProfileOrganizationInput } from './organization-upsert-without-job-profile-organization.input';
-import { Prisma } from '@prisma/client';
-import { OrganizationWhereUniqueInput } from './organization-where-unique.input';
+import { OrganizationCreateWithoutJobProfileOrganizationInput } from './organization-create-without-job-profile-organization.input';
 import { OrganizationUpdateToOneWithWhereWithoutJobProfileOrganizationInput } from './organization-update-to-one-with-where-without-job-profile-organization.input';
+import { OrganizationUpsertWithoutJobProfileOrganizationInput } from './organization-upsert-without-job-profile-organization.input';
+import { OrganizationWhereUniqueInput } from './organization-where-unique.input';
 
 @InputType()
 export class OrganizationUpdateOneRequiredWithoutJobProfileOrganizationNestedInput {

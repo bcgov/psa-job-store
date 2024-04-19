@@ -1,9 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { SortOrder } from '../prisma/sort-order.enum';
+import { Field, InputType } from '@nestjs/graphql';
 import { LocationOrderByWithRelationAndSearchRelevanceInput } from '../location/location-order-by-with-relation-and-search-relevance.input';
 import { OrganizationOrderByWithRelationAndSearchRelevanceInput } from '../organization/organization-order-by-with-relation-and-search-relevance.input';
 import { PositionRequestOrderByRelationAggregateInput } from '../position-request/position-request-order-by-relation-aggregate.input';
+import { SortOrder } from '../prisma/sort-order.enum';
 import { DepartmentOrderByRelevanceInput } from './department-order-by-relevance.input';
 
 @InputType()

@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileOrganizationWhereInput } from './job-profile-organization-where.input';
-import { Type } from 'class-transformer';
-import { JobProfileOrganizationOrderByWithRelationAndSearchRelevanceInput } from './job-profile-organization-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileOrganizationWhereUniqueInput } from './job-profile-organization-where-unique.input';
-import { Int } from '@nestjs/graphql';
-import { JobProfileOrganizationCountAggregateInput } from './job-profile-organization-count-aggregate.input';
+import { Type } from 'class-transformer';
 import { JobProfileOrganizationAvgAggregateInput } from './job-profile-organization-avg-aggregate.input';
-import { JobProfileOrganizationSumAggregateInput } from './job-profile-organization-sum-aggregate.input';
-import { JobProfileOrganizationMinAggregateInput } from './job-profile-organization-min-aggregate.input';
+import { JobProfileOrganizationCountAggregateInput } from './job-profile-organization-count-aggregate.input';
 import { JobProfileOrganizationMaxAggregateInput } from './job-profile-organization-max-aggregate.input';
+import { JobProfileOrganizationMinAggregateInput } from './job-profile-organization-min-aggregate.input';
+import { JobProfileOrganizationOrderByWithRelationAndSearchRelevanceInput } from './job-profile-organization-order-by-with-relation-and-search-relevance.input';
+import { JobProfileOrganizationSumAggregateInput } from './job-profile-organization-sum-aggregate.input';
+import { JobProfileOrganizationWhereUniqueInput } from './job-profile-organization-where-unique.input';
+import { JobProfileOrganizationWhereInput } from './job-profile-organization-where.input';
 
 @ArgsType()
 export class JobProfileOrganizationAggregateArgs {

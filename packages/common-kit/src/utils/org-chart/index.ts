@@ -1,6 +1,10 @@
 import dagre from '@dagrejs/dagre';
 import { Edge, Node, Position } from 'reactflow';
-import { Elements } from '../interfaces/elements.interface';
+
+export interface Elements {
+  edges: Edge[];
+  nodes: Node[];
+}
 
 export enum AutolayoutDirection {
   Vertical,

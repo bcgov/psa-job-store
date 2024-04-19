@@ -1,13 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { OrganizationWhereInput } from './organization-where.input';
+import { ArgsType, Field, HideField, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { OrganizationOrderByWithRelationAndSearchRelevanceInput } from './organization-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { OrganizationWhereUniqueInput } from './organization-where-unique.input';
-import { HideField } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
 import { OrganizationScalarFieldEnum } from './organization-scalar-field.enum';
+import { OrganizationWhereUniqueInput } from './organization-where-unique.input';
+import { OrganizationWhereInput } from './organization-where.input';
 
 @ArgsType()
 export class FindManyOrganizationArgs {

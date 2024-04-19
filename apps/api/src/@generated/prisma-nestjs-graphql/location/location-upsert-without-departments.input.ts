@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { LocationUpdateWithoutDepartmentsInput } from './location-update-without-departments.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { LocationCreateWithoutDepartmentsInput } from './location-create-without-departments.input';
+import { LocationUpdateWithoutDepartmentsInput } from './location-update-without-departments.input';
 import { LocationWhereInput } from './location-where.input';
 
 @InputType()

@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileJobFamilyLinkWhereInput } from './job-profile-job-family-link-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileJobFamilyLinkAvgAggregateInput } from './job-profile-job-family-link-avg-aggregate.input';
+import { JobProfileJobFamilyLinkCountAggregateInput } from './job-profile-job-family-link-count-aggregate.input';
+import { JobProfileJobFamilyLinkMaxAggregateInput } from './job-profile-job-family-link-max-aggregate.input';
+import { JobProfileJobFamilyLinkMinAggregateInput } from './job-profile-job-family-link-min-aggregate.input';
 import { JobProfileJobFamilyLinkOrderByWithAggregationInput } from './job-profile-job-family-link-order-by-with-aggregation.input';
 import { JobProfileJobFamilyLinkScalarFieldEnum } from './job-profile-job-family-link-scalar-field.enum';
 import { JobProfileJobFamilyLinkScalarWhereWithAggregatesInput } from './job-profile-job-family-link-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { JobProfileJobFamilyLinkCountAggregateInput } from './job-profile-job-family-link-count-aggregate.input';
-import { JobProfileJobFamilyLinkAvgAggregateInput } from './job-profile-job-family-link-avg-aggregate.input';
 import { JobProfileJobFamilyLinkSumAggregateInput } from './job-profile-job-family-link-sum-aggregate.input';
-import { JobProfileJobFamilyLinkMinAggregateInput } from './job-profile-job-family-link-min-aggregate.input';
-import { JobProfileJobFamilyLinkMaxAggregateInput } from './job-profile-job-family-link-max-aggregate.input';
+import { JobProfileJobFamilyLinkWhereInput } from './job-profile-job-family-link-where.input';
 
 @ArgsType()
 export class JobProfileJobFamilyLinkGroupByArgs {

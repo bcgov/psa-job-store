@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileClassificationScalarWhereInput } from './job-profile-classification-scalar-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileClassificationScalarWhereInput } from './job-profile-classification-scalar-where.input';
 import { JobProfileClassificationUncheckedUpdateManyWithoutJob_profileInput } from './job-profile-classification-unchecked-update-many-without-job-profile.input';
 
 @InputType()

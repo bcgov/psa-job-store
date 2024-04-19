@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { ClassificationUpdateWithoutJob_profilesInput } from './classification-update-without-job-profiles.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { ClassificationCreateWithoutJob_profilesInput } from './classification-create-without-job-profiles.input';
+import { ClassificationUpdateWithoutJob_profilesInput } from './classification-update-without-job-profiles.input';
 import { ClassificationWhereInput } from './classification-where.input';
 
 @InputType()

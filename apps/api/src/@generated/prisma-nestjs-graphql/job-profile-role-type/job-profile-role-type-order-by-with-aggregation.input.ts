@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
-import { JobProfileRoleTypeCountOrderByAggregateInput } from './job-profile-role-type-count-order-by-aggregate.input';
 import { JobProfileRoleTypeAvgOrderByAggregateInput } from './job-profile-role-type-avg-order-by-aggregate.input';
+import { JobProfileRoleTypeCountOrderByAggregateInput } from './job-profile-role-type-count-order-by-aggregate.input';
 import { JobProfileRoleTypeMaxOrderByAggregateInput } from './job-profile-role-type-max-order-by-aggregate.input';
 import { JobProfileRoleTypeMinOrderByAggregateInput } from './job-profile-role-type-min-order-by-aggregate.input';
 import { JobProfileRoleTypeSumOrderByAggregateInput } from './job-profile-role-type-sum-order-by-aggregate.input';

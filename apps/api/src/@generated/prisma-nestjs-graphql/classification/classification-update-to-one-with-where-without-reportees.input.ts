@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { ClassificationWhereInput } from './classification-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { ClassificationUpdateWithoutReporteesInput } from './classification-update-without-reportees.input';
+import { ClassificationWhereInput } from './classification-where.input';
 
 @InputType()
 export class ClassificationUpdateToOneWithWhereWithoutReporteesInput {

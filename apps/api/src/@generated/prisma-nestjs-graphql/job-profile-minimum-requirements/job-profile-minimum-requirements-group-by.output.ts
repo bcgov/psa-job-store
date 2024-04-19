@@ -1,11 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfileMinimumRequirementsCountAggregate } from './job-profile-minimum-requirements-count-aggregate.output';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { JobProfileMinimumRequirementsAvgAggregate } from './job-profile-minimum-requirements-avg-aggregate.output';
-import { JobProfileMinimumRequirementsSumAggregate } from './job-profile-minimum-requirements-sum-aggregate.output';
-import { JobProfileMinimumRequirementsMinAggregate } from './job-profile-minimum-requirements-min-aggregate.output';
+import { JobProfileMinimumRequirementsCountAggregate } from './job-profile-minimum-requirements-count-aggregate.output';
 import { JobProfileMinimumRequirementsMaxAggregate } from './job-profile-minimum-requirements-max-aggregate.output';
+import { JobProfileMinimumRequirementsMinAggregate } from './job-profile-minimum-requirements-min-aggregate.output';
+import { JobProfileMinimumRequirementsSumAggregate } from './job-profile-minimum-requirements-sum-aggregate.output';
 
 @ObjectType()
 export class JobProfileMinimumRequirementsGroupBy {

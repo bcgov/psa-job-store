@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { BehaviouralCompetencyType } from '../prisma/behavioural-competency-type.enum';
+import { Field, InputType } from '@nestjs/graphql';
 import { BehaviouralCompetencyCategory } from '../prisma/behavioural-competency-category.enum';
+import { BehaviouralCompetencyType } from '../prisma/behavioural-competency-type.enum';
 
 @InputType()
 export class BehaviouralCompetencyUpdateManyMutationInput {

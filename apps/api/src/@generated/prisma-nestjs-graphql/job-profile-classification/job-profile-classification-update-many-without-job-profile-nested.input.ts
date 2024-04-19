@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileClassificationCreateWithoutJob_profileInput } from './job-profile-classification-create-without-job-profile.input';
-import { Type } from 'class-transformer';
-import { JobProfileClassificationCreateOrConnectWithoutJob_profileInput } from './job-profile-classification-create-or-connect-without-job-profile.input';
-import { JobProfileClassificationUpsertWithWhereUniqueWithoutJob_profileInput } from './job-profile-classification-upsert-with-where-unique-without-job-profile.input';
-import { JobProfileClassificationCreateManyJob_profileInputEnvelope } from './job-profile-classification-create-many-job-profile-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileClassificationWhereUniqueInput } from './job-profile-classification-where-unique.input';
-import { JobProfileClassificationUpdateWithWhereUniqueWithoutJob_profileInput } from './job-profile-classification-update-with-where-unique-without-job-profile.input';
-import { JobProfileClassificationUpdateManyWithWhereWithoutJob_profileInput } from './job-profile-classification-update-many-with-where-without-job-profile.input';
+import { Type } from 'class-transformer';
+import { JobProfileClassificationCreateManyJob_profileInputEnvelope } from './job-profile-classification-create-many-job-profile-input-envelope.input';
+import { JobProfileClassificationCreateOrConnectWithoutJob_profileInput } from './job-profile-classification-create-or-connect-without-job-profile.input';
+import { JobProfileClassificationCreateWithoutJob_profileInput } from './job-profile-classification-create-without-job-profile.input';
 import { JobProfileClassificationScalarWhereInput } from './job-profile-classification-scalar-where.input';
+import { JobProfileClassificationUpdateManyWithWhereWithoutJob_profileInput } from './job-profile-classification-update-many-with-where-without-job-profile.input';
+import { JobProfileClassificationUpdateWithWhereUniqueWithoutJob_profileInput } from './job-profile-classification-update-with-where-unique-without-job-profile.input';
+import { JobProfileClassificationUpsertWithWhereUniqueWithoutJob_profileInput } from './job-profile-classification-upsert-with-where-unique-without-job-profile.input';
+import { JobProfileClassificationWhereUniqueInput } from './job-profile-classification-where-unique.input';
 
 @InputType()
 export class JobProfileClassificationUpdateManyWithoutJob_profileNestedInput {

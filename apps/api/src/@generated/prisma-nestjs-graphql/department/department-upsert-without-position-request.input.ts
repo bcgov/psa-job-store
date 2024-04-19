@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentUpdateWithoutPositionRequestInput } from './department-update-without-position-request.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { DepartmentCreateWithoutPositionRequestInput } from './department-create-without-position-request.input';
+import { DepartmentUpdateWithoutPositionRequestInput } from './department-update-without-position-request.input';
 import { DepartmentWhereInput } from './department-where.input';
 
 @InputType()

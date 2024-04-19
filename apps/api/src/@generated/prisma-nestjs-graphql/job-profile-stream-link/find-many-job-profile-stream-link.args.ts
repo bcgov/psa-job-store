@@ -1,13 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileStreamLinkWhereInput } from './job-profile-stream-link-where.input';
+import { ArgsType, Field, HideField, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { JobProfileStreamLinkOrderByWithRelationAndSearchRelevanceInput } from './job-profile-stream-link-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { JobProfileStreamLinkWhereUniqueInput } from './job-profile-stream-link-where-unique.input';
-import { HideField } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
 import { JobProfileStreamLinkScalarFieldEnum } from './job-profile-stream-link-scalar-field.enum';
+import { JobProfileStreamLinkWhereUniqueInput } from './job-profile-stream-link-where-unique.input';
+import { JobProfileStreamLinkWhereInput } from './job-profile-stream-link-where.input';
 
 @ArgsType()
 export class FindManyJobProfileStreamLinkArgs {

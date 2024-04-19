@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { DepartmentCreateNestedManyWithoutLocationInput } from '../department/department-create-nested-many-without-location.input';
 import { PositionRequestCreateNestedManyWithoutWorkLocationInput } from '../position-request/position-request-create-nested-many-without-work-location.input';
 

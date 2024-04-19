@@ -1,13 +1,11 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
-import { PositionRequestCountAggregate } from './position-request-count-aggregate.output';
 import { PositionRequestAvgAggregate } from './position-request-avg-aggregate.output';
-import { PositionRequestSumAggregate } from './position-request-sum-aggregate.output';
-import { PositionRequestMinAggregate } from './position-request-min-aggregate.output';
+import { PositionRequestCountAggregate } from './position-request-count-aggregate.output';
 import { PositionRequestMaxAggregate } from './position-request-max-aggregate.output';
+import { PositionRequestMinAggregate } from './position-request-min-aggregate.output';
+import { PositionRequestSumAggregate } from './position-request-sum-aggregate.output';
 
 @ObjectType()
 export class PositionRequestGroupBy {

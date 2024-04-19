@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { OrganizationUpdateOneRequiredWithoutDepartmentsNestedInput } from '../organization/organization-update-one-required-without-departments-nested.input';
 import { PositionRequestUpdateManyWithoutDepartmentNestedInput } from '../position-request/position-request-update-many-without-department-nested.input';
 import { PositionRequestUpdateManyWithoutPaylist_departmentNestedInput } from '../position-request/position-request-update-many-without-paylist-department-nested.input';

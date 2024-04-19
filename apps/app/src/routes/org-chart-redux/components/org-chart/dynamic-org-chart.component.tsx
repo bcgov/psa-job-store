@@ -15,11 +15,11 @@ import ReactFlow, {
 } from 'reactflow';
 import { useDebounce } from 'usehooks-ts';
 import { useLazyGetOrgChartQuery } from '../../../../redux/services/graphql-api/org-chart.api';
+import { autolayout } from '../../../org-chart-next/utils/autolayout.util';
 import { initialElements } from '../../constants/initial-elements.constant';
 import { OrgChartContext } from '../../enums/org-chart-context.enum';
 import { OrgChartType } from '../../enums/org-chart-type.enum';
 import { Elements } from '../../interfaces/elements.interface';
-import { autolayout } from '../../utils/autolayout.util';
 import { getFocusedElements } from '../../utils/get-focused-elements.util';
 import { DepartmentFilter } from '../department-filter.component';
 import { OrgChartNode } from '../org-chart-node.component';

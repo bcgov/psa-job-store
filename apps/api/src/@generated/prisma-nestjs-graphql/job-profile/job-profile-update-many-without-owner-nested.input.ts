@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileCreateWithoutOwnerInput } from './job-profile-create-without-owner.input';
-import { Type } from 'class-transformer';
-import { JobProfileCreateOrConnectWithoutOwnerInput } from './job-profile-create-or-connect-without-owner.input';
-import { JobProfileUpsertWithWhereUniqueWithoutOwnerInput } from './job-profile-upsert-with-where-unique-without-owner.input';
-import { JobProfileCreateManyOwnerInputEnvelope } from './job-profile-create-many-owner-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileWhereUniqueInput } from './job-profile-where-unique.input';
-import { JobProfileUpdateWithWhereUniqueWithoutOwnerInput } from './job-profile-update-with-where-unique-without-owner.input';
-import { JobProfileUpdateManyWithWhereWithoutOwnerInput } from './job-profile-update-many-with-where-without-owner.input';
+import { Type } from 'class-transformer';
+import { JobProfileCreateManyOwnerInputEnvelope } from './job-profile-create-many-owner-input-envelope.input';
+import { JobProfileCreateOrConnectWithoutOwnerInput } from './job-profile-create-or-connect-without-owner.input';
+import { JobProfileCreateWithoutOwnerInput } from './job-profile-create-without-owner.input';
 import { JobProfileScalarWhereInput } from './job-profile-scalar-where.input';
+import { JobProfileUpdateManyWithWhereWithoutOwnerInput } from './job-profile-update-many-with-where-without-owner.input';
+import { JobProfileUpdateWithWhereUniqueWithoutOwnerInput } from './job-profile-update-with-where-unique-without-owner.input';
+import { JobProfileUpsertWithWhereUniqueWithoutOwnerInput } from './job-profile-upsert-with-where-unique-without-owner.input';
+import { JobProfileWhereUniqueInput } from './job-profile-where-unique.input';
 
 @InputType()
 export class JobProfileUpdateManyWithoutOwnerNestedInput {

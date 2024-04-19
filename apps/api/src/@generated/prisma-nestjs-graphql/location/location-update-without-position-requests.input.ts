@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { DepartmentUpdateManyWithoutLocationNestedInput } from '../department/department-update-many-without-location-nested.input';
 
 @InputType()

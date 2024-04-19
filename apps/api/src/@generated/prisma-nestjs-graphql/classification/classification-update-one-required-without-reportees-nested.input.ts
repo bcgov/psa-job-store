@@ -1,12 +1,11 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { ClassificationCreateWithoutReporteesInput } from './classification-create-without-reportees.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { ClassificationCreateOrConnectWithoutReporteesInput } from './classification-create-or-connect-without-reportees.input';
-import { ClassificationUpsertWithoutReporteesInput } from './classification-upsert-without-reportees.input';
-import { Prisma } from '@prisma/client';
-import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
+import { ClassificationCreateWithoutReporteesInput } from './classification-create-without-reportees.input';
 import { ClassificationUpdateToOneWithWhereWithoutReporteesInput } from './classification-update-to-one-with-where-without-reportees.input';
+import { ClassificationUpsertWithoutReporteesInput } from './classification-upsert-without-reportees.input';
+import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
 
 @InputType()
 export class ClassificationUpdateOneRequiredWithoutReporteesNestedInput {

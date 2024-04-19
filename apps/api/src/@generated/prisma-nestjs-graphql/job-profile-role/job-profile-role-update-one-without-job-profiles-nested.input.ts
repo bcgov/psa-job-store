@@ -1,13 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileRoleCreateWithoutJob_profilesInput } from './job-profile-role-create-without-job-profiles.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { JobProfileRoleCreateOrConnectWithoutJob_profilesInput } from './job-profile-role-create-or-connect-without-job-profiles.input';
-import { JobProfileRoleUpsertWithoutJob_profilesInput } from './job-profile-role-upsert-without-job-profiles.input';
-import { JobProfileRoleWhereInput } from './job-profile-role-where.input';
-import { Prisma } from '@prisma/client';
-import { JobProfileRoleWhereUniqueInput } from './job-profile-role-where-unique.input';
+import { JobProfileRoleCreateWithoutJob_profilesInput } from './job-profile-role-create-without-job-profiles.input';
 import { JobProfileRoleUpdateToOneWithWhereWithoutJob_profilesInput } from './job-profile-role-update-to-one-with-where-without-job-profiles.input';
+import { JobProfileRoleUpsertWithoutJob_profilesInput } from './job-profile-role-upsert-without-job-profiles.input';
+import { JobProfileRoleWhereUniqueInput } from './job-profile-role-where-unique.input';
+import { JobProfileRoleWhereInput } from './job-profile-role-where.input';
 
 @InputType()
 export class JobProfileRoleUpdateOneWithoutJob_profilesNestedInput {

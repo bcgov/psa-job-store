@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileBehaviouralCompetencyCreateWithoutBehavioural_competencyInput } from './job-profile-behavioural-competency-create-without-behavioural-competency.input';
-import { Type } from 'class-transformer';
-import { JobProfileBehaviouralCompetencyCreateOrConnectWithoutBehavioural_competencyInput } from './job-profile-behavioural-competency-create-or-connect-without-behavioural-competency.input';
-import { JobProfileBehaviouralCompetencyCreateManyBehavioural_competencyInputEnvelope } from './job-profile-behavioural-competency-create-many-behavioural-competency-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { JobProfileBehaviouralCompetencyCreateManyBehavioural_competencyInputEnvelope } from './job-profile-behavioural-competency-create-many-behavioural-competency-input-envelope.input';
+import { JobProfileBehaviouralCompetencyCreateOrConnectWithoutBehavioural_competencyInput } from './job-profile-behavioural-competency-create-or-connect-without-behavioural-competency.input';
+import { JobProfileBehaviouralCompetencyCreateWithoutBehavioural_competencyInput } from './job-profile-behavioural-competency-create-without-behavioural-competency.input';
 import { JobProfileBehaviouralCompetencyWhereUniqueInput } from './job-profile-behavioural-competency-where-unique.input';
 
 @InputType()

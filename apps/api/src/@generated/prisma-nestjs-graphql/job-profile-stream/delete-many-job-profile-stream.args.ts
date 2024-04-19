@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileStreamWhereInput } from './job-profile-stream-where.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileStreamWhereInput } from './job-profile-stream-where.input';
 
 @ArgsType()
 export class DeleteManyJobProfileStreamArgs {

@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { DepartmentUpdateInput } from './department-update.input';
-import { Type } from 'class-transformer';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { DepartmentUpdateInput } from './department-update.input';
 import { DepartmentWhereUniqueInput } from './department-where-unique.input';
 
 @ArgsType()

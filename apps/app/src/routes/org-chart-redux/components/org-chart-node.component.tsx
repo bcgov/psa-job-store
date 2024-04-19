@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { CheckCircleFilled, UserAddOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Row, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Row, Tag, Tooltip, Typography } from 'antd';
 import { CSSProperties } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { Handle, NodeProps, Position } from 'reactflow';
@@ -39,7 +39,8 @@ const renderPositionNumber = (roles: string[], positionData: Record<string, any>
     if (positionData.position_status === 'Approved') {
       return positionData.id;
     } else {
-      return <em>Pending approval</em>;
+      // return <em>Pending approval</em>;
+      return positionData.id;
     }
   }
 };
@@ -144,7 +145,7 @@ export const OrgChartNode = ({
           </Tooltip>
           <Row gutter={8}>
             <Col style={{ flex: 1 }}>Department ID :</Col>
-            <Col>{data.department.id}</Col>
+            <Col>{data.department?.id}</Col>
           </Row>
           <Row gutter={8}>
             <Col style={{ flex: 1 }}>Position Number:</Col>
@@ -166,6 +167,21 @@ export const OrgChartNode = ({
             <CheckCircleFilled style={{ color: '#52C41A' }} /> Selected
           </div>
         )}
+        {orgChartType === OrgChartType.READONLY &&
+          (data.isNewPosition === true || data.isSupervisor === true || data.isExcludedManager === true) && (
+            <div
+              style={{
+                margin: '0.25rem 0',
+                padding: '0.25rem',
+                textAlign: 'center',
+                width: '100%',
+              }}
+            >
+              {data.isExcludedManager && <Tag color="orange">Excluded Manager</Tag>}
+              {data.isSupervisor && <Tag color="green">Supervisor</Tag>}
+              {data.isNewPosition === true && <Tag color="blue">New Position</Tag>}
+            </div>
+          )}
       </div>
       {/* <NodeToolbar isVisible={selected} position={Bottom}></NodeToolbar> */}
       <Handle type="source" position={sourcePosition} isConnectable={isConnectable} />

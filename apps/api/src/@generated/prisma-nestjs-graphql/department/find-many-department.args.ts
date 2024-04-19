@@ -1,13 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { DepartmentWhereInput } from './department-where.input';
+import { ArgsType, Field, HideField, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { DepartmentOrderByWithRelationAndSearchRelevanceInput } from './department-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { DepartmentWhereUniqueInput } from './department-where-unique.input';
-import { HideField } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
 import { DepartmentScalarFieldEnum } from './department-scalar-field.enum';
+import { DepartmentWhereUniqueInput } from './department-where-unique.input';
+import { DepartmentWhereInput } from './department-where.input';
 
 @ArgsType()
 export class FindManyDepartmentArgs {
