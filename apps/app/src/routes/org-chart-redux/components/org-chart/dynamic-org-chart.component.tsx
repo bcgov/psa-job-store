@@ -1,4 +1,4 @@
-import { Col, Row, Space } from 'antd';
+import { Col, Row, Space, Spin } from 'antd';
 import { autolayout } from 'common-kit';
 import Fuse from 'fuse.js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -55,7 +55,7 @@ export const DynamicOrgChart = ({
 }: DynamicOrgChartProps) => {
   const [elements, setElements] = useState<Elements>(initialElements);
   const debouncedElements = useDebounce(elements, 500);
-  const [getOrgChart, { currentData: orgChartData }] = useLazyGetOrgChartQuery();
+  const [getOrgChart, { currentData: orgChartData, isFetching: orgChartDataIsFetching }] = useLazyGetOrgChartQuery();
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
@@ -243,30 +243,36 @@ export const DynamicOrgChart = ({
           </Space>
         </Col>
       </Row>
-      <ReactFlow
-        onEdgesChange={onEdgesChange}
-        onNodesChange={onNodesChange}
-        onPaneClick={() => {
-          setIsDirty(true);
-          setSearchTerm(undefined);
-        }}
-        edges={edges}
-        elevateEdgesOnSelect
-        minZoom={0.1}
-        nodeTypes={nodeTypes}
-        nodes={nodes}
-        nodesConnectable={false}
-        nodesDraggable={false}
-      >
-        <Background />
-        <Controls position="top-right" />
-        <MiniMap
-          nodeStrokeWidth={3}
-          pannable
-          style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
-          zoomable
-        />
-      </ReactFlow>
+      {orgChartDataIsFetching ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
+          <Spin spinning style={{ margin: 'auto' }} />
+        </div>
+      ) : (
+        <ReactFlow
+          onEdgesChange={onEdgesChange}
+          onNodesChange={onNodesChange}
+          onPaneClick={() => {
+            setIsDirty(true);
+            setSearchTerm(undefined);
+          }}
+          edges={edges}
+          elevateEdgesOnSelect
+          minZoom={0.1}
+          nodeTypes={nodeTypes}
+          nodes={nodes}
+          nodesConnectable={false}
+          nodesDraggable={false}
+        >
+          <Background />
+          <Controls position="top-right" />
+          <MiniMap
+            nodeStrokeWidth={3}
+            pannable
+            style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
+            zoomable
+          />
+        </ReactFlow>
+      )}
     </div>
   );
 };
