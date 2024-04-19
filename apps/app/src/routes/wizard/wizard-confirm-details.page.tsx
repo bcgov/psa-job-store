@@ -736,10 +736,12 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     labelCol={{ className: 'card-label' }}
                     colon={false}
                   >
-                    <PositionProfile
-                      positionNumber={positionRequestData?.reports_to_position_id}
-                      orgChartData={positionRequestData?.orgchart_json}
-                    ></PositionProfile>
+                    <div data-testid="reporting-manager-info">
+                      <PositionProfile
+                        positionNumber={positionRequestData?.reports_to_position_id}
+                        orgChartData={positionRequestData?.orgchart_json}
+                      ></PositionProfile>
+                    </div>
                     {/* <div style={{ margin: 0 }}>
                       {firstActivePosition2 && !isFetchingPositionProfile2 && !isFetchingPositionProfileError2 && (
                         <div data-testid="reporting-manager-info">
