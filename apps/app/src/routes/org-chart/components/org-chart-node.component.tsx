@@ -61,7 +61,6 @@ export const OrgChartNode = ({
   orgChartContext,
   orgChartData,
   orgChartType,
-  ...rest
 }: OrgChartNodeProps) => {
   const auth = useAuth();
   const positionIsVacant = data.employees.length === 0;
