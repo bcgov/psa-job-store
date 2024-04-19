@@ -746,6 +746,20 @@ export class PositionRequestApiService {
       const orgChart = positionRequest.orgchart_json;
 
       if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
+        // Remove existing node with role: 'first_level_excluded_manager'
+        const updatedNodes = (orgChart.nodes as any[]).filter(
+          (node) => node.data?.role !== 'first_level_excluded_manager',
+        );
+
+        const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
+          const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
+          const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
+          return (
+            sourceNode?.data?.role !== 'first_level_excluded_manager' &&
+            targetNode?.data?.role !== 'first_level_excluded_manager'
+          );
+        });
+
         const isExcludedManagerInOrgChart = (orgChart.nodes as any[]).some(
           (node) => node.id === updateData.additional_info_excluded_mgr_position_number,
         );
@@ -769,7 +783,7 @@ export class PositionRequestApiService {
           const updatedOrgChart = {
             ...orgChart,
             nodes: [
-              ...(orgChart.nodes as any[]),
+              ...updatedNodes,
               {
                 id: updateData.additional_info_excluded_mgr_position_number,
                 data: {
@@ -799,8 +813,7 @@ export class PositionRequestApiService {
               },
             ],
             edges: [
-              ...(orgChart.edges as any[]),
-
+              ...updatedEdges,
               {
                 id: `${updateData.additional_info_excluded_mgr_position_number}-${topLevelPositionId}`,
                 type: 'smoothstep',
