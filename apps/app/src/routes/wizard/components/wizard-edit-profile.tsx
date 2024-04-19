@@ -31,13 +31,13 @@ import '../../../components/app/common/css/custom-descriptions.css';
 import '../../../components/app/common/css/custom-form.css';
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
 import {
+  AccountabilitiesModel,
   GetClassificationsResponse,
   JobProfileModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useGetJobProfileQuery, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
-import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { ContextOptions } from './context-options.component';
@@ -169,6 +169,7 @@ const WizardEditProfile = forwardRef(
         handleSectionScroll(currentSection);
         setCurrentSection(null);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     // get original profile data for comparison to the edited state
     const { data: originalProfileData } = useGetJobProfileQuery({ id: positionRequestProfileId ?? -1 });
@@ -1080,6 +1081,7 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
+        setEditedAccReqFields((prev) => ({ ...prev, [index]: true }));
         acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
         trigger();
       }
@@ -1088,6 +1090,10 @@ const WizardEditProfile = forwardRef(
     // Function to add back a removed field
     const handleAccReqAddBack = (index: number) => {
       const currentValues = getValues('accountabilities');
+      setEditedAccReqFields((prev) => ({
+        ...prev,
+        [index]: (currentValues[index] as AccountabilitiesModel)?.text !== originalAccReqFields[index]?.text,
+      }));
       acc_req_update(index, { ...currentValues[index], disabled: false });
     };
 
@@ -1427,6 +1433,7 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
+        setEditedMinReqFields((prev) => ({ ...prev, [index]: true }));
         education_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
@@ -1435,6 +1442,10 @@ const WizardEditProfile = forwardRef(
     // Function to add back a removed field
     const handleMinReqAddBack = (index: number) => {
       const currentValues = getValues('education');
+      setEditedMinReqFields((prev) => ({
+        ...prev,
+        [index]: (currentValues[index] as AccountabilitiesModel)?.text !== originalMinReqFields[index]?.text,
+      }));
       education_update(index, { ...currentValues[index], disabled: false });
     };
 
@@ -1621,12 +1632,13 @@ const WizardEditProfile = forwardRef(
           content: 'This action cannot be undone.',
           onOk: () => {
             // If confirmed, remove the item
-            setEditedRelWorkFields((prev) => ({ ...prev, [index]: true }));
+            setEditedRelWorkFields((prev) => ({ ...prev, [index]: false }));
             job_experience_remove(index);
           },
         });
       } else {
         // If it's an original field, mark as disabled
+        setEditedRelWorkFields((prev) => ({ ...prev, [index]: true }));
         job_experience_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
@@ -1635,6 +1647,10 @@ const WizardEditProfile = forwardRef(
     // Function to add back a removed field
     const handleRelWorkAddBack = (index: number) => {
       const currentValues = getValues('job_experience');
+      setEditedRelWorkFields((prev) => ({
+        ...prev,
+        [index]: (currentValues[index] as AccountabilitiesModel)?.text !== originalRelWorkFields[index]?.text,
+      }));
       job_experience_update(index, { ...currentValues[index], disabled: false });
     };
 
@@ -1800,6 +1816,7 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
+        setEditedSecurityScreeningsFields((prev) => ({ ...prev, [index]: true }));
         security_screenings_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
@@ -1808,6 +1825,12 @@ const WizardEditProfile = forwardRef(
     // Function to add back a removed field
     const handleSecurityScreeningsAddBack = (index: number) => {
       const currentValues = getValues('security_screenings');
+      // adding back - if it's equal to original, set to false
+      setEditedSecurityScreeningsFields((prev) => ({
+        ...prev,
+        [index]:
+          (currentValues[index] as AccountabilitiesModel)?.text !== originalSecurityScreeningsFields[index]?.text,
+      }));
       security_screenings_update(index, { ...currentValues[index], disabled: false });
     };
 
@@ -2726,31 +2749,9 @@ const WizardEditProfile = forwardRef(
 
     // DIFFS DONE
 
-    const [getPositionProfile, { data: positionProfileData, isFetching: isFetchingPositionProfile }] =
-      useLazyGetPositionProfileQuery();
-
     const { data: positionRequestData } = useGetPositionRequestQuery({
       id: positionRequestId ? positionRequestId : -1,
     });
-
-    useEffect(() => {
-      if (positionRequestData?.positionRequest?.reports_to_position_id) {
-        getPositionProfile({ positionNumber: positionRequestData.positionRequest.reports_to_position_id.toString() });
-      }
-    }, [positionRequestData, getPositionProfile]);
-
-    const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel>();
-    const [additionalPositions, setAdditionalPositions] = useState(0);
-
-    useEffect(() => {
-      if (positionProfileData && positionProfileData.positionProfile) {
-        const activePositions = positionProfileData.positionProfile.filter((p) => p.status === 'Active');
-        setFirstActivePosition(activePositions[0] || null);
-
-        // Set state to the number of additional active positions
-        setAdditionalPositions(positionProfileData.positionProfile.length - 1);
-      }
-    }, [positionProfileData]);
 
     if (isLoading) {
       return <LoadingSpinnerWithMessage />;
@@ -3076,7 +3077,7 @@ const WizardEditProfile = forwardRef(
                               },
                               true,
                               undefined,
-                              'accountabilities-warning',
+                              'optional-accountabilities-warning',
                             );
                             // setRenderKey((prevKey) => prevKey + 1);
                           }}

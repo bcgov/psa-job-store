@@ -121,12 +121,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     { data: positionProfileData, isFetching: isFetchingPositionProfile, isError: isFetchingPositionProfileError },
   ] = useLazyGetPositionProfileQuery();
 
-  // this is for the reporting manager
-  const [
-    getPositionProfile2,
-    { data: positionProfileData2, isFetching: isFetchingPositionProfile2, isError: isFetchingPositionProfileError2 },
-  ] = useLazyGetPositionProfileQuery();
-
   const departmentsData = useGetDepartmentsWithLocationQuery().data?.departments;
 
   // State to track selected location
@@ -146,8 +140,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const [additionalPositions, setAdditionalPositions] = useState(0);
   const [noPositions, setNoPositions] = useState(false);
   const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel>();
-  const [firstActivePosition2, setFirstActivePosition2] = useState<PositionProfileModel>();
-  const [additionalPositions2, setAdditionalPositions2] = useState(0);
 
   useEffect(() => {
     if (positionProfileData && positionProfileData.positionProfile) {
@@ -163,16 +155,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       setAdditionalPositions(positionProfileData.positionProfile.length - 1);
     }
   }, [positionProfileData]);
-
-  useEffect(() => {
-    if (positionProfileData2 && positionProfileData2.positionProfile) {
-      const activePositions = positionProfileData2.positionProfile.filter((p) => p.status === 'Active');
-      setFirstActivePosition2(activePositions[0] || null);
-
-      // Set state to the number of additional active positions
-      setAdditionalPositions2(positionProfileData2.positionProfile.length - 1);
-    }
-  }, [positionProfileData2]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchPositionProfile = useCallback(
@@ -201,16 +183,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   // });
 
   // console.log('positionRequestData: ', positionRequestData);
-
-  // get profile info for reporting position from reports_to_position_id using GetPositionProfileQuery and useEffect
-  useEffect(() => {
-    if (positionRequestData?.reports_to_position_id) {
-      getPositionProfile2({
-        positionNumber: positionRequestData.reports_to_position_id.toString(),
-        uniqueKey: 'managerProfile',
-      });
-    }
-  }, [positionRequestData?.reports_to_position_id, getPositionProfile2]);
 
   // get profile info for excluded manager from additional_info_excluded_mgr_position_number using GetPositionProfileQuery and useEffect
   useEffect(() => {
@@ -489,7 +461,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
             onClick={() => showModal()}
             data-testid="next-button"
             loading={isLoading}
-            disabled={isFetchingPositionProfile || isFetchingPositionProfile2}
+            disabled={isFetchingPositionProfile}
           >
             Save and next
           </Button>,
@@ -767,10 +739,12 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     labelCol={{ className: 'card-label' }}
                     colon={false}
                   >
-                    <PositionProfile
-                      positionNumber={positionRequestData?.reports_to_position_id}
-                      orgChartData={positionRequestData?.orgchart_json}
-                    ></PositionProfile>
+                    <div data-testid="reporting-manager-info">
+                      <PositionProfile
+                        positionNumber={positionRequestData?.reports_to_position_id}
+                        orgChartData={positionRequestData?.orgchart_json}
+                      ></PositionProfile>
+                    </div>
                     {/* <div style={{ margin: 0 }}>
                       {firstActivePosition2 && !isFetchingPositionProfile2 && !isFetchingPositionProfileError2 && (
                         <div data-testid="reporting-manager-info">
