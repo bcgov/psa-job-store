@@ -46,6 +46,9 @@ export const departmentApi = graphqlApi.injectEndpoints({
           document: gql`
             query Department($id: String!) {
               department(where: { id: $id }) {
+                id
+                name
+                code
                 organization {
                   id
                   peoplesoft_id

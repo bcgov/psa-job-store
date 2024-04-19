@@ -18,7 +18,6 @@ import { ServiceRequestDetails } from '../classification-tasks/components/servic
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { OrgChart } from '../org-chart-redux/components/org-chart';
 import { OrgChartType } from '../org-chart-redux/enums/org-chart-type.enum';
-import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
 import { useWizardContext } from './components/wizard.provider';
 import './position-request.page.css';
 import { WizardConfirmDetailsPage } from './wizard-confirm-details.page';
@@ -241,26 +240,13 @@ export const PositionRequestPage = () => {
       key: '2',
       label: 'Organization Chart',
       children: (
-        <>
-          <div style={{ overflow: 'hidden', position: 'relative', height: '800px' }}>
-            <OrgChart type={OrgChartType.READONLY} elements={snapshotCopy} />
-          </div>
-          <div style={{ overflow: 'hidden', position: 'relative', height: '800px' }}>
-            <OrgChartWrapped
-              selectedDepartment={unwrappedPositionRequestData?.department_id ?? null}
-              orgChartSnapshot={snapshotCopy}
-              highlightPositionId={'extraNode'}
-              extraNodeInfo={{
-                nodeId: 'extraNode',
-                title: unwrappedPositionRequestData?.title,
-                classification: { code: '', name: '' },
-                status: unwrappedPositionRequestData?.status,
-                targetNodeId: unwrappedPositionRequestData?.reports_to_position_id?.toString(),
-                submittedBy: unwrappedPositionRequestData?.user_name,
-              }}
-            />
-          </div>
-        </>
+        <div style={{ height: '100%' }}>
+          <OrgChart
+            type={OrgChartType.READONLY}
+            departmentId={unwrappedPositionRequestData?.department_id ?? ''}
+            elements={snapshotCopy}
+          />
+        </div>
       ),
     },
     ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json)
