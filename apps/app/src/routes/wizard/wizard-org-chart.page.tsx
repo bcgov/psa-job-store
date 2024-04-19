@@ -75,12 +75,14 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
           <Link to="/" aria-label="Go to dashboard">
             <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
           </Link>
-          {positionRequest?.title ? positionRequest.title : 'New position'}
+          {positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position'}
         </div>
       }
       subTitle="Here you are able to create a position. Start by clicking the supervisor of the position you would like to create."
       hpad={false}
-      additionalBreadcrumb={{ title: positionRequest?.title ? positionRequest.title : 'New position' }}
+      additionalBreadcrumb={{
+        title: positionRequest?.title && positionRequest?.title != 'Untitled' ? positionRequest.title : 'New position',
+      }}
       grayBg={false}
       pageHeaderExtra={[
         <Button onClick={() => navigate('/')}>Cancel</Button>,

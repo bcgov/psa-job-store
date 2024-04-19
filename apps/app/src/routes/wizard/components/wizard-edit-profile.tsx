@@ -26,6 +26,7 @@ import DOMPurify from 'dompurify';
 import debounce from 'lodash.debounce';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
+import PositionProfile from '../../../components/app/common/components/positionProfile';
 import '../../../components/app/common/css/custom-descriptions.css';
 import '../../../components/app/common/css/custom-form.css';
 import { useLazyGetClassificationsQuery } from '../../../redux/services/graphql-api/classification.api';
@@ -431,7 +432,7 @@ const WizardEditProfile = forwardRef(
         initialMinReqFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
           const isEdited =
-            item.text !== originalMinReqFieldsValue[index]?.text ||
+            (item.text !== originalMinReqFieldsValue[index]?.text && item.is_significant == true) ||
             (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
@@ -481,7 +482,7 @@ const WizardEditProfile = forwardRef(
         initialRelWorkFieldsValue?.forEach((item, index) => {
           // Determine if the field has been edited
           const isEdited =
-            item.text !== originalRelWorkFieldsValue[index]?.text ||
+            (item.text !== originalRelWorkFieldsValue[index]?.text && item.is_significant == true) ||
             (item.disabled === true && item.is_significant == true);
           initialEditStatus[index] = isEdited;
         });
@@ -1566,8 +1567,8 @@ const WizardEditProfile = forwardRef(
               confirmRemoveModal={() =>
                 WizardModal(
                   'Do you want to make changes to education and work experiences?',
-                  reqAlertShown,
-                  setReqAlertShown,
+                  minReqAlertShown,
+                  setMinReqAlertShown,
                   () => handleMinReqRemove(index),
                   true,
                   undefined,
@@ -1769,8 +1770,8 @@ const WizardEditProfile = forwardRef(
               confirmRemoveModal={() =>
                 WizardModal(
                   'Do you want to make changes to related experiences?',
-                  reqAlertShown,
-                  setReqAlertShown,
+                  relWorkAlertShown,
+                  setRelWorkAlertShown,
                   () => handleRelWorkRemove(index),
                   true,
                   undefined,
@@ -2845,7 +2846,11 @@ const WizardEditProfile = forwardRef(
                 {effectiveData?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
-                {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
+                <PositionProfile
+                  positionNumber={positionRequestData?.positionRequest?.reports_to_position_id?.toString()}
+                  orgChartData={positionRequestData?.positionRequest?.orgchart_json}
+                ></PositionProfile>
+                {/* {isFetchingPositionProfile && <LoadingSpinnerWithMessage mode="small" />}
                 {firstActivePosition && !isFetchingPositionProfile && (
                   <div>
                     <p
@@ -2861,7 +2866,7 @@ const WizardEditProfile = forwardRef(
                 )}
                 {!firstActivePosition && !isFetchingPositionProfile && (
                   <div>Position {positionRequestData?.positionRequest?.reports_to_position_id} is unoccupied</div>
-                )}
+                )} */}
               </Descriptions.Item>
               <Descriptions.Item label="Job Store #">{effectiveData?.number}</Descriptions.Item>
             </Descriptions>

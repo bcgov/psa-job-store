@@ -25,6 +25,7 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/custom-form.css';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
 import { useGetLocationsQuery } from '../../redux/services/graphql-api/location.api';
@@ -766,7 +767,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     labelCol={{ className: 'card-label' }}
                     colon={false}
                   >
-                    <div style={{ margin: 0 }}>
+                    <PositionProfile
+                      positionNumber={positionRequestData?.reports_to_position_id}
+                      orgChartData={positionRequestData?.orgchart_json}
+                    ></PositionProfile>
+                    {/* <div style={{ margin: 0 }}>
                       {firstActivePosition2 && !isFetchingPositionProfile2 && !isFetchingPositionProfileError2 && (
                         <div data-testid="reporting-manager-info">
                           <p
@@ -780,10 +785,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                           </Typography.Paragraph>
                         </div>
                       )}
-                      {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
                       {isFetchingPositionProfile2 && <LoadingSpinnerWithMessage mode={'small'} />}
                       {isFetchingPositionProfileError2 && <p>Error loading, please refresh page</p>}
-                    </div>
+                    </div> */}
                   </Form.Item>
 
                   <Divider className="hr-reduced-margin" />

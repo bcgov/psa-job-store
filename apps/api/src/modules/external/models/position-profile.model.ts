@@ -27,4 +27,19 @@ export class PositionProfile {
 
   @Field()
   status: string;
+
+  @Field({ nullable: true })
+  employeeId?: string;
+
+  @Field({ nullable: true })
+  departmentId?: string;
+
+  @Field({ nullable: true })
+  organizationId?: string;
+
+  @Field({ nullable: true })
+  classificationId?: string;
+
+  @Field({ nullable: true })
+  classificationCode?: string;
 }
