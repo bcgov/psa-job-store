@@ -1,10 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfileHistoryWhereInput } from './job-profile-history-where.input';
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { DateTimeFilter } from '../prisma/date-time-filter.input';
 import { IntFilter } from '../prisma/int-filter.input';
 import { JsonFilter } from '../prisma/json-filter.input';
-import { DateTimeFilter } from '../prisma/date-time-filter.input';
+import { JobProfileHistoryWhereInput } from './job-profile-history-where.input';
 
 @InputType()
 export class JobProfileHistoryWhereUniqueInput {

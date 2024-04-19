@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { PositionRequestCreateWithoutPaylist_departmentInput } from './position-request-create-without-paylist-department.input';
-import { Type } from 'class-transformer';
-import { PositionRequestCreateOrConnectWithoutPaylist_departmentInput } from './position-request-create-or-connect-without-paylist-department.input';
-import { PositionRequestCreateManyPaylist_departmentInputEnvelope } from './position-request-create-many-paylist-department-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { PositionRequestCreateManyPaylist_departmentInputEnvelope } from './position-request-create-many-paylist-department-input-envelope.input';
+import { PositionRequestCreateOrConnectWithoutPaylist_departmentInput } from './position-request-create-or-connect-without-paylist-department.input';
+import { PositionRequestCreateWithoutPaylist_departmentInput } from './position-request-create-without-paylist-department.input';
 import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
 
 @InputType()

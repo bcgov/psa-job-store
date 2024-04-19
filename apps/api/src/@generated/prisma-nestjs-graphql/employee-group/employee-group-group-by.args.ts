@@ -1,14 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { EmployeeGroupWhereInput } from './employee-group-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { EmployeeGroupCountAggregateInput } from './employee-group-count-aggregate.input';
+import { EmployeeGroupMaxAggregateInput } from './employee-group-max-aggregate.input';
+import { EmployeeGroupMinAggregateInput } from './employee-group-min-aggregate.input';
 import { EmployeeGroupOrderByWithAggregationInput } from './employee-group-order-by-with-aggregation.input';
 import { EmployeeGroupScalarFieldEnum } from './employee-group-scalar-field.enum';
 import { EmployeeGroupScalarWhereWithAggregatesInput } from './employee-group-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { EmployeeGroupCountAggregateInput } from './employee-group-count-aggregate.input';
-import { EmployeeGroupMinAggregateInput } from './employee-group-min-aggregate.input';
-import { EmployeeGroupMaxAggregateInput } from './employee-group-max-aggregate.input';
+import { EmployeeGroupWhereInput } from './employee-group-where.input';
 
 @ArgsType()
 export class EmployeeGroupGroupByArgs {

@@ -1,9 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileRoleCreateWithoutJob_profilesInput } from './job-profile-role-create-without-job-profiles.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { JobProfileRoleCreateOrConnectWithoutJob_profilesInput } from './job-profile-role-create-or-connect-without-job-profiles.input';
-import { Prisma } from '@prisma/client';
+import { JobProfileRoleCreateWithoutJob_profilesInput } from './job-profile-role-create-without-job-profiles.input';
 import { JobProfileRoleWhereUniqueInput } from './job-profile-role-where-unique.input';
 
 @InputType()

@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileUpdateManyWithoutRole_typeNestedInput } from '../job-profile/job-profile-update-many-without-role-type-nested.input';
 
 @InputType()

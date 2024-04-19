@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileRoleTypeWhereInput } from './job-profile-role-type-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileRoleTypeAvgAggregateInput } from './job-profile-role-type-avg-aggregate.input';
+import { JobProfileRoleTypeCountAggregateInput } from './job-profile-role-type-count-aggregate.input';
+import { JobProfileRoleTypeMaxAggregateInput } from './job-profile-role-type-max-aggregate.input';
+import { JobProfileRoleTypeMinAggregateInput } from './job-profile-role-type-min-aggregate.input';
 import { JobProfileRoleTypeOrderByWithAggregationInput } from './job-profile-role-type-order-by-with-aggregation.input';
 import { JobProfileRoleTypeScalarFieldEnum } from './job-profile-role-type-scalar-field.enum';
 import { JobProfileRoleTypeScalarWhereWithAggregatesInput } from './job-profile-role-type-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { JobProfileRoleTypeCountAggregateInput } from './job-profile-role-type-count-aggregate.input';
-import { JobProfileRoleTypeAvgAggregateInput } from './job-profile-role-type-avg-aggregate.input';
 import { JobProfileRoleTypeSumAggregateInput } from './job-profile-role-type-sum-aggregate.input';
-import { JobProfileRoleTypeMinAggregateInput } from './job-profile-role-type-min-aggregate.input';
-import { JobProfileRoleTypeMaxAggregateInput } from './job-profile-role-type-max-aggregate.input';
+import { JobProfileRoleTypeWhereInput } from './job-profile-role-type-where.input';
 
 @ArgsType()
 export class JobProfileRoleTypeGroupByArgs {

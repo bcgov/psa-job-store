@@ -1,9 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { EmployeeGroupCreateWithoutClassificationsInput } from './employee-group-create-without-classifications.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { EmployeeGroupCreateOrConnectWithoutClassificationsInput } from './employee-group-create-or-connect-without-classifications.input';
-import { Prisma } from '@prisma/client';
+import { EmployeeGroupCreateWithoutClassificationsInput } from './employee-group-create-without-classifications.input';
 import { EmployeeGroupWhereUniqueInput } from './employee-group-where-unique.input';
 
 @InputType()

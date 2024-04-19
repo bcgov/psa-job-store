@@ -16,6 +16,7 @@ import { PositionRequestApiService } from './position-request.service';
   providers: [
     ClassificationService,
     CrmService,
+    DepartmentService,
     PeoplesoftService,
     PositionRequestApiResolver,
     PositionRequestApiService,

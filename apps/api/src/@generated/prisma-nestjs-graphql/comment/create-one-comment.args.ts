@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { CommentCreateInput } from './comment-create.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { CommentCreateInput } from './comment-create.input';
 
 @ArgsType()
 export class CreateOneCommentArgs {

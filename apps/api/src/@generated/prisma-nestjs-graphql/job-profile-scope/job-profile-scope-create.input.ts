@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileCreateNestedManyWithoutScopeInput } from '../job-profile/job-profile-create-nested-many-without-scope.input';
 
 @InputType()

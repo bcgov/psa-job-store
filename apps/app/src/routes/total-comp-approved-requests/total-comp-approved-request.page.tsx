@@ -9,7 +9,9 @@ import { PageHeader } from '../../components/app/page-header.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
-import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
+import { OrgChart } from '../org-chart/components/org-chart';
+import { initialElements } from '../org-chart/constants/initial-elements.constant';
+import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import WizardEditControlBar from '../wizard/components/wizard-edit-control-bar';
 import '../wizard/wizard-review.page.css';
 import './total-comp-approved-request.page.css';
@@ -266,11 +268,14 @@ export const TotalCompApprovedRequestPage = () => {
       key: '2',
       label: 'Organization Chart',
       children: (
-        <>
-          <div style={{ overflow: 'hidden', position: 'relative', height: '500px' }}>
-            <OrgChartWrapped selectedDepartment={data?.positionRequest?.additional_info_department_id ?? null} />
-          </div>
-        </>
+        <div style={{ height: '100%' }}>
+          {/* <OrgChartWrapped selectedDepartment={data?.positionRequest?.additional_info_department_id ?? null} /> */}
+          <OrgChart
+            type={OrgChartType.READONLY}
+            departmentId={data?.positionRequest?.department_id ?? ''}
+            elements={data?.positionRequest?.orgchart_json ?? initialElements}
+          />
+        </div>
       ),
     },
     {

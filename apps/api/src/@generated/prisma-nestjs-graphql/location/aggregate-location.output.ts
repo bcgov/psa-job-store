@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { LocationCountAggregate } from './location-count-aggregate.output';
-import { LocationMinAggregate } from './location-min-aggregate.output';
 import { LocationMaxAggregate } from './location-max-aggregate.output';
+import { LocationMinAggregate } from './location-min-aggregate.output';
 
 @ObjectType()
 export class AggregateLocation {

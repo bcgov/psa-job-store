@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileJobFamilyWhereInput } from './job-profile-job-family-where.input';
-import { Type } from 'class-transformer';
-import { JobProfileJobFamilyOrderByWithRelationAndSearchRelevanceInput } from './job-profile-job-family-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileJobFamilyWhereUniqueInput } from './job-profile-job-family-where-unique.input';
-import { Int } from '@nestjs/graphql';
-import { JobProfileJobFamilyCountAggregateInput } from './job-profile-job-family-count-aggregate.input';
+import { Type } from 'class-transformer';
 import { JobProfileJobFamilyAvgAggregateInput } from './job-profile-job-family-avg-aggregate.input';
-import { JobProfileJobFamilySumAggregateInput } from './job-profile-job-family-sum-aggregate.input';
-import { JobProfileJobFamilyMinAggregateInput } from './job-profile-job-family-min-aggregate.input';
+import { JobProfileJobFamilyCountAggregateInput } from './job-profile-job-family-count-aggregate.input';
 import { JobProfileJobFamilyMaxAggregateInput } from './job-profile-job-family-max-aggregate.input';
+import { JobProfileJobFamilyMinAggregateInput } from './job-profile-job-family-min-aggregate.input';
+import { JobProfileJobFamilyOrderByWithRelationAndSearchRelevanceInput } from './job-profile-job-family-order-by-with-relation-and-search-relevance.input';
+import { JobProfileJobFamilySumAggregateInput } from './job-profile-job-family-sum-aggregate.input';
+import { JobProfileJobFamilyWhereUniqueInput } from './job-profile-job-family-where-unique.input';
+import { JobProfileJobFamilyWhereInput } from './job-profile-job-family-where.input';
 
 @ArgsType()
 export class JobProfileJobFamilyAggregateArgs {

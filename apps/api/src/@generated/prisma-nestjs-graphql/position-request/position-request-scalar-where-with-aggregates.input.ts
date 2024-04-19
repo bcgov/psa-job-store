@@ -1,11 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.input';
-import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
-import { JsonWithAggregatesFilter } from '../prisma/json-with-aggregates-filter.input';
-import { UuidWithAggregatesFilter } from '../prisma/uuid-with-aggregates-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { DateTimeWithAggregatesFilter } from '../prisma/date-time-with-aggregates-filter.input';
 import { EnumPositionRequestStatusWithAggregatesFilter } from '../prisma/enum-position-request-status-with-aggregates-filter.input';
+import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.input';
+import { JsonWithAggregatesFilter } from '../prisma/json-with-aggregates-filter.input';
+import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
+import { UuidWithAggregatesFilter } from '../prisma/uuid-with-aggregates-filter.input';
 
 @InputType()
 export class PositionRequestScalarWhereWithAggregatesInput {

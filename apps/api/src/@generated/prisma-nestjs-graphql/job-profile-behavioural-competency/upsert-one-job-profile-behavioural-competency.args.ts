@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileBehaviouralCompetencyWhereUniqueInput } from './job-profile-behavioural-competency-where-unique.input';
 import { Type } from 'class-transformer';
 import { JobProfileBehaviouralCompetencyCreateInput } from './job-profile-behavioural-competency-create.input';
 import { JobProfileBehaviouralCompetencyUpdateInput } from './job-profile-behavioural-competency-update.input';
+import { JobProfileBehaviouralCompetencyWhereUniqueInput } from './job-profile-behavioural-competency-where-unique.input';
 
 @ArgsType()
 export class UpsertOneJobProfileBehaviouralCompetencyArgs {

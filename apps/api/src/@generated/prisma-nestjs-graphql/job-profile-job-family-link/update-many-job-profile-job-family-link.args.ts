@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileJobFamilyLinkUncheckedUpdateManyInput } from './job-profile-job-family-link-unchecked-update-many.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileJobFamilyLinkUncheckedUpdateManyInput } from './job-profile-job-family-link-unchecked-update-many.input';
 import { JobProfileJobFamilyLinkWhereInput } from './job-profile-job-family-link-where.input';
 
 @ArgsType()

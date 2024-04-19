@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
 
 @ArgsType()
 export class DeleteManyScheduledTaskMetadataArgs {

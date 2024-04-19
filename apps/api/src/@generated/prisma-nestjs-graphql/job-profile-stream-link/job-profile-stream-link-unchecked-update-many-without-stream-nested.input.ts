@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileStreamLinkCreateWithoutStreamInput } from './job-profile-stream-link-create-without-stream.input';
-import { Type } from 'class-transformer';
-import { JobProfileStreamLinkCreateOrConnectWithoutStreamInput } from './job-profile-stream-link-create-or-connect-without-stream.input';
-import { JobProfileStreamLinkUpsertWithWhereUniqueWithoutStreamInput } from './job-profile-stream-link-upsert-with-where-unique-without-stream.input';
-import { JobProfileStreamLinkCreateManyStreamInputEnvelope } from './job-profile-stream-link-create-many-stream-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileStreamLinkWhereUniqueInput } from './job-profile-stream-link-where-unique.input';
-import { JobProfileStreamLinkUpdateWithWhereUniqueWithoutStreamInput } from './job-profile-stream-link-update-with-where-unique-without-stream.input';
-import { JobProfileStreamLinkUpdateManyWithWhereWithoutStreamInput } from './job-profile-stream-link-update-many-with-where-without-stream.input';
+import { Type } from 'class-transformer';
+import { JobProfileStreamLinkCreateManyStreamInputEnvelope } from './job-profile-stream-link-create-many-stream-input-envelope.input';
+import { JobProfileStreamLinkCreateOrConnectWithoutStreamInput } from './job-profile-stream-link-create-or-connect-without-stream.input';
+import { JobProfileStreamLinkCreateWithoutStreamInput } from './job-profile-stream-link-create-without-stream.input';
 import { JobProfileStreamLinkScalarWhereInput } from './job-profile-stream-link-scalar-where.input';
+import { JobProfileStreamLinkUpdateManyWithWhereWithoutStreamInput } from './job-profile-stream-link-update-many-with-where-without-stream.input';
+import { JobProfileStreamLinkUpdateWithWhereUniqueWithoutStreamInput } from './job-profile-stream-link-update-with-where-unique-without-stream.input';
+import { JobProfileStreamLinkUpsertWithWhereUniqueWithoutStreamInput } from './job-profile-stream-link-upsert-with-where-unique-without-stream.input';
+import { JobProfileStreamLinkWhereUniqueInput } from './job-profile-stream-link-where-unique.input';
 
 @InputType()
 export class JobProfileStreamLinkUncheckedUpdateManyWithoutStreamNestedInput {

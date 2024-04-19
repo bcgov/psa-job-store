@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { BehaviouralCompetencyCategory } from './behavioural-competency-category.enum';
-import { IntFilter } from './int-filter.input';
 import { EnumBehaviouralCompetencyCategoryFilter } from './enum-behavioural-competency-category-filter.input';
+import { IntFilter } from './int-filter.input';
 
 @InputType()
 export class EnumBehaviouralCompetencyCategoryWithAggregatesFilter {

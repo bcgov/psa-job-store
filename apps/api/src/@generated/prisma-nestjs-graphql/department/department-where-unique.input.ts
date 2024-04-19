@@ -1,11 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentWhereInput } from './department-where.input';
-import { StringFilter } from '../prisma/string-filter.input';
-import { DateTimeFilter } from '../prisma/date-time-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { LocationRelationFilter } from '../location/location-relation-filter.input';
 import { OrganizationRelationFilter } from '../organization/organization-relation-filter.input';
 import { PositionRequestListRelationFilter } from '../position-request/position-request-list-relation-filter.input';
+import { DateTimeFilter } from '../prisma/date-time-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
+import { DepartmentWhereInput } from './department-where.input';
 
 @InputType()
 export class DepartmentWhereUniqueInput {

@@ -1,12 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { BehaviouralCompetencyWhereInput } from './behavioural-competency-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { BehaviouralCompetencyOrderByWithRelationAndSearchRelevanceInput } from './behavioural-competency-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { BehaviouralCompetencyWhereUniqueInput } from './behavioural-competency-where-unique.input';
-import { Int } from '@nestjs/graphql';
 import { BehaviouralCompetencyScalarFieldEnum } from './behavioural-competency-scalar-field.enum';
+import { BehaviouralCompetencyWhereUniqueInput } from './behavioural-competency-where-unique.input';
+import { BehaviouralCompetencyWhereInput } from './behavioural-competency-where.input';
 
 @ArgsType()
 export class FindFirstBehaviouralCompetencyArgs {

@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileContextWhereUniqueInput } from './job-profile-context-where-unique.input';
 import { Type } from 'class-transformer';
 import { JobProfileContextCreateInput } from './job-profile-context-create.input';
 import { JobProfileContextUpdateInput } from './job-profile-context-update.input';
+import { JobProfileContextWhereUniqueInput } from './job-profile-context-where-unique.input';
 
 @ArgsType()
 export class UpsertOneJobProfileContextArgs {

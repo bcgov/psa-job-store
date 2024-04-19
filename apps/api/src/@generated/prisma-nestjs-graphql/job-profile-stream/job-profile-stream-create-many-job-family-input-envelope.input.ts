@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileStreamCreateManyJob_familyInput } from './job-profile-stream-create-many-job-family.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileStreamCreateManyJob_familyInput } from './job-profile-stream-create-many-job-family.input';
 
 @InputType()
 export class JobProfileStreamCreateManyJob_familyInputEnvelope {

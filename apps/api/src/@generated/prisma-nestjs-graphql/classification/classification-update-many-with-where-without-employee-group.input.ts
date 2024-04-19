@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { ClassificationScalarWhereInput } from './classification-scalar-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { ClassificationScalarWhereInput } from './classification-scalar-where.input';
 import { ClassificationUpdateManyMutationInput } from './classification-update-many-mutation.input';
 
 @InputType()

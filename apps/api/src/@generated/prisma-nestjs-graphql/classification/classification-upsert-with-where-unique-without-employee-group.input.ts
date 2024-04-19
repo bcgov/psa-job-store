@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
 import { Type } from 'class-transformer';
-import { ClassificationUpdateWithoutEmployee_groupInput } from './classification-update-without-employee-group.input';
 import { ClassificationCreateWithoutEmployee_groupInput } from './classification-create-without-employee-group.input';
+import { ClassificationUpdateWithoutEmployee_groupInput } from './classification-update-without-employee-group.input';
+import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
 
 @InputType()
 export class ClassificationUpsertWithWhereUniqueWithoutEmployee_groupInput {

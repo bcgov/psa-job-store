@@ -1,21 +1,19 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfileState } from '../prisma/job-profile-state.enum';
-import { JobProfileType } from '../prisma/job-profile-type.enum';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { JobProfileBehaviouralCompetency } from '../job-profile-behavioural-competency/job-profile-behavioural-competency.model';
 import { JobProfileClassification } from '../job-profile-classification/job-profile-classification.model';
-import { JobProfileOrganization } from '../job-profile-organization/job-profile-organization.model';
 import { JobProfileContext } from '../job-profile-context/job-profile-context.model';
-import { JobProfileRole } from '../job-profile-role/job-profile-role.model';
-import { JobProfileRoleType } from '../job-profile-role-type/job-profile-role-type.model';
-import { JobProfileScope } from '../job-profile-scope/job-profile-scope.model';
-import { User } from '../user/user.model';
 import { JobProfileJobFamilyLink } from '../job-profile-job-family-link/job-profile-job-family-link.model';
-import { JobProfileStreamLink } from '../job-profile-stream-link/job-profile-stream-link.model';
+import { JobProfileOrganization } from '../job-profile-organization/job-profile-organization.model';
 import { JobProfileReportsTo } from '../job-profile-reports-to/job-profile-reports-to.model';
+import { JobProfileRoleType } from '../job-profile-role-type/job-profile-role-type.model';
+import { JobProfileRole } from '../job-profile-role/job-profile-role.model';
+import { JobProfileScope } from '../job-profile-scope/job-profile-scope.model';
+import { JobProfileStreamLink } from '../job-profile-stream-link/job-profile-stream-link.model';
 import { PositionRequest } from '../position-request/position-request.model';
+import { JobProfileState } from '../prisma/job-profile-state.enum';
+import { JobProfileType } from '../prisma/job-profile-type.enum';
+import { User } from '../user/user.model';
 
 @ObjectType()
 export class JobProfile {

@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { CommentWhereUniqueInput } from './comment-where-unique.input';
 import { Type } from 'class-transformer';
-import { CommentUpdateWithoutAuthorInput } from './comment-update-without-author.input';
 import { CommentCreateWithoutAuthorInput } from './comment-create-without-author.input';
+import { CommentUpdateWithoutAuthorInput } from './comment-update-without-author.input';
+import { CommentWhereUniqueInput } from './comment-where-unique.input';
 
 @InputType()
 export class CommentUpsertWithWhereUniqueWithoutAuthorInput {

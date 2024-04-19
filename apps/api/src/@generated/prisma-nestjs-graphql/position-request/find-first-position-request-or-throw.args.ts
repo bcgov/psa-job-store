@@ -1,12 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { PositionRequestWhereInput } from './position-request-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { PositionRequestOrderByWithRelationAndSearchRelevanceInput } from './position-request-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
-import { Int } from '@nestjs/graphql';
 import { PositionRequestScalarFieldEnum } from './position-request-scalar-field.enum';
+import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
+import { PositionRequestWhereInput } from './position-request-where.input';
 
 @ArgsType()
 export class FindFirstPositionRequestOrThrowArgs {

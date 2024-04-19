@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileUpdateOneRequiredWithoutReports_toNestedInput } from '../job-profile/job-profile-update-one-required-without-reports-to-nested.input';
 
 @InputType()

@@ -25,6 +25,9 @@ export class OrgChartNodeData {
   @Field(() => String, { nullable: false })
   title?: string;
 
+  @Field(() => String, { nullable: false })
+  position_status?: string;
+
   @Field(() => Classification, { nullable: true })
   classification?: Classification;
 

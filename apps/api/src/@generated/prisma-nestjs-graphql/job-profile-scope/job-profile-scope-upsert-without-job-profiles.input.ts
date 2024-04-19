@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileScopeUpdateWithoutJob_profilesInput } from './job-profile-scope-update-without-job-profiles.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { JobProfileScopeCreateWithoutJob_profilesInput } from './job-profile-scope-create-without-job-profiles.input';
+import { JobProfileScopeUpdateWithoutJob_profilesInput } from './job-profile-scope-update-without-job-profiles.input';
 import { JobProfileScopeWhereInput } from './job-profile-scope-where.input';
 
 @InputType()

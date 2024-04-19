@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { CommentCreateManyAuthorInput } from './comment-create-many-author.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { CommentCreateManyAuthorInput } from './comment-create-many-author.input';
 
 @InputType()
 export class CommentCreateManyAuthorInputEnvelope {

@@ -1,11 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
-import { PositionRequestStatus } from '../prisma/position-request-status.enum';
-import { JobProfile } from '../job-profile/job-profile.model';
 import { Department } from '../department/department.model';
+import { JobProfile } from '../job-profile/job-profile.model';
 import { Location } from '../location/location.model';
+import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 
 @ObjectType()
 export class PositionRequest {

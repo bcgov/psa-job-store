@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
-import { IntFilter } from '../prisma/int-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { DateTimeFilter } from '../prisma/date-time-filter.input';
+import { IntFilter } from '../prisma/int-filter.input';
+import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
 
 @InputType()
 export class ScheduledTaskMetadataWhereUniqueInput {

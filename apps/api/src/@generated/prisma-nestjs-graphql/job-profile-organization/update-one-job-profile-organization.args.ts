@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileOrganizationUpdateInput } from './job-profile-organization-update.input';
-import { Type } from 'class-transformer';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { JobProfileOrganizationUpdateInput } from './job-profile-organization-update.input';
 import { JobProfileOrganizationWhereUniqueInput } from './job-profile-organization-where-unique.input';
 
 @ArgsType()

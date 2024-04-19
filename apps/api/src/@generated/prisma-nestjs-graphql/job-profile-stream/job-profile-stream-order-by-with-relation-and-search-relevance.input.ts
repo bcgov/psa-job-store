@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { SortOrder } from '../prisma/sort-order.enum';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileJobFamilyOrderByWithRelationAndSearchRelevanceInput } from '../job-profile-job-family/job-profile-job-family-order-by-with-relation-and-search-relevance.input';
 import { JobProfileStreamLinkOrderByRelationAggregateInput } from '../job-profile-stream-link/job-profile-stream-link-order-by-relation-aggregate.input';
+import { SortOrder } from '../prisma/sort-order.enum';
 import { JobProfileStreamOrderByRelevanceInput } from './job-profile-stream-order-by-relevance.input';
 
 @InputType()

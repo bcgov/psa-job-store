@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { btoa } from 'buffer';
-import { generateJobProfile } from 'common-kit';
+import { Elements, autolayout, generateJobProfile } from 'common-kit';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import { Packer } from 'docx';
@@ -17,6 +17,7 @@ import {
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
+import { DepartmentService } from '../external/department.service';
 import {
   IncidentCreateUpdateInput,
   IncidentStatus,
@@ -95,6 +96,7 @@ export class PositionRequestApiService {
   constructor(
     private readonly classificationService: ClassificationService,
     private readonly crmService: CrmService,
+    private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
     private readonly positionService: PositionService,
@@ -161,10 +163,75 @@ export class PositionRequestApiService {
         const position =
           process.env.TEST_ENV === 'true' ? { positionNbr: '1234' } : await this.createPositionForPositionRequest(id);
         if (position.positionNbr.length > 0) {
+          const result = await this.peoplesoftService.getPosition(position.positionNbr);
+          const rows = result?.data?.query?.rows;
+          const positionObj: Record<string, any> | null = (rows ?? []).length > 0 ? rows[0] : null;
+
+          const classification = await this.classificationService.getClassification({
+            where: { id: positionObj['A.JOBCODE'] },
+          });
+
+          const department = await this.departmentService.getDepartment({ where: { id: positionObj['A.DEPTID'] } });
+          const { edges, nodes } = positionRequest.orgchart_json as Record<string, any> as Elements;
+
+          // Update supervisor, excluded manager nodes
+          const excludedManagerId = positionRequest.additional_info_excluded_mgr_position_number;
+          const supervisorId = positionObj['A.REPORTS_TO'];
+          nodes.forEach((node) => {
+            node.data = {
+              ...node.data,
+              isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
+              isExcludedManager: node.id === excludedManagerId,
+              isNewPosition: false, // Clear previous positions marked as new
+              isSupervisor: node.id === supervisorId,
+            };
+          });
+
+          // Add edge & node for new position
+          const edgeId = `${supervisorId}-${positionObj['A.POSITION_NBR']}`;
+          if (edges.find((edge) => edge.id === edgeId) == null) {
+            edges.push({
+              id: edgeId,
+              source: supervisorId,
+              target: positionObj['A.POSITION_NBR'],
+              style: { stroke: 'blue' },
+              type: 'smoothstep',
+              animated: true,
+              selected: true,
+            });
+          }
+
+          const nodeId = positionObj['A.POSITION_NBR'];
+          if (nodes.find((node) => node.id === nodeId) == null) {
+            nodes.push({
+              id: nodeId,
+              type: 'org-chart-card',
+              data: {
+                id: nodeId,
+                isAdjacent: true,
+                isNewPosition: true,
+                title: positionObj['A.DESCR'],
+                classification: {
+                  id: classification.id,
+                  code: classification.code,
+                  name: classification.name,
+                },
+                department: {
+                  id: department.id,
+                  organization_id: department.organization_id,
+                  name: department.name,
+                },
+                employees: [],
+              },
+              position: { x: 0, y: 0 },
+            });
+          }
+
           positionRequest = await this.prisma.positionRequest.update({
             where: { id },
             data: {
               position_number: +position.positionNbr,
+              orgchart_json: autolayout({ edges, nodes }) as any,
             },
           });
         }
@@ -746,18 +813,13 @@ export class PositionRequestApiService {
       const orgChart = positionRequest.orgchart_json;
 
       if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
-        // Remove existing node with role: 'first_level_excluded_manager'
-        const updatedNodes = (orgChart.nodes as any[]).filter(
-          (node) => node.data?.role !== 'first_level_excluded_manager',
-        );
+        // Remove existing node with isExcludedManager = true
+        const updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.isExcludedManager !== true);
 
         const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
           const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
           const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
-          return (
-            sourceNode?.data?.role !== 'first_level_excluded_manager' &&
-            targetNode?.data?.role !== 'first_level_excluded_manager'
-          );
+          return sourceNode?.data?.isExcludedManager !== true && targetNode?.data?.isExcludedManager !== true;
         });
 
         const isExcludedManagerInOrgChart = (orgChart.nodes as any[]).some(
@@ -789,7 +851,7 @@ export class PositionRequestApiService {
                 data: {
                   id: updateData.additional_info_excluded_mgr_position_number,
                   title: employeeInfo[0].positionDescription,
-                  role: 'first_level_excluded_manager',
+                  isExcludedManager: true,
                   employees: employeeInfo.map((employee) => ({
                     id: employee.employeeId,
                     name: employee.employeeName,

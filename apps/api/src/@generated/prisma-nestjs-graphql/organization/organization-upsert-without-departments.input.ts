@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { OrganizationUpdateWithoutDepartmentsInput } from './organization-update-without-departments.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { OrganizationCreateWithoutDepartmentsInput } from './organization-create-without-departments.input';
+import { OrganizationUpdateWithoutDepartmentsInput } from './organization-update-without-departments.input';
 import { OrganizationWhereInput } from './organization-where.input';
 
 @InputType()

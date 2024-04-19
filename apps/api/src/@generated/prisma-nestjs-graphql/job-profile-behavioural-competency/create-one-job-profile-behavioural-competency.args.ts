@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileBehaviouralCompetencyCreateInput } from './job-profile-behavioural-competency-create.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileBehaviouralCompetencyCreateInput } from './job-profile-behavioural-competency-create.input';
 
 @ArgsType()
 export class CreateOneJobProfileBehaviouralCompetencyArgs {

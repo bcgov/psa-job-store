@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentCreateWithoutLocationInput } from './department-create-without-location.input';
-import { Type } from 'class-transformer';
-import { DepartmentCreateOrConnectWithoutLocationInput } from './department-create-or-connect-without-location.input';
-import { DepartmentCreateManyLocationInputEnvelope } from './department-create-many-location-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { DepartmentCreateManyLocationInputEnvelope } from './department-create-many-location-input-envelope.input';
+import { DepartmentCreateOrConnectWithoutLocationInput } from './department-create-or-connect-without-location.input';
+import { DepartmentCreateWithoutLocationInput } from './department-create-without-location.input';
 import { DepartmentWhereUniqueInput } from './department-where-unique.input';
 
 @InputType()

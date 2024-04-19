@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { BehaviouralCompetencyWhereInput } from './behavioural-competency-where.input';
-import { Type } from 'class-transformer';
-import { BehaviouralCompetencyOrderByWithRelationAndSearchRelevanceInput } from './behavioural-competency-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { BehaviouralCompetencyWhereUniqueInput } from './behavioural-competency-where-unique.input';
-import { Int } from '@nestjs/graphql';
-import { BehaviouralCompetencyCountAggregateInput } from './behavioural-competency-count-aggregate.input';
+import { Type } from 'class-transformer';
 import { BehaviouralCompetencyAvgAggregateInput } from './behavioural-competency-avg-aggregate.input';
-import { BehaviouralCompetencySumAggregateInput } from './behavioural-competency-sum-aggregate.input';
-import { BehaviouralCompetencyMinAggregateInput } from './behavioural-competency-min-aggregate.input';
+import { BehaviouralCompetencyCountAggregateInput } from './behavioural-competency-count-aggregate.input';
 import { BehaviouralCompetencyMaxAggregateInput } from './behavioural-competency-max-aggregate.input';
+import { BehaviouralCompetencyMinAggregateInput } from './behavioural-competency-min-aggregate.input';
+import { BehaviouralCompetencyOrderByWithRelationAndSearchRelevanceInput } from './behavioural-competency-order-by-with-relation-and-search-relevance.input';
+import { BehaviouralCompetencySumAggregateInput } from './behavioural-competency-sum-aggregate.input';
+import { BehaviouralCompetencyWhereUniqueInput } from './behavioural-competency-where-unique.input';
+import { BehaviouralCompetencyWhereInput } from './behavioural-competency-where.input';
 
 @ArgsType()
 export class BehaviouralCompetencyAggregateArgs {
