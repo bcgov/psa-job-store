@@ -2269,15 +2269,9 @@ const WizardEditProfile = forwardRef(
       }, 300);
       // console.log('field', JSON.stringify(field)); Job preferences
 
-      const icon = field.disabled ? (
-        <PlusOutlined style={{ color: '#000000' }} />
-      ) : (
-        <DeleteOutlined style={field.is_readonly ? {} : { color: '#000000' }} />
-      );
       const ariaLabel = field.disabled
         ? `Undo remove job preference ${index + 1}`
         : `Remove job preference ${index + 1}`;
-      const tooltipTitle = field.is_readonly ? 'Required' : '';
 
       return (
         <List.Item

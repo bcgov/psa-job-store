@@ -24,7 +24,7 @@ export const PositionSearch = ({
   return (
     <Input.Search
       onChange={(event) => setSearchTerm(event.currentTarget.value)}
-      onSearch={(value, event, source) =>
+      onSearch={(value, _, source) =>
         setSearchTermFromProps(source?.source === 'clear' ? undefined : (value ?? '').length > 0 ? value : undefined)
       }
       addonAfter={
