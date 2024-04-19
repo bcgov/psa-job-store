@@ -54,6 +54,9 @@ export const autolayout = (elements: Elements, direction: AutolayoutDirection = 
         y: match.y - nodeHeight / 2,
       };
 
+      node.height = nodeHeight;
+      node.width = nodeWidth;
+
       return node;
     });
   }
