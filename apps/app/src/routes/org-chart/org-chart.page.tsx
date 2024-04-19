@@ -34,7 +34,7 @@ export const OrgChartPage = () => {
             setDepartmentId={setDepartmentId}
             departmentId={departmentId}
             departmentIdIsLoading={profileDataIsFetching}
-            targetId="00134581"
+            targetId={profileData?.profile.position_id}
           />
         </Col>
       </Row>

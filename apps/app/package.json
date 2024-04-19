@@ -17,6 +17,7 @@
     "@hookform/resolvers": "^3.3.2",
     "@reduxjs/toolkit": "^1.9.7",
     "@rtk-query/graphql-request-base-query": "^2.2.0",
+    "@simbathesailor/use-what-changed": "^2.0.0",
     "@types/diff-match-patch": "^1.0.36",
     "@types/dompurify": "^3.0.5",
     "@types/lodash.debounce": "^4.0.9",
