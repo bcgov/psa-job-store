@@ -161,7 +161,10 @@ export class PositionRequestApiService {
       if (positionRequest.position_number == null) {
         // in testmode, we can skip the peoplesoft call to create position
         const position =
-          process.env.TEST_ENV === 'true' ? { positionNbr: '1234' } : await this.createPositionForPositionRequest(id);
+          process.env.TEST_ENV === 'true'
+            ? { positionNbr: '00028153' }
+            : await this.createPositionForPositionRequest(id);
+
         if (position.positionNbr.length > 0) {
           const result = await this.peoplesoftService.getPosition(position.positionNbr);
           const rows = result?.data?.query?.rows;
