@@ -72,7 +72,6 @@ export const DynamicOrgChart = ({
 
     if (departmentId == null) {
       setElements(initialElements);
-      getOrgChart('', false);
     } else {
       getOrgChart(departmentId, false);
     }
@@ -83,7 +82,7 @@ export const DynamicOrgChart = ({
       const elements = autolayout(orgChartData?.orgChart);
       setElements(JSON.parse(JSON.stringify(elements)));
     }
-  }, [orgChartData?.orgChart]);
+  }, [orgChartData?.orgChart, orgChartDataIsFetching]);
 
   const search = useCallback(
     (searchTerm: string | undefined) => {
@@ -234,13 +233,13 @@ export const DynamicOrgChart = ({
         <OrgChartNode
           {...nodeProps}
           isConnectable={false}
-          orgChartData={{ edges, nodes }}
+          orgChartData={{ edges: elements.edges, nodes: elements.nodes }}
           orgChartContext={props.context}
           orgChartType={type}
         />
       ),
     };
-  }, [props.context, edges, nodes, type]);
+  }, [props.context, elements, type]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
