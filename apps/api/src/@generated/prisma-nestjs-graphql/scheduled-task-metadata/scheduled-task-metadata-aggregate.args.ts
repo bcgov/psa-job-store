@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
-import { Type } from 'class-transformer';
-import { ScheduledTaskMetadataOrderByWithRelationAndSearchRelevanceInput } from './scheduled-task-metadata-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { ScheduledTaskMetadataWhereUniqueInput } from './scheduled-task-metadata-where-unique.input';
-import { Int } from '@nestjs/graphql';
-import { ScheduledTaskMetadataCountAggregateInput } from './scheduled-task-metadata-count-aggregate.input';
+import { Type } from 'class-transformer';
 import { ScheduledTaskMetadataAvgAggregateInput } from './scheduled-task-metadata-avg-aggregate.input';
-import { ScheduledTaskMetadataSumAggregateInput } from './scheduled-task-metadata-sum-aggregate.input';
-import { ScheduledTaskMetadataMinAggregateInput } from './scheduled-task-metadata-min-aggregate.input';
+import { ScheduledTaskMetadataCountAggregateInput } from './scheduled-task-metadata-count-aggregate.input';
 import { ScheduledTaskMetadataMaxAggregateInput } from './scheduled-task-metadata-max-aggregate.input';
+import { ScheduledTaskMetadataMinAggregateInput } from './scheduled-task-metadata-min-aggregate.input';
+import { ScheduledTaskMetadataOrderByWithRelationAndSearchRelevanceInput } from './scheduled-task-metadata-order-by-with-relation-and-search-relevance.input';
+import { ScheduledTaskMetadataSumAggregateInput } from './scheduled-task-metadata-sum-aggregate.input';
+import { ScheduledTaskMetadataWhereUniqueInput } from './scheduled-task-metadata-where-unique.input';
+import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
 
 @ArgsType()
 export class ScheduledTaskMetadataAggregateArgs {

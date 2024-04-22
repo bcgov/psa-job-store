@@ -2,7 +2,9 @@ import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Menu, Modal, Popover, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import LoadingComponent from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
+import { useGetDepartmentQuery } from '../../redux/services/graphql-api/department.api';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
   GetPositionRequestResponseContent,
@@ -52,15 +54,20 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const { setPositionRequestProfileId } = useWizardContext();
   const navigate = useNavigate();
 
+  // get organization for the department in which the position is being created in
+  // this will be used to filter the profiles to ones that belong to this organization only
+  const { data: departmentData } = useGetDepartmentQuery(positionRequestData?.department_id ?? '');
+
   // if positionRequestData.parent_job_profile is not null, change searchParams to include selectedProfile
   useEffect(() => {
     if (positionRequestData?.parent_job_profile_id) {
       // check if searchparams already has selectedProfile
-      if (!searchParams.get('selectedProfile')) {
-        // determine what page we need to switch to
-        setSelectProfileId(positionRequestData.parent_job_profile_id.toString());
-        // setSearchParams({ selectedProfile: positionRequestData.parent_job_profile_id.toString() }, { replace: true });
-      }
+      // removed this to make reloading on thepage work after user selected a different profile and reloaded the page
+      // if (!searchParams.get('selectedProfile')) {
+      // determine what page we need to switch to
+      setSelectProfileId(positionRequestData.parent_job_profile_id.toString());
+      // setSearchParams({ selectedProfile: positionRequestData.parent_job_profile_id.toString() }, { replace: true });
+      // }
     }
   }, [positionRequestData, setSearchParams, searchParams]);
 
@@ -105,7 +112,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               const basePath = getBasePath(location.pathname);
 
               const searchParams = new URLSearchParams(previousSearchState.current);
+              if (searchParams.get('search')) searchParams.delete('search');
+
               searchParams.set('fetch', 'true');
+              searchParams.set('clearFilters', 'true');
               const page = parseInt(searchParams.get('page') || '1', 10);
               jobProfileSearchResultsRef.current.handlePageChange(page);
 
@@ -248,6 +258,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     );
   };
 
+  if (!departmentData) return <LoadingComponent></LoadingComponent>;
+
   return (
     <WizardPageWrapper
       title={
@@ -264,6 +276,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
             prefix="Reporting to"
             mode="compact"
             positionNumber={positionRequestData?.reports_to_position_id}
+            orgChartData={positionRequestData?.orgchart_json}
           ></PositionProfile>
         </div>
       }
@@ -311,7 +324,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           page_size={page_size}
           selectProfileId={selectProfileId}
           previousSearchState={previousSearchState}
-          // onUseProfile={handleSubmit(onSubmit)}
+          // this will filter job profiles by organization in which this position is being created in
+          organizationFilterExtra={departmentData?.department?.organization}
         />
       </div>
     </WizardPageWrapper>

@@ -1,9 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfileScopeWhereInput } from './job-profile-scope-where.input';
-import { StringFilter } from '../prisma/string-filter.input';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
+import { JobProfileScopeWhereInput } from './job-profile-scope-where.input';
 
 @InputType()
 export class JobProfileScopeWhereUniqueInput {

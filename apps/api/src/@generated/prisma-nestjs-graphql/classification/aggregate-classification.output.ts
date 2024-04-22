@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { ClassificationCountAggregate } from './classification-count-aggregate.output';
-import { ClassificationMinAggregate } from './classification-min-aggregate.output';
 import { ClassificationMaxAggregate } from './classification-max-aggregate.output';
+import { ClassificationMinAggregate } from './classification-min-aggregate.output';
 
 @ObjectType()
 export class AggregateClassification {

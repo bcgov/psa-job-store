@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { ClassificationCreateNestedOneWithoutReporteesInput } from '../classification/classification-create-nested-one-without-reportees.input';
 import { JobProfileCreateNestedOneWithoutReports_toInput } from '../job-profile/job-profile-create-nested-one-without-reports-to.input';
 

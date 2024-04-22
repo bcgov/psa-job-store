@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Classification } from '../classification/classification.model';
 
 @ObjectType()

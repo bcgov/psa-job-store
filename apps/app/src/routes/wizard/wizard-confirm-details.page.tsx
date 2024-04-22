@@ -25,6 +25,7 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/custom-form.css';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
 import { useGetLocationsQuery } from '../../redux/services/graphql-api/location.api';
@@ -37,6 +38,7 @@ import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redu
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
+import './wizard-confirm-details.page.css';
 
 interface WizardConfirmPageProps {
   onNext?: () => void;
@@ -119,12 +121,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     { data: positionProfileData, isFetching: isFetchingPositionProfile, isError: isFetchingPositionProfileError },
   ] = useLazyGetPositionProfileQuery();
 
-  // this is for the reporting manager
-  const [
-    getPositionProfile2,
-    { data: positionProfileData2, isFetching: isFetchingPositionProfile2, isError: isFetchingPositionProfileError2 },
-  ] = useLazyGetPositionProfileQuery();
-
   const departmentsData = useGetDepartmentsWithLocationQuery().data?.departments;
 
   // State to track selected location
@@ -144,8 +140,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const [additionalPositions, setAdditionalPositions] = useState(0);
   const [noPositions, setNoPositions] = useState(false);
   const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel>();
-  const [firstActivePosition2, setFirstActivePosition2] = useState<PositionProfileModel>();
-  const [additionalPositions2, setAdditionalPositions2] = useState(0);
 
   useEffect(() => {
     if (positionProfileData && positionProfileData.positionProfile) {
@@ -161,16 +155,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       setAdditionalPositions(positionProfileData.positionProfile.length - 1);
     }
   }, [positionProfileData]);
-
-  useEffect(() => {
-    if (positionProfileData2 && positionProfileData2.positionProfile) {
-      const activePositions = positionProfileData2.positionProfile.filter((p) => p.status === 'Active');
-      setFirstActivePosition2(activePositions[0] || null);
-
-      // Set state to the number of additional active positions
-      setAdditionalPositions2(positionProfileData2.positionProfile.length - 1);
-    }
-  }, [positionProfileData2]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchPositionProfile = useCallback(
@@ -199,16 +183,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   // });
 
   // console.log('positionRequestData: ', positionRequestData);
-
-  // get profile info for reporting position from reports_to_position_id using GetPositionProfileQuery and useEffect
-  useEffect(() => {
-    if (positionRequestData?.reports_to_position_id) {
-      getPositionProfile2({
-        positionNumber: positionRequestData.reports_to_position_id.toString(),
-        uniqueKey: 'managerProfile',
-      });
-    }
-  }, [positionRequestData?.reports_to_position_id, getPositionProfile2]);
 
   // get profile info for excluded manager from additional_info_excluded_mgr_position_number using GetPositionProfileQuery and useEffect
   useEffect(() => {
@@ -487,7 +461,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
             onClick={() => showModal()}
             data-testid="next-button"
             loading={isLoading}
-            disabled={isFetchingPositionProfile || isFetchingPositionProfile2}
+            disabled={isFetchingPositionProfile}
           >
             Save and next
           </Button>,
@@ -731,7 +705,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>Other Details</span>
                     <Tooltip title="Information shown here is dependent on the values that you selected in the previous steps.">
-                      <Button type="link">Why can't I make changes?</Button>
+                      <Button id="changes" type="link">
+                        Why can't I make changes?
+                      </Button>
                     </Tooltip>
                   </div>
                 }
@@ -763,7 +739,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     labelCol={{ className: 'card-label' }}
                     colon={false}
                   >
-                    <div style={{ margin: 0 }}>
+                    <div data-testid="reporting-manager-info">
+                      <PositionProfile
+                        positionNumber={positionRequestData?.reports_to_position_id}
+                        orgChartData={positionRequestData?.orgchart_json}
+                      ></PositionProfile>
+                    </div>
+                    {/* <div style={{ margin: 0 }}>
                       {firstActivePosition2 && !isFetchingPositionProfile2 && !isFetchingPositionProfileError2 && (
                         <div data-testid="reporting-manager-info">
                           <p
@@ -777,10 +759,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                           </Typography.Paragraph>
                         </div>
                       )}
-                      {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
                       {isFetchingPositionProfile2 && <LoadingSpinnerWithMessage mode={'small'} />}
                       {isFetchingPositionProfileError2 && <p>Error loading, please refresh page</p>}
-                    </div>
+                    </div> */}
                   </Form.Item>
 
                   <Divider className="hr-reduced-margin" />

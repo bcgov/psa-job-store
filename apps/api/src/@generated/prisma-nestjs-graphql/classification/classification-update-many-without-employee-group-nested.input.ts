@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { ClassificationCreateWithoutEmployee_groupInput } from './classification-create-without-employee-group.input';
-import { Type } from 'class-transformer';
-import { ClassificationCreateOrConnectWithoutEmployee_groupInput } from './classification-create-or-connect-without-employee-group.input';
-import { ClassificationUpsertWithWhereUniqueWithoutEmployee_groupInput } from './classification-upsert-with-where-unique-without-employee-group.input';
-import { ClassificationCreateManyEmployee_groupInputEnvelope } from './classification-create-many-employee-group-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
-import { ClassificationUpdateWithWhereUniqueWithoutEmployee_groupInput } from './classification-update-with-where-unique-without-employee-group.input';
-import { ClassificationUpdateManyWithWhereWithoutEmployee_groupInput } from './classification-update-many-with-where-without-employee-group.input';
+import { Type } from 'class-transformer';
+import { ClassificationCreateManyEmployee_groupInputEnvelope } from './classification-create-many-employee-group-input-envelope.input';
+import { ClassificationCreateOrConnectWithoutEmployee_groupInput } from './classification-create-or-connect-without-employee-group.input';
+import { ClassificationCreateWithoutEmployee_groupInput } from './classification-create-without-employee-group.input';
 import { ClassificationScalarWhereInput } from './classification-scalar-where.input';
+import { ClassificationUpdateManyWithWhereWithoutEmployee_groupInput } from './classification-update-many-with-where-without-employee-group.input';
+import { ClassificationUpdateWithWhereUniqueWithoutEmployee_groupInput } from './classification-update-with-where-unique-without-employee-group.input';
+import { ClassificationUpsertWithWhereUniqueWithoutEmployee_groupInput } from './classification-upsert-with-where-unique-without-employee-group.input';
+import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
 
 @InputType()
 export class ClassificationUpdateManyWithoutEmployee_groupNestedInput {

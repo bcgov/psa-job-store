@@ -1,13 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentCreateWithoutPositionRequestsByPaylistDepartmentInput } from './department-create-without-position-requests-by-paylist-department.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { DepartmentCreateOrConnectWithoutPositionRequestsByPaylistDepartmentInput } from './department-create-or-connect-without-position-requests-by-paylist-department.input';
-import { DepartmentUpsertWithoutPositionRequestsByPaylistDepartmentInput } from './department-upsert-without-position-requests-by-paylist-department.input';
-import { DepartmentWhereInput } from './department-where.input';
-import { Prisma } from '@prisma/client';
-import { DepartmentWhereUniqueInput } from './department-where-unique.input';
+import { DepartmentCreateWithoutPositionRequestsByPaylistDepartmentInput } from './department-create-without-position-requests-by-paylist-department.input';
 import { DepartmentUpdateToOneWithWhereWithoutPositionRequestsByPaylistDepartmentInput } from './department-update-to-one-with-where-without-position-requests-by-paylist-department.input';
+import { DepartmentUpsertWithoutPositionRequestsByPaylistDepartmentInput } from './department-upsert-without-position-requests-by-paylist-department.input';
+import { DepartmentWhereUniqueInput } from './department-where-unique.input';
+import { DepartmentWhereInput } from './department-where.input';
 
 @InputType()
 export class DepartmentUpdateOneWithoutPositionRequestsByPaylistDepartmentNestedInput {

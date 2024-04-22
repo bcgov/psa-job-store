@@ -25,6 +25,9 @@ interface WizardContextProps {
   reqAlertShown: boolean;
   setReqAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 
+  optionalAccountabilitiesAlertShown: boolean;
+  setOptionalAccountabilitiesAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
   relWorkAlertShown: boolean;
   setRelWorkAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -68,11 +71,16 @@ interface WizardContextProps {
   setOriginalKnowledgeSkillsAbilitiesFields: React.Dispatch<React.SetStateAction<any[]>>;
   originalProvisosFields: any[];
   setOriginalProvisosFields: React.Dispatch<React.SetStateAction<any[]>>;
+  originalBehaviouralCompetenciesFields: any[];
+  setOriginalBehaviouralCompetenciesFields: React.Dispatch<React.SetStateAction<any[]>>;
   originalOptionalRequirementsFields: any[];
   setOriginalOptionalRequirementsFields: React.Dispatch<React.SetStateAction<any[]>>;
 
   positionRequestData: GetPositionRequestResponseContent | null;
   setPositionRequestData: React.Dispatch<React.SetStateAction<GetPositionRequestResponseContent | null>>;
+
+  currentSection: string | null;
+  setCurrentSection: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -94,6 +102,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [classificationsData, setClassificationsData] = useState<GetClassificationsResponse | null>(null);
   const [minReqAlertShown, setMinReqAlertShown] = useState<boolean>(false);
   const [reqAlertShown, setReqAlertShown] = useState<boolean>(false);
+  const [optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown] = useState<boolean>(false);
   const [originalValuesSet, setOriginalValuesSet] = useState<boolean>(false);
   const [originalAccReqFields, setOriginalAccReqFields] = useState<any[]>([]);
   const [originalOptReqFields, setOriginalOptReqFields] = useState<any[]>([]);
@@ -118,6 +127,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalPreferencesFields, setOriginalPreferencesFields] = useState<any[]>([]);
   const [originalKnowledgeSkillsAbilitiesFields, setOriginalKnowledgeSkillsAbilitiesFields] = useState<any[]>([]);
   const [originalProvisosFields, setOriginalProvisosFields] = useState<any[]>([]);
+  const [originalBehaviouralCompetenciesFields, setOriginalBehaviouralCompetenciesFields] = useState<any[]>([]);
+  const [currentSection, setCurrentSection] = useState<string | null>(null);
 
   const value = {
     wizardData,
@@ -141,6 +152,9 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
 
     reqAlertShown,
     setReqAlertShown,
+    optionalAccountabilitiesAlertShown,
+    setOptionalAccountabilitiesAlertShown,
+
     originalValuesSet,
     setOriginalValuesSet,
     originalAccReqFields,
@@ -172,8 +186,12 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setOriginalKnowledgeSkillsAbilitiesFields,
     originalProvisosFields,
     setOriginalProvisosFields,
+    originalBehaviouralCompetenciesFields,
+    setOriginalBehaviouralCompetenciesFields,
     positionRequestData,
     setPositionRequestData,
+    currentSection,
+    setCurrentSection,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

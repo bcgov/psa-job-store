@@ -1,9 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentCreateWithoutPositionRequestInput } from './department-create-without-position-request.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { DepartmentCreateOrConnectWithoutPositionRequestInput } from './department-create-or-connect-without-position-request.input';
-import { Prisma } from '@prisma/client';
+import { DepartmentCreateWithoutPositionRequestInput } from './department-create-without-position-request.input';
 import { DepartmentWhereUniqueInput } from './department-where-unique.input';
 
 @InputType()

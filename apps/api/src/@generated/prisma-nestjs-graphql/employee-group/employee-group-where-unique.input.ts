@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { EmployeeGroupWhereInput } from './employee-group-where.input';
-import { StringFilter } from '../prisma/string-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { ClassificationListRelationFilter } from '../classification/classification-list-relation-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
+import { EmployeeGroupWhereInput } from './employee-group-where.input';
 
 @InputType()
 export class EmployeeGroupWhereUniqueInput {

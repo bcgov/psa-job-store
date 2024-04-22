@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { BehaviouralCompetencyUpdateInput } from './behavioural-competency-update.input';
-import { Type } from 'class-transformer';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { BehaviouralCompetencyUpdateInput } from './behavioural-competency-update.input';
 import { BehaviouralCompetencyWhereUniqueInput } from './behavioural-competency-where-unique.input';
 
 @ArgsType()

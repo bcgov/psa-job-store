@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
 import { EmployeeGroupCountOrderByAggregateInput } from './employee-group-count-order-by-aggregate.input';
 import { EmployeeGroupMaxOrderByAggregateInput } from './employee-group-max-order-by-aggregate.input';

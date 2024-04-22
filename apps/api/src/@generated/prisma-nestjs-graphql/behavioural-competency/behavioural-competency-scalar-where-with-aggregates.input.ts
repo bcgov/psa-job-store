@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.input';
-import { EnumBehaviouralCompetencyTypeWithAggregatesFilter } from '../prisma/enum-behavioural-competency-type-with-aggregates-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { EnumBehaviouralCompetencyCategoryWithAggregatesFilter } from '../prisma/enum-behavioural-competency-category-with-aggregates-filter.input';
+import { EnumBehaviouralCompetencyTypeWithAggregatesFilter } from '../prisma/enum-behavioural-competency-type-with-aggregates-filter.input';
+import { IntWithAggregatesFilter } from '../prisma/int-with-aggregates-filter.input';
 import { StringWithAggregatesFilter } from '../prisma/string-with-aggregates-filter.input';
 
 @InputType()

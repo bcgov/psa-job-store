@@ -31,6 +31,7 @@ export const orgChartApi = graphqlApi.injectEndpoints({
                 data {
                   id
                   title
+                  position_status
                   classification {
                     id
                     code
@@ -61,4 +62,4 @@ export const orgChartApi = graphqlApi.injectEndpoints({
   }),
 });
 
-export const { useLazyGetOrgChartQuery } = orgChartApi;
+export const { useGetOrgChartQuery, useLazyGetOrgChartQuery } = orgChartApi;

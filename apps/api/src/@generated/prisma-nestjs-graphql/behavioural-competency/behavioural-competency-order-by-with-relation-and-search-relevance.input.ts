@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { SortOrder } from '../prisma/sort-order.enum';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileBehaviouralCompetencyOrderByRelationAggregateInput } from '../job-profile-behavioural-competency/job-profile-behavioural-competency-order-by-relation-aggregate.input';
+import { SortOrder } from '../prisma/sort-order.enum';
 import { BehaviouralCompetencyOrderByRelevanceInput } from './behavioural-competency-order-by-relevance.input';
 
 @InputType()

@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileRoleWhereInput } from './job-profile-role-where.input';
-import { Type } from 'class-transformer';
-import { JobProfileRoleOrderByWithRelationAndSearchRelevanceInput } from './job-profile-role-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileRoleWhereUniqueInput } from './job-profile-role-where-unique.input';
-import { Int } from '@nestjs/graphql';
-import { JobProfileRoleCountAggregateInput } from './job-profile-role-count-aggregate.input';
+import { Type } from 'class-transformer';
 import { JobProfileRoleAvgAggregateInput } from './job-profile-role-avg-aggregate.input';
-import { JobProfileRoleSumAggregateInput } from './job-profile-role-sum-aggregate.input';
-import { JobProfileRoleMinAggregateInput } from './job-profile-role-min-aggregate.input';
+import { JobProfileRoleCountAggregateInput } from './job-profile-role-count-aggregate.input';
 import { JobProfileRoleMaxAggregateInput } from './job-profile-role-max-aggregate.input';
+import { JobProfileRoleMinAggregateInput } from './job-profile-role-min-aggregate.input';
+import { JobProfileRoleOrderByWithRelationAndSearchRelevanceInput } from './job-profile-role-order-by-with-relation-and-search-relevance.input';
+import { JobProfileRoleSumAggregateInput } from './job-profile-role-sum-aggregate.input';
+import { JobProfileRoleWhereUniqueInput } from './job-profile-role-where-unique.input';
+import { JobProfileRoleWhereInput } from './job-profile-role-where.input';
 
 @ArgsType()
 export class JobProfileRoleAggregateArgs {

@@ -639,7 +639,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       const allOrganizationsValue = jobProfileData.jobProfile.all_organizations;
       if (allOrganizationsValue) {
         // If 'all_organizations' is true, set 'ministries' to all possible values
-        const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
+        const allValues = allMinistriesData?.organizations?.map((m) => m?.id?.toString() ?? '') || [];
         setValue('ministries', allValues);
       } else {
         // If 'all_organizations' is false, set 'ministries' to specific values
@@ -687,7 +687,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       );
     } else {
       // no profile data - select all ministries as that's the default setting
-      const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
+      const allValues = allMinistriesData?.organizations?.map((m) => m?.id?.toString() ?? '') || [];
       setValue('ministries', allValues);
     }
   }, [
@@ -703,7 +703,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   // Update local state when URL parameter changes
   useEffect(() => {
     if (!urlId) {
-      const allValues = allMinistriesData?.organizations?.map((m) => m.id.toString()) || [];
+      const allValues = allMinistriesData?.organizations?.map((m) => m?.id?.toString() ?? '') || [];
       setValue('ministries', allValues);
     }
   }, [urlId, setValue, allMinistriesData]);

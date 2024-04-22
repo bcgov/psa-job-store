@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileCreateWithoutRole_typeInput } from './job-profile-create-without-role-type.input';
-import { Type } from 'class-transformer';
-import { JobProfileCreateOrConnectWithoutRole_typeInput } from './job-profile-create-or-connect-without-role-type.input';
-import { JobProfileUpsertWithWhereUniqueWithoutRole_typeInput } from './job-profile-upsert-with-where-unique-without-role-type.input';
-import { JobProfileCreateManyRole_typeInputEnvelope } from './job-profile-create-many-role-type-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileWhereUniqueInput } from './job-profile-where-unique.input';
-import { JobProfileUpdateWithWhereUniqueWithoutRole_typeInput } from './job-profile-update-with-where-unique-without-role-type.input';
-import { JobProfileUpdateManyWithWhereWithoutRole_typeInput } from './job-profile-update-many-with-where-without-role-type.input';
+import { Type } from 'class-transformer';
+import { JobProfileCreateManyRole_typeInputEnvelope } from './job-profile-create-many-role-type-input-envelope.input';
+import { JobProfileCreateOrConnectWithoutRole_typeInput } from './job-profile-create-or-connect-without-role-type.input';
+import { JobProfileCreateWithoutRole_typeInput } from './job-profile-create-without-role-type.input';
 import { JobProfileScalarWhereInput } from './job-profile-scalar-where.input';
+import { JobProfileUpdateManyWithWhereWithoutRole_typeInput } from './job-profile-update-many-with-where-without-role-type.input';
+import { JobProfileUpdateWithWhereUniqueWithoutRole_typeInput } from './job-profile-update-with-where-unique-without-role-type.input';
+import { JobProfileUpsertWithWhereUniqueWithoutRole_typeInput } from './job-profile-upsert-with-where-unique-without-role-type.input';
+import { JobProfileWhereUniqueInput } from './job-profile-where-unique.input';
 
 @InputType()
 export class JobProfileUncheckedUpdateManyWithoutRole_typeNestedInput {

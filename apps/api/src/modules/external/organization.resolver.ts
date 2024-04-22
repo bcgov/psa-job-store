@@ -1,5 +1,10 @@
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { Department, FindManyOrganizationArgs, Organization } from '../../@generated/prisma-nestjs-graphql';
+import {
+  Department,
+  FindManyOrganizationArgs,
+  FindUniqueOrganizationArgs,
+  Organization,
+} from '../../@generated/prisma-nestjs-graphql';
 import { DepartmentService } from './department.service';
 import { OrganizationService } from './organization.service';
 
@@ -13,6 +18,11 @@ export class OrganizationResolver {
   @Query(() => [Organization], { name: 'organizations' })
   getOrganizations(@Args() args?: FindManyOrganizationArgs) {
     return this.organizationService.getOrganizations(args);
+  }
+
+  @Query(() => Organization, { name: 'organization', nullable: true })
+  getOrganization(@Args() args: FindUniqueOrganizationArgs) {
+    return this.organizationService.getOrganization(args);
   }
 
   @ResolveField(() => [Department])

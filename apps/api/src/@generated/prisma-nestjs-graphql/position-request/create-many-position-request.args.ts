@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { PositionRequestCreateManyInput } from './position-request-create-many.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { PositionRequestCreateManyInput } from './position-request-create-many.input';
 
 @ArgsType()
 export class CreateManyPositionRequestArgs {

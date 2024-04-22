@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { LocationUpdateWithoutPositionRequestsInput } from './location-update-without-position-requests.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { LocationCreateWithoutPositionRequestsInput } from './location-create-without-position-requests.input';
+import { LocationUpdateWithoutPositionRequestsInput } from './location-update-without-position-requests.input';
 import { LocationWhereInput } from './location-where.input';
 
 @InputType()

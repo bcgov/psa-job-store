@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentCreateWithoutLocationInput } from './department-create-without-location.input';
-import { Type } from 'class-transformer';
-import { DepartmentCreateOrConnectWithoutLocationInput } from './department-create-or-connect-without-location.input';
-import { DepartmentUpsertWithWhereUniqueWithoutLocationInput } from './department-upsert-with-where-unique-without-location.input';
-import { DepartmentCreateManyLocationInputEnvelope } from './department-create-many-location-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { DepartmentWhereUniqueInput } from './department-where-unique.input';
-import { DepartmentUpdateWithWhereUniqueWithoutLocationInput } from './department-update-with-where-unique-without-location.input';
-import { DepartmentUpdateManyWithWhereWithoutLocationInput } from './department-update-many-with-where-without-location.input';
+import { Type } from 'class-transformer';
+import { DepartmentCreateManyLocationInputEnvelope } from './department-create-many-location-input-envelope.input';
+import { DepartmentCreateOrConnectWithoutLocationInput } from './department-create-or-connect-without-location.input';
+import { DepartmentCreateWithoutLocationInput } from './department-create-without-location.input';
 import { DepartmentScalarWhereInput } from './department-scalar-where.input';
+import { DepartmentUpdateManyWithWhereWithoutLocationInput } from './department-update-many-with-where-without-location.input';
+import { DepartmentUpdateWithWhereUniqueWithoutLocationInput } from './department-update-with-where-unique-without-location.input';
+import { DepartmentUpsertWithWhereUniqueWithoutLocationInput } from './department-upsert-with-where-unique-without-location.input';
+import { DepartmentWhereUniqueInput } from './department-where-unique.input';
 
 @InputType()
 export class DepartmentUncheckedUpdateManyWithoutLocationNestedInput {

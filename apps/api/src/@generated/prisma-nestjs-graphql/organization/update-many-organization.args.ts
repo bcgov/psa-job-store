@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { OrganizationUpdateManyMutationInput } from './organization-update-many-mutation.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { OrganizationUpdateManyMutationInput } from './organization-update-many-mutation.input';
 import { OrganizationWhereInput } from './organization-where.input';
 
 @ArgsType()

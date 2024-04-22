@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { PositionRequestCreateWithoutDepartmentInput } from './position-request-create-without-department.input';
-import { Type } from 'class-transformer';
-import { PositionRequestCreateOrConnectWithoutDepartmentInput } from './position-request-create-or-connect-without-department.input';
-import { PositionRequestUpsertWithWhereUniqueWithoutDepartmentInput } from './position-request-upsert-with-where-unique-without-department.input';
-import { PositionRequestCreateManyDepartmentInputEnvelope } from './position-request-create-many-department-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
-import { PositionRequestUpdateWithWhereUniqueWithoutDepartmentInput } from './position-request-update-with-where-unique-without-department.input';
-import { PositionRequestUpdateManyWithWhereWithoutDepartmentInput } from './position-request-update-many-with-where-without-department.input';
+import { Type } from 'class-transformer';
+import { PositionRequestCreateManyDepartmentInputEnvelope } from './position-request-create-many-department-input-envelope.input';
+import { PositionRequestCreateOrConnectWithoutDepartmentInput } from './position-request-create-or-connect-without-department.input';
+import { PositionRequestCreateWithoutDepartmentInput } from './position-request-create-without-department.input';
 import { PositionRequestScalarWhereInput } from './position-request-scalar-where.input';
+import { PositionRequestUpdateManyWithWhereWithoutDepartmentInput } from './position-request-update-many-with-where-without-department.input';
+import { PositionRequestUpdateWithWhereUniqueWithoutDepartmentInput } from './position-request-update-with-where-unique-without-department.input';
+import { PositionRequestUpsertWithWhereUniqueWithoutDepartmentInput } from './position-request-upsert-with-where-unique-without-department.input';
+import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
 
 @InputType()
 export class PositionRequestUncheckedUpdateManyWithoutDepartmentNestedInput {

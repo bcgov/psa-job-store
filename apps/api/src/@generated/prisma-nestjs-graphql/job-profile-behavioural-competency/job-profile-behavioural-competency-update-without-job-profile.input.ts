@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { BehaviouralCompetencyUpdateOneRequiredWithoutJob_profilesNestedInput } from '../behavioural-competency/behavioural-competency-update-one-required-without-job-profiles-nested.input';
 
 @InputType()

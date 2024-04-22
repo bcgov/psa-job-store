@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { ScheduledTaskMetadataAvgAggregateInput } from './scheduled-task-metadata-avg-aggregate.input';
+import { ScheduledTaskMetadataCountAggregateInput } from './scheduled-task-metadata-count-aggregate.input';
+import { ScheduledTaskMetadataMaxAggregateInput } from './scheduled-task-metadata-max-aggregate.input';
+import { ScheduledTaskMetadataMinAggregateInput } from './scheduled-task-metadata-min-aggregate.input';
 import { ScheduledTaskMetadataOrderByWithAggregationInput } from './scheduled-task-metadata-order-by-with-aggregation.input';
 import { ScheduledTaskMetadataScalarFieldEnum } from './scheduled-task-metadata-scalar-field.enum';
 import { ScheduledTaskMetadataScalarWhereWithAggregatesInput } from './scheduled-task-metadata-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { ScheduledTaskMetadataCountAggregateInput } from './scheduled-task-metadata-count-aggregate.input';
-import { ScheduledTaskMetadataAvgAggregateInput } from './scheduled-task-metadata-avg-aggregate.input';
 import { ScheduledTaskMetadataSumAggregateInput } from './scheduled-task-metadata-sum-aggregate.input';
-import { ScheduledTaskMetadataMinAggregateInput } from './scheduled-task-metadata-min-aggregate.input';
-import { ScheduledTaskMetadataMaxAggregateInput } from './scheduled-task-metadata-max-aggregate.input';
+import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
 
 @ArgsType()
 export class ScheduledTaskMetadataGroupByArgs {

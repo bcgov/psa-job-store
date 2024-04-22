@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { PositionRequestCreateManyDepartmentInput } from './position-request-create-many-department.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { PositionRequestCreateManyDepartmentInput } from './position-request-create-many-department.input';
 
 @InputType()
 export class PositionRequestCreateManyDepartmentInputEnvelope {

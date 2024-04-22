@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
 import { LocationCountOrderByAggregateInput } from './location-count-order-by-aggregate.input';
 import { LocationMaxOrderByAggregateInput } from './location-max-order-by-aggregate.input';

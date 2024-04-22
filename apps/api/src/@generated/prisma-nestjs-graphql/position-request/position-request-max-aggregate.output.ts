@@ -1,6 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 
 @ObjectType()

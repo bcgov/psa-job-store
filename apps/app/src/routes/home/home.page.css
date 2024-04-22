@@ -1,13 +1,9 @@
 
-.orgChartCart .ant-card-head{
+.orgChartCard .ant-card-head{
     z-index: 999;
     position: relative;
     background: white;
     font-size: inherit;
-}
-
-.orgChartCart .ant-card-body{
-    height:100%;
 }
 
 .react-flow__controls{

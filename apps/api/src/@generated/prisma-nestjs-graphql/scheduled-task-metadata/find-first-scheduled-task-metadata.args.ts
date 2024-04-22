@@ -1,12 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { ScheduledTaskMetadataOrderByWithRelationAndSearchRelevanceInput } from './scheduled-task-metadata-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { ScheduledTaskMetadataWhereUniqueInput } from './scheduled-task-metadata-where-unique.input';
-import { Int } from '@nestjs/graphql';
 import { ScheduledTaskMetadataScalarFieldEnum } from './scheduled-task-metadata-scalar-field.enum';
+import { ScheduledTaskMetadataWhereUniqueInput } from './scheduled-task-metadata-where-unique.input';
+import { ScheduledTaskMetadataWhereInput } from './scheduled-task-metadata-where.input';
 
 @ArgsType()
 export class FindFirstScheduledTaskMetadataArgs {

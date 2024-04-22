@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileReportsToCreateWithoutClassificationInput } from './job-profile-reports-to-create-without-classification.input';
-import { Type } from 'class-transformer';
-import { JobProfileReportsToCreateOrConnectWithoutClassificationInput } from './job-profile-reports-to-create-or-connect-without-classification.input';
-import { JobProfileReportsToCreateManyClassificationInputEnvelope } from './job-profile-reports-to-create-many-classification-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { JobProfileReportsToCreateManyClassificationInputEnvelope } from './job-profile-reports-to-create-many-classification-input-envelope.input';
+import { JobProfileReportsToCreateOrConnectWithoutClassificationInput } from './job-profile-reports-to-create-or-connect-without-classification.input';
+import { JobProfileReportsToCreateWithoutClassificationInput } from './job-profile-reports-to-create-without-classification.input';
 import { JobProfileReportsToWhereUniqueInput } from './job-profile-reports-to-where-unique.input';
 
 @InputType()

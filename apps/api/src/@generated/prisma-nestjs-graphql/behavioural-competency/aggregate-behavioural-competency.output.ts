@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { BehaviouralCompetencyCountAggregate } from './behavioural-competency-count-aggregate.output';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { BehaviouralCompetencyAvgAggregate } from './behavioural-competency-avg-aggregate.output';
-import { BehaviouralCompetencySumAggregate } from './behavioural-competency-sum-aggregate.output';
-import { BehaviouralCompetencyMinAggregate } from './behavioural-competency-min-aggregate.output';
+import { BehaviouralCompetencyCountAggregate } from './behavioural-competency-count-aggregate.output';
 import { BehaviouralCompetencyMaxAggregate } from './behavioural-competency-max-aggregate.output';
+import { BehaviouralCompetencyMinAggregate } from './behavioural-competency-min-aggregate.output';
+import { BehaviouralCompetencySumAggregate } from './behavioural-competency-sum-aggregate.output';
 
 @ObjectType()
 export class AggregateBehaviouralCompetency {

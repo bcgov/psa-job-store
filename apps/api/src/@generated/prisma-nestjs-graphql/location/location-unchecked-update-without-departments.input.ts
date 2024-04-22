@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { PositionRequestUncheckedUpdateManyWithoutWorkLocationNestedInput } from '../position-request/position-request-unchecked-update-many-without-work-location-nested.input';
 
 @InputType()

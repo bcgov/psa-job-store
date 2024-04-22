@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { EmployeeGroupCountAggregate } from './employee-group-count-aggregate.output';
-import { EmployeeGroupMinAggregate } from './employee-group-min-aggregate.output';
 import { EmployeeGroupMaxAggregate } from './employee-group-max-aggregate.output';
+import { EmployeeGroupMinAggregate } from './employee-group-min-aggregate.output';
 
 @ObjectType()
 export class EmployeeGroupGroupBy {

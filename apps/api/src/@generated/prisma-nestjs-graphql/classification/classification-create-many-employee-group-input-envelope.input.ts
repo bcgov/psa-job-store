@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { ClassificationCreateManyEmployee_groupInput } from './classification-create-many-employee-group.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { ClassificationCreateManyEmployee_groupInput } from './classification-create-many-employee-group.input';
 
 @InputType()
 export class ClassificationCreateManyEmployee_groupInputEnvelope {

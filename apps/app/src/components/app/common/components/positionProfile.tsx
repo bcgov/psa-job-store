@@ -1,5 +1,7 @@
-import { Skeleton, Typography } from 'antd';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Alert, Skeleton, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
+import { useGetOrganizationQuery } from '../../../../redux/services/graphql-api/organization';
 import {
   PositionProfileModel,
   useLazyGetPositionProfileQuery,
@@ -12,6 +14,7 @@ interface PositionProfileProps {
   mode?: 'compact' | 'compact2' | 'full';
   unOccupiedText?: string;
   loadingStyle?: 'spinner' | 'skeleton';
+  orgChartData?: any;
 }
 
 const PositionProfile: React.FC<PositionProfileProps> = ({
@@ -20,16 +23,44 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
   mode = 'full',
   loadingStyle = 'spinner',
   unOccupiedText,
+  orgChartData,
 }) => {
-  const [getPositionProfile, { data: positionProfileData, isFetching }] = useLazyGetPositionProfileQuery();
+  const [getPositionProfile, { data: positionProfileData, isFetching, error: positionProfileError }] =
+    useLazyGetPositionProfileQuery();
   const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel | null>(null);
   const [additionalPositions, setAdditionalPositions] = useState<number>(0);
+  const [ministryId, setMinistryId] = useState<string | null>(null);
+
+  const {
+    data: organizationData,
+    isFetching: isOrganizationFetching,
+    error: organizationError,
+  } = useGetOrganizationQuery({ id: ministryId ?? '' }, { skip: !ministryId || mode === 'compact2' });
 
   useEffect(() => {
-    if (positionNumber) {
+    if (orgChartData && positionNumber) {
+      const node = orgChartData.nodes.find((node: any) => node.id === positionNumber.toString());
+      if (node) {
+        const activePositions = node.data.employees.filter((employee: any) => employee.status === 'Active');
+        const firstActiveEmployee = activePositions[0];
+        if (firstActiveEmployee) {
+          setFirstActivePosition({
+            employeeName: firstActiveEmployee.name,
+            ministry: node.data.department.organization_id || '',
+            positionDescription: node.data.title,
+            departmentName: node.data.department.name,
+            positionNumber: node.id,
+            classification: node.data.classification.name,
+            status: firstActiveEmployee.status,
+          });
+          setAdditionalPositions(activePositions.length - 1);
+          setMinistryId(node.data.department.organization_id);
+        }
+      }
+    } else if (positionNumber) {
       getPositionProfile({ positionNumber: positionNumber.toString() });
     }
-  }, [positionNumber, getPositionProfile]);
+  }, [positionNumber, getPositionProfile, orgChartData]);
 
   useEffect(() => {
     if (positionProfileData && positionProfileData.positionProfile) {
@@ -39,10 +70,23 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
     }
   }, [positionProfileData]);
 
+  const ministryName = organizationData?.organization?.name || '';
+
+  if (positionProfileError || organizationError) {
+    return (
+      <Alert
+        message="Could not get position information, please reload the page."
+        description={positionProfileError?.message || organizationError?.message}
+        type="error"
+        role="info"
+      />
+    );
+  }
+
   return (
     <>
-      {isFetching ? (
-        loadingStyle == 'spinner' ? (
+      {isFetching || isOrganizationFetching ? (
+        loadingStyle === 'spinner' ? (
           <LoadingSpinnerWithMessage mode="small" />
         ) : (
           <Skeleton.Input active={true} size={'small'} />
@@ -53,7 +97,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
             <div>
               <p style={{ margin: 0 }}>
                 {prefix && `${prefix} `}
-                {`${firstActivePosition.employeeName}, ${firstActivePosition.ministry}`}
+                {`${firstActivePosition.employeeName}, ${ministryName}`}
               </p>
             </div>
           ) : mode === 'compact2' ? (
@@ -65,7 +109,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
             </h1>
           ) : (
             <div>
-              <p style={{ margin: 0 }}>{`${firstActivePosition.employeeName}, ${firstActivePosition.ministry}`}</p>
+              <p style={{ margin: 0 }}>{`${firstActivePosition.employeeName}, ${ministryName}`}</p>
               <Typography.Paragraph type="secondary">
                 {`${firstActivePosition.positionDescription}, ${firstActivePosition.classification}`}
                 <br />

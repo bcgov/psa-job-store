@@ -1,11 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfileReportsToCountAggregate } from './job-profile-reports-to-count-aggregate.output';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { JobProfileReportsToAvgAggregate } from './job-profile-reports-to-avg-aggregate.output';
-import { JobProfileReportsToSumAggregate } from './job-profile-reports-to-sum-aggregate.output';
-import { JobProfileReportsToMinAggregate } from './job-profile-reports-to-min-aggregate.output';
+import { JobProfileReportsToCountAggregate } from './job-profile-reports-to-count-aggregate.output';
 import { JobProfileReportsToMaxAggregate } from './job-profile-reports-to-max-aggregate.output';
+import { JobProfileReportsToMinAggregate } from './job-profile-reports-to-min-aggregate.output';
+import { JobProfileReportsToSumAggregate } from './job-profile-reports-to-sum-aggregate.output';
 
 @ObjectType()
 export class JobProfileReportsToGroupBy {
