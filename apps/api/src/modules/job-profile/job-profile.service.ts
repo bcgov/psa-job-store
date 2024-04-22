@@ -193,7 +193,7 @@ export class JobProfileService {
   }: FindManyJobProfileWithSearch) {
     if (selectProfile) {
       // Fetch all job profiles based on the search and where conditions
-      const allJobProfiles = await this.getJobProfilesWithSearch(search, where, {
+      const allJobProfiles = await this.getJobProfilesWithSearch(search, this.transofrmWhereForAllOrgs(where), {
         ...args,
         take: undefined,
         skip: undefined,
@@ -223,6 +223,46 @@ export class JobProfileService {
     return -1;
   }
 
+  private transofrmWhereForAllOrgs(where: any) {
+    // example of where:
+    // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"organizations":{"some":{"organization_id":{"in":["BC026","ALL"]}}}}]}
+    // Check if "ALL" is present in the organization_id array
+    const hasAllOrganization = where?.AND?.some(
+      (condition) => condition.organizations?.some?.organization_id?.in?.includes('ALL'),
+    );
+
+    // Modify the where query if "ALL" is present
+    // Transform above where statement by including all_organizations: true by transforming into this:
+    // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"OR":[{"all_organizations":{"equals":true}},{"organizations":{"some":{"organization_id":{"in":["BC026"]}}}}]}]}
+    if (hasAllOrganization) {
+      where.AND = where.AND.map((condition) => {
+        if (condition.organizations?.some?.organization_id?.in?.includes('ALL')) {
+          const organizationIdIn = condition.organizations.some.organization_id.in.filter((id) => id !== 'ALL');
+          const updatedCondition = {
+            ...condition,
+            OR: [
+              { all_organizations: { equals: true } },
+              {
+                organizations: {
+                  some: {
+                    organization_id: {
+                      in: organizationIdIn,
+                    },
+                  },
+                },
+              },
+            ],
+          };
+          delete updatedCondition.organizations;
+          return updatedCondition;
+        }
+        return condition;
+      });
+    }
+
+    return where;
+  }
+
   async getJobProfiles({
     search,
     where,
@@ -235,6 +275,11 @@ export class JobProfileService {
   }: FindManyJobProfileWithSearch) {
     let jobProfiles: any[];
 
+    where = this.transofrmWhereForAllOrgs(where);
+
+    // if we are selecting a specific profile, we need to adjust page
+    // used for when user presses back from the edit page and we need to select previously selected profile
+    // on correct page
     if (selectProfile) {
       // Fetch all job profiles based on the search and where conditions
       const allJobProfiles = await this.getJobProfilesWithSearch(search, where, {
@@ -426,7 +471,7 @@ export class JobProfileService {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
-        ...where,
+        ...this.transofrmWhereForAllOrgs(where),
       },
     });
   }
@@ -931,7 +976,30 @@ export class JobProfileService {
     return null;
   }
 
-  async getJobProfilesMinistries() {
+  async getJobProfilesMinistries(positionRequestId?: number) {
+    // if position request id is included, we need to construct a where statement that filters
+    // job profiles for that position request
+    if (positionRequestId) {
+      // todo: see comment below
+      // const positionRequest = await this.prisma.positionRequest.findUnique({
+      //   where: { id: positionRequestId },
+      // });
+      // // ger organization in which this position is being created
+      // const department = await this.prisma.department.findUnique({
+      //   where: { id: positionRequest.department_id },
+      // });
+      // const organization = await this.prisma.organization.findUnique({
+      //   where: { id: department.organization_id },
+      // });
+      // // find classification for the position to which the new position will report to
+      // const r = positionRequest.reports_to_position_id;
+      // // todo: would need to call peoplesoft API here,
+      // // need to do this for all filters, so is not efficient
+      // // find a way to save classification info somewhere?
+      // // generate a statement like this:
+      // // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"organizations":{"some":{"organization_id":{"in":["BC026","ALL"]}}}}]}
+    }
+
     const jobProfiles = await this.prisma.jobProfile.findMany({
       where: { state: 'PUBLISHED' },
       select: {

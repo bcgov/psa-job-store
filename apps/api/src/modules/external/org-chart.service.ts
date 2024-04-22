@@ -61,6 +61,7 @@ export class OrgChartService {
         data: {
           id: `${position['A.POSITION_NBR']}`,
           title: position['A.DESCR'],
+          position_status: position['A.POSN_STATUS'],
           classification: classification,
           department: department,
           employees: employees.get(position['A.POSITION_NBR']) ?? [],

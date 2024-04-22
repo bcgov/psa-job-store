@@ -1,13 +1,11 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { BehaviouralCompetencyType } from '../prisma/behavioural-competency-type.enum';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { BehaviouralCompetencyCategory } from '../prisma/behavioural-competency-category.enum';
-import { BehaviouralCompetencyCountAggregate } from './behavioural-competency-count-aggregate.output';
+import { BehaviouralCompetencyType } from '../prisma/behavioural-competency-type.enum';
 import { BehaviouralCompetencyAvgAggregate } from './behavioural-competency-avg-aggregate.output';
-import { BehaviouralCompetencySumAggregate } from './behavioural-competency-sum-aggregate.output';
-import { BehaviouralCompetencyMinAggregate } from './behavioural-competency-min-aggregate.output';
+import { BehaviouralCompetencyCountAggregate } from './behavioural-competency-count-aggregate.output';
 import { BehaviouralCompetencyMaxAggregate } from './behavioural-competency-max-aggregate.output';
+import { BehaviouralCompetencyMinAggregate } from './behavioural-competency-min-aggregate.output';
+import { BehaviouralCompetencySumAggregate } from './behavioural-competency-sum-aggregate.output';
 
 @ObjectType()
 export class BehaviouralCompetencyGroupBy {

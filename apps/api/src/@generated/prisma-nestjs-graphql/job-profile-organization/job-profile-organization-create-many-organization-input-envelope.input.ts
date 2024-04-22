@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileOrganizationCreateManyOrganizationInput } from './job-profile-organization-create-many-organization.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileOrganizationCreateManyOrganizationInput } from './job-profile-organization-create-many-organization.input';
 
 @InputType()
 export class JobProfileOrganizationCreateManyOrganizationInputEnvelope {

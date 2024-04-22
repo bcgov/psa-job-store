@@ -1,14 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ClassificationWhereInput } from './classification-where.input';
-import { Type } from 'class-transformer';
-import { ClassificationOrderByWithRelationAndSearchRelevanceInput } from './classification-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
-import { Int } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
 import { ClassificationCountAggregateInput } from './classification-count-aggregate.input';
-import { ClassificationMinAggregateInput } from './classification-min-aggregate.input';
 import { ClassificationMaxAggregateInput } from './classification-max-aggregate.input';
+import { ClassificationMinAggregateInput } from './classification-min-aggregate.input';
+import { ClassificationOrderByWithRelationAndSearchRelevanceInput } from './classification-order-by-with-relation-and-search-relevance.input';
+import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
+import { ClassificationWhereInput } from './classification-where.input';
 
 @ArgsType()
 export class ClassificationAggregateArgs {

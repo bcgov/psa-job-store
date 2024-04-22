@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { DepartmentUpdateWithoutPositionRequestsByPaylistDepartmentInput } from './department-update-without-position-requests-by-paylist-department.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { DepartmentCreateWithoutPositionRequestsByPaylistDepartmentInput } from './department-create-without-position-requests-by-paylist-department.input';
+import { DepartmentUpdateWithoutPositionRequestsByPaylistDepartmentInput } from './department-update-without-position-requests-by-paylist-department.input';
 import { DepartmentWhereInput } from './department-where.input';
 
 @InputType()

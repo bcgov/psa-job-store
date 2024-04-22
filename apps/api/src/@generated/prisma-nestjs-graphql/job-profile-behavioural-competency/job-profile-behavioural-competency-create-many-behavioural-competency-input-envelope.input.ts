@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileBehaviouralCompetencyCreateManyBehavioural_competencyInput } from './job-profile-behavioural-competency-create-many-behavioural-competency.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileBehaviouralCompetencyCreateManyBehavioural_competencyInput } from './job-profile-behavioural-competency-create-many-behavioural-competency.input';
 
 @InputType()
 export class JobProfileBehaviouralCompetencyCreateManyBehavioural_competencyInputEnvelope {

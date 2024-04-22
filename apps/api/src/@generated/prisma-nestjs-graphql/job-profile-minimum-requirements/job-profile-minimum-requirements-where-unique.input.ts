@@ -1,8 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfileMinimumRequirementsWhereInput } from './job-profile-minimum-requirements-where.input';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { StringFilter } from '../prisma/string-filter.input';
+import { JobProfileMinimumRequirementsWhereInput } from './job-profile-minimum-requirements-where.input';
 
 @InputType()
 export class JobProfileMinimumRequirementsWhereUniqueInput {

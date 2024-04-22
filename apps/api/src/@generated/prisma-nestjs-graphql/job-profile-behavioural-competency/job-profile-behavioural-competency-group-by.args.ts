@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileBehaviouralCompetencyWhereInput } from './job-profile-behavioural-competency-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileBehaviouralCompetencyAvgAggregateInput } from './job-profile-behavioural-competency-avg-aggregate.input';
+import { JobProfileBehaviouralCompetencyCountAggregateInput } from './job-profile-behavioural-competency-count-aggregate.input';
+import { JobProfileBehaviouralCompetencyMaxAggregateInput } from './job-profile-behavioural-competency-max-aggregate.input';
+import { JobProfileBehaviouralCompetencyMinAggregateInput } from './job-profile-behavioural-competency-min-aggregate.input';
 import { JobProfileBehaviouralCompetencyOrderByWithAggregationInput } from './job-profile-behavioural-competency-order-by-with-aggregation.input';
 import { JobProfileBehaviouralCompetencyScalarFieldEnum } from './job-profile-behavioural-competency-scalar-field.enum';
 import { JobProfileBehaviouralCompetencyScalarWhereWithAggregatesInput } from './job-profile-behavioural-competency-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { JobProfileBehaviouralCompetencyCountAggregateInput } from './job-profile-behavioural-competency-count-aggregate.input';
-import { JobProfileBehaviouralCompetencyAvgAggregateInput } from './job-profile-behavioural-competency-avg-aggregate.input';
 import { JobProfileBehaviouralCompetencySumAggregateInput } from './job-profile-behavioural-competency-sum-aggregate.input';
-import { JobProfileBehaviouralCompetencyMinAggregateInput } from './job-profile-behavioural-competency-min-aggregate.input';
-import { JobProfileBehaviouralCompetencyMaxAggregateInput } from './job-profile-behavioural-competency-max-aggregate.input';
+import { JobProfileBehaviouralCompetencyWhereInput } from './job-profile-behavioural-competency-where.input';
 
 @ArgsType()
 export class JobProfileBehaviouralCompetencyGroupByArgs {

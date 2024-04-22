@@ -1,11 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
-import { JobProfileRoleCountAggregate } from './job-profile-role-count-aggregate.output';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { JobProfileRoleAvgAggregate } from './job-profile-role-avg-aggregate.output';
-import { JobProfileRoleSumAggregate } from './job-profile-role-sum-aggregate.output';
-import { JobProfileRoleMinAggregate } from './job-profile-role-min-aggregate.output';
+import { JobProfileRoleCountAggregate } from './job-profile-role-count-aggregate.output';
 import { JobProfileRoleMaxAggregate } from './job-profile-role-max-aggregate.output';
+import { JobProfileRoleMinAggregate } from './job-profile-role-min-aggregate.output';
+import { JobProfileRoleSumAggregate } from './job-profile-role-sum-aggregate.output';
 
 @ObjectType()
 export class JobProfileRoleGroupBy {

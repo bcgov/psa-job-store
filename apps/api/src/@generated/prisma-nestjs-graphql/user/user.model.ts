@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { Comment } from '../comment/comment.model';
 import { JobProfile } from '../job-profile/job-profile.model';

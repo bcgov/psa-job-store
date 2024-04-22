@@ -1,9 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { UserCreateWithoutCommentsInput } from './user-create-without-comments.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { UserCreateOrConnectWithoutCommentsInput } from './user-create-or-connect-without-comments.input';
-import { Prisma } from '@prisma/client';
+import { UserCreateWithoutCommentsInput } from './user-create-without-comments.input';
 import { UserWhereUniqueInput } from './user-where-unique.input';
 
 @InputType()

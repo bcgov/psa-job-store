@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
-import { JobProfileOrganizationCountAggregate } from './job-profile-organization-count-aggregate.output';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { JobProfileOrganizationAvgAggregate } from './job-profile-organization-avg-aggregate.output';
-import { JobProfileOrganizationSumAggregate } from './job-profile-organization-sum-aggregate.output';
-import { JobProfileOrganizationMinAggregate } from './job-profile-organization-min-aggregate.output';
+import { JobProfileOrganizationCountAggregate } from './job-profile-organization-count-aggregate.output';
 import { JobProfileOrganizationMaxAggregate } from './job-profile-organization-max-aggregate.output';
+import { JobProfileOrganizationMinAggregate } from './job-profile-organization-min-aggregate.output';
+import { JobProfileOrganizationSumAggregate } from './job-profile-organization-sum-aggregate.output';
 
 @ObjectType()
 export class AggregateJobProfileOrganization {

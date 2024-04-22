@@ -1,11 +1,14 @@
 import { Button, Card, Col, Divider, Row, Space, Typography } from 'antd';
+import { useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-positions/components/my-positions-table.component';
-import OrgChartWrapped from '../org-chart/components/org-chart-wrapped.component';
+import { OrgChart } from '../org-chart/components/org-chart';
+import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
+import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import ContentWrapper from './components/content-wrapper.component';
 import HeaderWrapper from './components/header-wrapper.component';
 import { InitialsAvatar } from './components/initials-avatar.component';
@@ -17,7 +20,13 @@ export const HomePage = () => {
   const auth = useAuth();
   const { data: positionsCountData } = useGetPositionRequestsCountQuery();
   const { total = 0, completed = 0, inReview = 0 } = positionsCountData?.positionRequestsCount || {};
-  const { data: profileData, isLoading: profileIsLoading } = useGetProfileQuery();
+  const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
+
+  const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    setDepartmentId(profileData?.profile.department_id);
+  }, [profileData?.profile]);
 
   return (
     <>
@@ -101,14 +110,19 @@ export const HomePage = () => {
         {/* Todo: pull in from actual user data */}
 
         <Card
-          loading={profileIsLoading}
-          className="orgChartCart"
+          loading={profileDataIsFetching}
+          className="orgChartCard"
           style={{
             height: '500px',
             overflow: 'hidden',
             background: 'none',
             border: '1px solid #D9D9D9',
             marginTop: '1rem',
+            marginBottom: '2rem',
+          }}
+          bodyStyle={{
+            padding: 0,
+            height: '444px', // card height - header height
           }}
           title={<h2 style={{ marginBottom: 0 }}>My organization</h2>}
           extra={
@@ -119,11 +133,17 @@ export const HomePage = () => {
             </Link>
           }
         >
-          <OrgChartWrapped
-            data-testid="org-chart"
-            selectedDepartment={profileData?.profile.department_id ?? null}
-            profileHasNoDepartment={profileData?.profile.department_id === null ? true : false}
-          />
+          <div style={{ height: '100%' }}>
+            <OrgChart
+              data-testid="org-chart"
+              type={OrgChartType.DYNAMIC}
+              context={OrgChartContext.DEFAULT}
+              setDepartmentId={setDepartmentId}
+              departmentId={departmentId}
+              departmentIdIsLoading={profileDataIsFetching}
+              targetId={profileData?.profile.position_id}
+            />
+          </div>
         </Card>
       </ContentWrapper>
     </>

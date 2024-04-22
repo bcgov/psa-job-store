@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { DepartmentWhereUniqueInput } from './department-where-unique.input';
 import { Type } from 'class-transformer';
-import { DepartmentUpdateWithoutOrganizationInput } from './department-update-without-organization.input';
 import { DepartmentCreateWithoutOrganizationInput } from './department-create-without-organization.input';
+import { DepartmentUpdateWithoutOrganizationInput } from './department-update-without-organization.input';
+import { DepartmentWhereUniqueInput } from './department-where-unique.input';
 
 @InputType()
 export class DepartmentUpsertWithWhereUniqueWithoutOrganizationInput {

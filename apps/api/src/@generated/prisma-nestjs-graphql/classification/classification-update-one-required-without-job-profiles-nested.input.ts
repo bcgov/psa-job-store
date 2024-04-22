@@ -1,12 +1,11 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { ClassificationCreateWithoutJob_profilesInput } from './classification-create-without-job-profiles.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { ClassificationCreateOrConnectWithoutJob_profilesInput } from './classification-create-or-connect-without-job-profiles.input';
-import { ClassificationUpsertWithoutJob_profilesInput } from './classification-upsert-without-job-profiles.input';
-import { Prisma } from '@prisma/client';
-import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
+import { ClassificationCreateWithoutJob_profilesInput } from './classification-create-without-job-profiles.input';
 import { ClassificationUpdateToOneWithWhereWithoutJob_profilesInput } from './classification-update-to-one-with-where-without-job-profiles.input';
+import { ClassificationUpsertWithoutJob_profilesInput } from './classification-upsert-without-job-profiles.input';
+import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
 
 @InputType()
 export class ClassificationUpdateOneRequiredWithoutJob_profilesNestedInput {

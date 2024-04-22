@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { btoa } from 'buffer';
-import { generateJobProfile } from 'common-kit';
+import { Elements, autolayout, generateJobProfile } from 'common-kit';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import { Packer } from 'docx';
@@ -17,6 +17,7 @@ import {
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
+import { DepartmentService } from '../external/department.service';
 import {
   IncidentCreateUpdateInput,
   IncidentStatus,
@@ -31,6 +32,7 @@ import {
   PositionType,
 } from '../external/models/position-create.input';
 import { PeoplesoftService } from '../external/peoplesoft.service';
+import { PositionService } from '../external/position.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import { convertIncidentStatusToPositionRequestStatus } from './utils/convert-incident-status-to-position-request-status.util';
@@ -94,8 +96,10 @@ export class PositionRequestApiService {
   constructor(
     private readonly classificationService: ClassificationService,
     private readonly crmService: CrmService,
+    private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
+    private readonly positionService: PositionService,
   ) {}
 
   async generateUniqueShortId(length: number, retries: number = 5): Promise<string> {
@@ -159,10 +163,75 @@ export class PositionRequestApiService {
         const position =
           process.env.TEST_ENV === 'true' ? { positionNbr: '1234' } : await this.createPositionForPositionRequest(id);
         if (position.positionNbr.length > 0) {
+          const result = await this.peoplesoftService.getPosition(position.positionNbr);
+          const rows = result?.data?.query?.rows;
+          const positionObj: Record<string, any> | null = (rows ?? []).length > 0 ? rows[0] : null;
+
+          const classification = await this.classificationService.getClassification({
+            where: { id: positionObj['A.JOBCODE'] },
+          });
+
+          const department = await this.departmentService.getDepartment({ where: { id: positionObj['A.DEPTID'] } });
+          const { edges, nodes } = positionRequest.orgchart_json as Record<string, any> as Elements;
+
+          // Update supervisor, excluded manager nodes
+          const excludedManagerId = positionRequest.additional_info_excluded_mgr_position_number;
+          const supervisorId = positionObj['A.REPORTS_TO'];
+          nodes.forEach((node) => {
+            node.data = {
+              ...node.data,
+              isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
+              isExcludedManager: node.id === excludedManagerId,
+              isNewPosition: false, // Clear previous positions marked as new
+              isSupervisor: node.id === supervisorId,
+            };
+          });
+
+          // Add edge & node for new position
+          const edgeId = `${supervisorId}-${positionObj['A.POSITION_NBR']}`;
+          if (edges.find((edge) => edge.id === edgeId) == null) {
+            edges.push({
+              id: edgeId,
+              source: supervisorId,
+              target: positionObj['A.POSITION_NBR'],
+              style: { stroke: 'blue' },
+              type: 'smoothstep',
+              animated: true,
+              selected: true,
+            });
+          }
+
+          const nodeId = positionObj['A.POSITION_NBR'];
+          if (nodes.find((node) => node.id === nodeId) == null) {
+            nodes.push({
+              id: nodeId,
+              type: 'org-chart-card',
+              data: {
+                id: nodeId,
+                isAdjacent: true,
+                isNewPosition: true,
+                title: positionObj['A.DESCR'],
+                classification: {
+                  id: classification.id,
+                  code: classification.code,
+                  name: classification.name,
+                },
+                department: {
+                  id: department.id,
+                  organization_id: department.organization_id,
+                  name: department.name,
+                },
+                employees: [],
+              },
+              position: { x: 0, y: 0 },
+            });
+          }
+
           positionRequest = await this.prisma.positionRequest.update({
             where: { id },
             data: {
               position_number: +position.positionNbr,
+              orgchart_json: autolayout({ edges, nodes }) as any,
             },
           });
         }
@@ -685,11 +754,6 @@ export class PositionRequestApiService {
       updatePayload.reports_to_position_id = updateData.reports_to_position_id;
     }
 
-    // Position # is _never_ set by client
-    // if (updateData.position_number !== undefined) {
-    //   updatePayload.position_number = updateData.position_number;
-    // }
-
     if (updateData.profile_json !== undefined) {
       updatePayload.profile_json = updateData.profile_json;
     }
@@ -701,10 +765,6 @@ export class PositionRequestApiService {
     if (updateData.title !== undefined) {
       updatePayload.title = updateData.title;
     }
-
-    // if (updateData.classification !== undefined) {
-    //   updatePayload.classification = updateData.classification;
-    // }
 
     if (updateData.classification_id !== undefined) {
       updatePayload.classification_id = updateData.classification_id;
@@ -725,8 +785,111 @@ export class PositionRequestApiService {
     // additional information form data:
 
     if (updateData.additional_info_excluded_mgr_position_number !== undefined) {
+      // console.log('updating additional_info_excluded_mgr_position_number...');
       updatePayload.additional_info_excluded_mgr_position_number =
         updateData.additional_info_excluded_mgr_position_number;
+
+      // if updating the excluded manager position number, we need to check if that position
+      // exists in the org chart, if it doesn't we need to add this position to the org chart
+      // such that the top level of the reporting chain reports to this position
+
+      // get the org chart
+
+      // check if the excluded manager position number is in the org chart
+
+      // if not in org chart, fetch employee info from peoplesoft
+
+      // get the top level of the reporting chain, from the report_to position number and up
+
+      // update org chart json
+
+      // save result to the database
+
+      const positionRequest = await this.prisma.positionRequest.findUnique({
+        where: { id: id },
+        select: { orgchart_json: true, reports_to_position_id: true },
+      });
+
+      const orgChart = positionRequest.orgchart_json;
+
+      if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
+        // Remove existing node with isExcludedManager = true
+        const updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.isExcludedManager !== true);
+
+        const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
+          const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
+          const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
+          return sourceNode?.data?.isExcludedManager !== true && targetNode?.data?.isExcludedManager !== true;
+        });
+
+        const isExcludedManagerInOrgChart = (orgChart.nodes as any[]).some(
+          (node) => node.id === updateData.additional_info_excluded_mgr_position_number,
+        );
+
+        // console.log('isExcludedManagerInOrgChart: ', isExcludedManagerInOrgChart);
+
+        if (!isExcludedManagerInOrgChart) {
+          // console.log('isExcludedManagerInOrgChart false');
+
+          const employeeInfo = await this.positionService.getPositionProfile(
+            updateData.additional_info_excluded_mgr_position_number,
+            true,
+          );
+
+          // console.log('employeeInfo: ', employeeInfo);
+
+          const topLevelPositionId = this.getTopLevelReportingChain(orgChart, positionRequest.reports_to_position_id);
+
+          // console.log('topLevelPositionId: ', topLevelPositionId);
+
+          const updatedOrgChart = {
+            ...orgChart,
+            nodes: [
+              ...updatedNodes,
+              {
+                id: updateData.additional_info_excluded_mgr_position_number,
+                data: {
+                  id: updateData.additional_info_excluded_mgr_position_number,
+                  title: employeeInfo[0].positionDescription,
+                  isExcludedManager: true,
+                  employees: employeeInfo.map((employee) => ({
+                    id: employee.employeeId,
+                    name: employee.employeeName,
+                    status: employee.status,
+                  })),
+                  department: {
+                    id: employeeInfo[0].departmentId,
+                    name: employeeInfo[0].departmentName,
+                    organization_id: employeeInfo[0].organizationId,
+                  },
+                  classification: {
+                    id: employeeInfo[0].classificationId,
+                    code: employeeInfo[0].classificationCode,
+                    name: employeeInfo[0].classification,
+                  },
+                },
+                type: 'org-chart-card',
+                position: { x: 0, y: 0 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+            ],
+            edges: [
+              ...updatedEdges,
+              {
+                id: `${updateData.additional_info_excluded_mgr_position_number}-${topLevelPositionId}`,
+                type: 'smoothstep',
+                source: updateData.additional_info_excluded_mgr_position_number,
+                target: topLevelPositionId,
+                style: { strokeDasharray: '5 5' },
+              },
+            ],
+          };
+
+          // console.log('new org chart: ', JSON.stringify(updatedOrgChart));
+          updatePayload.orgchart_json = updatedOrgChart;
+        }
+      }
     }
 
     if (updateData.additional_info_comments !== undefined) {
@@ -748,6 +911,46 @@ export class PositionRequestApiService {
     });
 
     return positionRequest;
+  }
+
+  private getTopLevelReportingChain(orgChart: any, startPositionId: string): string {
+    // console.log('getTopLevelReportingChain, startPositionId: ', startPositionId);
+
+    // Find the edge with target equal to the startPositionId
+    const startEdge = orgChart.edges.find((edge: any) => edge.target === startPositionId);
+
+    if (!startEdge) {
+      // If no edge is found with the startPositionId as the target, it means it's already a top-level position
+      // console.log('No edge found with startPositionId as target. Returning startPositionId: ', startPositionId);
+      return startPositionId;
+    }
+
+    let currentPositionId = startEdge.source;
+    // console.log('Starting position: ', currentPositionId);
+
+    while (true) {
+      // Find the edge where the current position is the target
+      const currentEdge = orgChart.edges.find((edge: any) => edge.target === currentPositionId);
+
+      if (!currentEdge) {
+        // If no edge is found with the current position as the target, it means it's a terminal node
+        // console.log('No edge found with currentPositionId as target. Returning currentPositionId: ', currentPositionId);
+        return currentPositionId;
+      }
+
+      // Check if the source of the current edge exists in the nodes array
+      const sourceNode = orgChart.nodes.find((node: any) => node.id === currentEdge.source);
+
+      if (!sourceNode) {
+        // If the source node doesn't exist in the nodes array, it means it's a terminal node
+        // console.log('Source node not found in nodes array. Returning currentPositionId: ', currentPositionId);
+        return currentPositionId;
+      }
+
+      // Update the current position to the source of the current edge
+      currentPositionId = currentEdge.source;
+      // console.log('Moving to next position: ', currentPositionId);
+    }
   }
 
   async deletePositionRequest(id: number) {

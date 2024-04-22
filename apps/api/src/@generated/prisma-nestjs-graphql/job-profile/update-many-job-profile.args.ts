@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileUpdateManyMutationInput } from './job-profile-update-many-mutation.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { JobProfileUpdateManyMutationInput } from './job-profile-update-many-mutation.input';
 import { JobProfileWhereInput } from './job-profile-where.input';
 
 @ArgsType()

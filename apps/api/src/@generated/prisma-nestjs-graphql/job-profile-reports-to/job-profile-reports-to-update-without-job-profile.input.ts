@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { ClassificationUpdateOneRequiredWithoutReporteesNestedInput } from '../classification/classification-update-one-required-without-reportees-nested.input';
 
 @InputType()

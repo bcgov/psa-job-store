@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileReportsToOrderByRelevanceFieldEnum } from './job-profile-reports-to-order-by-relevance-field.enum';
+import { Field, InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
+import { JobProfileReportsToOrderByRelevanceFieldEnum } from './job-profile-reports-to-order-by-relevance-field.enum';
 
 @InputType()
 export class JobProfileReportsToOrderByRelevanceInput {

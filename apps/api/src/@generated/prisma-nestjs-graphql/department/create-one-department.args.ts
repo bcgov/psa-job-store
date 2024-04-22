@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { DepartmentCreateInput } from './department-create.input';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { DepartmentCreateInput } from './department-create.input';
 
 @ArgsType()
 export class CreateOneDepartmentArgs {

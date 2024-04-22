@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Department } from '../department/department.model';
 import { PositionRequest } from '../position-request/position-request.model';
 

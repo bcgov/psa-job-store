@@ -1,16 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileScopeWhereInput } from './job-profile-scope-where.input';
-import { Type } from 'class-transformer';
-import { JobProfileScopeOrderByWithRelationAndSearchRelevanceInput } from './job-profile-scope-order-by-with-relation-and-search-relevance.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileScopeWhereUniqueInput } from './job-profile-scope-where-unique.input';
-import { Int } from '@nestjs/graphql';
-import { JobProfileScopeCountAggregateInput } from './job-profile-scope-count-aggregate.input';
+import { Type } from 'class-transformer';
 import { JobProfileScopeAvgAggregateInput } from './job-profile-scope-avg-aggregate.input';
-import { JobProfileScopeSumAggregateInput } from './job-profile-scope-sum-aggregate.input';
-import { JobProfileScopeMinAggregateInput } from './job-profile-scope-min-aggregate.input';
+import { JobProfileScopeCountAggregateInput } from './job-profile-scope-count-aggregate.input';
 import { JobProfileScopeMaxAggregateInput } from './job-profile-scope-max-aggregate.input';
+import { JobProfileScopeMinAggregateInput } from './job-profile-scope-min-aggregate.input';
+import { JobProfileScopeOrderByWithRelationAndSearchRelevanceInput } from './job-profile-scope-order-by-with-relation-and-search-relevance.input';
+import { JobProfileScopeSumAggregateInput } from './job-profile-scope-sum-aggregate.input';
+import { JobProfileScopeWhereUniqueInput } from './job-profile-scope-where-unique.input';
+import { JobProfileScopeWhereInput } from './job-profile-scope-where.input';
 
 @ArgsType()
 export class JobProfileScopeAggregateArgs {

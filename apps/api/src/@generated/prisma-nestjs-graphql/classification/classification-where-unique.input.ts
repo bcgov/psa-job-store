@@ -1,11 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { ClassificationWhereInput } from './classification-where.input';
-import { StringFilter } from '../prisma/string-filter.input';
-import { DateTimeFilter } from '../prisma/date-time-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { EmployeeGroupRelationFilter } from '../employee-group/employee-group-relation-filter.input';
 import { JobProfileClassificationListRelationFilter } from '../job-profile-classification/job-profile-classification-list-relation-filter.input';
 import { JobProfileReportsToListRelationFilter } from '../job-profile-reports-to/job-profile-reports-to-list-relation-filter.input';
+import { DateTimeFilter } from '../prisma/date-time-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
+import { ClassificationWhereInput } from './classification-where.input';
 
 @InputType()
 export class ClassificationWhereUniqueInput {

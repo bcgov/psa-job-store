@@ -152,8 +152,14 @@ Then('they see a confirmation screen with the position number', () => {
 When('the user makes edits in significant fields', () => {
   cy.get('[data-testid="job-title-input"]').clear().type('Verification test');
   cy.get('[data-testid="remove-accountability-7"]').click();
+  cy.get('[data-testid="accountabilities-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
   cy.get('[data-testid="remove-education-8"]').click();
-  cy.get('[data-testid="remove-job-experience-1"]').click(); // 2 is non-significant
+  cy.get('[data-testid="education-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
+  cy.get('[data-testid="remove-job-experience-1"]').click();
+  cy.get('[data-testid="experience-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
 });
 
 Then('proceeds to next step', () => {
@@ -166,6 +172,11 @@ Then('proceeds to next step', () => {
 Then('they see a verification warning window', () => {
   // Check for the presence of the verification warning window
   cy.get('[data-testid="verification-warning"]').should('be.visible');
+});
+
+When('the user enters comments into the comment box', () => {
+  // Type in the comments
+  cy.get('[data-testid="comments-input"]').type('This is a test comment');
 });
 
 ////
@@ -185,6 +196,33 @@ Then('they see a success message', () => {
     if (matches && matches.length > 1) {
       positionId = matches[1];
     }
+  });
+});
+
+Then('position request contains the comment', () => {
+  // make a request to the endpoint to get the position request details
+  const token = Cypress.env('AUTH_TOKEN');
+  console.log('token: ', token);
+
+  // make the request
+  cy.request({
+    method: 'POST',
+    url: 'http://localhost:4000/graphql',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: {
+      query: `
+        query {
+          positionRequest(id: ${positionId}) {
+            additional_info_comments
+          }
+        }
+      `,
+    },
+  }).then((response) => {
+    expect(response.status).to.equal(200);
+    expect(response.body.data.positionRequest.additional_info_comments).to.equal('This is a test comment');
   });
 });
 

@@ -1,12 +1,11 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { UserWhereInput } from './user-where.input';
-import { StringFilter } from '../prisma/string-filter.input';
-import { StringListFilter } from '../prisma/string-list-filter.input';
-import { JsonFilter } from '../prisma/json-filter.input';
-import { DateTimeFilter } from '../prisma/date-time-filter.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { CommentListRelationFilter } from '../comment/comment-list-relation-filter.input';
 import { JobProfileListRelationFilter } from '../job-profile/job-profile-list-relation-filter.input';
+import { DateTimeFilter } from '../prisma/date-time-filter.input';
+import { JsonFilter } from '../prisma/json-filter.input';
+import { StringFilter } from '../prisma/string-filter.input';
+import { StringListFilter } from '../prisma/string-list-filter.input';
+import { UserWhereInput } from './user-where.input';
 
 @InputType()
 export class UserWhereUniqueInput {

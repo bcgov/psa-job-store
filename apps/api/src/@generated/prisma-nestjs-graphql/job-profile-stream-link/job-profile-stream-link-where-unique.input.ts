@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
+import { JobProfileStreamRelationFilter } from '../job-profile-stream/job-profile-stream-relation-filter.input';
+import { JobProfileRelationFilter } from '../job-profile/job-profile-relation-filter.input';
+import { IntFilter } from '../prisma/int-filter.input';
 import { JobProfileStreamLinkJobProfileIdStreamIdCompoundUniqueInput } from './job-profile-stream-link-job-profile-id-stream-id-compound-unique.input';
 import { JobProfileStreamLinkWhereInput } from './job-profile-stream-link-where.input';
-import { IntFilter } from '../prisma/int-filter.input';
-import { JobProfileRelationFilter } from '../job-profile/job-profile-relation-filter.input';
-import { JobProfileStreamRelationFilter } from '../job-profile-stream/job-profile-stream-relation-filter.input';
 
 @InputType()
 export class JobProfileStreamLinkWhereUniqueInput {

@@ -1,9 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
 import { SortOrderInput } from '../prisma/sort-order.input';
-import { ScheduledTaskMetadataCountOrderByAggregateInput } from './scheduled-task-metadata-count-order-by-aggregate.input';
 import { ScheduledTaskMetadataAvgOrderByAggregateInput } from './scheduled-task-metadata-avg-order-by-aggregate.input';
+import { ScheduledTaskMetadataCountOrderByAggregateInput } from './scheduled-task-metadata-count-order-by-aggregate.input';
 import { ScheduledTaskMetadataMaxOrderByAggregateInput } from './scheduled-task-metadata-max-order-by-aggregate.input';
 import { ScheduledTaskMetadataMinOrderByAggregateInput } from './scheduled-task-metadata-min-order-by-aggregate.input';
 import { ScheduledTaskMetadataSumOrderByAggregateInput } from './scheduled-task-metadata-sum-order-by-aggregate.input';

@@ -5,7 +5,6 @@ import {
   FileOutlined,
   FileProtectOutlined,
   FileSearchOutlined,
-  FileTextOutlined,
   HistoryOutlined,
   HomeOutlined,
   MenuFoldOutlined,
@@ -107,7 +106,11 @@ export const AppLayout = () => {
         '5',
         <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
       ),
-      getItem(<Link to="/job-profiles">Job profiles</Link>, '6', <FileTextOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(
+        <Link to="/job-profiles">Explore job profiles</Link>,
+        '6',
+        <FileSearchOutlined style={{ fontSize: '1.25rem' }} />,
+      ),
       getItem(<Link to="/my-positions">My positions</Link>, '7', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
     ]),
   ];
@@ -193,8 +196,8 @@ export const AppLayout = () => {
                           to: '/org-chart',
                         },
                         {
-                          icon: <FileTextOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'Job profiles',
+                          icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Explore job profiles',
                           to: '/job-profiles',
                         },
                         {
@@ -249,8 +252,8 @@ export const AppLayout = () => {
                             hideTitle: true,
                           },
                           {
-                            icon: <FileTextOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'Job profiles',
+                            icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'Explore job profiles',
                             to: '/job-profiles',
                             hideTitle: true,
                           },

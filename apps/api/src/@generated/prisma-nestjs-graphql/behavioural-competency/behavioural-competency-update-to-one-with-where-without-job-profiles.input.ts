@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { BehaviouralCompetencyWhereInput } from './behavioural-competency-where.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { BehaviouralCompetencyUpdateWithoutJob_profilesInput } from './behavioural-competency-update-without-job-profiles.input';
+import { BehaviouralCompetencyWhereInput } from './behavioural-competency-where.input';
 
 @InputType()
 export class BehaviouralCompetencyUpdateToOneWithWhereWithoutJob_profilesInput {

@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { SortOrder } from '../prisma/sort-order.enum';
-import { BehaviouralCompetencyCountOrderByAggregateInput } from './behavioural-competency-count-order-by-aggregate.input';
 import { BehaviouralCompetencyAvgOrderByAggregateInput } from './behavioural-competency-avg-order-by-aggregate.input';
+import { BehaviouralCompetencyCountOrderByAggregateInput } from './behavioural-competency-count-order-by-aggregate.input';
 import { BehaviouralCompetencyMaxOrderByAggregateInput } from './behavioural-competency-max-order-by-aggregate.input';
 import { BehaviouralCompetencyMinOrderByAggregateInput } from './behavioural-competency-min-order-by-aggregate.input';
 import { BehaviouralCompetencySumOrderByAggregateInput } from './behavioural-competency-sum-order-by-aggregate.input';

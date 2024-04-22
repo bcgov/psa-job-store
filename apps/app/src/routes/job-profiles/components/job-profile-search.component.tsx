@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Card, Col, Input, Row, Tag, TreeSelect } from 'antd';
+import { CloseCircleFilled } from '@ant-design/icons';
+import { Button, Card, Col, Input, Row, Tag, Tooltip, TreeSelect } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
@@ -38,6 +39,7 @@ interface JobProfileSearchProps {
   fullWidth?: boolean;
   ministriesData?: any;
   classificationData?: any;
+  positionRequestId?: number;
 }
 
 // Unified state for all selections
@@ -57,6 +59,7 @@ interface MinistriesOption {
 }
 
 export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
+  positionRequestId,
   searchPlaceHolderText = 'Search by job title or keyword',
   // additionalFilters = false,
   fullWidth = false,
@@ -88,6 +91,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   if (!classificationData)
     // eslint-disable-next-line react-hooks/rules-of-hooks
     classificationData = useGetJobProfilesClassificationsQuery().data?.jobProfilesClassifications;
+
+  const [searchText, setSearchText] = useState(searchParams.get('search') || '');
 
   // JOB FAMILIES AND STREAMS TREE VIEW
   const { data: jobFamiliesData } = useGetJobFamiliesQuery();
@@ -126,8 +131,9 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   //   // eslint-disable-next-line react-hooks/rules-of-hooks
   //   careerGroupData = useGetJobProfilesCareerGroupsQuery().data?.jobProfilesCareerGroups;
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  if (!ministriesData) ministriesData = useGetJobProfilesMinistriesQuery().data?.jobProfilesMinistries;
+  if (!ministriesData)
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    ministriesData = useGetJobProfilesMinistriesQuery({ positionRequestId }).data?.jobProfilesMinistries;
 
   const [allSelections, setAllSelections] = useState<Selection[]>([]); // holds tags from all filters
   const [classificationFilterData, setClassificationOptions] = useState<ClassificationOption[]>([]); // holds options for classification filter
@@ -269,7 +275,11 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     }
   }, [searchParams, initialSelectionSet, setInitialSelectionSet]);
 
+  // user updated filters, now update the search params to reflect that
   useEffect(() => {
+    if (!initialSelectionSet) return;
+
+    // get filters from allSelections (these are the tags that are displayed on the page)
     const jobFamilyValues = allSelections
       .filter((s) => s.type === 'jobFamily')
       .map((s) => s.value)
@@ -307,6 +317,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const sortFieldFromURL = searchParams.get('sortField');
     const sortOrderFromURL = searchParams.get('sortOrder');
 
+    // construct new url params
     // Update URL parameters if needed
     if (selectedProfileFromUrl) newSearchParams.set('selectedProfile', selectedProfileFromUrl);
     if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
@@ -356,7 +367,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
         );
       }
     }
-  }, [allSelections, searchParams, setSearchParams, location.pathname, navigate, getBasePath]);
+  }, [allSelections, initialSelectionSet, searchParams, setSearchParams, location.pathname, navigate, getBasePath]); //]);
 
   // Add a new tag from any of the filters
   const addSelection = (value: any, type: any) => {
@@ -402,8 +413,17 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     );
   };
 
+  useEffect(() => {
+    // if searchparams has clear filters flag, do that
+    if (searchParams.get('clearFilters')) {
+      setAllSelections([]);
+      searchParams.delete('clearFilters');
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setAllSelections, setSearchParams]);
+
   const clearFilters = () => {
-    setAllSelections([]);
+    // setAllSelections([]);
 
     // Update the URL parameters
     const newSearchParams = new URLSearchParams();
@@ -414,6 +434,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
 
+    newSearchParams.set('clearFilters', 'true');
     // setSearchParams(newSearchParams);
 
     const basePath = getBasePath(location.pathname);
@@ -461,14 +482,32 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
           <Row gutter={24}>
             <Col xl={6} lg={8} md={12} sm={24}>
               <Search
-                defaultValue={searchParams.get('search') ?? undefined}
+                // defaultValue={searchParams.get('search') ?? undefined}
                 enterButton="Find job profiles"
                 aria-label={searchPlaceHolderText}
                 onPressEnter={(e) => handleSearch(e.currentTarget.value)}
-                allowClear
+                // allowClear
                 placeholder={searchPlaceHolderText}
                 onSearch={handleSearch}
                 style={{ width: '100%' }}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                }}
+                value={searchText}
+                onBlur={() => {
+                  handleSearch(searchText);
+                }}
+                suffix={
+                  <Tooltip placement="top" title={'Clear search'}>
+                    <CloseCircleFilled
+                      style={{ fontSize: '0.8rem', color: '#bfbfbf', display: searchText == '' ? 'none' : 'block' }}
+                      onClick={() => {
+                        setSearchText('');
+                        handleSearch('');
+                      }}
+                    />
+                  </Tooltip>
+                }
                 // style={{ width: fullWidth ? 500 : 400 }}
               />
             </Col>
@@ -726,7 +765,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
               </Row>
             )}
           </Row>
-          <Row>
+          <Row data-testid="filters-tags-section">
             <Col lg={15} xs={24}>
               {allSelections.map((selection) => (
                 <Tag

@@ -54,6 +54,7 @@ Feature: Search and Filter Job Profiles
   Scenario: Job profile selection
     When the user clicks on a job profile from the list
     Then the details of the selected job profile are displayed
+    And the new job profile should be selected
 
   Scenario: Page navigation in job profiles
     Given there are multiple pages of job profiles

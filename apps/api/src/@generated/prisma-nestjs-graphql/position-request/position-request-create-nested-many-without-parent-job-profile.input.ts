@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { PositionRequestCreateWithoutParent_job_profileInput } from './position-request-create-without-parent-job-profile.input';
-import { Type } from 'class-transformer';
-import { PositionRequestCreateOrConnectWithoutParent_job_profileInput } from './position-request-create-or-connect-without-parent-job-profile.input';
-import { PositionRequestCreateManyParent_job_profileInputEnvelope } from './position-request-create-many-parent-job-profile-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { PositionRequestCreateManyParent_job_profileInputEnvelope } from './position-request-create-many-parent-job-profile-input-envelope.input';
+import { PositionRequestCreateOrConnectWithoutParent_job_profileInput } from './position-request-create-or-connect-without-parent-job-profile.input';
+import { PositionRequestCreateWithoutParent_job_profileInput } from './position-request-create-without-parent-job-profile.input';
 import { PositionRequestWhereUniqueInput } from './position-request-where-unique.input';
 
 @InputType()

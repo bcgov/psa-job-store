@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { CommentCreateWithoutAuthorInput } from './comment-create-without-author.input';
-import { Type } from 'class-transformer';
-import { CommentCreateOrConnectWithoutAuthorInput } from './comment-create-or-connect-without-author.input';
-import { CommentCreateManyAuthorInputEnvelope } from './comment-create-many-author-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { CommentCreateManyAuthorInputEnvelope } from './comment-create-many-author-input-envelope.input';
+import { CommentCreateOrConnectWithoutAuthorInput } from './comment-create-or-connect-without-author.input';
+import { CommentCreateWithoutAuthorInput } from './comment-create-without-author.input';
 import { CommentWhereUniqueInput } from './comment-where-unique.input';
 
 @InputType()

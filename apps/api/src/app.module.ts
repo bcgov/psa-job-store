@@ -8,7 +8,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from 'nestjs-pino';
 import { AppResolver } from './app.resolver';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
-import { AppLogModule } from './modules/app-log/app-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RolesGlobalGuard } from './modules/auth/guards/role-global.guard';
@@ -63,7 +62,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobProfileStreamModule,
     JobProfileScopeModule,
     JobProfileMinimumRequirementsModule,
-    AppLogModule,
+    // AppLogModule,
     ScheduledTaskModule,
   ],
   controllers: [],

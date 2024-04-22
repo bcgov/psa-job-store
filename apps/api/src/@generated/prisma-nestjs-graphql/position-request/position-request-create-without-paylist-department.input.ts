@@ -1,11 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
-import { PositionRequestStatus } from '../prisma/position-request-status.enum';
-import { JobProfileCreateNestedOneWithoutPosition_requestInput } from '../job-profile/job-profile-create-nested-one-without-position-request.input';
 import { DepartmentCreateNestedOneWithoutPositionRequestInput } from '../department/department-create-nested-one-without-position-request.input';
+import { JobProfileCreateNestedOneWithoutPosition_requestInput } from '../job-profile/job-profile-create-nested-one-without-position-request.input';
 import { LocationCreateNestedOneWithoutPositionRequestsInput } from '../location/location-create-nested-one-without-position-requests.input';
+import { PositionRequestStatus } from '../prisma/position-request-status.enum';
 
 @InputType()
 export class PositionRequestCreateWithoutPaylist_departmentInput {

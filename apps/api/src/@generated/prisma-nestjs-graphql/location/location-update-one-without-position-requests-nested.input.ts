@@ -1,13 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { LocationCreateWithoutPositionRequestsInput } from './location-create-without-position-requests.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { LocationCreateOrConnectWithoutPositionRequestsInput } from './location-create-or-connect-without-position-requests.input';
-import { LocationUpsertWithoutPositionRequestsInput } from './location-upsert-without-position-requests.input';
-import { LocationWhereInput } from './location-where.input';
-import { Prisma } from '@prisma/client';
-import { LocationWhereUniqueInput } from './location-where-unique.input';
+import { LocationCreateWithoutPositionRequestsInput } from './location-create-without-position-requests.input';
 import { LocationUpdateToOneWithWhereWithoutPositionRequestsInput } from './location-update-to-one-with-where-without-position-requests.input';
+import { LocationUpsertWithoutPositionRequestsInput } from './location-upsert-without-position-requests.input';
+import { LocationWhereUniqueInput } from './location-where-unique.input';
+import { LocationWhereInput } from './location-where.input';
 
 @InputType()
 export class LocationUpdateOneWithoutPositionRequestsNestedInput {

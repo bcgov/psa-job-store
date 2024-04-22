@@ -1,5 +1,4 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { JobProfileStreamLinkUpdateManyWithoutStreamNestedInput } from '../job-profile-stream-link/job-profile-stream-link-update-many-without-stream-nested.input';
 
 @InputType()

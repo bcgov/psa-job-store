@@ -1,10 +1,9 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileCreateWithoutScopeInput } from './job-profile-create-without-scope.input';
-import { Type } from 'class-transformer';
-import { JobProfileCreateOrConnectWithoutScopeInput } from './job-profile-create-or-connect-without-scope.input';
-import { JobProfileCreateManyScopeInputEnvelope } from './job-profile-create-many-scope-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { JobProfileCreateManyScopeInputEnvelope } from './job-profile-create-many-scope-input-envelope.input';
+import { JobProfileCreateOrConnectWithoutScopeInput } from './job-profile-create-or-connect-without-scope.input';
+import { JobProfileCreateWithoutScopeInput } from './job-profile-create-without-scope.input';
 import { JobProfileWhereUniqueInput } from './job-profile-where-unique.input';
 
 @InputType()

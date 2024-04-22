@@ -14,8 +14,8 @@ import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
 import { MyPositionsRoute } from '../routes/my-positions';
 import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
-import { OrgChartRoute } from '../routes/org-chart';
-import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { OrgChartRoute as OrgChartOldRoute, OrgChartRoute } from '../routes/org-chart';
+import { OrgChartPage as OrgChartOldPage, OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
@@ -129,7 +129,6 @@ export const router = createBrowserRouter([
               },
             ],
           },
-
           {
             path: '/org-chart',
             element: <OrgChartRoute />,
@@ -141,6 +140,20 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 element: <OrgChartPage />,
+              },
+            ],
+          },
+          {
+            path: '/org-chart-old',
+            element: <OrgChartOldRoute />,
+            handle: {
+              breadcrumb: () => 'My organizations',
+              icon: <PartitionOutlined />,
+            },
+            children: [
+              {
+                index: true,
+                element: <OrgChartOldPage />,
               },
             ],
           },

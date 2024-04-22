@@ -1,13 +1,10 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { JobProfileScopeWhereInput } from './job-profile-scope-where.input';
+import { ArgsType, Field, HideField, Int } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { JobProfileScopeOrderByWithRelationAndSearchRelevanceInput } from './job-profile-scope-order-by-with-relation-and-search-relevance.input';
-import { Prisma } from '@prisma/client';
-import { JobProfileScopeWhereUniqueInput } from './job-profile-scope-where-unique.input';
-import { HideField } from '@nestjs/graphql';
-import { Int } from '@nestjs/graphql';
 import { JobProfileScopeScalarFieldEnum } from './job-profile-scope-scalar-field.enum';
+import { JobProfileScopeWhereUniqueInput } from './job-profile-scope-where-unique.input';
+import { JobProfileScopeWhereInput } from './job-profile-scope-where.input';
 
 @ArgsType()
 export class FindManyJobProfileScopeArgs {

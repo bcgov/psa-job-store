@@ -1,15 +1,14 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { JobProfileBehaviouralCompetencyCreateWithoutJob_profileInput } from './job-profile-behavioural-competency-create-without-job-profile.input';
-import { Type } from 'class-transformer';
-import { JobProfileBehaviouralCompetencyCreateOrConnectWithoutJob_profileInput } from './job-profile-behavioural-competency-create-or-connect-without-job-profile.input';
-import { JobProfileBehaviouralCompetencyUpsertWithWhereUniqueWithoutJob_profileInput } from './job-profile-behavioural-competency-upsert-with-where-unique-without-job-profile.input';
-import { JobProfileBehaviouralCompetencyCreateManyJob_profileInputEnvelope } from './job-profile-behavioural-competency-create-many-job-profile-input-envelope.input';
+import { Field, InputType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JobProfileBehaviouralCompetencyWhereUniqueInput } from './job-profile-behavioural-competency-where-unique.input';
-import { JobProfileBehaviouralCompetencyUpdateWithWhereUniqueWithoutJob_profileInput } from './job-profile-behavioural-competency-update-with-where-unique-without-job-profile.input';
-import { JobProfileBehaviouralCompetencyUpdateManyWithWhereWithoutJob_profileInput } from './job-profile-behavioural-competency-update-many-with-where-without-job-profile.input';
+import { Type } from 'class-transformer';
+import { JobProfileBehaviouralCompetencyCreateManyJob_profileInputEnvelope } from './job-profile-behavioural-competency-create-many-job-profile-input-envelope.input';
+import { JobProfileBehaviouralCompetencyCreateOrConnectWithoutJob_profileInput } from './job-profile-behavioural-competency-create-or-connect-without-job-profile.input';
+import { JobProfileBehaviouralCompetencyCreateWithoutJob_profileInput } from './job-profile-behavioural-competency-create-without-job-profile.input';
 import { JobProfileBehaviouralCompetencyScalarWhereInput } from './job-profile-behavioural-competency-scalar-where.input';
+import { JobProfileBehaviouralCompetencyUpdateManyWithWhereWithoutJob_profileInput } from './job-profile-behavioural-competency-update-many-with-where-without-job-profile.input';
+import { JobProfileBehaviouralCompetencyUpdateWithWhereUniqueWithoutJob_profileInput } from './job-profile-behavioural-competency-update-with-where-unique-without-job-profile.input';
+import { JobProfileBehaviouralCompetencyUpsertWithWhereUniqueWithoutJob_profileInput } from './job-profile-behavioural-competency-upsert-with-where-unique-without-job-profile.input';
+import { JobProfileBehaviouralCompetencyWhereUniqueInput } from './job-profile-behavioural-competency-where-unique.input';
 
 @InputType()
 export class JobProfileBehaviouralCompetencyUncheckedUpdateManyWithoutJob_profileNestedInput {

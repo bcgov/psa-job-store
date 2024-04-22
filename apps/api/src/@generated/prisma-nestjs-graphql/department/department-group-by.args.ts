@@ -1,14 +1,12 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { DepartmentWhereInput } from './department-where.input';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
+import { DepartmentCountAggregateInput } from './department-count-aggregate.input';
+import { DepartmentMaxAggregateInput } from './department-max-aggregate.input';
+import { DepartmentMinAggregateInput } from './department-min-aggregate.input';
 import { DepartmentOrderByWithAggregationInput } from './department-order-by-with-aggregation.input';
 import { DepartmentScalarFieldEnum } from './department-scalar-field.enum';
 import { DepartmentScalarWhereWithAggregatesInput } from './department-scalar-where-with-aggregates.input';
-import { Int } from '@nestjs/graphql';
-import { DepartmentCountAggregateInput } from './department-count-aggregate.input';
-import { DepartmentMinAggregateInput } from './department-min-aggregate.input';
-import { DepartmentMaxAggregateInput } from './department-max-aggregate.input';
+import { DepartmentWhereInput } from './department-where.input';
 
 @ArgsType()
 export class DepartmentGroupByArgs {

@@ -1,9 +1,8 @@
-import { Field } from '@nestjs/graphql';
-import { InputType } from '@nestjs/graphql';
-import { LocationCreateWithoutPositionRequestsInput } from './location-create-without-position-requests.input';
+import { Field, InputType } from '@nestjs/graphql';
+import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { LocationCreateOrConnectWithoutPositionRequestsInput } from './location-create-or-connect-without-position-requests.input';
-import { Prisma } from '@prisma/client';
+import { LocationCreateWithoutPositionRequestsInput } from './location-create-without-position-requests.input';
 import { LocationWhereUniqueInput } from './location-where-unique.input';
 
 @InputType()

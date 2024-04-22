@@ -1,8 +1,7 @@
-import { Field } from '@nestjs/graphql';
-import { ArgsType } from '@nestjs/graphql';
-import { ClassificationUpdateInput } from './classification-update.input';
-import { Type } from 'class-transformer';
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { ClassificationUpdateInput } from './classification-update.input';
 import { ClassificationWhereUniqueInput } from './classification-where-unique.input';
 
 @ArgsType()
