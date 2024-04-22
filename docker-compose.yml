@@ -1,69 +1,119 @@
 version: '3.8'
 
 services:
-  nestjs-app:
-    env_file:
-        - .env
-    build:
-      context: .
-      image: pjs-frontend:18-alpine
-      dockerfile: apps/api/Dockerfile.dev
-      args:
-        - POSTGRES_DB=${POSTGRES_DB}
-        - POSTGRES_USER=${POSTGRES_USER}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        - DATABASE_URL=${DATABASE_URL}
-        - KEYCLOAK_REALM_URL=${KEYCLOAK_REALM_URL}
-        - KEYCLOAK_CLIENT_ID_PRIVATE=${KEYCLOAK_CLIENT_ID_PRIVATE}
-        - KEYCLOAK_CLIENT_ID_PUBLIC=${KEYCLOAK_CLIENT_ID_PUBLIC}
-        - KEYCLOAK_REDIRECT_URL=${KEYCLOAK_REDIRECT_URL}
-    ports:
-      - 4000:4000
-    depends_on:
-      db:
-        condition: service_started
-    volumes:
-      - ./apps/api/src:/usr/src/app/src:cached
-      - ./apps/api/prisma:/usr/src/app/prisma
-      - api-nodemodules:/node_modules
-    networks:
-      - psa-job-store
-
   db:
     image: postgres:16
     user: postgres
     container_name: db
-    hostname: db    
+    hostname: db
     ports:
       - 5432:5432
     env_file:
       - .env
     volumes:
-      - postgres:/var/lib/postgresql/data:delegated      
+      - postgres:/var/lib/postgresql/data:delegated
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
       interval: 10s
       timeout: 5s
-      retries: 5      
+      retries: 5
     networks:
       - psa-job-store
 
-  # http://localhost:5173/
-  vite_docker:
+  api:
     build:
+      dockerfile: apps/api/Dockerfile.v2
       context: .
-      dockerfile: apps/app/Dockerfile
-      args:
-        - VITE_BACKEND_URL=${VITE_BACKEND_URL}
-        - VITE_KEYCLOAK_REALM_URL=${VITE_KEYCLOAK_REALM_URL}
-        - VITE_KEYCLOAK_CLIENT_ID=${VITE_KEYCLOAK_CLIENT_ID}
-        - VITE_KEYCLOAK_REDIRECT_URL=${VITE_KEYCLOAK_REDIRECT_URL}
-    ports:
-      - 5173:5173
+      # Only will build development stage from our dockerfile
+      target: development
+    image: pjs-frontend:20-alpine
     volumes:
-      - ./src:/usr/src/app/src:cached
+      - .:/usr/src/app
+    env_file:
+      - .env
+      # Run a command against the development stage of the image
+    command: npm run start:dev
+    ports:
+      - 3000:3000
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    # 8.x
+    environment:
+      [
+        'ELASTIC_PASSWORD=${ELASTIC_PASSWORD}',
+        'CLI_JAVA_OPTS=-Xms2g -Xmx2g',
+        'bootstrap.memory_lock=true',
+        'discovery.type=single-node',
+        'xpack.security.enabled=false',
+        'xpack.security.enrollment.enabled=false'
+      ]
+    ports:
+      - 9200:9200
     networks:
       - psa-job-store
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+        reservations:
+          cpus: '1.0'
+
+# services:
+#   nestjs-app:
+#     env_file:
+#         - .env
+#     build:
+#       context: .
+#       image: pjs-frontend:18-alpine
+#       dockerfile: apps/api/Dockerfile.dev
+#       args:
+#         - POSTGRES_DB=${POSTGRES_DB}
+#         - POSTGRES_USER=${POSTGRES_USER}
+#         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+#         - DATABASE_URL=${DATABASE_URL}
+#         - KEYCLOAK_REALM_URL=${KEYCLOAK_REALM_URL}
+#         - KEYCLOAK_CLIENT_ID_PRIVATE=${KEYCLOAK_CLIENT_ID_PRIVATE}
+#         - KEYCLOAK_CLIENT_ID_PUBLIC=${KEYCLOAK_CLIENT_ID_PUBLIC}
+#         - KEYCLOAK_REDIRECT_URL=${KEYCLOAK_REDIRECT_URL}
+#     ports:
+#       - 4000:4000
+#     depends_on:
+#       db:
+#         condition: service_started
+#     volumes:
+#       - ./apps/api/src:/usr/src/app/src:cached
+#       - ./apps/api/prisma:/usr/src/app/prisma
+#       - api-nodemodules:/node_modules
+#     networks:
+#       - psa-job-store
+
+
+
+#   # http://localhost:5173/
+#   vite_docker:
+#     build:
+#       context: .
+#       dockerfile: apps/app/Dockerfile
+#       args:
+#         - VITE_BACKEND_URL=${VITE_BACKEND_URL}
+#         - VITE_KEYCLOAK_REALM_URL=${VITE_KEYCLOAK_REALM_URL}
+#         - VITE_KEYCLOAK_CLIENT_ID=${VITE_KEYCLOAK_CLIENT_ID}
+#         - VITE_KEYCLOAK_REDIRECT_URL=${VITE_KEYCLOAK_REDIRECT_URL}
+#     ports:
+#       - 5173:5173
+#     volumes:
+#       - ./src:/usr/src/app/src:cached
+#     networks:
+#       - psa-job-store
 
 networks:
   psa-job-store:

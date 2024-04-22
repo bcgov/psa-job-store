@@ -1039,6 +1039,7 @@ async function seed() {
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
     all_organizations: true,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1137,6 +1138,7 @@ async function seed() {
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
     all_organizations: false,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1239,6 +1241,7 @@ async function seed() {
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
     all_organizations: false,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1371,6 +1374,7 @@ async function seed() {
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
     all_organizations: false,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1489,6 +1493,7 @@ async function seed() {
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
     all_organizations: false,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1622,6 +1627,7 @@ async function seed() {
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
     all_organizations: false,
+    is_archived: false,
 
     scope_id: null,
     role_id: 1,
@@ -1753,6 +1759,8 @@ async function seed() {
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
     all_organizations: false,
+    is_archived: false,
+
     scope_id: null,
     role_id: 1,
     role_type_id: null,
