@@ -428,6 +428,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   if (!allLocations) return <LoadingSpinnerWithMessage />;
 
   // console.log('firstActivePosition:', firstActivePosition);
+  // console.log('errors.excludedManagerPosit: ', errors.excludedManagerPositionNumber);
 
   return (
     <div data-testid="additional-information-form">
@@ -612,7 +613,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                             validateStatus={
                               (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
                               (noPositions && !isFetchingPositionProfile) ||
-                              (!firstActivePosition?.employeeName && !isFetchingPositionProfile) ||
+                              (firstActivePosition &&
+                                !firstActivePosition?.employeeName &&
+                                !isFetchingPositionProfile) ||
                               isFetchingPositionProfileError
                                 ? 'error'
                                 : ''
@@ -620,7 +623,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                             help={
                               (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) || // error is present and not fetching OR
                               (noPositions && !isFetchingPositionProfile) || // no positions and not fetching
-                              (!firstActivePosition?.employeeName && !isFetchingPositionProfile) ||
+                              (firstActivePosition &&
+                                !firstActivePosition?.employeeName &&
+                                !isFetchingPositionProfile) ||
                               isFetchingPositionProfileError // fetch error
                                 ? errors.excludedManagerPositionNumber
                                   ? errors.excludedManagerPositionNumber?.message
