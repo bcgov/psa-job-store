@@ -26,12 +26,14 @@ clean:
 		rm -rf ./node_modules
 
 build:
-		docker-compose build --no-cache
+		docker compose build --no-cache
 
 run: 
-		@printf "open ${RED}http://localhost:5173${NOCOLOUR}\n"
-		docker compose up -d
-		docker compose logs -f		
+		@printf "open ${RED} http://localhost:5173 \n${NOCOLOUR}"
+		docker compose up -d db elasticsearch
+		@printf "npm -w api run start:dev\n"
+		@printf "npm -w app run dev\n"
+		
 
 db.reset: 
 		docker-compose exec -u root -w /usr/src/apps/api nestjs-app /usr/bin/bash -c \
@@ -41,7 +43,7 @@ db.seed:
 		docker-compose exec -u root -w /usr/src/apps/api nestjs-app /usr/bin/bash -c \
 			'npx -w api prisma db push --force-reset && npx -w api prisma db seed'
 
-db.data-delete: clean
+db.data-delete:
 		docker compose down
 		docker volume rm $(VOLUME)_postgres
 
