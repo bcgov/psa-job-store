@@ -16,8 +16,8 @@ export class PositionProfile {
   // @Field()
   // employeeId: string;
 
-  @Field()
-  employeeName: string;
+  @Field({ nullable: true })
+  employeeName?: string;
 
   @Field()
   classification: string;
