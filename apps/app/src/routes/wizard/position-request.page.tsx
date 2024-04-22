@@ -47,14 +47,25 @@ export const PositionRequestPage = () => {
     useState<GetPositionRequestResponseContent | null>(null);
 
   const {
+    positionRequestId: positionRequestId1,
     setWizardData,
     setPositionRequestId,
     setPositionRequestProfileId,
     setPositionRequestDepartmentId,
     setPositionRequestData,
+    resetWizardContext,
   } = useWizardContext();
 
   const { positionRequestId } = useParams();
+
+  // position request id changed from what's being stored in the context,
+  // clear context
+  useEffect(() => {
+    if (positionRequestId && positionRequestId1 && positionRequestId !== positionRequestId1?.toString()) {
+      resetWizardContext();
+    }
+  }, [positionRequestId, positionRequestId1, resetWizardContext]);
+
   const location = useLocation();
 
   // Determine if the current path is a shared URL

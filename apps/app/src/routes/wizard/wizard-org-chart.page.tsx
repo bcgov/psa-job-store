@@ -2,7 +2,7 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import 'reactflow/dist/style.css';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import { usePosition } from '../../components/app/common/contexts/position.context';
@@ -23,7 +23,19 @@ interface WizardOrgChartPageProps {
 }
 
 export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: WizardOrgChartPageProps) => {
-  const { positionRequestDepartmentId } = useWizardContext();
+  const { positionRequestDepartmentId, resetWizardContext } = useWizardContext();
+
+  // this page gets displayed on two routes: /my-positions/create and /my-positions/:id
+  // if we navigate to /my-positions/create, wipe all wizard context info
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname === '/my-positions/create') {
+      resetWizardContext();
+      setSelectedDepartment(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
   const [selectedDepartment, setSelectedDepartment] = useState<string | null | undefined>(positionRequestDepartmentId);
   const [isLoading, setIsLoading] = useState(false);
   const [nextButtonTooltipTitle, setNextButtonTooltipTitle] = useState<string>('');

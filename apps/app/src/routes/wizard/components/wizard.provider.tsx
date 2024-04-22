@@ -81,6 +81,7 @@ interface WizardContextProps {
 
   currentSection: string | null;
   setCurrentSection: React.Dispatch<React.SetStateAction<string | null>>;
+  resetWizardContext: () => void;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -129,6 +130,36 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalProvisosFields, setOriginalProvisosFields] = useState<any[]>([]);
   const [originalBehaviouralCompetenciesFields, setOriginalBehaviouralCompetenciesFields] = useState<any[]>([]);
   const [currentSection, setCurrentSection] = useState<string | null>(null);
+
+  const resetWizardContext = () => {
+    setWizardData(null);
+    setClassificationsData(null);
+    setMinReqAlertShown(false);
+    setReqAlertShown(false);
+    setOptionalAccountabilitiesAlertShown(false);
+    setOriginalValuesSet(false);
+    setOriginalAccReqFields([]);
+    setOriginalOptReqFields([]);
+    setOriginalMinReqFields([]);
+    setOriginalRelWorkFields([]);
+    setRelWorkAlertShown(false);
+    setOriginalSecurityScreeningsFields([]);
+    setSecurityScreeningsAlertShown(false);
+    setOriginalTitle({});
+    setOriginalOverview({});
+    setOriginalProgramOverview({});
+    setPositionRequestData(null);
+    setPositionRequestId(null);
+    setPositionRequestProfileId(null);
+    setPositionRequestDepartmentId(null);
+    setOriginalProfessionalRegistrationFields([]);
+    setOriginalOptionalRequirementsFields([]);
+    setOriginalPreferencesFields([]);
+    setOriginalKnowledgeSkillsAbilitiesFields([]);
+    setOriginalProvisosFields([]);
+    setOriginalBehaviouralCompetenciesFields([]);
+    setCurrentSection(null);
+  };
 
   const value = {
     wizardData,
@@ -192,6 +223,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setPositionRequestData,
     currentSection,
     setCurrentSection,
+    resetWizardContext,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

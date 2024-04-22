@@ -362,7 +362,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       </Form>
                     </Card>
 
-                    <Card title="Other actions" bordered={false} style={{ marginTop: '1rem' }}>
+                    <Card
+                      title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Other actions</h3>}
+                      bordered={false}
+                      style={{ marginTop: '1rem' }}
+                    >
                       {/* <Typography.Title level={5}>Send for Review</Typography.Title>
               <Typography.Paragraph>
                 This Job Profile is not ready to be published yet. There seems to me many changes to the profile, so you
@@ -385,7 +389,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
               <Divider /> */}
 
-                      <Title level={5}>View all Positions</Title>
+                      <Title level={4}>View all Positions</Title>
                       <Paragraph>View all positions that you have created.</Paragraph>
                       <Button type="default" onClick={() => navigate('/')}>
                         Go to Dashboard
@@ -425,7 +429,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       style={{ marginBottom: '24px' }}
                     />
 
-                    <Card title="Send for verification" bordered={false} style={{ marginBottom: '1rem' }}>
+                    <Card
+                      title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Send for verification</h3>}
+                      bordered={false}
+                      style={{ marginBottom: '1rem' }}
+                    >
                       <Paragraph>
                         Forward the profile to be verified by the classifications team. We will respond shortly after
                         verification, once submitted. There are no other steps required, just look for our followup
@@ -437,6 +445,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         </label>
                         <>
                           <Input.TextArea
+                            id="comments"
                             data-testid="comments-input"
                             autoSize
                             maxLength={1000}
@@ -472,7 +481,10 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       </Button>
                     </Card>
 
-                    <Card title="Other Actions" bordered={false}>
+                    <Card
+                      title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Other actions</h3>}
+                      bordered={false}
+                    >
                       {/* <Title level={5}>Save as Draft</Title>
                 <Paragraph>
                   Let's save your progress and come back later to make changes or get a position number.
@@ -489,7 +501,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
                 <Divider /> */}
 
-                      <Title level={5}>View all Positions</Title>
+                      <Title level={4}>View all Positions</Title>
                       <Paragraph>View all positions that you have created.</Paragraph>
                       <Button type="default" onClick={() => navigate('/')}>
                         Go to Dashboard
@@ -515,7 +527,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       style={{ marginBottom: '24px' }}
                     />
 
-                    <Card title="Send for verification" bordered={false} style={{ marginBottom: '1rem' }}>
+                    <Card
+                      title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Send for verification</h3>}
+                      bordered={false}
+                      style={{ marginBottom: '1rem' }}
+                    >
                       <Paragraph>
                         There are changes to the profile which needs to be verified by the classifications team.
                       </Paragraph>
@@ -524,7 +540,10 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       </Button>
                     </Card>
 
-                    <Card title="Other Actions" bordered={false}>
+                    <Card
+                      title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Other actions</h3>}
+                      bordered={false}
+                    >
                       {/* <Title level={5}>Save as Draft</Title>
                 <Paragraph>
                   Let's save your progress and come back later to make changes or get a position number.
@@ -541,7 +560,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
                 <Divider /> */}
 
-                      <Title level={5}>View all Positions</Title>
+                      <Title level={4}>View all Positions</Title>
                       <Paragraph>View all positions that you have created.</Paragraph>
                       <Button type="default" onClick={() => navigate('/')}>
                         Go to Dashboard
@@ -571,7 +590,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       style={{ marginBottom: '24px' }}
                     />
 
-                    <Card title="Send for verification" bordered={false} style={{ marginBottom: '1rem' }}>
+                    <Card
+                      title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Send for verification</h3>}
+                      bordered={false}
+                      style={{ marginBottom: '1rem' }}
+                    >
                       <Paragraph>
                         There are changes to the profile which needs to be reviewed by a specialist in the
                         classifications team.
@@ -581,7 +604,10 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       </Button>
                     </Card>
 
-                    <Card title="Other Actions" bordered={false}>
+                    <Card
+                      title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Other actions</h3>}
+                      bordered={false}
+                    >
                       {/* <Title level={5}>Save as Draft</Title>
                 <Paragraph>
                   Let's save your progress and come back later to make changes or get a position number.
@@ -598,7 +624,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
                 <Divider /> */}
 
-                      <Title level={5}>View all Positions</Title>
+                      <Title level={4}>View all Positions</Title>
                       <Paragraph>View all positions that you have created.</Paragraph>
                       <Button type="default" onClick={() => navigate('/')}>
                         Go to Dashboard
