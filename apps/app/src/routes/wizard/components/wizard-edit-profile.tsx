@@ -2936,7 +2936,7 @@ const WizardEditProfile = forwardRef(
                   type="info"
                   role="note"
                   style={{ marginBottom: '24px' }}
-                  message="Some fields are standard and cannot be edited, others are marked as significant and may result in a classification request.  Those not marked as significant or shaded, may be edited without a classification impact."
+                  message="Some fields are standard and cannot be edited, others are marked as significant and may result in a classification review.  Those not marked as significant or shaded, may be edited without a classification impact."
                   showIcon
                 />
               ) : (
