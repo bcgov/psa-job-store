@@ -86,7 +86,13 @@ export const OrgChartNode = ({
                 : undefined
               : undefined
           }
-          title={data.title}
+          title={
+            <Tooltip title={data.title}>
+              <Text style={{ color: data.isSearchResult === true || selected === true ? '#FFF' : '#000' }}>
+                {data.title}
+              </Text>
+            </Tooltip>
+          }
           extra={
             <Text strong style={{ ...((selected === true || data.isSearchResult === true) && { color: '#FFF' }) }}>
               {data.classification?.code}
