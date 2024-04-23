@@ -107,7 +107,7 @@ export const OrgChartNode = ({
           size="small"
           style={{
             border: '1px solid #B1B1B7',
-            cursor: 'pointer',
+            cursor: orgChartType === OrgChartType.DYNAMIC ? 'pointer' : 'grab',
             width: '300px',
             minHeight: '10px',
             ...applyDoubleBunkingStyles(data.employees),
