@@ -1,6 +1,6 @@
 import { Col, Row, Space, Spin, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
-import ReactFlow, { Background, MiniMap, Node, NodeProps, useEdgesState, useNodesState } from 'reactflow';
+import ReactFlow, { Background, MiniMap, Node, NodeProps, useEdgesState, useNodesState, useStoreApi } from 'reactflow';
 import { useGetDepartmentQuery } from '../../../../redux/services/graphql-api/department.api';
 import { OrgChartType } from '../../enums/org-chart-type.enum';
 import { Elements } from '../../interfaces/elements.interface';
@@ -20,6 +20,15 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
 
   const [edges, setEdges] = useEdgesState([]);
   const [nodes, setNodes] = useNodesState([]);
+  const store = useStoreApi();
+
+  useEffect(() => {
+    store.setState({
+      elementsSelectable: false,
+      nodesConnectable: false,
+      nodesDraggable: false,
+    });
+  }, []);
 
   useEffect(() => {
     const { edges, nodes } = JSON.parse(JSON.stringify(elements));
