@@ -1,9 +1,10 @@
 import { Col, Row, Space, Spin, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
-import ReactFlow, { Background, Controls, MiniMap, Node, NodeProps, useEdgesState, useNodesState } from 'reactflow';
+import ReactFlow, { Background, MiniMap, Node, NodeProps, useEdgesState, useNodesState } from 'reactflow';
 import { useGetDepartmentQuery } from '../../../../redux/services/graphql-api/department.api';
 import { OrgChartType } from '../../enums/org-chart-type.enum';
 import { Elements } from '../../interfaces/elements.interface';
+import { Controls } from '../controls';
 import { OrgChartNode } from '../org-chart-node.component';
 
 const { Text } = Typography;
