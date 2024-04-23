@@ -161,7 +161,6 @@ export const router = createBrowserRouter([
             path: '/job-profiles',
             element: <JobProfilesRoute />,
             handle: {
-              breadcrumb: () => 'Job Profiles',
               icon: <FileTextOutlined />,
             },
             children: [

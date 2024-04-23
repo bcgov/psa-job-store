@@ -81,6 +81,10 @@ interface WizardContextProps {
 
   currentSection: string | null;
   setCurrentSection: React.Dispatch<React.SetStateAction<string | null>>;
+
+  requiresVerification: boolean;
+  setRequiresVerification: React.Dispatch<React.SetStateAction<boolean>>;
+
   resetWizardContext: () => void;
 }
 
@@ -130,6 +134,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalProvisosFields, setOriginalProvisosFields] = useState<any[]>([]);
   const [originalBehaviouralCompetenciesFields, setOriginalBehaviouralCompetenciesFields] = useState<any[]>([]);
   const [currentSection, setCurrentSection] = useState<string | null>(null);
+  const [requiresVerification, setRequiresVerification] = useState(false);
 
   const resetWizardContext = () => {
     setWizardData(null);
@@ -159,6 +164,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setOriginalProvisosFields([]);
     setOriginalBehaviouralCompetenciesFields([]);
     setCurrentSection(null);
+    setRequiresVerification(false);
   };
 
   const value = {
@@ -223,6 +229,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setPositionRequestData,
     currentSection,
     setCurrentSection,
+    requiresVerification,
+    setRequiresVerification,
     resetWizardContext,
   };
 

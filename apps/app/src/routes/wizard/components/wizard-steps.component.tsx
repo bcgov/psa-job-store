@@ -1,16 +1,19 @@
 import { Col, Row, Steps } from 'antd';
 import React, { useEffect, useState } from 'react';
 import './wizard-steps.component.css';
+import { useWizardContext } from './wizard.provider';
 
 interface WizardStepsProps {
   current: number; // Define the current prop as a number
   xl?: number;
-  highlightEdit?: boolean;
 }
 
-export const WizardSteps: React.FC<WizardStepsProps> = ({ current, highlightEdit, xl = 14 }) => {
+export const WizardSteps: React.FC<WizardStepsProps> = ({ current, xl = 14 }) => {
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [stepsDirection, setStepsDirection] = useState<'horizontal' | 'vertical'>('horizontal');
+
+  // get requiresVerification from useWizardContext
+  const { requiresVerification } = useWizardContext();
 
   const handleResize = () => {
     setScreenWidth(window.innerWidth);
@@ -35,7 +38,7 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({ current, highlightEdit
           responsive={false}
           direction={stepsDirection}
           progressDot={(dot, { index }) => {
-            if (index == 2 && highlightEdit)
+            if (index == 2 && requiresVerification && current >= 2)
               return (
                 <div
                   style={{
