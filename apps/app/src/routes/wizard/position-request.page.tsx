@@ -13,6 +13,7 @@ import {
   GetPositionRequestResponseContent,
   useGetPositionRequestQuery,
   useGetSharedPositionRequestQuery,
+  useLazyPositionNeedsRivewQuery,
 } from '../../redux/services/graphql-api/position-request.api';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
@@ -55,7 +56,16 @@ export const PositionRequestPage = () => {
     setPositionRequestDepartmentId,
     setPositionRequestData,
     resetWizardContext,
+    setRequiresVerification,
   } = useWizardContext();
+
+  // check if this position currently requires review
+  // do this only if it's past the edit page
+  const [triggerPositionNeedsReviewQuery, { data: positionNeedsReviewData }] = useLazyPositionNeedsRivewQuery();
+
+  useEffect(() => {
+    setRequiresVerification(positionNeedsReviewData?.positionNeedsRivew?.result ?? false);
+  }, [positionNeedsReviewData, setRequiresVerification]);
 
   const { positionRequestId } = useParams();
 
@@ -110,6 +120,8 @@ export const PositionRequestPage = () => {
     const step = unwrappedPositionRequestData?.step;
 
     if (step != null) setCurrentStep(step);
+
+    if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: unwrappedPositionRequestData?.id });
 
     if (unwrappedPositionRequestData) setPositionRequestData(unwrappedPositionRequestData);
 

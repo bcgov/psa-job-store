@@ -46,11 +46,11 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     setClassificationsData,
     positionRequestProfileId,
     positionRequestId,
+    setRequiresVerification,
   } = useWizardContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingBack, setIsLoadingBack] = useState(false);
   const [saveAndQuitLoading, setSaveAndQuitLoading] = useState(false);
-  const [verificationRequired, setVerificationRequired] = useState(false);
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
@@ -316,7 +316,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         </Button>,
       ]}
     >
-      <WizardSteps current={2} highlightEdit={verificationRequired}></WizardSteps>
+      <WizardSteps current={2}></WizardSteps>
       {/* <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
         onNext={onNextCallback}
@@ -340,7 +340,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         <Row justify="center" gutter={16}>
           <Col>
             <WizardEditProfile
-              onVerificationRequiredChange={setVerificationRequired}
+              onVerificationRequiredChange={setRequiresVerification}
               ref={wizardEditProfileRef}
               profileData={wizardData}
               id={profileId?.toString()}
