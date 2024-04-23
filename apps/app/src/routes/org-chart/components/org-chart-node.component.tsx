@@ -86,14 +86,32 @@ export const OrgChartNode = ({
                 : undefined
               : undefined
           }
-          title={data.title}
+          title={
+            <Tooltip title={data.title}>
+              <Text
+                style={{
+                  color:
+                    selected === true || data.isNewPosition === true || data.isSearchResult === true ? '#FFF' : '#000',
+                }}
+              >
+                {data.title}
+              </Text>
+            </Tooltip>
+          }
           extra={
-            <Text strong style={{ ...((selected === true || data.isSearchResult === true) && { color: '#FFF' }) }}>
+            <Text
+              strong
+              style={{
+                ...((selected === true || data.isNewPosition === true || data.isSearchResult === true) && {
+                  color: '#FFF',
+                }),
+              }}
+            >
               {data.classification?.code}
             </Text>
           }
           headStyle={{
-            ...((selected === true || data.isSearchResult === true) && {
+            ...((selected === true || data.isNewPosition === true || data.isSearchResult === true) && {
               backgroundColor: '#003366',
               color: 'white',
             }),
@@ -101,7 +119,7 @@ export const OrgChartNode = ({
           size="small"
           style={{
             border: '1px solid #B1B1B7',
-            cursor: 'pointer',
+            cursor: orgChartType === OrgChartType.DYNAMIC ? 'pointer' : 'grab',
             width: '300px',
             minHeight: '10px',
             ...applyDoubleBunkingStyles(data.employees),

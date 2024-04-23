@@ -35,6 +35,7 @@ import {
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
+import { findExcludedManager } from '../org-chart/utils/find-excluded-manager.util';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { useWizardContext } from './components/wizard.provider';
@@ -358,7 +359,23 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           null,
       );
       setValue('payListDepartmentId', additional_info_department_id || positionRequestData?.department_id || null);
-      setValue('excludedManagerPositionNumber', additional_info_excluded_mgr_position_number || '');
+
+      const { orgchart_json, reports_to_position_id } = positionRequest ?? {
+        orgchart_json: undefined,
+        reports_to_position_id: undefined,
+      };
+
+      // Find first parent which is an excluded manager
+      const lookup =
+        orgchart_json != null && reports_to_position_id != null
+          ? findExcludedManager(`${reports_to_position_id}`, orgchart_json)
+          : undefined;
+
+      setValue('excludedManagerPositionNumber', additional_info_excluded_mgr_position_number || lookup?.id || '');
+      if (lookup?.id) {
+        debouncedFetchPositionProfile(lookup.id);
+      }
+
       setValue('comments', additional_info_comments || '');
 
       if (

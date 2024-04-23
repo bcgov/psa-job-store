@@ -6,11 +6,9 @@ import { ReadonlyOrgChart, ReadonlyOrgChartProps } from './readonly-org-chart.co
 export type OrgChartProps = DynamicOrgChartProps | ReadonlyOrgChartProps;
 
 export const OrgChart = (props: OrgChartProps) => {
-  return props.type === OrgChartType.DYNAMIC ? (
+  return (
     <ReactFlowProvider>
-      <DynamicOrgChart {...props} />
+      {props.type === OrgChartType.DYNAMIC ? <DynamicOrgChart {...props} /> : <ReadonlyOrgChart {...props} />}
     </ReactFlowProvider>
-  ) : (
-    <ReadonlyOrgChart {...props} />
   );
 };
