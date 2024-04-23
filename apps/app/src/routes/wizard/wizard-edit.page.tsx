@@ -81,15 +81,17 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       context: originalData.context,
       overview: originalData.overview,
       program_overview: originalData.program_overview,
-      accountabilities: [...originalData.accountabilities, ...originalData.optional_accountabilities].map((acc) => ({
-        text: acc.text,
-        is_significant: acc.is_significant,
-        is_readonly: acc.is_readonly,
-        isCustom: acc.isCustom,
-        disabled: acc.disabled,
-      })),
-      education: originalData.education,
-      job_experience: originalData.job_experience,
+      accountabilities: [...originalData.accountabilities, ...originalData.optional_accountabilities]
+        .map((acc) => ({
+          text: acc.text,
+          is_significant: acc.is_significant,
+          is_readonly: acc.is_readonly,
+          isCustom: acc.isCustom,
+          disabled: acc.disabled,
+        }))
+        .filter((acc) => acc.text.trim() !== ''),
+      education: originalData.education.filter((edu: { text: string }) => edu.text.trim() !== ''),
+      job_experience: originalData.job_experience.filter((exp: { text: string }) => exp.text.trim() !== ''),
       behavioural_competencies: originalData.behavioural_competencies,
       classifications: originalData.classifications.map((classification: any) => ({
         classification: getClassificationById(classification.classification),
@@ -99,19 +101,28 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       scope: { id: originalData.scopeId || null },
       reports_to: [],
       organizations: [],
-
       review_required: false,
       professions: [],
-      professional_registration_requirements: originalData.professional_registration,
-      optional_requirements: originalData.optional_requirements,
-      preferences: originalData.preferences,
-      knowledge_skills_abilities: originalData.knowledge_skills_abilities,
-      willingness_statements: originalData.provisos.map((proviso: any) => ({
-        value: proviso.value,
-        isCustom: proviso.isCustom,
-        disabled: proviso.disabled,
-      })),
-      security_screenings: originalData.security_screenings,
+      professional_registration_requirements: originalData.professional_registration.filter(
+        (reg: { value: string }) => reg.value.trim() !== '',
+      ),
+      optional_requirements: originalData.optional_requirements.filter(
+        (req: { value: string }) => req.value.trim() !== '',
+      ),
+      preferences: originalData.preferences.filter((pref: { value: string }) => pref.value.trim() !== ''),
+      knowledge_skills_abilities: originalData.knowledge_skills_abilities.filter(
+        (ksa: { value: string }) => ksa.value.trim() !== '',
+      ),
+      willingness_statements: originalData.provisos
+        .map((proviso: any) => ({
+          value: proviso.value,
+          isCustom: proviso.isCustom,
+          disabled: proviso.disabled,
+        }))
+        .filter((stmt: { value: string }) => stmt.value.trim() !== ''),
+      security_screenings: originalData.security_screenings.filter(
+        (screening: { text: string }) => screening.text.trim() !== '',
+      ),
       all_organizations: false,
       all_reports_to: false,
     };
