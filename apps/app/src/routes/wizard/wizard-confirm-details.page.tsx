@@ -212,18 +212,12 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
     // Check if noPositions is true and excludedManagerPositionNumber should be filled
     const formValues = getValues();
-    // console.log('got values');
-    // console.log(
-    //   '!skipValidation && noPositions && formValues.excludedManagerPositionNumber: ',
-    //   !skipValidation,
-    //   noPositions,
-    //   formValues.excludedManagerPositionNumber,
-    // );
-    console.log('skipValidation: ', skipValidation);
 
     if (
       !skipValidation &&
-      ((noPositions && formValues.excludedManagerPositionNumber) || !firstActivePosition?.employeeName)
+      ((noPositions && formValues.excludedManagerPositionNumber) ||
+        (firstActivePosition && !firstActivePosition?.employeeName) ||
+        isFetchingPositionProfileError)
     ) {
       // Set an error on the excludedManagerPositionNumber field
       setError('excludedManagerPositionNumber', {
@@ -247,7 +241,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       return; // Do not open the modal
     }
 
-    // console.log('handlesubmit');
     if (skipValidation) {
       // console.log('handleOk 2');
       await handleOk(updateStep);
@@ -309,6 +302,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       } else {
         throw Error('Position request not found');
       }
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsLoading(false);
     }

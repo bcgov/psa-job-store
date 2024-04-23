@@ -32,6 +32,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
     if (location.pathname === '/my-positions/create') {
       resetWizardContext();
       setSelectedDepartment(null);
+      setSelectedPositionId(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
