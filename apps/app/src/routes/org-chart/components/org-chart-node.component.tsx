@@ -88,18 +88,30 @@ export const OrgChartNode = ({
           }
           title={
             <Tooltip title={data.title}>
-              <Text style={{ color: data.isSearchResult === true || selected === true ? '#FFF' : '#000' }}>
+              <Text
+                style={{
+                  color:
+                    selected === true || data.isNewPosition === true || data.isSearchResult === true ? '#FFF' : '#000',
+                }}
+              >
                 {data.title}
               </Text>
             </Tooltip>
           }
           extra={
-            <Text strong style={{ ...((selected === true || data.isSearchResult === true) && { color: '#FFF' }) }}>
+            <Text
+              strong
+              style={{
+                ...((selected === true || data.isNewPosition === true || data.isSearchResult === true) && {
+                  color: '#FFF',
+                }),
+              }}
+            >
               {data.classification?.code}
             </Text>
           }
           headStyle={{
-            ...((selected === true || data.isSearchResult === true) && {
+            ...((selected === true || data.isNewPosition === true || data.isSearchResult === true) && {
               backgroundColor: '#003366',
               color: 'white',
             }),

@@ -186,6 +186,7 @@ export class PositionRequestApiService {
               isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
               isExcludedManager: node.id === excludedManagerId,
               isNewPosition: false, // Clear previous positions marked as new
+              isSelected: false,
               isSupervisor: node.id === supervisorId,
             };
           });
