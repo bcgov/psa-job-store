@@ -45,4 +45,6 @@ export class Position {
 
   // @Field(() => [PositionEmployee], { nullable: true })
   // employees?: Array<PositionEmployee>;
+  @Field(() => String, { nullable: true })
+  A_UPDATE_INCUMBENTS!: string;
 }

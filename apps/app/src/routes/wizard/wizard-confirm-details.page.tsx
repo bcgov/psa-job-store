@@ -21,7 +21,7 @@ import {
 } from 'antd';
 import { IsNotEmpty, ValidationOptions, registerDecorator } from 'class-validator';
 import debounce from 'lodash.debounce';
-import { CSSProperties, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
@@ -147,10 +147,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       if (positionProfileData.positionProfile.length === 0) {
         setNoPositions(true);
       }
-
       const activePositions = positionProfileData.positionProfile.filter((p) => p.status === 'Active');
       setFirstActivePosition(activePositions[0] || null);
-
       // Set state to the number of additional active positions
       setAdditionalPositions(positionProfileData.positionProfile.length - 1);
     }
@@ -160,8 +158,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const debouncedFetchPositionProfile = useCallback(
     debounce(async (positionNumber: string) => {
       try {
-        console.log(positionNumber);
         getPositionProfile({ positionNumber, suppressGlobalError: true });
+        trigger('excludedManagerPositionNumber');
       } catch (e) {
         // handled by isError, prevents showing error toast
         console.log(e);
@@ -221,11 +219,20 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     //   noPositions,
     //   formValues.excludedManagerPositionNumber,
     // );
-    if (!skipValidation && noPositions && formValues.excludedManagerPositionNumber) {
+    console.log('skipValidation: ', skipValidation);
+
+    if (
+      !skipValidation &&
+      ((noPositions && formValues.excludedManagerPositionNumber) || !firstActivePosition?.employeeName)
+    ) {
       // Set an error on the excludedManagerPositionNumber field
       setError('excludedManagerPositionNumber', {
         type: 'manual',
-        message: 'Position not found',
+        message: noPositions
+          ? 'Position not found'
+          : !firstActivePosition?.employeeName
+            ? 'Position is unencumbered'
+            : 'Position not found',
       });
       // console.log('error, returning');
       Modal.error({
@@ -329,6 +336,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     clearErrors,
     getValues,
     formState: { errors },
+    trigger,
   } = useForm<WizardConfirmDetailsModel>({
     resolver: classValidatorResolver(WizardConfirmDetailsModel),
     defaultValues: {
@@ -370,17 +378,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   }, [departmentsData, positionRequestData, setValue]);
 
   const confirmation = watch('confirmation');
-
-  const srOnlyStyle: CSSProperties = {
-    position: 'absolute',
-    width: '1px',
-    height: '1px',
-    padding: '0',
-    margin: '-1px',
-    overflow: 'hidden',
-    clip: 'rect(0, 0, 0, 0)',
-    border: '0',
-  };
 
   const [deletePositionRequest] = useDeletePositionRequestMutation();
   const deleteRequest = async () => {
@@ -429,6 +426,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   };
 
   if (!allLocations) return <LoadingSpinnerWithMessage />;
+
+  // console.log('firstActivePosition:', firstActivePosition);
+  // console.log('errors.excludedManagerPosit: ', errors.excludedManagerPositionNumber);
 
   return (
     <div data-testid="additional-information-form">
@@ -608,23 +608,30 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                       <Row justify="start">
                         <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                           <Form.Item
+                            style={{ margin: 0 }}
                             name="firstLevelExcludedManager"
                             validateStatus={
                               (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
                               (noPositions && !isFetchingPositionProfile) ||
+                              (firstActivePosition &&
+                                !firstActivePosition?.employeeName &&
+                                !isFetchingPositionProfile) ||
                               isFetchingPositionProfileError
                                 ? 'error'
                                 : ''
                             }
-                            // display help only if there is an error and the position profile is not being fetched
-
                             help={
-                              (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
-                              (noPositions && !isFetchingPositionProfile) ||
-                              isFetchingPositionProfileError
+                              (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) || // error is present and not fetching OR
+                              (noPositions && !isFetchingPositionProfile) || // no positions and not fetching
+                              (firstActivePosition &&
+                                !firstActivePosition?.employeeName &&
+                                !isFetchingPositionProfile) ||
+                              isFetchingPositionProfileError // fetch error
                                 ? errors.excludedManagerPositionNumber
                                   ? errors.excludedManagerPositionNumber?.message
-                                  : 'Position not found'
+                                  : firstActivePosition && !firstActivePosition.employeeName
+                                    ? 'Position is unencumbered'
+                                    : 'Position not found'
                                 : ''
                             }
                           >
@@ -638,9 +645,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                   onBlur={onBlur}
                                   value={value}
                                   onChange={(e) => {
-                                    if (e.target.value) {
-                                      debouncedFetchPositionProfile(e.target.value); // Fetch position profile
-                                    }
+                                    debouncedFetchPositionProfile(e.target.value); // Fetch position profile
                                     onChange(e); // Update controller state
                                   }}
                                   placeholder="Position number"
@@ -648,22 +653,33 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                 />
                               )}
                             />
-                            {firstActivePosition && !isFetchingPositionProfile && (
-                              <div>
-                                <p>
-                                  {`${firstActivePosition.employeeName} - ${firstActivePosition.ministry}`}
-                                  {additionalPositions > 0 && ` +${additionalPositions}`}
-                                </p>
-                              </div>
-                            )}
-                            {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
+
+                            {/* <div>
+                              errors.excludedManagerPositionNumber:{' '}
+                              {errors.excludedManagerPositionNumber &&
+                                JSON.stringify(errors.excludedManagerPositionNumber)}
+                            </div>
+                            <div>noPositions: {noPositions.toString()}</div>
+                            <div>isFetchingPositionProfileError: {isFetchingPositionProfileError.toString()}</div> */}
+                          </Form.Item>
+                          <div>
+                            {firstActivePosition &&
+                              !isFetchingPositionProfile &&
+                              firstActivePosition.employeeName &&
+                              !noPositions &&
+                              !errors.excludedManagerPositionNumber &&
+                              !isFetchingPositionProfileError && (
+                                <div style={{ height: '15px' }}>
+                                  <p>
+                                    {`${firstActivePosition.employeeName} - ${firstActivePosition.ministry}`}
+                                    {additionalPositions > 0 && ` +${additionalPositions}`}
+                                  </p>
+                                </div>
+                              )}
                             {isFetchingPositionProfile && (
                               <LoadingSpinnerWithMessage data-testid="loading-spinner" mode="small" />
                             )}
-                            {/* {errors.excludedManagerPositionNumber && !isFetchingPositionProfile && (
-                      <p style={{ color: 'red' }}>{errors.excludedManagerPositionNumber.message}</p>
-                    )} */}
-                          </Form.Item>
+                          </div>
                         </Col>
                       </Row>
                     </Card>

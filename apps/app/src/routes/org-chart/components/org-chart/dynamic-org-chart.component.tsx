@@ -114,6 +114,11 @@ export const DynamicOrgChart = ({
 
   useEffect(() => {
     if (type === OrgChartType.DYNAMIC && props.context === OrgChartContext.WIZARD) {
+      // do not clear selection unless user actually clicked on the pane
+      // this prevents clearing of selection when the org chart is first loaded with a targetId set
+      if (selectedNodeIds.length == 0 && !isDirty) {
+        return;
+      }
       props.onSelectedNodeIdsChange(selectedNodeIds, { edges, nodes });
     }
   }, [props.context, edges, nodes, selectedNodeIds]);

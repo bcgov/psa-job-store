@@ -778,7 +778,8 @@ export class PositionRequestApiService {
     }
 
     if (updateData.parent_job_profile !== undefined) {
-      updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
+      if (updateData.parent_job_profile.connect.id == null) updatePayload.parent_job_profile = { disconnect: true };
+      else updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
     }
 
     if (updateData.department !== undefined) {
@@ -787,11 +788,14 @@ export class PositionRequestApiService {
 
     // additional information form data:
 
-    if (updateData.additional_info_excluded_mgr_position_number !== undefined) {
-      // console.log('updating additional_info_excluded_mgr_position_number...');
+    if (updateData.additional_info_excluded_mgr_position_number !== undefined)
       updatePayload.additional_info_excluded_mgr_position_number =
         updateData.additional_info_excluded_mgr_position_number;
 
+    if (
+      updateData.additional_info_excluded_mgr_position_number !== undefined &&
+      updateData.additional_info_excluded_mgr_position_number !== null // it might be null if we're unsetting, e.g. when user changes supervisor on org chart
+    ) {
       // if updating the excluded manager position number, we need to check if that position
       // exists in the org chart, if it doesn't we need to add this position to the org chart
       // such that the top level of the reporting chain reports to this position
@@ -904,7 +908,8 @@ export class PositionRequestApiService {
     }
 
     if (updateData.paylist_department !== undefined) {
-      updatePayload.paylist_department = { connect: { id: updateData.paylist_department.connect.id } };
+      if (updateData.paylist_department.connect.id == null) updatePayload.paylist_department = { disconnect: true };
+      else updatePayload.paylist_department = { connect: { id: updateData.paylist_department.connect.id } };
     }
 
     // First pass updates
@@ -1273,6 +1278,9 @@ export class PositionRequestApiService {
           ])
         ).get(positionRequest.additional_info_excluded_mgr_position_number);
         const employeeId = employees.length > 0 ? employees[0].id : null;
+
+        // todo: if position is unencumbered, do not create position
+        // check if A.UPDATE_INCUMBENTS is "Y" on position
 
         data = {
           BUSINESS_UNIT: paylist_department.organization.id,
