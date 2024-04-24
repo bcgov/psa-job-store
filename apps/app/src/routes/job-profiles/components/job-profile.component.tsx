@@ -557,7 +557,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     })}
             </ul>
             {/* Optional Accountabilities - is_significant == false */}
-            <h4>Optional accountabilities</h4>
+            {(effectiveData?.accountabilities.filter((acc) => !acc.is_significant && !acc.disabled)?.length ?? 0) >
+              0 && <h4>Optional accountabilities</h4>}
             <ul data-testid="optional-accountabilities">
               {showDiff && originalData
                 ? compareLists(
@@ -590,7 +591,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       children: (
         <>
           <span tabIndex={0}>
-            <h4>Education</h4>
+            {(showDiff || (!showDiff && (effectiveData?.education.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
+              <h4>Education</h4>
+            )}
             <ul data-testid="education">
               {showDiff && originalData
                 ? compareLists(originalData.education, effectiveData?.education)
