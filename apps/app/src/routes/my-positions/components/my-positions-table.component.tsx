@@ -506,15 +506,19 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               const valueString = value != null ? `${value}`.padStart(8, '0') : '';
 
               return (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div
+                  style={{
+                    alignItems: 'center',
+                    display:
+                      record.status === 'COMPLETED' || mode === 'classification' || mode === 'total-compensation'
+                        ? 'flex'
+                        : 'none',
+                  }}
+                >
                   <span>{valueString}</span>
                   <span
                     style={{
-                      visibility:
-                        (record.status === 'COMPLETED' || mode === 'classification' || mode === 'total-compensation') &&
-                        hoveredRowKey === record.id
-                          ? 'visible'
-                          : 'hidden',
+                      visibility: hoveredRowKey === record.id ? 'visible' : 'hidden',
                       marginLeft: 0,
                     }}
                   >

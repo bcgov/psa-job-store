@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Alert, Skeleton, Typography } from 'antd';
+import { Skeleton, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useGetOrganizationQuery } from '../../../../redux/services/graphql-api/organization';
 import {
@@ -73,14 +73,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
   const ministryName = organizationData?.organization?.name || '';
 
   if (positionProfileError || organizationError) {
-    return (
-      <Alert
-        message="Could not get position information, please reload the page."
-        description={positionProfileError?.message || organizationError?.message}
-        type="error"
-        role="info"
-      />
-    );
+    return <span>Could not get position information, please reload the page.</span>;
   }
 
   return (
@@ -91,7 +84,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
         ) : (
           <Skeleton.Input active={true} size={'small'} />
         )
-      ) : firstActivePosition ? (
+      ) : firstActivePosition && firstActivePosition.employeeName ? (
         <>
           {mode === 'compact' ? (
             <div>
