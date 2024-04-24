@@ -1,7 +1,9 @@
-import { Logger } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Logger } from '@nestjs/common';
 import { Field, ObjectType, Query, Resolver } from '@nestjs/graphql';
-import { isEmpty } from 'class-validator';
+import { Cache } from 'cache-manager';
 import { PeoplesoftService } from '../external/peoplesoft.service';
+import { CACHE_USER_PREFIX } from './auth.constants';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { AllowNoRoles } from './guards/role-global.guard';
@@ -18,6 +20,7 @@ export class ProfileResolver {
   private readonly logger = new Logger(ProfileResolver.name);
 
   constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly peoplesoftService: PeoplesoftService,
     private authService: AuthService,
   ) {}
@@ -55,25 +58,38 @@ export class ProfileResolver {
   }
 
   @Query(() => Profile, { name: 'profile' })
-  async getProfile(@CurrentUser() user: Express.User) {
-    const peoplesoftProfile = (await this.peoplesoftService.getProfile(user.username))?.data?.query?.rows;
-    const peoplesoftProfileData = (peoplesoftProfile ?? []).length > 0 ? peoplesoftProfile[0] : null;
+  async getProfile(@CurrentUser() { id }: Express.User) {
+    const CACHE_KEY = `${CACHE_USER_PREFIX}${id}`;
+    let match: Express.User = await this.cacheManager.get<Express.User>(CACHE_KEY);
+    if (match == null) {
+      const userFromDb = await this.authService.getUser(id);
+      if (userFromDb != null) {
+        const { id, name, email, username, roles, metadata } = userFromDb;
 
-    let employeeRows = [];
-    let employee: Record<string, any> | null = null;
-    if (peoplesoftProfileData != null && !isEmpty(peoplesoftProfileData.EMPLID)) {
-      employeeRows = (await this.peoplesoftService.getEmployee(peoplesoftProfileData.EMPLID))?.data?.query?.rows;
-      employee = (employeeRows ?? []).length > 0 ? employeeRows[0] : null;
+        match = {
+          id,
+          name,
+          email,
+          username,
+          roles,
+          metadata: metadata as Record<string, any>,
+        };
+      }
     }
 
+    const { name, username, metadata } = match;
+
     return {
-      id: user.id,
-      username: user.username,
-      department_id: process.env.TEST_ENV === 'true' ? '112-0072' : employee?.DEPTID,
-      employee_id: peoplesoftProfileData?.EMPLID,
-      organization_id: employee?.BUSINESS_UNIT,
-      position_id: employee?.POSITION_NBR,
-      metadata: user.metadata,
+      id,
+      name: name,
+      username: username,
+      department_id: process.env.TEST_ENV === 'true' ? '112-0072' : metadata?.peoplesoft?.department_id,
+      employee_id: metadata?.peoplesoft?.employee_id,
+      organization_id: metadata?.peoplesoft?.organization_id,
+      position_id: metadata?.peoplesoft?.position_id,
+      metadata: {
+        crm: metadata.crm,
+      },
     };
   }
 }
