@@ -1120,7 +1120,7 @@ export class PositionRequestApiService {
       positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
 
     const data: IncidentCreateUpdateInput = {
-      subject: `TESTING - Position Number Request - ${classification.code}`,
+      subject: `Job Store Beta - Position Number Request - ${classification.code}`,
       primaryContact: { id: contactId },
       assignedTo: {
         staffGroup: {
