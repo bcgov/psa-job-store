@@ -3475,7 +3475,7 @@ const WizardEditProfile = forwardRef(
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <>
                         <Typography.Text type="secondary">
-                          * denotes an Indigenous Behavioural Competency
+                          * denotes an Indigenous Relations Behavioural Competency
                         </Typography.Text>
                         <div data-testid="behavioral-competencies-selector">
                           <BehaviouralComptencyPicker
