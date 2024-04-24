@@ -3046,7 +3046,7 @@ const WizardEditProfile = forwardRef(
                         colon={false}
                       ></Form.Item>
                       <Typography.Paragraph type="secondary">
-                        Choose or add accountabilities. <i> Adding new accountabilities will trigger verification.</i>
+                        Choose from optional accountabilities.
                       </Typography.Paragraph>
                       <>
                         {acc_opt_fields.length > 0 && (
@@ -3056,7 +3056,7 @@ const WizardEditProfile = forwardRef(
                             ariaLabel="Optional Accountabilities"
                           />
                         )}
-                        <Button
+                        {/* <Button
                           data-testid="add-optional-accountability-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
@@ -3073,11 +3073,10 @@ const WizardEditProfile = forwardRef(
                               undefined,
                               'optional-accountabilities-warning',
                             );
-                            // setRenderKey((prevKey) => prevKey + 1);
                           }}
                         >
                           Add optional accountability
-                        </Button>
+                        </Button> */}
                       </>
                     </Col>
                   </Row>
