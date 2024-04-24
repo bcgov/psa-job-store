@@ -221,7 +221,7 @@ const WizardEditProfile = forwardRef(
     //     // Optional Accountability Fields
     const {
       fields: acc_opt_fields,
-      append: acc_opt_append,
+      // append: acc_opt_append,
       remove: acc_opt_remove,
       update: acc_opt_update,
     } = useFieldArray({
@@ -1059,7 +1059,7 @@ const WizardEditProfile = forwardRef(
     const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
     const { securityScreeningsAlertShown, setSecurityScreeningsAlertShown } = useWizardContext();
     const { reqAlertShown, setReqAlertShown } = useWizardContext();
-    const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
+    // const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
 
     // DIFF HANDLING
     // Cross out deleted core items, allow ability to add back
@@ -1269,10 +1269,10 @@ const WizardEditProfile = forwardRef(
     };
 
     // Function to handle adding a new field
-    const handleOptReqAddNew = () => {
-      acc_opt_append({ text: '', isCustom: true, disabled: false });
-      trigger();
-    };
+    // const handleOptReqAddNew = () => {
+    //   acc_opt_append({ text: '', isCustom: true, disabled: false });
+    //   trigger();
+    // };
 
     // const [editedOptReqFields, setEditedOptReqFields] = useState<{ [key: number]: boolean }>({});
 
