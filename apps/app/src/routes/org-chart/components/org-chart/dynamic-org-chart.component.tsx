@@ -4,7 +4,6 @@ import Fuse from 'fuse.js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
   Background,
-  Controls,
   Edge,
   MiniMap,
   Node,
@@ -21,6 +20,7 @@ import { OrgChartContext } from '../../enums/org-chart-context.enum';
 import { OrgChartType } from '../../enums/org-chart-type.enum';
 import { Elements } from '../../interfaces/elements.interface';
 import { getFocusedElements } from '../../utils/get-focused-elements.util';
+import { Controls } from '../controls';
 import { DepartmentFilter } from '../department-filter.component';
 import { OrgChartNode } from '../org-chart-node.component';
 import { PositionSearch } from '../position-search.component';
@@ -114,6 +114,11 @@ export const DynamicOrgChart = ({
 
   useEffect(() => {
     if (type === OrgChartType.DYNAMIC && props.context === OrgChartContext.WIZARD) {
+      // do not clear selection unless user actually clicked on the pane
+      // this prevents clearing of selection when the org chart is first loaded with a targetId set
+      if (selectedNodeIds.length == 0 && !isDirty) {
+        return;
+      }
       props.onSelectedNodeIdsChange(selectedNodeIds, { edges, nodes });
     }
   }, [props.context, edges, nodes, selectedNodeIds]);

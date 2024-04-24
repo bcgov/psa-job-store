@@ -304,7 +304,7 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
           }),
 
           // Accountabilities
-          createHeading('Accountabilities testing'),
+          createHeading('Accountabilities'),
           ...jobProfile.accountabilities
             .filter((obj: Record<string, any>) => !obj.disabled)
             .map(
