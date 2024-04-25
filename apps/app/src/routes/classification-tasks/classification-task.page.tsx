@@ -7,21 +7,7 @@ import {
   ExclamationCircleFilled,
   LinkOutlined,
 } from '@ant-design/icons';
-import {
-  Alert,
-  Button,
-  Card,
-  Checkbox,
-  Col,
-  Divider,
-  Dropdown,
-  Result,
-  Row,
-  Space,
-  Tabs,
-  Typography,
-  message,
-} from 'antd';
+import { Alert, Button, Card, Col, Divider, Dropdown, Result, Row, Space, Tabs, Typography, message } from 'antd';
 import { MenuProps } from 'antd/es/menu';
 import TabPane from 'antd/es/tabs/TabPane';
 import copy from 'copy-to-clipboard';
@@ -249,12 +235,8 @@ export const ClassificationTaskPage = () => {
                             </Paragraph>
                             {taskList.map((task) => (
                               <div key={task.key} className="task-item">
-                                <Checkbox className="custom-checkbox">
-                                  <div className="checkbox-contents">
-                                    {task.title}
-                                    <Paragraph type="secondary">{task.subtitle}</Paragraph>
-                                  </div>
-                                </Checkbox>
+                                <Text strong>{task.title} </Text>
+                                <Paragraph type="secondary">{task.subtitle}</Paragraph>
                               </div>
                             ))}
                           </TabPane>
@@ -264,12 +246,9 @@ export const ClassificationTaskPage = () => {
                             </Paragraph>
                             {highTouchTasks.map((task) => (
                               <div key={task.key} className="task-item">
-                                <Checkbox className="custom-checkbox">
-                                  <div className="checkbox-contents">
-                                    {task.title}
-                                    <Paragraph type="secondary">{task.subtitle}</Paragraph>
-                                  </div>
-                                </Checkbox>
+                                <Text strong> {task.title}</Text>
+
+                                <Paragraph type="secondary">{task.subtitle}</Paragraph>
                               </div>
                             ))}
                           </TabPane>
@@ -279,12 +258,8 @@ export const ClassificationTaskPage = () => {
                             </Paragraph>
                             {solvedTasks.map((task) => (
                               <div key={task.key} className="task-item">
-                                <Checkbox className="custom-checkbox">
-                                  <div className="checkbox-contents">
-                                    {task.title}
-                                    <Paragraph type="secondary">{task.subtitle}</Paragraph>
-                                  </div>
-                                </Checkbox>
+                                <Text strong> {task.title}</Text>
+                                <Paragraph type="secondary">{task.subtitle}</Paragraph>
                               </div>
                             ))}
                           </TabPane>
