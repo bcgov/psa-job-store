@@ -135,6 +135,132 @@ export class SearchService {
                 },
               },
             },
+            {
+              match_phrase_prefix: {
+                professional_registration_requirements: value,
+              },
+            },
+            {
+              match: {
+                professional_registration_requirements: {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
+                },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                knowledge_skills_abilities: value,
+              },
+            },
+            {
+              match: {
+                knowledge_skills_abilities: {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
+                },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                willingness_statements: value,
+              },
+            },
+            {
+              match: {
+                willingness_statements: {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
+                },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                optional_requirements: value,
+              },
+            },
+            {
+              match: {
+                optional_requirements: {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
+                },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                security_screenings: value,
+              },
+            },
+            {
+              match: {
+                security_screenings: {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
+                },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                classifications: value,
+              },
+            },
+            {
+              match: {
+                classifications: {
+                  query: value,
+                  fuzziness: 0,
+                  operator: 'and',
+                },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                organizations: value,
+              },
+            },
+            {
+              match: {
+                organizations: {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
+                },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                jobFamilies: value,
+              },
+            },
+            {
+              match: {
+                jobFamilies: {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
+                },
+              },
+            },
+            {
+              match_phrase_prefix: {
+                streams: value,
+              },
+            },
+            {
+              match: {
+                streams: {
+                  query: value,
+                  fuzziness: 1,
+                  operator: 'and',
+                },
+              },
+            },
           ],
         },
       },
@@ -190,6 +316,71 @@ export class SearchService {
             },
           })
         ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
+        professional_registration_requirements: profile.professional_registration_requirements,
+        preferences: profile.preferences,
+        knowledge_skills_abilities: profile.knowledge_skills_abilities,
+        willingness_statements: profile.willingness_statements,
+        optional_requirements: profile.optional_requirements,
+        security_screenings: profile.security_screenings,
+        classifications: (
+          await this.prisma.jobProfileClassification.findMany({
+            where: {
+              job_profile_id: profile.id,
+            },
+            select: {
+              classification: {
+                select: {
+                  name: true,
+                  code: true,
+                },
+              },
+            },
+          })
+        ).map(({ classification: { name, code } }) => `${name} ${code}`),
+        organizations: (
+          await this.prisma.jobProfileOrganization.findMany({
+            where: {
+              job_profile_id: profile.id,
+            },
+            select: {
+              organization: {
+                select: {
+                  name: true,
+                  code: true,
+                },
+              },
+            },
+          })
+        ).map(({ organization: { name, code } }) => `${name} ${code}`),
+        jobFamilies: (
+          await this.prisma.jobProfileJobFamilyLink.findMany({
+            where: {
+              jobProfileId: profile.id,
+            },
+            select: {
+              jobFamily: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          })
+        ).map(({ jobFamily: { name } }) => `${name}`),
+        streams: (
+          await this.prisma.jobProfileStreamLink.findMany({
+            where: {
+              jobProfileId: profile.id,
+            },
+            select: {
+              stream: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          })
+        ).map(({ stream: { name } }) => `${name}`),
+        program_overview: profile.program_overview,
       },
     });
   }
