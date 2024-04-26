@@ -5,19 +5,28 @@ FROM node:20-alpine AS development
 
 WORKDIR /usr/src
 # root project level
-COPY --chown=node:node package*.json ./
-# libs
+COPY --chown=node:node package.json.v2 ./package.json
+COPY --chown=node:node package-lock.json.v2 ./package-lock.json 
 COPY --chown=node:node packages ./packages
+
 # specific to our npm workspace
-COPY --chown=node:node apps/api/package*.json ./apps/api/
+COPY --chown=node:node apps/api/package.json.v2 ./apps/api/package.json
+
+ENV NODE_ENV "development"
 RUN npm ci
 
 # packages/tsconfig is deployed to root project folder
-COPY --chown=node:node tsconfig.json ./
-COPY --chown=node:node packages/tsconfig ./tsconfig/
+COPY --chown=node:node tsconfig.json.v2 ./apps/api/tsconfig.json
+# GW can I simply repoint it in the tscconfig.json.v2 or in the package.json.v2?
+# COPY --chown=node:node packages/tsconfig ./tsconfig/
 
 # typically COPY . . 
 COPY --chown=node:node apps/api ./apps/api
+
+RUN npx -w api prisma generate
+# build common-kit
+RUN npm -w common-kit run build
+
 USER node
 
 ###################
@@ -26,83 +35,62 @@ USER node
 FROM node:20-alpine AS build
 
 WORKDIR /usr/src
-COPY --chown=node:node package*.json ./
+COPY --chown=node:node package.json.v2 ./package.json
+COPY --chown=node:node package-lock.json.v2 ./package-lock.json 
 COPY --chown=node:node packages ./packages
-COPY --chown=node:node apps/api/package*.json ./apps/api/
+
+# specific to our npm workspace
+COPY --chown=node:node apps/api/package.json.v2 ./apps/api/package.json
+
+ENV NODE_ENV production
 RUN npm ci # needed for `npx -w api prisma generate`
 
-# COPY --chown=node:node tsconfig.json ./
-# COPY --chown=node:node packages/tsconfig ./tsconfig/
 
-COPY --chown=node:node apps/api ./apps/api
+# packages/tsconfig is deployed to root project folder
+COPY --chown=node:node tsconfig.json ./
+COPY --chown=node:node packages/tsconfig ./tsconfig/
+
+# WORKDIR /usr/src/apps/api/
+# COPY --chown=node:node apps/api ./apps/api
 RUN npx -w api prisma generate
 # build common-kit
 RUN npm -w common-kit run build
 
-# COPY --chown=node:node --from=development /usr/src/apps/api/node_modules ./apps/api/node_modules
+# In order to run `npm run build` we need access to the Nest CLI.
+# The Nest CLI is a dev dependency,
+# In the previous development stage we ran `npm ci` which installed all dependencies.
+# So we can copy over the node_modules directory from the development image into this build image.
+COPY --chown=node:node --from=development /usr/src/apps/api/node_modules ./apps/api/node_modules
+COPY --chown=node:node apps/api apps/api
 
-# COPY --chown=node:node apps/api apps/api
+WORKDIR /usr/src/apps/api
+# RUN npm run build # commenting out to avoid dependencies on a sync'd schema
+## https://docs.nestjs.com/cli/usages to avoid having to copy tsconfig.json twice!
 
-# WORKDIR /usr/src/apps/api
-RUN npm run build
-
-
-
-# COPY --chown=node:node packages ./packages
-# COPY --chown=node:node apps/api/package*.json ./apps/api/
-# RUN npm ci # needed for `npx -w api prisma generate`
-
-# COPY tsconfig.json ./
-# COPY packages/tsconfig ./tsconfig/
-
-# # Typically "COPY . ."
-# WORKDIR /usr/src/apps/api
-# # COPY --chown=node:node apps/api ./apps/api 
-# COPY --chown=node:node apps/api/prisma ./prisma
-# COPY --chown=node:node apps/api/package*.json .
-
-# RUN npx -w api prisma generate
-# # build common-kit
-# RUN npm -w common-kit run build
-# #generates the dist folder for nest to run
-
-# COPY --chown=node:node apps/api apps/api
-
-# # In order to run `npm run build` we need access to the Nest CLI which is a dev dependency. In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
-# COPY --chown=node:node --from=development /usr/src/apps/api/node_modules ./apps/api/node_modules
-# # COPY --chown=node:node --from=development /usr/src/node_modules ./node_modules
-
-# ## GW dunno if I'm copying from /usr/src/apps/api/node_modules or /usr/src/node_modules
-
-# RUN npm -w api run build
-
-# # Set NODE_ENV environment variable
-# # ENV NODE_ENV production
-# # ^ will break due to prepare script with `husky` in `<rootFolder/package.json`
+# # nexe line will break due to prepare script with `husky` in `<rootFolder/package.json`
 # # https://stackoverflow.com/questions/67063993/sh-husky-command-not-found
+ENV NODE_ENV production
+
+# Running `npm ci` removes the existing node_modules directory.
+# Passing in --only=production ensures that only the production dependencies are installed.
+# This ensures that the node_modules directory is as optimized as possible.
+#
+# See https://github.com/typicode/husky/issues/914#issuecomment-809821560 for
+# why `--ignore-scripts` is required in psa-job-store
+RUN npm ci --only=production --ignore-scripts && npm cache clean --force
+USER node
 
 
-# # Running `npm ci` removes the existing node_modules directory and passing in --only=production ensures that only the production dependencies are installed. This ensures that the node_modules directory is as optimized as possible
-# WORKDIR /usr/src
-# COPY --chown=node:node package*.json ./
-# COPY --chown=node:node  packages ./packages
-# COPY --chown=node:node apps/api/package.json ./apps/api/
+###################
+# PRODUCTION
+###################
+FROM node:20-alpine AS production
 
-# RUN npm ci && npm cache clean --force
+# Copy the bundled code from the build stage to the production image
+COPY --chown=node:node --from=build /usr/src/apps/api/node_modules ./apps/api/node_modules
+# COPY --chown=node:node --from=build /usr/src/dist ./dist
 
-# # RUN npm ci --only=production && npm cache clean --force
-# USER node
-
-# ###################
-# # PRODUCTION
-# ###################
-# FROM node:20-alpine AS production
-
-# # Copy the bundled code from the build stage to the production image
-# COPY --chown=node:node --from=build /usr/src/apps/api/node_modules ./node_modules
-# ## GW ^ dunno if I'm copying from /usr/src/apps/api/node_modules or /usr/src/node_modules
-# COPY --chown=node:node --from=development /usr/src/apps/api/node_modules ./apps/api/node_modules
-# COPY --chown=node:node --from=build /usr/src/apps/api/dist ./dist
+EXPOSE 4000
 
 # Start the server using the production build
-CMD [ "node", "dist/main.js" ]
+CMD [ "node", "dist/main.js" ]`
