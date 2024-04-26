@@ -972,6 +972,13 @@ export class PositionRequestApiService {
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id: id } });
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id: positionRequest.parent_job_profile_id },
+      include: {
+        jobFamilies: {
+          include: {
+            jobFamily: true, // Ensures that the related jobFamily data is returned
+          },
+        },
+      },
     });
 
     // If the Job Profile is denoted as requiring review, it _must_ be reviewed every time
@@ -1047,7 +1054,7 @@ export class PositionRequestApiService {
       this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.education),
         JSON.stringify(prJobProfileSignificantSections.education),
-      ),
+      ) && jobProfile.jobFamilies.some((jf) => jf.jobFamily.name != 'Administrative Services'), // AL-619 this is a temporary measure to disable education requirements for admin family
       // Job Experience
       this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.job_experience),
