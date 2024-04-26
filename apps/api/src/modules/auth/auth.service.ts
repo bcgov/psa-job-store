@@ -3,10 +3,12 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
+import { isEmpty } from 'class-validator';
 import { JwtPayload } from 'jsonwebtoken';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { CrmService } from '../external/crm.service';
+import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CACHE_USER_PREFIX, KEYCLOAK_PUBLIC_KEY } from './auth.constants';
 
@@ -17,6 +19,7 @@ export class AuthService {
     private readonly configService: ConfigService<AppConfigDto, true>,
     private readonly crmService: CrmService,
     private readonly httpService: HttpService,
+    private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -56,6 +59,11 @@ export class AuthService {
     return [this.configService.get('KEYCLOAK_CLIENT_ID_PRIVATE'), this.configService.get('KEYCLOAK_CLIENT_ID_PUBLIC')];
   }
 
+  async getUser(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: id } });
+    return user;
+  }
+
   async getUserFromPayload(data: JwtPayload) {
     const { idir_user_guid, idir_username, name, email, client_roles, exp } = data;
 
@@ -69,17 +77,45 @@ export class AuthService {
         contact_id: null,
       };
 
-      const userFromDb = await this.prisma.user.findUnique({ where: { id: idir_user_guid } });
-      if (
-        (userFromDb != null && userFromDb?.metadata?.['crm']['account_id'] == null) ||
-        userFromDb?.metadata?.['crm']['contact_id'] == null
-      ) {
-        const accountId = await this.crmService.getAccountId(idir_username);
-        const contactId = await this.crmService.getContactId(idir_username);
+      let peoplesoftMetadata: Record<string, any> = {
+        department_id: null,
+        employee_id: null,
+        organization_id: null,
+        position_id: null,
+      };
 
-        crmMetadata = {
-          account_id: accountId ?? null,
-          contact_id: contactId ?? null,
+      const userFromDb = await this.prisma.user.findUnique({ where: { id: idir_user_guid } });
+      if (userFromDb != null) {
+        // Update CRM IDs
+        if (
+          userFromDb?.metadata?.['crm']['account_id'] == null ||
+          userFromDb?.metadata?.['crm']['contact_id'] == null
+        ) {
+          const accountId = await this.crmService.getAccountId(idir_username);
+          const contactId = await this.crmService.getContactId(idir_username);
+
+          crmMetadata = {
+            account_id: accountId ?? null,
+            contact_id: contactId ?? null,
+          };
+        }
+
+        // Update Peoplesoft IDs
+        const peoplesoftProfile = (await this.peoplesoftService.getProfile(userFromDb.username))?.data?.query?.rows;
+        const peoplesoftProfileData = (peoplesoftProfile ?? []).length > 0 ? peoplesoftProfile[0] : null;
+
+        let employeeRows = [];
+        let employee: Record<string, any> | null = null;
+        if (peoplesoftProfileData != null && !isEmpty(peoplesoftProfileData.EMPLID)) {
+          employeeRows = (await this.peoplesoftService.getEmployee(peoplesoftProfileData.EMPLID))?.data?.query?.rows;
+          employee = (employeeRows ?? []).length > 0 ? employeeRows[0] : null;
+        }
+
+        peoplesoftMetadata = {
+          department_id: employee?.DEPTID,
+          employee_id: peoplesoftProfileData?.EMPLID,
+          organization_id: employee?.BUSINESS_UNIT,
+          position_id: employee?.POSITION_NBR,
         };
       }
 
@@ -91,6 +127,7 @@ export class AuthService {
         roles: ((client_roles as string[]) ?? []).sort(),
         metadata: {
           crm: crmMetadata,
+          peoplesoft: peoplesoftMetadata,
         },
       };
 

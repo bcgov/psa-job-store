@@ -89,7 +89,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     ) {
       return new Promise((resolve) => {
         Modal.confirm({
-          title: 'Change job profile?',
+          title: 'Change profile?',
           content: (
             <div data-testid="change-profile-warning">
               <p>
@@ -99,7 +99,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               <p>This action is irreversible. Are you sure you wish to proceed?</p>
             </div>
           ),
-          okText: 'Change job profile',
+          okText: 'Change profile',
           cancelText: 'Cancel',
           onOk: () => {
             setWizardData(null); // this ensures that any previous edits are cleared

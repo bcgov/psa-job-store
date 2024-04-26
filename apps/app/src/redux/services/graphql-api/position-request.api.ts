@@ -112,7 +112,7 @@ export interface UpdatePositionRequestInput {
   orgchart_json?: any;
   profile_json?: any;
   user_id?: string;
-  title?: string;
+  title?: string | null;
   position_number?: number;
   classification_id?: string;
   submission_id?: string;
@@ -125,14 +125,14 @@ export interface UpdatePositionRequestInput {
   };
   paylist_department?: {
     connect: {
-      id: string;
+      id: string | null;
     };
   };
-  additional_info_excluded_mgr_position_number?: string;
-  additional_info_comments?: string;
+  additional_info_excluded_mgr_position_number?: string | null;
+  additional_info_comments?: string | null;
   parent_job_profile?: {
     connect: {
-      id: number;
+      id: number | null;
     };
   };
   department?: {
@@ -546,5 +546,6 @@ export const {
   useGetPositionRequestStatusesQuery,
   useGetPositionRequestSubmittedByQuery,
   usePositionNeedsRivewQuery,
+  useLazyPositionNeedsRivewQuery,
   useGetSharedPositionRequestQuery,
 } = positionRequestApi;

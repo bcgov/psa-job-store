@@ -221,7 +221,7 @@ const WizardEditProfile = forwardRef(
     //     // Optional Accountability Fields
     const {
       fields: acc_opt_fields,
-      append: acc_opt_append,
+      // append: acc_opt_append,
       remove: acc_opt_remove,
       update: acc_opt_update,
     } = useFieldArray({
@@ -1059,7 +1059,7 @@ const WizardEditProfile = forwardRef(
     const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
     const { securityScreeningsAlertShown, setSecurityScreeningsAlertShown } = useWizardContext();
     const { reqAlertShown, setReqAlertShown } = useWizardContext();
-    const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
+    // const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
 
     // DIFF HANDLING
     // Cross out deleted core items, allow ability to add back
@@ -1269,10 +1269,10 @@ const WizardEditProfile = forwardRef(
     };
 
     // Function to handle adding a new field
-    const handleOptReqAddNew = () => {
-      acc_opt_append({ text: '', isCustom: true, disabled: false });
-      trigger();
-    };
+    // const handleOptReqAddNew = () => {
+    //   acc_opt_append({ text: '', isCustom: true, disabled: false });
+    //   trigger();
+    // };
 
     // const [editedOptReqFields, setEditedOptReqFields] = useState<{ [key: number]: boolean }>({});
 
@@ -2936,7 +2936,7 @@ const WizardEditProfile = forwardRef(
                   type="info"
                   role="note"
                   style={{ marginBottom: '24px' }}
-                  message="Some fields are standard and cannot be edited, others are marked as significant and may result in a classification request.  Those not marked as significant or shaded, may be edited without a classification impact."
+                  message="Some fields are standard and cannot be edited, others are marked as significant and may result in a classification review.  Those not marked as significant or shaded, may be edited without a classification impact."
                   showIcon
                 />
               ) : (
@@ -3046,7 +3046,7 @@ const WizardEditProfile = forwardRef(
                         colon={false}
                       ></Form.Item>
                       <Typography.Paragraph type="secondary">
-                        Choose or add accountabilities. <i> Adding new accountabilities will trigger verification.</i>
+                        Choose from optional accountabilities.
                       </Typography.Paragraph>
                       <>
                         {acc_opt_fields.length > 0 && (
@@ -3056,7 +3056,7 @@ const WizardEditProfile = forwardRef(
                             ariaLabel="Optional Accountabilities"
                           />
                         )}
-                        <Button
+                        {/* <Button
                           data-testid="add-optional-accountability-button"
                           type="link"
                           icon={<PlusOutlined aria-hidden />}
@@ -3073,11 +3073,10 @@ const WizardEditProfile = forwardRef(
                               undefined,
                               'optional-accountabilities-warning',
                             );
-                            // setRenderKey((prevKey) => prevKey + 1);
                           }}
                         >
                           Add optional accountability
-                        </Button>
+                        </Button> */}
                       </>
                     </Col>
                   </Row>
@@ -3476,7 +3475,7 @@ const WizardEditProfile = forwardRef(
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <>
                         <Typography.Text type="secondary">
-                          * denotes an Indigenous Behavioural Competency
+                          * denotes an Indigenous Relations Behavioural Competency
                         </Typography.Text>
                         <div data-testid="behavioral-competencies-selector">
                           <BehaviouralComptencyPicker
