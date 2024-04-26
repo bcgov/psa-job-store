@@ -145,9 +145,9 @@ const WizardEditProfile = forwardRef(
     const securitySection = useRef<null | HTMLDivElement>(null);
     const sections: sectionMap = {
       [reasons.ACCOUNTABILITIES]: acctSection,
-      [reasons.EDUCATION]: educationSection, // Adjusted for demonstration
+      [reasons.EDUCATION]: educationSection,
       [reasons.JOB_EXPERIENCE]: workExperienceSection,
-      [reasons.SECURITY_SCREENINGS]: securitySection, // Adjusted for demonstration
+      [reasons.SECURITY_SCREENINGS]: securitySection,
     };
     const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
 
@@ -178,6 +178,8 @@ const WizardEditProfile = forwardRef(
     const [requiresVerification, setRequiresVerification] = useState(false);
     const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
 
+    // AL-619 this is a temporary measure to disable education requirements for admin family
+    const [isAdmin, setisAdmin] = useState<boolean>(false);
     const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
     const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
     const [editedRelWorkFields, setEditedRelWorkFields] = useState<{ [key: number]: boolean }>({});
@@ -238,7 +240,8 @@ const WizardEditProfile = forwardRef(
       // acc_opt_fields is an array of objects, check if any of items have isCustom == true
       const anyOptionalAccsTrue = Object.values(acc_opt_fields).some((item) => (item as any).isCustom === true);
 
-      const anyEducationTrue = Object.values(editedMinReqFields).some((item) => item === true);
+      // AL-619 this is a temporary measure to disable education requirements for admin family
+      const anyEducationTrue = Object.values(editedMinReqFields).some((item) => item === true) && !isAdmin;
       const anyRelWorkTrue = Object.values(editedRelWorkFields).some((item) => item === true);
       const anySsecurityScreeningsTrue = Object.values(editedSecurityScreeningsFields).some((item) => item === true);
       const verificationReasons = [];
@@ -272,6 +275,11 @@ const WizardEditProfile = forwardRef(
     // console.log('effectiveData: ', effectiveData);
     useEffect(() => {
       if (effectiveData && !isLoading && classificationsData && originalProfileData) {
+        // AL-619 this is a temporary measure to disable education requirements for admin family
+        originalProfileData?.jobProfile?.jobFamilies.some((jf) => jf.jobFamily.name === 'Administrative Services') &&
+          setisAdmin(true);
+        // profileData?.jobFamilies.some((jf) => (jf.jobFamily.name = 'Administrative Services')) && setisAdmin(true);
+
         const classificationIds =
           effectiveData?.classifications?.map((c) => ({ classification: c.classification.id })) ?? [];
 
@@ -1470,7 +1478,9 @@ const WizardEditProfile = forwardRef(
     };
 
     const renderMinReqFields = (field: any, index: number) => {
-      const isEdited = editedMinReqFields[index] || field.isCustom;
+      //AL-619
+      const isEdited = !isAdmin && (editedMinReqFields[index] || field.isCustom);
+      // const isEdited = editedMinReqFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
         setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.text }));
@@ -1543,6 +1553,8 @@ const WizardEditProfile = forwardRef(
                         if (field.is_significant) handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
                       }}
                       onFocus={() =>
+                        //AL-619
+                        !isAdmin &&
                         WizardModal(
                           'Do you want to make changes to education and work experiences?',
                           minReqAlertShown,
@@ -1554,7 +1566,8 @@ const WizardEditProfile = forwardRef(
                         )
                       }
                       onBlur={() => {
-                        validateVerification();
+                        //AL-619
+                        !isAdmin && validateVerification();
                         onBlur();
                       }}
                       value={value ? (typeof value === 'string' ? value : value.value) : ''}
@@ -1576,15 +1589,18 @@ const WizardEditProfile = forwardRef(
               handleRemove={handleMinReqRemove}
               testId="education"
               confirmRemoveModal={() =>
-                WizardModal(
-                  'Do you want to make changes to education and work experiences?',
-                  minReqAlertShown,
-                  setMinReqAlertShown,
-                  () => handleMinReqRemove(index),
-                  true,
-                  undefined,
-                  'education-warning',
-                )
+                //AL-619
+                !isAdmin
+                  ? WizardModal(
+                      'Do you want to make changes to education and work experiences?',
+                      minReqAlertShown,
+                      setMinReqAlertShown,
+                      () => handleMinReqRemove(index),
+                      true,
+                      undefined,
+                      'education-warning',
+                    )
+                  : handleMinReqRemove(index)
               }
             ></ContextOptions>
 
