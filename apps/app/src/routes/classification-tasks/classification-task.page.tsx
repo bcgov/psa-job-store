@@ -7,23 +7,8 @@ import {
   ExclamationCircleFilled,
   LinkOutlined,
 } from '@ant-design/icons';
-import {
-  Alert,
-  Button,
-  Card,
-  Checkbox,
-  Col,
-  Divider,
-  Dropdown,
-  Result,
-  Row,
-  Space,
-  Tabs,
-  Typography,
-  message,
-} from 'antd';
+import { Alert, Button, Card, Col, Divider, Dropdown, Result, Row, Space, Tabs, Typography, message } from 'antd';
 import { MenuProps } from 'antd/es/menu';
-import TabPane from 'antd/es/tabs/TabPane';
 import copy from 'copy-to-clipboard';
 import { cloneElement } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -41,7 +26,7 @@ import { JobProfileWithDiff } from './components/job-profile-with-diff.component
 import { ServiceRequestDetails } from './components/service-request-details.component';
 // import '../wizard/wizard-review.page.css';
 // import './total-comp-approved-request.page.css';
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 // Import your API service to fetch position request
 
@@ -67,79 +52,6 @@ export const ClassificationTaskPage = () => {
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
     message.success('Link copied to clipboard!');
   };
-
-  const taskList = [
-    {
-      key: '1',
-      title: 'CRM: If needed, contact an analyst for guidance',
-      subtitle: 'Analysts can help answer any questions and concerns you may have regarding this request.',
-    },
-    {
-      key: '2',
-      title: 'CRM: Send feedback email to client',
-      subtitle:
-        'Describe the changes that need to me made which will ensure that the profile clears the review process.',
-    },
-    {
-      key: '3',
-      title: 'CRM: Update state to ‘Waiting - Client’',
-      subtitle:
-        'This will change the ticket status here to ‘Action required’, and once the client responds, this will revert to ‘Review’.',
-    },
-  ];
-
-  const highTouchTasks = [
-    {
-      key: '1',
-      title: 'CRM: Contact a specialist for guidance',
-      subtitle: 'Specialists can help answer any questions and concerns you may have regarding this request.',
-    },
-    {
-      key: '2',
-      title: 'CRM: Reach out to client to obtain a review approval',
-      subtitle:
-        'Describe the need for a full review process and get confirmation that they would submit a new webform for classification review.',
-    },
-    {
-      key: '3',
-      title: 'CRM: Update state to ‘Unresolved’',
-      subtitle: 'This will change the ticket status here to ‘Escalated’, and then closed.',
-    },
-    {
-      key: '4',
-      title: 'CRM: Update category to ‘Classification’',
-      subtitle: 'This will help with reporting and documentation.',
-    },
-    {
-      key: '5',
-      title: 'CRM: Update case to ‘ECLASS’',
-      subtitle: 'This will help with reporting and documentation.',
-    },
-    {
-      key: '6',
-      title: 'CRM: Assign service request to the specialist',
-      subtitle:
-        'Reassign the CRM service request to the same specialist that will be taking over the classification review.',
-    },
-  ];
-
-  const solvedTasks = [
-    {
-      key: '1',
-      title: 'Generate position',
-      subtitle: 'In PeopleSoft, approve the ‘proposed’ position number.',
-    },
-    {
-      key: '2',
-      title: 'Contact client',
-      subtitle: 'Inform the client that the review was successful and share the position number.',
-    },
-    {
-      key: '3',
-      title: 'Generate position',
-      subtitle: 'Change state to ‘Solved’: This will mark the service request as ‘Complete’ and then closed.',
-    },
-  ];
 
   const statusIconColorMap: any = {
     ESCALATED: { icon: <ExclamationCircleFilled />, color: '#FA8C16', text: 'Escalated' },
@@ -239,59 +151,7 @@ export const ClassificationTaskPage = () => {
                         showIcon
                       />
                     )}
-
-                    {(currentStatus == 'IN_REVIEW' || currentStatus == 'ACTION_REQUIRED') && (
-                      <Card title="Next steps" bordered={false} style={{ marginBottom: '1rem' }}>
-                        <Tabs defaultActiveKey="1">
-                          <TabPane tab="Medium touch" key="1">
-                            <Paragraph>
-                              If you consider this ticket as medium touch, then perform the following tasks:
-                            </Paragraph>
-                            {taskList.map((task) => (
-                              <div key={task.key} className="task-item">
-                                <Checkbox className="custom-checkbox">
-                                  <div className="checkbox-contents">
-                                    {task.title}
-                                    <Paragraph type="secondary">{task.subtitle}</Paragraph>
-                                  </div>
-                                </Checkbox>
-                              </div>
-                            ))}
-                          </TabPane>
-                          <TabPane tab="High touch" key="2">
-                            <Paragraph>
-                              If you consider this ticket as high touch, then perform the following tasks:
-                            </Paragraph>
-                            {highTouchTasks.map((task) => (
-                              <div key={task.key} className="task-item">
-                                <Checkbox className="custom-checkbox">
-                                  <div className="checkbox-contents">
-                                    {task.title}
-                                    <Paragraph type="secondary">{task.subtitle}</Paragraph>
-                                  </div>
-                                </Checkbox>
-                              </div>
-                            ))}
-                          </TabPane>
-                          <TabPane tab="Solved" key="3">
-                            <Paragraph>
-                              If you consider this ticket as solved, then perform the following tasks:
-                            </Paragraph>
-                            {solvedTasks.map((task) => (
-                              <div key={task.key} className="task-item">
-                                <Checkbox className="custom-checkbox">
-                                  <div className="checkbox-contents">
-                                    {task.title}
-                                    <Paragraph type="secondary">{task.subtitle}</Paragraph>
-                                  </div>
-                                </Checkbox>
-                              </div>
-                            ))}
-                          </TabPane>
-                        </Tabs>
-                      </Card>
-                    )}
-                    <Card title="Other Actions" style={{ marginBottom: '1rem' }}>
+                    <Card title="Actions" style={{ marginBottom: '1rem' }}>
                       <Space direction="vertical" size="small" style={{ width: '100%' }}>
                         <div>
                           <strong>Download job profile</strong>
