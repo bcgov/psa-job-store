@@ -12,29 +12,37 @@ COPY --chown=node:node packages ./packages
 # specific to our npm workspace
 COPY --chown=node:node apps/api/package.json.v2 ./apps/api/package.json
 
-ENV NODE_ENV "development"
-RUN npm ci
+ENV NODE_ENV development
+# needed for `npx -w api prisma generate`
+RUN npm ci 
 
-# packages/tsconfig is deployed to root project folder
-COPY --chown=node:node tsconfig.json.v2 ./apps/api/tsconfig.json
+#  tsconfig.json (base, from root project folder..)
+COPY --chown=node:node tsconfig.json.v2 ./tsconfig.json
+#  .. and 'extends', from /apps/api
+COPY --chown=node:node /apps/api/tsconfig.json.v2 ./apps/api/tsconfig.json
+
 # GW can I simply repoint it in the tscconfig.json.v2 or in the package.json.v2?
 # COPY --chown=node:node packages/tsconfig ./tsconfig/
 
 # typically COPY . . 
-COPY --chown=node:node apps/api ./apps/api
-
+# COPY --chown=node:node apps/api ./apps/api
 RUN npx -w api prisma generate
-# build common-kit
 RUN npm -w common-kit run build
 
 USER node
+EXPOSE 4000
+
+# Start the server using the development build
+CMD [ "npm", "-w", "api", "run", "start:dev" ]
+
 
 ###################
 # BUILD FOR PRODUCTION
-###################`
+###################
 FROM node:20-alpine AS build
 
 WORKDIR /usr/src
+# root project level
 COPY --chown=node:node package.json.v2 ./package.json
 COPY --chown=node:node package-lock.json.v2 ./package-lock.json 
 COPY --chown=node:node packages ./packages
@@ -42,34 +50,34 @@ COPY --chown=node:node packages ./packages
 # specific to our npm workspace
 COPY --chown=node:node apps/api/package.json.v2 ./apps/api/package.json
 
+# RUN npm run build # commenting out to avoid dependencies on a sync'd schema
+# https://docs.nestjs.com/cli/usages to avoid having to copy tsconfig.json twice!
+# next line will break due to prepare script with `husky` in `<rootFolder/package.json`
+# https://stackoverflow.com/questions/67063993/sh-husky-command-not-found
 ENV NODE_ENV production
-RUN npm ci # needed for `npx -w api prisma generate`
+# RUN npm ci --only=production --ignore-scripts
 
-
-# packages/tsconfig is deployed to root project folder
-COPY --chown=node:node tsconfig.json ./
-COPY --chown=node:node packages/tsconfig ./tsconfig/
+#  tsconfig.json (base, from root project folder..)
+COPY --chown=node:node tsconfig.json.v2 ./tsconfig.json
+#  .. and 'extends', from /apps/api
+COPY --chown=node:node /apps/api/tsconfig.json.v2 ./apps/api/tsconfig.json
 
 # WORKDIR /usr/src/apps/api/
-# COPY --chown=node:node apps/api ./apps/api
-RUN npx -w api prisma generate
-# build common-kit
-RUN npm -w common-kit run build
-
 # In order to run `npm run build` we need access to the Nest CLI.
 # The Nest CLI is a dev dependency,
 # In the previous development stage we ran `npm ci` which installed all dependencies.
 # So we can copy over the node_modules directory from the development image into this build image.
-COPY --chown=node:node --from=development /usr/src/apps/api/node_modules ./apps/api/node_modules
-COPY --chown=node:node apps/api apps/api
+COPY --chown=node:node apps/api ./apps/api
 
-WORKDIR /usr/src/apps/api
-# RUN npm run build # commenting out to avoid dependencies on a sync'd schema
-## https://docs.nestjs.com/cli/usages to avoid having to copy tsconfig.json twice!
+# Required for `prisma-nestjs-graphql`
+COPY --chown=node:node --from=development /usr/src/node_modules ./node_modules
+# # Required for ``
+# COPY --chown=node:node --from=development /usr/src/apps/api/node_modules ./apps/api/node_modules
+RUN npx -w api prisma generate
 
-# # nexe line will break due to prepare script with `husky` in `<rootFolder/package.json`
-# # https://stackoverflow.com/questions/67063993/sh-husky-command-not-found
-ENV NODE_ENV production
+# Required for `vite`
+COPY --chown=node:node --from=development /usr/src/packages/common-kit/node_modules ./packages/common-kit/node_modules
+RUN npm -w common-kit run build
 
 # Running `npm ci` removes the existing node_modules directory.
 # Passing in --only=production ensures that only the production dependencies are installed.
@@ -79,7 +87,6 @@ ENV NODE_ENV production
 # why `--ignore-scripts` is required in psa-job-store
 RUN npm ci --only=production --ignore-scripts && npm cache clean --force
 USER node
-
 
 ###################
 # PRODUCTION

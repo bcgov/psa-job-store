@@ -20,6 +20,9 @@ coverage
 **/README.md
 **/tslint.json
 **/nodemon.json
+# Additional variants 
+**/Dockerfile*
+**/docker-compose.yaml
 
 # Next.js
 **/.next

@@ -32,28 +32,28 @@ services:
       # image: pjs-frontend:18-alpine
       dockerfile: apps/api/Dockerfile.v2
       target: development
-      args:
-        - POSTGRES_DB=${POSTGRES_DB}
-        - POSTGRES_USER=${POSTGRES_USER}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        - DATABASE_URL=${DATABASE_URL}
-        - KEYCLOAK_REALM_URL=${KEYCLOAK_REALM_URL}
-        - KEYCLOAK_CLIENT_ID_PRIVATE=${KEYCLOAK_CLIENT_ID_PRIVATE}
-        - KEYCLOAK_CLIENT_ID_PUBLIC=${KEYCLOAK_CLIENT_ID_PUBLIC}
-        - KEYCLOAK_REDIRECT_URL=${VITE_KEYCLOAK_REDIRECT_URL}
-        - BI_URL=${BI_URL}
-        - BI_USERNAME=${BI_USERNAME}
-        - BI_PASSWORD=${BI_PASSWORD}
-        - ELASTIC_NODE=${ELASTIC_NODE}
-        - ELASTIC_USERNAME=${ELASTIC_USERNAME}
-        - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-        - PEOPLESOFT_URL=${PEOPLESOFT_URL}
-        - PEOPLESOFT_USERNAME=${PEOPLESOFT_USERNAME}
-        - PEOPLESOFT_PASSWORD=${PEOPLESOFT_PASSWORD}
-        - CRM_APPLICATION_CONTEXT=${CRM_APPLICATION_CONTEXT}
-        - CRM_PASSWORD=${CRM_PASSWORD}
-        - CRM_URL=${CRM_URL}
-        - CRM_USERNAME=${CRM_USERNAME}
+      # args:
+      #   - POSTGRES_DB=${POSTGRES_DB}
+      #   - POSTGRES_USER=${POSTGRES_USER}
+      #   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      #   - DATABASE_URL=${DATABASE_URL}
+      #   - KEYCLOAK_REALM_URL=${KEYCLOAK_REALM_URL}
+      #   - KEYCLOAK_CLIENT_ID_PRIVATE=${KEYCLOAK_CLIENT_ID_PRIVATE}
+      #   - KEYCLOAK_CLIENT_ID_PUBLIC=${KEYCLOAK_CLIENT_ID_PUBLIC}
+      #   - KEYCLOAK_REDIRECT_URL=${VITE_KEYCLOAK_REDIRECT_URL}
+      #   - BI_URL=${BI_URL}
+      #   - BI_USERNAME=${BI_USERNAME}
+      #   - BI_PASSWORD=${BI_PASSWORD}
+      #   - ELASTIC_NODE=${ELASTIC_NODE}
+      #   - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+      #   - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      #   - PEOPLESOFT_URL=${PEOPLESOFT_URL}
+      #   - PEOPLESOFT_USERNAME=${PEOPLESOFT_USERNAME}
+      #   - PEOPLESOFT_PASSWORD=${PEOPLESOFT_PASSWORD}
+      #   - CRM_APPLICATION_CONTEXT=${CRM_APPLICATION_CONTEXT}
+      #   - CRM_PASSWORD=${CRM_PASSWORD}
+      #   - CRM_URL=${CRM_URL}
+      #   - CRM_USERNAME=${CRM_USERNAME}
     command: npm -w api run start:dev
     ports:
       - 4000:4000
@@ -61,8 +61,8 @@ services:
       db:
         condition: service_started
     volumes:
-      - ./apps/api/src:/usr/src/app/src:cached
-      - ./apps/api/prisma:/usr/src/app/prisma
+      - ./apps/api/src:/usr/src/apps/api/src:cached
+      - ./apps/api/prisma:/usr/src/apps/api/prisma
       - api-nodemodules:/node_modules
 
   # # http://localhost:5173/
@@ -78,7 +78,7 @@ services:
   #   ports:
   #     - 5173:5173
   #   volumes:
-  #     - ./src:/usr/src/app/src:cached
+  #     - ./src:/usr/src/apps/src:cached
 
 
   cypress:
@@ -147,8 +147,8 @@ services:
 #       db:
 #         condition: service_started
 #     volumes:
-#       - ./apps/api/src:/usr/src/app/src:cached
-#       - ./apps/api/prisma:/usr/src/app/prisma
+#       - ./apps/api/src:/usr/src/apps/src:cached
+#       - ./apps/api/prisma:/usr/src/apps/prisma
 #       - api-nodemodules:/node_modules
 #     networks:
 #       - psa-job-store
@@ -168,7 +168,7 @@ services:
 #     ports:
 #       - 5173:5173
 #     volumes:
-#       - ./src:/usr/src/app/src:cached
+#       - ./src:/usr/src/apps/src:cached
 #     networks:
 #       - psa-job-store
 
