@@ -66,7 +66,10 @@ export const DynamicOrgChart = ({
   const [edges, setEdges] = useEdgesState([]);
   const [nodes, setNodes] = useNodesState([]);
 
-  const getSearchResults = useCallback(() => nodes.filter((node) => node.data.isSearchResult === true), [nodes]);
+  const getSearchResults = useCallback(
+    () => (searchTerm ? nodes.filter((node) => node.data.isSearchResult === true) : undefined),
+    [nodes],
+  );
 
   useEffect(() => {
     setIsDirty(false);

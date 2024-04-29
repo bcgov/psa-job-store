@@ -1,7 +1,10 @@
 import { TreeSelect, Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import { useGetDepartmentsWithOrganizationQuery } from '../../../redux/services/graphql-api/department.api';
-import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
+import {
+  DepartmentModel,
+  useGetDepartmentsWithOrganizationQuery,
+} from '../../../redux/services/graphql-api/department.api';
+import { OrganizationModel, useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
 
 const { Text } = Typography;
 
@@ -17,12 +20,13 @@ export const DepartmentFilter = ({ setDepartmentId, departmentId, loading }: Dep
   const [treeData, setTreeData] = useState<React.ComponentProps<typeof TreeSelect>['treeData']>([]);
 
   useEffect(() => {
-    const ministries = ministryData?.organizations || [];
-    const departments = departmentData?.departments || [];
+    const ministries: OrganizationModel[] = JSON.parse(JSON.stringify(ministryData?.organizations || []));
+    const departments: DepartmentModel[] = JSON.parse(JSON.stringify(departmentData?.departments || []));
 
     if (ministries.length > 0 && departments.length > 0) {
       const treeData = ministries.map((ministry) => ({
         children: departments
+          .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
           .filter((department) => department.organization_id === ministry.id)
           .map(({ id, name }) => ({
             filterString: `${id} ${name}`,

@@ -6,7 +6,7 @@ export interface PositionSearchProps {
   setSearchTerm: React.Dispatch<React.SetStateAction<string | undefined>>;
   disabled?: boolean;
   searchTerm?: string | undefined;
-  searchResults: (() => Node[]) | Node[];
+  searchResults: (() => Node[]) | Node[] | undefined;
 }
 
 export const PositionSearch = ({
@@ -28,8 +28,12 @@ export const PositionSearch = ({
         setSearchTermFromProps(source?.source === 'clear' ? undefined : (value ?? '').length > 0 ? value : undefined)
       }
       addonAfter={
-        searchResults.length > 0 && (
-          <Tag color={searchTerm != null && searchResults.length === 0 ? 'red' : 'green'}>
+        searchTermFromProps != null &&
+        searchResults != null && (
+          <Tag
+            color={searchTermFromProps != null && searchResults.length === 0 ? 'red' : 'green'}
+            style={{ marginLeft: '0.5rem', marginRight: 0 }}
+          >
             {searchResults.length === 1 ? '1 result' : `${searchResults.length} results`}
           </Tag>
         )
