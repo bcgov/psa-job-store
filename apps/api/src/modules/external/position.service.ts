@@ -62,7 +62,6 @@ export class PositionService {
         job_profile_number: raw['A.TGB_E_CLASS'],
         effective_status: raw['A.EFF_STATUS'],
         effective_date: raw['A.EFFDT'],
-        A_UPDATE_INCUMBENTS: raw['A.UPDATE_INCUMBENTS'],
       };
     }
 
@@ -75,8 +74,6 @@ export class PositionService {
     if (!positionDetails) throw AlexandriaError(`Position ${positionNumber} not found`);
 
     let employeesForPositions = new Map<string, Employee[]>();
-
-    // check if position has encumbent by checking UPDATE_INCUMBENTS:Y flag
 
     employeesForPositions = await this.peoplesoftService.getEmployeesForPositions([positionNumber]);
 
@@ -91,13 +88,12 @@ export class PositionService {
           positionNumber: positionNumber,
           positionDescription: positionDetails.title,
           departmentName: positionDetails.department.name,
-          employeeName: positionDetails.A_UPDATE_INCUMBENTS == 'Y' ? employeeDetail?.NAME_DISPLAY ?? '' : null,
+          employeeName: employeeDetail?.NAME_DISPLAY,
           classification: positionDetails.classification.name,
           ministry: positionDetails.organization.name,
           status: employee.status,
 
-          employeeId:
-            positionDetails.A_UPDATE_INCUMBENTS == 'Y' ? (extraInfo ? employeeDetail?.EMPLID ?? '' : '') : null,
+          employeeId: extraInfo ? employeeDetail?.EMPLID ?? '' : '',
           departmentId: extraInfo ? positionDetails.department_id : '',
           organizationId: extraInfo ? positionDetails.organization_id : '',
           classificationId: extraInfo ? positionDetails.classification_id : '',

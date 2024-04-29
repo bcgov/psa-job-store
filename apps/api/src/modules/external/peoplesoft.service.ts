@@ -286,7 +286,6 @@ export class PeoplesoftService {
   }
 
   async getEmployeesForPositions(positions: string[]) {
-    // NOTE: before running this function, check that position is encumbered by checking positionDetails.A_UPDATE_INCUMBENTS !== 'Y' flag
     const requests: any[] = [];
 
     const positionEmployeesMap: Map<string, Employee[]> = new Map();
