@@ -1,0 +1,17 @@
+name: Trigger Deploy
+description: 'Trigger Deploy'
+inputs:
+  openshift-server:
+    description: 'OpenShift server'
+    required: true
+  api-token:
+    description: 'OpenShift service account API token'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Rebuild the image streams
+      run: |
+        chmod +x ./.github/actions/trigger-deploy/restart_imagestreams.sh
+        ./.github/actions/trigger-deploy/restart_imagestreams.sh "${{ inputs.openshift-server }}" "${{ inputs.api-token }}"
+      shell: bash
