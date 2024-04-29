@@ -1280,9 +1280,6 @@ export class PositionRequestApiService {
         ).get(positionRequest.additional_info_excluded_mgr_position_number);
         const employeeId = employees.length > 0 ? employees[0].id : null;
 
-        // todo: if position is unencumbered, do not create position
-        // check if A.UPDATE_INCUMBENTS is "Y" on position
-
         data = {
           BUSINESS_UNIT: paylist_department.organization.id,
           DEPTID: paylist_department.id,
