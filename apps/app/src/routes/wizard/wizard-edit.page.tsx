@@ -151,7 +151,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       return message;
     });
 
-    if (errors.length) {
+    if (errors.length && action == 'next') {
       Modal.error({
         title: 'Errors',
         content: (

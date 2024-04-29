@@ -3,15 +3,7 @@
 import { ArrowLeftOutlined, ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
 import { Alert, Descriptions, DescriptionsProps, Grid, Tooltip, Typography } from 'antd';
 import { Type } from 'class-transformer';
-import {
-  IsNotEmpty,
-  Length,
-  ValidateNested,
-  ValidationOptions,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
-  registerDecorator,
-} from 'class-validator';
+import { IsNotEmpty, Length, ValidateNested, ValidationOptions, registerDecorator } from 'class-validator';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
@@ -57,12 +49,12 @@ export interface ValueString {
 }
 
 export class TitleField extends TrackedFieldArrayItem {
-  @Length(5, 500, { message: 'Title must be between 5 and 500 characters.' })
+  @Length(5, 200, { message: 'Title must be between 5 and 200 characters.' })
   declare value: string;
 }
 
 export class OverviewField extends TrackedFieldArrayItem {
-  @Length(5, 500, { message: 'Overview must be between 5 and 500 characters.' })
+  @Length(5, 200, { message: 'Overview must be between 5 and 200 characters.' })
   declare value: string;
 }
 
@@ -86,29 +78,53 @@ function getItemValue(item: string | TrackedFieldArrayItem | AccountabilitiesMod
   }
 }
 
-@ValidatorConstraint({ async: false })
-class AllDisabledConstraint implements ValidatorConstraintInterface {
-  validate(array: (TrackedFieldArrayItem | string | AccountabilitiesModel)[]) {
-    return !array?.every((item) => {
-      // Check if the item is disabled or empty
-      const itemValue = getItemValue(item);
-      return typeof item === 'object' && (item.disabled === true || itemValue.length == 0);
-    });
-  }
-
-  defaultMessage() {
-    return 'All items must be disabled.';
-  }
-}
-
-function AllDisabled(validationOptions?: ValidationOptions) {
+function BehaviouralCompetencyValidator(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
+      name: 'behaviouralCompetencyValidator',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [],
-      validator: AllDisabledConstraint,
+      validator: {
+        validate(value: any[]) {
+          console.log('beh comp validate: ', value);
+          return value.length >= 3 && value.length <= 10;
+        },
+        defaultMessage(): string {
+          return 'There must be at least one related experience.';
+        },
+      },
+    });
+  };
+}
+
+function AtLeastOneItem(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'atLeastOneRelatedExperience',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any[]) {
+          // console.log(
+          //   'validate: ',
+          //   propertyName,
+          //   value,
+          //   value.some(
+          //     (item) =>
+          //       !item.disabled && ((item.text && item?.text.trim() != '') || (item.value && item?.value.trim() != '')),
+          //   ),
+          // );
+          return value.some(
+            (item) =>
+              !item.disabled && ((item.text && item?.text.trim() != '') || (item.value && item?.value.trim() != '')),
+          );
+        },
+        defaultMessage(): string {
+          return 'There must be at least one related experience.';
+        },
+      },
     });
   };
 }
@@ -138,18 +154,21 @@ export class JobProfileValidationModel {
   @Type(() => ProgramOverviewField)
   program_overview: ProgramOverviewField | string;
 
-  @AllDisabled({ message: 'There must be at least one accountability.' })
+  // @AllDisabled({ message: 'There must be at least one accountability.' })
+  @AtLeastOneItem({ message: 'There must be at least one accountability.' })
   accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   optional_accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @AllDisabled({ message: 'There must be at least one education requirement.' })
+  @AtLeastOneItem({ message: 'There must be at least one education requirement.' })
   education: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  // @AllDisabled({ message: 'There must be at least one job experience requirement.' })
+  @AtLeastOneItem({ message: 'There must be at least one related experience.' })
   job_experience: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+
   security_screenings: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
+  @BehaviouralCompetencyValidator({ message: 'The profile should have between 3 and 10 behavioural competencies' })
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 
   professional_registration: (TrackedFieldArrayItem | ValueString)[];
