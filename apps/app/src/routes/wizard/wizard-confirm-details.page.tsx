@@ -213,7 +213,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
     // Check if noPositions is true and excludedManagerPositionNumber should be filled
     const formValues = getValues();
-    skipValidation = true;
+    // skipValidation = true;
     if (
       !skipValidation &&
       ((noPositions && formValues.excludedManagerPositionNumber) ||
