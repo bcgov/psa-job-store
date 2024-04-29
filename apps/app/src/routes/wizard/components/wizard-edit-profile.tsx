@@ -1441,7 +1441,8 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
-        setEditedMinReqFields((prev) => ({ ...prev, [index]: true }));
+        if ((currentValues[index] as AccountabilitiesModel).is_significant)
+          setEditedMinReqFields((prev) => ({ ...prev, [index]: true }));
         education_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
@@ -1654,7 +1655,9 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
-        setEditedRelWorkFields((prev) => ({ ...prev, [index]: true }));
+        if ((currentValues[index] as AccountabilitiesModel).is_significant)
+          setEditedRelWorkFields((prev) => ({ ...prev, [index]: true }));
+
         job_experience_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
