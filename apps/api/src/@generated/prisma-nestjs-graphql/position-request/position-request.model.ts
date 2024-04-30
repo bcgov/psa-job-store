@@ -88,6 +88,9 @@ export class PositionRequest {
   @Field(() => String, { nullable: true })
   additional_info_comments!: string | null;
 
+  @Field(() => GraphQLJSON, { nullable: true })
+  additional_info!: any | null;
+
   @Field(() => JobProfile, { nullable: true })
   parent_job_profile?: JobProfile | null;
 

@@ -73,6 +73,9 @@ export class PositionRequestCreateWithoutParent_job_profileInput {
   @Field(() => String, { nullable: true })
   additional_info_comments?: string;
 
+  @Field(() => GraphQLJSON, { nullable: true })
+  additional_info?: any;
+
   @Field(() => DepartmentCreateNestedOneWithoutPositionRequestInput, { nullable: false })
   department!: DepartmentCreateNestedOneWithoutPositionRequestInput;
 

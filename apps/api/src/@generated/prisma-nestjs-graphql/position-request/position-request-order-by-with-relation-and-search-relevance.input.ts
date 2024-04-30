@@ -89,6 +89,9 @@ export class PositionRequestOrderByWithRelationAndSearchRelevanceInput {
   @Field(() => SortOrderInput, { nullable: true })
   additional_info_comments?: SortOrderInput;
 
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info?: SortOrderInput;
+
   @Field(() => JobProfileOrderByWithRelationAndSearchRelevanceInput, { nullable: true })
   parent_job_profile?: JobProfileOrderByWithRelationAndSearchRelevanceInput;
 
