@@ -28,6 +28,7 @@ export enum PositionRequestScalarFieldEnum {
   additional_info_department_id = 'additional_info_department_id',
   additional_info_excluded_mgr_position_number = 'additional_info_excluded_mgr_position_number',
   additional_info_comments = 'additional_info_comments',
+  additional_info = 'additional_info',
 }
 
 registerEnumType(PositionRequestScalarFieldEnum, { name: 'PositionRequestScalarFieldEnum', description: undefined });

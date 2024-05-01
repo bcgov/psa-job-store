@@ -85,7 +85,7 @@ export const TotalCompApprovedRequestPage = () => {
       label: 'Reports to',
       children: (
         <div>
-          Hill, Nathan CITZ:EX <br />
+          TEST DATA Hill, Nathan CITZ:EX <br />
           Sr. Director, Digital Portfolio, Band 4 <br />
           Position No.: 00012345
         </div>
@@ -97,7 +97,7 @@ export const TotalCompApprovedRequestPage = () => {
       label: 'First level excluded manager for this position',
       children: (
         <div>
-          Hill, Nathan CITZ:EX <br />
+          TEST DATA Hill, Nathan CITZ:EX <br />
           Sr. Director, Digital Portfolio, Band 4 <br />
           Position No.: 00012345
         </div>
@@ -107,7 +107,19 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'payListDepartmentIdNumber',
       label: 'Department ID',
-      children: <div>{data?.positionRequest?.additional_info_department_id}</div>,
+      children: <div>{data?.positionRequest?.additional_info?.department_id}</div>,
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
+    },
+    {
+      key: 'branch',
+      label: 'Branch',
+      children: <div>{data?.positionRequest?.additional_info?.branch}</div>,
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
+    },
+    {
+      key: 'division',
+      label: 'Division',
+      children: <div>{data?.positionRequest?.additional_info?.division}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -269,7 +281,6 @@ export const TotalCompApprovedRequestPage = () => {
       label: 'Organization Chart',
       children: (
         <div style={{ height: '100%' }}>
-          {/* <OrgChartWrapped selectedDepartment={data?.positionRequest?.additional_info_department_id ?? null} /> */}
           <OrgChart
             type={OrgChartType.READONLY}
             departmentId={data?.positionRequest?.department_id ?? ''}

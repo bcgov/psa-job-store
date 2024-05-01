@@ -97,4 +97,7 @@ export class PositionRequestScalarWhereWithAggregatesInput {
 
   @Field(() => StringWithAggregatesFilter, { nullable: true })
   additional_info_comments?: StringWithAggregatesFilter;
+
+  @Field(() => JsonWithAggregatesFilter, { nullable: true })
+  additional_info?: JsonWithAggregatesFilter;
 }

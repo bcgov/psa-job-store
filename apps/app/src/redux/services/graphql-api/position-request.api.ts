@@ -54,12 +54,18 @@ export interface GetPositionRequestResponseContent {
     number: number;
   };
 
-  additional_info_work_location_id?: string;
-  additional_info_department_id?: string;
-  additional_info_excluded_mgr_position_number?: string;
-  additional_info_comments?: string;
+  additional_info?: AdditionalInfo;
 
   crm_id?: string;
+}
+
+export interface AdditionalInfo {
+  work_location_id?: string;
+  department_id?: string;
+  excluded_mgr_position_number?: string;
+  comments?: string;
+  branch?: string;
+  division?: string;
 }
 
 export interface GetPositionRequestResponse {
@@ -117,19 +123,7 @@ export interface UpdatePositionRequestInput {
   classification_id?: string;
   submission_id?: string;
   status?: string;
-
-  workLocation?: {
-    connect: {
-      id: string;
-    };
-  };
-  paylist_department?: {
-    connect: {
-      id: string | null;
-    };
-  };
-  additional_info_excluded_mgr_position_number?: string | null;
-  additional_info_comments?: string | null;
+  additional_info?: AdditionalInfo | null;
   parent_job_profile?: {
     connect: {
       id: number | null;
@@ -284,10 +278,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   parent_job_profile {
                     number
                   }
-                  additional_info_work_location_id
-                  additional_info_department_id
-                  additional_info_excluded_mgr_position_number
-                  additional_info_comments
+                  additional_info
                   crm_id
                   shareUUID
               }
@@ -327,10 +318,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   parent_job_profile {
                     number
                   }
-                  additional_info_work_location_id
-                  additional_info_department_id
-                  additional_info_excluded_mgr_position_number
-                  additional_info_comments
+                  additional_info
                   crm_id
               }
           }

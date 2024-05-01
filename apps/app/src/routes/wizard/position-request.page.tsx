@@ -10,6 +10,7 @@ import LoadingSpinnerWithMessage from '../../components/app/common/components/lo
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import {
+  GetPositionRequestResponse,
   GetPositionRequestResponseContent,
   useGetPositionRequestQuery,
   useGetSharedPositionRequestQuery,
@@ -256,7 +257,7 @@ export const PositionRequestPage = () => {
       label: 'Job details',
       children: (
         <ServiceRequestDetails
-          positionRequestData={{ positionRequest: unwrappedPositionRequestData }}
+          positionRequestData={{ positionRequest: unwrappedPositionRequestData } as GetPositionRequestResponse}
         ></ServiceRequestDetails>
       ),
     },
@@ -502,7 +503,10 @@ export const PositionRequestPage = () => {
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
-                              <DownloadJobProfileComponent jobProfile={unwrappedPositionRequestData?.profile_json}>
+                              <DownloadJobProfileComponent
+                                jobProfile={unwrappedPositionRequestData?.profile_json}
+                                useModal={true}
+                              >
                                 <a href="#">Download</a>
                               </DownloadJobProfileComponent>
                             </Descriptions.Item>

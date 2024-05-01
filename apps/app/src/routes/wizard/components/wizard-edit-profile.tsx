@@ -899,6 +899,7 @@ const WizardEditProfile = forwardRef(
           provisos: initialProvisosFieldsValue,
           optional_requirements: initialOptionalRequirementsFieldsValue,
         });
+        trigger();
       }
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1057,9 +1058,17 @@ const WizardEditProfile = forwardRef(
         return getValues();
       },
       getFormErrors: () => {
-        return formState.errors;
+        return formErrors;
       },
     }));
+
+    // useState to hold errors
+    const [formErrors, setFormErrors] = useState<any>({});
+
+    useEffect(() => {
+      setFormErrors(formState.errors);
+    }, [formState.errors]);
+    // console.log('formState.errors: ', formState.errors);
 
     // FOCUS ALERTS
     // when user focuses on required accountabilities and minimum requirements fields, show an alert once
@@ -1085,6 +1094,7 @@ const WizardEditProfile = forwardRef(
             // If confirmed, remove the item
             setEditedAccReqFields((prev) => ({ ...prev, [index]: false }));
             acc_req_remove(index);
+            trigger();
           },
         });
       } else {
@@ -1441,7 +1451,8 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
-        setEditedMinReqFields((prev) => ({ ...prev, [index]: true }));
+        if ((currentValues[index] as AccountabilitiesModel).is_significant)
+          setEditedMinReqFields((prev) => ({ ...prev, [index]: true }));
         education_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
@@ -1470,10 +1481,10 @@ const WizardEditProfile = forwardRef(
       currentValues[index].value = originalMinReqFields[index]?.value;
       // acc_req_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       education_update(index, {
-        text: originalAccReqFields[index]?.text,
+        text: originalMinReqFields[index]?.text,
         disabled: false,
-        is_readonly: originalAccReqFields[index]?.is_readonly,
-        is_significant: originalAccReqFields[index]?.is_significant,
+        is_readonly: originalMinReqFields[index]?.is_readonly,
+        is_significant: originalMinReqFields[index]?.is_significant,
       });
     };
 
@@ -1483,7 +1494,8 @@ const WizardEditProfile = forwardRef(
       // const isEdited = editedMinReqFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
-        setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.text }));
+        if (field.is_significant)
+          setEditedMinReqFields((prev) => ({ ...prev, [index]: updatedValue !== originalMinReqFields[index]?.text }));
         trigger();
       }, 300);
 
@@ -1550,7 +1562,7 @@ const WizardEditProfile = forwardRef(
                       onChange={(event) => {
                         onChange(event);
                         const updatedValue = event.target.value;
-                        if (field.is_significant) handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
+                        handleFieldChange(index, updatedValue); // todo: find a way to eliminate this
                       }}
                       onFocus={() =>
                         //AL-619
@@ -1654,7 +1666,9 @@ const WizardEditProfile = forwardRef(
         });
       } else {
         // If it's an original field, mark as disabled
-        setEditedRelWorkFields((prev) => ({ ...prev, [index]: true }));
+        if ((currentValues[index] as AccountabilitiesModel).is_significant)
+          setEditedRelWorkFields((prev) => ({ ...prev, [index]: true }));
+
         job_experience_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
       }
       trigger();
@@ -1694,7 +1708,8 @@ const WizardEditProfile = forwardRef(
       const isEdited = editedRelWorkFields[index] || field.isCustom;
 
       const handleFieldChange = debounce((index, updatedValue) => {
-        setEditedRelWorkFields((prev) => ({ ...prev, [index]: updatedValue !== originalRelWorkFields[index]?.text }));
+        if (field.is_significant)
+          setEditedRelWorkFields((prev) => ({ ...prev, [index]: updatedValue !== originalRelWorkFields[index]?.text }));
         trigger();
       }, 300);
 
@@ -1764,7 +1779,7 @@ const WizardEditProfile = forwardRef(
                       onChange={(event) => {
                         onChange(event);
                         const updatedValue = event.target.value;
-                        if (field.is_significant) handleFieldChange(index, updatedValue);
+                        handleFieldChange(index, updatedValue);
                       }}
                       onFocus={() =>
                         WizardModal(
@@ -2003,13 +2018,14 @@ const WizardEditProfile = forwardRef(
           onOk: () => {
             // If confirmed, remove the item
             professional_registration_remove(index);
+            trigger();
           },
         });
       } else {
         // If it's an original field, mark as disabled
         professional_registration_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+        trigger();
       }
-      trigger();
     };
 
     // Function to add back a removed field
@@ -2360,6 +2376,7 @@ const WizardEditProfile = forwardRef(
           onOk: () => {
             // If confirmed, remove the item
             knowledge_skills_abilities_remove(index);
+            trigger();
           },
         });
       } else {
@@ -2368,14 +2385,15 @@ const WizardEditProfile = forwardRef(
           ...(currentValues[index] as TrackedFieldArrayItem),
           disabled: true,
         });
+        trigger();
       }
-      trigger();
     };
 
     // Function to add back a removed field
     const handleKnowledgeSkillsAbilitiesAddBack = (index: number) => {
       const currentValues = getValues('knowledge_skills_abilities');
       knowledge_skills_abilities_update(index, { ...currentValues[index], disabled: false });
+      trigger();
     };
 
     // Function to handle adding a new field
@@ -2597,13 +2615,21 @@ const WizardEditProfile = forwardRef(
     // TITLE DIFF
 
     const [titleEdited, setTitleEdited] = useState<boolean>(false);
+    const [titleOver30, setTitleOver30] = useState<boolean>(getValues('title.value')?.length > 30);
 
     const renderTitle = (field: any) => {
       if (!field) return null;
 
       const isEdited = titleEdited || field.isCustom;
 
-      const handleFieldChange = (event: any) => {
+      const handleFieldChange = debounce((event: any) => {
+        const updatedValue = event.target.value;
+        setTitleEdited(() => updatedValue !== originalTitle?.value);
+        setTitleOver30(() => updatedValue.length > 30);
+        trigger();
+      }, 300);
+
+      (event: any) => {
         const updatedValue = event.target.value;
         setTitleEdited(() => updatedValue !== originalTitle?.value);
       };
@@ -2621,7 +2647,37 @@ const WizardEditProfile = forwardRef(
             <section aria-label="Job title" role="region">
               <Row justify="start">
                 <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                  <FormItem
+                  <Form.Item
+                    name="confirmation"
+                    validateStatus={formErrors.title?.value || titleOver30 ? 'error' : ''}
+                    help={
+                      formErrors.title?.value?.message
+                        ? formErrors.title.value.message
+                        : titleOver30
+                          ? 'Warning: Job titles over 30 characters will be truncated by PeopleSoft and will appear so in the Organizational Chart.'
+                          : ''
+                    }
+                  >
+                    <Controller
+                      control={control}
+                      name={`title.value`}
+                      render={({ field: { onChange, onBlur, value } }) => (
+                        <Input
+                          data-testid="job-title-input"
+                          placeholder="Ex.: Program Assistant"
+                          aria-label="Job Title"
+                          className={`${isEdited ? 'edited-textarea' : ''}`}
+                          onBlur={onBlur}
+                          value={value}
+                          onChange={(event) => {
+                            handleFieldChange(event);
+                            onChange(event);
+                          }}
+                        />
+                      )}
+                    />
+                  </Form.Item>
+                  {/* <FormItem
                     labelCol={{ span: 24 }}
                     wrapperCol={{ span: 24 }}
                     name="title.value"
@@ -2635,7 +2691,7 @@ const WizardEditProfile = forwardRef(
                       className={`${isEdited ? 'edited-textarea' : ''}`}
                       onChange={handleFieldChange}
                     />
-                  </FormItem>
+                  </FormItem> */}
                   <label className="sr-only" htmlFor="title.value">
                     Job title
                   </label>
@@ -3030,6 +3086,11 @@ const WizardEditProfile = forwardRef(
                             renderItem={renderAccReqFields}
                           />
                         )}
+                        {formErrors['accountabilities'] && (
+                          <div style={{ color: '#ff4d4f' }}>
+                            {formErrors['accountabilities'].message ?? formErrors['accountabilities'].root?.message}
+                          </div>
+                        )}
                         <Button
                           data-testid="add-accountability-button"
                           type="link"
@@ -3138,6 +3199,11 @@ const WizardEditProfile = forwardRef(
                               ariaLabel="Education and work experience"
                             />
                           )}
+                          {formErrors['education'] && (
+                            <div style={{ color: '#ff4d4f' }}>
+                              {formErrors['education'].message ?? formErrors['education'].root?.message}
+                            </div>
+                          )}
                           <Button
                             data-testid="add-education-button"
                             type="link"
@@ -3181,6 +3247,11 @@ const WizardEditProfile = forwardRef(
                               renderItem={renderRelWorkFields}
                               ariaLabel="Related experience"
                             />
+                          )}
+                          {formErrors['job_experience'] && (
+                            <div style={{ color: '#ff4d4f' }}>
+                              {formErrors['job_experience'].message ?? formErrors['job_experience'].root?.message}
+                            </div>
                           )}
                           <Button
                             data-testid="add-job-experience-button"
@@ -3234,6 +3305,12 @@ const WizardEditProfile = forwardRef(
                             renderItem={renderProfessionalRegistrationFields}
                             ariaLabel="Professional registration requirements"
                           />
+                        )}
+                        {formErrors['professional_registration'] && (
+                          <div style={{ color: '#ff4d4f' }}>
+                            {formErrors['professional_registration'].message ??
+                              formErrors['professional_registration'].root?.message}
+                          </div>
                         )}
                         <Button
                           data-testid="add-professional-registration-button"
@@ -3313,6 +3390,12 @@ const WizardEditProfile = forwardRef(
                             ariaLabel="Knowledge, skills and abilities"
                           />
                         )}
+                        {formErrors['knowledge_skills_abilities'] && (
+                          <div style={{ color: '#ff4d4f' }}>
+                            {formErrors['knowledge_skills_abilities'].message ??
+                              formErrors['knowledge_skills_abilities'].root?.message}
+                          </div>
+                        )}
                         <Button
                           data-testid="add-knowledge-skills-ability-button"
                           type="link"
@@ -3384,6 +3467,12 @@ const WizardEditProfile = forwardRef(
                               renderItem={renderSecurityScreeningsFields}
                               ariaLabel="Security screenings"
                             />
+                          )}
+                          {formErrors['security_screenings'] && (
+                            <div style={{ color: '#ff4d4f' }}>
+                              {formErrors['security_screenings'].message ??
+                                formErrors['security_screenings'].root?.message}
+                            </div>
                           )}
                           <Button
                             data-testid="add-security-screening-button"
@@ -3537,7 +3626,6 @@ const WizardEditProfile = forwardRef(
                                   // setRenderKey((prevKey) => prevKey + 1);
                                 }}
                                 style={{
-                                  display: behavioural_competencies_fields.length < 4 ? 'none' : 'block',
                                   marginLeft: '10px',
                                   border: '1px solid',
                                   borderColor: '#d9d9d9',
@@ -3585,6 +3673,13 @@ const WizardEditProfile = forwardRef(
                         </Button> */}
                         {/* )} */}
                       </>
+
+                      {formErrors['behavioural_competencies'] && (
+                        <div style={{ color: '#ff4d4f' }}>
+                          {formErrors['behavioural_competencies'].message ??
+                            formErrors['behavioural_competencies'].root?.message}
+                        </div>
+                      )}
                     </Col>
                   </Row>
                 </section>
