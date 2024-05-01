@@ -93,4 +93,4 @@ jobs:
         uses: ./.github/actions/trigger-deploy
         with:
           openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
-          api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
+          api-token: ${{ secrets.OPENSHIFT_TOOLS_API_TOKEN }}
