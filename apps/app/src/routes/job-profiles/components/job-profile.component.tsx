@@ -129,27 +129,27 @@ function ItemCountValidator(min: number, max: number, label: string, validationO
   };
 }
 
-function AtLeastOneItem(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
-    registerDecorator({
-      name: 'atLeastOneRelatedExperience',
-      target: object.constructor,
-      propertyName: propertyName,
-      options: validationOptions,
-      validator: {
-        validate(value: any[]) {
-          return value.some(
-            (item) =>
-              !item.disabled && ((item.text && item?.text.trim() != '') || (item.value && item?.value.trim() != '')),
-          );
-        },
-        defaultMessage(): string {
-          return 'There must be at least one related experience.';
-        },
-      },
-    });
-  };
-}
+// function AtLeastOneItem(validationOptions?: ValidationOptions) {
+//   return function (object: object, propertyName: string) {
+//     registerDecorator({
+//       name: 'atLeastOneRelatedExperience',
+//       target: object.constructor,
+//       propertyName: propertyName,
+//       options: validationOptions,
+//       validator: {
+//         validate(value: any[]) {
+//           return value.some(
+//             (item) =>
+//               !item.disabled && ((item.text && item?.text.trim() != '') || (item.value && item?.value.trim() != '')),
+//           );
+//         },
+//         defaultMessage(): string {
+//           return 'There must be at least one related experience.';
+//         },
+//       },
+//     });
+//   };
+// }
 
 function MinItemsValidator(min: number, validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
