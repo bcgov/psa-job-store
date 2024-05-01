@@ -1,4 +1,3 @@
-import { useWhatChanged } from '@simbathesailor/use-what-changed';
 import { Col, Row, Space, Spin } from 'antd';
 import { autolayout } from 'common-kit';
 import Fuse from 'fuse.js';
@@ -240,8 +239,6 @@ export const DynamicOrgChart = ({
     setEdges(edges);
     setNodes(nodes);
   }, [isDirty, elements, searchTerm, selectedNodeIds]);
-
-  useWhatChanged([isDirty, elements, searchTerm, selectedNodeIds], 'isDirty, elements, searchTerm, selectedNodeIds');
 
   useEffect(() => {
     const searchResultNodes = nodes.filter((node) => node.data.isSearchResult === true);
