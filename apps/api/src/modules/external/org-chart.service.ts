@@ -20,17 +20,22 @@ export class OrgChartService {
     edgeMap: Map<string, OrgChartEdge>,
     nodeMap: Map<string, OrgChartNode>,
   ) {
+    // Filter out any deleted or frozen positions
+    const filteredPositions = (result?.data?.query?.rows ?? []).filter(
+      (row) => row['A.EFF_STATUS'] === 'Active' && row['A.POSN_STATUS'] !== 'Frozen',
+    );
+
     const classifications = await this.classificationService.getClassifications({});
     const departments = await this.departmentService.getDepartments();
 
-    const positionsWithIncumbentsIds = (result?.data?.query?.rows ?? []).map((row) => row['A.POSITION_NBR']);
+    const positionsWithIncumbentsIds = filteredPositions.map((row) => row['A.POSITION_NBR']);
 
     const employees: Map<string, Employee[]> = await this.peoplesoftService.getEmployeesForPositions(
       process.env.TEST_ENV === 'true' ? ['00054971', '00100306'] : positionsWithIncumbentsIds,
     );
 
     // Loop through response and generate the tree for everyone in the _current department_
-    (result?.data?.query?.rows ?? []).forEach((position) => {
+    filteredPositions.forEach((position) => {
       // In rare cases, positions do _not_ include a value for A.REPORTS_TO, which causes the org chart to crash.
       // This workaround prevents a crash and allows positions to float in space with no reporting relationship
       const reportsTo = position['A.REPORTS_TO'].length > 0 ? position['A.REPORTS_TO'] : '-1';
