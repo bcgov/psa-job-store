@@ -3,13 +3,11 @@ import { Card, Col, Descriptions, Row } from 'antd';
 import LoadingComponent from '../../../components/app/common/components/loading.component';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
 import { useGetLocationQuery } from '../../../redux/services/graphql-api/location.api';
-import { GetPositionRequestResponseContent } from '../../../redux/services/graphql-api/position-request.api';
+import { GetPositionRequestResponse } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
 
 type ServiceRequestDetailsProps = {
-  positionRequestData: {
-    positionRequest: GetPositionRequestResponseContent | null;
-  };
+  positionRequestData: GetPositionRequestResponse;
 };
 
 export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ positionRequestData }) => {
