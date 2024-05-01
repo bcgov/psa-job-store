@@ -1094,6 +1094,7 @@ const WizardEditProfile = forwardRef(
             // If confirmed, remove the item
             setEditedAccReqFields((prev) => ({ ...prev, [index]: false }));
             acc_req_remove(index);
+            trigger();
           },
         });
       } else {
@@ -2017,13 +2018,14 @@ const WizardEditProfile = forwardRef(
           onOk: () => {
             // If confirmed, remove the item
             professional_registration_remove(index);
+            trigger();
           },
         });
       } else {
         // If it's an original field, mark as disabled
         professional_registration_update(index, { ...(currentValues[index] as TrackedFieldArrayItem), disabled: true });
+        trigger();
       }
-      trigger();
     };
 
     // Function to add back a removed field
@@ -2374,6 +2376,7 @@ const WizardEditProfile = forwardRef(
           onOk: () => {
             // If confirmed, remove the item
             knowledge_skills_abilities_remove(index);
+            trigger();
           },
         });
       } else {
@@ -2382,14 +2385,15 @@ const WizardEditProfile = forwardRef(
           ...(currentValues[index] as TrackedFieldArrayItem),
           disabled: true,
         });
+        trigger();
       }
-      trigger();
     };
 
     // Function to add back a removed field
     const handleKnowledgeSkillsAbilitiesAddBack = (index: number) => {
       const currentValues = getValues('knowledge_skills_abilities');
       knowledge_skills_abilities_update(index, { ...currentValues[index], disabled: false });
+      trigger();
     };
 
     // Function to handle adding a new field
@@ -3302,6 +3306,12 @@ const WizardEditProfile = forwardRef(
                             ariaLabel="Professional registration requirements"
                           />
                         )}
+                        {formErrors['professional_registration'] && (
+                          <div style={{ color: '#ff4d4f' }}>
+                            {formErrors['professional_registration'].message ??
+                              formErrors['professional_registration'].root?.message}
+                          </div>
+                        )}
                         <Button
                           data-testid="add-professional-registration-button"
                           type="link"
@@ -3380,6 +3390,12 @@ const WizardEditProfile = forwardRef(
                             ariaLabel="Knowledge, skills and abilities"
                           />
                         )}
+                        {formErrors['knowledge_skills_abilities'] && (
+                          <div style={{ color: '#ff4d4f' }}>
+                            {formErrors['knowledge_skills_abilities'].message ??
+                              formErrors['knowledge_skills_abilities'].root?.message}
+                          </div>
+                        )}
                         <Button
                           data-testid="add-knowledge-skills-ability-button"
                           type="link"
@@ -3451,6 +3467,12 @@ const WizardEditProfile = forwardRef(
                               renderItem={renderSecurityScreeningsFields}
                               ariaLabel="Security screenings"
                             />
+                          )}
+                          {formErrors['security_screenings'] && (
+                            <div style={{ color: '#ff4d4f' }}>
+                              {formErrors['security_screenings'].message ??
+                                formErrors['security_screenings'].root?.message}
+                            </div>
                           )}
                           <Button
                             data-testid="add-security-screening-button"

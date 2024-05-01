@@ -3,7 +3,14 @@
 import { ArrowLeftOutlined, ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
 import { Alert, Descriptions, DescriptionsProps, Grid, Tooltip, Typography } from 'antd';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, Length, ValidateNested, ValidationOptions, registerDecorator } from 'class-validator';
+import {
+  IsNotEmpty,
+  Length,
+  ValidateNested,
+  ValidationArguments,
+  ValidationOptions,
+  registerDecorator,
+} from 'class-validator';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
@@ -87,7 +94,6 @@ function BehaviouralCompetencyValidator(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any[]) {
-          console.log('beh comp validate: ', value);
           return value.length >= 3 && value.length <= 10;
         },
         defaultMessage(): string {
@@ -98,33 +104,104 @@ function BehaviouralCompetencyValidator(validationOptions?: ValidationOptions) {
   };
 }
 
-function AtLeastOneItem(validationOptions?: ValidationOptions) {
+function ItemCountValidator(min: number, max: number, label: string, validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
-      name: 'atLeastOneRelatedExperience',
+      name: 'itemCountValidator',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any[]) {
-          // console.log(
-          //   'validate: ',
-          //   propertyName,
-          //   value,
-          //   value.some(
-          //     (item) =>
-          //       !item.disabled && ((item.text && item?.text.trim() != '') || (item.value && item?.value.trim() != '')),
-          //   ),
-          // );
-          return value.some(
+          const validItems = value.filter(
             (item) =>
-              !item.disabled && ((item.text && item?.text.trim() != '') || (item.value && item?.value.trim() != '')),
+              !item.disabled && ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
           );
+          return validItems.length >= min && validItems.length <= max;
         },
-        defaultMessage(): string {
-          return 'There must be at least one related experience.';
+        defaultMessage(args: ValidationArguments): string {
+          const [relatedMin, relatedMax, relatedLabel] = args.constraints;
+          return `There should be between ${relatedMin} and ${relatedMax} ${relatedLabel}.`;
         },
       },
+      constraints: [min, max, label],
+    });
+  };
+}
+
+// function AtLeastOneItem(validationOptions?: ValidationOptions) {
+//   return function (object: object, propertyName: string) {
+//     registerDecorator({
+//       name: 'atLeastOneRelatedExperience',
+//       target: object.constructor,
+//       propertyName: propertyName,
+//       options: validationOptions,
+//       validator: {
+//         validate(value: any[]) {
+//           return value.some(
+//             (item) =>
+//               !item.disabled && ((item.text && item?.text.trim() != '') || (item.value && item?.value.trim() != '')),
+//           );
+//         },
+//         defaultMessage(): string {
+//           return 'There must be at least one related experience.';
+//         },
+//       },
+//     });
+//   };
+// }
+
+function MinItemsValidator(min: number, validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'minItemsValidator',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any[]) {
+          const validItems = value.filter(
+            (item) =>
+              !item.disabled && ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
+          );
+          return validItems.length >= min;
+        },
+        defaultMessage(args: ValidationArguments): string {
+          const [relatedMin] = args.constraints;
+          return `There must be at least ${relatedMin} ${args.property}.`;
+        },
+      },
+      constraints: [min],
+    });
+  };
+}
+
+function CustomItemCountValidator(min: number, max: number, label: string, validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'customItemCountValidator',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any[]) {
+          const defaultFields = value.filter((item) => !item.isCustom);
+          if (defaultFields.length === 0) {
+            return true; // No default items, so minimum count is 0
+          }
+
+          const validItems = value.filter(
+            (item) =>
+              !item.disabled && ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
+          );
+          return validItems.length >= min && validItems.length <= max;
+        },
+        defaultMessage(args: ValidationArguments): string {
+          const [relatedMin, relatedMax, relatedLabel] = args.constraints;
+          return `There should be between ${relatedMin} and ${relatedMax} custom ${relatedLabel}.`;
+        },
+      },
+      constraints: [min, max, label],
     });
   };
 }
@@ -155,24 +232,37 @@ export class JobProfileValidationModel {
   program_overview: ProgramOverviewField | string;
 
   // @AllDisabled({ message: 'There must be at least one accountability.' })
-  @AtLeastOneItem({ message: 'There must be at least one accountability.' })
+  @ItemCountValidator(5, 30, 'accountabilities', {
+    message: 'There should be between $constraint1 and $constraint2 $constraint3.',
+  })
   accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   optional_accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @AtLeastOneItem({ message: 'There must be at least one education requirement.' })
+  @MinItemsValidator(2, { message: 'There must be at least 2 education or work experience requirements.' })
   education: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @AtLeastOneItem({ message: 'There must be at least one related experience.' })
+  @MinItemsValidator(2, { message: 'There must be at least 2 related work experience requirements.' })
   job_experience: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
+  @ItemCountValidator(1, 10, 'security screenings', {
+    message: 'There should be between $constraint1 and $constraint2 $constraint3.',
+  })
   security_screenings: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   @BehaviouralCompetencyValidator({ message: 'The profile should have between 3 and 10 behavioural competencies' })
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 
+  @CustomItemCountValidator(1, 10, 'professional registration requirements', {
+    message: 'There should be between $constraint1 and $constraint2 $constraint3.',
+  })
   professional_registration: (TrackedFieldArrayItem | ValueString)[];
+
   preferences: (TrackedFieldArrayItem | ValueString)[];
+
+  @CustomItemCountValidator(3, 5, 'knowledge, skills or abilities', {
+    message: 'There should be between $constraint1 and $constraint2 $constraint3.',
+  })
   knowledge_skills_abilities: (TrackedFieldArrayItem | ValueString)[];
   provisos: (TrackedFieldArrayItem | ValueString)[];
   optional_requirements: (TrackedFieldArrayItem | ValueString)[];
