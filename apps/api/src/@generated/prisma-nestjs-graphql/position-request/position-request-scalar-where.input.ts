@@ -97,4 +97,7 @@ export class PositionRequestScalarWhereInput {
 
   @Field(() => StringFilter, { nullable: true })
   additional_info_comments?: StringFilter;
+
+  @Field(() => JsonFilter, { nullable: true })
+  additional_info?: JsonFilter;
 }

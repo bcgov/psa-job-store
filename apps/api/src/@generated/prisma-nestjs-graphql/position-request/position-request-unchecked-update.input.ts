@@ -84,4 +84,7 @@ export class PositionRequestUncheckedUpdateInput {
 
   @Field(() => String, { nullable: true })
   additional_info_comments?: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  additional_info?: any;
 }

@@ -90,6 +90,9 @@ export class PositionRequestOrderByWithAggregationInput {
   @Field(() => SortOrderInput, { nullable: true })
   additional_info_comments?: SortOrderInput;
 
+  @Field(() => SortOrderInput, { nullable: true })
+  additional_info?: SortOrderInput;
+
   @Field(() => PositionRequestCountOrderByAggregateInput, { nullable: true })
   _count?: PositionRequestCountOrderByAggregateInput;
 

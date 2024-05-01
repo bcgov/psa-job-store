@@ -73,6 +73,9 @@ export class PositionRequestUpdateWithoutWorkLocationInput {
   @Field(() => String, { nullable: true })
   additional_info_comments?: string;
 
+  @Field(() => GraphQLJSON, { nullable: true })
+  additional_info?: any;
+
   @Field(() => JobProfileUpdateOneWithoutPosition_requestNestedInput, { nullable: true })
   parent_job_profile?: JobProfileUpdateOneWithoutPosition_requestNestedInput;
 

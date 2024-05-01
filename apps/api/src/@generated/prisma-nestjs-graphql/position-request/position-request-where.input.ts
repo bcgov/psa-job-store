@@ -101,6 +101,9 @@ export class PositionRequestWhereInput {
   @Field(() => StringFilter, { nullable: true })
   additional_info_comments?: StringFilter;
 
+  @Field(() => JsonFilter, { nullable: true })
+  additional_info?: JsonFilter;
+
   @Field(() => JobProfileRelationFilter, { nullable: true })
   parent_job_profile?: JobProfileRelationFilter;
 

@@ -79,7 +79,7 @@ export const ClassificationTaskPage = () => {
     return <LoadingSpinnerWithMessage />;
   }
 
-  // console.log('positionRequest data: ', data?.positionRequest);
+  // console.log('positionRequest data: ', data);
 
   // END ACTIONS TAB DATA
   const snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
