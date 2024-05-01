@@ -90,7 +90,7 @@ jobs:
             VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
             KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
       - name: Trigger Deployments
-        uses: ./.github/actions/trigger_deploy
+        uses: ./.github/actions/trigger-deploy
         with:
           openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
           api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
