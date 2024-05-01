@@ -205,7 +205,7 @@ const WizardEditProfile = forwardRef(
     }, [classificationsData, classificationsDataIsLoading, receivedClassificationsDataCallback]);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { control, reset, handleSubmit, getValues, formState, trigger, watch } = useForm<JobProfileValidationModel>({
+    const { control, reset, handleSubmit, getValues, formState, trigger } = useForm<JobProfileValidationModel>({
       resolver: classValidatorResolver(JobProfileValidationModel),
       mode: 'onChange',
     });

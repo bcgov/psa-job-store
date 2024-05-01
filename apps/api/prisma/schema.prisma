@@ -75,6 +75,8 @@ model PositionRequest {
   additional_info_excluded_mgr_position_number String?
   additional_info_comments                     String?
 
+  additional_info Json? @db.JsonB
+
   // TODO: AL-146
   // user        User       @relation(fields: [user_id], references: [id])
   // classification     Classification @relation(fields: [classification_id], references: [id])

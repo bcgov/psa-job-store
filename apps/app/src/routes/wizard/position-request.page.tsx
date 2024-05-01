@@ -502,7 +502,10 @@ export const PositionRequestPage = () => {
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
-                              <DownloadJobProfileComponent jobProfile={unwrappedPositionRequestData?.profile_json}>
+                              <DownloadJobProfileComponent
+                                jobProfile={unwrappedPositionRequestData?.profile_json}
+                                useModal={true}
+                              >
                                 <a href="#">Download</a>
                               </DownloadJobProfileComponent>
                             </Descriptions.Item>

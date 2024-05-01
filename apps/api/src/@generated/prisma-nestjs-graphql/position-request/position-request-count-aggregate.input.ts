@@ -84,5 +84,8 @@ export class PositionRequestCountAggregateInput {
   additional_info_comments?: true;
 
   @Field(() => Boolean, { nullable: true })
+  additional_info?: true;
+
+  @Field(() => Boolean, { nullable: true })
   _all?: true;
 }

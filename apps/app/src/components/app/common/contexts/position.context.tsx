@@ -94,9 +94,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   // clear previous data
                   profile_json: null,
                   parent_job_profile: { connect: { id: null } },
-                  additional_info_comments: null,
-                  additional_info_excluded_mgr_position_number: null,
-                  paylist_department: { connect: { id: null } },
+                  additional_info: null,
                   title: null,
                 }).unwrap();
                 resolve(true);

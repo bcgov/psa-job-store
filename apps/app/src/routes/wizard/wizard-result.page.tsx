@@ -89,8 +89,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     if (positionRequestLoading || positionNeedsRivewLoading) return;
 
     // load comment if prevsiously entered
-    if (positionRequestData?.positionRequest?.additional_info_comments) {
-      setComment(positionRequestData.positionRequest.additional_info_comments);
+    if (positionRequestData?.positionRequest?.additional_info?.comments) {
+      setComment(positionRequestData.positionRequest?.additional_info.comments);
     }
 
     // if state is draft and position doesn't need review, set mode to readyToCreatePositionNumber
@@ -338,7 +338,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 <Row justify="center" style={{ padding: '0 1rem' }}>
                   <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
                     <Alert
-                      description="You have completed your profile. At this point, it is saved as draft. You may ask others to review by sending them a link, or you may proceed to generating a position number. If there have been changes to significant accountabilities, we will seamlessly create a position review for classification and exclusion services."
+                      description="You have completed your profile. At this point, it is saved as draft. You may proceed to generate the position number."
                       type="info"
                       showIcon
                     />

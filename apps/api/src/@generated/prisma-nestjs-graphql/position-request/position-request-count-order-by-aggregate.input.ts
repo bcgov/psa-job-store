@@ -83,4 +83,7 @@ export class PositionRequestCountOrderByAggregateInput {
 
   @Field(() => SortOrder, { nullable: true })
   additional_info_comments?: keyof typeof SortOrder;
+
+  @Field(() => SortOrder, { nullable: true })
+  additional_info?: keyof typeof SortOrder;
 }

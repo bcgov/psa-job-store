@@ -84,5 +84,8 @@ export class PositionRequestCountAggregate {
   additional_info_comments!: number;
 
   @Field(() => Int, { nullable: false })
+  additional_info!: number;
+
+  @Field(() => Int, { nullable: false })
   _all!: number;
 }

@@ -81,4 +81,7 @@ export class PositionRequestUncheckedUpdateManyWithoutPaylist_departmentInput {
 
   @Field(() => String, { nullable: true })
   additional_info_comments?: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  additional_info?: any;
 }
