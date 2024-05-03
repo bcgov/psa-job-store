@@ -61,7 +61,7 @@ export class TitleField extends TrackedFieldArrayItem {
 }
 
 export class OverviewField extends TrackedFieldArrayItem {
-  @Length(5, 200, { message: 'Overview must be between 5 and 200 characters.' })
+  @Length(5, 320, { message: 'Overview must be between 5 and 320 characters.' })
   declare value: string;
 }
 
@@ -232,17 +232,17 @@ export class JobProfileValidationModel {
   program_overview: ProgramOverviewField | string;
 
   // @AllDisabled({ message: 'There must be at least one accountability.' })
-  @ItemCountValidator(5, 30, 'accountabilities', {
+  @ItemCountValidator(1, 30, 'accountabilities', {
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
   accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   optional_accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @MinItemsValidator(2, { message: 'There must be at least 2 education or work experience requirements.' })
+  @MinItemsValidator(1, { message: 'There must be at least 1 education or work experience requirements.' })
   education: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @MinItemsValidator(2, { message: 'There must be at least 2 related work experience requirements.' })
+  @MinItemsValidator(1, { message: 'There must be at least 1 related work experience requirements.' })
   job_experience: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   @ItemCountValidator(1, 10, 'security screenings', {
@@ -260,7 +260,7 @@ export class JobProfileValidationModel {
 
   preferences: (TrackedFieldArrayItem | ValueString)[];
 
-  @CustomItemCountValidator(3, 5, 'knowledge, skills or abilities', {
+  @CustomItemCountValidator(1, 5, 'knowledge, skills or abilities', {
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
   knowledge_skills_abilities: (TrackedFieldArrayItem | ValueString)[];
