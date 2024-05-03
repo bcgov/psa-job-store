@@ -53,7 +53,7 @@ export class CrmService {
       select: { crm_id: true },
     });
 
-    if (positionRequests.length === 0) return;
+    if (positionRequests.length === 0) return [];
 
     // The following API call returns an object with the structure:
     //
