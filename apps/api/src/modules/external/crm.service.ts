@@ -1,10 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
-import { convertIncidentStatusToPositionRequestStatus } from '../position-request/utils/convert-incident-status-to-position-request-status.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { IncidentCreateUpdateInput } from './models/incident-create.input';
 
@@ -17,7 +16,6 @@ enum Endpoint {
 
 @Injectable()
 export class CrmService {
-  private readonly logger = new Logger(CrmService.name);
   private readonly headers: AxiosHeaders;
   private request = (endpoint: Endpoint, extra?: string) =>
     this.httpService.get(`${this.configService.get('CRM_URL')}/${endpoint}${extra != null ? `?${extra}` : ''}`, {
@@ -57,8 +55,6 @@ export class CrmService {
 
     if (positionRequests.length === 0) return;
 
-    this.logger.log(`Start syncIncidentStatus @ ${new Date()}`);
-
     // The following API call returns an object with the structure:
     //
     // {
@@ -78,7 +74,7 @@ export class CrmService {
     const response = await firstValueFrom(
       this.request(
         Endpoint.Query,
-        `query=USE REPORT;SELECT id,statusWithType.status FROM incidents WHERE id IN (${positionRequests
+        `query=USE REPORT;SELECT id,statusWithType.status.lookupName, category.lookupName FROM incidents WHERE id IN (${positionRequests
           .map((pr) => pr.crm_id)
           .join(',')})`,
       ).pipe(
@@ -93,25 +89,7 @@ export class CrmService {
     );
 
     const { rows } = response.items[0];
-
-    for await (const row of rows) {
-      const [crm_id, status] = row as [string, string];
-      const positionRequest = await this.prisma.positionRequest.findUnique({ where: { crm_id: +crm_id } });
-      const incomingPositionRequestStatus = convertIncidentStatusToPositionRequestStatus(+status);
-
-      // Conditionally update the positionRequest.status
-      if (positionRequest.status !== incomingPositionRequestStatus) {
-        // TODO: Send email regarding updated status
-
-        await this.prisma.positionRequest.update({
-          where: { crm_id: +crm_id },
-          data: {
-            status: incomingPositionRequestStatus,
-          },
-        });
-      }
-    }
-    this.logger.log(`End syncIncidentStatus @ ${new Date()}`);
+    return rows;
   }
 
   async getAccountId(idir: string): Promise<number | null> {

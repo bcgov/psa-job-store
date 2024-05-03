@@ -132,7 +132,10 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
     // if it's in ESCALATED status, show "classification review required" screen
     if (positionRequestData?.positionRequest?.status === 'ESCALATED') {
-      setMode('classificationReviewRequired');
+      switchParentMode && switchParentMode('readonly');
+      // setMode('classificationReviewRequired');
+      switchParentReadonlyMode && switchParentReadonlyMode('inQueue');
+      setReadOnlySelectedTab && setReadOnlySelectedTab('4');
       return;
     }
   }, [
@@ -589,7 +592,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       icon={<ExclamationCircleFilled />}
                       style={{ marginBottom: '24px' }}
                     />
-
+                    {/* 
                     <Card
                       title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Send for verification</h3>}
                       bordered={false}
@@ -602,7 +605,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
                         Send for classification review
                       </Button>
-                    </Card>
+                    </Card> */}
 
                     <Card
                       title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Other actions</h3>}
