@@ -684,7 +684,9 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: `${parentJobProfile?.role_type?.name}`,
+                                text: `${
+                                  parentJobProfile?.role_type?.name != null ? parentJobProfile?.role_type?.name : ''
+                                }`,
                               }),
                             ],
                           }),
