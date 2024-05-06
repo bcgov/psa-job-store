@@ -632,11 +632,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       ? {
           orderBy: [
             {
-              [sortField]:
-                sortField === 'updated_at'
-                  ? sortOrder === 'ascend'
-                    ? 'asc'
-                    : 'desc' // Directly use 'asc'/'desc' for updated_at
+              [sortField]: ['approved_at', 'submitted_at', 'updated_at'].includes(sortField)
+                ? sortOrder === 'ascend'
+                  ? 'asc'
+                  : 'desc' // Directly use 'asc'/'desc' for updated_at
+                : sortField === 'parent_job_profile'
+                  ? { number: sortOrder === 'ascend' ? 'asc' : 'desc' }
                   : sortField === 'title'
                     ? { sort: sortOrder === 'ascend' ? 'asc' : 'desc' } // Use SortOrderInput for title
                     : { sort: sortOrder === 'ascend' ? 'asc' : 'desc' }, // Use SortOrderInput for other fields as needed
@@ -644,6 +645,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           ],
         }
       : {};
+
+    console.log('sortParams: ', sortParams);
 
     trigger({
       ...(search != null && { search }),
@@ -694,6 +697,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const newPageSize = pagination.pageSize;
     const newSortField = sorter.field;
     const newSortOrder = sorter.order;
+
+    console.log('sorter: ', sorter);
 
     // console.log('sorter: ', JSON.stringify(sorter));
 
