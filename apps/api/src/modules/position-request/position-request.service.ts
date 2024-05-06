@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { JsonObject } from '@prisma/client/runtime/library';
 import { btoa } from 'buffer';
 import { Elements, autolayout, generateJobProfile } from 'common-kit';
 import dayjs from 'dayjs';
@@ -163,9 +164,8 @@ export class PositionRequestApiService {
         where: { id },
         data: {
           additional_info: {
-            update: {
-              comments: comment,
-            },
+            ...(positionRequest.additional_info as JsonObject),
+            comments: comment,
           },
         },
       });
