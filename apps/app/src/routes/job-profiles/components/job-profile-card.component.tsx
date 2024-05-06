@@ -32,7 +32,7 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       }}
     >
       <Title level={3} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
-        {typeof data?.title === 'string' ? data?.title : data?.title?.value}
+        {typeof data?.title === 'string' ? data?.title : data?.title?.text}
       </Title>
       <div>
         <Text type="secondary" data-cy="card-classification">
@@ -74,7 +74,7 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       <div>
         <Text strong>Overview:</Text>
         <Paragraph ellipsis={{ rows: 3 }}>
-          {typeof data?.overview === 'string' ? data?.overview : data?.overview?.value}
+          {typeof data?.overview === 'string' ? data?.overview : data?.overview?.text}
         </Paragraph>
       </div>
       <Button type="link" aria-label={`click to see details for ${data.title}`} style={{ padding: '0' }}>
