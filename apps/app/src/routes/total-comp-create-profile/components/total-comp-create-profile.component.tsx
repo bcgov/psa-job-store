@@ -9,6 +9,7 @@ import {
   PlusOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
+import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import {
   Alert,
   Button,
@@ -32,6 +33,7 @@ import {
   notification,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
+import debounce from 'lodash.debounce';
 import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ReactQuill, { Quill } from 'react-quill';
@@ -72,8 +74,13 @@ import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-rol
 import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
 import { FormItem } from '../../../utils/FormItem';
 import ContentWrapper from '../../home/components/content-wrapper.component';
+import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
 import { IsIndigenousCompetency } from '../../wizard/components/is-indigenous-competency.component';
 import BehaviouralComptencyPicker from '../../wizard/components/wizard-behavioural-comptency-picker';
+import WizardOverview from '../../wizard/components/wizard-edit-profile-overview';
+import WizardProgramOverview from '../../wizard/components/wizard-edit-profile-program-overview';
+import WizardTitle from '../../wizard/components/wizard-edit-profile-title';
+import WizardValidationError from '../../wizard/components/wizard-edit-profile-validation-error';
 import ReorderButtons from './reorder-buttons';
 
 const { Option } = Select;
@@ -95,7 +102,7 @@ export interface AccountabilityItem {
   text: string;
   id?: string;
   nonEditable: boolean;
-  significant: boolean;
+  is_significant: boolean;
 }
 
 export interface SecurityScreeningItem {
@@ -121,12 +128,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [profileJson, setProfileJson] = useState<any>(null);
 
   const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
-
-  useEffect(() => {
-    if (jobProfileData) {
-      setProfileJson(jobProfileData);
-    }
-  }, [jobProfileData]);
 
   useEffect(() => {
     if (lazyJobProfile) {
@@ -160,16 +161,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       .map((stream) => stream.stream.id),
   }));
 
-  const {
-    control,
-    handleSubmit,
-    watch,
-    setValue,
-    getValues: getBasicDetailsValues,
-    reset,
-  } = useForm({
+  const basicUseFormReturn = useForm<JobProfileValidationModel>({
+    resolver: classValidatorResolver(JobProfileValidationModel),
     defaultValues: {
-      jobTitle: '',
+      title: { text: '' } as TitleField,
       jobStoreNumber: '',
       originalJobStoreNumber: '',
       employeeGroup: null as string | null,
@@ -190,6 +185,21 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     },
     // resolver: zodResolver(schema)
   });
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues: getBasicDetailsValues,
+    reset,
+    trigger: triggerBasicDetailsValidation,
+    formState: basicFormState,
+  } = basicUseFormReturn;
+
+  //triggerBasicDetailsValidation();
+
+  const title = watch('title.text');
 
   // job store number validation
   const jobStoreNumber = watch('jobStoreNumber');
@@ -347,23 +357,18 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   // console.log('useForm? : ', jobProfileData?.jobProfile.accountabilities);
 
-  const {
-    control: profileControl,
-    watch: profileWatch,
-    setValue: profileSetValue,
-    getValues: getProfileValues,
-    reset: resetProfileForm,
-  } = useForm({
+  const jobProfileUseFormReturn = useForm<JobProfileValidationModel>({
+    resolver: classValidatorResolver(JobProfileValidationModel),
     defaultValues: {
       state: '',
-      overview: '' as string | TrackedFieldArrayItem,
-      programOverview: '' as string | TrackedFieldArrayItem,
+      overview: { text: '' } as TrackedFieldArrayItem,
+      program_overview: { text: '' } as TrackedFieldArrayItem,
       accountabilities: jobProfileData?.jobProfile.accountabilities.map(
         (a) =>
           ({
             text: a.text,
             nonEditable: a.is_readonly,
-            significant: a.is_significant,
+            is_significant: a.is_significant,
           }) as AccountabilityItem,
       ),
       education: jobProfileData?.jobProfile.education?.map(
@@ -371,7 +376,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           ({
             text: r.text,
             nonEditable: r.is_readonly,
-            significant: r.is_significant,
+            is_significant: r.is_significant,
           }) as AccountabilityItem,
       ),
       job_experience: jobProfileData?.jobProfile.job_experience?.map(
@@ -379,17 +384,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           ({
             text: r.text,
             nonEditable: r.is_readonly,
-            significant: r.is_significant,
+            is_significant: r.is_significant,
           }) as AccountabilityItem,
       ),
-      professionalRegistrationRequirements: jobProfileData?.jobProfile.professional_registration_requirements.map(
+      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements.map(
         (r: any) => ({ text: r }),
       ),
-      optionalRequirements: jobProfileData?.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
+      optional_requirements: jobProfileData?.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
       preferences: jobProfileData?.jobProfile.preferences.map((p: any) => ({ text: p })),
-      knowledgeSkillsAbilities: jobProfileData?.jobProfile.knowledge_skills_abilities.map((k: any) => ({ text: k })),
-      willingnessStatements: jobProfileData?.jobProfile.willingness_statements.map((w: any) => ({ text: w })),
-      securityScreenings: jobProfileData?.jobProfile.security_screenings.map(
+      knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities.map((k: any) => ({ text: k })),
+      willingness_statements: jobProfileData?.jobProfile.willingness_statements.map((w: any) => ({ text: w })),
+      security_screenings: jobProfileData?.jobProfile.security_screenings.map(
         (s) =>
           ({
             text: s.text,
@@ -409,6 +414,25 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     },
   });
 
+  const {
+    control: profileControl,
+    watch: profileWatch,
+    setValue: profileSetValue,
+    getValues: getProfileValues,
+    reset: resetProfileForm,
+    trigger: triggerProfileValidation,
+    formState: profileFormState,
+  } = jobProfileUseFormReturn;
+
+  useEffect(() => {
+    if (jobProfileData) {
+      setProfileJson(jobProfileData);
+      triggerBasicDetailsValidation();
+      triggerProfileValidation();
+    }
+  }, [jobProfileData, triggerBasicDetailsValidation, triggerProfileValidation]);
+
+  // bug fix for case when user re-navigates to previously opened profile and some of the fields would appear blank
   useEffect(() => {
     // Check if the URL is for creating a new profile
     if (!urlId) {
@@ -416,8 +440,18 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       reset();
       resetProfileForm();
       fetchNextNumber();
+      triggerBasicDetailsValidation();
+      triggerProfileValidation();
     }
-  }, [urlId, setValue, reset, resetProfileForm, fetchNextNumber]);
+  }, [
+    urlId,
+    setValue,
+    reset,
+    resetProfileForm,
+    fetchNextNumber,
+    triggerBasicDetailsValidation,
+    triggerProfileValidation,
+  ]);
 
   const { data: treeData } = useGetGroupedClassificationsQuery({
     employee_group_ids: ['MGT', 'GEU', 'OEX', 'NUR'],
@@ -500,9 +534,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
-      console.log('setting values..');
+      // console.log('setting values..');
       // Basic Details Form
-      setValue('jobTitle', jobProfileData.jobProfile.title as string);
+      setValue('title.text', jobProfileData.jobProfile.title as string);
       setValue('jobStoreNumber', jobProfileData.jobProfile.number.toString());
       setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
 
@@ -543,8 +577,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       // Profile Form
       if (jobProfileData.jobProfile.state) profileSetValue('state', jobProfileData.jobProfile.state);
 
-      profileSetValue('overview', jobProfileData.jobProfile.overview);
-      profileSetValue('programOverview', jobProfileData.jobProfile.program_overview);
+      profileSetValue('overview.text', jobProfileData.jobProfile.overview as string);
+      profileSetValue('program_overview.text', jobProfileData.jobProfile.program_overview as string);
 
       // console.log(
       //   'setting accountabilities: ',
@@ -591,11 +625,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       //   ),
       // );
       // profileSetValue(
-      //   'professionalRegistrationRequirements',
+      //   'professional_registration_requirements',
       //   jobProfileData.jobProfile.professional_registration_requirements.map((r: any) => ({ text: r })),
       // );
       // profileSetValue(
-      //   'optionalRequirements',
+      //   'optional_requirements',
       //   jobProfileData.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
       // );
       // profileSetValue(
@@ -603,15 +637,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       //   jobProfileData.jobProfile.preferences.map((p: any) => ({ text: p })),
       // );
       // profileSetValue(
-      //   'knowledgeSkillsAbilities',
+      //   'optional_requirements',
       //   jobProfileData.jobProfile.knowledge_skills_abilities.map((k: any) => ({ text: k })),
       // );
       // profileSetValue(
-      //   'willingnessStatements',
+      //   'willingness_statements',
       //   jobProfileData.jobProfile.willingness_statements.map((w: any) => ({ text: w })),
       // );
       // profileSetValue(
-      //   'securityScreenings',
+      //   'security_screenings',
       //   jobProfileData.jobProfile.security_screenings.map(
       //     (s) =>
       //       ({
@@ -733,23 +767,23 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const updatedAccountabilities = accountabilities?.map((field) => ({
       ...field,
       nonEditable: nonEditable,
-      significant: nonEditable ? true : false,
+      is_significant: nonEditable ? true : false,
     }));
     profileSetValue('accountabilities', updatedAccountabilities as AccountabilityItem[]);
   };
 
-  const updateSignificant = (significant: boolean) => {
+  const updateSignificant = (is_significant: boolean) => {
     const updatedAccountabilities = accountabilities?.map((field) => ({
       ...field,
-      significant: significant,
+      is_significant: is_significant,
     }));
     profileSetValue('accountabilities', updatedAccountabilities as AccountabilityItem[]);
   };
 
-  const updateSignificantEdu = (significant: boolean) => {
+  const updateSignificantEdu = (is_significant: boolean) => {
     const updatedExperiences = educations?.map((field) => ({
       ...field,
-      significant: significant,
+      is_significant: is_significant,
     }));
     profileSetValue('education', updatedExperiences as AccountabilityItem[]);
   };
@@ -758,15 +792,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const updatedExperiences = educations?.map((field) => ({
       ...field,
       nonEditable: nonEditable,
-      significant: nonEditable ? true : false,
+      is_significant: nonEditable ? true : false,
     }));
     profileSetValue('education', updatedExperiences as AccountabilityItem[]);
   };
 
-  const updateSignificantJob_experience = (significant: boolean) => {
+  const updateSignificantJob_experience = (is_significant: boolean) => {
     const updatedExperiences = job_experiences?.map((field) => ({
       ...field,
-      significant: significant,
+      is_significant: is_significant,
     }));
     profileSetValue('job_experience', updatedExperiences as AccountabilityItem[]);
   };
@@ -775,7 +809,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const updatedExperiences = job_experiences?.map((field) => ({
       ...field,
       nonEditable: nonEditable,
-      significant: nonEditable ? true : false,
+      is_significant: nonEditable ? true : false,
     }));
     profileSetValue('job_experience', updatedExperiences as AccountabilityItem[]);
   };
@@ -785,7 +819,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       ...field,
       nonEditable: nonEditable,
     }));
-    profileSetValue('securityScreenings', securityScreeningsUpdated as SecurityScreeningItem[]);
+    profileSetValue('security_screenings', securityScreeningsUpdated as SecurityScreeningItem[]);
   };
 
   const allOrganizations = watch('all_organizations');
@@ -801,7 +835,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   const markAllSignificant = profileWatch('markAllSignificant');
   const accountabilities = profileWatch('accountabilities');
-  const securityScreenings = profileWatch('securityScreenings');
+  const securityScreenings = profileWatch('security_screenings');
   const educations = profileWatch('education');
   const job_experiences = profileWatch('job_experience');
 
@@ -851,7 +885,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     move: moveProfessionalRegistrationRequirement,
   } = useFieldArray({
     control: profileControl,
-    name: 'professionalRegistrationRequirements',
+    name: 'professional_registration_requirements',
   });
 
   const handleProfessionalRegistrationRequirementsMove = (index: number, direction: 'up' | 'down') => {
@@ -870,7 +904,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     move: moveOptionalRequirement,
   } = useFieldArray({
     control: profileControl,
-    name: 'optionalRequirements',
+    name: 'optional_requirements',
   });
 
   const handleOptionalRequirementsMove = (index: number, direction: 'up' | 'down') => {
@@ -909,7 +943,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     move: moveKnowledgeSkillAbility,
   } = useFieldArray({
     control: profileControl,
-    name: 'knowledgeSkillsAbilities',
+    name: 'optional_requirements',
   });
 
   const handleKnowledgeSkillsAbilitiesMove = (index: number, direction: 'up' | 'down') => {
@@ -928,7 +962,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     move: moveWillingnessStatement,
   } = useFieldArray({
     control: profileControl,
-    name: 'willingnessStatements',
+    name: 'willingness_statements',
   });
 
   const handleWillingnessStatementsMove = (index: number, direction: 'up' | 'down') => {
@@ -947,7 +981,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     move: moveSecurityScreening,
   } = useFieldArray({
     control: profileControl,
-    name: 'securityScreenings',
+    name: 'security_screenings',
   });
 
   const handleSecurityScreeningsMove = (index: number, direction: 'up' | 'down') => {
@@ -1026,7 +1060,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       if (jobProfileMinimumRequirements && selectedClassification) {
         const filteredRequirements = jobProfileMinimumRequirements.jobProfileMinimumRequirements
           .filter((req) => req.grade === selectedClassification.grade)
-          .map((req) => ({ text: req.requirement, nonEditable: false, significant: true }));
+          .map((req) => ({ text: req.requirement, nonEditable: false, is_significant: true }));
 
         // console.log('filteredRequirements: ', filteredRequirements);
         // Update the educationAndWorkExperiences field array
@@ -1047,33 +1081,33 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     return {
       data: {
         state: formData.state,
-        title: formData.jobTitle,
+        title: formData.title.text,
         type: 'MINISTRY', // this gets set on the server
         number: parseInt(formData.jobStoreNumber, 10),
-        overview: formData.overview,
-        program_overview: formData.programOverview,
+        overview: formData.overview.text,
+        program_overview: formData.program_overview.text,
         review_required: formData.classificationReviewRequired,
         accountabilities: formData.accountabilities.map((a: any) => ({
           text: a.text,
           is_readonly: a.nonEditable,
-          is_significant: a.significant,
+          is_significant: a.is_significant,
         })),
         education: formData.education.map((a: any) => ({
           text: a.text,
           is_readonly: a.nonEditable,
-          is_significant: a.significant,
+          is_significant: a.is_significant,
         })),
         job_experience: formData.job_experience.map((a: any) => ({
           text: a.text,
           is_readonly: a.nonEditable,
-          is_significant: a.significant,
+          is_significant: a.is_significant,
         })),
-        professional_registration_requirements: formData.professionalRegistrationRequirements.map((p: any) => p.text),
-        optional_requirements: formData.optionalRequirements.map((o: any) => o.text),
+        professional_registration_requirements: formData.professional_registration_requirements.map((p: any) => p.text),
+        optional_requirements: formData.optional_requirements.map((o: any) => o.text),
         preferences: formData.preferences.map((p: any) => p.text),
-        knowledge_skills_abilities: formData.knowledgeSkillsAbilities.map((k: any) => k.text),
-        willingness_statements: formData.willingnessStatements.map((w: any) => w.text),
-        security_screenings: formData.securityScreenings.map((a: any) => ({
+        knowledge_skills_abilities: formData.optional_requirements.map((k: any) => k.text),
+        willingness_statements: formData.willingness_statements.map((w: any) => w.text),
+        security_screenings: formData.security_screenings.map((a: any) => ({
           text: a.text,
           is_readonly: a.nonEditable,
         })),
@@ -1299,6 +1333,21 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     });
   };
 
+  const [profileFormErrors, setProfileFormErrors] = useState<any>({});
+
+  useEffect(() => {
+    setProfileFormErrors(profileFormState.errors);
+  }, [profileFormState.errors]);
+
+  const [basicFormErrors, setBasicFormErrors] = useState<any>({});
+
+  useEffect(() => {
+    setBasicFormErrors(basicFormState.errors);
+  }, [basicFormState.errors]);
+
+  // console.log('basicFormState.errors: ', basicFormState.errors);
+  // console.log('profileFormState.errors: ', profileFormState.errors);
+
   const tabItems = [
     {
       key: '1',
@@ -1327,9 +1376,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   // console.log(data);
                 })}
               >
+                <WizardTitle
+                  trigger={triggerBasicDetailsValidation}
+                  formErrors={basicFormErrors}
+                  useFormReturn={basicUseFormReturn}
+                />
+                {/*
                 <Card title="Job Title" bordered={false} className="custom-card">
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <FormItem control={control} name="jobTitle">
                         <label style={srOnlyStyle} htmlFor="jobTitle">
                           Job Title
@@ -1339,10 +1394,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
                 </Card>
+                */}
 
                 <Card title="JobStore Number" style={{ marginTop: 16 }} bordered={false} className="custom-card">
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <FormItem control={control} name="jobStoreNumber">
                         <label style={srOnlyStyle} htmlFor="jobStoreNumber">
                           JobStore Number
@@ -1377,7 +1433,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 <Card title="Classification" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Employee group" labelCol={{ className: 'card-label' }}>
                         <Controller
                           name="employeeGroup"
@@ -1414,7 +1470,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Classification" labelCol={{ className: 'card-label' }}>
                         {/* Form.Item for cosmetic purposes */}
                         <Controller
@@ -1456,7 +1512,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 <Card title="Type" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Job role" labelCol={{ className: 'card-label' }}>
                         <Controller
                           name="jobRole"
@@ -1481,7 +1537,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item
                         label="Job Family / Profession"
                         labelCol={{ className: 'card-label' }}
@@ -1590,7 +1646,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 <Card title="Additional information" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {/* Role Radio Buttons */}
                       <Form.Item label="Role" labelCol={{ className: 'card-label' }}>
                         <Controller
@@ -1609,7 +1665,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {/* Report-to relationship Select */}
 
                       <Form.Item label="Report-to relationship" labelCol={{ className: 'card-label' }}>
@@ -1651,7 +1707,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {/* Scope of Responsibility Select */}
                       <Form.Item label="Scope of Responsibility" labelCol={{ className: 'card-label' }}>
                         <Controller
@@ -1678,7 +1734,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {/* Ministries Select */}
 
                       <Form.Item
@@ -1717,7 +1773,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Divider className="hr-reduced-margin" />
 
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {/* Other Functions Checkbox */}
                       <Form.Item
                         label={
@@ -1748,7 +1804,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 <Card title="Job Context" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Controller
                         control={control}
                         name="jobContext"
@@ -1773,67 +1829,22 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           <Row justify="center" style={{ margin: '1rem 0' }}>
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
               <Form layout="vertical">
-                <Card title="Job overview" bordered={false} className="custom-card">
-                  <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
-                      <Form.Item labelCol={{ className: 'card-label' }}>
-                        {/* Form.Item for cosmetic purposes */}
-                        <Controller
-                          name="overview"
-                          control={profileControl}
-                          render={({ field: { onChange, onBlur, value } }) => (
-                            <TextArea
-                              autoSize
-                              value={value as string}
-                              placeholder="Provide an overview of the job profile"
-                              aria-label="overview"
-                              onChange={onChange} // send value to hook form
-                              onBlur={onBlur} // notify when input is touched/blur
-                            />
-                          )}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Card>
+                <WizardOverview
+                  trigger={triggerProfileValidation}
+                  formErrors={profileFormErrors}
+                  useFormReturn={jobProfileUseFormReturn}
+                />
 
-                <Card title="Program overview" bordered={false} style={{ marginTop: 16 }} className="custom-card">
-                  <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
-                      <Form.Item labelCol={{ className: 'card-label' }}>
-                        {/* Form.Item for cosmetic purposes */}
-                        <Controller
-                          name="programOverview"
-                          control={profileControl}
-                          render={({ field: { onChange, onBlur, value } }) => (
-                            <>
-                              <TextArea
-                                maxLength={320}
-                                autoSize
-                                placeholder="Provide a program overview of the job profile"
-                                aria-label="program overview"
-                                onChange={onChange} // send value to hook form
-                                onBlur={onBlur} // notify when input is touched/blur
-                                value={value as string}
-                              />
-                              <Typography.Paragraph
-                                type="secondary"
-                                style={{ textAlign: 'right', width: '100%', margin: '0' }}
-                              >
-                                {(value as string).length} / 320
-                              </Typography.Paragraph>
-                            </>
-                          )}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Card>
+                <WizardProgramOverview
+                  trigger={triggerProfileValidation}
+                  formErrors={profileFormErrors}
+                  useFormReturn={jobProfileUseFormReturn}
+                />
 
                 <Card title="Accountabilities" style={{ marginTop: 16 }} bordered={false}>
                   {/* Required accountabilities */}
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -1854,6 +1865,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           onChange={(e) => {
                                             field.onChange(e.target.checked);
                                             updateNonEditable(e.target.checked);
+                                            triggerProfileValidation();
                                           }}
                                         >
                                           Mark all as non-editable
@@ -1877,6 +1889,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           onChange={(e) => {
                                             field.onChange(e.target.checked);
                                             updateSignificant(e.target.checked);
+                                            triggerProfileValidation();
                                           }}
                                           disabled={markAllNonEditable || accountabilitiesFields.length === 0}
                                         >
@@ -1919,13 +1932,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             // set this item as significant as well
                                             // console.log('non-editable toggle: ', args);
                                             if (args.target.checked) {
-                                              profileSetValue(`accountabilities.${index}.significant`, true);
+                                              profileSetValue(`accountabilities.${index}.is_significant`, true);
                                             }
                                             if (!args.target.checked) {
                                               // console.log('setting markAllNonEditable to false');
                                               profileSetValue('markAllNonEditable', false);
                                             }
                                             onChange(args);
+                                            triggerProfileValidation();
                                           }}
                                           checked={value}
                                         >
@@ -1935,7 +1949,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     }}
                                   />
                                   <Controller
-                                    name={`accountabilities.${index}.significant`}
+                                    name={`accountabilities.${index}.is_significant`}
                                     control={profileControl}
                                     render={({ field: { onChange, value } }) => {
                                       return (
@@ -1945,6 +1959,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                               profileSetValue('markAllSignificant', false);
                                             }
                                             onChange(args);
+                                            triggerProfileValidation();
                                           }} // send value to hook form
                                           // disable if this item is non-editable
                                           disabled={accountabilities?.[index].nonEditable}
@@ -1963,28 +1978,44 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     <Controller
                                       control={profileControl}
                                       name={`accountabilities.${index}.text`}
-                                      render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add an accountability" {...field} />
+                                      render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextArea
+                                          autoSize
+                                          placeholder="Add an accountability"
+                                          onChange={(event) => {
+                                            onChange(event);
+                                            debounce(triggerProfileValidation, 300)();
+                                          }}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
+                                        />
                                       )}
                                     />
                                   </Form.Item>
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button icon={<DeleteOutlined />} onClick={() => removeAccountability(index)} />
+                                  <Button
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => {
+                                      removeAccountability(index);
+                                      triggerProfileValidation();
+                                    }}
+                                  />
                                 </Col>
                               </Row>
                             </Col>
                           </Row>
                         ))}
                         <Form.Item>
+                          <WizardValidationError formErrors={profileFormErrors} fieldName="accountabilities" />
                           <Button
                             type="link"
                             onClick={() =>
                               appendAccountability({
                                 text: '',
                                 nonEditable: markAllNonEditable,
-                                significant: markAllSignificant,
+                                is_significant: markAllSignificant,
                               })
                             }
                             icon={<PlusOutlined />}
@@ -2016,13 +2047,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   {/* Eduction */}
 
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
                           <Row justify="space-between" align="middle" style={{ width: '100%' }}>
-                            <Col>Education</Col>
+                            <Col>Education and work experience</Col>
                             <Col>
                               <Form.Item style={{ margin: 0 }}>
                                 <Row>
@@ -2101,7 +2132,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         onChange={(args) => {
                                           // set this item as significant as well
                                           if (args.target.checked) {
-                                            profileSetValue(`education.${index}.significant`, true);
+                                            profileSetValue(`education.${index}.is_significant`, true);
                                           }
                                           if (!args.target.checked) {
                                             profileSetValue('markAllNonEditableEdu', false);
@@ -2115,7 +2146,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     )}
                                   />
                                   <Controller
-                                    name={`education.${index}.significant`}
+                                    name={`education.${index}.is_significant`}
                                     control={profileControl}
                                     render={({ field: { onChange, value } }) => (
                                       <Checkbox
@@ -2140,8 +2171,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     <Controller
                                       control={profileControl}
                                       name={`education.${index}.text`}
-                                      render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add education" {...field} />
+                                      render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextArea
+                                          autoSize
+                                          placeholder="Add education"
+                                          onChange={(event) => {
+                                            onChange(event);
+                                            debounce(triggerProfileValidation, 300)();
+                                          }}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
+                                        />
                                       )}
                                     />
                                   </Form.Item>
@@ -2150,13 +2190,19 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 <Col flex="none">
                                   <Button
                                     icon={<DeleteOutlined />}
-                                    onClick={() => removeEducationAndWorkExperience(index)}
+                                    onClick={() => {
+                                      removeEducationAndWorkExperience(index);
+                                      triggerProfileValidation();
+                                    }}
                                   />
                                 </Col>
                               </Row>
                             </Col>
                           </Row>
                         ))}
+
+                        <WizardValidationError formErrors={profileFormErrors} fieldName="education" />
+
                         <Form.Item>
                           <Button
                             type="link"
@@ -2164,7 +2210,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               appendEducationAndWorkExperience({
                                 text: '',
                                 nonEditable: markAllNonEditableEdu,
-                                significant: markAllSignificantEdu,
+                                is_significant: markAllSignificantEdu,
                               })
                             }
                             icon={<PlusOutlined />}
@@ -2178,7 +2224,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Related experience */}
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2263,7 +2309,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         onChange={(args) => {
                                           // set this item as significant as well
                                           if (args.target.checked) {
-                                            profileSetValue(`job_experience.${index}.significant`, true);
+                                            profileSetValue(`job_experience.${index}.is_significant`, true);
                                           }
                                           if (!args.target.checked) {
                                             profileSetValue('markAllNonEditableJob_experience', false);
@@ -2277,7 +2323,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     )}
                                   />
                                   <Controller
-                                    name={`job_experience.${index}.significant`}
+                                    name={`job_experience.${index}.is_significant`}
                                     control={profileControl}
                                     render={({ field: { onChange, value } }) => (
                                       <Checkbox
@@ -2302,20 +2348,37 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     <Controller
                                       control={profileControl}
                                       name={`job_experience.${index}.text`}
-                                      render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add related experience" {...field} />
+                                      render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextArea
+                                          autoSize
+                                          placeholder="Add related experience"
+                                          onChange={(event) => {
+                                            onChange(event);
+                                            debounce(triggerProfileValidation, 300)();
+                                          }}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
+                                        />
                                       )}
                                     />
                                   </Form.Item>
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button icon={<DeleteOutlined />} onClick={() => removeJob_experience(index)} />
+                                  <Button
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => {
+                                      removeJob_experience(index);
+                                      triggerProfileValidation();
+                                    }}
+                                  />
                                 </Col>
                               </Row>
                             </Col>
                           </Row>
                         ))}
+
+                        <WizardValidationError formErrors={profileFormErrors} fieldName="job_experience" />
                         <Form.Item>
                           <Button
                             type="link"
@@ -2323,7 +2386,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               appendJob_experience({
                                 text: '',
                                 nonEditable: markAllNonEditableJob_experience,
-                                significant: markAllSignificantJob_experience,
+                                is_significant: markAllSignificantJob_experience,
                               })
                             }
                             icon={<PlusOutlined />}
@@ -2339,7 +2402,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Professional registration requirement */}
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2367,12 +2430,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   <Form.Item>
                                     <Controller
                                       control={profileControl}
-                                      name={`professionalRegistrationRequirements.${index}.text`}
-                                      render={({ field }) => (
+                                      name={`professional_registration_requirements.${index}.text`}
+                                      render={({ field: { onChange, onBlur, value } }) => (
                                         <TextArea
                                           autoSize
                                           placeholder="Add a professional registration requirement"
-                                          {...field}
+                                          onChange={onChange}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
                                         />
                                       )}
                                     />
@@ -2404,7 +2469,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Preferences */}
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2433,8 +2498,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     <Controller
                                       control={profileControl}
                                       name={`preferences.${index}.text`}
-                                      render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add a preference" {...field} />
+                                      render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextArea
+                                          autoSize
+                                          placeholder="Add a preference"
+                                          onChange={onChange}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
+                                        />
                                       )}
                                     />
                                   </Form.Item>
@@ -2458,7 +2529,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Knowledge skills and abilities */}
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2486,12 +2557,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   <Form.Item>
                                     <Controller
                                       control={profileControl}
-                                      name={`knowledgeSkillsAbilities.${index}.text`}
-                                      render={({ field }) => (
+                                      name={`optional_requirements.${index}.text`}
+                                      render={({ field: { onChange, onBlur, value } }) => (
                                         <TextArea
                                           autoSize
                                           placeholder="Add a knowledge, skill, or ability"
-                                          {...field}
+                                          onChange={onChange}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
                                         />
                                       )}
                                     />
@@ -2524,7 +2597,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   {/* Provisios */}
 
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2552,12 +2625,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   <Form.Item>
                                     <Controller
                                       control={profileControl}
-                                      name={`willingnessStatements.${index}.text`}
-                                      render={({ field }) => (
+                                      name={`willingness_statements.${index}.text`}
+                                      render={({ field: { onChange, onBlur, value } }) => (
                                         <TextArea
                                           autoSize
                                           placeholder="Add a willingness statement or proviso"
-                                          {...field}
+                                          onChange={onChange}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
                                         />
                                       )}
                                     />
@@ -2586,7 +2661,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Security screenings NEW */}
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2640,7 +2715,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 {/* Non-editable checkbox */}
                                 <div style={{ marginBottom: '5px' }}>
                                   <Controller
-                                    name={`securityScreenings.${index}.nonEditable`}
+                                    name={`security_screenings.${index}.nonEditable`}
                                     control={profileControl}
                                     render={({ field: { onChange, value } }) => (
                                       <Checkbox
@@ -2663,12 +2738,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   <Form.Item>
                                     <Controller
                                       control={profileControl}
-                                      name={`securityScreenings.${index}.text`}
-                                      render={({ field }) => (
+                                      name={`security_screenings.${index}.text`}
+                                      render={({ field: { onChange, onBlur, value } }) => (
                                         <TextArea
                                           autoSize
                                           placeholder="Add a security screenings requirement"
-                                          {...field}
+                                          onChange={onChange}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
                                         />
                                       )}
                                     />
@@ -2702,7 +2779,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* optional requirements */}
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2730,9 +2807,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   <Form.Item>
                                     <Controller
                                       control={profileControl}
-                                      name={`optionalRequirements.${index}.text`}
-                                      render={({ field }) => (
-                                        <TextArea autoSize placeholder="Add an optional requirement" {...field} />
+                                      name={`optional_requirements.${index}.text`}
+                                      render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextArea
+                                          autoSize
+                                          placeholder="Add an optional requirement"
+                                          onChange={onChange}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
+                                        />
                                       )}
                                     />
                                   </Form.Item>
@@ -2761,14 +2844,20 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 <Card title="Behavioural competencies" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={12} md={12} lg={12} xl={12}>
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <>
                         <Typography.Text type="secondary">
                           * denotes an Indigenous Behavioural Competency
                         </Typography.Text>
                         <BehaviouralComptencyPicker
-                          onAdd={behavioural_competencies_append}
-                          onRemove={behavioural_competencies_remove}
+                          onAdd={(item) => {
+                            behavioural_competencies_append(item);
+                            triggerProfileValidation();
+                          }}
+                          onRemove={(item) => {
+                            behavioural_competencies_remove(item);
+                            triggerProfileValidation();
+                          }}
                           behavioural_competencies_fields={behavioural_competencies_fields}
                         />
 
@@ -2801,6 +2890,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 icon={<DeleteOutlined />}
                                 onClick={() => {
                                   behavioural_competencies_remove(index);
+                                  triggerProfileValidation();
                                 }}
                                 style={{
                                   border: 'none',
@@ -2847,6 +2937,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Button>
                         )} */}
                       </>
+                      <WizardValidationError formErrors={profileFormErrors} fieldName="behavioural_competencies" />
                     </Col>
                   </Row>
                 </Card>
@@ -3002,8 +3093,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   return (
     <>
       <PageHeader
-        title="New profile"
-        subTitle="New profile"
+        title={
+          location.pathname.startsWith('/draft-job-profiles') && title.trim() == ''
+            ? 'New profile'
+            : !location.pathname.startsWith('/draft-job-profiles') && title.trim() == ''
+              ? 'Untitled'
+              : title
+        }
         showButton1
         showButton2
         button2Text={state == 'PUBLISHED' ? 'Save and publish' : 'Save as draft'}
