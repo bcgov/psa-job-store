@@ -54,6 +54,7 @@ model PositionRequest {
   parent_job_profile_id      Int?
   crm_json                   Json?                  @db.JsonB
   profile_json               Json?                  @db.JsonB
+  profile_json_updated       Json?                  @db.JsonB
   orgchart_json              Json?                  @db.JsonB
   user_id                    String?                @db.Uuid
   title                      String?

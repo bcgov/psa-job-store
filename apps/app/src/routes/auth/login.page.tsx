@@ -12,11 +12,11 @@ export const LoginPage = () => {
   const isLoginPage = useMatch('/auth/login') != null;
 
   return (
-    <Row justify="center" align="middle" style={{ height: '100%', justifyContent: 'center' }}>
+    <Row justify="center" align="middle" style={{ height: '100%', justifyContent: 'center', background: '#f0f2f5' }}>
       <Col span={12}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <div>
-            <Title>{isLoginPage ? 'Welcome to the Job Store' : 'Logged out'}</Title>
+            <Title style={{ fontSize: '2rem' }}>{isLoginPage ? 'Welcome to the Job Store' : 'Logged out'}</Title>
             <Text style={{ fontSize: '18px', lineHeight: '26px' }} type="secondary">
               {isLoginPage
                 ? 'Please log in to access your Job Store account.'

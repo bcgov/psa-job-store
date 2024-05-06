@@ -9,6 +9,7 @@ import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-rou
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
+import { useLazyGetClassificationsQuery } from '../../redux/services/graphql-api/classification.api';
 import {
   GetPositionRequestResponse,
   GetPositionRequestResponseContent,
@@ -58,11 +59,30 @@ export const PositionRequestPage = () => {
     setPositionRequestData,
     resetWizardContext,
     setRequiresVerification,
+    setClassificationsData,
   } = useWizardContext();
 
   // check if this position currently requires review
   // do this only if it's past the edit page
   const [triggerPositionNeedsReviewQuery, { data: positionNeedsReviewData }] = useLazyPositionNeedsRivewQuery();
+
+  const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataLoading }] =
+    useLazyGetClassificationsQuery();
+
+  const [classificationsFetched, setClassificationsFetched] = useState(false);
+
+  useEffect(() => {
+    if (classificationsData) {
+      setClassificationsData(classificationsData);
+      setClassificationsFetched(true);
+    }
+  }, [classificationsData, setClassificationsData]);
+
+  useEffect(() => {
+    if (!classificationsFetched) {
+      triggerGetClassificationData();
+    }
+  }, [classificationsFetched, triggerGetClassificationData]);
 
   useEffect(() => {
     setRequiresVerification(positionNeedsReviewData?.positionNeedsRivew?.result ?? false);
@@ -130,7 +150,8 @@ export const PositionRequestPage = () => {
       setPositionRequestId(unwrappedPositionRequestData?.id);
     }
 
-    if (unwrappedPositionRequestData?.profile_json) setWizardData(unwrappedPositionRequestData?.profile_json);
+    if (unwrappedPositionRequestData?.profile_json_updated)
+      setWizardData(unwrappedPositionRequestData?.profile_json_updated);
 
     if (unwrappedPositionRequestData?.parent_job_profile_id)
       setPositionRequestProfileId(unwrappedPositionRequestData?.parent_job_profile_id);
@@ -145,6 +166,7 @@ export const PositionRequestPage = () => {
     setPositionRequestProfileId,
     setPositionRequestDepartmentId,
     setPositionRequestData,
+    triggerPositionNeedsReviewQuery,
   ]);
 
   const onNext = async () => {
@@ -274,7 +296,7 @@ export const PositionRequestPage = () => {
         </div>
       ),
     },
-    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json)
+    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json_updated)
       ? [
           {
             key: '3',
@@ -445,7 +467,7 @@ export const PositionRequestPage = () => {
                               <Button type="link">View</Button> |{' '}
                               <Button type="link">
                                 <DownloadJobProfileComponent
-                                  jobProfile={positionRequestData?.positionRequest?.profile_json}
+                                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
                                 >
                                   Download
                                 </DownloadJobProfileComponent>
@@ -504,7 +526,7 @@ export const PositionRequestPage = () => {
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
                               <DownloadJobProfileComponent
-                                jobProfile={unwrappedPositionRequestData?.profile_json}
+                                jobProfile={unwrappedPositionRequestData?.profile_json_updated}
                                 useModal={true}
                               >
                                 <a href="#">Download</a>
@@ -522,6 +544,8 @@ export const PositionRequestPage = () => {
         ]
       : []),
   ];
+
+  if (classificationsDataLoading) return <LoadingSpinnerWithMessage />;
 
   return (
     <>

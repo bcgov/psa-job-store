@@ -91,6 +91,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
   const { createNewPosition } = usePosition();
   const next = async () => {
     if (selectedDepartment == null || selectedPositionId == null) return;
+
     setIsLoading(true);
     try {
       const result = await createNewPosition(
@@ -100,6 +101,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
         positionRequestData?.reports_to_position_id,
         reSelectSupervisor,
       );
+
       if (result) onCreateNewPosition?.();
       else {
         setIsResetting(true);
