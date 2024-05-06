@@ -604,38 +604,6 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                   new TableRow({
                     children: [
                       new TableCell({
-                        margins: {
-                          bottom: 20,
-                        },
-                        width: {
-                          size: 20,
-                          type: WidthType.PERCENTAGE,
-                        },
-                        children: [
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                bold: true,
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                text: 'Career Group',
-                              }),
-                            ],
-                          }),
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                // text: `${parentJobProfile?.jobFamilies[0]?.job_family?.name}`, // todo: support multiple. This was career_group, got replaced with job_family
-                              }),
-                            ],
-                          }),
-                        ],
-                      }),
-                      new TableCell({
                         width: {
                           size: 20,
                           type: WidthType.PERCENTAGE,
@@ -658,7 +626,7 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                // text: `${parentJobProfile?.jobFamilies[0].jobFamily?.name}`,
+                                text: `${parentJobProfile?.jobFamilies[0].jobFamily?.name}`,
                               }),
                             ],
                           }),
@@ -687,7 +655,7 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                // text: `${parentJobProfile?.streams[0]?.stream?.name}`,
+                                text: `${parentJobProfile?.streams[0]?.stream?.name}`,
                               }),
                             ],
                           }),
@@ -716,7 +684,7 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                // text: `${parentJobProfile?.role?.name}`,
+                                text: `${parentJobProfile?.role_type?.name}`,
                               }),
                             ],
                           }),
