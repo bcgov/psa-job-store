@@ -181,7 +181,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
             id: positionRequestId,
             step: action === 'next' ? 3 : action === 'back' ? 1 : 2,
             profile_json_updated: transformedData,
-            title: formData.title.value,
+            title: formData.title.text,
             // classification_code: classification ? classification.code : '',
           }).unwrap();
       } catch (error) {
