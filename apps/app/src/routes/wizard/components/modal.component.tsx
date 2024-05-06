@@ -1,5 +1,7 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
+import { UseFormTrigger } from 'react-hook-form';
+import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 
 export const WizardModal = (
   title: string,
@@ -9,6 +11,7 @@ export const WizardModal = (
   showCancel: boolean,
   isSignificant?: boolean,
   dataTestId?: string,
+  trigger?: UseFormTrigger<JobProfileValidationModel>,
 ) => {
   if (!alertShown && (isSignificant || isSignificant === undefined)) {
     setShown(true);
@@ -22,7 +25,10 @@ export const WizardModal = (
       ),
       okText: 'Proceed',
       cancelText: 'Cancel',
-      onOk: action,
+      onOk: () => {
+        action();
+        trigger?.();
+      },
       onCancel: () => Modal.destroyAll(),
       // The following props are set to style the modal like a warning
       icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
@@ -32,5 +38,6 @@ export const WizardModal = (
     });
   } else {
     action();
+    trigger?.();
   }
 };

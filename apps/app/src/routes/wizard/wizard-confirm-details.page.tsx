@@ -394,7 +394,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         setValue('confirmation', true);
       }
     }
-  }, [departmentsData, positionRequestData, setValue]);
+  }, [departmentsData, positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
 
   const confirmation = watch('confirmation');
 
@@ -815,7 +815,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     colon={false}
                   >
                     <div style={{ margin: 0 }}>
-                      {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.value}
+                      {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.text}
                     </div>
                   </Form.Item>
 

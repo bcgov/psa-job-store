@@ -80,9 +80,24 @@ When completing a feature, run
 
 in the project root and follow the prompts. This info is going to be automatically included in change log.
 
+## To publish a hotfix to production
+
+- Make a hotfix branch off main
+- Create pull request from hotfix into develop to test it on develop
+- Create pull request from develop to stage to test on stage
+- If looks good, create a pull request from hotfix to main
+
+If there's a conflict because develop is ahead of main:
+
+- Create a branch off develop
+- Merge hotfix into this branch and resolve conflicts
+- Make a pull request from this branch into develop
+
 ## @generated files and slow commits
 
 To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)
+
+If above doesn't work, use `lacroixdavid1.vscode-format-context-menu` VS Code extension. After installing, right click on the @generated folder and click `Format`
 
 ## To apply a db change via db migration
 
@@ -143,7 +158,15 @@ Clear position requests:
 
 `TRUNCATE TABLE position_request;`
 
+## To connect to local db
+
+Open container terminal and enter:
+
+`psql -h localhost -p 5432 -U admin -d api`
+
 ## To accelerate new image uptake on openshift after publishing
+
+NOTE: these changes have been integrated into the pipeline and now happen automatically on every publish
 
 Openshift may take up to 15 minutes to pick a new image from artifactory. There is no way to change this frequency. If needed, as a workaround
 perform these operations to get openshift to pick up the image from artifactory faster:
@@ -185,6 +208,8 @@ oc get secret/artifacts-default-[random] -o json | jq '.data.password' | tr -d "
 ```
 
 ## Run Prisma Studio with a remote database
+
+NOTE: this no longer works since OS installation now uses crunchy postgresql cluster configuration instead of standalone configuration.
 
 To run Prisma Studio that is connected to a remote database follow these steps:
 

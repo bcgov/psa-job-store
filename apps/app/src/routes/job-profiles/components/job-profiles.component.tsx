@@ -178,13 +178,22 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             ...(classificationIdFilter != null
               ? [
                   {
-                    reports_to: {
-                      some: {
-                        classification_id: {
-                          in: [classificationIdFilter],
+                    OR: [
+                      {
+                        all_reports_to: {
+                          equals: true,
                         },
                       },
-                    },
+                      {
+                        reports_to: {
+                          some: {
+                            classification_id: {
+                              in: [classificationIdFilter],
+                            },
+                          },
+                        },
+                      },
+                    ],
                   },
                 ]
               : []),
