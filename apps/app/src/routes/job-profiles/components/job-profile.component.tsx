@@ -6,6 +6,7 @@ import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   Length,
+  Matches,
   ValidateNested,
   ValidationArguments,
   ValidationOptions,
@@ -60,6 +61,9 @@ export interface ValueString {
 }
 
 export class TitleField extends TrackedFieldArrayItem {
+  @Matches(/^[A-Za-z0-9\s.,\-'()]{1,200}$/, {
+    message: 'Title can only contain letters, numbers, spaces, periods, commas, hyphens, apostrophes, and parentheses.',
+  })
   @Length(5, 200, { message: 'Title must be between 5 and 200 characters.' })
   declare text: string;
 }

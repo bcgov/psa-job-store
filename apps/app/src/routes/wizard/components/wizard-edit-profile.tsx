@@ -146,6 +146,7 @@ const WizardEditProfile = forwardRef(
     const initialData = profileData ?? null;
     const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
     const [requiresVerification, setRequiresVerification] = useState(false);
+    const [resetComplete, setResetComplete] = useState(false);
     const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
 
     const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
@@ -422,6 +423,8 @@ const WizardEditProfile = forwardRef(
           willingness_statements: getInitialFieldValue(effectiveData.willingness_statements),
           optional_requirements: getInitialFieldValue(effectiveData.optional_requirements),
         });
+        setResetComplete(true);
+        console.log('reset complete');
 
         trigger();
       }
@@ -532,7 +535,7 @@ const WizardEditProfile = forwardRef(
       id: positionRequestId ? positionRequestId : -1,
     });
 
-    if (isLoading) {
+    if (isLoading || !resetComplete) {
       return <LoadingSpinnerWithMessage />;
     }
 

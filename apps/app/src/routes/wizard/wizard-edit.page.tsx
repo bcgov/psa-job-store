@@ -137,8 +137,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
           ? error.message
           : error.root != null
             ? error.root?.message
-            : error.value != null
-              ? error.value.message
+            : error.text != null
+              ? error.text.message
               : 'Error';
       return message;
     });
