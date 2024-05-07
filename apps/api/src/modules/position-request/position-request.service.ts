@@ -1001,8 +1001,8 @@ export class PositionRequestApiService {
     }
   }
 
-  async deletePositionRequest(id: number) {
-    const result = await this.prisma.positionRequest.delete({ where: { id } });
+  async deletePositionRequest(id: number, userId: string) {
+    const result = await this.prisma.positionRequest.delete({ where: { id, user_id: userId, status: 'DRAFT' } });
     return result;
   }
 

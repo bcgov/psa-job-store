@@ -9,3 +9,4 @@ AL-645 Set validations to fields (Total comp)
 AL-611 Empty line validation on the total compensation view - to prevent published profiles for having empty lines (Total comp)
 AL-656 Going back after editing the form does not display "title over 30 characters" warning until edited
 AL-604 Set character limits and validation to fields as per existing PS guidelines
+AL-602 Implement action button on final wizard screen, status indicator, context menu

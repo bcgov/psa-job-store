@@ -38,6 +38,7 @@ import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redu
 import { findExcludedManager } from '../org-chart/utils/find-excluded-manager.util';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 import './wizard-confirm-details.page.css';
 
@@ -468,6 +469,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
+          <div style={{ marginRight: '1rem' }}>
+            <StatusIndicator status={positionRequest?.status ?? ''} />
+          </div>,
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
             <Button data-testid="ellipsis-menu" icon={<EllipsisOutlined />}></Button>
           </Popover>,
