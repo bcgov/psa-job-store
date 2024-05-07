@@ -945,9 +945,9 @@ export class PositionRequestApiService {
       if (additionalInfo.comments !== undefined) {
         (updatePayload.additional_info as Record<string, Prisma.JsonValue>).comments = additionalInfo.comments;
       }
-    } else if (additionalInfo == null) {
+    } else if (additionalInfo === null) {
       updatingAdditionalInfo = true;
-      updatePayload.additional_info = null;
+      updatePayload.additional_info = Prisma.DbNull;
     }
 
     if (!updatingAdditionalInfo) delete updatePayload.additional_info;
