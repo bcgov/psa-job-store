@@ -353,6 +353,7 @@ export class PositionRequestApiService {
         approved_at: true,
         submitted_at: true,
         crm_id: true,
+        crm_lookup_name: true,
         shareUUID: true,
         additional_info: true,
       },
@@ -1287,6 +1288,15 @@ export class PositionRequestApiService {
     } else {
       await this.crmService.updateIncident(positionRequest.crm_id, data);
       incident = await this.crmService.getIncident(positionRequest.crm_id);
+    }
+
+    if (incident.lookupName != null) {
+      await this.prisma.positionRequest.update({
+        where: { id: positionRequest.id },
+        data: {
+          crm_lookup_name: incident.lookupName,
+        },
+      });
     }
 
     return incident;

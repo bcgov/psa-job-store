@@ -402,10 +402,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       ? [
           {
             sorter: allowSorting,
-            defaultSortOrder: getSortOrder('crm_id'),
+            defaultSortOrder: getSortOrder('crm_lookup_name'),
             title: <span data-testid="crm-service-request-header">CRM service request</span>,
-            dataIndex: 'crm_id',
-            key: 'crm_id',
+            dataIndex: 'crm_lookup_name',
+            key: 'crm_lookup_name',
           },
         ]
       : []),

@@ -48,6 +48,7 @@ model PositionRequest {
   id                         Int                    @id @default(autoincrement())
   crm_id                     Int?                   @unique
   crm_assigned_to_account_id Int? // CRM account id of the classifications user who is assigned to the incident
+  crm_lookup_name            String?
   step                       Int
   reports_to_position_id     String
   department_id              String // this is department id that user selected in org chart
