@@ -5,7 +5,7 @@ import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import { Alert, Col, Descriptions, Form, Input, List, Row, Tooltip } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 import DOMPurify from 'dompurify';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -24,7 +24,9 @@ import { JobProfileValidationModel } from '../../job-profiles/components/job-pro
 import AccountabilitiesSection from './wizard-edit-profile-accountabilities-section';
 import WizardBehaviouralCompetencies from './wizard-edit-profile-behavioural-competencies';
 import MinimumRequirementsSection from './wizard-edit-profile-minimum-job-req-section';
-import WizardTextField from './wizard-edit-profile-text-field';
+import WizardOverview from './wizard-edit-profile-overview';
+import WizardProgramOverview from './wizard-edit-profile-program-overview';
+import WizardTitle from './wizard-edit-profile-title';
 import './wizard-edit-profile.css';
 import { useWizardContext } from './wizard.provider';
 
@@ -36,7 +38,6 @@ interface WizardEditProfileProps {
   id?: string;
   profileData?: JobProfileModel | null;
   config?: ConfigProps;
-  submitHandler?: SubmitHandler<JobProfileValidationModel>;
   submitText?: string;
   showBackButton?: boolean;
   onVerificationRequiredChange?: (verificationRequired: boolean) => void;
@@ -54,7 +55,7 @@ type sectionMap = {
 };
 
 const WizardEditProfile = forwardRef(
-  ({ id, profileData, config, submitHandler, onVerificationRequiredChange }: WizardEditProfileProps, ref) => {
+  ({ id, profileData, config, onVerificationRequiredChange }: WizardEditProfileProps, ref) => {
     const {
       originalValuesSet,
       setOriginalValuesSet,
@@ -145,6 +146,7 @@ const WizardEditProfile = forwardRef(
     const initialData = profileData ?? null;
     const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
     const [requiresVerification, setRequiresVerification] = useState(false);
+    const [resetComplete, setResetComplete] = useState(false);
     const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
 
     const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
@@ -421,6 +423,8 @@ const WizardEditProfile = forwardRef(
           willingness_statements: getInitialFieldValue(effectiveData.willingness_statements),
           optional_requirements: getInitialFieldValue(effectiveData.optional_requirements),
         });
+        setResetComplete(true);
+        console.log('reset complete');
 
         trigger();
       }
@@ -531,7 +535,7 @@ const WizardEditProfile = forwardRef(
       id: positionRequestId ? positionRequestId : -1,
     });
 
-    if (isLoading) {
+    if (isLoading || !resetComplete) {
       return <LoadingSpinnerWithMessage />;
     }
 
@@ -627,12 +631,7 @@ const WizardEditProfile = forwardRef(
             </Descriptions>
           </Col>
           <Col xs={24} sm={24} lg={16}>
-            <Form
-              form={form}
-              onFinish={handleSubmit((data) => {
-                submitHandler?.(data);
-              })}
-            >
+            <Form form={form} onFinish={handleSubmit((_data) => {})}>
               <FormItem name="id" control={control} hidden>
                 <Input />
               </FormItem>
@@ -680,29 +679,9 @@ const WizardEditProfile = forwardRef(
                 <></>
               )}
 
-              <WizardTextField
-                name="title"
-                label="Job title"
-                placeholder="Ex.: Program Assistant"
-                testId="job-title"
-                trigger={trigger}
-                formErrors={formErrors}
-                useFormReturn={useFormReturn}
-                jobTitleWarning={true}
-              />
+              <WizardTitle trigger={trigger} formErrors={formErrors} useFormReturn={useFormReturn} />
 
-              <WizardTextField
-                name="program_overview"
-                label="Program overview"
-                placeholder="(Optional) Add more details about the program"
-                testId="program-overview"
-                trigger={trigger}
-                formErrors={formErrors}
-                useFormReturn={useFormReturn}
-                isTextArea={true}
-                maxCharacterCount={320}
-                showCharacterCount={true}
-              />
+              <WizardProgramOverview trigger={trigger} formErrors={formErrors} useFormReturn={useFormReturn} />
 
               {config?.contextEditable ? (
                 <FormItem
@@ -719,15 +698,7 @@ const WizardEditProfile = forwardRef(
                 <></>
               )}
 
-              <WizardTextField
-                name="overview"
-                label="Overview"
-                testId="job-overview"
-                trigger={trigger}
-                formErrors={formErrors}
-                useFormReturn={useFormReturn}
-                isTextArea={true}
-              />
+              <WizardOverview trigger={trigger} formErrors={formErrors} useFormReturn={useFormReturn} />
 
               <AccountabilitiesSection
                 useFormReturn={useFormReturn}

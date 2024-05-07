@@ -6,6 +6,7 @@ import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   Length,
+  Matches,
   ValidateNested,
   ValidationArguments,
   ValidationOptions,
@@ -21,6 +22,7 @@ import '../../../components/app/common/css/custom-descriptions.css';
 import {
   AccountabilitiesModel,
   JobProfileModel,
+  ProfessionsModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
@@ -53,9 +55,15 @@ class BehaviouralCompetency {
 
 export interface ValueString {
   value: string;
+
+  // total comp
+  nonEditable?: boolean;
 }
 
 export class TitleField extends TrackedFieldArrayItem {
+  @Matches(/^[A-Za-z0-9\s.,\-'()]{1,200}$/, {
+    message: 'Title can only contain letters, numbers, spaces, periods, commas, hyphens, apostrophes, and parentheses.',
+  })
   @Length(5, 200, { message: 'Title must be between 5 and 200 characters.' })
   declare text: string;
 }
@@ -91,12 +99,49 @@ function BehaviouralCompetencyValidator(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any[]) {
+          if (!value) return false;
+
           return value.length >= 3 && value.length <= 10;
         },
         defaultMessage(): string {
           return 'There must be at least one related experience.';
         },
       },
+    });
+  };
+}
+
+function AccountabilitiesCountValidator(
+  min: number,
+  max: number,
+  label: string,
+  validationOptions?: ValidationOptions,
+) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'accountabilitiesCountValidator',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any[]) {
+          // console.log('accountabilitiesCountValidator value: ', value);
+          if (!value) return false;
+
+          const validItems = value.filter(
+            (item) =>
+              item.is_significant &&
+              !item.disabled &&
+              ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
+          );
+          return validItems.length >= min && validItems.length <= max;
+        },
+        defaultMessage(args: ValidationArguments): string {
+          const [relatedMin, relatedMax, relatedLabel] = args.constraints;
+          return `There should be between ${relatedMin} and ${relatedMax} ${relatedLabel}.`;
+        },
+      },
+      constraints: [min, max, label],
     });
   };
 }
@@ -110,6 +155,8 @@ function ItemCountValidator(min: number, max: number, label: string, validationO
       options: validationOptions,
       validator: {
         validate(value: any[]) {
+          if (!value) return false;
+
           const validItems = value.filter(
             (item) =>
               !item.disabled && ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
@@ -157,6 +204,7 @@ function MinItemsValidator(min: number, validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any[]) {
+          if (!value) return false;
           const validItems = value.filter(
             (item) =>
               !item.disabled && ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
@@ -182,6 +230,8 @@ function CustomItemCountValidator(min: number, max: number, label: string, valid
       options: validationOptions,
       validator: {
         validate(value: any[]) {
+          if (!value) return false;
+
           const defaultFields = value.filter((item) => !item.isCustom);
           if (defaultFields.length === 0) {
             return true; // No default items, so minimum count is 0
@@ -229,7 +279,7 @@ export class JobProfileValidationModel {
   program_overview: ProgramOverviewField | string;
 
   // @AllDisabled({ message: 'There must be at least one accountability.' })
-  @ItemCountValidator(1, 30, 'accountabilities', {
+  @AccountabilitiesCountValidator(1, 30, 'required accountabilities', {
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
   accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
@@ -263,6 +313,31 @@ export class JobProfileValidationModel {
   knowledge_skills_abilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
   willingness_statements: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
   optional_requirements: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+
+  // total comp fields
+  state: string;
+  markAllNonEditable: boolean;
+  markAllSignificant: boolean;
+  markAllNonEditableEdu: boolean;
+  markAllSignificantEdu: boolean;
+  markAllNonEditableJob_experience: boolean;
+  markAllSignificantJob_experience: boolean;
+  markAllNonEditableSec: boolean;
+  jobStoreNumber: string;
+  originalJobStoreNumber: string;
+  employeeGroup: string | null;
+  classification: string | null;
+
+  jobRole: number | null;
+  professions: ProfessionsModel[];
+  role: number;
+  reportToRelationship: string[];
+  scopeOfResponsibility: number | null;
+  ministries: string[];
+  classificationReviewRequired: boolean;
+  jobContext: string;
+  all_reports_to: boolean;
+  all_organizations: boolean;
 }
 
 export const JobProfile: React.FC<JobProfileProps> = ({

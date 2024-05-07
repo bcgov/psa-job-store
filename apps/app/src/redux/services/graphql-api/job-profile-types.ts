@@ -177,6 +177,9 @@ export interface AccountabilitiesModel {
   // HM view
   isCustom?: boolean;
   disabled?: boolean;
+
+  // total comp
+  nonEditable?: boolean;
 }
 
 export interface SecuritiyScreeningModel {
@@ -194,6 +197,9 @@ export class TrackedFieldArrayItem {
   isCustom?: boolean;
   is_significant?: boolean;
   is_readonly?: boolean;
+
+  // total comp
+  nonEditable?: boolean;
 }
 
 interface BehaviouralCompetencyConnect {

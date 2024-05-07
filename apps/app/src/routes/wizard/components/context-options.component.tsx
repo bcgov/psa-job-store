@@ -37,7 +37,7 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
   confirmRemoveModal,
 }) => {
   // Set the tooltip title based on the read-only state
-  const tooltipTitle = isReadonly ? 'Required' : '';
+  const tooltipTitle = isReadonly ? 'Required' : 'Delete';
 
   // Initialize an empty array for menu items
   const items: MenuProps['items'] = [];
@@ -125,7 +125,7 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
       </Dropdown>
     </Tooltip>
   ) : (
-    <Tooltip title={tooltipTitle} overlayStyle={!isReadonly ? { display: 'none' } : undefined}>
+    <Tooltip title={tooltipTitle}>
       <Button
         data-testid={isDisabled ? `undo-remove-${testId}-${index}` : `remove-${testId}-${index}`}
         className="remove-item-btn"
