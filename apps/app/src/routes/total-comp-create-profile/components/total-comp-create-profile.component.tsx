@@ -943,7 +943,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     move: moveKnowledgeSkillAbility,
   } = useFieldArray({
     control: profileControl,
-    name: 'optional_requirements',
+    name: 'knowledge_skills_abilities',
   });
 
   const handleKnowledgeSkillsAbilitiesMove = (index: number, direction: 'up' | 'down') => {
@@ -1087,30 +1087,46 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         overview: formData.overview.text,
         program_overview: formData.program_overview.text,
         review_required: formData.classificationReviewRequired,
-        accountabilities: formData.accountabilities.map((a: any) => ({
-          text: a.text,
-          is_readonly: a.nonEditable,
-          is_significant: a.is_significant,
-        })),
-        education: formData.education.map((a: any) => ({
-          text: a.text,
-          is_readonly: a.nonEditable,
-          is_significant: a.is_significant,
-        })),
-        job_experience: formData.job_experience.map((a: any) => ({
-          text: a.text,
-          is_readonly: a.nonEditable,
-          is_significant: a.is_significant,
-        })),
-        professional_registration_requirements: formData.professional_registration_requirements.map((p: any) => p.text),
-        optional_requirements: formData.optional_requirements.map((o: any) => o.text),
-        preferences: formData.preferences.map((p: any) => p.text),
-        knowledge_skills_abilities: formData.optional_requirements.map((k: any) => k.text),
-        willingness_statements: formData.willingness_statements.map((w: any) => w.text),
-        security_screenings: formData.security_screenings.map((a: any) => ({
-          text: a.text,
-          is_readonly: a.nonEditable,
-        })),
+        accountabilities: formData.accountabilities
+          .map((a: any) => ({
+            text: a.text,
+            is_readonly: a.nonEditable,
+            is_significant: a.is_significant,
+          }))
+          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+        education: formData.education
+          .map((a: any) => ({
+            text: a.text,
+            is_readonly: a.nonEditable,
+            is_significant: a.is_significant,
+          }))
+          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+        job_experience: formData.job_experience
+          .map((a: any) => ({
+            text: a.text,
+            is_readonly: a.nonEditable,
+            is_significant: a.is_significant,
+          }))
+          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+        professional_registration_requirements: formData.professional_registration_requirements
+          .map((p: any) => p.text)
+          .filter((acc: string) => acc.trim() !== ''),
+        optional_requirements: formData.optional_requirements
+          .map((o: any) => o.text)
+          .filter((acc: string) => acc.trim() !== ''),
+        preferences: formData.preferences.map((p: any) => p.text).filter((acc: string) => acc.trim() !== ''),
+        knowledge_skills_abilities: formData.knowledge_skills_abilities
+          .map((k: any) => k.text)
+          .filter((acc: string) => acc.trim() !== ''),
+        willingness_statements: formData.willingness_statements
+          .map((w: any) => w.text)
+          .filter((acc: string) => acc.trim() !== ''),
+        security_screenings: formData.security_screenings
+          .map((a: any) => ({
+            text: a.text,
+            is_readonly: a.nonEditable,
+          }))
+          .filter((acc: { text: string }) => acc.text.trim() !== ''),
         all_reports_to: formData.all_reports_to,
         all_organizations: formData.all_organizations,
         total_comp_create_form_misc: {
@@ -1268,6 +1284,65 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   };
 
   const save = async (isPublishing = false, isUnpublishing = false) => {
+    // validate only if publishing
+    if (state === 'PUBLISHED' || isPublishing) {
+      const errors = Object.values(profileFormErrors).map((error: any) => {
+        const message =
+          error.message != null
+            ? error.message
+            : error.root != null
+              ? error.root?.message
+              : error.value != null
+                ? error.value.message
+                : error?.text.message
+                  ? error.text.message
+                  : 'Error';
+        return message;
+      });
+
+      const errors2 = Object.values(basicFormErrors)
+        .map((error: any) => {
+          // only interested in title validation here
+          // todo: tag the error so it's easier to identify
+          if (!error?.text?.message || !error?.text?.message.toString().startsWith('Title must be between'))
+            return null;
+
+          const message =
+            error.message != null
+              ? error.message
+              : error.root != null
+                ? error.root?.message
+                : error.value != null
+                  ? error.value.message
+                  : error?.text.message
+                    ? error.text.message
+                    : 'Error';
+          return message;
+        })
+        .filter((m) => m != null);
+
+      if (errors.length || errors2.length) {
+        Modal.error({
+          title: 'Errors',
+          content: (
+            <List>
+              {errors2.map((message, index) => (
+                <List.Item>
+                  <p key={index}>{message}</p>
+                </List.Item>
+              ))}
+              {errors.map((message, index) => (
+                <List.Item>
+                  <p key={index}>{message}</p>
+                </List.Item>
+              ))}
+            </List>
+          ),
+        });
+        return;
+      }
+    }
+
     const transformedData = getTransofrmedData(isPublishing, isUnpublishing);
     await submitJobProfileData(transformedData, isPublishing);
     // Refetch job profile data
@@ -2557,7 +2632,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   <Form.Item>
                                     <Controller
                                       control={profileControl}
-                                      name={`optional_requirements.${index}.text`}
+                                      name={`knowledge_skills_abilities.${index}.text`}
                                       render={({ field: { onChange, onBlur, value } }) => (
                                         <TextArea
                                           autoSize
