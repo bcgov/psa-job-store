@@ -50,7 +50,7 @@ export class CrmService {
           },
         ],
       },
-      select: { crm_id: true },
+      select: { crm_id: true, crm_lookup_name: true },
     });
 
     if (positionRequests.length === 0) return [];
@@ -74,7 +74,7 @@ export class CrmService {
     const response = await firstValueFrom(
       this.request(
         Endpoint.Query,
-        `query=USE REPORT;SELECT id,statusWithType.status.lookupName, category.lookupName FROM incidents WHERE id IN (${positionRequests
+        `query=USE REPORT;SELECT id,lookupName,statusWithType.status.lookupName, category.lookupName FROM incidents WHERE id IN (${positionRequests
           .map((pr) => pr.crm_id)
           .join(',')})`,
       ).pipe(

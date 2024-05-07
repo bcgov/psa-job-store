@@ -57,6 +57,7 @@ export interface GetPositionRequestResponseContent {
   additional_info?: AdditionalInfo;
 
   crm_id?: string;
+  crm_lookup_name?: string;
 }
 
 export interface AdditionalInfo {
@@ -227,6 +228,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   number
                 }
                 crm_id
+                crm_lookup_name
               }
               positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
                 draft
@@ -280,6 +282,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   }
                   additional_info
                   crm_id
+                  crm_lookup_name
                   shareUUID
               }
           }
@@ -320,6 +323,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   }
                   additional_info
                   crm_id
+                  crm_lookup_name
               }
           }
           `,
