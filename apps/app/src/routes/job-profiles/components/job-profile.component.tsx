@@ -711,68 +711,75 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
-    {
-      key: 'accountabilities',
-      label: <h3 tabIndex={0}>Accountabilities</h3>,
-      children: (
-        <>
-          {/* Main Accountabilities - is_significant == true */}
-          <span tabIndex={0}>
-            <ul data-testid="significant-accountabilities">
-              {showDiff && originalData
-                ? compareLists(
-                    originalData.accountabilities.filter((acc) => acc.is_significant),
-                    effectiveData?.accountabilities.filter((acc) => acc.is_significant),
-                  )
-                : effectiveData?.accountabilities
-                    .filter((acc) => acc.is_significant)
-                    .map((accountability, index) => {
-                      if (typeof accountability === 'string' || accountability.disabled) {
-                        return null;
-                      }
-                      if (accountability.text instanceof TrackedFieldArrayItem) {
-                        return <li key={index}>{accountability.text.text}</li>;
-                      } else if (typeof accountability.text === 'string') {
-                        return <li key={index}>{accountability.text}</li>;
-                      }
-                    })}
-            </ul>
-            {/* Optional Accountabilities - is_significant == false */}
-            {(effectiveData?.accountabilities.filter((acc) => !acc.is_significant && !acc.disabled)?.length ?? 0) >
-              0 && <h4>Optional accountabilities</h4>}
-            <ul data-testid="optional-accountabilities">
-              {showDiff && originalData
-                ? compareLists(
-                    originalData.accountabilities.filter((acc) => !acc.is_significant),
-                    effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
-                    true,
-                  )
-                : effectiveData?.accountabilities
-                    .filter((acc) => !acc.is_significant)
-                    .map((accountability, index) => {
-                      if (typeof accountability === 'string' || accountability.disabled) {
-                        return null;
-                      }
-                      if (accountability.text instanceof TrackedFieldArrayItem) {
-                        return <li key={index}>{accountability.text.text}</li>;
-                      } else if (typeof accountability.text === 'string') {
-                        return <li key={index}>{accountability.text}</li>;
-                      }
-                    })}
-            </ul>
-          </span>
-        </>
-      ),
-      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
+    ...((!showDiff && (effectiveData?.accountabilities.filter((acc) => !acc.disabled)?.length ?? 0) > 0) ||
+    (showDiff && (effectiveData?.accountabilities?.length ?? 0) > 0)
+      ? [
+          {
+            key: 'accountabilities',
+            label: <h3 tabIndex={0}>Accountabilities</h3>,
+            children: (
+              <>
+                {/* Main Accountabilities - is_significant == true */}
+                <span tabIndex={0}>
+                  <ul data-testid="significant-accountabilities">
+                    {showDiff && originalData
+                      ? compareLists(
+                          originalData.accountabilities.filter((acc) => acc.is_significant),
+                          effectiveData?.accountabilities.filter((acc) => acc.is_significant),
+                        )
+                      : effectiveData?.accountabilities
+                          .filter((acc) => acc.is_significant)
+                          .map((accountability, index) => {
+                            if (typeof accountability === 'string' || accountability.disabled) {
+                              return null;
+                            }
+                            if (accountability.text instanceof TrackedFieldArrayItem) {
+                              return <li key={index}>{accountability.text.text}</li>;
+                            } else if (typeof accountability.text === 'string') {
+                              return <li key={index}>{accountability.text}</li>;
+                            }
+                          })}
+                  </ul>
+                  {/* Optional Accountabilities - is_significant == false */}
+                  {(effectiveData?.accountabilities.filter((acc) => !acc.is_significant && !acc.disabled)?.length ??
+                    0) > 0 && <h4>Optional accountabilities</h4>}
+                  <ul data-testid="optional-accountabilities">
+                    {showDiff && originalData
+                      ? compareLists(
+                          originalData.accountabilities.filter((acc) => !acc.is_significant),
+                          effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
+                          true,
+                        )
+                      : effectiveData?.accountabilities
+                          .filter((acc) => !acc.is_significant)
+                          .map((accountability, index) => {
+                            if (typeof accountability === 'string' || accountability.disabled) {
+                              return null;
+                            }
+                            if (accountability.text instanceof TrackedFieldArrayItem) {
+                              return <li key={index}>{accountability.text.text}</li>;
+                            } else if (typeof accountability.text === 'string') {
+                              return <li key={index}>{accountability.text}</li>;
+                            }
+                          })}
+                  </ul>
+                </span>
+              </>
+            ),
+            // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+            span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
+          },
+        ]
+      : []),
+
     {
       key: 'requirements',
       label: <h3 tabIndex={0}>Minimum job requirements</h3>,
       children: (
         <>
           <span tabIndex={0}>
-            {(showDiff || (!showDiff && (effectiveData?.education.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
+            {((showDiff && (effectiveData?.education?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.education.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <h4>Education</h4>
             )}
             <ul data-testid="education">
@@ -793,7 +800,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                   })}
             </ul>
 
-            {effectiveData?.job_experience && effectiveData?.job_experience.length > 0 && (
+            {((showDiff && (effectiveData?.job_experience?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.job_experience.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Related experience</h4>
                 <ul data-testid="job-experience">
@@ -816,30 +824,33 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               </>
             )}
 
-            {effectiveData?.professional_registration_requirements &&
-              effectiveData?.professional_registration_requirements.length > 0 && (
-                <>
-                  <h4>Professional registration requirements</h4>
-                  <ul data-testid="professional-registration">
-                    {showDiff && originalData
-                      ? compareLists(
-                          originalData.professional_registration_requirements,
-                          effectiveData?.professional_registration_requirements,
-                        )
-                      : effectiveData?.professional_registration_requirements?.map((requirement, index) => {
-                          if (typeof requirement === 'string') {
-                            return <li key={index}>{requirement}</li>;
-                          }
-                          if (requirement.disabled) {
-                            return null;
-                          }
-                          return <li key={index}>{requirement.text}</li>;
-                        })}
-                  </ul>
-                </>
-              )}
+            {((showDiff && (effectiveData?.professional_registration_requirements?.length ?? 0) > 0) ||
+              (!showDiff &&
+                (effectiveData?.professional_registration_requirements.filter((ed) => !ed.disabled)?.length ?? 0) >
+                  0)) && (
+              <>
+                <h4>Professional registration requirements</h4>
+                <ul data-testid="professional-registration">
+                  {showDiff && originalData
+                    ? compareLists(
+                        originalData.professional_registration_requirements,
+                        effectiveData?.professional_registration_requirements,
+                      )
+                    : effectiveData?.professional_registration_requirements?.map((requirement, index) => {
+                        if (typeof requirement === 'string') {
+                          return <li key={index}>{requirement}</li>;
+                        }
+                        if (requirement.disabled) {
+                          return null;
+                        }
+                        return <li key={index}>{requirement.text}</li>;
+                      })}
+                </ul>
+              </>
+            )}
 
-            {effectiveData?.preferences && effectiveData?.preferences.length > 0 && (
+            {((showDiff && (effectiveData?.preferences?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.preferences.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Preferences</h4>
                 <ul data-testid="preferences">
@@ -858,7 +869,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               </>
             )}
 
-            {effectiveData?.knowledge_skills_abilities && effectiveData?.knowledge_skills_abilities.length > 0 && (
+            {((showDiff && (effectiveData?.knowledge_skills_abilities?.length ?? 0) > 0) ||
+              (!showDiff &&
+                (effectiveData?.knowledge_skills_abilities.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Knowledge, skills and abilities</h4>
                 <ul data-testid="knowledge-skills-abilities">
@@ -877,7 +890,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               </>
             )}
 
-            {effectiveData?.willingness_statements && effectiveData?.willingness_statements.length > 0 && (
+            {((showDiff && (effectiveData?.willingness_statements?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.willingness_statements.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Willingness statements or provisos</h4>
                 <ul data-testid="provisos">
@@ -896,7 +910,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               </>
             )}
 
-            {effectiveData?.security_screenings && effectiveData?.security_screenings.length > 0 && (
+            {((showDiff && (effectiveData?.security_screenings?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.security_screenings.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Security screening</h4>
                 <ul data-testid="security-screenings">
@@ -919,7 +934,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               </>
             )}
 
-            {effectiveData?.optional_requirements && effectiveData?.optional_requirements.length > 0 && (
+            {((showDiff && (effectiveData?.optional_requirements?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.optional_requirements.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Optional requirements</h4>
                 <ul data-testid="optional-requirements">

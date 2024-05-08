@@ -10,3 +10,5 @@ AL-611 Empty line validation on the total compensation view - to prevent publish
 AL-656 Going back after editing the form does not display "title over 30 characters" warning until edited
 AL-604 Set character limits and validation to fields as per existing PS guidelines
 AL-602 Implement action button on final wizard screen, status indicator, context menu
+AL-613 Address empty headings appearing on review page
+AL-614 Address empty headings appearing on exported document
