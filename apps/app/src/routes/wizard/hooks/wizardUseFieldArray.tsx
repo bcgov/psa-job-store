@@ -71,11 +71,10 @@ const useFormFields = ({
   };
 
   const handleReset = (index: number) => {
-    if (significant || forceSignificant) setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: false }));
+    // if (significant || forceSignificant)
+    setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: false }));
 
-    const currentValues: TrackedFieldArrayItem[] = useFormReturn.getValues(
-      'accountabilities',
-    ) as TrackedFieldArrayItem[];
+    const currentValues: TrackedFieldArrayItem[] = useFormReturn.getValues(fieldName) as TrackedFieldArrayItem[];
     currentValues[index].text = originalFields?.[index]?.text;
     update(index, {
       text: originalFields?.[index]?.text,

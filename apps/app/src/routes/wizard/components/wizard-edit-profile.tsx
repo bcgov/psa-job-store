@@ -109,17 +109,17 @@ const WizardEditProfile = forwardRef(
     };
     const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
 
-    // const [editedProvisosFields, setEditedProvisosFields] = useState<{ [key: number]: boolean }>({});
-    // const [editedProfessionalRegistrationFields, setEditedProfessionalRegistrationFields] = useState<{
-    //   [key: number]: boolean;
-    // }>({});
-    // const [editedOptionalRequirementsFields, setEditedOptionalRequirementsFields] = useState<{
-    //   [key: number]: boolean;
-    // }>({});
-    // const [editedPreferencesFields, setEditedPreferencesFields] = useState<{ [key: number]: boolean }>({});
-    // const [editedKnowledgeSkillsAbilitiesFields, setEditedKnowledgeSkillsAbilitiesFields] = useState<{
-    //   [key: number]: boolean;
-    // }>({});
+    const [editedProvisosFields, setEditedProvisosFields] = useState<{ [key: number]: boolean }>({});
+    const [editedProfessionalRegistrationFields, setEditedProfessionalRegistrationFields] = useState<{
+      [key: number]: boolean;
+    }>({});
+    const [editedOptionalRequirementsFields, setEditedOptionalRequirementsFields] = useState<{
+      [key: number]: boolean;
+    }>({});
+    const [editedPreferencesFields, setEditedPreferencesFields] = useState<{ [key: number]: boolean }>({});
+    const [editedKnowledgeSkillsAbilitiesFields, setEditedKnowledgeSkillsAbilitiesFields] = useState<{
+      [key: number]: boolean;
+    }>({});
 
     const handleSectionScroll = (reason: string) => {
       for (const key in sections) {
@@ -194,8 +194,17 @@ const WizardEditProfile = forwardRef(
       const anyReqAccsTrue = Object.values(editedAccReqFields).some((item) => item === true);
 
       // AL-619 this is a temporary measure to disable education requirements for admin family
-      const anyEducationTrue = Object.values(editedMinReqFields).some((item) => item === true) && !isAdmin;
-      const anyRelWorkTrue = Object.values(editedRelWorkFields).some((item) => item === true);
+
+      const anyEducationTrue = Object.entries(editedMinReqFields).some(([index, item]) => {
+        const originalItem = originalMinReqFields[Number(index)];
+        return item === true && originalItem && originalItem.is_significant && !isAdmin;
+      });
+
+      const anyRelWorkTrue = Object.entries(editedRelWorkFields).some(([index, item]) => {
+        const originalItem = originalRelWorkFields[Number(index)];
+        return item === true && originalItem && originalItem.is_significant && !isAdmin;
+      });
+
       const anySsecurityScreeningsTrue = Object.values(editedSecurityScreeningsFields).some((item) => item === true);
       const verificationReasons = [];
       anyReqAccsTrue && verificationReasons.push(reasons.ACCOUNTABILITIES);
@@ -213,6 +222,8 @@ const WizardEditProfile = forwardRef(
       editedSecurityScreeningsFields,
       onVerificationRequiredChange,
       isAdmin,
+      originalMinReqFields,
+      originalRelWorkFields,
     ]);
 
     useEffect(() => {
@@ -274,31 +285,31 @@ const WizardEditProfile = forwardRef(
             field: 'professional_registration_requirements',
             originalField: 'professional_registration_requirements',
             setOriginal: setOriginalProfessionalRegistrationFields,
-            setEdited: () => {},
+            setEdited: setEditedProfessionalRegistrationFields,
           },
           {
             field: 'optional_requirements',
             originalField: 'optional_requirements',
             setOriginal: setOriginalOptionalRequirementsFields,
-            setEdited: () => {},
+            setEdited: setEditedOptionalRequirementsFields,
           },
           {
             field: 'preferences',
             originalField: 'preferences',
             setOriginal: setOriginalPreferencesFields,
-            setEdited: () => {},
+            setEdited: setEditedPreferencesFields,
           },
           {
             field: 'knowledge_skills_abilities',
             originalField: 'knowledge_skills_abilities',
             setOriginal: setOriginalKnowledgeSkillsAbilitiesFields,
-            setEdited: () => {},
+            setEdited: setEditedKnowledgeSkillsAbilitiesFields,
           },
           {
             field: 'willingness_statements',
             originalField: 'willingness_statements',
             setOriginal: setOriginalProvisosFields,
-            setEdited: () => {},
+            setEdited: setEditedProvisosFields,
           },
         ];
 
@@ -724,11 +735,21 @@ const WizardEditProfile = forwardRef(
                 editedRelatedExperienceFields={editedRelWorkFields}
                 setEditedRelatedExperienceFields={setEditedRelWorkFields}
                 originalProfessionalRegistrationFields={originalProfessionalRegistrationFields}
+                editedProfessionalRegistrationFields={editedProfessionalRegistrationFields}
+                setEditedProfessionalRegistrationFields={setEditedProfessionalRegistrationFields}
                 originalPreferencesFields={originalPreferencesFields}
+                editedPreferencesFields={editedPreferencesFields}
+                setEditedPreferencesFields={setEditedPreferencesFields}
                 originalKnowledgeSkillsAbilitiesFields={originalKnowledgeSkillsAbilitiesFields}
+                editedKnowledgeSkillsAbilitiesFields={editedKnowledgeSkillsAbilitiesFields}
+                setEditedKnowledgeSkillsAbilitiesFields={setEditedKnowledgeSkillsAbilitiesFields}
                 originalProvisosFields={originalProvisosFields}
+                editedProvisosFields={editedProvisosFields}
+                setEditedProvisosFields={setEditedProvisosFields}
+                originalOptionalRequirementsFields={originalOptionalRequirementsFields}
+                editedOptionalRequirementsFields={editedOptionalRequirementsFields}
+                setEditedOptionalRequirementsFields={setEditedOptionalRequirementsFields}
                 originalSecurityScreeningsFields={originalSecurityScreeningsFields}
-                originalMinimumJobRequirementsFields={originalMinReqFields}
                 setEditedSecurityScreeningsFields={setEditedSecurityScreeningsFields}
                 editedSecurityScreeningsFields={editedSecurityScreeningsFields}
                 isAdmin={isAdmin}
