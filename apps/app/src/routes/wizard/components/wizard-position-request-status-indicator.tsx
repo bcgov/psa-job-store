@@ -1,5 +1,6 @@
 import { Space } from 'antd';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from 'react-oidc-context';
 import './wizard-position-request-status-indicator.css';
 
 interface StatusIndicatorProps {
@@ -8,6 +9,23 @@ interface StatusIndicatorProps {
 }
 
 const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status, colorText = true }) => {
+  const [role, setRole] = useState<string | null>(null);
+  const auth = useAuth();
+
+  useEffect(() => {
+    // console.log('auth.user: ', auth.user);
+    const roles = auth.user?.profile['client_roles'];
+    if (roles && (roles as string[]).includes('total-compensation')) {
+      setRole('total-compensation');
+    } else if (roles && (roles as string[]).includes('classification')) {
+      setRole('classification');
+    } else if (roles && (roles as string[]).includes('hiring-manager')) {
+      setRole('hiring-manager');
+    } else {
+      setRole('user');
+    }
+  }, [auth]);
+
   const getColorForStatus = (status: string) => {
     switch (status) {
       case 'DRAFT':
@@ -53,7 +71,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status, colorText = t
       case 'ESCALATED':
         return 'Escalated';
       case 'ACTION_REQUIRED':
-        return 'Action Required';
+        return role == 'classification' ? 'Reivew required' : 'Action required';
       default:
         return 'Unknown';
     }

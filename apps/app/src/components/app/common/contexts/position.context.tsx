@@ -34,7 +34,7 @@ interface PositionProviderProps {
 }
 
 export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) => {
-  const { setPositionRequestId, positionRequestId, resetWizardContext } = useWizardContext();
+  const { positionRequestId, resetWizardContext } = useWizardContext();
   const [createPositionRequest] = useCreatePositionRequestMutation();
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
       };
       // 'CreatePositionRequestInput': profile_json_updated, parent_job_profile, title, classification_code
       const resp = await createPositionRequest(positionRequestInput).unwrap();
-      setPositionRequestId(resp.createPositionRequest);
+      // setPositionRequestId(resp.createPositionRequest);
       navigate(`/my-positions/${resp.createPositionRequest}`, { replace: true });
       return true;
     } else {

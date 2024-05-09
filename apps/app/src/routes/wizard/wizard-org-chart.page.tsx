@@ -27,6 +27,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
 
   // this page gets displayed on two routes: /my-positions/create and /my-positions/:id
   // if we navigate to /my-positions/create, wipe all wizard context info
+  const [locationProcessed, setLocationProcessed] = useState(false);
   const location = useLocation();
   useEffect(() => {
     if (location.pathname === '/my-positions/create') {
@@ -34,6 +35,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
       setSelectedDepartment(null);
       setSelectedPositionId(null);
     }
+    setLocationProcessed(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
@@ -119,6 +121,10 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
     setSelectedPositionId(positionRequestData?.reports_to_position_id?.toString());
     setSelectedDepartment(positionRequestData?.department_id);
   };
+
+  if (locationProcessed === false) {
+    return <LoadingComponent />;
+  }
 
   return (
     <WizardPageWrapper

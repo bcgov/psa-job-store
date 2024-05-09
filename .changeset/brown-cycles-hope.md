@@ -13,3 +13,5 @@ AL-602 Implement action button on final wizard screen, status indicator, context
 AL-613 Address empty headings appearing on review page
 AL-614 Address empty headings appearing on exported document
 AL-618 Implement undo functionality on all fields on edit form
+AL-305 Classifications - actions tab functionality
+AL-655 Going through "My organizations" after editing a different position request does not clear selected person + profile data not resetting
