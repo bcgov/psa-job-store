@@ -69,7 +69,6 @@ export class ScheduledTaskService {
     if (needsUpdate === true) {
       await this.updateMetadata(ScheduledTask.CrmSync, 60);
       this.logger.log(`Start syncPositionStatus @ ${new Date()}`);
-      this.logger.log(`hello${new Date()}`);
       await this.crmService.syncIncidentStatus().then(async (rows) => {
         for (const row of rows) {
           const [crm_id, crm_lookup_name, crm_status, crm_category] = row as [string, string, string, string];
