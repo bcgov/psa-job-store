@@ -118,7 +118,7 @@ export const ClassificationTaskPage = () => {
               <div className="result-extra-content">
                 <Row justify="center">
                   <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-                    {currentStatus == 'ESCALATED' && (
+                    {currentStatus == 'REVIEW' && (
                       <Alert
                         style={{ marginBottom: '1rem' }}
                         message={

@@ -69,6 +69,7 @@ export class ScheduledTaskService {
     if (needsUpdate === true) {
       await this.updateMetadata(ScheduledTask.CrmSync, 60);
       this.logger.log(`Start syncPositionStatus @ ${new Date()}`);
+      this.logger.log(`hello${new Date()}`);
       await this.crmService.syncIncidentStatus().then(async (rows) => {
         for (const row of rows) {
           const [crm_id, crm_lookup_name, crm_status, crm_category] = row as [string, string, string, string];
@@ -107,7 +108,12 @@ export class ScheduledTaskService {
 
               // Conditionally update the positionRequest.status
               if (positionRequest.status !== incomingPositionRequestStatus) {
-                // console.log('updating db', positionRequest.status, incomingPositionRequestStatus);
+                this.logger.log(
+                  `Updating status ${positionRequest.status} to ${incomingPositionRequestStatus} 
+                  crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, 
+                  crm status:  ${crm_status}, crm category: ${crm_category}, 
+                  ps status: ${positionObj['A.POSN_STATUS']}, ps effective status: ${positionObj['A.EFF_STATUS']}`,
+                );
 
                 await this.prisma.positionRequest.update({
                   where: { crm_id: +crm_id },
