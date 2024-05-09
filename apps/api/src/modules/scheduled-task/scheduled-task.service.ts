@@ -62,7 +62,7 @@ export class ScheduledTaskService {
     }
   }
 
-  @Cron('*/1 * * * * *')
+  @Cron('*/5 * * * * *')
   async syncPositionStatuses() {
     const needsUpdate = await this.isMetadataOutdated(ScheduledTask.CrmSync);
 
