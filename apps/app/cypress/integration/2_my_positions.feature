@@ -81,8 +81,8 @@ Feature: Manage and Display Position Requests
             | Download  |
             | Copy link |
 
-    Scenario: Executing actions for IN_REVIEW status menu options
-        When the user opens the action menu for a job position with "IN_REVIEW" status
+    Scenario: Executing actions for VERIFICATION status menu options
+        When the user opens the action menu for a job position with "VERIFICATION" status
         And the user selects the "<Action>" option
         Then the system should perform the "<Action>" action
 

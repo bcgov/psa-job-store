@@ -54,10 +54,10 @@ export const ClassificationTaskPage = () => {
   };
 
   const statusIconColorMap: any = {
-    ESCALATED: { icon: <ExclamationCircleFilled />, color: '#FA8C16', text: 'Escalated' },
+    REVIEW: { icon: <ExclamationCircleFilled />, color: '#FA8C16', text: 'Classification Review' },
     ACTION_REQUIRED: { icon: <CloseSquareFilled />, color: '#FF4D4F', text: 'Action Required' },
     COMPLETED: { icon: <CheckCircleFilled />, color: '#237804', text: 'Completed' },
-    IN_REVIEW: { icon: <CheckCircleFilled />, color: '#722ED1', text: 'Review' },
+    VERIFICATION: { icon: <CheckCircleFilled />, color: '#722ED1', text: 'Review' },
   };
 
   const StatusIcon = ({ status }: any) => {

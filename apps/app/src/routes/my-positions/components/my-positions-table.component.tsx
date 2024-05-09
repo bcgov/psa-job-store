@@ -263,7 +263,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               </>
             )}
 
-            {record.status === 'IN_REVIEW' && (
+            {record.status === 'VERIFICATION' && (
               <>
                 <Menu.Item
                   data-testid="menu-option-view"
@@ -378,11 +378,11 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                 switch (status) {
                   case 'DRAFT':
                     return 'gray';
-                  case 'IN_REVIEW':
+                  case 'VERIFICATION':
                     return '#722ED1';
                   case 'COMPLETED':
                     return '#13C2C2';
-                  case 'ESCALATED':
+                  case 'REVIEW':
                     return '#FAAD14';
                   case 'ACTION_REQUIRED':
                     return '#F5222D';
@@ -395,12 +395,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                 switch (status) {
                   case 'DRAFT':
                     return 'Draft';
-                  case 'IN_REVIEW':
+                  case 'VERIFICATION':
                     return 'In Review';
                   case 'COMPLETED':
                     return 'Completed';
-                  case 'ESCALATED':
-                    return 'Escalated';
+                  case 'REVIEW':
+                    return 'In Classification Review';
                   case 'ACTION_REQUIRED':
                     return 'Action Required';
                   default:

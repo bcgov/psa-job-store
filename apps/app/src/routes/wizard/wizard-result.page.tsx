@@ -116,8 +116,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       return;
     }
 
-    // if it's in IN_REVIEW;, set mode to sentForVerification
-    if (positionRequestData?.positionRequest?.status === 'IN_REVIEW') {
+    // if it's in VERIFICATION;, set mode to sentForVerification
+    if (positionRequestData?.positionRequest?.status === 'VERIFICATION') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -130,8 +130,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       return;
     }
 
-    // if it's in ESCALATED status, show "classification review required" screen
-    if (positionRequestData?.positionRequest?.status === 'ESCALATED') {
+    // if it's in REVIEW status, show "classification review required" screen
+    if (positionRequestData?.positionRequest?.status === 'REVIEW') {
       switchParentMode && switchParentMode('readonly');
       // setMode('classificationReviewRequired');
       switchParentReadonlyMode && switchParentReadonlyMode('inQueue');
@@ -191,7 +191,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           switchParentMode && switchParentMode('readonly');
           switchParentReadonlyMode && switchParentReadonlyMode('completed');
           setReadOnlySelectedTab && setReadOnlySelectedTab('4');
-        } else if (result?.submitPositionRequest.status === 'IN_REVIEW') {
+        } else if (result?.submitPositionRequest.status === 'VERIFICATION') {
           switchParentMode && switchParentMode('readonly');
           switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
           setReadOnlySelectedTab && setReadOnlySelectedTab('4');

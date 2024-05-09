@@ -235,7 +235,7 @@ Then('they see the new position in the list with "In Review" status', () => {
   cy.get('.job-position-row').first().find('[data-testid="job-title"]').should('have.text', 'Verification test');
 
   // Check if the new position is present in the list with "In Review" status
-  cy.get('.job-position-row').first().find('[data-testid="status-IN_REVIEW"]').should('be.visible');
+  cy.get('.job-position-row').first().find('[data-testid="status-VERIFICATION"]').should('be.visible');
 });
 
 // Classifications switches status scenario

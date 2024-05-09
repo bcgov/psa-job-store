@@ -77,7 +77,7 @@ describe('ScheduledTaskService', () => {
       {
         description: "should return 'VERIFICATION' for 'New Position', 'Proposed', and 'Unresolved'",
         context: { category: 'New Position', crm_status: 'Unresolved', ps_status: 'Proposed' },
-        expected: 'IN_REVIEW',
+        expected: 'VERIFICATION',
       },
       {
         description: "should return 'ACTION_REQUIRED' for 'Classification', 'Waiting - Client', and 'Proposed'",
@@ -92,7 +92,7 @@ describe('ScheduledTaskService', () => {
       {
         description: "should return 'REVIEW' for 'Classification', 'Updated', and 'Proposed'",
         context: { category: 'Classification', crm_status: 'Updated', ps_status: 'Proposed' },
-        expected: 'ESCALATED',
+        expected: 'REVIEW',
       },
       {
         description: "should return 'COMPLETED' for 'Classification', 'Solved', and 'Approved'",

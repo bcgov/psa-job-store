@@ -14,9 +14,9 @@ import MyPositionsTable from './components/my-positions-table.component';
 // eslint-disable-next-line react-refresh/only-export-components
 export const statusFilterDataMap = [
   { label: 'Draft', value: 'DRAFT' },
-  { label: 'In Review', value: 'IN_REVIEW' },
+  { label: 'In Review', value: 'VERIFICATION' },
   { label: 'Completed', value: 'COMPLETED' },
-  { label: 'Escalated', value: 'ESCALATED' },
+  { label: 'Escalated', value: 'REVIEW' },
   { label: 'Action required', value: 'ACTION_REQUIRED' },
 ];
 

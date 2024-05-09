@@ -3577,7 +3577,7 @@ async function seed() {
         submission_id: 'SUB002',
         submitted_at: new Date(),
         approved_at: new Date(),
-        status: 'IN_REVIEW',
+        status: 'VERIFICATION',
         updated_at: new Date(),
         additional_info_work_location_id: 'LOC02',
         additional_info_department_id: 'DEPT02',

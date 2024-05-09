@@ -30,8 +30,8 @@ When('the user opens the action menu for a job position with "COMPLETED" status'
     .as('draftRecordId');
 });
 
-When('the user opens the action menu for a job position with "IN_REVIEW" status', () => {
-  cy.get('[data-testid="status-IN_REVIEW"]')
+When('the user opens the action menu for a job position with "VERIFICATION" status', () => {
+  cy.get('[data-testid="status-VERIFICATION"]')
     .first()
     .parents('[data-row-key]')
     .invoke('attr', 'data-row-key')
