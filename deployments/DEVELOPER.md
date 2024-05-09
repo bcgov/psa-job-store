@@ -117,7 +117,7 @@ kubectl annotate -n <namespace> postgrescluster <postgres-cluster-name> \
 Performing a restore can be done by changing the file:
 
 ```
-oc apply -k deployments/openshift/kustomize/base/api/crunchy/postgrescluster.yml
+deployments/openshift/kustomize/overlays/<ENV>/crunchy/postgrescluster.yml
 ```
 
 Change the metadata.name to the new cluster name that will become the restored database; change the spec.dataSource.postgresCluster.clusterName to the existing database. Specify under options the exact time you would like to restore from; the closest backup to the date-time specified will be used.
@@ -137,7 +137,13 @@ spec:
      - --target="2024-02-06 19:50:11-04"
 ```
 
-You can run
+And also change the metadata.name in the base file, so the patch can identify the base. You can run
+
+```
+oc apply -k deployments/openshift/kustomize/overlays/<ENV>/crunchy/
+```
+
+To start up the restored cluster. You can then run
 
 ```
 oc describe postgrescluster.postgres-operator.crunchydata.com/<new-cluster-name>
@@ -145,7 +151,34 @@ oc describe postgrescluster.postgres-operator.crunchydata.com/<new-cluster-name>
 
 to check the status of the new cluster.
 
-Once the new cluster is up and running, we simply need to change the URI used by the backend to point to the new cluster. Find the openshift secret "<new-cluster-name>-pguser-admin" and copy the value for the key "uri". Update the "secrets" secret with this value, overwriting the existing value for the key "DATABASE_URL". Find the nestjs-app deployment config and start a rollout; the new pod should pick up the updated secret value and be pointing to the new cluster database.
+Once the new cluster is up and running, we simply need to change the URI used by the backend to point to the new cluster. Find the openshift secret "<new-cluster-name>-pguser-admin" and copy the value for the key "uri". Update the "secrets" secret with this value, overwriting the existing value for the key "DATABASE_URL". Find the nestjs-app deployment config and start a rollout; the new pod should pick up the updated secret value and be pointing to the new cluster database. If you have rolled back to a version prior to the latest schema migration, you will need to change the version of the image which the deployment config references (you may wish to do this regardless, but it may not be necessary if there were no database changes).
+
+Once the new cluster is connected, verify the application is working. You can then delete the old cluster (although a waiting period of a few days might not be a bad idea!). Before deleting, RECORD THE NAME OF THE PERSISTANT VOLUME (PV) ATTACHED TO THE BACKUP PVC, AND ENSURE THAT YOU ARE REFERENCING THE CORRECT CLUSTER. In the metadata section of the postgrescluster.yml file, it must be set to the resource name you want to delete (Similarily, if you testing out backup and restore, make sure this is set to your cloned cluster's name when cleaning up!):
+
+```
+metadata:
+ name: api-postgres-old
+```
+
+Record the new name of the PV here:
+
+### PV NAME
+
+```
+pvc-514dc12f-64aa-438c-b0a8-f79423aaa626
+```
+
+PVCs should be marked with a custom finalizer, to prevent them from being accidentally deleted. If you have run the oc delete command, the PVCs will be stuck in a terminating state. To permanently delete them, simply remove the 'kubernetes' finalizer.
+
+If you have indeed swapped over to a new cluster, you should mark the new PVCs with a finalizer, which prevents PVCs from automatically being deleted. There should be an exisiting finalizer; you can add 'kubernetes' as an additional finalizer, like so:
+
+```
+finalizers:
+  - kubernetes.io/pvc-protection
+  - kubernetes
+```
+
+In the event that the postgrescluster is totally lost and a restore process is not possible, it is still possible to recover the backup files as they are stored in netapp-file-backup storage. You can contact the platforms team and ask them to restore it to another PVC by referencing the PV name, as listed above.
 
 ## Notes:
 
