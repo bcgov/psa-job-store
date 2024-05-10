@@ -1762,6 +1762,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   setValue('all_reports_to', false);
                                   field.onChange(selectedItems); // Continue with the original onChange
                                 }}
+                                autoClearSearchValue={false}
                                 // todo: do the filtering externally, wasn't able to do it because of inifinite render loop
                                 treeData={filterTreeData(treeDataConverted, selectedClassificationId)}
                                 // treeData={treeDataConverted} // Replace with your data
