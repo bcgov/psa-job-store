@@ -454,7 +454,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   ]);
 
   const { data: treeData } = useGetGroupedClassificationsQuery({
-    employee_group_ids: ['MGT', 'GEU', 'OEX', 'NUR'],
+    employee_group_ids: ['MGT', 'GEU', 'OEX', 'NUR', 'PEA'],
     effective_status: 'Active',
   });
 
