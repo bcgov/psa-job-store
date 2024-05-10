@@ -1640,11 +1640,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       }}
                                     >
                                       {/* Dynamically render profession options based on your data */}
-                                      {jobFamiliesData?.jobFamilies.map((family) => (
-                                        <Option key={family.id} value={family.id}>
-                                          {family.name}
-                                        </Option>
-                                      ))}
+                                      {jobFamiliesData?.jobFamilies
+                                        .filter(
+                                          (jf) =>
+                                            !selectedProfession.map((p) => p.jobFamily).includes(jf.id) ||
+                                            jf.id == selectedProfession[index].jobFamily,
+                                        )
+                                        .map((family) => (
+                                          <Option key={family.id} value={family.id}>
+                                            {family.name}
+                                          </Option>
+                                        ))}
                                     </Select>
                                   </Col>
                                   <Col>
