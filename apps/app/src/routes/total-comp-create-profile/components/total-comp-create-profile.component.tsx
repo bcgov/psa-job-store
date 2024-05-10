@@ -2968,9 +2968,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   triggerProfileValidation();
                                 }}
                                 style={{
-                                  border: 'none',
-                                  padding: 0,
-                                  color: '#D9D9D9',
+                                  marginLeft: '10px',
+                                  border: '1px solid',
+                                  borderColor: '#d9d9d9',
                                 }}
                               />
 
