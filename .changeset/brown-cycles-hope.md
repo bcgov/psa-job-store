@@ -15,3 +15,4 @@ AL-614 Address empty headings appearing on exported document
 AL-618 Implement undo functionality on all fields on edit form
 AL-305 Classifications - actions tab functionality
 AL-655 Going through "My organizations" after editing a different position request does not clear selected person + profile data not resetting
+AL-250 Empty view doesn't expand to the bottom of the screen (total comp)
