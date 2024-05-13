@@ -454,7 +454,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   ]);
 
   const { data: treeData } = useGetGroupedClassificationsQuery({
-    employee_group_ids: ['MGT', 'GEU', 'OEX', 'NUR'],
+    employee_group_ids: ['MGT', 'GEU', 'OEX', 'NUR', 'PEA'],
     effective_status: 'Active',
   });
 
@@ -1640,11 +1640,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       }}
                                     >
                                       {/* Dynamically render profession options based on your data */}
-                                      {jobFamiliesData?.jobFamilies.map((family) => (
-                                        <Option key={family.id} value={family.id}>
-                                          {family.name}
-                                        </Option>
-                                      ))}
+                                      {jobFamiliesData?.jobFamilies
+                                        .filter(
+                                          (jf) =>
+                                            !selectedProfession.map((p) => p.jobFamily).includes(jf.id) ||
+                                            jf.id == selectedProfession[index].jobFamily,
+                                        )
+                                        .map((family) => (
+                                          <Option key={family.id} value={family.id}>
+                                            {family.name}
+                                          </Option>
+                                        ))}
                                     </Select>
                                   </Col>
                                   <Col>
@@ -1762,6 +1768,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   setValue('all_reports_to', false);
                                   field.onChange(selectedItems); // Continue with the original onChange
                                 }}
+                                autoClearSearchValue={false}
                                 // todo: do the filtering externally, wasn't able to do it because of inifinite render loop
                                 treeData={filterTreeData(treeDataConverted, selectedClassificationId)}
                                 // treeData={treeDataConverted} // Replace with your data
@@ -2968,9 +2975,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   triggerProfileValidation();
                                 }}
                                 style={{
-                                  border: 'none',
-                                  padding: 0,
-                                  color: '#D9D9D9',
+                                  marginLeft: '10px',
+                                  border: '1px solid',
+                                  borderColor: '#d9d9d9',
                                 }}
                               />
 
