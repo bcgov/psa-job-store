@@ -89,7 +89,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     ) {
       return new Promise((resolve) => {
         Modal.confirm({
-          title: 'Change job profile?',
+          title: 'Change profile?',
           content: (
             <div data-testid="change-profile-warning">
               <p>
@@ -99,7 +99,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               <p>This action is irreversible. Are you sure you wish to proceed?</p>
             </div>
           ),
-          okText: 'Change job profile',
+          okText: 'Change profile',
           cancelText: 'Cancel',
           onOk: () => {
             setWizardData(null); // this ensures that any previous edits are cleared
@@ -148,10 +148,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           await updatePositionRequest({
             id: positionRequestId,
             step: action === 'next' ? 2 : 1,
-            // if user selected same profile as before, do not clear profile_json
+            // if user selected same profile as before, do not clear profile_json_updated
             // also do not update title to default
             ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
-              profile_json: null,
+              profile_json_updated: null,
               title: selectedProfileName ?? undefined,
             }),
             parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },

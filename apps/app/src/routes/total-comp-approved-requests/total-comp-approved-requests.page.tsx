@@ -36,7 +36,7 @@ export const TotalCompApprovedRequestsPage = () => {
         <MyPositionsTable
           tableTitle={'Requests'}
           mode="total-compensation"
-          style={{ marginTop: '1rem' }}
+          style={{ marginTop: '1rem', flexGrow: '1', display: 'flex', flexDirection: 'column' }}
           // handleTableChangeCallback={handleTableChangeCallback}
         ></MyPositionsTable>
       </ContentWrapper>

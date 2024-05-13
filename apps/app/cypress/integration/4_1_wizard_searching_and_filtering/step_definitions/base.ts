@@ -9,19 +9,19 @@ Given('the user is on the home page', () => {
 });
 
 When('the user presses "Create new direct report" on the home page org chart', () => {
-  cy.visit('/my-positions/7');
-  // // Wait for the org chart to load
-  // cy.get('[data-testid="org-chart-loading"]', { timeout: 100000 }).should('not.exist');
-  // cy.get('[data-testid="org-chart-container"]', { timeout: 100000 }).should('be.visible');
+  // cy.visit('/my-positions/7');
+  // Wait for the org chart to load
+  cy.get('[data-testid="org-chart-loading"]', { timeout: 100000 }).should('not.exist');
+  cy.get('[data-testid="org-chart-container"]', { timeout: 100000 }).should('be.visible');
 
-  // // Select the specific node with ID '00121521' and assign it an alias
-  // cy.get('[data-testid="org-chart-node-00121521"]').as('targetNode');
+  // Select the specific node with ID '00121521' and assign it an alias
+  cy.get('[data-testid="org-chart-node-00121521"]').as('targetNode');
 
-  // // Click on the node to select it or to reveal the 'Create new direct report' button
-  // cy.get('@targetNode').scrollIntoView().should('be.visible').click();
+  // Click on the node to select it or to reveal the 'Create new direct report' button
+  cy.get('@targetNode').scrollIntoView().should('be.visible').click();
 
-  // // Re-query the DOM for the node and find the 'Create new direct report' button within it
-  // cy.get('@targetNode').find('[data-testid="create-direct-report-button"]').click();
+  // Re-query the DOM for the node and find the 'Create new direct report' button within it
+  cy.get('@targetNode').find('[data-testid="create-direct-report-button"]').click();
 });
 
 Then('they are taken to the job profile selection step', () => {

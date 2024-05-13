@@ -9,7 +9,10 @@ export const JobProfilesPage = () => {
   return (
     <>
       {/* <Space direction="vertical" style={{ width: '100%' }} size="large"> */}
-      <PageHeader title="Explore job profiles" subTitle="" />
+      <PageHeader
+        title="Explore job profiles"
+        subTitle="To search profiles, please choose filters to access.  Please note you will be able to see profiles, however position creation options may be limited by your organization structure or reporting relationship."
+      />
       {/* <div style={{ padding: '0 1rem' }}> */}
       <ContentWrapper>
         <JobProfiles searchParams={searchParams} />

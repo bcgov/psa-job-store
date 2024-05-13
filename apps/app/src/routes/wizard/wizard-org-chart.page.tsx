@@ -2,7 +2,7 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import 'reactflow/dist/style.css';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import { usePosition } from '../../components/app/common/contexts/position.context';
@@ -23,9 +23,25 @@ interface WizardOrgChartPageProps {
 }
 
 export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: WizardOrgChartPageProps) => {
-  const { positionRequestDepartmentId } = useWizardContext();
+  const { positionRequestDepartmentId, resetWizardContext, positionRequestData } = useWizardContext();
+
+  // this page gets displayed on two routes: /my-positions/create and /my-positions/:id
+  // if we navigate to /my-positions/create, wipe all wizard context info
+  const [locationProcessed, setLocationProcessed] = useState(false);
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname === '/my-positions/create') {
+      resetWizardContext();
+      setSelectedDepartment(null);
+      setSelectedPositionId(null);
+    }
+    setLocationProcessed(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
   const [selectedDepartment, setSelectedDepartment] = useState<string | null | undefined>(positionRequestDepartmentId);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [nextButtonTooltipTitle, setNextButtonTooltipTitle] = useState<string>('');
 
   const {
@@ -44,7 +60,9 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
 
   const navigate = useNavigate();
 
-  const [selectedPositionId, setSelectedPositionId] = useState<string | null | undefined>(undefined);
+  const [selectedPositionId, setSelectedPositionId] = useState<string | null | undefined>(
+    positionRequestData?.reports_to_position_id?.toString(),
+  );
   const [orgChartData, setOrgChartData] = useState<Elements>(initialElements);
 
   const nextButtonIsDisabled = useCallback(() => {
@@ -75,14 +93,38 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
   const { createNewPosition } = usePosition();
   const next = async () => {
     if (selectedDepartment == null || selectedPositionId == null) return;
+
     setIsLoading(true);
     try {
-      await createNewPosition(selectedPositionId as any, selectedDepartment, orgChartData);
-      onCreateNewPosition?.();
+      const result = await createNewPosition(
+        selectedPositionId as any,
+        selectedDepartment,
+        orgChartData,
+        positionRequestData?.reports_to_position_id,
+        reSelectSupervisor,
+      );
+
+      if (result) onCreateNewPosition?.();
+      else {
+        setIsResetting(true);
+        setTimeout(() => {
+          setIsResetting(false);
+        }, 1000);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  const reSelectSupervisor = () => {
+    // reset the selected position and department to original values
+    setSelectedPositionId(positionRequestData?.reports_to_position_id?.toString());
+    setSelectedDepartment(positionRequestData?.department_id);
+  };
+
+  if (locationProcessed === false) {
+    return <LoadingComponent />;
+  }
 
   return (
     <WizardPageWrapper
@@ -121,7 +163,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
           marginTop: '-1px',
         }}
       >
-        {isLoadingUserProfile || isFetchingUserProfile ? (
+        {isLoadingUserProfile || isFetchingUserProfile || isResetting ? (
           <LoadingComponent height="100%"></LoadingComponent>
         ) : (
           <OrgChart

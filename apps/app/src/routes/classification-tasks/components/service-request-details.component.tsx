@@ -3,10 +3,11 @@ import { Card, Col, Descriptions, Row } from 'antd';
 import LoadingComponent from '../../../components/app/common/components/loading.component';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
 import { useGetLocationQuery } from '../../../redux/services/graphql-api/location.api';
+import { GetPositionRequestResponse } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
 
 type ServiceRequestDetailsProps = {
-  positionRequestData: any;
+  positionRequestData: GetPositionRequestResponse;
 };
 
 export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ positionRequestData }) => {
@@ -14,9 +15,9 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
 
   const { data: locationInfo, isLoading: locationLoading } = useGetLocationQuery(
     {
-      id: positionRequestData?.positionRequest?.additional_info_work_location_id,
+      id: positionRequestData?.positionRequest?.additional_info?.work_location_id,
     },
-    { skip: !positionRequestData?.positionRequest?.additional_info_work_location_id },
+    { skip: !positionRequestData?.positionRequest?.additional_info?.work_location_id },
   );
 
   // console.log('locationInfo: ', locationInfo);
@@ -31,13 +32,18 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'submittedAt',
       label: 'Submitted at',
-      children: <div>{formatDateTime(positionRequestData?.positionRequest?.approved_at)}</div>,
+      children: (
+        <div>
+          {positionRequestData?.positionRequest?.approved_at &&
+            formatDateTime(positionRequestData?.positionRequest?.approved_at)}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'ticketId',
       label: 'CRM service request',
-      children: <div>{positionRequestData?.positionRequest?.crm_id}</div>,
+      children: <div>{positionRequestData?.positionRequest?.crm_lookup_name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -71,7 +77,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'jobTitle',
       label: 'Job title',
-      children: <div>{positionRequestData?.positionRequest?.profile_json?.title?.value}</div>,
+      children: <div>{positionRequestData?.positionRequest?.profile_json_updated?.title?.text}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -91,7 +97,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'Reports to',
       children: (
         <PositionProfile
-          positionNumber={positionRequestData?.positionRequest?.additional_info_excluded_mgr_position_number}
+          positionNumber={positionRequestData?.positionRequest?.additional_info?.excluded_mgr_position_number}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>
@@ -147,7 +153,19 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'payListDepartmentIdNumber',
       label: 'Department ID',
-      children: <div>{positionRequestData?.positionRequest?.additional_info_department_id}</div>,
+      children: <div>{positionRequestData?.positionRequest?.additional_info?.department_id}</div>,
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
+    },
+    {
+      key: 'branch',
+      label: 'Branch',
+      children: <div>{positionRequestData?.positionRequest?.additional_info?.branch}</div>,
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
+    },
+    {
+      key: 'division',
+      label: 'Division',
+      children: <div>{positionRequestData?.positionRequest?.additional_info?.division}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {

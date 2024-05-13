@@ -16,7 +16,7 @@ export class ScheduledTaskModule implements OnApplicationBootstrap {
   constructor(private readonly scheduledTaskService: ScheduledTaskService) {}
 
   async onApplicationBootstrap() {
-    await this.scheduledTaskService.syncCrmStatuses();
+    await this.scheduledTaskService.syncPositionStatuses();
     await this.scheduledTaskService.syncPeoplesoftData();
   }
 }

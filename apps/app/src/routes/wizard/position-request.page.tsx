@@ -1,23 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-design/icons';
+import { ArrowLeftOutlined, ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography, message } from 'antd';
 import Title from 'antd/es/typography/Title';
 import copy from 'copy-to-clipboard';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
-import { useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import PositionProfile from '../../components/app/common/components/positionProfile';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
+import { useLazyGetClassificationsQuery } from '../../redux/services/graphql-api/classification.api';
 import {
+  GetPositionRequestResponse,
   GetPositionRequestResponseContent,
   useGetPositionRequestQuery,
   useGetSharedPositionRequestQuery,
+  useLazyPositionNeedsRivewQuery,
 } from '../../redux/services/graphql-api/position-request.api';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
+import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 import './position-request.page.css';
 import { WizardConfirmDetailsPage } from './wizard-confirm-details.page';
@@ -47,14 +52,53 @@ export const PositionRequestPage = () => {
     useState<GetPositionRequestResponseContent | null>(null);
 
   const {
+    positionRequestId: wizardPositionRequestId,
     setWizardData,
     setPositionRequestId,
     setPositionRequestProfileId,
     setPositionRequestDepartmentId,
     setPositionRequestData,
+    resetWizardContext,
+    setRequiresVerification,
+    setClassificationsData,
   } = useWizardContext();
 
+  // check if this position currently requires review
+  // do this only if it's past the edit page
+  const [triggerPositionNeedsReviewQuery, { data: positionNeedsReviewData }] = useLazyPositionNeedsRivewQuery();
+
+  const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataLoading }] =
+    useLazyGetClassificationsQuery();
+
+  const [classificationsFetched, setClassificationsFetched] = useState(false);
+
+  useEffect(() => {
+    if (classificationsData) {
+      setClassificationsData(classificationsData);
+      setClassificationsFetched(true);
+    }
+  }, [classificationsData, setClassificationsData]);
+
+  useEffect(() => {
+    if (!classificationsFetched) {
+      triggerGetClassificationData();
+    }
+  }, [classificationsFetched, triggerGetClassificationData]);
+
+  useEffect(() => {
+    setRequiresVerification(positionNeedsReviewData?.positionNeedsRivew?.result ?? false);
+  }, [positionNeedsReviewData, setRequiresVerification]);
+
   const { positionRequestId } = useParams();
+
+  // position request id changed from what's being stored in the context,
+  // clear context
+  useEffect(() => {
+    if (positionRequestId && wizardPositionRequestId && positionRequestId !== wizardPositionRequestId?.toString()) {
+      resetWizardContext();
+    }
+  }, [positionRequestId, wizardPositionRequestId, resetWizardContext]);
+
   const location = useLocation();
 
   // Determine if the current path is a shared URL
@@ -99,13 +143,16 @@ export const PositionRequestPage = () => {
 
     if (step != null) setCurrentStep(step);
 
+    if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: unwrappedPositionRequestData?.id });
+
     if (unwrappedPositionRequestData) setPositionRequestData(unwrappedPositionRequestData);
 
     if (unwrappedPositionRequestData?.id) {
       setPositionRequestId(unwrappedPositionRequestData?.id);
     }
 
-    if (unwrappedPositionRequestData?.profile_json) setWizardData(unwrappedPositionRequestData?.profile_json);
+    if (unwrappedPositionRequestData?.profile_json_updated)
+      setWizardData(unwrappedPositionRequestData?.profile_json_updated);
 
     if (unwrappedPositionRequestData?.parent_job_profile_id)
       setPositionRequestProfileId(unwrappedPositionRequestData?.parent_job_profile_id);
@@ -120,6 +167,7 @@ export const PositionRequestPage = () => {
     setPositionRequestProfileId,
     setPositionRequestDepartmentId,
     setPositionRequestData,
+    triggerPositionNeedsReviewQuery,
   ]);
 
   const onNext = async () => {
@@ -232,7 +280,7 @@ export const PositionRequestPage = () => {
       label: 'Job details',
       children: (
         <ServiceRequestDetails
-          positionRequestData={{ positionRequest: unwrappedPositionRequestData }}
+          positionRequestData={{ positionRequest: unwrappedPositionRequestData } as GetPositionRequestResponse}
         ></ServiceRequestDetails>
       ),
     },
@@ -249,7 +297,7 @@ export const PositionRequestPage = () => {
         </div>
       ),
     },
-    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json)
+    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json_updated)
       ? [
           {
             key: '3',
@@ -417,10 +465,9 @@ export const PositionRequestPage = () => {
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
-                              <Button type="link">View</Button> |{' '}
                               <Button type="link">
                                 <DownloadJobProfileComponent
-                                  jobProfile={positionRequestData?.positionRequest?.profile_json}
+                                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
                                 >
                                   Download
                                 </DownloadJobProfileComponent>
@@ -478,7 +525,10 @@ export const PositionRequestPage = () => {
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
-                              <DownloadJobProfileComponent jobProfile={unwrappedPositionRequestData?.profile_json}>
+                              <DownloadJobProfileComponent
+                                jobProfile={unwrappedPositionRequestData?.profile_json_updated}
+                                useModal={true}
+                              >
                                 <a href="#">Download</a>
                               </DownloadJobProfileComponent>
                             </Descriptions.Item>
@@ -495,21 +545,83 @@ export const PositionRequestPage = () => {
       : []),
   ];
 
+  if (classificationsDataLoading) return <LoadingSpinnerWithMessage />;
+
   return (
     <>
       {mode === 'readonly' && (
         <>
-          <ContentWrapper>
-            {currentStep !== null ? (
-              <Tabs
-                defaultActiveKey={readOnlySelectedTab}
-                items={tabItems}
-                tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
-              />
-            ) : (
-              <LoadingSpinnerWithMessage />
-            )}
-          </ContentWrapper>
+          {/* <ContentWrapper> */}
+          <WizardPageWrapper
+            title={
+              <div>
+                <Link to="/" aria-label="Go to dashboard">
+                  <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
+                </Link>
+                {positionRequestData?.positionRequest?.title &&
+                positionRequestData?.positionRequest?.title != 'Untitled'
+                  ? positionRequestData.positionRequest?.title
+                  : 'New position'}
+              </div>
+            }
+            subTitle={
+              <div>
+                <PositionProfile
+                  prefix="Reporting to"
+                  mode="compact"
+                  positionNumber={positionRequestData?.positionRequest?.reports_to_position_id}
+                  orgChartData={positionRequestData?.positionRequest?.orgchart_json}
+                ></PositionProfile>
+              </div>
+            }
+            pageHeaderExtra={[
+              <div style={{ marginRight: '1rem' }}>
+                <StatusIndicator status={positionRequestData?.positionRequest?.status ?? ''} />
+              </div>,
+              (readonlyMode === 'completed' || readonlyMode === 'inQueue') && (
+                <DownloadJobProfileComponent
+                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
+                  useModal={readonlyMode === 'completed'}
+                >
+                  <Button type="primary">Download profile</Button>
+                </DownloadJobProfileComponent>
+              ),
+            ]}
+            spaceSize="small"
+            hpad={false}
+            additionalBreadcrumb={{
+              title:
+                positionRequestData?.positionRequest?.title && positionRequestData?.positionRequest?.title != 'Untitled'
+                  ? positionRequestData.positionRequest?.title
+                  : 'New position',
+            }}
+            grayBg={false}
+          >
+            <div
+              style={{
+                overflow: 'hidden',
+                position: 'relative',
+                height: '100%',
+                background: 'rgb(240, 242, 245)',
+                marginLeft: '-1rem',
+                marginRight: '-1rem',
+                marginTop: '-1px',
+                padding: '0 1rem',
+                borderTop: '1px solid rgba(0, 0, 0, 0.15)',
+              }}
+            >
+              {currentStep !== null ? (
+                <Tabs
+                  defaultActiveKey={readOnlySelectedTab}
+                  items={tabItems}
+                  tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
+                />
+              ) : (
+                <LoadingSpinnerWithMessage />
+              )}
+            </div>
+          </WizardPageWrapper>
+          {/* </ContentWrapper> */}
         </>
       )}
       {mode === 'editable' && (

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { JsonObject } from '@prisma/client/runtime/library';
 import { btoa } from 'buffer';
 import { Elements, autolayout, generateJobProfile } from 'common-kit';
 import dayjs from 'dayjs';
@@ -52,7 +53,7 @@ export class PositionRequestResponse {
   parent_job_profile_id: number;
 
   @Field(() => GraphQLJSON)
-  profile_json: any;
+  profile_json_updated: any;
 
   @Field(() => GraphQLJSON)
   orgchart_json: any;
@@ -77,6 +78,15 @@ export class PositionRequestStatusCounts {
 
   @Field(() => Int)
   actionRequiredCount: number;
+}
+
+interface AdditionalInfo {
+  work_location_id?: string;
+  department_id?: string;
+  excluded_mgr_position_number?: string;
+  comments?: string;
+  branch?: string;
+  division?: string;
 }
 
 function generateShortId(length: number): string {
@@ -122,11 +132,11 @@ export class PositionRequestApiService {
     return this.prisma.positionRequest.create({
       data: {
         department: data.department,
-        paylist_department: data.paylist_department,
+        additional_info: data.additional_info === null ? Prisma.DbNull : data.additional_info,
         step: data.step,
         reports_to_position_id: data.reports_to_position_id,
-        profile_json: data.profile_json,
-        orgchart_json: data.orgchart_json,
+        profile_json_updated: data.profile_json_updated === null ? Prisma.DbNull : data.profile_json_updated,
+        orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
         // TODO: AL-146
         // user: data.user,
         user_id: userId,
@@ -149,19 +159,26 @@ export class PositionRequestApiService {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
     // ensure comments are saved
-    if (comment != null && comment.length > 0)
+    if (comment != null && comment.length > 0) {
       positionRequest = await this.prisma.positionRequest.update({
         where: { id },
         data: {
-          additional_info_comments: comment,
+          additional_info: {
+            ...(positionRequest.additional_info as JsonObject),
+            comments: comment,
+          },
         },
       });
+    }
 
     try {
       if (positionRequest.position_number == null) {
         // in testmode, we can skip the peoplesoft call to create position
         const position =
-          process.env.TEST_ENV === 'true' ? { positionNbr: '1234' } : await this.createPositionForPositionRequest(id);
+          process.env.TEST_ENV === 'true'
+            ? { positionNbr: '00028153' }
+            : await this.createPositionForPositionRequest(id);
+
         if (position.positionNbr.length > 0) {
           const result = await this.peoplesoftService.getPosition(position.positionNbr);
           const rows = result?.data?.query?.rows;
@@ -175,7 +192,8 @@ export class PositionRequestApiService {
           const { edges, nodes } = positionRequest.orgchart_json as Record<string, any> as Elements;
 
           // Update supervisor, excluded manager nodes
-          const excludedManagerId = positionRequest.additional_info_excluded_mgr_position_number;
+          const excludedManagerId = (positionRequest.additional_info as AdditionalInfo | null)
+            ?.excluded_mgr_position_number;
           const supervisorId = positionObj['A.REPORTS_TO'];
           nodes.forEach((node) => {
             node.data = {
@@ -183,6 +201,7 @@ export class PositionRequestApiService {
               isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
               isExcludedManager: node.id === excludedManagerId,
               isNewPosition: false, // Clear previous positions marked as new
+              isSelected: false,
               isSupervisor: node.id === supervisorId,
             };
           });
@@ -334,7 +353,9 @@ export class PositionRequestApiService {
         approved_at: true,
         submitted_at: true,
         crm_id: true,
+        crm_lookup_name: true,
         shareUUID: true,
+        additional_info: true,
       },
     });
 
@@ -744,7 +765,10 @@ export class PositionRequestApiService {
 
   async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
     // todo: AL-146 - tried to do this with a spread operator, but getting an error
-    const updatePayload: any = {};
+    let updatingAdditionalInfo = false;
+    const updatePayload: Prisma.PositionRequestUpdateInput = {
+      additional_info: {} as Prisma.JsonValue,
+    };
 
     if (updateData.step !== undefined) {
       updatePayload.step = updateData.step;
@@ -754,12 +778,13 @@ export class PositionRequestApiService {
       updatePayload.reports_to_position_id = updateData.reports_to_position_id;
     }
 
-    if (updateData.profile_json !== undefined) {
-      updatePayload.profile_json = updateData.profile_json;
+    if (updateData.profile_json_updated !== undefined) {
+      updatePayload.profile_json_updated =
+        updateData.profile_json_updated === null ? Prisma.DbNull : updateData.profile_json_updated;
     }
 
     if (updateData.orgchart_json !== undefined) {
-      updatePayload.orgchart_json = updateData.orgchart_json;
+      updatePayload.orgchart_json = updateData.orgchart_json === null ? Prisma.DbNull : updateData.orgchart_json;
     }
 
     if (updateData.title !== undefined) {
@@ -775,7 +800,8 @@ export class PositionRequestApiService {
     }
 
     if (updateData.parent_job_profile !== undefined) {
-      updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
+      if (updateData.parent_job_profile.connect.id == null) updatePayload.parent_job_profile = { disconnect: true };
+      else updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
     }
 
     if (updateData.department !== undefined) {
@@ -784,125 +810,149 @@ export class PositionRequestApiService {
 
     // additional information form data:
 
-    if (updateData.additional_info_excluded_mgr_position_number !== undefined) {
-      // console.log('updating additional_info_excluded_mgr_position_number...');
-      updatePayload.additional_info_excluded_mgr_position_number =
-        updateData.additional_info_excluded_mgr_position_number;
+    const additionalInfo = updateData.additional_info as AdditionalInfo | null;
 
-      // if updating the excluded manager position number, we need to check if that position
-      // exists in the org chart, if it doesn't we need to add this position to the org chart
-      // such that the top level of the reporting chain reports to this position
+    if (additionalInfo) {
+      updatingAdditionalInfo = true;
+      if (additionalInfo.excluded_mgr_position_number !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).excluded_mgr_position_number =
+          additionalInfo.excluded_mgr_position_number;
+      }
 
-      // get the org chart
+      if (additionalInfo.department_id !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).department_id =
+          additionalInfo.department_id;
+      }
 
-      // check if the excluded manager position number is in the org chart
+      if (additionalInfo.branch !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).branch = additionalInfo.branch;
+      }
 
-      // if not in org chart, fetch employee info from peoplesoft
+      if (additionalInfo.division !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).division = additionalInfo.division;
+      }
 
-      // get the top level of the reporting chain, from the report_to position number and up
+      if (additionalInfo.work_location_id !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).work_location_id =
+          additionalInfo.work_location_id;
+      }
 
-      // update org chart json
+      if (
+        additionalInfo.excluded_mgr_position_number !== undefined &&
+        additionalInfo.excluded_mgr_position_number !== null // it might be null if we're unsetting, e.g. when user changes supervisor on org chart
+      ) {
+        // if updating the excluded manager position number, we need to check if that position
+        // exists in the org chart, if it doesn't we need to add this position to the org chart
+        // such that the top level of the reporting chain reports to this position
 
-      // save result to the database
+        // get the org chart
 
-      const positionRequest = await this.prisma.positionRequest.findUnique({
-        where: { id: id },
-        select: { orgchart_json: true, reports_to_position_id: true },
-      });
+        // check if the excluded manager position number is in the org chart
 
-      const orgChart = positionRequest.orgchart_json;
+        // if not in org chart, fetch employee info from peoplesoft
 
-      if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
-        // Remove existing node with isExcludedManager = true
-        const updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.isExcludedManager !== true);
+        // get the top level of the reporting chain, from the report_to position number and up
 
-        const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
-          const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
-          const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
-          return sourceNode?.data?.isExcludedManager !== true && targetNode?.data?.isExcludedManager !== true;
+        // update org chart json
+
+        // save result to the database
+
+        const positionRequest = await this.prisma.positionRequest.findUnique({
+          where: { id: id },
+          select: { orgchart_json: true, reports_to_position_id: true },
         });
 
-        const isExcludedManagerInOrgChart = (orgChart.nodes as any[]).some(
-          (node) => node.id === updateData.additional_info_excluded_mgr_position_number,
-        );
+        const orgChart = positionRequest.orgchart_json;
 
-        // console.log('isExcludedManagerInOrgChart: ', isExcludedManagerInOrgChart);
+        if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
+          // Remove existing node with isExcludedManager = true
+          const updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.isExcludedManager !== true);
 
-        if (!isExcludedManagerInOrgChart) {
-          // console.log('isExcludedManagerInOrgChart false');
+          const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
+            const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
+            const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
+            return sourceNode?.data?.isExcludedManager !== true && targetNode?.data?.isExcludedManager !== true;
+          });
 
-          const employeeInfo = await this.positionService.getPositionProfile(
-            updateData.additional_info_excluded_mgr_position_number,
-            true,
+          const isExcludedManagerInOrgChart = (orgChart.nodes as any[]).some(
+            (node) => node.id === additionalInfo.excluded_mgr_position_number,
           );
 
-          // console.log('employeeInfo: ', employeeInfo);
+          // console.log('isExcludedManagerInOrgChart: ', isExcludedManagerInOrgChart);
 
-          const topLevelPositionId = this.getTopLevelReportingChain(orgChart, positionRequest.reports_to_position_id);
+          if (!isExcludedManagerInOrgChart) {
+            // console.log('isExcludedManagerInOrgChart false');
 
-          // console.log('topLevelPositionId: ', topLevelPositionId);
+            const employeeInfo = await this.positionService.getPositionProfile(
+              additionalInfo.excluded_mgr_position_number,
+              true,
+            );
 
-          const updatedOrgChart = {
-            ...orgChart,
-            nodes: [
-              ...updatedNodes,
-              {
-                id: updateData.additional_info_excluded_mgr_position_number,
-                data: {
-                  id: updateData.additional_info_excluded_mgr_position_number,
-                  title: employeeInfo[0].positionDescription,
-                  isExcludedManager: true,
-                  employees: employeeInfo.map((employee) => ({
-                    id: employee.employeeId,
-                    name: employee.employeeName,
-                    status: employee.status,
-                  })),
-                  department: {
-                    id: employeeInfo[0].departmentId,
-                    name: employeeInfo[0].departmentName,
-                    organization_id: employeeInfo[0].organizationId,
+            // console.log('employeeInfo: ', employeeInfo);
+
+            const topLevelPositionId = this.getTopLevelReportingChain(orgChart, positionRequest.reports_to_position_id);
+
+            // console.log('topLevelPositionId: ', topLevelPositionId);
+
+            const updatedOrgChart = {
+              ...orgChart,
+              nodes: [
+                ...updatedNodes,
+                {
+                  id: additionalInfo.excluded_mgr_position_number,
+                  data: {
+                    id: additionalInfo.excluded_mgr_position_number,
+                    title: employeeInfo[0].positionDescription,
+                    isExcludedManager: true,
+                    employees: employeeInfo.map((employee) => ({
+                      id: employee.employeeId,
+                      name: employee.employeeName,
+                      status: employee.status,
+                    })),
+                    department: {
+                      id: employeeInfo[0].departmentId,
+                      name: employeeInfo[0].departmentName,
+                      organization_id: employeeInfo[0].organizationId,
+                    },
+                    classification: {
+                      id: employeeInfo[0].classificationId,
+                      code: employeeInfo[0].classificationCode,
+                      name: employeeInfo[0].classification,
+                    },
                   },
-                  classification: {
-                    id: employeeInfo[0].classificationId,
-                    code: employeeInfo[0].classificationCode,
-                    name: employeeInfo[0].classification,
-                  },
+                  type: 'org-chart-card',
+                  position: { x: 0, y: 0 },
+                  sourcePosition: 'bottom',
+                  targetPosition: 'top',
                 },
-                type: 'org-chart-card',
-                position: { x: 0, y: 0 },
-                sourcePosition: 'bottom',
-                targetPosition: 'top',
-              },
-            ],
-            edges: [
-              ...updatedEdges,
-              {
-                id: `${updateData.additional_info_excluded_mgr_position_number}-${topLevelPositionId}`,
-                type: 'smoothstep',
-                source: updateData.additional_info_excluded_mgr_position_number,
-                target: topLevelPositionId,
-                style: { strokeDasharray: '5 5' },
-              },
-            ],
-          };
+              ],
+              edges: [
+                ...updatedEdges,
+                {
+                  id: `${additionalInfo.excluded_mgr_position_number}-${topLevelPositionId}`,
+                  type: 'smoothstep',
+                  source: additionalInfo.excluded_mgr_position_number,
+                  target: topLevelPositionId,
+                  style: { strokeDasharray: '5 5' },
+                },
+              ],
+            };
 
-          // console.log('new org chart: ', JSON.stringify(updatedOrgChart));
-          updatePayload.orgchart_json = updatedOrgChart;
+            // console.log('new org chart: ', JSON.stringify(updatedOrgChart));
+            updatePayload.orgchart_json = updatedOrgChart;
+          }
         }
       }
+
+      if (additionalInfo.comments !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).comments = additionalInfo.comments;
+      }
+    } else if (additionalInfo === null) {
+      updatingAdditionalInfo = true;
+      updatePayload.additional_info = Prisma.DbNull;
     }
 
-    if (updateData.additional_info_comments !== undefined) {
-      updatePayload.additional_info_comments = updateData.additional_info_comments;
-    }
-
-    if (updateData.workLocation !== undefined) {
-      updatePayload.workLocation = { connect: { id: updateData.workLocation.connect.id } };
-    }
-
-    if (updateData.paylist_department !== undefined) {
-      updatePayload.paylist_department = { connect: { id: updateData.paylist_department.connect.id } };
-    }
+    if (!updatingAdditionalInfo) delete updatePayload.additional_info;
 
     // First pass updates
     const positionRequest = await this.prisma.positionRequest.update({
@@ -953,8 +1003,8 @@ export class PositionRequestApiService {
     }
   }
 
-  async deletePositionRequest(id: number) {
-    const result = await this.prisma.positionRequest.delete({ where: { id } });
+  async deletePositionRequest(id: number, userId: string) {
+    const result = await this.prisma.positionRequest.delete({ where: { id, user_id: userId, status: 'DRAFT' } });
     return result;
   }
 
@@ -963,6 +1013,13 @@ export class PositionRequestApiService {
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id: id } });
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id: positionRequest.parent_job_profile_id },
+      include: {
+        jobFamilies: {
+          include: {
+            jobFamily: true, // Ensures that the related jobFamily data is returned
+          },
+        },
+      },
     });
 
     // If the Job Profile is denoted as requiring review, it _must_ be reviewed every time
@@ -972,7 +1029,7 @@ export class PositionRequestApiService {
     }
 
     // If the job profile is _not_ denoted as requiring review, it must be reviewed _only_ if significant sections have been changed
-    const prJobProfile = positionRequest.profile_json as Record<string, any>;
+    const prJobProfile = positionRequest.profile_json_updated as Record<string, any>;
 
     // Find position request job profile signficant sections
     const prJobProfileSignificantSections = {
@@ -1038,7 +1095,8 @@ export class PositionRequestApiService {
       this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.education),
         JSON.stringify(prJobProfileSignificantSections.education),
-      ),
+      ) && !jobProfile.jobFamilies.some((jf) => jf.jobFamily.name == 'Administrative Services'), // AL-619 this is a temporary measure to disable education requirements for admin family
+
       // Job Experience
       this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.job_experience),
@@ -1087,8 +1145,10 @@ export class PositionRequestApiService {
       throw AlexandriaError('CRM Contact ID not found');
     }
 
+    const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
+
     const paylist_department = await this.prisma.department.findUnique({
-      where: { id: positionRequest.additional_info_department_id },
+      where: { id: additionalInfo.department_id },
     });
     const location = await this.prisma.location.findUnique({ where: { id: paylist_department.location_id } });
     const parentJobProfile = await this.prisma.jobProfile.findUnique({
@@ -1096,9 +1156,9 @@ export class PositionRequestApiService {
     });
 
     const jobProfileDocument =
-      positionRequest.profile_json != null
+      positionRequest.profile_json_updated != null
         ? generateJobProfile({
-            jobProfile: positionRequest.profile_json as Record<string, any>,
+            jobProfile: positionRequest.profile_json_updated as Record<string, any>,
             parentJobProfile: parentJobProfile,
           })
         : null;
@@ -1111,7 +1171,7 @@ export class PositionRequestApiService {
       positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
 
     const data: IncidentCreateUpdateInput = {
-      subject: `TESTING - Position Number Request - ${classification.code}`,
+      subject: `Job Store Beta - Position Number Request - ${classification.code}`,
       primaryContact: { id: contactId },
       assignedTo: {
         staffGroup: {
@@ -1169,12 +1229,12 @@ export class PositionRequestApiService {
           text: `
           <div>
             ${
-              (positionRequest.additional_info_comments ?? '').length > 0
+              (additionalInfo.comments ?? '').length > 0
                 ? `
             <br />
             <strong>The following note was added to this position request:</strong>
             <br />
-            <em>${positionRequest.additional_info_comments}</em>`
+            <em>${additionalInfo.comments}</em>`
                 : ''
             }
             <br />
@@ -1231,6 +1291,15 @@ export class PositionRequestApiService {
       incident = await this.crmService.getIncident(positionRequest.crm_id);
     }
 
+    if (incident.lookupName != null) {
+      await this.prisma.positionRequest.update({
+        where: { id: positionRequest.id },
+        data: {
+          crm_lookup_name: incident.lookupName,
+        },
+      });
+    }
+
     return incident;
   }
 
@@ -1238,12 +1307,14 @@ export class PositionRequestApiService {
     const positionRequestNeedsReview = await this.positionRequestNeedsReview(id);
 
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+    const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
+
     const classification = await this.prisma.classification.findUnique({
       where: { id: positionRequest.classification_id },
     });
     const paylist_department = await this.prisma.department.findUnique({
       select: { id: true, organization: { select: { id: true } } },
-      where: { id: positionRequest.additional_info_department_id },
+      where: { id: additionalInfo.department_id },
     });
 
     let data: PositionCreateInput;
@@ -1265,10 +1336,8 @@ export class PositionRequestApiService {
       case 'OEX':
       case 'PEA': {
         const employees = (
-          await this.peoplesoftService.getEmployeesForPositions([
-            positionRequest.additional_info_excluded_mgr_position_number,
-          ])
-        ).get(positionRequest.additional_info_excluded_mgr_position_number);
+          await this.peoplesoftService.getEmployeesForPositions([additionalInfo.excluded_mgr_position_number])
+        ).get(additionalInfo.excluded_mgr_position_number);
         const employeeId = employees.length > 0 ? employees[0].id : null;
 
         data = {
@@ -1280,7 +1349,7 @@ export class PositionRequestApiService {
           DESCR: positionRequest.title,
           REG_TEMP: PositionDuration.Regular,
           FULL_PART_TIME: PositionType.FullTime,
-          TGB_E_CLASS: `P${(positionRequest.profile_json as Record<string, any>).number}`,
+          TGB_E_CLASS: `P${(positionRequest.profile_json_updated as Record<string, any>).number}`,
           TGB_APPRV_MGR: employeeId,
         };
 

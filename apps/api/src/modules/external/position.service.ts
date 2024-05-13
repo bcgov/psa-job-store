@@ -3,6 +3,7 @@ import { Classification, Department } from '@prisma/client';
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { ClassificationService } from './classification.service';
 import { DepartmentService } from './department.service';
+import { Employee } from './models/employee.model';
 import { FindUniquePositionArgs } from './models/find-unique-position.args';
 import { PositionProfile } from './models/position-profile.model';
 import { Position } from './models/position.model';
@@ -29,6 +30,7 @@ export class PositionService {
   async getPosition(args?: FindUniquePositionArgs) {
     const result = await this.peoplesoftService.getPosition(args.where.id);
     const rows = result?.data?.query?.rows;
+
     let position: Position | null = null;
 
     if (rows?.length > 0) {
@@ -67,10 +69,14 @@ export class PositionService {
   }
 
   async getPositionProfile(positionNumber: string, extraInfo = false): Promise<PositionProfile[]> {
+    if (!positionNumber) throw AlexandriaError('Position number is required');
     const positionDetails = await this.getPosition({ where: { id: positionNumber } });
     if (!positionDetails) throw AlexandriaError(`Position ${positionNumber} not found`);
 
-    const employeesForPositions = await this.peoplesoftService.getEmployeesForPositions([positionNumber]);
+    let employeesForPositions = new Map<string, Employee[]>();
+
+    employeesForPositions = await this.peoplesoftService.getEmployeesForPositions([positionNumber]);
+
     const employeesInPosition = employeesForPositions.get(positionNumber) ?? [];
 
     const positionProfiles = await Promise.all(
@@ -82,7 +88,7 @@ export class PositionService {
           positionNumber: positionNumber,
           positionDescription: positionDetails.title,
           departmentName: positionDetails.department.name,
-          employeeName: employeeDetail?.NAME_DISPLAY ?? '',
+          employeeName: employeeDetail?.NAME_DISPLAY,
           classification: positionDetails.classification.name,
           ministry: positionDetails.organization.name,
           status: employee.status,

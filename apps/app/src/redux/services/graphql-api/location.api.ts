@@ -39,7 +39,7 @@ export const locationApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    getLocation: build.query<GetLocationResponse, { id: string }>({
+    getLocation: build.query<GetLocationResponse, { id?: string }>({
       query: (args) => {
         return {
           document: gql`

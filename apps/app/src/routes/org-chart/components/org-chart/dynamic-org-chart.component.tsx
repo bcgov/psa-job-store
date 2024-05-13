@@ -1,10 +1,10 @@
 import { Col, Row, Space, Spin } from 'antd';
 import { autolayout } from 'common-kit';
 import Fuse from 'fuse.js';
+import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
   Background,
-  Controls,
   Edge,
   MiniMap,
   Node,
@@ -14,13 +14,13 @@ import ReactFlow, {
   useOnSelectionChange,
   useReactFlow,
 } from 'reactflow';
-import { useDebounce } from 'usehooks-ts';
 import { useLazyGetOrgChartQuery } from '../../../../redux/services/graphql-api/org-chart.api';
 import { initialElements } from '../../constants/initial-elements.constant';
 import { OrgChartContext } from '../../enums/org-chart-context.enum';
 import { OrgChartType } from '../../enums/org-chart-type.enum';
 import { Elements } from '../../interfaces/elements.interface';
 import { getFocusedElements } from '../../utils/get-focused-elements.util';
+import { Controls } from '../controls';
 import { DepartmentFilter } from '../department-filter.component';
 import { OrgChartNode } from '../org-chart-node.component';
 import { PositionSearch } from '../position-search.component';
@@ -54,17 +54,21 @@ export const DynamicOrgChart = ({
   ...props
 }: DynamicOrgChartProps) => {
   const [elements, setElements] = useState<Elements>(initialElements);
-  const debouncedElements = useDebounce(elements, 500);
+  const debounceSetElements = useMemo(() => debounce((elements: Elements) => setElements(elements), 500), []);
+
   const [getOrgChart, { currentData: orgChartData, isFetching: orgChartDataIsFetching }] = useLazyGetOrgChartQuery();
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
-  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
+  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>(targetId != null ? [targetId] : []);
 
   const { fitView } = useReactFlow();
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges] = useEdgesState([]);
+  const [nodes, setNodes] = useNodesState([]);
 
-  const getSearchResults = useCallback(() => nodes.filter((node) => node.data.isSearchResult === true), [nodes]);
+  const getSearchResults = useCallback(
+    () => (searchTerm ? nodes.filter((node) => node.data.isSearchResult === true) : undefined),
+    [nodes],
+  );
 
   useEffect(() => {
     setIsDirty(false);
@@ -80,7 +84,17 @@ export const DynamicOrgChart = ({
   useEffect(() => {
     if (orgChartData?.orgChart != null) {
       const elements = autolayout(orgChartData?.orgChart);
-      setElements(JSON.parse(JSON.stringify(elements)));
+
+      if (targetId != null) {
+        const targetIndex = elements.nodes.findIndex((node: Node) => node.id === targetId);
+        if (targetIndex >= 0) {
+          const targetNode = elements.nodes[targetIndex];
+          targetNode.selected = true;
+          elements.nodes[targetIndex] = targetNode;
+        }
+      }
+
+      debounceSetElements(JSON.parse(JSON.stringify(elements)));
     }
   }, [orgChartData?.orgChart, orgChartDataIsFetching]);
 
@@ -89,7 +103,7 @@ export const DynamicOrgChart = ({
       if (searchTerm == null) return [];
 
       // For the ID search, don't include positions where position_status === 'PROPOSED'
-      const approvedPositionNodes = debouncedElements.nodes.filter((node) => node.data.position_status === 'Approved');
+      const approvedPositionNodes = elements.nodes.filter((node) => node.data.position_status === 'Approved');
       const idSearch = new Fuse(approvedPositionNodes, {
         keys: ['id'],
         includeMatches: true,
@@ -97,7 +111,7 @@ export const DynamicOrgChart = ({
         threshold: 0,
       });
 
-      const stringSearch = new Fuse(debouncedElements.nodes, {
+      const stringSearch = new Fuse(elements.nodes, {
         keys: ['data.title', 'data.employees.name'],
         includeMatches: true,
         includeScore: true,
@@ -109,37 +123,67 @@ export const DynamicOrgChart = ({
 
       return [...idResults.map((r) => r.item), ...stringResults.map((r) => r.item)].flatMap((node) => node.id);
     },
-    [debouncedElements.nodes],
+    [elements.nodes],
   );
 
   useEffect(() => {
     if (type === OrgChartType.DYNAMIC && props.context === OrgChartContext.WIZARD) {
+      // do not clear selection unless user actually clicked on the pane
+      // this prevents clearing of selection when the org chart is first loaded with a targetId set
+      if (selectedNodeIds.length == 0 && !isDirty) {
+        return;
+      }
       props.onSelectedNodeIdsChange(selectedNodeIds, { edges, nodes });
     }
   }, [props.context, edges, nodes, selectedNodeIds]);
 
   useEffect(() => {
-    const { edges, nodes } = JSON.parse(JSON.stringify(debouncedElements));
-    if (searchTerm && searchTerm.length > 0 && selectedNodeIds.length > 0) setSelectedNodeIds([]);
-    if (
-      isDirty === false &&
-      targetId &&
-      targetId.length > 0 &&
-      nodes.filter((node: Node) => node.id === targetId).length > 0 &&
-      !selectedNodeIds.includes(targetId)
-    )
-      setSelectedNodeIds([targetId]);
+    const { edges, nodes } = JSON.parse(JSON.stringify(elements));
+    // if (searchTerm != null && searchTerm.length > 0 && selectedNodeIds.length > 0) setSelectedNodeIds([]);
+    // if (
+    //   isDirty === false &&
+    //   targetId != null &&
+    //   targetId.length > 0 &&
+    //   nodes.filter((node: Node) => node.id === targetId).length > 0 &&
+    //   !selectedNodeIds.includes(targetId)
+    // )
+    //   setSelectedNodeIds([targetId]);
 
-    if (selectedNodeIds.length > 0) {
+    if (searchTerm != null && searchTerm.length > 0) {
+      const searchResultIds = search(searchTerm);
+
+      edges.forEach((edge: Edge) => {
+        edge.animated = false;
+        edge.selected = false;
+        edge.style = {
+          ...edge.style,
+          stroke: '#B1B1B1',
+        };
+      });
+
+      nodes.forEach((node: Node) => {
+        node.data = {
+          ...node.data,
+          isAdjacent: false,
+          isSearchResult: searchResultIds.includes(node.id),
+        };
+        node.selected = false;
+        node.style = {
+          ...node.style,
+          opacity: 1,
+        };
+      });
+    } else if (selectedNodeIds.length > 0) {
+      // selectedNodeIds is set - select those elements
       const focusedElements = [
         ...getFocusedElements(
           nodes.filter((node: Node) => selectedNodeIds.includes(node.id)),
-          debouncedElements,
+          elements,
           true,
         ),
         ...getFocusedElements(
           nodes.filter((node: Node) => selectedNodeIds.includes(node.id)),
-          debouncedElements,
+          elements,
           false,
         ),
       ];
@@ -170,14 +214,11 @@ export const DynamicOrgChart = ({
               : 1,
         };
       });
-    } else if (searchTerm && searchTerm.length > 0 && selectedNodeIds.length === 0) {
-      const searchResultIds = search(searchTerm);
-
+    } else {
       edges.forEach((edge: Edge) => {
         edge.animated = false;
         edge.selected = false;
         edge.style = {
-          ...edge.style,
           stroke: '#B1B1B1',
         };
       });
@@ -186,7 +227,7 @@ export const DynamicOrgChart = ({
         node.data = {
           ...node.data,
           isAdjacent: false,
-          isSearchResult: searchResultIds.includes(node.id),
+          isSearchResult: false,
         };
         node.selected = false;
         node.style = {
@@ -198,7 +239,7 @@ export const DynamicOrgChart = ({
 
     setEdges(edges);
     setNodes(nodes);
-  }, [debouncedElements, searchTerm, selectedNodeIds]);
+  }, [isDirty, elements, searchTerm, selectedNodeIds]);
 
   useEffect(() => {
     const searchResultNodes = nodes.filter((node) => node.data.isSearchResult === true);
@@ -223,7 +264,10 @@ export const DynamicOrgChart = ({
         setSearchTerm(undefined);
       }
 
-      setSelectedNodeIds(nodes.flatMap((node) => node.id));
+      const nodeIds = nodes.flatMap((node) => node.id);
+      if (JSON.stringify(nodeIds) != JSON.stringify(selectedNodeIds)) {
+        setSelectedNodeIds(nodeIds);
+      }
     },
   });
 
@@ -266,11 +310,10 @@ export const DynamicOrgChart = ({
         </div>
       ) : (
         <ReactFlow
-          onEdgesChange={onEdgesChange}
-          onNodesChange={onNodesChange}
           onPaneClick={() => {
             setIsDirty(true);
             setSearchTerm(undefined);
+            setSelectedNodeIds([]);
           }}
           edges={edges}
           elevateEdgesOnSelect

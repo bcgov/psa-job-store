@@ -21,7 +21,7 @@ import {
 } from 'antd';
 import { IsNotEmpty, ValidationOptions, registerDecorator } from 'class-validator';
 import debounce from 'lodash.debounce';
-import { CSSProperties, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
@@ -35,8 +35,10 @@ import {
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
+import { findExcludedManager } from '../org-chart/utils/find-excluded-manager.util';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 import './wizard-confirm-details.page.css';
 
@@ -86,6 +88,12 @@ export class WizardConfirmDetailsModel {
 
   @IsNotEmpty({ message: 'Department ID is required' })
   payListDepartmentId: string | null;
+
+  @IsNotEmpty({ message: 'Branch is required' })
+  branch: string;
+
+  @IsNotEmpty({ message: 'Division is required' })
+  division: string;
 
   // Validate only if the field is not empty
   // @ValidateIf((o) => o.excludedManagerPositionNumber !== '')
@@ -147,10 +155,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       if (positionProfileData.positionProfile.length === 0) {
         setNoPositions(true);
       }
-
       const activePositions = positionProfileData.positionProfile.filter((p) => p.status === 'Active');
       setFirstActivePosition(activePositions[0] || null);
-
       // Set state to the number of additional active positions
       setAdditionalPositions(positionProfileData.positionProfile.length - 1);
     }
@@ -160,8 +166,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const debouncedFetchPositionProfile = useCallback(
     debounce(async (positionNumber: string) => {
       try {
-        console.log(positionNumber);
         getPositionProfile({ positionNumber, suppressGlobalError: true });
+        trigger('excludedManagerPositionNumber');
       } catch (e) {
         // handled by isError, prevents showing error toast
         console.log(e);
@@ -187,10 +193,10 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   // get profile info for excluded manager from additional_info_excluded_mgr_position_number using GetPositionProfileQuery and useEffect
   useEffect(() => {
     async function fetchExcludedManagerProfile() {
-      if (positionRequestData?.additional_info_excluded_mgr_position_number) {
+      if (positionRequestData?.additional_info?.excluded_mgr_position_number) {
         try {
           await getPositionProfile({
-            positionNumber: positionRequestData.additional_info_excluded_mgr_position_number,
+            positionNumber: positionRequestData.additional_info.excluded_mgr_position_number,
             uniqueKey: 'excludedManagerProfile',
             suppressGlobalError: true,
           }).unwrap();
@@ -200,7 +206,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       }
     }
     fetchExcludedManagerProfile();
-  }, [positionRequestData?.additional_info_excluded_mgr_position_number, getPositionProfile]);
+  }, [positionRequestData?.additional_info?.excluded_mgr_position_number, getPositionProfile]);
 
   const { data: allLocations } = useGetLocationsQuery();
 
@@ -214,18 +220,21 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
     // Check if noPositions is true and excludedManagerPositionNumber should be filled
     const formValues = getValues();
-    // console.log('got values');
-    // console.log(
-    //   '!skipValidation && noPositions && formValues.excludedManagerPositionNumber: ',
-    //   !skipValidation,
-    //   noPositions,
-    //   formValues.excludedManagerPositionNumber,
-    // );
-    if (!skipValidation && noPositions && formValues.excludedManagerPositionNumber) {
+    // skipValidation = true;
+    if (
+      !skipValidation &&
+      ((noPositions && formValues.excludedManagerPositionNumber) ||
+        (firstActivePosition && !firstActivePosition?.employeeName) ||
+        isFetchingPositionProfileError)
+    ) {
       // Set an error on the excludedManagerPositionNumber field
       setError('excludedManagerPositionNumber', {
         type: 'manual',
-        message: 'Position not found',
+        message: noPositions
+          ? 'Position not found'
+          : !firstActivePosition?.employeeName
+            ? 'Position is unencumbered'
+            : 'Position not found',
       });
       // console.log('error, returning');
       Modal.error({
@@ -240,7 +249,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       return; // Do not open the modal
     }
 
-    // console.log('handlesubmit');
     if (skipValidation) {
       // console.log('handleOk 2');
       await handleOk(updateStep);
@@ -293,15 +301,21 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           // position_number: 123456,
 
           // attach additional information
-          workLocation: { connect: { id: formData.workLocation || '' } },
-          paylist_department: { connect: { id: formData.payListDepartmentId || '' } },
-          additional_info_excluded_mgr_position_number: formData.excludedManagerPositionNumber,
-          additional_info_comments: formData.comments,
+          additional_info: {
+            department_id: formData.payListDepartmentId ?? undefined,
+            work_location_id: formData.workLocation ?? undefined,
+            excluded_mgr_position_number: formData.excludedManagerPositionNumber,
+            comments: formData.comments,
+            branch: formData.branch,
+            division: formData.division,
+          },
         }).unwrap();
         if (onNext && updateStep) onNext();
       } else {
         throw Error('Position request not found');
       }
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsLoading(false);
     }
@@ -329,6 +343,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     clearErrors,
     getValues,
     formState: { errors },
+    trigger,
   } = useForm<WizardConfirmDetailsModel>({
     resolver: classValidatorResolver(WizardConfirmDetailsModel),
     defaultValues: {
@@ -337,50 +352,52 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       excludedManagerPositionNumber: '',
       payListDepartmentId: null as string | null,
       comments: '',
+      branch: '',
+      division: '',
     },
   });
 
   useEffect(() => {
     if (positionRequestData) {
-      const {
-        additional_info_work_location_id,
-        additional_info_department_id,
-        additional_info_excluded_mgr_position_number,
-        additional_info_comments,
-      } = positionRequestData;
+      const { work_location_id, department_id, excluded_mgr_position_number, comments, branch, division } =
+        positionRequestData.additional_info ?? {};
+
+      setValue('branch', branch || '');
+      setValue('division', division || '');
+
       setValue(
         'workLocation',
-        additional_info_work_location_id ||
+        work_location_id ||
           departmentsData?.find((dept) => dept.id === positionRequestData?.department_id)?.location_id ||
           null,
       );
-      setValue('payListDepartmentId', additional_info_department_id || positionRequestData?.department_id || null);
-      setValue('excludedManagerPositionNumber', additional_info_excluded_mgr_position_number || '');
-      setValue('comments', additional_info_comments || '');
+      setValue('payListDepartmentId', department_id || positionRequestData?.department_id || null);
 
-      if (
-        additional_info_work_location_id ||
-        additional_info_department_id ||
-        additional_info_excluded_mgr_position_number ||
-        additional_info_comments
-      ) {
+      const { orgchart_json, reports_to_position_id } = positionRequest ?? {
+        orgchart_json: undefined,
+        reports_to_position_id: undefined,
+      };
+
+      // Find first parent which is an excluded manager
+      const lookup =
+        orgchart_json != null && reports_to_position_id != null
+          ? findExcludedManager(`${reports_to_position_id}`, orgchart_json)
+          : undefined;
+
+      setValue('excludedManagerPositionNumber', excluded_mgr_position_number || lookup?.id || '');
+      if (lookup?.id) {
+        debouncedFetchPositionProfile(lookup.id);
+      }
+
+      setValue('comments', comments || '');
+
+      if (work_location_id || department_id || excluded_mgr_position_number || comments || branch || division) {
         setValue('confirmation', true);
       }
     }
-  }, [departmentsData, positionRequestData, setValue]);
+  }, [departmentsData, positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
 
   const confirmation = watch('confirmation');
-
-  const srOnlyStyle: CSSProperties = {
-    position: 'absolute',
-    width: '1px',
-    height: '1px',
-    padding: '0',
-    margin: '-1px',
-    overflow: 'hidden',
-    clip: 'rect(0, 0, 0, 0)',
-    border: '0',
-  };
 
   const [deletePositionRequest] = useDeletePositionRequestMutation();
   const deleteRequest = async () => {
@@ -430,6 +447,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
   if (!allLocations) return <LoadingSpinnerWithMessage />;
 
+  // console.log('firstActivePosition:', firstActivePosition);
+  // console.log('errors.excludedManagerPosit: ', errors.excludedManagerPositionNumber);
+
   return (
     <div data-testid="additional-information-form">
       <WizardPageWrapper
@@ -449,6 +469,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
+          <div style={{ marginRight: '1rem' }}>
+            <StatusIndicator status={positionRequest?.status ?? ''} />
+          </div>,
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
             <Button data-testid="ellipsis-menu" icon={<EllipsisOutlined />}></Button>
           </Popover>,
@@ -481,7 +504,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
             padding: '2rem 1rem',
           }}
         >
-          <Row justify="center" gutter={16}>
+          <Row justify="center" gutter={16} role="form" aria-label="additional information">
             <Col sm={24} md={24} lg={24} xxl={18}>
               <Row justify="center">
                 <Col xs={24} sm={24} md={24} lg={24} xl={24}>
@@ -491,7 +514,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                       // console.log(data);
                     })}
                   >
-                    <Card title="Confirmation" bordered={false} className="custom-card">
+                    <Card
+                      title={<h3 style={{ fontWeight: '600', fontSize: '16px' }}>Confirmation</h3>}
+                      bordered={false}
+                      className="custom-card"
+                    >
                       <Row justify="start">
                         <Col xs={24} sm={24} md={24} lg={24} xl={24}>
                           <Form.Item
@@ -499,15 +526,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                             validateStatus={errors.confirmation ? 'error' : ''}
                             help={errors.confirmation?.message}
                           >
-                            <label style={srOnlyStyle} htmlFor="confirmation">
-                              Confirmation
-                            </label>
                             <Controller
                               name="confirmation"
                               control={control}
                               render={({ field: { onChange, value } }) => {
                                 return (
                                   <Switch
+                                    aria-labelledby="confirmation-label-id"
                                     checkedChildren="Yes"
                                     data-testid="confirmation-switch"
                                     checked={value}
@@ -518,18 +543,21 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                 );
                               }}
                             />
-                            <span style={{ marginLeft: '1rem' }}>
+                            <span style={{ marginLeft: '1rem' }} id="confirmation-label-id">
                               I confirm that I have received executive approval (Deputy Minister or delegate) for this
                               new position.
                             </span>
-                            {/* {errors.confirmation && <p style={{ color: 'red' }}>{errors.confirmation.message}</p>} */}
                           </Form.Item>
                         </Col>
                       </Row>
                     </Card>
 
                     <Card
-                      title="Department ID"
+                      title={
+                        <span id="department-id-label">
+                          <h3 style={{ fontWeight: '600', fontSize: '16px' }}>Department ID</h3>
+                        </span>
+                      }
                       // title="Department & work location"
                       bordered={false}
                       className="custom-card"
@@ -549,6 +577,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               control={control}
                               render={({ field: { onChange, onBlur, value } }) => (
                                 <Select
+                                  aria-labelledby="department-id-label"
                                   data-testid="department-select"
                                   onChange={(newValue) => {
                                     const selectedDept = departmentsData?.find((dept) => dept.id === newValue);
@@ -590,7 +619,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     </Card>
 
                     <Card
-                      title="First level excluded manager"
+                      title={
+                        <span id="excluded-manager-id-label">
+                          <h3 style={{ fontWeight: '600', fontSize: '16px' }}>First level excluded manager</h3>
+                        </span>
+                      }
                       bordered={false}
                       className="custom-card"
                       style={{ marginTop: 16 }}
@@ -598,41 +631,44 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                       <Row justify="start">
                         <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                           <Form.Item
+                            style={{ margin: 0 }}
                             name="firstLevelExcludedManager"
                             validateStatus={
                               (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
                               (noPositions && !isFetchingPositionProfile) ||
+                              (firstActivePosition &&
+                                !firstActivePosition?.employeeName &&
+                                !isFetchingPositionProfile) ||
                               isFetchingPositionProfileError
                                 ? 'error'
                                 : ''
                             }
-                            // display help only if there is an error and the position profile is not being fetched
-
                             help={
-                              (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
-                              (noPositions && !isFetchingPositionProfile) ||
-                              isFetchingPositionProfileError
+                              (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) || // error is present and not fetching OR
+                              (noPositions && !isFetchingPositionProfile) || // no positions and not fetching
+                              (firstActivePosition &&
+                                !firstActivePosition?.employeeName &&
+                                !isFetchingPositionProfile) ||
+                              isFetchingPositionProfileError // fetch error
                                 ? errors.excludedManagerPositionNumber
                                   ? errors.excludedManagerPositionNumber?.message
-                                  : 'Position not found'
+                                  : firstActivePosition && !firstActivePosition.employeeName
+                                    ? 'Position is unencumbered'
+                                    : 'Position not found'
                                 : ''
                             }
                           >
-                            <label style={srOnlyStyle} htmlFor="excludedManagerPositionNumber">
-                              First level excluded manager
-                            </label>
                             <Controller
                               name="excludedManagerPositionNumber"
                               control={control}
                               render={({ field: { onChange, onBlur, value } }) => (
                                 <Input
+                                  aria-labelledby="excluded-manager-id-label"
                                   data-testid="reporting-manager-input"
                                   onBlur={onBlur}
                                   value={value}
                                   onChange={(e) => {
-                                    if (e.target.value) {
-                                      debouncedFetchPositionProfile(e.target.value); // Fetch position profile
-                                    }
+                                    debouncedFetchPositionProfile(e.target.value); // Fetch position profile
                                     onChange(e); // Update controller state
                                   }}
                                   placeholder="Position number"
@@ -640,21 +676,73 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                 />
                               )}
                             />
-                            {firstActivePosition && !isFetchingPositionProfile && (
-                              <div>
-                                <p>
-                                  {`${firstActivePosition.employeeName} - ${firstActivePosition.ministry}`}
-                                  {additionalPositions > 0 && ` +${additionalPositions}`}
-                                </p>
-                              </div>
-                            )}
-                            {/* {noPositions && !isFetchingPositionProfile && <p>Position not found</p>} */}
+
+                            {/* <div>
+                              errors.excludedManagerPositionNumber:{' '}
+                              {errors.excludedManagerPositionNumber &&
+                                JSON.stringify(errors.excludedManagerPositionNumber)}
+                            </div>
+                            <div>noPositions: {noPositions.toString()}</div>
+                            <div>isFetchingPositionProfileError: {isFetchingPositionProfileError.toString()}</div> */}
+                          </Form.Item>
+                          <div>
+                            {firstActivePosition &&
+                              !isFetchingPositionProfile &&
+                              firstActivePosition.employeeName &&
+                              !noPositions &&
+                              !errors.excludedManagerPositionNumber &&
+                              !isFetchingPositionProfileError && (
+                                <div style={{ height: '15px' }}>
+                                  <p>
+                                    {`${firstActivePosition.employeeName} - ${firstActivePosition.ministry}`}
+                                    {additionalPositions > 0 && ` +${additionalPositions}`}
+                                  </p>
+                                </div>
+                              )}
                             {isFetchingPositionProfile && (
                               <LoadingSpinnerWithMessage data-testid="loading-spinner" mode="small" />
                             )}
-                            {/* {errors.excludedManagerPositionNumber && !isFetchingPositionProfile && (
-                      <p style={{ color: 'red' }}>{errors.excludedManagerPositionNumber.message}</p>
-                    )} */}
+                          </div>
+                        </Col>
+                      </Row>
+                    </Card>
+
+                    <Card
+                      title={
+                        <span id="excluded-manager-id-label">
+                          <h3 style={{ fontWeight: '600', fontSize: '16px' }}>Branch and Division</h3>
+                        </span>
+                      }
+                      bordered={false}
+                      className="custom-card"
+                      style={{ marginTop: 16 }}
+                    >
+                      <Row justify="start">
+                        <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                          <Form.Item
+                            name="branch"
+                            label="Branch"
+                            validateStatus={errors.branch ? 'error' : ''}
+                            help={errors.branch?.message}
+                          >
+                            <Controller
+                              name="branch"
+                              control={control}
+                              render={({ field }) => <Input {...field} disabled={!confirmation} />}
+                            />
+                          </Form.Item>
+
+                          <Form.Item
+                            name="division"
+                            label="Division"
+                            validateStatus={errors.division ? 'error' : ''}
+                            help={errors.division?.message}
+                          >
+                            <Controller
+                              name="division"
+                              control={control}
+                              render={({ field }) => <Input {...field} disabled={!confirmation} />}
+                            />
                           </Form.Item>
                         </Col>
                       </Row>
@@ -703,9 +791,19 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                 style={{ marginTop: '1rem' }}
                 title={
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Other Details</span>
-                    <Tooltip title="Information shown here is dependent on the values that you selected in the previous steps.">
-                      <Button id="changes" type="link">
+                    <span>
+                      <h3 style={{ fontWeight: '600', fontSize: '16px' }}>Other Details</h3>
+                    </span>
+                    <Tooltip
+                      trigger={['hover', 'click']}
+                      title="Information shown here is dependent on the values that you selected in the previous steps."
+                    >
+                      <Button
+                        id="changes"
+                        role="note"
+                        type="link"
+                        aria-label="Why can't I make changes? Because information shown here is dependent on the values that you selected in the previous steps."
+                      >
                         Why can't I make changes?
                       </Button>
                     </Tooltip>
@@ -714,9 +812,14 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                 bordered={false}
               >
                 <Form layout="vertical" data-testid="job-info">
-                  <Form.Item name="jobTitle" label="Job title" labelCol={{ className: 'card-label' }} colon={false}>
+                  <Form.Item
+                    name="jobTitle"
+                    label={<h4 style={{ margin: 0 }}>Job title</h4>}
+                    labelCol={{ className: 'card-label' }}
+                    colon={false}
+                  >
                     <div style={{ margin: 0 }}>
-                      {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.value}
+                      {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.text}
                     </div>
                   </Form.Item>
 
@@ -724,7 +827,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
                   <Form.Item
                     name="expectedClass"
-                    label="Expected classification level"
+                    label={<h4 style={{ margin: 0 }}>Expected classification level</h4>}
                     labelCol={{ className: 'card-label' }}
                     colon={false}
                   >
@@ -735,7 +838,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
                   <Form.Item
                     name="jobTitle"
-                    label="Reporting Manager"
+                    label={<h4 style={{ margin: 0 }}>Reporting Manager</h4>}
                     labelCol={{ className: 'card-label' }}
                     colon={false}
                   >
@@ -766,7 +869,12 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
                   <Divider className="hr-reduced-margin" />
 
-                  <Form.Item name="jobTitle" label="Type" labelCol={{ className: 'card-label' }} colon={false}>
+                  <Form.Item
+                    name="jobTitle"
+                    label={<h4 style={{ margin: 0 }}>Type</h4>}
+                    labelCol={{ className: 'card-label' }}
+                    colon={false}
+                  >
                     <div style={{ margin: 0 }}>Full-time, regular</div>
                   </Form.Item>
 
@@ -774,7 +882,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
                   <Form.Item
                     name="jobTitle"
-                    label="Job Store profile number"
+                    label={<h4 style={{ margin: 0 }}>Job Store profile number</h4>}
                     labelCol={{ className: 'card-label' }}
                     colon={false}
                   >

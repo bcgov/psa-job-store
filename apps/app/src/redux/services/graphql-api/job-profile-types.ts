@@ -159,6 +159,16 @@ export interface BehaviouralCompetency {
   description: string;
 }
 
+export interface EditFieldModel {
+  text: string;
+  is_readonly?: boolean;
+  is_significant?: boolean;
+
+  // HM view
+  isCustom?: boolean;
+  disabled?: boolean;
+}
+
 export interface AccountabilitiesModel {
   text: string | TrackedFieldArrayItem;
   is_readonly?: boolean;
@@ -167,6 +177,9 @@ export interface AccountabilitiesModel {
   // HM view
   isCustom?: boolean;
   disabled?: boolean;
+
+  // total comp
+  nonEditable?: boolean;
 }
 
 export interface SecuritiyScreeningModel {
@@ -179,9 +192,14 @@ export interface SecuritiyScreeningModel {
 }
 
 export class TrackedFieldArrayItem {
-  value: string;
+  text: string;
   disabled?: boolean;
   isCustom?: boolean;
+  is_significant?: boolean;
+  is_readonly?: boolean;
+
+  // total comp
+  nonEditable?: boolean;
 }
 
 interface BehaviouralCompetencyConnect {
