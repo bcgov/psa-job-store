@@ -16,3 +16,4 @@ AL-618 Implement undo functionality on all fields on edit form
 AL-305 Classifications - actions tab functionality
 AL-655 Going through "My organizations" after editing a different position request does not clear selected person + profile data not resetting
 AL-250 Empty view doesn't expand to the bottom of the screen (total comp)
+AL-586 Update documentation to allow new developer onboarding

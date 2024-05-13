@@ -1,5 +1,4 @@
-# Use the official Node.js 18 image.
-FROM node:18-alpine AS base
+FROM node:20.13.1-alpine AS base
 # Create and change to the app directory.
 FROM base AS builder
 WORKDIR /tmp/build
