@@ -174,6 +174,7 @@ export const DynamicOrgChart = ({
         };
       });
     } else if (selectedNodeIds.length > 0) {
+      // selectedNodeIds is set - select those elements
       const focusedElements = [
         ...getFocusedElements(
           nodes.filter((node: Node) => selectedNodeIds.includes(node.id)),

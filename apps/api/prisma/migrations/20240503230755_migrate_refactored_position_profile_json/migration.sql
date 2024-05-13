@@ -5,6 +5,7 @@ ALTER TABLE "position_request" ADD COLUMN profile_json_updated JSONB;
 UPDATE "position_request"
 SET profile_json_updated = CASE
     WHEN profile_json IS NULL THEN NULL
+    WHEN profile_json = 'null'::jsonb THEN NULL
     ELSE profile_json
       || jsonb_build_object('title', jsonb_build_object(
            'text', profile_json->'title'->>'value',

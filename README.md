@@ -13,7 +13,7 @@ Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one soluti
 
 ### 📈 Create & Edit Positions Instantly
 
-- Create New Positions: Add new roles to your organization in real-time, customizing as per your needs.
+- Create New Positions: Add new roles to your organization in real-time, customizing as per your needs or using provided job profiles.
 
 ### 📚 Library of Job Profiles
 
@@ -39,11 +39,45 @@ Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one soluti
 
 ## Running the project
 
-### Build common-kit
+### Requirements
+
+- node >=20.11.1 <21.0.0
+
+### Installation
+
+First, clone the repository:
+
+`git clone https://github.com/bcgov/psa-job-store.git`
+
+Install dependencies:
+
+`npm i`
+
+Rename `/sample.env` to `.env` and configure the variables
+
+Start elastic search and postgres containers:
+
+`docker compose up`
+
+Build common-kit:
 
 `npm -w common-kit run build`
 
-More instructions coming soon..
+Setup the database and seed it with test data:
+
+`npx -w api npm run migrate:reset:e2e-test`
+
+Rename `/apps/app/sample.env` to `.env` and configure the environment.
+
+Start API project:
+
+`npm -w api run start:dev`
+
+Start the web project:
+
+`npm -w app run dev`
+
+Visit [http://localhost:5173/](http://localhost:5173/) to see the application!
 
 ## Running end-to-end tests
 

@@ -11,7 +11,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Modal, Result, Row, Space, Table, Tooltip, message } from 'antd';
+import { Button, Card, Col, Menu, Modal, Result, Row, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import { generateJobProfile } from 'common-kit';
 import copy from 'copy-to-clipboard';
@@ -32,6 +32,7 @@ import {
   useLazyGetPositionRequestsQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
+import StatusIndicator from '../../wizard/components/wizard-position-request-status-indicator';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -374,46 +375,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('status'),
             render: (status: any) => {
-              const getColorForStatus = (status: string) => {
-                switch (status) {
-                  case 'DRAFT':
-                    return 'gray';
-                  case 'IN_REVIEW':
-                    return '#722ED1';
-                  case 'COMPLETED':
-                    return '#13C2C2';
-                  case 'ESCALATED':
-                    return '#FAAD14';
-                  case 'ACTION_REQUIRED':
-                    return '#F5222D';
-                  default:
-                    return 'black';
-                }
-              };
-
-              const getStatusLabel = (status: string) => {
-                switch (status) {
-                  case 'DRAFT':
-                    return 'Draft';
-                  case 'IN_REVIEW':
-                    return 'In Review';
-                  case 'COMPLETED':
-                    return 'Completed';
-                  case 'ESCALATED':
-                    return 'Escalated';
-                  case 'ACTION_REQUIRED':
-                    return 'Action Required';
-                  default:
-                    return 'Unknown'; // or any default status label you prefer
-                }
-              };
-
-              const color = getColorForStatus(status);
               return (
-                <Space>
-                  <span className={`status-dot`} style={{ backgroundColor: color }} />
-                  <span data-testid={`status-${status}`}>{getStatusLabel(status)}</span>
-                </Space>
+                <StatusIndicator status={status} colorText={false} />
+                // <Space>
+                //   <span className={`status-dot`} style={{ backgroundColor: color }} />
+                //   <span data-testid={`status-${status}`}>{getStatusLabel(status)}</span>
+                // </Space>
               );
             },
           },
