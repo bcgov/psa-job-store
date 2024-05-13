@@ -1,3 +1,4 @@
+import { UnauthorizedException } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { FindUniqueOrgChartArgs } from './models/find-unique-org-chart.args';
@@ -10,7 +11,10 @@ export class OrgChartResolver {
   constructor(private readonly orgChartService: OrgChartService) {}
 
   @Query(() => OrgChart, { name: 'orgChart' })
-  getOrgChart(@Args() args?: FindUniqueOrgChartArgs) {
+  async getOrgChart(@CurrentUser() user: Express.User, @Args() args?: FindUniqueOrgChartArgs) {
+    if (!(user.metadata.org_chart.department_ids ?? []).includes(args?.where?.department_id))
+      throw new UnauthorizedException();
+
     return this.orgChartService.getOrgChart(args);
   }
 
