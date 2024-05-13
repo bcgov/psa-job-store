@@ -146,7 +146,6 @@ export class AuthService {
       };
 
       const upsertedUser = await this.upsertUser(user);
-      console.log('user: ', user);
 
       // Add user to cache
       await this.cacheManager.set(CACHE_KEY, upsertedUser, (exp ?? 0) * 1000 - Date.now());
