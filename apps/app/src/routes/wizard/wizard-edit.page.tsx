@@ -13,6 +13,7 @@ import {
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditProfile from './components/wizard-edit-profile';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 
 export interface InputData {
@@ -298,6 +299,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       hpad={false}
       grayBg={false}
       pageHeaderExtra={[
+        <div style={{ marginRight: '1rem' }}>
+          <StatusIndicator status={positionRequest?.status ?? ''} />
+        </div>,
         <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
           <Button icon={<EllipsisOutlined />}></Button>
         </Popover>,

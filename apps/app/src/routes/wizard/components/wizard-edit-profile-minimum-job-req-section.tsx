@@ -18,10 +18,20 @@ interface MinimumRequirementsSectionProps {
   editedEducationFields: { [key: number]: boolean };
   editedSecurityScreeningsFields: { [key: number]: boolean };
   editedRelatedExperienceFields: { [key: number]: boolean };
+  editedProfessionalRegistrationFields: { [key: number]: boolean };
+  editedPreferencesFields: { [key: number]: boolean };
+  editedKnowledgeSkillsAbilitiesFields: { [key: number]: boolean };
+  editedProvisosFields: { [key: number]: boolean };
+  editedOptionalRequirementsFields: { [key: number]: boolean };
 
   setEditedEducationFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
   setEditedRelatedExperienceFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
   setEditedSecurityScreeningsFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
+  setEditedProfessionalRegistrationFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
+  setEditedPreferencesFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
+  setEditedKnowledgeSkillsAbilitiesFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
+  setEditedProvisosFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
+  setEditedOptionalRequirementsFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
 
   originalRelatedExperienceFields: any[];
   originalEducationFields: any[];
@@ -30,7 +40,7 @@ interface MinimumRequirementsSectionProps {
   originalKnowledgeSkillsAbilitiesFields: any[];
   originalProvisosFields: any[];
   originalSecurityScreeningsFields: any[];
-  originalMinimumJobRequirementsFields: any[];
+  originalOptionalRequirementsFields: any[];
 
   isAdmin: boolean;
   formErrors: any;
@@ -56,11 +66,26 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
   setEditedSecurityScreeningsFields,
 
   originalProfessionalRegistrationFields,
+  setEditedProfessionalRegistrationFields,
+  editedProfessionalRegistrationFields,
+
   originalPreferencesFields,
+  setEditedPreferencesFields,
+  editedPreferencesFields,
+
   originalKnowledgeSkillsAbilitiesFields,
+  setEditedKnowledgeSkillsAbilitiesFields,
+  editedKnowledgeSkillsAbilitiesFields,
+
   originalProvisosFields,
+  setEditedProvisosFields,
+  editedProvisosFields,
+
+  originalOptionalRequirementsFields,
+  setEditedOptionalRequirementsFields,
+  editedOptionalRequirementsFields,
+
   originalSecurityScreeningsFields,
-  originalMinimumJobRequirementsFields,
 
   isAdmin,
   formErrors,
@@ -134,6 +159,8 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               testId="professional-registration"
               addButtonText="Add a professional registration requirement"
               formErrors={formErrors}
+              setEditedFields={setEditedProfessionalRegistrationFields}
+              editedFields={editedProfessionalRegistrationFields}
             />
 
             <Divider className="hr-reduced-margin" />
@@ -147,6 +174,8 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               fieldName="preferences"
               testId="preferences"
               addButtonText="Add a job preference"
+              setEditedFields={setEditedPreferencesFields}
+              editedFields={editedPreferencesFields}
             />
 
             <Divider className="hr-reduced-margin" />
@@ -161,6 +190,8 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               testId="knowledge-skills-abilities"
               addButtonText="Add a knowledge, skill or ability requirement"
               formErrors={formErrors}
+              setEditedFields={setEditedKnowledgeSkillsAbilitiesFields}
+              editedFields={editedKnowledgeSkillsAbilitiesFields}
             />
 
             <Divider className="hr-reduced-margin" />
@@ -174,6 +205,8 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               fieldName="willingness_statements"
               testId="proviso"
               addButtonText="Add a proviso"
+              setEditedFields={setEditedProvisosFields}
+              editedFields={editedProvisosFields}
             />
 
             <Divider className="hr-reduced-margin" />
@@ -213,12 +246,14 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
             {/* optional requirements */}
             <WizardEditProfileArrayField
               useFormReturn={useFormReturn}
-              originalFields={originalMinimumJobRequirementsFields}
+              originalFields={originalOptionalRequirementsFields}
               validateVerification={validateVerification}
               label="Optional requirements"
               fieldName="optional_requirements"
               testId="optional-requirement"
               addButtonText="Add an optional requirement"
+              setEditedFields={setEditedOptionalRequirementsFields}
+              editedFields={editedOptionalRequirementsFields}
             />
           </Col>
         </Row>

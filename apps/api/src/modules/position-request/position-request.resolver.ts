@@ -135,8 +135,11 @@ export class PositionRequestApiResolver {
   }
 
   @Mutation(() => PositionRequestResponse, { name: 'deletePositionRequest' })
-  async deletePositionRequest(@Args('id', { type: () => Int }) id: number) {
-    return this.positionRequestService.deletePositionRequest(id);
+  async deletePositionRequest(
+    @Args('id', { type: () => Int }) id: number,
+    @CurrentUser() { id: userId }: Express.User,
+  ) {
+    return this.positionRequestService.deletePositionRequest(id, userId);
   }
 
   @Roles('total-compensation', 'classification')

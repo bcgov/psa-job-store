@@ -66,9 +66,9 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
   else isEdited = editedFields ? !isAdmin && (editedFields[index] || field.isCustom) : false;
 
   const handleFieldChange = debounce((index, updatedValue) => {
-    if (field.is_significant || forceSignificant)
-      setEditedFields &&
-        setEditedFields((prev) => ({ ...prev, [index]: updatedValue !== originalFields[index]?.['text'] }));
+    // if (field.is_significant || forceSignificant)
+    setEditedFields &&
+      setEditedFields((prev) => ({ ...prev, [index]: updatedValue !== originalFields[index]?.['text'] }));
     useFormReturn.trigger();
   }, 300);
 
@@ -111,7 +111,9 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
               {ariaLabel} {index + 1}
             </label>
             <div
-              className={`${isEdited ? 'edited-field-container' : ''} input-container`}
+              className={`${
+                isEdited && (field.is_significant || forceSignificant) ? 'edited-field-container' : ''
+              } input-container`}
               style={{ display: field.is_readonly ? 'none' : 'block' }}
             >
               <TextArea
@@ -119,7 +121,9 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                 data-testid={`${testId}-input-${index}`}
                 autoSize
                 disabled={field.disabled || useFormReturn.getValues(`${fieldName}.${index}.is_readonly`)}
-                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${isEdited ? 'edited-textarea' : ''}`}
+                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
+                  isEdited && (field.is_significant || forceSignificant) ? 'edited-textarea' : ''
+                }`}
                 onChange={(event) => {
                   onChange(event);
                   const updatedValue = event.target.value;

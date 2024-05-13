@@ -22,6 +22,7 @@ import { ServiceRequestDetails } from '../classification-tasks/components/servic
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 import './position-request.page.css';
 import { WizardConfirmDetailsPage } from './wizard-confirm-details.page';
@@ -464,7 +465,6 @@ export const PositionRequestPage = () => {
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
-                              <Button type="link">View</Button> |{' '}
                               <Button type="link">
                                 <DownloadJobProfileComponent
                                   jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
@@ -574,6 +574,19 @@ export const PositionRequestPage = () => {
                 ></PositionProfile>
               </div>
             }
+            pageHeaderExtra={[
+              <div style={{ marginRight: '1rem' }}>
+                <StatusIndicator status={positionRequestData?.positionRequest?.status ?? ''} />
+              </div>,
+              (readonlyMode === 'completed' || readonlyMode === 'inQueue') && (
+                <DownloadJobProfileComponent
+                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
+                  useModal={readonlyMode === 'completed'}
+                >
+                  <Button type="primary">Download profile</Button>
+                </DownloadJobProfileComponent>
+              ),
+            ]}
             spaceSize="small"
             hpad={false}
             additionalBreadcrumb={{

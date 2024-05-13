@@ -132,11 +132,11 @@ export class PositionRequestApiService {
     return this.prisma.positionRequest.create({
       data: {
         department: data.department,
-        additional_info: data.additional_info,
+        additional_info: data.additional_info === null ? Prisma.DbNull : data.additional_info,
         step: data.step,
         reports_to_position_id: data.reports_to_position_id,
-        profile_json_updated: data.profile_json_updated,
-        orgchart_json: data.orgchart_json,
+        profile_json_updated: data.profile_json_updated === null ? Prisma.DbNull : data.profile_json_updated,
+        orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
         // TODO: AL-146
         // user: data.user,
         user_id: userId,
@@ -779,11 +779,12 @@ export class PositionRequestApiService {
     }
 
     if (updateData.profile_json_updated !== undefined) {
-      updatePayload.profile_json_updated = updateData.profile_json_updated;
+      updatePayload.profile_json_updated =
+        updateData.profile_json_updated === null ? Prisma.DbNull : updateData.profile_json_updated;
     }
 
     if (updateData.orgchart_json !== undefined) {
-      updatePayload.orgchart_json = updateData.orgchart_json;
+      updatePayload.orgchart_json = updateData.orgchart_json === null ? Prisma.DbNull : updateData.orgchart_json;
     }
 
     if (updateData.title !== undefined) {
@@ -1002,8 +1003,8 @@ export class PositionRequestApiService {
     }
   }
 
-  async deletePositionRequest(id: number) {
-    const result = await this.prisma.positionRequest.delete({ where: { id } });
+  async deletePositionRequest(id: number, userId: string) {
+    const result = await this.prisma.positionRequest.delete({ where: { id, user_id: userId, status: 'DRAFT' } });
     return result;
   }
 
