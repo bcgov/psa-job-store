@@ -77,6 +77,10 @@ export class AuthService {
         contact_id: null,
       };
 
+      let orgChartMetadata: Record<string, any> = {
+        department_ids: null,
+      };
+
       let peoplesoftMetadata: Record<string, any> = {
         department_id: null,
         employee_id: null,
@@ -117,6 +121,13 @@ export class AuthService {
           organization_id: employee?.BUSINESS_UNIT,
           position_id: employee?.POSITION_NBR,
         };
+
+        // Update Org Chart Department IDs
+        if (userFromDb?.metadata?.['org_chart']?.['department_ids'] == null) {
+          orgChartMetadata = {
+            department_ids: peoplesoftMetadata.department_id != null ? [peoplesoftMetadata.department_id] : null,
+          };
+        }
       }
 
       const user = {
@@ -127,14 +138,16 @@ export class AuthService {
         roles: ((client_roles as string[]) ?? []).sort(),
         metadata: {
           crm: crmMetadata,
+          org_chart: orgChartMetadata,
           peoplesoft: peoplesoftMetadata,
         },
       };
 
-      await this.upsertUser(user);
+      const upsertedUser = await this.upsertUser(user);
+      console.log('user: ', user);
 
       // Add user to cache
-      await this.cacheManager.set(CACHE_KEY, user, (exp ?? 0) * 1000 - Date.now());
+      await this.cacheManager.set(CACHE_KEY, upsertedUser, (exp ?? 0) * 1000 - Date.now());
       match = await this.cacheManager.get<Express.User>(CACHE_KEY);
     }
 
@@ -152,6 +165,9 @@ export class AuthService {
       }),
     ];
     await this.prisma.$transaction(queries);
+
+    const upsertedUser = await this.prisma.user.findUnique({ where: { id } });
+    return upsertedUser;
   }
 
   async logoutUser(idir_user_guid: string): Promise<void> {
