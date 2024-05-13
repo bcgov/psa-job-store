@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Buffer } from 'buffer';
-import dayjs from 'dayjs';
 import {
   BorderStyle,
   Document,
@@ -662,7 +661,7 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: `${parentJobProfile?.jobFamilies[0].jobFamily?.name}`,
+                                // text: `${parentJobProfile?.jobFamilies[0].jobFamily?.name}`,
                               }),
                             ],
                           }),
@@ -691,7 +690,7 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: `${parentJobProfile?.streams[0]?.stream?.name}`,
+                                // text: `${parentJobProfile?.streams[0]?.stream?.name}`,
                               }),
                             ],
                           }),
@@ -720,9 +719,9 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text: `${
-                                  parentJobProfile?.role_type?.name != null ? parentJobProfile?.role_type?.name : ''
-                                }`,
+                                // text: `${
+                                // parentJobProfile?.role_type?.name != null ? parentJobProfile?.role_type?.name : ''
+                                // }`,
                               }),
                             ],
                           }),
@@ -751,10 +750,10 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text:
-                                  parentJobProfile != null
-                                    ? `${dayjs(parentJobProfile.updated_at).format('MMM d, YYYY')}`
-                                    : '',
+                                // text:
+                                //   parentJobProfile != null
+                                // ? `${dayjs(parentJobProfile.updated_at).format('MMM d, YYYY')}`
+                                // : '',
                               }),
                             ],
                           }),
