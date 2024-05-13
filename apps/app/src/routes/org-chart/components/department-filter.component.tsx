@@ -1,10 +1,6 @@
 import { TreeSelect, Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import {
-  DepartmentModel,
-  useGetDepartmentsWithOrganizationQuery,
-} from '../../../redux/services/graphql-api/department.api';
-import { OrganizationModel, useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
+import { useGetOrgChartDepartmentFilterQuery } from '../../../redux/services/graphql-api/org-chart.api';
 
 const { Text } = Typography;
 
@@ -15,49 +11,43 @@ interface DepartmentFilterProps {
 }
 
 export const DepartmentFilter = ({ setDepartmentId, departmentId, loading }: DepartmentFilterProps) => {
-  const { data: ministryData, isFetching: ministryDataIsFetching } = useGetOrganizationsQuery();
-  const { data: departmentData, isFetching: departmentDataIsFetching } = useGetDepartmentsWithOrganizationQuery();
+  const { data: filterData, isFetching: filterDataIsFetching } = useGetOrgChartDepartmentFilterQuery();
   const [treeData, setTreeData] = useState<React.ComponentProps<typeof TreeSelect>['treeData']>([]);
 
   useEffect(() => {
-    const ministries: OrganizationModel[] = JSON.parse(JSON.stringify(ministryData?.organizations || []));
-    const departments: DepartmentModel[] = JSON.parse(JSON.stringify(departmentData?.departments || []));
+    const items = Array.isArray(filterData?.getOrgChartDepartmentFilter) ? filterData?.getOrgChartDepartmentFilter : [];
 
-    if (ministries.length > 0 && departments.length > 0) {
-      const treeData = ministries.map((ministry) => ({
-        children: departments
-          .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
-          .filter((department) => department.organization_id === ministry.id)
-          .map(({ id, name }) => ({
-            filterString: `${id} ${name}`,
-            label: (
-              <span title={`${name} (${id})`}>
-                {name}{' '}
-                <Text style={{ whiteSpace: 'nowrap' }} type="secondary">
-                  ({id})
-                </Text>
-              </span>
-            ),
-            value: id,
-          })),
-        label: ministry.name,
-        selectable: false,
-        value: `ministry-${ministry.id}`,
-      }));
+    const treeData = items?.map((ministry) => ({
+      label: ministry.label,
+      value: ministry.value,
+      selectable: ministry.selectable,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      children: ministry.children.map(({ label, value, filterString }: Record<string, any>) => ({
+        label: (
+          <span title={`${label} (${value})`}>
+            {label}{' '}
+            <Text style={{ whiteSpace: 'nowrap' }} type="secondary">
+              ({value})
+            </Text>
+          </span>
+        ),
+        value: value,
+        filterString: filterString,
+      })),
+    }));
 
-      setTreeData(treeData);
-    }
-  }, [ministryData, departmentData]);
+    setTreeData(treeData);
+  }, [filterData]);
 
   return (
     <TreeSelect
       onClear={() => setDepartmentId(undefined)}
       onSelect={(value) => setDepartmentId(value)}
       allowClear
-      disabled={loading || departmentDataIsFetching || ministryDataIsFetching}
+      disabled={loading || filterDataIsFetching}
       filterTreeNode
       listHeight={300}
-      loading={loading || departmentDataIsFetching || ministryDataIsFetching}
+      loading={loading || filterDataIsFetching}
       placeholder="Select a Department"
       showSearch
       style={{ width: '100%' }}
