@@ -127,6 +127,8 @@ export class AuthService {
           orgChartMetadata = {
             department_ids: peoplesoftMetadata.department_id != null ? [peoplesoftMetadata.department_id] : null,
           };
+        } else if (userFromDb.metadata['org_chart']['department_ids'] != null) {
+          orgChartMetadata = userFromDb.metadata['org_chart'];
         }
       }
 
