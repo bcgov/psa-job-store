@@ -177,7 +177,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           : professionsData,
       role: 1,
       reportToRelationship: [] as string[],
-      scopeOfResponsibility: null as number | null,
+      scopeOfResponsibility: [] as number[] | null,
       ministries: [] as string[],
       classificationReviewRequired: false,
       jobContext: '',
@@ -437,7 +437,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     // Check if the URL is for creating a new profile
     if (!urlId) {
-      console.log('RESET FORM');
       reset();
       resetProfileForm();
       fetchNextNumber();
@@ -547,7 +546,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
       if (jobProfileData.jobProfile.role_type) setValue('role', jobProfileData.jobProfile.role_type.id);
 
-      setValue('scopeOfResponsibility', jobProfileData.jobProfile?.scope?.id);
+      if (jobProfileData.jobProfile?.scopes) {
+        setValue(
+          'scopeOfResponsibility',
+          jobProfileData.jobProfile.scopes.map((s) => s.scope.id),
+        );
+      }
 
       setValue('classificationReviewRequired', jobProfileData.jobProfile.review_required);
       if (typeof jobProfileData.jobProfile.context === 'string') {
@@ -1030,7 +1034,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const selectedScopeId = watch('scopeOfResponsibility');
 
   const selectedScopeDescription = useMemo(() => {
-    return jobProfileScopes?.jobProfileScopes.find((scope) => scope.id === selectedScopeId)?.description || null;
+    // return jobProfileScopes?.jobProfileScopes.find((scope) => scope.id === selectedScopeId)?.description || null;
+    if (!selectedScopeId || !jobProfileScopes) return null;
+    return (selectedScopeId as number[])
+      .map((scopeId) => jobProfileScopes.jobProfileScopes.find((scope) => scope.id === scopeId)?.description)
+      .filter((description) => description)
+      .join(', ');
   }, [selectedScopeId, jobProfileScopes]);
 
   // minimum requirements that change in reponse to classification changes
@@ -1170,7 +1179,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         }),
         role_type: { connect: { id: formData.role } },
         ...(formData.scopeOfResponsibility && {
-          scope: { connect: { id: formData.scopeOfResponsibility } },
+          scopes: {
+            create: formData.scopeOfResponsibility.map((scopeId: number) => ({
+              scope: { connect: { id: scopeId } },
+            })),
+          },
         }),
         jobFamilies: {
           create: formData.professions
@@ -1845,23 +1858,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                      {/* Scope of Responsibility Select */}
+                      {/* Scopes of Responsibility Select */}
                       <Form.Item label="Scope of Responsibility" labelCol={{ className: 'card-label' }}>
                         <Controller
                           name="scopeOfResponsibility"
                           control={control}
-                          render={({ field: { onChange, onBlur, value } }) => (
-                            <Select
-                              placeholder="Choose the scope of responsibility"
-                              onChange={onChange}
-                              onBlur={onBlur}
-                              value={value}
-                              options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
-                                label: scope.name,
-                                value: scope.id,
-                              }))}
-                            ></Select>
-                          )}
+                          render={({ field: { onChange, onBlur, value } }) => {
+                            return (
+                              <Select
+                                placeholder="Choose the scopes of responsibility"
+                                onChange={onChange}
+                                onBlur={onBlur}
+                                value={value}
+                                mode="multiple"
+                                options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
+                                  label: scope.name,
+                                  value: scope.id,
+                                }))}
+                              ></Select>
+                            );
+                          }}
                         />
                         <Typography.Text type="secondary">{selectedScopeDescription}</Typography.Text>
                       </Form.Item>

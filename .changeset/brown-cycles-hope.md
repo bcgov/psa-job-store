@@ -18,3 +18,4 @@ AL-655 Going through "My organizations" after editing a different position reque
 AL-250 Empty view doesn't expand to the bottom of the screen (total comp)
 AL-586 Update documentation to allow new developer onboarding
 AL-368 Total comp - add ability to select all job streams for a job family
+AL-244 Total Comp - ability to pick multiple "scopes of responsibility"
