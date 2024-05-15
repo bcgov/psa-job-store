@@ -105,7 +105,8 @@ model User {
 
   // TODO: AL-146
   // PositionRequest PositionRequest[]
-  JobProfile JobProfile[]
+  JobProfile      JobProfile[]
+  SavedJobProfile SavedJobProfile[]
 
   @@map("user")
 }
@@ -195,9 +196,21 @@ model JobProfile {
   position_request                       PositionRequest[]
   total_comp_create_form_misc            Json? // stores e.x. state of checkbox for markAllNonEditable for accountabilities
 
-  is_archived Boolean @default(false) // When total comp puts profile to draft, then deletes it AND it's linked to PositionRequests
+  is_archived     Boolean           @default(false) // When total comp puts profile to draft, then deletes it AND it's linked to PositionRequests
+  SavedJobProfile SavedJobProfile[]
 
   @@map("job_profile")
+}
+
+model SavedJobProfile {
+  user         User       @relation(fields: [userId], references: [id])
+  userId       String     @db.Uuid
+  jobProfile   JobProfile @relation(fields: [jobProfileId], references: [id])
+  jobProfileId Int
+  createdAt    DateTime   @default(now())
+
+  @@id([userId, jobProfileId])
+  @@map("saved_job_profile")
 }
 
 model JobProfileScopeLink {

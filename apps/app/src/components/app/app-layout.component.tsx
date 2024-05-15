@@ -11,6 +11,7 @@ import {
   MenuUnfoldOutlined,
   PartitionOutlined,
   PlusCircleFilled,
+  TagOutlined,
   UserAddOutlined,
 } from '@ant-design/icons';
 import { Button, Layout, Menu, MenuProps } from 'antd';
@@ -196,14 +197,19 @@ export const AppLayout = () => {
                           to: '/org-chart',
                         },
                         {
+                          icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'My positions',
+                          to: '/my-positions',
+                        },
+                        {
                           icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                           title: 'Explore job profiles',
                           to: '/job-profiles',
                         },
                         {
-                          icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'My positions',
-                          to: '/my-positions',
+                          icon: <TagOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Saved profiles',
+                          to: '/saved-profiles',
                         },
                       ]}
                     />
@@ -252,16 +258,21 @@ export const AppLayout = () => {
                             hideTitle: true,
                           },
                           {
+                            icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'My positions',
+                            to: '/my-positions',
+                            hideTitle: true,
+                          },
+                          {
                             icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                             title: 'Explore job profiles',
                             to: '/job-profiles',
                             hideTitle: true,
                           },
                           {
-                            icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'My positions',
-                            to: '/my-positions',
-                            hideTitle: true,
+                            icon: <TagOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'Saved profiles',
+                            to: '/saved-profiles',
                           },
                         ]}
                       />
@@ -323,6 +334,16 @@ export const AppLayout = () => {
                           icon: <CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                           title: 'My tasks',
                           to: '/',
+                        },
+                        {
+                          icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Explore job profiles',
+                          to: '/job-profiles',
+                        },
+                        {
+                          icon: <TagOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Saved profiles',
+                          to: '/saved-profiles',
                         },
                       ]}
                     />

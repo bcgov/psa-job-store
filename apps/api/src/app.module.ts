@@ -23,6 +23,7 @@ import { JobProfileStreamModule } from './modules/job-profile-stream/job-profile
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
 import { PositionRequestModule } from './modules/position-request/position-request.module';
+import { SavedJobProfileModule } from './modules/saved-job-profile/saved-job-profile.module';
 import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
 import { SearchModule } from './modules/search/search.module';
 import { apolloPinoLoggingPlugin } from './utils/logging/apolloPinoLoggingPlugin';
@@ -64,6 +65,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobProfileMinimumRequirementsModule,
     // AppLogModule,
     ScheduledTaskModule,
+    SavedJobProfileModule,
   ],
   controllers: [],
   providers: [
