@@ -91,7 +91,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       })),
       role: { id: originalData.roleId || null },
       role_type: { id: originalData.roleTypeId || null },
-      scope: { id: originalData.scopeId || null },
+      scopes: [], //{ id: originalData.scopeId || null },
       reports_to: [],
       organizations: [],
       review_required: false,

@@ -92,6 +92,20 @@ export interface Stream {
   stream: StreamDetail;
 }
 
+export interface Scope {
+  id: number;
+  name?: string;
+  description?: string;
+}
+
+export interface ScopeItem {
+  scope: {
+    id: number;
+    name?: string;
+    description?: string;
+  };
+}
+
 export interface JobProfileModel {
   id: number;
   accountabilities: AccountabilitiesModel[];
@@ -122,7 +136,8 @@ export interface JobProfileModel {
   role_type: { id: number; name?: string };
   reports_to: ClassificationModelWrapped[];
   organizations: OrganizationsModelWrapped[];
-  scope: { id: number; name?: string; description?: string };
+  scope?: Scope; // new is Scope[], old is Scope for backwards compat
+  scopes: ScopeItem[];
   review_required: boolean;
   professions: ProfessionsModel[];
   program_overview: string | TrackedFieldArrayItem;
@@ -262,6 +277,10 @@ interface JobFamilyCreateInput {
   jobFamily: JobFamilyConnectInput;
 }
 
+interface ScopeCreateInput {
+  scope: JobFamilyConnectInput;
+}
+
 interface StreamConnectInput {
   connect: {
     id: number;
@@ -308,9 +327,9 @@ export interface CreateJobProfileInput {
         description: string;
       };
     };
-    role: NumberConnectInput; // Assuming this connects to a classification-like entity
-    role_type: NumberConnectInput; // Assuming this connects to a classification-like entity
-    scope: NumberConnectInput; // Assuming this connects to a classification-like entity
+    role: NumberConnectInput;
+    role_type: NumberConnectInput;
+    scope: ScopeCreateInput;
     jobFamilies: {
       create: JobFamilyCreateInput[];
     };

@@ -81,6 +81,7 @@ import WizardOverview from '../../wizard/components/wizard-edit-profile-overview
 import WizardProgramOverview from '../../wizard/components/wizard-edit-profile-program-overview';
 import WizardTitle from '../../wizard/components/wizard-edit-profile-title';
 import WizardValidationError from '../../wizard/components/wizard-edit-profile-validation-error';
+import JobStreamDiscipline from './jobstream-discipline.component';
 import ReorderButtons from './reorder-buttons';
 
 const { Option } = Select;
@@ -176,7 +177,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           : professionsData,
       role: 1,
       reportToRelationship: [] as string[],
-      scopeOfResponsibility: null as number | null,
+      scopeOfResponsibility: [] as number[] | null,
       ministries: [] as string[],
       classificationReviewRequired: false,
       jobContext: '',
@@ -436,7 +437,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     // Check if the URL is for creating a new profile
     if (!urlId) {
-      console.log('RESET FORM');
       reset();
       resetProfileForm();
       fetchNextNumber();
@@ -546,7 +546,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
       if (jobProfileData.jobProfile.role_type) setValue('role', jobProfileData.jobProfile.role_type.id);
 
-      setValue('scopeOfResponsibility', jobProfileData.jobProfile?.scope?.id);
+      if (jobProfileData.jobProfile?.scopes) {
+        setValue(
+          'scopeOfResponsibility',
+          jobProfileData.jobProfile.scopes.map((s) => s.scope.id),
+        );
+      }
 
       setValue('classificationReviewRequired', jobProfileData.jobProfile.review_required);
       if (typeof jobProfileData.jobProfile.context === 'string') {
@@ -832,6 +837,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const markAllSignificantJob_experience = profileWatch('markAllSignificantJob_experience');
 
   const markAllNonEditableSec = profileWatch('markAllNonEditableSec');
+  // const markAllNonEditableProfReg = profileWatch('markAllNonEditableProfReg');
 
   const markAllSignificant = profileWatch('markAllSignificant');
   const accountabilities = profileWatch('accountabilities');
@@ -1028,7 +1034,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const selectedScopeId = watch('scopeOfResponsibility');
 
   const selectedScopeDescription = useMemo(() => {
-    return jobProfileScopes?.jobProfileScopes.find((scope) => scope.id === selectedScopeId)?.description || null;
+    // return jobProfileScopes?.jobProfileScopes.find((scope) => scope.id === selectedScopeId)?.description || null;
+    if (!selectedScopeId || !jobProfileScopes) return null;
+    return (selectedScopeId as number[])
+      .map((scopeId) => jobProfileScopes.jobProfileScopes.find((scope) => scope.id === scopeId)?.description)
+      .filter((description) => description)
+      .join(', ');
   }, [selectedScopeId, jobProfileScopes]);
 
   // minimum requirements that change in reponse to classification changes
@@ -1168,7 +1179,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         }),
         role_type: { connect: { id: formData.role } },
         ...(formData.scopeOfResponsibility && {
-          scope: { connect: { id: formData.scopeOfResponsibility } },
+          scopes: {
+            create: formData.scopeOfResponsibility.map((scopeId: number) => ({
+              scope: { connect: { id: scopeId } },
+            })),
+          },
         }),
         jobFamilies: {
           create: formData.professions
@@ -1673,38 +1688,91 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                           {/* Second level for job family/profession selector (select job stream/discipline) */}
                           {selectedProfession?.[index]?.jobFamily != -1 && (
-                            <Form.Item
-                              label="Job Streams / Disciplines"
-                              labelCol={{ className: 'card-label' }}
-                              style={{ borderLeft: '2px solid rgba(5, 5, 5, 0.06)', paddingLeft: '1rem' }}
-                            >
-                              <Controller
-                                control={control}
-                                name={`professions.${index}.jobStreams`}
-                                render={({
-                                  field: { onChange: onChangeInner, onBlur: onBlurInner, value: valueInner },
-                                }) => {
-                                  // console.log('valueInner: ', valueInner);
-                                  return (
-                                    <Select
-                                      // {...field2}
-                                      mode="multiple"
-                                      placeholder="Select the job streams this role is part of"
-                                      style={{ width: '100%' }}
-                                      onChange={onChangeInner}
-                                      value={valueInner}
-                                      onBlur={onBlurInner}
-                                      // onChange={(selectedStreams) => {
-                                      //   field2.onChange(selectedStreams);
-                                      // }}
-                                      options={getJobStreamsForFamily(selectedProfession?.[index]?.jobFamily ?? -1).map(
-                                        (stream) => ({ label: stream.name, value: stream.id }),
-                                      )}
-                                    ></Select>
-                                  );
-                                }}
-                              />
-                            </Form.Item>
+                            // <Form.Item
+                            //   label="Job Streams / Disciplines"
+                            //   labelCol={{ className: 'card-label' }}
+                            //   style={{ borderLeft: '2px solid rgba(5, 5, 5, 0.06)', paddingLeft: '1rem' }}
+                            // >
+                            //   <Controller
+                            //     control={control}
+                            //     name={`professions.${index}.jobStreams`}
+                            //     render={({
+                            //       field: { onChange: onChangeInner, onBlur: onBlurInner, value: valueInner },
+                            //     }) => {
+                            //       // console.log('valueInner: ', valueInner);
+                            //       return (
+                            //         <Select
+                            //           // {...field2}
+                            //           mode="multiple"
+                            //           placeholder="Select the job streams this role is part of"
+                            //           style={{ width: '100%' }}
+                            //           onChange={onChangeInner}
+                            //           value={valueInner}
+                            //           onBlur={onBlurInner}
+                            //           // onChange={(selectedStreams) => {
+                            //           //   field2.onChange(selectedStreams);
+                            //           // }}
+                            //           options={getJobStreamsForFamily(selectedProfession?.[index]?.jobFamily ?? -1).map(
+                            //             (stream) => ({ label: stream.name, value: stream.id }),
+                            //           )}
+                            //         ></Select>
+                            //       );
+                            //     }}
+                            //   />
+                            // </Form.Item>
+
+                            <JobStreamDiscipline
+                              index={index}
+                              control={control}
+                              getJobStreamsForFamily={getJobStreamsForFamily}
+                              selectedProfession={selectedProfession}
+                            ></JobStreamDiscipline>
+
+                            // <Form.Item
+                            //   label="Job Streams / Disciplines"
+                            //   labelCol={{ className: 'card-label' }}
+                            //   style={{ borderLeft: '2px solid rgba(5, 5, 5, 0.06)', paddingLeft: '1rem' }}
+                            // >
+                            //   <Controller
+                            //     control={control}
+                            //     name={`professions.${index}.jobStreams`}
+                            //     render={({
+                            //       field: { onChange: onChangeInner, onBlur: onBlurInner, value: valueInner },
+                            //     }) => {
+                            //       const jobStreams = getJobStreamsForFamily(
+                            //         selectedProfession?.[index]?.jobFamily ?? -1,
+                            //       );
+                            //       const isAllSelected = valueInner?.length === jobStreams.length;
+
+                            //       return (
+                            //         <Select
+                            //           mode="multiple"
+                            //           placeholder="Select the job streams this role is part of"
+                            //           style={{ width: '100%' }}
+                            //           onChange={(selectedStreams) => {
+                            //             console.log('selectedStreams: ', selectedStreams);
+                            //             if (selectedStreams.includes('all')) {
+                            //               onChangeInner(isAllSelected ? [] : jobStreams.map((stream) => stream.id));
+                            //             } else {
+                            //               onChangeInner(selectedStreams);
+                            //             }
+                            //           }}
+                            //           value={valueInner}
+                            //           onBlur={onBlurInner}
+                            //         >
+                            //           <Option key="all" value="all">
+                            //             Select All
+                            //           </Option>
+                            //           {jobStreams.map((stream) => (
+                            //             <Option key={stream.id} value={stream.id}>
+                            //               {stream.name}
+                            //             </Option>
+                            //           ))}
+                            //         </Select>
+                            //       );
+                            //     }}
+                            //   />
+                            // </Form.Item>
                           )}
                         </div>
                       ))}
@@ -1790,23 +1858,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                      {/* Scope of Responsibility Select */}
+                      {/* Scopes of Responsibility Select */}
                       <Form.Item label="Scope of Responsibility" labelCol={{ className: 'card-label' }}>
                         <Controller
                           name="scopeOfResponsibility"
                           control={control}
-                          render={({ field: { onChange, onBlur, value } }) => (
-                            <Select
-                              placeholder="Choose the scope of responsibility"
-                              onChange={onChange}
-                              onBlur={onBlur}
-                              value={value}
-                              options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
-                                label: scope.name,
-                                value: scope.id,
-                              }))}
-                            ></Select>
-                          )}
+                          render={({ field: { onChange, onBlur, value } }) => {
+                            return (
+                              <Select
+                                placeholder="Choose the scopes of responsibility"
+                                onChange={onChange}
+                                onBlur={onBlur}
+                                value={value}
+                                mode="multiple"
+                                options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
+                                  label: scope.name,
+                                  value: scope.id,
+                                }))}
+                              ></Select>
+                            );
+                          }}
                         />
                         <Typography.Text type="secondary">{selectedScopeDescription}</Typography.Text>
                       </Form.Item>
@@ -2549,6 +2620,122 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  {/* Professional registration requirement NEW */}
+                  {/* <Row justify="start">
+                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                      <Form.Item
+                        style={{ marginBottom: '0' }}
+                        labelCol={{ className: 'full-width-label card-label' }}
+                        label={
+                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                            <Col>Professional registration requirements</Col>
+                            <Col>
+                              <Form.Item style={{ margin: 0 }}>
+                                <Row>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllNonEditableProfReg"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllNonEditableProfReg}
+                                          disabled={professionalRegistrationRequirementsFields.length === 0}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateNonEditableProfReg(e.target.checked);
+                                          }}
+                                        >
+                                          Mark all as non-editable
+                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                        }
+                      >
+                        {professionalRegistrationRequirementsFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                            <Col flex="none" className="reorder-controls">
+                              <ReorderButtons
+                                index={index}
+                                moveItem={handleProfessionalRegistrationRequirementsMove}
+                                upperDisabled={index === 0}
+                                lowerDisabled={index === professionalRegistrationRequirementsFields.length - 1}
+                              />
+                            </Col>
+                            <Col flex="auto">
+                              <Row>
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`professional_registration_requirements.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableProfReg', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                              </Row>
+                              <Row gutter={10}>
+                                <Col flex="auto">
+                                  <Form.Item>
+                                    <Controller
+                                      control={profileControl}
+                                      name={`professional_registration_requirements.${index}.text`}
+                                      render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextArea
+                                          autoSize
+                                          placeholder="Add a professional registration requirement"
+                                          onChange={onChange}
+                                          onBlur={onBlur}
+                                          value={value.toString()}
+                                        />
+                                      )}
+                                    />
+                                  </Form.Item>
+                                </Col>
+
+                                <Col flex="none">
+                                  <Button icon={<DeleteOutlined />} onClick={() => removeProfessionalRegistrationRequirement(index)} />
+                                </Col>
+                              </Row>
+                            </Col>
+                          </Row>
+                        ))}
+                        <Form.Item>
+                          <Button
+                            type="link"
+                            onClick={() =>
+                              appendProfessionalRegistrationRequirement({
+                                text: '',
+                                nonEditable: markAllNonEditableSec,
+                              })
+                            }
+                            icon={<PlusOutlined />}
+                          >
+                            Add a professional registration requirement
+                          </Button>
+                        </Form.Item>
+                      </Form.Item>
+                    </Col>
+                  </Row> */}
+
                   {/* Preferences */}
                   <Row justify="start">
                     <Col xs={24} sm={16} md={16} lg={16} xl={16}>
@@ -2741,7 +2928,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
-                  {/* Security screenings NEW */}
+                  {/* Security screenings */}
                   <Row justify="start">
                     <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <Form.Item

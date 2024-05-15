@@ -332,7 +332,7 @@ export class JobProfileValidationModel {
   professions: ProfessionsModel[];
   role: number;
   reportToRelationship: string[];
-  scopeOfResponsibility: number | null;
+  scopeOfResponsibility: number | number[] | null; // number[] is latest change, used to allow only single selection
   ministries: string[];
   classificationReviewRequired: boolean;
   jobContext: string;
@@ -583,9 +583,17 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: <h3 tabIndex={0}>Scope of responsibility</h3>,
       children: (
         <span tabIndex={0}>
-          {effectiveData?.scope?.name && effectiveData?.scope?.description
-            ? `${effectiveData?.scope?.name} - ${effectiveData?.scope?.description}`
-            : 'Unknown'}
+          {/* Used to have only single scope, later expanded to multiple */}
+          {!effectiveData?.scopes
+            ? effectiveData?.scope?.name && effectiveData?.scope?.description
+              ? `${effectiveData?.scope?.name} - ${effectiveData?.scope?.description}`
+              : 'Unknown'
+            : ''}
+          {effectiveData?.scopes
+            .map((scopeItem) => {
+              return `${scopeItem.scope.name} ${scopeItem.scope.description}`;
+            })
+            .join(', ')}
         </span>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
