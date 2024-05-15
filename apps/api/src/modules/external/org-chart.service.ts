@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { isEmpty } from 'class-validator';
+import { PrismaService } from '../prisma/prisma.service';
 import { ClassificationService } from './classification.service';
 import { DepartmentService } from './department.service';
 import { Employee } from './models/employee.model';
@@ -13,6 +14,7 @@ export class OrgChartService {
     private readonly classificationService: ClassificationService,
     private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
+    private readonly prisma: PrismaService,
   ) {}
 
   private async populateOrgChart(
@@ -93,5 +95,29 @@ export class OrgChartService {
     };
 
     return orgChart;
+  }
+
+  async getOrgChartDepartmentFilter(department_ids: string[]) {
+    const departments = await this.prisma.department.findMany({
+      where: { id: { in: department_ids } },
+      orderBy: [{ name: 'asc' }],
+    });
+
+    const ministryIds = new Set(departments.map((department) => department.organization_id));
+    const ministries = await this.prisma.organization.findMany({
+      where: { id: { in: Array.from(ministryIds) } },
+      select: { id: true, name: true },
+    });
+
+    return ministries.map((ministry) => ({
+      label: ministry.name,
+      value: `ministry-${ministry.id}`,
+      selectable: false,
+      children: departments.map((department) => ({
+        label: department.name,
+        value: department.id,
+        filterString: `${department.id} ${department.name}`,
+      })),
+    }));
   }
 }
