@@ -107,12 +107,13 @@ export const AppLayout = () => {
         '5',
         <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
       ),
+      getItem(<Link to="/my-positions">My positions</Link>, '6', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
       getItem(
         <Link to="/job-profiles">Explore job profiles</Link>,
-        '6',
+        '7',
         <FileSearchOutlined style={{ fontSize: '1.25rem' }} />,
       ),
-      getItem(<Link to="/my-positions">My positions</Link>, '7', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(<Link to="/saved-profiles">Saved profiles</Link>, '8', <TagOutlined style={{ fontSize: '1.25rem' }} />),
     ]),
   ];
 
