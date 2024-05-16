@@ -6,6 +6,7 @@ import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   Length,
+  Matches,
   ValidateNested,
   ValidationArguments,
   ValidationOptions,
@@ -21,6 +22,7 @@ import '../../../components/app/common/css/custom-descriptions.css';
 import {
   AccountabilitiesModel,
   JobProfileModel,
+  ProfessionsModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
@@ -53,21 +55,27 @@ class BehaviouralCompetency {
 
 export interface ValueString {
   value: string;
+
+  // total comp
+  nonEditable?: boolean;
 }
 
 export class TitleField extends TrackedFieldArrayItem {
+  @Matches(/^[A-Za-z0-9\s.,\-'()]{1,200}$/, {
+    message: 'Title can only contain letters, numbers, spaces, periods, commas, hyphens, apostrophes, and parentheses.',
+  })
   @Length(5, 200, { message: 'Title must be between 5 and 200 characters.' })
-  declare value: string;
+  declare text: string;
 }
 
 export class OverviewField extends TrackedFieldArrayItem {
   @Length(5, 320, { message: 'Overview must be between 5 and 320 characters.' })
-  declare value: string;
+  declare text: string;
 }
 
 export class ProgramOverviewField extends TrackedFieldArrayItem {
   @Length(0, 320, { message: 'Program overview must be between 0 and 320 characters.' })
-  declare value: string;
+  declare text: string;
 }
 
 function getItemValue(item: string | TrackedFieldArrayItem | AccountabilitiesModel): string {
@@ -77,9 +85,6 @@ function getItemValue(item: string | TrackedFieldArrayItem | AccountabilitiesMod
   } else if ('text' in item) {
     // Handle AccountabilitiesModel
     return typeof item.text === 'string' ? item.text : '';
-  } else if ('value' in item) {
-    // Handle TrackedFieldArrayItem
-    return item.value;
   } else {
     return '';
   }
@@ -94,12 +99,49 @@ function BehaviouralCompetencyValidator(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any[]) {
+          if (!value) return false;
+
           return value.length >= 3 && value.length <= 10;
         },
         defaultMessage(): string {
           return 'There must be at least one related experience.';
         },
       },
+    });
+  };
+}
+
+function AccountabilitiesCountValidator(
+  min: number,
+  max: number,
+  label: string,
+  validationOptions?: ValidationOptions,
+) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'accountabilitiesCountValidator',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any[]) {
+          // console.log('accountabilitiesCountValidator value: ', value);
+          if (!value) return false;
+
+          const validItems = value.filter(
+            (item) =>
+              item.is_significant &&
+              !item.disabled &&
+              ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
+          );
+          return validItems.length >= min && validItems.length <= max;
+        },
+        defaultMessage(args: ValidationArguments): string {
+          const [relatedMin, relatedMax, relatedLabel] = args.constraints;
+          return `There should be between ${relatedMin} and ${relatedMax} ${relatedLabel}.`;
+        },
+      },
+      constraints: [min, max, label],
     });
   };
 }
@@ -113,6 +155,8 @@ function ItemCountValidator(min: number, max: number, label: string, validationO
       options: validationOptions,
       validator: {
         validate(value: any[]) {
+          if (!value) return false;
+
           const validItems = value.filter(
             (item) =>
               !item.disabled && ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
@@ -160,6 +204,7 @@ function MinItemsValidator(min: number, validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any[]) {
+          if (!value) return false;
           const validItems = value.filter(
             (item) =>
               !item.disabled && ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
@@ -185,6 +230,8 @@ function CustomItemCountValidator(min: number, max: number, label: string, valid
       options: validationOptions,
       validator: {
         validate(value: any[]) {
+          if (!value) return false;
+
           const defaultFields = value.filter((item) => !item.isCustom);
           if (defaultFields.length === 0) {
             return true; // No default items, so minimum count is 0
@@ -232,7 +279,7 @@ export class JobProfileValidationModel {
   program_overview: ProgramOverviewField | string;
 
   // @AllDisabled({ message: 'There must be at least one accountability.' })
-  @ItemCountValidator(1, 30, 'accountabilities', {
+  @AccountabilitiesCountValidator(1, 30, 'required accountabilities', {
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
   accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
@@ -256,16 +303,41 @@ export class JobProfileValidationModel {
   @CustomItemCountValidator(1, 10, 'professional registration requirements', {
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
-  professional_registration: (TrackedFieldArrayItem | ValueString)[];
+  professional_registration_requirements: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  preferences: (TrackedFieldArrayItem | ValueString)[];
+  preferences: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   @CustomItemCountValidator(1, 5, 'knowledge, skills or abilities', {
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
-  knowledge_skills_abilities: (TrackedFieldArrayItem | ValueString)[];
-  provisos: (TrackedFieldArrayItem | ValueString)[];
-  optional_requirements: (TrackedFieldArrayItem | ValueString)[];
+  knowledge_skills_abilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+  willingness_statements: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+  optional_requirements: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+
+  // total comp fields
+  state: string;
+  markAllNonEditable: boolean;
+  markAllSignificant: boolean;
+  markAllNonEditableEdu: boolean;
+  markAllSignificantEdu: boolean;
+  markAllNonEditableJob_experience: boolean;
+  markAllSignificantJob_experience: boolean;
+  markAllNonEditableSec: boolean;
+  jobStoreNumber: string;
+  originalJobStoreNumber: string;
+  employeeGroup: string | null;
+  classification: string | null;
+
+  jobRole: number | null;
+  professions: ProfessionsModel[];
+  role: number;
+  reportToRelationship: string[];
+  scopeOfResponsibility: number | number[] | null; // number[] is latest change, used to allow only single selection
+  ministries: string[];
+  classificationReviewRequired: boolean;
+  jobContext: string;
+  all_reports_to: boolean;
+  all_organizations: boolean;
 }
 
 export const JobProfile: React.FC<JobProfileProps> = ({
@@ -511,9 +583,18 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: <h3 tabIndex={0}>Scope of responsibility</h3>,
       children: (
         <span tabIndex={0}>
-          {effectiveData?.scope?.name && effectiveData?.scope?.description
-            ? `${effectiveData?.scope?.name} - ${effectiveData?.scope?.description}`
-            : 'Unknown'}
+          {/* Used to have only single scope, later expanded to multiple */}
+          {!effectiveData?.scopes
+            ? effectiveData?.scope?.name && effectiveData?.scope?.description
+              ? `${effectiveData?.scope?.name} - ${effectiveData?.scope?.description}`
+              : 'Unknown'
+            : ''}
+          {effectiveData?.scopes &&
+            effectiveData?.scopes
+              .map((scopeItem) => {
+                return `${scopeItem.scope.name} ${scopeItem.scope.description}`;
+              })
+              .join(', ')}
         </span>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
@@ -550,12 +631,12 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         <span data-testid="job-title" tabIndex={0}>
           {showDiff && originalData
             ? compareData(
-                typeof originalData.title === 'string' ? originalData.title : originalData.title.value,
-                typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.value,
+                typeof originalData.title === 'string' ? originalData.title : originalData.title.text,
+                typeof effectiveData?.title === 'string' ? effectiveData?.title : effectiveData?.title?.text,
               )
             : typeof effectiveData?.title === 'string'
               ? effectiveData?.title
-              : effectiveData?.title?.value}
+              : effectiveData?.title?.text}
         </span>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
@@ -564,13 +645,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'classification',
       label: <h3 tabIndex={0}>Classification</h3>,
-      children: <div tabIndex={0}>{effectiveData?.classifications?.map((c) => c.classification.code).join(', ')}</div>,
+      children: <div tabIndex={0}>{effectiveData?.classifications?.map((c) => c.classification?.code).join(', ')}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     ...(effectiveData?.program_overview && // if program overview field is present AND it's not empty
     (typeof effectiveData.program_overview === 'string'
       ? effectiveData.program_overview.trim()
-      : effectiveData.program_overview.value.trim()) !== ''
+      : effectiveData.program_overview.text.trim()) !== ''
       ? [
           {
             key: 'program_overview',
@@ -581,14 +662,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                   ? compareData(
                       typeof originalData.program_overview === 'string'
                         ? originalData.program_overview
-                        : originalData?.program_overview?.value,
+                        : originalData?.program_overview?.text,
                       typeof effectiveData?.program_overview === 'string'
                         ? effectiveData?.program_overview
-                        : effectiveData?.program_overview?.value,
+                        : effectiveData?.program_overview?.text,
                     )
                   : typeof effectiveData?.program_overview === 'string'
                     ? effectiveData?.program_overview
-                    : effectiveData?.program_overview?.value}
+                    : effectiveData?.program_overview?.text}
               </span>
             ),
             span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
@@ -628,79 +709,86 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         <span data-testid="job-overview" tabIndex={0}>
           {showDiff && originalData
             ? compareData(
-                typeof originalData.overview === 'string' ? originalData.overview : originalData?.overview?.value,
-                typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.value,
+                typeof originalData.overview === 'string' ? originalData.overview : originalData?.overview?.text,
+                typeof effectiveData?.overview === 'string' ? effectiveData?.overview : effectiveData?.overview?.text,
               )
             : typeof effectiveData?.overview === 'string'
               ? effectiveData?.overview
-              : effectiveData?.overview?.value}
+              : effectiveData?.overview?.text}
         </span>
       ),
       // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
-    {
-      key: 'accountabilities',
-      label: <h3 tabIndex={0}>Accountabilities</h3>,
-      children: (
-        <>
-          {/* Main Accountabilities - is_significant == true */}
-          <span tabIndex={0}>
-            <ul data-testid="significant-accountabilities">
-              {showDiff && originalData
-                ? compareLists(
-                    originalData.accountabilities.filter((acc) => acc.is_significant),
-                    effectiveData?.accountabilities.filter((acc) => acc.is_significant),
-                  )
-                : effectiveData?.accountabilities
-                    .filter((acc) => acc.is_significant)
-                    .map((accountability, index) => {
-                      if (typeof accountability === 'string' || accountability.disabled) {
-                        return null;
-                      }
-                      if (accountability.text instanceof TrackedFieldArrayItem) {
-                        return <li key={index}>{accountability.text.value}</li>;
-                      } else if (typeof accountability.text === 'string') {
-                        return <li key={index}>{accountability.text}</li>;
-                      }
-                    })}
-            </ul>
-            {/* Optional Accountabilities - is_significant == false */}
-            {(effectiveData?.accountabilities.filter((acc) => !acc.is_significant && !acc.disabled)?.length ?? 0) >
-              0 && <h4>Optional accountabilities</h4>}
-            <ul data-testid="optional-accountabilities">
-              {showDiff && originalData
-                ? compareLists(
-                    originalData.accountabilities.filter((acc) => !acc.is_significant),
-                    effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
-                    true,
-                  )
-                : effectiveData?.accountabilities
-                    .filter((acc) => !acc.is_significant)
-                    .map((accountability, index) => {
-                      if (typeof accountability === 'string' || accountability.disabled) {
-                        return null;
-                      }
-                      if (accountability.text instanceof TrackedFieldArrayItem) {
-                        return <li key={index}>{accountability.text.value}</li>;
-                      } else if (typeof accountability.text === 'string') {
-                        return <li key={index}>{accountability.text}</li>;
-                      }
-                    })}
-            </ul>
-          </span>
-        </>
-      ),
-      // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
+    ...((!showDiff && (effectiveData?.accountabilities.filter((acc) => !acc.disabled)?.length ?? 0) > 0) ||
+    (showDiff && (effectiveData?.accountabilities?.length ?? 0) > 0)
+      ? [
+          {
+            key: 'accountabilities',
+            label: <h3 tabIndex={0}>Accountabilities</h3>,
+            children: (
+              <>
+                {/* Main Accountabilities - is_significant == true */}
+                <span tabIndex={0}>
+                  <ul data-testid="significant-accountabilities">
+                    {showDiff && originalData
+                      ? compareLists(
+                          originalData.accountabilities.filter((acc) => acc.is_significant),
+                          effectiveData?.accountabilities.filter((acc) => acc.is_significant),
+                        )
+                      : effectiveData?.accountabilities
+                          .filter((acc) => acc.is_significant)
+                          .map((accountability, index) => {
+                            if (typeof accountability === 'string' || accountability.disabled) {
+                              return null;
+                            }
+                            if (accountability.text instanceof TrackedFieldArrayItem) {
+                              return <li key={index}>{accountability.text.text}</li>;
+                            } else if (typeof accountability.text === 'string') {
+                              return <li key={index}>{accountability.text}</li>;
+                            }
+                          })}
+                  </ul>
+                  {/* Optional Accountabilities - is_significant == false */}
+                  {(effectiveData?.accountabilities.filter((acc) => !acc.is_significant && !acc.disabled)?.length ??
+                    0) > 0 && <h4>Optional accountabilities</h4>}
+                  <ul data-testid="optional-accountabilities">
+                    {showDiff && originalData
+                      ? compareLists(
+                          originalData.accountabilities.filter((acc) => !acc.is_significant),
+                          effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
+                          true,
+                        )
+                      : effectiveData?.accountabilities
+                          .filter((acc) => !acc.is_significant)
+                          .map((accountability, index) => {
+                            if (typeof accountability === 'string' || accountability.disabled) {
+                              return null;
+                            }
+                            if (accountability.text instanceof TrackedFieldArrayItem) {
+                              return <li key={index}>{accountability.text.text}</li>;
+                            } else if (typeof accountability.text === 'string') {
+                              return <li key={index}>{accountability.text}</li>;
+                            }
+                          })}
+                  </ul>
+                </span>
+              </>
+            ),
+            // needs to be in this format to remove warning Sum of column `span` in a line not match `column` of Descriptions
+            span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
+          },
+        ]
+      : []),
+
     {
       key: 'requirements',
       label: <h3 tabIndex={0}>Minimum job requirements</h3>,
       children: (
         <>
           <span tabIndex={0}>
-            {(showDiff || (!showDiff && (effectiveData?.education.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
+            {((showDiff && (effectiveData?.education?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.education.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <h4>Education</h4>
             )}
             <ul data-testid="education">
@@ -714,14 +802,15 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                       return null;
                     }
                     if (requirement.text instanceof TrackedFieldArrayItem) {
-                      return <li key={index}>{requirement.text.value}</li>;
+                      return <li key={index}>{requirement.text.text}</li>;
                     } else if (typeof requirement.text === 'string') {
                       return <li key={index}>{requirement.text}</li>;
                     }
                   })}
             </ul>
 
-            {effectiveData?.job_experience && effectiveData?.job_experience.length > 0 && (
+            {((showDiff && (effectiveData?.job_experience?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.job_experience.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Related experience</h4>
                 <ul data-testid="job-experience">
@@ -735,7 +824,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                           return null;
                         }
                         if (requirement.text instanceof TrackedFieldArrayItem) {
-                          return <li key={index}>{requirement.text.value}</li>;
+                          return <li key={index}>{requirement.text.text}</li>;
                         } else if (typeof requirement.text === 'string') {
                           return <li key={index}>{requirement.text}</li>;
                         }
@@ -744,30 +833,33 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               </>
             )}
 
-            {effectiveData?.professional_registration_requirements &&
-              effectiveData?.professional_registration_requirements.length > 0 && (
-                <>
-                  <h4>Professional registration requirements</h4>
-                  <ul data-testid="professional-registration">
-                    {showDiff && originalData
-                      ? compareLists(
-                          originalData.professional_registration_requirements,
-                          effectiveData?.professional_registration_requirements,
-                        )
-                      : effectiveData?.professional_registration_requirements?.map((requirement, index) => {
-                          if (typeof requirement === 'string') {
-                            return <li key={index}>{requirement}</li>;
-                          }
-                          if (requirement.disabled) {
-                            return null;
-                          }
-                          return <li key={index}>{requirement.value}</li>;
-                        })}
-                  </ul>
-                </>
-              )}
+            {((showDiff && (effectiveData?.professional_registration_requirements?.length ?? 0) > 0) ||
+              (!showDiff &&
+                (effectiveData?.professional_registration_requirements.filter((ed) => !ed.disabled)?.length ?? 0) >
+                  0)) && (
+              <>
+                <h4>Professional registration requirements</h4>
+                <ul data-testid="professional-registration">
+                  {showDiff && originalData
+                    ? compareLists(
+                        originalData.professional_registration_requirements,
+                        effectiveData?.professional_registration_requirements,
+                      )
+                    : effectiveData?.professional_registration_requirements?.map((requirement, index) => {
+                        if (typeof requirement === 'string') {
+                          return <li key={index}>{requirement}</li>;
+                        }
+                        if (requirement.disabled) {
+                          return null;
+                        }
+                        return <li key={index}>{requirement.text}</li>;
+                      })}
+                </ul>
+              </>
+            )}
 
-            {effectiveData?.preferences && effectiveData?.preferences.length > 0 && (
+            {((showDiff && (effectiveData?.preferences?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.preferences.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Preferences</h4>
                 <ul data-testid="preferences">
@@ -780,13 +872,15 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                         if (requirement.disabled) {
                           return null;
                         }
-                        return <li key={index}>{requirement.value}</li>;
+                        return <li key={index}>{requirement.text}</li>;
                       })}
                 </ul>
               </>
             )}
 
-            {effectiveData?.knowledge_skills_abilities && effectiveData?.knowledge_skills_abilities.length > 0 && (
+            {((showDiff && (effectiveData?.knowledge_skills_abilities?.length ?? 0) > 0) ||
+              (!showDiff &&
+                (effectiveData?.knowledge_skills_abilities.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Knowledge, skills and abilities</h4>
                 <ul data-testid="knowledge-skills-abilities">
@@ -799,13 +893,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                         if (requirement.disabled) {
                           return null;
                         }
-                        return <li key={index}>{requirement.value}</li>;
+                        return <li key={index}>{requirement.text}</li>;
                       })}
                 </ul>
               </>
             )}
 
-            {effectiveData?.willingness_statements && effectiveData?.willingness_statements.length > 0 && (
+            {((showDiff && (effectiveData?.willingness_statements?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.willingness_statements.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Willingness statements or provisos</h4>
                 <ul data-testid="provisos">
@@ -818,13 +913,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                         if (requirement.disabled) {
                           return null;
                         }
-                        return <li key={index}>{requirement.value}</li>;
+                        return <li key={index}>{requirement.text}</li>;
                       })}
                 </ul>
               </>
             )}
 
-            {effectiveData?.security_screenings && effectiveData?.security_screenings.length > 0 && (
+            {((showDiff && (effectiveData?.security_screenings?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.security_screenings.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Security screening</h4>
                 <ul data-testid="security-screenings">
@@ -838,7 +934,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                           return null;
                         }
                         if (requirement.text instanceof TrackedFieldArrayItem) {
-                          return <li key={index}>{requirement.text.value}</li>;
+                          return <li key={index}>{requirement.text.text}</li>;
                         } else if (typeof requirement.text === 'string') {
                           return <li key={index}>{requirement.text}</li>;
                         }
@@ -847,7 +943,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               </>
             )}
 
-            {effectiveData?.optional_requirements && effectiveData?.optional_requirements.length > 0 && (
+            {((showDiff && (effectiveData?.optional_requirements?.length ?? 0) > 0) ||
+              (!showDiff && (effectiveData?.optional_requirements.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Optional requirements</h4>
                 <ul data-testid="optional-requirements">
@@ -860,7 +957,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                         if (requirement.disabled) {
                           return null;
                         }
-                        return <li key={index}>{requirement.value}</li>;
+                        return <li key={index}>{requirement.text}</li>;
                       })}
                 </ul>
               </>

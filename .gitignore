@@ -433,6 +433,9 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/certificates,linux,macos,node,react,reactnative,turbo,visualstudiocode,windows
 
+# Do not commit the prisma-nestjs-graphql @generated directory
+apps/api/src/@generated
+
 # Do not commit the seed file
 apps/api/src/assets/positions.csv
 apps/api/prisma/seed.ts

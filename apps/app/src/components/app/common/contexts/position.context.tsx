@@ -20,6 +20,7 @@ interface PositionContextProps {
 
 const PositionContext = React.createContext<PositionContextProps | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePosition = (): PositionContextProps => {
   const context = useContext(PositionContext);
   if (!context) {
@@ -33,7 +34,7 @@ interface PositionProviderProps {
 }
 
 export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) => {
-  const { setPositionRequestId, positionRequestId, resetWizardContext } = useWizardContext();
+  const { positionRequestId, resetWizardContext } = useWizardContext();
   const [createPositionRequest] = useCreatePositionRequestMutation();
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const navigate = useNavigate();
@@ -60,9 +61,9 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         department: { connect: { id: selectedDepartment ?? '' } },
         orgchart_json: orgChartData,
       };
-      // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
+      // 'CreatePositionRequestInput': profile_json_updated, parent_job_profile, title, classification_code
       const resp = await createPositionRequest(positionRequestInput).unwrap();
-      setPositionRequestId(resp.createPositionRequest);
+      // setPositionRequestId(resp.createPositionRequest);
       navigate(`/my-positions/${resp.createPositionRequest}`, { replace: true });
       return true;
     } else {
@@ -92,7 +93,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   department: { connect: { id: selectedDepartment } },
                   orgchart_json: orgChartData,
                   // clear previous data
-                  profile_json: null,
+                  profile_json_updated: null,
                   parent_job_profile: { connect: { id: null } },
                   additional_info: null,
                   title: null,

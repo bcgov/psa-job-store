@@ -36,3 +36,12 @@
   .ant-input, .ant-select-selector {
     border-radius: 0 !important;
   }
+
+  .addButton {
+    padding: 0;
+    height: auto;
+    line-height: inherit;
+    margin-top: 5px;
+    margin-bottom: 1rem;
+    display: block;
+  }

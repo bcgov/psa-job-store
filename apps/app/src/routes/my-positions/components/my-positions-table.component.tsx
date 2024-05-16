@@ -11,7 +11,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Modal, Result, Row, Space, Table, Tooltip, message } from 'antd';
+import { Button, Card, Col, Menu, Modal, Result, Row, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import { generateJobProfile } from 'common-kit';
 import copy from 'copy-to-clipboard';
@@ -32,6 +32,7 @@ import {
   useLazyGetPositionRequestsQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
+import StatusIndicator from '../../wizard/components/wizard-position-request-status-indicator';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -134,7 +135,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       }
       // else {
       //   // If there's no parent, proceed to generate the document with the current profile data
-      //   generateAndDownloadDocument(profile_json, null);
+      //   generateAndDownloadDocument(profile_json_updated, null);
       // }
     }
   }, [prData, jpData, jpTrigger]);
@@ -144,9 +145,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     if (jpData && jpData.jobProfiles && jpData.jobProfiles.length > 0) {
       const parentProfile = jpData.jobProfiles[0];
 
-      if (prData && prData.positionRequest && prData.positionRequest.profile_json) {
+      if (prData && prData.positionRequest && prData.positionRequest.profile_json_updated) {
         // Generate and download the document with both job and parent job profiles
-        generateAndDownloadDocument(prData.positionRequest.profile_json, parentProfile);
+        generateAndDownloadDocument(prData.positionRequest.profile_json_updated, parentProfile);
       }
     }
   }, [jpData, prData, generateAndDownloadDocument]);
@@ -374,46 +375,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('status'),
             render: (status: any) => {
-              const getColorForStatus = (status: string) => {
-                switch (status) {
-                  case 'DRAFT':
-                    return 'gray';
-                  case 'IN_REVIEW':
-                    return '#722ED1';
-                  case 'COMPLETED':
-                    return '#13C2C2';
-                  case 'ESCALATED':
-                    return '#FAAD14';
-                  case 'ACTION_REQUIRED':
-                    return '#F5222D';
-                  default:
-                    return 'black';
-                }
-              };
-
-              const getStatusLabel = (status: string) => {
-                switch (status) {
-                  case 'DRAFT':
-                    return 'Draft';
-                  case 'IN_REVIEW':
-                    return 'In Review';
-                  case 'COMPLETED':
-                    return 'Completed';
-                  case 'ESCALATED':
-                    return 'Escalated';
-                  case 'ACTION_REQUIRED':
-                    return 'Action Required';
-                  default:
-                    return 'Unknown'; // or any default status label you prefer
-                }
-              };
-
-              const color = getColorForStatus(status);
               return (
-                <Space>
-                  <span className={`status-dot`} style={{ backgroundColor: color }} />
-                  <span data-testid={`status-${status}`}>{getStatusLabel(status)}</span>
-                </Space>
+                <StatusIndicator status={status} colorText={false} />
+                // <Space>
+                //   <span className={`status-dot`} style={{ backgroundColor: color }} />
+                //   <span data-testid={`status-${status}`}>{getStatusLabel(status)}</span>
+                // </Space>
               );
             },
           },
@@ -435,10 +402,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       ? [
           {
             sorter: allowSorting,
-            defaultSortOrder: getSortOrder('crm_id'),
+            defaultSortOrder: getSortOrder('crm_lookup_name'),
             title: <span data-testid="crm-service-request-header">CRM service request</span>,
-            dataIndex: 'crm_id',
-            key: 'crm_id',
+            dataIndex: 'crm_lookup_name',
+            key: 'crm_lookup_name',
           },
         ]
       : []),
@@ -632,11 +599,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       ? {
           orderBy: [
             {
-              [sortField]:
-                sortField === 'updated_at'
-                  ? sortOrder === 'ascend'
-                    ? 'asc'
-                    : 'desc' // Directly use 'asc'/'desc' for updated_at
+              [sortField]: ['approved_at', 'submitted_at', 'updated_at'].includes(sortField)
+                ? sortOrder === 'ascend'
+                  ? 'asc'
+                  : 'desc' // Directly use 'asc'/'desc' for updated_at
+                : sortField === 'parent_job_profile'
+                  ? { number: sortOrder === 'ascend' ? 'asc' : 'desc' }
                   : sortField === 'title'
                     ? { sort: sortOrder === 'ascend' ? 'asc' : 'desc' } // Use SortOrderInput for title
                     : { sort: sortOrder === 'ascend' ? 'asc' : 'desc' }, // Use SortOrderInput for other fields as needed
@@ -644,6 +612,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           ],
         }
       : {};
+
+    console.log('sortParams: ', sortParams);
 
     trigger({
       ...(search != null && { search }),
@@ -694,6 +664,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const newPageSize = pagination.pageSize;
     const newSortField = sorter.field;
     const newSortOrder = sorter.order;
+
+    console.log('sorter: ', sorter);
 
     // console.log('sorter: ', JSON.stringify(sorter));
 

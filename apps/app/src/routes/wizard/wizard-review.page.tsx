@@ -11,6 +11,7 @@ import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 import './wizard-review.page.css';
 
@@ -151,6 +152,9 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
+          <div style={{ marginRight: '1rem' }}>
+            <StatusIndicator status={positionRequest?.status ?? ''} />
+          </div>,
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
             <Button icon={<EllipsisOutlined />}></Button>
           </Popover>,

@@ -4,11 +4,7 @@ import { Button, Col, FormInstance, List, Menu, Modal, Popover, Row, Typography 
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LoadingComponent from '../../components/app/common/components/loading.component';
-import {
-  ClassificationModel,
-  GetClassificationsResponse,
-  JobProfileModel,
-} from '../../redux/services/graphql-api/job-profile-types';
+import { ClassificationModel, JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -17,6 +13,7 @@ import {
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditProfile from './components/wizard-edit-profile';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 
 export interface InputData {
@@ -43,7 +40,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     wizardData,
     setWizardData,
     classificationsData,
-    setClassificationsData,
     positionRequestProfileId,
     positionRequestId,
     setRequiresVerification,
@@ -56,9 +52,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   const profileId = positionRequestProfileId;
 
-  function receivedClassificationsDataCallback(data: GetClassificationsResponse) {
-    setClassificationsData(data);
-  }
   function getClassificationById(id: string): ClassificationModel | undefined {
     // If data is loaded, find the classification by ID
     if (classificationsData) {
@@ -98,28 +91,28 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       })),
       role: { id: originalData.roleId || null },
       role_type: { id: originalData.roleTypeId || null },
-      scope: { id: originalData.scopeId || null },
+      scopes: [], //{ id: originalData.scopeId || null },
       reports_to: [],
       organizations: [],
       review_required: false,
       professions: [],
-      professional_registration_requirements: originalData.professional_registration.filter(
-        (reg: { value: string }) => reg.value.trim() !== '',
+      professional_registration_requirements: originalData.professional_registration_requirements.filter(
+        (reg: { text: string }) => reg.text.trim() !== '',
       ),
       optional_requirements: originalData.optional_requirements.filter(
-        (req: { value: string }) => req.value.trim() !== '',
+        (req: { text: string }) => req.text.trim() !== '',
       ),
-      preferences: originalData.preferences.filter((pref: { value: string }) => pref.value.trim() !== ''),
+      preferences: originalData.preferences.filter((pref: { text: string }) => pref.text.trim() !== ''),
       knowledge_skills_abilities: originalData.knowledge_skills_abilities.filter(
-        (ksa: { value: string }) => ksa.value.trim() !== '',
+        (ksa: { text: string }) => ksa.text.trim() !== '',
       ),
-      willingness_statements: originalData.provisos
+      willingness_statements: originalData.willingness_statements
         .map((proviso: any) => ({
-          value: proviso.value,
+          text: proviso.text,
           isCustom: proviso.isCustom,
           disabled: proviso.disabled,
         }))
-        .filter((stmt: { value: string }) => stmt.value.trim() !== ''),
+        .filter((stmt: { text: string }) => stmt.text.trim() !== ''),
       security_screenings: originalData.security_screenings.filter(
         (screening: { text: string }) => screening.text.trim() !== '',
       ),
@@ -145,8 +138,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
           ? error.message
           : error.root != null
             ? error.root?.message
-            : error.value != null
-              ? error.value.message
+            : error.text != null
+              ? error.text.message
               : 'Error';
       return message;
     });
@@ -188,8 +181,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
           await updatePositionRequest({
             id: positionRequestId,
             step: action === 'next' ? 3 : action === 'back' ? 1 : 2,
-            profile_json: transformedData,
-            title: formData.title.value,
+            profile_json_updated: transformedData,
+            title: formData.title.text,
             // classification_code: classification ? classification.code : '',
           }).unwrap();
       } catch (error) {
@@ -205,12 +198,13 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         if (onNext) onNext();
       } else if (action === 'back') {
         if (onBack) {
-          console.log('onback');
+          // console.log('onback');
           onBack();
         }
       }
       return true;
     } catch (e) {
+      // throw e;
       return false;
     } finally {
       if (action === 'next') setIsLoading(false);
@@ -305,6 +299,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       hpad={false}
       grayBg={false}
       pageHeaderExtra={[
+        <div style={{ marginRight: '1rem' }}>
+          <StatusIndicator status={positionRequest?.status ?? ''} />
+        </div>,
         <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
           <Button icon={<EllipsisOutlined />}></Button>
         </Popover>,
@@ -346,7 +343,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
               id={profileId?.toString()}
               submitText="Review Profile"
               showBackButton={true}
-              receivedClassificationsDataCallback={receivedClassificationsDataCallback}
             ></WizardEditProfile>
           </Col>
         </Row>

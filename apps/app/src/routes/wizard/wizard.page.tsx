@@ -148,10 +148,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           await updatePositionRequest({
             id: positionRequestId,
             step: action === 'next' ? 2 : 1,
-            // if user selected same profile as before, do not clear profile_json
+            // if user selected same profile as before, do not clear profile_json_updated
             // also do not update title to default
             ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
-              profile_json: null,
+              profile_json_updated: null,
               title: selectedProfileName ?? undefined,
             }),
             parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },

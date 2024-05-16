@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Buffer } from 'buffer';
-import dayjs from 'dayjs';
 import {
   BorderStyle,
   Document,
@@ -224,7 +223,7 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                             smallCaps: true,
                           }),
                           new TextRun({
-                            text: jobProfile.title?.value,
+                            text: jobProfile.title?.text,
                             bold: true,
                             font: 'Calibri',
                             size: '12pt',
@@ -268,66 +267,83 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
               }),
             ],
           }),
-          // Job Overview
-          createHeading('Program Overview'),
-          new Paragraph({
-            indent: {
-              left: 160,
-              right: 160,
-            },
-            spacing: paragraphSpacing,
-            children: [
-              new TextRun({
-                font: 'Calibri',
-                italics: true,
-                size: '12pt',
-                text: jobProfile.program_overview.value,
-              }),
-            ],
-          }),
-          // Job Overview
-          createHeading('Job Overview'),
-          new Paragraph({
-            indent: {
-              left: 160,
-              right: 160,
-            },
-            spacing: paragraphSpacing,
-            children: [
-              new TextRun({
-                font: 'Calibri',
-                italics: true,
-                size: '12pt',
-                text: jobProfile.overview.value,
-              }),
-            ],
-          }),
 
-          // Accountabilities
-          createHeading('Accountabilities'),
-          ...jobProfile.accountabilities
-            .filter((obj: Record<string, any>) => !obj.disabled)
-            .map(
-              (obj: Record<string, any>) =>
+          // Program Overview
+          ...(jobProfile.program_overview?.text && jobProfile.program_overview.text.trim() != ''
+            ? [
+                createHeading('Program Overview'),
                 new Paragraph({
                   indent: {
+                    left: 160,
                     right: 160,
                   },
                   spacing: paragraphSpacing,
-                  bullet: {
-                    level: 0,
-                  },
                   children: [
                     new TextRun({
                       font: 'Calibri',
+                      italics: true,
                       size: '12pt',
-                      text: obj.text,
+                      text: jobProfile.program_overview.text,
                     }),
                   ],
                 }),
-            ),
+              ]
+            : []),
+
+          // Job Overview
+          ...(jobProfile.overview?.text && jobProfile.overview.text.trim() != ''
+            ? [
+                createHeading('Job Overview'),
+                new Paragraph({
+                  indent: {
+                    left: 160,
+                    right: 160,
+                  },
+                  spacing: paragraphSpacing,
+                  children: [
+                    new TextRun({
+                      font: 'Calibri',
+                      italics: true,
+                      size: '12pt',
+                      text: jobProfile.overview.text,
+                    }),
+                  ],
+                }),
+              ]
+            : []),
+
+          // Accountabilities
+          ...(jobProfile.accountabilities &&
+          jobProfile.accountabilities.filter((obj: Record<string, any>) => !obj.disabled).length > 0
+            ? [
+                createHeading('Accountabilities'),
+                ...jobProfile.accountabilities
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.text,
+                          }),
+                        ],
+                      }),
+                  ),
+              ]
+            : []),
+
           createHeading('Job Requirements'),
-          ...(jobProfile.education.length > 0
+          ...(jobProfile.education &&
+          jobProfile.education.filter((obj: Record<string, any>) => !obj.disabled).length > 0
             ? [
                 createHeading('Education and Experience', false),
                 ...jobProfile.education
@@ -353,7 +369,9 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                   ),
               ]
             : []),
-          ...(jobProfile.job_experience.length > 0
+
+          ...(jobProfile.job_experience &&
+          jobProfile.job_experience.filter((obj: Record<string, any>) => !obj.disabled).length > 0
             ? [
                 createHeading('Related Experience may include', false),
                 ...jobProfile.job_experience
@@ -379,7 +397,10 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                   ),
               ]
             : []),
-          ...(jobProfile.professional_registration_requirements.length > 0
+
+          ...(jobProfile.professional_registration_requirements &&
+          jobProfile.professional_registration_requirements.filter((obj: Record<string, any>) => !obj.disabled).length >
+            0
             ? [
                 createHeading('Professional Registration Requirements', false),
                 ...jobProfile.professional_registration_requirements
@@ -398,14 +419,16 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                           new TextRun({
                             font: 'Calibri',
                             size: '12pt',
-                            text: obj.value,
+                            text: obj.text,
                           }),
                         ],
                       }),
                   ),
               ]
             : []),
-          ...(jobProfile.preferences.length > 0
+
+          ...(jobProfile.preferences &&
+          jobProfile.preferences.filter((obj: Record<string, any>) => !obj.disabled).length > 0
             ? [
                 createHeading('Preferences', false),
                 ...jobProfile.preferences
@@ -424,14 +447,16 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                           new TextRun({
                             font: 'Calibri',
                             size: '12pt',
-                            text: obj.value,
+                            text: obj.text,
                           }),
                         ],
                       }),
                   ),
               ]
             : []),
-          ...(jobProfile.knowledge_skills_abilities.length > 0
+
+          ...(jobProfile.knowledge_skills_abilities &&
+          jobProfile.knowledge_skills_abilities.filter((obj: Record<string, any>) => !obj.disabled).length > 0
             ? [
                 createHeading('Knowledge, Skills and Abilities', false),
                 ...jobProfile.knowledge_skills_abilities
@@ -450,14 +475,16 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                           new TextRun({
                             font: 'Calibri',
                             size: '12pt',
-                            text: obj.value,
+                            text: obj.text,
                           }),
                         ],
                       }),
                   ),
               ]
             : []),
-          ...(jobProfile.willingness_statements.length > 0
+
+          ...(jobProfile.willingness_statements &&
+          jobProfile.willingness_statements.filter((obj: Record<string, any>) => !obj.disabled).length > 0
             ? [
                 createHeading('Willingness statements or provisos', false),
                 ...jobProfile.willingness_statements
@@ -476,7 +503,7 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                           new TextRun({
                             font: 'Calibri',
                             size: '12pt',
-                            text: obj.value,
+                            text: obj.text,
                           }),
                         ],
                       }),
@@ -484,7 +511,8 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
               ]
             : []),
 
-          ...(jobProfile.security_screenings.length > 0
+          ...(jobProfile.security_screenings &&
+          jobProfile.security_screenings.filter((obj: Record<string, any>) => !obj.disabled).length > 0
             ? [
                 createHeading('Security Screenings', false),
                 ...jobProfile.security_screenings
@@ -510,7 +538,9 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                   ),
               ]
             : []),
-          ...(jobProfile.optional_requirements.length > 0
+
+          ...(jobProfile.optional_requirements &&
+          jobProfile.optional_requirements.filter((obj: Record<string, any>) => !obj.disabled).length > 0
             ? [
                 createHeading('Optional Requirements', false),
                 ...jobProfile.optional_requirements
@@ -529,42 +559,47 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                           new TextRun({
                             font: 'Calibri',
                             size: '12pt',
-                            text: obj.value,
+                            text: obj.text,
                           }),
                         ],
                       }),
                   ),
               ]
             : []),
-          createHeading('Indigenous Relations and Behavioural Competencies'),
 
-          ...jobProfile.behavioural_competencies
-            .filter((obj: Record<string, any>) => !obj.disabled)
-            .map(
-              (obj: Record<string, any>) =>
-                new Paragraph({
-                  indent: {
-                    right: 160,
-                  },
-                  spacing: paragraphSpacing,
-                  bullet: {
-                    level: 0,
-                  },
-                  children: [
-                    new TextRun({
-                      bold: true,
-                      font: 'Calibri',
-                      size: '12pt',
-                      text: `${obj.behavioural_competency.name} `,
-                    }),
-                    new TextRun({
-                      font: 'Calibri',
-                      size: '12pt',
-                      text: obj.behavioural_competency.description,
-                    }),
-                  ],
-                }),
-            ),
+          ...(jobProfile.behavioural_competencies &&
+          jobProfile.behavioural_competencies.filter((obj: Record<string, any>) => !obj.disabled).length > 0
+            ? [
+                createHeading('Indigenous Relations and Behavioural Competencies'),
+                ...jobProfile.behavioural_competencies
+                  .filter((obj: Record<string, any>) => !obj.disabled)
+                  .map(
+                    (obj: Record<string, any>) =>
+                      new Paragraph({
+                        indent: {
+                          right: 160,
+                        },
+                        spacing: paragraphSpacing,
+                        bullet: {
+                          level: 0,
+                        },
+                        children: [
+                          new TextRun({
+                            bold: true,
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: `${obj.behavioural_competency.name} `,
+                          }),
+                          new TextRun({
+                            font: 'Calibri',
+                            size: '12pt',
+                            text: obj.behavioural_competency.description,
+                          }),
+                        ],
+                      }),
+                  ),
+              ]
+            : []),
         ],
         footers: {
           default: new Footer({
@@ -603,38 +638,6 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                 rows: [
                   new TableRow({
                     children: [
-                      new TableCell({
-                        margins: {
-                          bottom: 20,
-                        },
-                        width: {
-                          size: 20,
-                          type: WidthType.PERCENTAGE,
-                        },
-                        children: [
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                bold: true,
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                text: 'Career Group',
-                              }),
-                            ],
-                          }),
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                // text: `${parentJobProfile?.jobFamilies[0]?.job_family?.name}`, // todo: support multiple. This was career_group, got replaced with job_family
-                              }),
-                            ],
-                          }),
-                        ],
-                      }),
                       new TableCell({
                         width: {
                           size: 20,
@@ -716,7 +719,9 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                // text: `${parentJobProfile?.role?.name}`,
+                                // text: `${
+                                // parentJobProfile?.role_type?.name != null ? parentJobProfile?.role_type?.name : ''
+                                // }`,
                               }),
                             ],
                           }),
@@ -745,10 +750,10 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                text:
-                                  parentJobProfile != null
-                                    ? `${dayjs(parentJobProfile.updated_at).format('MMM d, YYYY')}`
-                                    : '',
+                                // text:
+                                //   parentJobProfile != null
+                                // ? `${dayjs(parentJobProfile.updated_at).format('MMM d, YYYY')}`
+                                // : '',
                               }),
                             ],
                           }),

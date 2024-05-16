@@ -25,5 +25,8 @@
     "tsconfig": "^0.0.0",
     "turbo": "^1.10.16"
   },
-  "packageManager": "npm@9.5.0"
+  "packageManager": "npm@9.5.0",
+  "engines": {
+    "node": ">=20.11.1 <21.0.0"
+  }
 }
