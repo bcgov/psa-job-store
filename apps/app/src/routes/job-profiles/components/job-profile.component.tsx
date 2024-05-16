@@ -589,11 +589,12 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               ? `${effectiveData?.scope?.name} - ${effectiveData?.scope?.description}`
               : 'Unknown'
             : ''}
-          {effectiveData?.scopes
-            .map((scopeItem) => {
-              return `${scopeItem.scope.name} ${scopeItem.scope.description}`;
-            })
-            .join(', ')}
+          {effectiveData?.scopes &&
+            effectiveData?.scopes
+              .map((scopeItem) => {
+                return `${scopeItem.scope.name} ${scopeItem.scope.description}`;
+              })
+              .join(', ')}
         </span>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
