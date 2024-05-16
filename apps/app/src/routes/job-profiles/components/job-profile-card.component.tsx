@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, Space, Tooltip, Typography } from 'antd';
+import { TagFilled, TagOutlined } from '@ant-design/icons';
+import { Button, Col, Row, Space, Tooltip, Typography } from 'antd';
 import DOMPurify from 'dompurify';
+import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
+import {
+  useGetSavedJobProfileIdsQuery,
+  useRemoveSavedJobProfileMutation,
+  useSaveJobProfileMutation,
+} from '../../../redux/services/graphql-api/saved-job-profile.api';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -13,6 +20,39 @@ export interface JobProfileCardProps {
 
 export const JobProfileCard = ({ data }: JobProfileCardProps) => {
   const [searchParams] = useSearchParams();
+  const [saveJobProfile] = useSaveJobProfileMutation();
+  const [removeSavedJobProfile] = useRemoveSavedJobProfileMutation();
+  const { data: savedJobProfileIds } = useGetSavedJobProfileIdsQuery();
+  const [initIsSaved, setInitIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (initIsSaved || !savedJobProfileIds) return;
+    setIsSaved(savedJobProfileIds?.getSavedJobProfileIds.includes(data.id) || false);
+    setInitIsSaved(true);
+  }, [data.id, savedJobProfileIds, initIsSaved, setInitIsSaved, setIsSaved]);
+
+  const handleSaveJobProfile = async (event: any) => {
+    event.stopPropagation();
+    event.preventDefault();
+    try {
+      saveJobProfile({ jobProfileId: data.id });
+      setIsSaved(true);
+    } catch (error) {
+      console.error('Failed to save job profile:', error);
+    }
+  };
+
+  const handleRemoveSavedJobProfile = async (event: any) => {
+    event.stopPropagation();
+    event.preventDefault();
+    try {
+      removeSavedJobProfile({ jobProfileId: data.id });
+      setIsSaved(false);
+    } catch (error) {
+      console.error('Failed to remove saved job profile:', error);
+    }
+  };
 
   // console.log('card data: ', data, searchParams);
   let { id } = useParams();
@@ -31,9 +71,29 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
         padding: '1rem',
       }}
     >
-      <Title level={3} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
-        {typeof data?.title === 'string' ? data?.title : data?.title?.text}
-      </Title>
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Title level={3} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
+            {typeof data?.title === 'string' ? data?.title : data?.title?.text}
+          </Title>
+        </Col>
+        <Col>
+          {initIsSaved && (
+            <div>
+              {isSaved ? (
+                <Tooltip title="Remove from saved profiles">
+                  <Button type="link" icon={<TagFilled></TagFilled>} onClick={handleRemoveSavedJobProfile}></Button>
+                </Tooltip>
+              ) : (
+                <Tooltip title="Save profile">
+                  <Button type="link" icon={<TagOutlined></TagOutlined>} onClick={handleSaveJobProfile}></Button>
+                </Tooltip>
+              )}
+            </div>
+          )}
+        </Col>
+      </Row>
+
       <div>
         <Text type="secondary" data-cy="card-classification">
           <b style={{ marginTop: '-0.8rem', marginBottom: '0.7rem', display: 'block' }}>

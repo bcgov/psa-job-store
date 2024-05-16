@@ -11,6 +11,7 @@ import {
   MenuUnfoldOutlined,
   PartitionOutlined,
   PlusCircleFilled,
+  TagOutlined,
   UserAddOutlined,
 } from '@ant-design/icons';
 import { Button, Layout, Menu, MenuProps } from 'antd';
@@ -106,12 +107,13 @@ export const AppLayout = () => {
         '5',
         <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
       ),
+      getItem(<Link to="/my-positions">My positions</Link>, '6', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
       getItem(
         <Link to="/job-profiles">Explore job profiles</Link>,
-        '6',
+        '7',
         <FileSearchOutlined style={{ fontSize: '1.25rem' }} />,
       ),
-      getItem(<Link to="/my-positions">My positions</Link>, '7', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(<Link to="/saved-profiles">Saved profiles</Link>, '8', <TagOutlined style={{ fontSize: '1.25rem' }} />),
     ]),
   ];
 
@@ -196,14 +198,19 @@ export const AppLayout = () => {
                           to: '/org-chart',
                         },
                         {
+                          icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'My positions',
+                          to: '/my-positions',
+                        },
+                        {
                           icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                           title: 'Explore job profiles',
                           to: '/job-profiles',
                         },
                         {
-                          icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'My positions',
-                          to: '/my-positions',
+                          icon: <TagOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Saved profiles',
+                          to: '/saved-profiles',
                         },
                       ]}
                     />
@@ -252,16 +259,21 @@ export const AppLayout = () => {
                             hideTitle: true,
                           },
                           {
+                            icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'My positions',
+                            to: '/my-positions',
+                            hideTitle: true,
+                          },
+                          {
                             icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                             title: 'Explore job profiles',
                             to: '/job-profiles',
                             hideTitle: true,
                           },
                           {
-                            icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'My positions',
-                            to: '/my-positions',
-                            hideTitle: true,
+                            icon: <TagOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'Saved profiles',
+                            to: '/saved-profiles',
                           },
                         ]}
                       />
@@ -323,6 +335,16 @@ export const AppLayout = () => {
                           icon: <CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                           title: 'My tasks',
                           to: '/',
+                        },
+                        {
+                          icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Explore job profiles',
+                          to: '/job-profiles',
+                        },
+                        {
+                          icon: <TagOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Saved profiles',
+                          to: '/saved-profiles',
                         },
                       ]}
                     />

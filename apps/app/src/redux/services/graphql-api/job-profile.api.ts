@@ -390,10 +390,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 preferences
                 education
                 job_experience
-                scope{
-                  id
-                  name
-                  description
+                scopes {
+                  scope {
+                    id
+                    name
+                    description
+                  }
                 }
                 total_comp_create_form_misc
                 role_type {

@@ -105,7 +105,8 @@ model User {
 
   // TODO: AL-146
   // PositionRequest PositionRequest[]
-  JobProfile JobProfile[]
+  JobProfile      JobProfile[]
+  SavedJobProfile SavedJobProfile[]
 
   @@map("user")
 }
@@ -168,8 +169,7 @@ model JobProfile {
   role_id          Int?
   role_type        JobProfileRoleType?       @relation(fields: [role_type_id], references: [id])
   role_type_id     Int?
-  scope            JobProfileScope?          @relation(fields: [scope_id], references: [id])
-  scope_id         Int?
+  scopes           JobProfileScopeLink[]
   state            JobProfileState           @default(DRAFT)
   type             JobProfileType
   updated_at       DateTime?                 @default(now()) @updatedAt
@@ -196,9 +196,31 @@ model JobProfile {
   position_request                       PositionRequest[]
   total_comp_create_form_misc            Json? // stores e.x. state of checkbox for markAllNonEditable for accountabilities
 
-  is_archived Boolean @default(false) // When total comp puts profile to draft, then deletes it AND it's linked to PositionRequests
+  is_archived     Boolean           @default(false) // When total comp puts profile to draft, then deletes it AND it's linked to PositionRequests
+  SavedJobProfile SavedJobProfile[]
 
   @@map("job_profile")
+}
+
+model SavedJobProfile {
+  user         User       @relation(fields: [userId], references: [id])
+  userId       String     @db.Uuid
+  jobProfile   JobProfile @relation(fields: [jobProfileId], references: [id])
+  jobProfileId Int
+  createdAt    DateTime   @default(now())
+
+  @@id([userId, jobProfileId])
+  @@map("saved_job_profile")
+}
+
+model JobProfileScopeLink {
+  id             Int             @id @default(autoincrement())
+  job_profile    JobProfile      @relation(fields: [job_profile_id], references: [id])
+  job_profile_id Int
+  scope          JobProfileScope @relation(fields: [scope_id], references: [id])
+  scope_id       Int
+
+  @@map("job_profile_scope_link")
 }
 
 model JobProfileJobFamilyLink {
@@ -294,7 +316,7 @@ model JobProfileScope {
   name        String
   description String
 
-  job_profiles JobProfile[]
+  JobProfileScopeLink JobProfileScopeLink[]
 
   @@map("job_profile_scope")
 }
