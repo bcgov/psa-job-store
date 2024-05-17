@@ -1041,7 +1041,6 @@ async function seed() {
     all_organizations: true,
     is_archived: false,
 
-    scope_id: null,
     role_id: 1,
     role_type_id: null,
     type: 'CORPORATE',
@@ -1140,7 +1139,6 @@ async function seed() {
     all_organizations: true,
     is_archived: false,
 
-    scope_id: null,
     role_id: 1,
     role_type_id: null,
     type: 'CORPORATE',
@@ -1243,7 +1241,6 @@ async function seed() {
     all_organizations: true,
     is_archived: false,
 
-    scope_id: null,
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -1376,7 +1373,6 @@ async function seed() {
     all_organizations: true,
     is_archived: false,
 
-    scope_id: null,
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -1495,7 +1491,6 @@ async function seed() {
     all_organizations: true,
     is_archived: false,
 
-    scope_id: null,
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -1629,7 +1624,6 @@ async function seed() {
     all_organizations: true,
     is_archived: false,
 
-    scope_id: null,
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -1759,7 +1753,6 @@ async function seed() {
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
     all_organizations: true,
-    scope_id: null,
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -2565,7 +2558,7 @@ async function seed() {
         department_id: '112-0072',
         parent_job_profile_id: 7,
         crm_json: null,
-        profile_json: null,
+        profile_json_updated: null,
         orgchart_json: {
           edges: [
             { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
@@ -2776,7 +2769,7 @@ async function seed() {
         department_id: '112-0072',
         parent_job_profile_id: profile200.id,
         crm_json: null,
-        profile_json: {
+        profile_json_updated: {
           id: 7,
           role: { id: null },
           type: 'USER',
@@ -3191,7 +3184,7 @@ async function seed() {
         department_id: 'DEPT02',
         parent_job_profile_id: profile200.id,
         crm_json: null,
-        profile_json: {
+        profile_json_updated: {
           id: 7,
           role: { id: null },
           type: 'USER',
@@ -3592,7 +3585,7 @@ async function seed() {
         department_id: 'DEPT03',
         parent_job_profile_id: profile208.id,
         crm_json: null,
-        profile_json: {
+        profile_json_updated: {
           id: 7,
           role: { id: null },
           type: 'USER',

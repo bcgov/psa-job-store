@@ -1,5 +1,5 @@
-import { UnauthorizedException } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
+import { AlexandriaError } from '../../utils/alexandria-error';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { FindUniqueOrgChartArgs } from './models/find-unique-org-chart.args';
 import { OrgChartDepartmentFilterItem } from './models/org-chart-department-filter-item.model';
@@ -13,7 +13,7 @@ export class OrgChartResolver {
   @Query(() => OrgChart, { name: 'orgChart' })
   async getOrgChart(@CurrentUser() user: Express.User, @Args() args?: FindUniqueOrgChartArgs) {
     if (!(user.metadata.org_chart.department_ids ?? []).includes(args?.where?.department_id))
-      throw new UnauthorizedException();
+      throw AlexandriaError("You don't have access to this department");
 
     return this.orgChartService.getOrgChart(args);
   }

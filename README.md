@@ -184,9 +184,19 @@ Login to sql, and clear all data:
 
 `psql -d DB_NAME -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`
 
+If importing to local:
+
+`psql -d api -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" -h localhost -p 5432 -U admin`
+
+`docker cp backup.sql api-postgres-1:/home/backup.sql`
+
 Import production data:
 
 `psql -U postgres -d api -f backup.sql`
+
+If on local:
+
+`psql -U postgres -d api -f /home/backup.sql -h localhost -p 5432 -U admin`
 
 Clear position requests:
 
