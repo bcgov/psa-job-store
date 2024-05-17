@@ -19,7 +19,7 @@ const { Text } = Typography;
 export const HomePage = () => {
   const auth = useAuth();
   const { data: positionsCountData } = useGetPositionRequestsCountQuery();
-  const { total = 0, completed = 0, inReview = 0 } = positionsCountData?.positionRequestsCount || {};
+  const { total = 0, completed = 0, verification = 0 } = positionsCountData?.positionRequestsCount || {};
   const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
 
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
@@ -76,7 +76,7 @@ export const HomePage = () => {
                 <Text>In Review</Text>
                 <br></br>
                 <Text strong style={{ fontSize: '140%', float: 'right' }} data-testid="in-review-positions">
-                  {inReview}
+                  {verification}
                 </Text>
               </div>
               <div>
