@@ -117,6 +117,15 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       return;
     }
 
+    // if state is CANCELLED, then set parent to readonly mode
+    // Will show "Your position has been created" screen
+    if (positionRequestData?.positionRequest?.status === 'CANCELLED') {
+      switchParentMode && switchParentMode('readonly');
+      switchParentReadonlyMode && switchParentReadonlyMode('cancelled');
+      setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+      return;
+    }
+
     // if it's in VERIFICATION;, set mode to sentForVerification
     if (positionRequestData?.positionRequest?.status === 'VERIFICATION') {
       switchParentMode && switchParentMode('readonly');
@@ -242,7 +251,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Positions' page.
+              Saves your progress. You can access this position request from the 'My Position Requests' page.
             </Typography.Text>
           </div>
         </Menu.Item>
@@ -254,7 +263,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 <div style={{ padding: '5px 0' }}>
                   Delete
                   <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                    Removes this position request from 'My Positions'. This action is irreversible.
+                    Removes this position request from 'My Position Requests'. This action is irreversible.
                   </Typography.Text>
                 </div>
               </Menu.Item>

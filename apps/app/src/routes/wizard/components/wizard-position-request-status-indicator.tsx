@@ -30,11 +30,13 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status, colorText = t
     switch (status) {
       case 'DRAFT':
         return 'gray';
-      case 'IN_REVIEW':
+      case 'VERIFICATION':
         return '#722ED1';
       case 'COMPLETED':
         return '#52C41A';
-      case 'ESCALATED':
+      case 'CANCELLED':
+        return '#444';
+      case 'REVIEW':
         return '#FF4D4F';
       case 'ACTION_REQUIRED':
         return ' #FA8C16';
@@ -47,11 +49,13 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status, colorText = t
     switch (status) {
       case 'DRAFT':
         return '#000';
-      case 'IN_REVIEW':
+      case 'VERIFICATION':
         return '#391085';
       case 'COMPLETED':
         return '#237804';
-      case 'ESCALATED':
+      case 'CANCELLED':
+        return '#444';
+      case 'REVIEW':
         return '#A8071A';
       case 'ACTION_REQUIRED':
         return '#AD4E00';
@@ -64,14 +68,16 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status, colorText = t
     switch (status) {
       case 'DRAFT':
         return 'Draft';
-      case 'IN_REVIEW':
+      case 'VERIFICATION':
         return 'Verification';
       case 'COMPLETED':
         return 'Completed';
-      case 'ESCALATED':
+      case 'CANCELLED':
+        return 'Cancelled';
+      case 'REVIEW':
         return 'Escalated';
       case 'ACTION_REQUIRED':
-        return role == 'classification' ? 'Reivew required' : 'Action required';
+        return role == 'classification' ? 'Review required' : 'Action required';
       default:
         return 'Unknown';
     }

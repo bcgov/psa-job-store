@@ -116,14 +116,14 @@ describe('ScheduledTaskService', () => {
         expected: 'COMPLETED',
       },
       {
-        description: "should return 'COMPLETED' for 'Inactive'",
+        description: "should return 'CANCELLED' for 'Inactive'",
         context: {
           category: 'New Position',
-          crm_status: 'Updated',
+          crm_status: 'Solved',
           ps_status: 'Proposed',
           ps_effective_status: 'Inactive',
         },
-        expected: 'COMPLETED',
+        expected: 'CANCELLED',
       },
       {
         description: "should return 'UNKNOWN' for unsupported status combinations",

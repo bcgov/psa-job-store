@@ -37,7 +37,7 @@ export const PageHeader = ({
   const currentPage = useLocation().pathname;
   const segments = currentPage.split('/').filter(Boolean); // Filter out empty segments
 
-  // Check if it's a level 1 subpage (e.g., 'my-positions')
+  // Check if it's a level 1 subpage (e.g., 'my-position-requests')
   const hideBreadcrumb = segments.length === 1;
   const breadcrumbs: BreadcrumbItem[] = matches
     .filter((match) => Boolean((match.handle as Record<string, any>)?.breadcrumb))

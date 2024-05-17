@@ -6,7 +6,7 @@ Feature: Manage and Display Position Requests
 
     Background:
         Given the user is logged in
-        And the user is on the My Positions page
+        And the user is on the My Position Requests page
 
     Scenario: Search for job positions using keywords
         When the user enters "analyst" into the search field

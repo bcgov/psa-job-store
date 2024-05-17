@@ -67,7 +67,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   style,
   itemsPerPage = 10,
   topRightComponent,
-  tableTitle = 'My Positions',
+  tableTitle = 'My Position Requests',
   mode = null,
   onDataAvailable,
   ...props
@@ -186,7 +186,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const handleCopyLink = (record: any) => {
     // shareUUID
     // Dynamically construct the link to include the current base URL
-    const linkToCopy = `${window.location.origin}/my-positions/share/${record.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/my-position-requests/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
@@ -207,9 +207,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   key="edit"
                   icon={<EditOutlined aria-hidden />}
                   data-testid="menu-option-edit"
-                  onClick={() => navigate(`/my-positions/${record.id}`)}
+                  onClick={() => navigate(`/my-position-requests/${record.id}`)}
                 >
-                  <Link to={`/my-positions/${record.id}`}>Edit</Link>
+                  <Link to={`/my-position-requests/${record.id}`}>Edit</Link>
                 </Menu.Item>
                 <Menu.Item
                   key="copy"
@@ -236,9 +236,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   data-testid="menu-option-view"
                   key="view"
                   icon={<EyeOutlined aria-hidden />}
-                  onClick={() => navigate(`/my-positions/${record.id}`)}
+                  onClick={() => navigate(`/my-position-requests/${record.id}`)}
                 >
-                  <Link data-testid="view-link" to={`/my-positions/${record.id}`}>
+                  <Link data-testid="view-link" to={`/my-position-requests/${record.id}`}>
                     View
                   </Link>
                 </Menu.Item>
@@ -270,9 +270,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   data-testid="menu-option-view"
                   key="view"
                   icon={<EyeOutlined aria-hidden />}
-                  onClick={() => navigate(`/my-positions/${record.id}`)}
+                  onClick={() => navigate(`/my-position-requests/${record.id}`)}
                 >
-                  <Link to={`/my-positions/${record.id}`}>View</Link>
+                  <Link to={`/my-position-requests/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item
                   key="copy"
@@ -296,7 +296,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               data-testid="menu-option-view"
               key="view"
               icon={<EyeOutlined aria-hidden />}
-              onClick={() => navigate(`/my-positions/${record.id}`)}
+              onClick={() => navigate(`/my-position-requests/${record.id}`)}
             >
               View
             </Menu.Item>
@@ -347,7 +347,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       render: (text: any, record: any) => {
         if (mode == null)
           return (
-            <Link to={`/my-positions/${record.id}`} data-testid={`job-position-${record.id}`}>
+            <Link to={`/my-position-requests/${record.id}`} data-testid={`job-position-${record.id}`}>
               <div data-testid="job-title">{text}</div>
             </Link>
           );
@@ -375,6 +375,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('status'),
             render: (status: any) => {
+              console.log('status ', status);
               return (
                 <StatusIndicator status={status} colorText={false} />
                 // <Space>
@@ -842,7 +843,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                     <img src={EmptyJobPositionGraphic} alt="No positions" />
                     <div>New to the JobStore?</div>
                     {/* Link button to the orgchart page */}
-                    <Link to="/my-positions/create">
+                    <Link to="/my-position-requests/create">
                       <Button type="primary" style={{ marginTop: '1rem' }}>
                         Create new position
                       </Button>

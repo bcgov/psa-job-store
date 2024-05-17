@@ -26,13 +26,13 @@ export interface Transition {
 //  Action Req. 	Waiting Client 					                    New Position /Classification	  Proposed           -
 //  Review		 	  Unresolved / Updated	/ Waiting Internal		Classification					        Proposed           -
 //  Completed		  Solved 							                        New Position /Classification	  Approved           -
-//  Completed     -                                           -                               -                  Inactive
+//  Cancelled      Solved                                      -                               -                  Inactive
 
 // Transition rules array
 const transitions: Transition[] = [
   {
-    condition: (context) => context.PS_effective_status === 'Inactive',
-    nextState: 'COMPLETED',
+    condition: (context) => context.CRM_status === 'Solved' && context.PS_effective_status === 'Inactive',
+    nextState: 'CANCELLED',
   },
   {
     condition: (context) =>

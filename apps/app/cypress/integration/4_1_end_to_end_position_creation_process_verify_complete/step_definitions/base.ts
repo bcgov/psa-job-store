@@ -28,7 +28,7 @@ When('the user presses "Create new direct report" on the home page org chart', (
 Then('they are taken to the job profile selection step', () => {
   // Check if the URL is correct
   // The URL pattern should match /position-request/{id}
-  cy.url().should('match', /\/my-positions\/\d+/);
+  cy.url().should('match', /\/my-position-requests\/\d+/);
 
   // Check for a unique element on the job profile selection page
   // Replace 'unique-element-selector' with an actual selector for an element unique to this page
@@ -192,7 +192,7 @@ Then('they see a success message', () => {
 
   // Capture the position ID from the URL
   cy.url().then((url) => {
-    const matches = url.match(/\/my-positions\/(\d+)/);
+    const matches = url.match(/\/my-position-requests\/(\d+)/);
     if (matches && matches.length > 1) {
       positionId = matches[1];
     }
@@ -226,9 +226,9 @@ Then('position request contains the comment', () => {
   });
 });
 
-When('user navigates to My Positions page', () => {
-  // Navigate to the "My Positions" page
-  cy.visit('/my-positions');
+When('user navigates to My Position Requests page', () => {
+  // Navigate to the "My Position Requests" page
+  cy.visit('/my-position-requests');
 });
 
 Then('they see the new position in the list with "In Review" status', () => {
@@ -270,9 +270,9 @@ When('user waits for systems to synchronize', () => {
   cy.wait(70000);
 });
 
-When('the user navigates to My Positions page', () => {
-  // Navigate to the "My Positions" page
-  cy.visit('/my-positions');
+When('the user navigates to My Position Requests page', () => {
+  // Navigate to the "My Position Requests" page
+  cy.visit('/my-position-requests');
 });
 
 Then('they see the new position in the list with "Action required" status', () => {

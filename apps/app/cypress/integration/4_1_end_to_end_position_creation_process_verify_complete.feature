@@ -38,10 +38,10 @@ Feature: End-to-End Position Creation Process with Verification warning
         Then they see a success message
         And position request contains the comment
 
-        When user navigates to My Positions page
+        When user navigates to My Position Requests page
         Then they see the new position in the list with "In Review" status
 
         When Classification team switches the CRM service request to "Action required"
         And user waits for systems to synchronize
-        And the user navigates to My Positions page
+        And the user navigates to My Position Requests page
         Then they see the new position in the list with "Action required" status

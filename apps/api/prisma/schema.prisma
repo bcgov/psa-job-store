@@ -42,6 +42,7 @@ enum PositionRequestStatus {
   COMPLETED
   REVIEW
   ACTION_REQUIRED
+  CANCELLED
 }
 
 model PositionRequest {

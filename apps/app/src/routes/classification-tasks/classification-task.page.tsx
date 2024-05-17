@@ -47,7 +47,7 @@ export const ClassificationTaskPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
-    const linkToCopy = `${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
@@ -178,7 +178,7 @@ export const ClassificationTaskPage = () => {
                           <strong>Invite others to review</strong>
                           <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                           <Space>
-                            <Text>{`${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`}</Text>
+                            <Text>{`${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`}</Text>
                             <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                               Copy URL
                             </Button>

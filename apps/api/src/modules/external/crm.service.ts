@@ -46,7 +46,7 @@ export class CrmService {
             crm_id: { not: null },
           },
           {
-            status: { not: { equals: 'COMPLETED' } },
+            status: { not: { in: ['COMPLETED', 'CANCELLED'] } },
           },
         ],
       },

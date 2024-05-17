@@ -165,7 +165,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     else setSaveAndQuitLoading(true);
 
     try {
-      // Create an entry in My Positions
+      // Create an entry in My Position Requests
 
       const formData = wizardEditProfileRef.current?.getFormData();
       // console.log('formData: ', formData);
@@ -262,7 +262,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
             <div style={{ padding: '5px 0' }}>
               Save and quit
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Saves your progress. You can access this position request from the 'My Positions' page.
+                Saves your progress. You can access this position request from the 'My Position Requests' page.
               </Typography.Text>
             </div>
           </div>
@@ -273,7 +273,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
             <div style={{ padding: '5px 0' }}>
               Delete
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Positions'. This action is irreversible.
+                Removes this position request from 'My Position Requests'. This action is irreversible.
               </Typography.Text>
             </div>
           </Menu.Item>
