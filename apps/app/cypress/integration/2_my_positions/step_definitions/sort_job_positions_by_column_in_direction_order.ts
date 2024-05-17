@@ -1,7 +1,7 @@
 const { Given, When, Then } = require('@badeball/cypress-cucumber-preprocessor');
 
 Given('job positions are listed', () => {
-  cy.visit('/my-positions'); // Adjust this to the correct URL if necessary
+  cy.visit('/my-position-requests'); // Adjust this to the correct URL if necessary
   // Add any required steps to ensure job positions are listed, such as API stubs or database setup
 });
 

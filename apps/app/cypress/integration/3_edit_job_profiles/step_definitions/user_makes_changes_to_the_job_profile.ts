@@ -5,7 +5,7 @@ Given('the user is logged in', () => {
 });
 
 When('user is editing a job profile', () => {
-  cy.visit('/my-positions/1');
+  cy.visit('/my-position-requests/1');
 });
 
 When('the user selects "Band 1" from the classification dropdown', () => {

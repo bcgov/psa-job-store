@@ -38,10 +38,11 @@ model ScheduledTaskMetadata {
 
 enum PositionRequestStatus {
   DRAFT
-  IN_REVIEW
+  VERIFICATION
   COMPLETED
-  ESCALATED
+  REVIEW
   ACTION_REQUIRED
+  CANCELLED
 }
 
 model PositionRequest {

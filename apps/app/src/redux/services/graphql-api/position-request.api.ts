@@ -90,7 +90,7 @@ export interface PositionNeedsReviewResponseContent {
 export interface PositionRequestStatusCounts {
   draft: number;
   completed: number;
-  inReview: number;
+  verification: number;
   total: number;
 }
 
@@ -233,7 +233,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
                 draft
                 completed
-                inReview
+                verification
                 total
               }
             }
@@ -490,7 +490,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               positionRequestsCount(search: $search, where: $where) {
                 draft
                 completed
-                inReview
+                verification
                 total
               }
             }

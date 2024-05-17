@@ -98,7 +98,7 @@ export const AppLayout = () => {
   const hiringManagerMenuItems: MenuProps['items'] = [
     getItem('Hiring Manager', 'sub1', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
       getItem(
-        <Link to="/my-positions/create">Create new position</Link>,
+        <Link to="/my-position-requests/create">Create new position</Link>,
         '3',
         <PlusCircleFilled style={{ fontSize: '1.25rem' }} />,
       ),
@@ -107,7 +107,11 @@ export const AppLayout = () => {
         '5',
         <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
       ),
-      getItem(<Link to="/my-positions">My positions</Link>, '6', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(
+        <Link to="/my-position-requests">My position requests</Link>,
+        '6',
+        <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
+      ),
       getItem(
         <Link to="/job-profiles">Explore job profiles</Link>,
         '7',
@@ -171,12 +175,12 @@ export const AppLayout = () => {
                         }
                         key={'Create new position'}
                         title={'Create new position'}
-                        to={'/my-positions/create'}
+                        to={'/my-position-requests/create'}
                         hideTitle={true}
                       />
                     ) : (
                       <div style={{ textAlign: 'center', padding: '10px 0' }}>
-                        <Link to="/my-positions/create">
+                        <Link to="/my-position-requests/create">
                           <Button type="primary" tabIndex={-1} data-testid="create-new-position-btn-expanded">
                             Create new position
                           </Button>
@@ -199,8 +203,8 @@ export const AppLayout = () => {
                         },
                         {
                           icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'My positions',
-                          to: '/my-positions',
+                          title: 'My position requests',
+                          to: '/my-position-requests',
                         },
                         {
                           icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
@@ -249,7 +253,7 @@ export const AppLayout = () => {
                           {
                             icon: <PlusCircleFilled aria-hidden style={{ fontSize: '1.25rem' }} />,
                             title: 'Create new position',
-                            to: '/my-positions/create',
+                            to: '/my-position-requests/create',
                             hideTitle: true,
                           },
                           {
@@ -260,8 +264,8 @@ export const AppLayout = () => {
                           },
                           {
                             icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'My positions',
-                            to: '/my-positions',
+                            title: 'My position requests',
+                            to: '/my-position-requests',
                             hideTitle: true,
                           },
                           {

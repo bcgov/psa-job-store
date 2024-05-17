@@ -68,13 +68,13 @@ export class PositionRequestStatusCounts {
   completed: number;
 
   @Field(() => Int)
-  inReview: number;
+  verification: number;
 
   @Field(() => Int)
   total: number;
 
   @Field(() => Int)
-  escalatedCount: number;
+  reviewCount: number;
 
   @Field(() => Int)
   actionRequiredCount: number;
@@ -606,18 +606,18 @@ export class PositionRequestApiService {
     // Get counts for each status
     const draftCount = await getCountForStatus(PositionRequestStatus.DRAFT);
     const completedCount = await getCountForStatus(PositionRequestStatus.COMPLETED);
-    const inReviewCount = await getCountForStatus(PositionRequestStatus.IN_REVIEW);
-    const escalatedCount = await getCountForStatus(PositionRequestStatus.ESCALATED);
+    const verificationCount = await getCountForStatus(PositionRequestStatus.VERIFICATION);
+    const reviewCount = await getCountForStatus(PositionRequestStatus.REVIEW);
     const actionRequiredCount = await getCountForStatus(PositionRequestStatus.ACTION_REQUIRED);
 
     // Return the counts
     return {
       draft: draftCount,
       completed: completedCount,
-      inReview: inReviewCount,
-      escalatedCount: escalatedCount,
+      verification: verificationCount,
+      reviewCount: reviewCount,
       actionRequiredCount: actionRequiredCount,
-      total: draftCount + completedCount + inReviewCount + escalatedCount + actionRequiredCount,
+      total: draftCount + completedCount + verificationCount + reviewCount + actionRequiredCount,
     };
   }
 
