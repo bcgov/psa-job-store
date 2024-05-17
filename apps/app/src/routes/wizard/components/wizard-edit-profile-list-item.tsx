@@ -151,9 +151,10 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
         isDisabled={field.disabled}
         isCustom={field.isCustom}
         isEdited={(() => {
-          if (isAdmin === undefined) return editedFields?.[index] ?? false;
-          else if (!isAdmin) return editedFields?.[index] ?? false;
-          else return false;
+          return editedFields?.[index] ?? false;
+          // if (isAdmin === undefined) return editedFields?.[index] ?? false;
+          // else if (!isAdmin) return editedFields?.[index] ?? false;
+          // else return false;
         })()}
         ariaLabel={ariaLabel}
         testId={testId}
