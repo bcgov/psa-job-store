@@ -650,7 +650,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       children: <div tabIndex={0}>{effectiveData?.classifications?.map((c) => c.classification?.code).join(', ')}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
-    ...(effectiveData?.program_overview && // if program overview field is present AND it's not empty
+    ...(effectiveData?.program_overview &&
+    (effectiveData?.program_overview as any).text && // if program overview field is present AND it's not empty
     (typeof effectiveData.program_overview === 'string'
       ? effectiveData.program_overview.trim()
       : effectiveData.program_overview.text.trim()) !== ''

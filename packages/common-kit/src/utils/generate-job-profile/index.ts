@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Buffer } from 'buffer';
+import dayjs from 'dayjs';
 import {
   BorderStyle,
   Document,
@@ -644,27 +645,27 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                           type: WidthType.PERCENTAGE,
                         },
                         children: [
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                bold: true,
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                text: 'Job Family',
-                              }),
-                            ],
-                          }),
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                // text: `${parentJobProfile?.jobFamilies[0].jobFamily?.name}`,
-                              }),
-                            ],
-                          }),
+                          // new Paragraph({
+                          //   spacing: paragraphSpacing,
+                          //   children: [
+                          //     new TextRun({
+                          //       bold: true,
+                          //       font: 'Arial Narrow',
+                          //       size: '8pt',
+                          //       text: 'Job Family',
+                          //     }),
+                          //   ],
+                          // }),
+                          // new Paragraph({
+                          //   spacing: paragraphSpacing,
+                          //   children: [
+                          //     new TextRun({
+                          //       font: 'Arial Narrow',
+                          //       size: '8pt',
+                          //       // text: `${parentJobProfile?.jobFamilies[0].jobFamily?.name}`,
+                          //     }),
+                          //   ],
+                          // }),
                         ],
                       }),
                       new TableCell({
@@ -673,60 +674,67 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                           type: WidthType.PERCENTAGE,
                         },
                         children: [
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                bold: true,
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                text: 'Job Stream',
-                              }),
-                            ],
-                          }),
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                // text: `${parentJobProfile?.streams[0]?.stream?.name}`,
-                              }),
-                            ],
-                          }),
+                          // new Paragraph({
+                          //   spacing: paragraphSpacing,
+                          //   children: [
+                          //     new TextRun({
+                          //       bold: true,
+                          //       font: 'Arial Narrow',
+                          //       size: '8pt',
+                          //       text: 'Job Stream',
+                          //     }),
+                          //   ],
+                          // }),
+                          // new Paragraph({
+                          //   spacing: paragraphSpacing,
+                          //   children: [
+                          //     new TextRun({
+                          //       font: 'Arial Narrow',
+                          //       size: '8pt',
+                          //       // text: `${parentJobProfile?.streams[0]?.stream?.name}`,
+                          //     }),
+                          //   ],
+                          // }),
                         ],
                       }),
+
                       new TableCell({
                         width: {
                           size: 20,
                           type: WidthType.PERCENTAGE,
                         },
-                        children: [
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                bold: true,
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                text: 'Role',
-                              }),
-                            ],
-                          }),
-                          new Paragraph({
-                            spacing: paragraphSpacing,
-                            children: [
-                              new TextRun({
-                                font: 'Arial Narrow',
-                                size: '8pt',
-                                // text: `${
-                                // parentJobProfile?.role_type?.name != null ? parentJobProfile?.role_type?.name : ''
-                                // }`,
-                              }),
-                            ],
-                          }),
-                        ],
+                        children:
+                          parentJobProfile?.role_type?.name != null
+                            ? [
+                                new Paragraph({
+                                  spacing: paragraphSpacing,
+                                  children: [
+                                    new TextRun({
+                                      bold: true,
+                                      font: 'Arial Narrow',
+                                      size: '8pt',
+                                      text: 'Role',
+                                    }),
+                                  ],
+                                }),
+                                new Paragraph({
+                                  spacing: paragraphSpacing,
+                                  children: [
+                                    new TextRun({
+                                      font: 'Arial Narrow',
+                                      size: '8pt',
+                                      text: `${
+                                        parentJobProfile?.role_type?.name != null
+                                          ? parentJobProfile?.role_type?.name
+                                          : ''
+                                      }`,
+                                    }),
+                                  ],
+                                }),
+                              ]
+                            : [],
                       }),
+
                       new TableCell({
                         width: {
                           size: 20,
@@ -750,10 +758,10 @@ const generateJobProfile = ({ jobProfile, parentJobProfile }: GenerateJobProfile
                               new TextRun({
                                 font: 'Arial Narrow',
                                 size: '8pt',
-                                // text:
-                                //   parentJobProfile != null
-                                // ? `${dayjs(parentJobProfile.updated_at).format('MMM d, YYYY')}`
-                                // : '',
+                                text:
+                                  parentJobProfile != null
+                                    ? `${dayjs(parentJobProfile.updated_at).format('MMM d, YYYY')}`
+                                    : '',
                               }),
                             ],
                           }),
