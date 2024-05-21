@@ -60,7 +60,6 @@ export const AppLayout = () => {
   // Function to handle menu item click
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     // Update the selectedKeys when a menu item is clicked
-    console.log(e.keyPath);
     setSelectedKeys([e.key]);
   };
 

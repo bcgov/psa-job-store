@@ -50,6 +50,11 @@ export const JobProfileSearchResults = ({
     //   searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
     // }`
 
+    // Check if we're on /saved-profiles route
+    if (location.pathname.includes('/saved-profiles')) {
+      return `/saved-profiles/${profileId}`;
+    }
+
     // Check if we're on the position-request route
     const newSearchParams = new URLSearchParams(searchParams.toString());
     if (positionRequestId) {
