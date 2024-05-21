@@ -4,14 +4,12 @@ import { JobProfile, JobProfileState, JobProfileType, Prisma } from '@prisma/cli
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { AlexandriaError } from '../../utils/alexandria-error';
-import { ClassificationService } from '../classification/classification.service';
 import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 
 @Injectable()
 export class JobProfileService {
   constructor(
-    private readonly classificationService: ClassificationService,
     private readonly prisma: PrismaService,
     private readonly searchService: SearchService,
   ) {}
@@ -437,7 +435,7 @@ export class JobProfileService {
   }
 
   async getJobProfile(id: number) {
-    return this.prisma.jobProfile.findUnique({
+    const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
         classifications: {
@@ -468,8 +466,14 @@ export class JobProfileService {
           },
         },
         context: true,
+        behavioural_competencies: {
+          include: {
+            behavioural_competency: true,
+          },
+        },
       },
     });
+    return jobProfile;
   }
 
   async getJobProfileCount({ search, where }: FindManyJobProfileWithSearch) {

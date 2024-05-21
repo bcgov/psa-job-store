@@ -34,6 +34,7 @@ import {
 } from '../external/models/position-create.input';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PositionService } from '../external/position.service';
+import { JobProfileService } from '../job-profile/job-profile.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import { convertIncidentStatusToPositionRequestStatus } from './utils/convert-incident-status-to-position-request-status.util';
@@ -110,6 +111,7 @@ export class PositionRequestApiService {
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
     private readonly positionService: PositionService,
+    private readonly jobProfileService: JobProfileService,
   ) {}
 
   async generateUniqueShortId(length: number, retries: number = 5): Promise<string> {
@@ -781,6 +783,11 @@ export class PositionRequestApiService {
     if (updateData.profile_json_updated !== undefined) {
       updatePayload.profile_json_updated =
         updateData.profile_json_updated === null ? Prisma.DbNull : updateData.profile_json_updated;
+      // attach original profile json
+      if (updateData.profile_json_updated !== null) {
+        const originalProfile = await this.jobProfileService.getJobProfile(updateData.profile_json_updated.id);
+        updateData.profile_json_updated.original_profile_json = originalProfile;
+      }
     }
 
     if (updateData.orgchart_json !== undefined) {
