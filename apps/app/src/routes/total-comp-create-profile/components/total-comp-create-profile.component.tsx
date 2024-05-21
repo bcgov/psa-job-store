@@ -724,6 +724,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         'markAllNonEditableSec',
         jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableSec ?? false,
       );
+
+      triggerBasicDetailsValidation();
+      triggerProfileValidation();
     } else {
       // no profile data - select all ministries as that's the default setting
       const allValues = allMinistriesData?.organizations?.map((m) => m?.id?.toString() ?? '') || [];
@@ -737,6 +740,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     ministriesData,
     allMinistriesData,
     getAllTreeValues,
+    triggerBasicDetailsValidation,
+    triggerProfileValidation,
   ]);
 
   // Update local state when URL parameter changes
