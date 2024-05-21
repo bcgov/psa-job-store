@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ExclamationCircleFilled, InfoCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import { Alert, Col, Descriptions, Form, Input, List, Row, Tooltip } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
@@ -171,7 +170,7 @@ const WizardEditProfile = forwardRef(
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const useFormReturn = useForm<JobProfileValidationModel>({
-      resolver: classValidatorResolver(JobProfileValidationModel),
+      // resolver: classValidatorResolver(JobProfileValidationModel), // todo: re-enable once profiles have proper fields
       mode: 'onChange',
     });
 
@@ -197,12 +196,15 @@ const WizardEditProfile = forwardRef(
 
       const anyEducationTrue = Object.entries(editedMinReqFields).some(([index, item]) => {
         const originalItem = originalMinReqFields[Number(index)];
+        if (!originalItem) return item === true && !isAdmin;
+
         return item === true && originalItem && originalItem.is_significant && !isAdmin;
       });
 
       const anyRelWorkTrue = Object.entries(editedRelWorkFields).some(([index, item]) => {
         const originalItem = originalRelWorkFields[Number(index)];
-        return item === true && originalItem && originalItem.is_significant && !isAdmin;
+        if (!originalItem) return item === true;
+        return item === true && originalItem && originalItem.is_significant;
       });
 
       const anySsecurityScreeningsTrue = Object.values(editedSecurityScreeningsFields).some((item) => item === true);
