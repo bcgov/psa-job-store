@@ -7,12 +7,14 @@ import { ExternalModule } from '../external/external.module';
 import { OrganizationService } from '../external/organization.service';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PositionService } from '../external/position.service';
+import { JobProfileService } from '../job-profile/job-profile.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { SearchModule } from '../search/search.module';
 import { PositionRequestApiResolver } from './position-request.resolver';
 import { PositionRequestApiService } from './position-request.service';
 
 @Module({
-  imports: [ExternalModule, HttpModule, PrismaModule],
+  imports: [ExternalModule, HttpModule, PrismaModule, PrismaModule, SearchModule],
   providers: [
     ClassificationService,
     CrmService,
@@ -23,6 +25,7 @@ import { PositionRequestApiService } from './position-request.service';
     PositionService,
     DepartmentService,
     OrganizationService,
+    JobProfileService,
   ],
 })
 export class PositionRequestModule {}

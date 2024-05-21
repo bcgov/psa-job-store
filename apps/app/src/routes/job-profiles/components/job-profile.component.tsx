@@ -370,11 +370,15 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   // State to hold the effectiveData which can be from profileData prop or fetched from API
   const initialData = profileData ?? null;
   const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
+  const [effectiveDataExtra, setEffectiveDataExtra] = useState<JobProfileModel | null>(
+    initialData?.original_profile_json ?? initialData,
+  );
 
   useEffect(() => {
     // If profileData exists, use it to set the form state
     if (profileData && !showDiff) {
       setEffectiveData(profileData);
+      setEffectiveDataExtra(profileData?.original_profile_json ?? profileData);
     } else if ((!profileData && resolvedId) || (profileData && showDiff && resolvedId)) {
       // If no profileData is provided and an id exists, fetch the data
       // OR profileData was provided, but we also want to run a diff
@@ -388,9 +392,11 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       // Only set effectiveData from fetched data if profileData is not provided
       if (onProfileLoad) onProfileLoad(data.jobProfile);
       setEffectiveData(data.jobProfile);
+      setEffectiveDataExtra(data.jobProfile);
     } else if (profileData && showDiff && data && !isLoading) {
       if (onProfileLoad) onProfileLoad(data.jobProfile);
-      setOriginalData(data.jobProfile); // for diff
+      // do diff between profile as it was submitted at the time, otherwise compare to the latest
+      setOriginalData(profileData?.original_profile_json ?? data.jobProfile); // for diff
     }
   }, [data, isLoading, profileData, onProfileLoad, showDiff]);
 
@@ -538,8 +544,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return <LoadingSpinnerWithMessage />;
   }
 
-  // console.log('effectiveData: ', effectiveData);
-
   const basicInfoItems: DescriptionsProps['items'] = [
     {
       key: 'number',
@@ -559,10 +563,12 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: <h3 tabIndex={0}>Ministries</h3>,
       children: (
         <span tabIndex={0}>
-          {effectiveData?.all_organizations ? (
+          {effectiveDataExtra?.all_organizations ? (
             'All'
           ) : (
-            <ul>{effectiveData?.organizations.map((org, index) => <li key={index}>{org.organization.name}</li>)}</ul>
+            <ul>
+              {effectiveDataExtra?.organizations.map((org, index) => <li key={index}>{org.organization.name}</li>)}
+            </ul>
           )}
         </span>
       ),
@@ -571,13 +577,17 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'Jobrole',
       label: <h3 tabIndex={0}>Job role</h3>,
-      children: <span tabIndex={0}>{effectiveData?.role?.name}</span>,
+      children: <span tabIndex={0}>{effectiveDataExtra?.role?.name}</span>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'Roletype',
       label: <h3 tabIndex={0}>Role type</h3>,
-      children: <span tabIndex={0}>{effectiveData?.role_type?.name ? effectiveData?.role_type?.name : 'Unknown'}</span>,
+      children: (
+        <span tabIndex={0}>
+          {effectiveDataExtra?.role_type?.name ? effectiveDataExtra?.role_type?.name : 'Unknown'}
+        </span>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -586,13 +596,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       children: (
         <span tabIndex={0}>
           {/* Used to have only single scope, later expanded to multiple */}
-          {!effectiveData?.scopes
-            ? effectiveData?.scope?.name && effectiveData?.scope?.description
-              ? `${effectiveData?.scope?.name} - ${effectiveData?.scope?.description}`
+          {!effectiveDataExtra?.scopes
+            ? effectiveDataExtra?.scope?.name && effectiveDataExtra?.scope?.description
+              ? `${effectiveDataExtra?.scope?.name} - ${effectiveDataExtra?.scope?.description}`
               : 'Unknown'
             : ''}
-          {effectiveData?.scopes &&
-            effectiveData?.scopes
+          {effectiveDataExtra?.scopes &&
+            effectiveDataExtra?.scopes
               .map((scopeItem) => {
                 return `${scopeItem.scope.name} ${scopeItem.scope.description}`;
               })
@@ -606,13 +616,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: <h3 tabIndex={0}>Professions & disciplines</h3>,
       children: (
         <div tabIndex={0}>
-          {effectiveData?.jobFamilies.map((jobFamilyItem) => {
+          {effectiveDataExtra?.jobFamilies.map((jobFamilyItem) => {
             const jobFamily = jobFamilyItem.jobFamily;
             return (
               <div key={jobFamily.id}>
                 <h4>{jobFamily.name}</h4>
                 <ul>
-                  {effectiveData?.streams
+                  {effectiveDataExtra?.streams
                     .filter((streamItem) => streamItem.stream.job_family_id === jobFamily.id)
                     .map((streamItem, index) => <li key={index}>{streamItem.stream.name}</li>)}
                 </ul>
