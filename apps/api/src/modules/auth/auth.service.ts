@@ -172,7 +172,7 @@ export class AuthService {
   }
 
   async logoutUser(idir_user_guid: string): Promise<void> {
-    const CACHE_KEY = `${CACHE_USER_PREFIX}${idir_user_guid}`;
+    const CACHE_KEY = `${CACHE_USER_PREFIX}${idir_user_guid.replaceAll('-', '').toUpperCase()}`;
 
     // Check if the user is in the cache
     const userInCache = await this.cacheManager.get<Express.User>(CACHE_KEY);
