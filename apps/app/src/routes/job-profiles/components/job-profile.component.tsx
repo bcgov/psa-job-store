@@ -101,7 +101,7 @@ function BehaviouralCompetencyValidator(validationOptions?: ValidationOptions) {
         validate(value: any[]) {
           if (!value) return false;
 
-          return value.length >= 3 && value.length <= 10;
+          return value.length >= 3 && value.length <= 20; //10
         },
         defaultMessage(): string {
           return 'There must be at least one related experience.';
@@ -279,17 +279,18 @@ export class JobProfileValidationModel {
   program_overview: ProgramOverviewField | string;
 
   // @AllDisabled({ message: 'There must be at least one accountability.' })
-  @AccountabilitiesCountValidator(1, 30, 'required accountabilities', {
+  @AccountabilitiesCountValidator(5, 30, 'required accountabilities', {
+    // 1
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
   accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   optional_accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @MinItemsValidator(1, { message: 'There must be at least 1 education or work experience requirements.' })
+  @MinItemsValidator(2, { message: 'There must be at least 1 education or work experience requirements.' }) // 1
   education: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @MinItemsValidator(1, { message: 'There must be at least 1 related work experience requirements.' })
+  @MinItemsValidator(2, { message: 'There must be at least 1 related work experience requirements.' }) //1
   job_experience: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   @ItemCountValidator(1, 10, 'security screenings', {
@@ -307,7 +308,8 @@ export class JobProfileValidationModel {
 
   preferences: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @CustomItemCountValidator(1, 5, 'knowledge, skills or abilities', {
+  @CustomItemCountValidator(3, 20, 'knowledge, skills or abilities', {
+    // 1-5
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
   knowledge_skills_abilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
