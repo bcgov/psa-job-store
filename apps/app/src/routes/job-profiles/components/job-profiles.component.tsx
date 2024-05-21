@@ -180,104 +180,114 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         applyOrgFilter = organizationFilter;
       }
 
-      if (loadProfileIds) {
-        // If loadProfileIds is provided, fetch only those job profiles
-        trigger({
-          where: {
-            id: {
-              in: loadProfileIds,
-            },
-          },
-          skip: (currentPage - 1) * pageSize,
-          take: pageSize,
-        });
-      } else {
-        trigger({
-          ...(search != null && { search }),
-          where: {
-            AND: [
-              ...(classificationIdFilter != null
-                ? [
-                    {
-                      OR: [
-                        {
-                          all_reports_to: {
-                            equals: true,
-                          },
+      // if (loadProfileIds) {
+      //   // If loadProfileIds is provided, fetch only those job profiles
+      //   trigger({
+      //     where: {
+      //       id: {
+      //         in: loadProfileIds,
+      //       },
+      //     },
+      //     skip: (currentPage - 1) * pageSize,
+      //     take: pageSize,
+      //   });
+      // } else {
+
+      trigger({
+        ...(search != null && { search }),
+        where: {
+          AND: [
+            ...(loadProfileIds
+              ? [
+                  {
+                    id: {
+                      in: loadProfileIds,
+                    },
+                  },
+                ]
+              : []),
+            ...(classificationIdFilter != null
+              ? [
+                  {
+                    OR: [
+                      {
+                        all_reports_to: {
+                          equals: true,
                         },
-                        {
-                          reports_to: {
-                            some: {
-                              classification_id: {
-                                in: [classificationIdFilter],
-                              },
+                      },
+                      {
+                        reports_to: {
+                          some: {
+                            classification_id: {
+                              in: [classificationIdFilter],
                             },
                           },
                         },
-                      ],
-                    },
-                  ]
-                : []),
-              ...(applyOrgFilter != ''
-                ? [
-                    {
-                      organizations: {
-                        some: {
-                          organization_id: {
-                            in: JSON.parse(`[${applyOrgFilter.split(',').map((v) => `"${v}"`)}]`),
-                          },
+                      },
+                    ],
+                  },
+                ]
+              : []),
+            ...(applyOrgFilter != ''
+              ? [
+                  {
+                    organizations: {
+                      some: {
+                        organization_id: {
+                          in: JSON.parse(`[${applyOrgFilter.split(',').map((v) => `"${v}"`)}]`),
                         },
                       },
                     },
-                  ]
-                : []),
-              ...(classificationFilter != null
-                ? [
-                    {
-                      classifications: {
-                        some: {
-                          classification_id: {
-                            in: classificationFilter.split(',').map((v) => v.trim()),
-                          },
+                  },
+                ]
+              : []),
+            ...(classificationFilter != null
+              ? [
+                  {
+                    classifications: {
+                      some: {
+                        classification_id: {
+                          in: classificationFilter.split(',').map((v) => v.trim()),
                         },
                       },
                     },
-                  ]
-                : []),
-              ...(jobFamilyFilter !== null
-                ? [
-                    {
-                      jobFamilies: { some: { jobFamilyId: { in: JSON.parse(`[${jobFamilyFilter}]`) } } },
+                  },
+                ]
+              : []),
+            ...(jobFamilyFilter !== null
+              ? [
+                  {
+                    jobFamilies: { some: { jobFamilyId: { in: JSON.parse(`[${jobFamilyFilter}]`) } } },
+                  },
+                ]
+              : []),
+            ...(jobRoleFilter !== null
+              ? [
+                  {
+                    role_id: {
+                      in: JSON.parse(`[${jobRoleFilter}]`),
                     },
-                  ]
-                : []),
-              ...(jobRoleFilter !== null
-                ? [
-                    {
-                      role_id: {
-                        in: JSON.parse(`[${jobRoleFilter}]`),
-                      },
-                    },
-                  ]
-                : []),
-              ...(jobStreamFilter !== null
-                ? [
-                    {
-                      streams: { some: { streamId: { in: JSON.parse(`[${jobStreamFilter}]`) } } },
-                    },
-                  ]
-                : []),
-            ],
-          },
-          skip: (currentPage - 1) * pageSize,
-          take: pageSize,
-          // if we need to have a specific profile selected, the server will ignore take and skip to get correct frame
-          // it will also ignore filters and search query
-          selectProfile: !selectProfileIdRan.current ? selectProfileId : null,
-        });
+                  },
+                ]
+              : []),
+            ...(jobStreamFilter !== null
+              ? [
+                  {
+                    streams: { some: { streamId: { in: JSON.parse(`[${jobStreamFilter}]`) } } },
+                  },
+                ]
+              : []),
+          ],
+        },
+        skip: (currentPage - 1) * pageSize,
+        take: pageSize,
+        // if we need to have a specific profile selected, the server will ignore take and skip to get correct frame
+        // it will also ignore filters and search query
+        selectProfile: !selectProfileIdRan.current ? selectProfileId : null,
+      });
 
-        // Fetch job profiles based on other filters and search query
-      }
+      // Fetch job profiles based on other filters and search query
+      // }
     }, [
       searchParams,
       trigger,

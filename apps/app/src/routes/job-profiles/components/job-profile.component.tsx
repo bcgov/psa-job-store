@@ -287,10 +287,10 @@ export class JobProfileValidationModel {
 
   optional_accountabilities: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @MinItemsValidator(2, { message: 'There must be at least 1 education or work experience requirements.' }) // 1
+  @MinItemsValidator(2, { message: 'There must be at least 2 education or work experience requirements.' }) // 1
   education: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @MinItemsValidator(2, { message: 'There must be at least 1 related work experience requirements.' }) //1
+  @MinItemsValidator(2, { message: 'There must be at least 2 related work experience requirements.' }) //1
   job_experience: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   @ItemCountValidator(1, 10, 'security screenings', {
