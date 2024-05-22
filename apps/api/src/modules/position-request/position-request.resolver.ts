@@ -171,6 +171,7 @@ export class PositionRequestApiResolver {
   }
 
   @Mutation(() => Boolean)
+  //deprecated - if we want to use this in the future, update to check Peoplesoft status as well
   async updatePositionRequestStatus(
     @Args('id', { type: () => Int }) id: number,
     @Args('status', { type: () => Int }) status: number,
