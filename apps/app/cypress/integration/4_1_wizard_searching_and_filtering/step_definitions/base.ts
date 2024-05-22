@@ -9,7 +9,7 @@ Given('the user is on the home page', () => {
 });
 
 When('the user presses "Create new direct report" on the home page org chart', () => {
-  // cy.visit('/my-positions/7');
+  // cy.visit('/my-position-requests/7');
   // Wait for the org chart to load
   cy.get('[data-testid="org-chart-loading"]', { timeout: 100000 }).should('not.exist');
   cy.get('[data-testid="org-chart-container"]', { timeout: 100000 }).should('be.visible');
@@ -27,7 +27,7 @@ When('the user presses "Create new direct report" on the home page org chart', (
 Then('they are taken to the job profile selection step', () => {
   // Check if the URL is correct
   // The URL pattern should match /position-request/{id}
-  cy.url().should('match', /\/my-positions\/\d+/);
+  cy.url().should('match', /\/my-position-requests\/\d+/);
 
   // Check for a unique element on the job profile selection page
   // Replace 'unique-element-selector' with an actual selector for an element unique to this page

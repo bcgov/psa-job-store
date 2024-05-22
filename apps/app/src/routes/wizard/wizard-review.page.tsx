@@ -108,7 +108,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Positions' page.
+              Saves your progress. You can access this position request from the 'My Position Requests' page.
             </Typography.Text>
           </div>
         </Menu.Item>
@@ -118,7 +118,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
             <div style={{ padding: '5px 0' }}>
               Delete
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Positions'. This action is irreversible.
+                Removes this position request from 'My Position Requests'. This action is irreversible.
               </Typography.Text>
             </div>
           </Menu.Item>

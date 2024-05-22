@@ -30,8 +30,8 @@ When('the user opens the action menu for a job position with "COMPLETED" status'
     .as('draftRecordId');
 });
 
-When('the user opens the action menu for a job position with "IN_REVIEW" status', () => {
-  cy.get('[data-testid="status-IN_REVIEW"]')
+When('the user opens the action menu for a job position with "VERIFICATION" status', () => {
+  cy.get('[data-testid="status-VERIFICATION"]')
     .first()
     .parents('[data-row-key]')
     .invoke('attr', 'data-row-key')
@@ -58,7 +58,7 @@ When('the user selects the {string} option', (action: string) => {
 });
 
 Then('the system should perform the "Edit" action', () => {
-  cy.url().should('match', /\/my-positions\/\d+$/);
+  cy.url().should('match', /\/my-position-requests\/\d+$/);
 });
 
 Then('the system should perform the "Download" action', () => {
@@ -66,7 +66,7 @@ Then('the system should perform the "Download" action', () => {
 });
 
 Then('the system should perform the "View" action', () => {
-  cy.url().should('match', /\/my-positions\/\d+$/);
+  cy.url().should('match', /\/my-position-requests\/\d+$/);
 });
 
 Then('the system should perform the "Copy link" action', () => {

@@ -8,11 +8,11 @@ export const convertIncidentStatusToPositionRequestStatus = (status: number) => 
       return PositionRequestStatus.COMPLETED;
     case IncidentStatus.Unresolved:
     case IncidentStatus.Updated:
-      return PositionRequestStatus.IN_REVIEW;
+      return PositionRequestStatus.VERIFICATION;
     case IncidentStatus.WaitingClient:
       return PositionRequestStatus.ACTION_REQUIRED;
     case IncidentStatus.WaitingInternal:
-      return PositionRequestStatus.ESCALATED;
+      return PositionRequestStatus.REVIEW;
     default:
       // Don't update status if not covered by the above
       return null;

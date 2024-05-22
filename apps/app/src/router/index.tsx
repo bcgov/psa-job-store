@@ -13,8 +13,8 @@ import { HomePage } from '../routes/home/home.page';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
 import { SavedJobProfilesPage } from '../routes/job-profiles/saved-job-profiles.page';
-import { MyPositionsRoute } from '../routes/my-positions';
-import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
+import { MyPositionsRoute } from '../routes/my-position-requests';
+import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
 import { OrgChartRoute as OrgChartOldRoute, OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage as OrgChartOldPage, OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
@@ -86,10 +86,10 @@ export const router = createBrowserRouter([
           },
 
           {
-            path: '/my-positions',
+            path: '/my-position-requests',
             element: <MyPositionsRoute />,
             handle: {
-              breadcrumb: () => 'My Positions',
+              breadcrumb: () => 'My Position Requests',
               icon: <UserAddOutlined />,
             },
             children: [
@@ -102,7 +102,7 @@ export const router = createBrowserRouter([
                 element: <WizardOrgChartPage />,
               },
               {
-                path: '/my-positions/:positionRequestId',
+                path: '/my-position-requests/:positionRequestId',
                 element: <WizardRoute />,
                 children: [
                   {
@@ -122,7 +122,7 @@ export const router = createBrowserRouter([
                     index: true,
                     element: <PositionRequestPage />,
                     handle: {
-                      breadcrumb: () => 'My positions',
+                      breadcrumb: () => 'My position requests',
                       icon: <FileTextOutlined />,
                     },
                   },

@@ -9,14 +9,14 @@ import '../../components/app/common/css/select-external-tags.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
-import MyPositionsTable from './components/my-positions-table.component';
+import MyPositionsTable from './components/my-position-requests-table.component';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const statusFilterDataMap = [
   { label: 'Draft', value: 'DRAFT' },
-  { label: 'In Review', value: 'IN_REVIEW' },
+  { label: 'In Review', value: 'VERIFICATION' },
   { label: 'Completed', value: 'COMPLETED' },
-  { label: 'Escalated', value: 'ESCALATED' },
+  { label: 'Escalated', value: 'REVIEW' },
   { label: 'Action required', value: 'ACTION_REQUIRED' },
 ];
 
@@ -231,7 +231,7 @@ export const MyPositionsPage = () => {
   return (
     <>
       <PageHeader
-        title="My Positions"
+        title="My Position Requests"
         subTitle="These are your positions you have actioned. If you'd like to review or access to continue reviewing, please click the Job title of the request."
       />
 

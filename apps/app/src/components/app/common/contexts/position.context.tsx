@@ -47,9 +47,9 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
     reSelectSupervisor?: () => void,
   ): Promise<boolean> => {
     // we are not editing a draft position request (creatign position from dashboard or from org chart page)
-    // we can create a new position from the my-positions org chart view, or directly from the org chart, or from home page
+    // we can create a new position from the my-position-requests org chart view, or directly from the org chart, or from home page
     if (
-      location.pathname.startsWith('/my-positions/create') ||
+      location.pathname.startsWith('/my-position-requests/create') ||
       location.pathname.startsWith('/org-chart') ||
       location.pathname == '/' || // home page
       location.pathname == '' // home page
@@ -64,7 +64,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
       // 'CreatePositionRequestInput': profile_json_updated, parent_job_profile, title, classification_code
       const resp = await createPositionRequest(positionRequestInput).unwrap();
       // setPositionRequestId(resp.createPositionRequest);
-      navigate(`/my-positions/${resp.createPositionRequest}`, { replace: true });
+      navigate(`/my-position-requests/${resp.createPositionRequest}`, { replace: true });
       return true;
     } else {
       // we are editing a draft position request - update existing position request
