@@ -2593,7 +2593,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         <TextArea
                                           autoSize
                                           placeholder="Add a professional registration requirement"
-                                          onChange={onChange}
+                                          onChange={(event) => {
+                                            onChange(event);
+                                            debounce(triggerProfileValidation, 300)();
+                                          }}
                                           onBlur={onBlur}
                                           value={value.toString()}
                                         />
@@ -2605,13 +2608,20 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 <Col flex="none">
                                   <Button
                                     icon={<DeleteOutlined />}
-                                    onClick={() => removeProfessionalRegistrationRequirement(index)}
+                                    onClick={() => {
+                                      removeProfessionalRegistrationRequirement(index);
+                                      triggerProfileValidation();
+                                    }}
                                   />
                                 </Col>
                               </Row>
                             </Col>
                           </Row>
                         ))}
+                        <WizardValidationError
+                          formErrors={profileFormErrors}
+                          fieldName="professional_registration_requirements"
+                        />
                         <Form.Item>
                           <Button
                             type="link"
@@ -2836,7 +2846,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         <TextArea
                                           autoSize
                                           placeholder="Add a knowledge, skill, or ability"
-                                          onChange={onChange}
+                                          onChange={(event) => {
+                                            onChange(event);
+                                            debounce(triggerProfileValidation, 300)();
+                                          }}
                                           onBlur={onBlur}
                                           value={value.toString()}
                                         />
@@ -2848,13 +2861,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 <Col flex="none">
                                   <Button
                                     icon={<DeleteOutlined />}
-                                    onClick={() => removeKnowledgeSkillAbility(index)}
+                                    onClick={() => {
+                                      removeKnowledgeSkillAbility(index);
+                                      triggerProfileValidation();
+                                    }}
                                   />
                                 </Col>
                               </Row>
                             </Col>
                           </Row>
                         ))}
+                        <WizardValidationError formErrors={profileFormErrors} fieldName="knowledge_skills_abilities" />
                         <Form.Item>
                           <Button
                             type="link"
@@ -3017,7 +3034,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         <TextArea
                                           autoSize
                                           placeholder="Add a security screenings requirement"
-                                          onChange={onChange}
+                                          onChange={(event) => {
+                                            onChange(event);
+                                            debounce(triggerProfileValidation, 300)();
+                                          }}
                                           onBlur={onBlur}
                                           value={value.toString()}
                                         />
@@ -3027,12 +3047,19 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button icon={<DeleteOutlined />} onClick={() => removeSecurityScreening(index)} />
+                                  <Button
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => {
+                                      removeSecurityScreening(index);
+                                      triggerProfileValidation();
+                                    }}
+                                  />
                                 </Col>
                               </Row>
                             </Col>
                           </Row>
                         ))}
+                        <WizardValidationError formErrors={profileFormErrors} fieldName="security_screenings" />
                         <Form.Item>
                           <Button
                             type="link"
