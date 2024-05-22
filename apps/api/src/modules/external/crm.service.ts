@@ -164,18 +164,21 @@ export class CrmService {
 
   async getIncident(id: number) {
     const response = await firstValueFrom(
-      this.httpService
-        .get(`${this.configService.get('CRM_URL')}/${Endpoint.Incidents}/${id}`, { headers: this.headers })
-        .pipe(
-          map((r) => r.data),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
+      this.request(
+        Endpoint.Query,
+        `query=USE REPORT;SELECT id,lookupName,statusWithType.status.lookupName, category.lookupName FROM incidents WHERE id = (${id})`,
+      ).pipe(
+        map((r) => {
+          return r.data;
+        }),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
     );
-
-    return response;
+    const [crm_id, crm_lookup_name, crm_status, crm_category] = response.items[0].rows[0];
+    return { crm_id, crm_lookup_name, crm_status, crm_category };
   }
 
   async updateIncidentStatus(incidentId: number, newStatus: number) {
