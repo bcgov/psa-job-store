@@ -85,6 +85,7 @@ export class ScheduledTaskService {
                 category: crm_category,
                 crm_status: crm_status,
                 ps_status: positionObj['A.POSN_STATUS'],
+                ps_effective_status: positionObj['A.EFF_STATUS'],
               });
 
               if (incomingPositionRequestStatus === 'UNKNOWN') {
