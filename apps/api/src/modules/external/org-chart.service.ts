@@ -109,15 +109,22 @@ export class OrgChartService {
       select: { id: true, name: true },
     });
 
-    return ministries.map((ministry) => ({
-      label: ministry.name,
-      value: `ministry-${ministry.id}`,
-      selectable: false,
-      children: departments.map((department) => ({
-        label: department.name,
-        value: department.id,
-        filterString: `${department.id} ${department.name}`,
-      })),
-    }));
+    console.log('departments: ', departments);
+    console.log('ministries: ', ministries);
+
+    return ministries.map((ministry) => {
+      return {
+        label: ministry.name,
+        value: `ministry-${ministry.id}`,
+        selectable: false,
+        children: departments
+          .filter((department) => department.organization_id === ministry.id)
+          .map((department) => ({
+            label: department.name,
+            value: department.id,
+            filterString: `${department.id} ${department.name}`,
+          })),
+      };
+    });
   }
 }

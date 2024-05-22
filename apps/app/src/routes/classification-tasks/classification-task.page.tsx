@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   CheckCircleFilled,
+  CloseSquareFilled,
   CopyOutlined,
   EllipsisOutlined,
   ExclamationCircleFilled,
-  FundFilled,
   LinkOutlined,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Divider, Dropdown, Result, Row, Space, Tabs, Typography, message } from 'antd';
@@ -47,7 +47,7 @@ export const ClassificationTaskPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
-    const linkToCopy = `${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
@@ -55,10 +55,10 @@ export const ClassificationTaskPage = () => {
   };
 
   const statusIconColorMap: any = {
-    ESCALATED: { icon: <FundFilled />, color: '#FF4D4F', text: 'Escalated' },
-    ACTION_REQUIRED: { icon: <ExclamationCircleFilled />, color: '#FA8C16', text: 'Review required' },
+    REVIEW: { icon: <ExclamationCircleFilled />, color: '#FA8C16', text: 'Classification Review' },
+    ACTION_REQUIRED: { icon: <CloseSquareFilled />, color: '#FF4D4F', text: 'Action Required' },
     COMPLETED: { icon: <CheckCircleFilled />, color: '#237804', text: 'Completed' },
-    IN_REVIEW: { icon: <CheckCircleFilled />, color: '#722ED1', text: 'Verification' },
+    VERIFICATION: { icon: <CheckCircleFilled />, color: '#722ED1', text: 'Review' },
   };
 
   const StatusIcon = ({ status }: any) => {
@@ -119,7 +119,7 @@ export const ClassificationTaskPage = () => {
               <div className="result-extra-content">
                 <Row justify="center">
                   <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-                    {currentStatus == 'ESCALATED' && (
+                    {currentStatus == 'REVIEW' && (
                       <Alert
                         style={{ marginBottom: '1rem' }}
                         message={
@@ -178,7 +178,7 @@ export const ClassificationTaskPage = () => {
                           <strong>Invite others to review</strong>
                           <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                           <Space>
-                            <Text>{`${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`}</Text>
+                            <Text>{`${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`}</Text>
                             <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                               Copy URL
                             </Button>

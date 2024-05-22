@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
-import MyPositionsTable from '../my-positions/components/my-positions-table.component';
+import MyPositionsTable from '../my-position-requests/components/my-position-requests-table.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -19,7 +19,7 @@ const { Text } = Typography;
 export const HomePage = () => {
   const auth = useAuth();
   const { data: positionsCountData } = useGetPositionRequestsCountQuery();
-  const { total = 0, completed = 0, inReview = 0 } = positionsCountData?.positionRequestsCount || {};
+  const { total = 0, completed = 0, verification = 0 } = positionsCountData?.positionRequestsCount || {};
   const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
 
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
@@ -66,7 +66,7 @@ export const HomePage = () => {
           <Col>
             <Space split={<Divider type="vertical" />}>
               <div>
-                <Text>My Positions</Text>
+                <Text>My Position Requests</Text>
                 <br></br>
                 <Text strong style={{ fontSize: '140%', float: 'right' }} data-testid="total-positions">
                   {total}
@@ -76,7 +76,7 @@ export const HomePage = () => {
                 <Text>In Review</Text>
                 <br></br>
                 <Text strong style={{ fontSize: '140%', float: 'right' }} data-testid="in-review-positions">
-                  {inReview}
+                  {verification}
                 </Text>
               </div>
               <div>
@@ -100,7 +100,7 @@ export const HomePage = () => {
           itemsPerPage={5}
           tableTitle="My recent positions"
           topRightComponent={
-            <Link to="/my-positions">
+            <Link to="/my-position-requests">
               <Button type="link" style={{ padding: '0' }}>
                 View all positions
               </Button>

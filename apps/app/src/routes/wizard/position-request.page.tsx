@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeftOutlined, ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-design/icons';
+import {
+  ArrowLeftOutlined,
+  ClockCircleFilled,
+  CloseSquareOutlined,
+  ExclamationCircleFilled,
+  FundFilled,
+} from '@ant-design/icons';
 import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography, message } from 'antd';
 import Title from 'antd/es/typography/Title';
 import copy from 'copy-to-clipboard';
@@ -102,7 +108,7 @@ export const PositionRequestPage = () => {
   const location = useLocation();
 
   // Determine if the current path is a shared URL
-  const isSharedRoute = location.pathname.includes('/my-positions/share/');
+  const isSharedRoute = location.pathname.includes('/my-position-requests/share/');
   // Use state or other logic to determine which query hook to use
   // This could be a piece of state that determines which query to run, for example
   const queryHook = isSharedRoute ? useGetSharedPositionRequestQuery : useGetPositionRequestQuery;
@@ -538,6 +544,21 @@ export const PositionRequestPage = () => {
                     </Row>
                   </>
                 )}
+                {readonlyMode === 'cancelled' && (
+                  <>
+                    <Result
+                      status="error"
+                      icon={<CloseSquareOutlined style={{ color: '#444' }} />}
+                      title="Your position request has been cancelled."
+                      subTitle="Contact classifications for more details"
+                      extra={[
+                        <Button type="primary" key="console" onClick={() => navigate('/')}>
+                          Go to Dashboard
+                        </Button>,
+                      ]}
+                    />
+                  </>
+                )}
               </>
             ),
           },
@@ -635,7 +656,7 @@ export const PositionRequestPage = () => {
               }}
               onCancel={() => blocker.reset()}
             >
-              <p>You can resume the process from "My Positions" page</p>
+              <p>You can resume the process from "My Position Requests" page</p>
             </Modal>
           )}
           {currentStep !== null ? renderStepComponent() : <LoadingSpinnerWithMessage />}

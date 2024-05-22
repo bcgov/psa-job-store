@@ -71,7 +71,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   style,
   itemsPerPage = 10,
   topRightComponent,
-  tableTitle = 'My Positions',
+  tableTitle = 'My Position Requests',
   state = 'DRAFT',
   onDataAvailable,
 }) => {

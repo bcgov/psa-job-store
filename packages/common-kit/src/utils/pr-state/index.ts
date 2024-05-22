@@ -2,11 +2,13 @@
 export type CRMCategory = 'New Position' | 'Classification';
 export type CRMStatus = 'Unresolved' | 'Updated' | 'Waiting - Client' | 'Waiting - Internal' | 'Solved';
 type PSStatus = 'Approved' | 'Proposed';
+type PSEffectiveStatus = 'Inactive';
 
 export interface Context {
   CRM_category: CRMCategory;
   CRM_status: CRMStatus;
   PS_status: PSStatus;
+  PS_effective_status: PSEffectiveStatus;
 }
 
 // Define a transition rule
@@ -18,25 +20,20 @@ export interface Transition {
 // The following table defines the mappings from external states to internal states.
 // If a mapping is not defined here, the function will return UNKNOWN, and the state will not transition.
 
-//  AL Status 		CRM Status 						                      CRM Category 					          PeopleSoft Status
+//  AL Status 		CRM Status 						                      CRM Category 					          PeopleSoft Status  PeopleSoft Effective Status
 //  Draft			    -								                            -								                -
-//  Verification	Unresolved / Updated / Waiting Internal	    New Position					          Proposed
-//  Action Req. 	Waiting Client 					                    New Position /Classification	  Proposed
-//  Review		 	  Unresolved / Updated	/ Waiting Internal		Classification					        Proposed
-//  Completed		  Solved 							                        New Position /Classification	  Approved
-
-// Likewise, we need to map the actual statuses defined in prisma to these statuses.
-// TODO: Data migration to change these statuses so we don't have to translate them.
-
-//  AL Status 	        Prisma Status
-//  DRAFT			         DRAFT
-//  VERIFICATION       IN_REVIEW
-//  ACTION_REQUIRED    ACTION_REQUIRED
-//  REVIEW		         ESCALATED
-//  COMPLETED	         COMPLETED
+//  Verification	Unresolved / Updated / Waiting Internal	    New Position					          Proposed           -
+//  Action Req. 	Waiting Client 					                    New Position /Classification	  Proposed           -
+//  Review		 	  Unresolved / Updated	/ Waiting Internal		Classification					        Proposed           -
+//  Completed		  Solved 							                        New Position /Classification	  Approved           -
+//  Cancelled      Solved                                      -                               -                  Inactive
 
 // Transition rules array
 const transitions: Transition[] = [
+  {
+    condition: (context) => context.CRM_status === 'Solved' && context.PS_effective_status === 'Inactive',
+    nextState: 'CANCELLED',
+  },
   {
     condition: (context) =>
       (context.CRM_status === 'Unresolved' ||
@@ -44,7 +41,7 @@ const transitions: Transition[] = [
         context.CRM_status === 'Waiting - Internal') &&
       context.CRM_category === 'New Position' &&
       context.PS_status === 'Proposed',
-    nextState: 'IN_REVIEW',
+    nextState: 'VERIFICATION',
   },
   {
     condition: (context) =>
@@ -67,7 +64,7 @@ const transitions: Transition[] = [
         context.CRM_status === 'Waiting - Internal') &&
       context.CRM_category.includes('Classification') &&
       context.PS_status === 'Proposed',
-    nextState: 'ESCALATED',
+    nextState: 'REVIEW',
   },
   {
     condition: (context) => context.CRM_status === 'Waiting - Client' && context.PS_status === 'Proposed',
@@ -84,14 +81,19 @@ const transitions: Transition[] = [
   },
 ];
 
-export const getALStatus = (context: { category: string; crm_status: string; ps_status: string }): string => {
-  console.log('changing status', JSON.stringify(context));
+export const getALStatus = (context: {
+  category: string;
+  crm_status: string;
+  ps_status: string;
+  ps_effective_status: string;
+}): string => {
   for (const transition of transitions) {
     if (
       transition.condition({
         CRM_category: context.category as CRMCategory,
         CRM_status: context.crm_status as CRMStatus,
         PS_status: context.ps_status as PSStatus,
+        PS_effective_status: context.ps_effective_status as PSEffectiveStatus,
       })
     ) {
       return transition.nextState;

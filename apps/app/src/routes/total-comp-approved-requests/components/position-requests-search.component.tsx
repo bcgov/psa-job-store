@@ -11,7 +11,7 @@ import {
   useGetPositionRequestStatusesQuery,
   useGetPositionRequestSubmittedByQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
-import { statusFilterDataMap } from '../../my-positions/my-positions.page';
+import { statusFilterDataMap } from '../../my-position-requests/my-position-requests.page';
 // import './job-profile-search.component.css'; // todo: add as necessary
 
 const { RangePicker } = DatePicker;
@@ -286,7 +286,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
     navigate(
       {
         // pathname: basePath,
-        // pathname: `/my-positions/${positionRequestId}`,
+        // pathname: `/my-position-requests/${positionRequestId}`,
         search: searchParams.toString(),
       },
       { replace: true },
