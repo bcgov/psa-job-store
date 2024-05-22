@@ -21,7 +21,7 @@ export const SiderNavItem = ({ collapsed, icon, title, to, hideTitle }: SiderNav
             ...(isActive && { backgroundColor: '#F0F8FF' }),
           }}
         >
-          <div style={{ padding: '0.625rem 1.125rem' }}>
+          <div style={{ padding: '0.625rem 0.9rem' }}>
             <span>
               {collapsed ? (
                 <Tooltip placement="right" title={title}>
@@ -35,7 +35,7 @@ export const SiderNavItem = ({ collapsed, icon, title, to, hideTitle }: SiderNav
               style={{
                 display: hideTitle ? 'none' : 'inline',
                 top: 0,
-                marginLeft: '1rem',
+                marginLeft: '0.7rem',
                 ...(collapsed === false
                   ? { opacity: 1, transition: 'opacity 0.5s ease' }
                   : { opacity: 0, transition: 'opacity 0.5s ease' }),

@@ -37,7 +37,7 @@ export class JobProfileService {
         ...where,
       },
       ...args,
-      orderBy: [...(args.orderBy || []), { id: 'desc' }],
+      orderBy: [...(args.orderBy || []), { title: 'asc' }],
       include: {
         owner: true,
         behavioural_competencies: true,
