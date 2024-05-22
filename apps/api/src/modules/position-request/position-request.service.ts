@@ -3,7 +3,7 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { btoa } from 'buffer';
-import { Elements, autolayout, generateJobProfile } from 'common-kit';
+import { Elements, autolayout, generateJobProfile, getALStatus } from 'common-kit';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import { Packer } from 'docx';
@@ -255,26 +255,36 @@ export class PositionRequestApiService {
               orgchart_json: autolayout({ edges, nodes }) as any,
             },
           });
+          // CRM Incident Managements
+          const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
+          const [crm_id, crm_lookup_name, crm_status, crm_category] = incident as [string, string, string, string];
+          if (positionObj) {
+            const incomingPositionRequestStatus = getALStatus({
+              category: crm_category,
+              crm_status: crm_status,
+              ps_status: positionObj['A.POSN_STATUS'],
+              ps_effective_status: positionObj['EFF_STATUS'],
+            });
+
+            if (incomingPositionRequestStatus === 'UNKNOWN') {
+              this.logger.warn(
+                `Failed to map to an internal status for crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, crm status:  ${crm_status}, crm category: ${crm_category}, ps status: ${positionObj['A.POSN_STATUS']}`,
+              );
+            }
+            // we will potentially create PRs with UNKNOWN status if there is an issue with CRM or PS creation
+            positionRequest = await this.prisma.positionRequest.update({
+              where: { id },
+              data: {
+                crm_id: incident.id,
+                status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
+              },
+            });
+          }
         }
       }
     } catch (error) {
       this.logger.error(error);
     }
-
-    try {
-      // CRM Incident Managements
-      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
-      positionRequest = await this.prisma.positionRequest.update({
-        where: { id },
-        data: {
-          crm_id: incident.id,
-          status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
-        },
-      });
-    } catch (error) {
-      this.logger.error(error);
-    }
-
     return positionRequest;
   }
 
@@ -802,9 +812,9 @@ export class PositionRequestApiService {
       updatePayload.classification_id = updateData.classification_id;
     }
 
-    if (updateData.status !== undefined) {
-      updatePayload.status = updateData.status;
-    }
+    // if (updateData.status !== undefined) {
+    //   updatePayload.status = updateData.status;
+    // }
 
     if (updateData.parent_job_profile !== undefined) {
       if (updateData.parent_job_profile.connect.id == null) updatePayload.parent_job_profile = { disconnect: true };
@@ -1369,6 +1379,7 @@ export class PositionRequestApiService {
     return position;
   }
 
+  //deprecated
   async updatePositionRequestStatus(id: number, status: number) {
     return await this.crmService.updateIncidentStatus(id, status);
   }
