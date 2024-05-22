@@ -37,7 +37,6 @@ import { PositionService } from '../external/position.service';
 import { JobProfileService } from '../job-profile/job-profile.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
-import { convertIncidentStatusToPositionRequestStatus } from './utils/convert-incident-status-to-position-request-status.util';
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -257,7 +256,7 @@ export class PositionRequestApiService {
           });
           // CRM Incident Managements
           const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
-          const [crm_id, crm_lookup_name, crm_status, crm_category] = incident as [string, string, string, string];
+          const { crm_id, crm_lookup_name, crm_status, crm_category } = incident;
           if (positionObj) {
             const incomingPositionRequestStatus = getALStatus({
               category: crm_category,
@@ -276,7 +275,7 @@ export class PositionRequestApiService {
               where: { id },
               data: {
                 crm_id: incident.id,
-                status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
+                status: incomingPositionRequestStatus as PositionRequestStatus,
               },
             });
           }
@@ -1305,14 +1304,15 @@ export class PositionRequestApiService {
       incident = await this.crmService.createIncident(data);
     } else {
       await this.crmService.updateIncident(positionRequest.crm_id, data);
-      incident = await this.crmService.getIncident(positionRequest.crm_id);
     }
+    // re-fetch the data in the structure we need
+    incident = await this.crmService.getIncident(incident.id);
 
-    if (incident.lookupName != null) {
+    if (incident.crm_lookup_name != null) {
       await this.prisma.positionRequest.update({
         where: { id: positionRequest.id },
         data: {
-          crm_lookup_name: incident.lookupName,
+          crm_lookup_name: incident.crm_lookup_name,
         },
       });
     }
