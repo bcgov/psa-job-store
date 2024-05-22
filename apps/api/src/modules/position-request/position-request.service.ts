@@ -1300,7 +1300,7 @@ export class PositionRequestApiService {
     if (positionRequest.crm_id === null) {
       // console.log(JSON.stringify(data));
 
-      this.logger.debug('incident creation ' + JSON.stringify(data));
+      // this.logger.debug('incident creation ' + JSON.stringify(data));
       incident = await this.crmService.createIncident(data);
     } else {
       await this.crmService.updateIncident(positionRequest.crm_id, data);
