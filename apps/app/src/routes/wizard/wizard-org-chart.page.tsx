@@ -20,9 +20,14 @@ import { useWizardContext } from './components/wizard.provider';
 interface WizardOrgChartPageProps {
   onCreateNewPosition?: () => void;
   positionRequest?: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
-export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: WizardOrgChartPageProps) => {
+export const WizardOrgChartPage = ({
+  onCreateNewPosition,
+  positionRequest,
+  setCurrentStep,
+}: WizardOrgChartPageProps) => {
   const { positionRequestDepartmentId, resetWizardContext, positionRequestData } = useWizardContext();
 
   // this page gets displayed on two routes: /my-position-requests/create and /my-position-requests/:id
@@ -91,7 +96,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
   }, [nextButtonIsDisabled, orgChartData.nodes, selectedPositionId]);
 
   const { createNewPosition } = usePosition();
-  const next = async () => {
+  const next = async ({ switchStep = true }: { switchStep?: boolean } = {}) => {
     if (selectedDepartment == null || selectedPositionId == null) return;
 
     setIsLoading(true);
@@ -104,13 +109,15 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
         reSelectSupervisor,
       );
 
-      if (result) onCreateNewPosition?.();
+      if (result != 'CANCELLED' && switchStep)
+        onCreateNewPosition?.(); // this will increment the step in parent, switching the tab to the next step
       else {
         setIsResetting(true);
         setTimeout(() => {
           setIsResetting(false);
         }, 1000);
       }
+      return result;
     } finally {
       setIsLoading(false);
     }
@@ -120,6 +127,12 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
     // reset the selected position and department to original values
     setSelectedPositionId(positionRequestData?.reports_to_position_id?.toString());
     setSelectedDepartment(positionRequestData?.department_id);
+  };
+
+  const switchStep = async (step: number) => {
+    const code = await next({ switchStep: false });
+    if (code == 'NO_CHANGE') setCurrentStep(step); // if the user didn't change the supervisor, just switch the step
+    else if (code != 'CANCELLED') setCurrentStep(2); // if the user changed the supervisor, switch to step 2, even if user selected something else
   };
 
   if (locationProcessed === false) {
@@ -145,13 +158,26 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
       pageHeaderExtra={[
         <Button onClick={() => navigate('/')}>Cancel</Button>,
         <Tooltip title={nextButtonTooltipTitle}>
-          <Button type="primary" disabled={nextButtonIsDisabled()} onClick={next} loading={isLoading}>
+          <Button
+            type="primary"
+            disabled={nextButtonIsDisabled()}
+            onClick={() => {
+              next();
+            }}
+            loading={isLoading}
+          >
             Next
           </Button>
         </Tooltip>,
       ]}
     >
-      <WizardSteps current={0}></WizardSteps>
+      <WizardSteps
+        current={0}
+        // onStepClick={handleStepClick}
+        // hasUnsavedChanges={hasUnsavedChanges}
+        maxStepCompleted={positionRequest?.max_step_completed}
+        onStepClick={switchStep}
+      ></WizardSteps>
       <div
         style={{
           overflow: 'hidden',

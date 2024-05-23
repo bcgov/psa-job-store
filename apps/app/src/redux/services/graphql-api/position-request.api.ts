@@ -33,6 +33,7 @@ export interface CreatePositionRequestInput {
 export interface GetPositionRequestResponseContent {
   id: number;
   step?: number;
+  max_step_completed?: number;
   reports_to_position_id?: number;
   orgchart_json?: any;
   profile_json_updated?: any;
@@ -115,6 +116,7 @@ export interface CreatePositionRequestResponse {
 export interface UpdatePositionRequestInput {
   id: number;
   step?: number;
+  max_step_completed?: number;
   reports_to_position_id?: number;
   orgchart_json?: any;
   profile_json_updated?: any;
@@ -210,6 +212,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               ) {
                 id
                 step
+                max_step_completed
                 reports_to_position_id
                 parent_job_profile_id
                 user_id
@@ -261,6 +264,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               positionRequest(id: ${args.id}) {
                   id
                   step
+                  max_step_completed
                   reports_to_position_id
                   parent_job_profile_id
                   profile_json_updated
@@ -302,6 +306,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               sharedPositionRequest(uuid: "${args.uuid}") {
                   id
                   step
+                  max_step_completed
                   reports_to_position_id
                   parent_job_profile_id
                   profile_json_updated
@@ -375,6 +380,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               submitPositionRequest(id: $id, comment: $comment) {
                 id
                 step
+                max_step_completed
                 reports_to_position_id
                 department_id
                 parent_job_profile_id

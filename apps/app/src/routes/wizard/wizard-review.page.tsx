@@ -20,6 +20,7 @@ interface WizardReviewPageProps {
   onBack?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
@@ -27,6 +28,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   onBack,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { wizardData, positionRequestId } = useWizardContext();
@@ -36,7 +38,13 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
     setIsLoading(true);
     try {
       if (positionRequestId) {
-        await updatePositionRequest({ id: positionRequestId, step: 4 }).unwrap();
+        await updatePositionRequest({
+          id: positionRequestId,
+          step: 4,
+
+          // increment max step only if it's not incremented
+          ...(positionRequest?.max_step_completed != 4 ? { max_step_completed: 4 } : {}),
+        }).unwrap();
         if (onNext) onNext();
         // navigate('/wizard/confirm');
       }
@@ -127,6 +135,15 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
     );
   };
 
+  const switchStep = async (step: number) => {
+    setCurrentStep(step);
+    if (positionRequestId)
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: step,
+      });
+  };
+
   return (
     <div data-testid="review-changes-page">
       <WizardPageWrapper
@@ -166,7 +183,11 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           </Button>,
         ]}
       >
-        <WizardSteps current={3}></WizardSteps>
+        <WizardSteps
+          onStepClick={switchStep}
+          current={3}
+          maxStepCompleted={positionRequest?.max_step_completed}
+        ></WizardSteps>
 
         <div
           style={{

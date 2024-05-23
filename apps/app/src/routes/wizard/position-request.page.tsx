@@ -219,10 +219,17 @@ export const PositionRequestPage = () => {
   const renderStepComponent = () => {
     switch (currentStep) {
       case 0:
-        return <WizardOrgChartPage onCreateNewPosition={onNext} positionRequest={unwrappedPositionRequestData} />;
+        return (
+          <WizardOrgChartPage
+            setCurrentStep={setCurrentStep}
+            onCreateNewPosition={onNext}
+            positionRequest={unwrappedPositionRequestData}
+          />
+        );
       case 1:
         return (
           <WizardPage
+            setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
@@ -232,6 +239,7 @@ export const PositionRequestPage = () => {
       case 2:
         return (
           <WizardEditPage
+            setCurrentStep={setCurrentStep}
             onBack={onBack}
             onNext={onNext}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
@@ -242,6 +250,7 @@ export const PositionRequestPage = () => {
       case 3:
         return (
           <WizardReviewPage
+            setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
@@ -251,6 +260,7 @@ export const PositionRequestPage = () => {
       case 4:
         return (
           <WizardConfirmDetailsPage
+            setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
@@ -260,6 +270,7 @@ export const PositionRequestPage = () => {
       case 5:
         return (
           <WizardResultPage
+            setCurrentStep={setCurrentStep}
             onBack={onBack}
             setStep={setStep}
             switchParentMode={switchParentMode}

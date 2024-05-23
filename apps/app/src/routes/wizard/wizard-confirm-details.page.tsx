@@ -47,6 +47,7 @@ interface WizardConfirmPageProps {
   onBack?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 function IsTrue(validationOptions?: ValidationOptions) {
@@ -118,6 +119,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   onBack,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // const [createJobProfile] = useCreateJobProfileMutation();
   const [isLoading, setIsLoading] = useState(false);
@@ -300,6 +302,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           // status: 'COMPLETED',
           // position_number: 123456,
 
+          // increment max step only if it's not incremented
+          ...(updateStep && positionRequest?.max_step_completed != 5 ? { max_step_completed: 5 } : {}),
+
           // attach additional information
           additional_info: {
             department_id: formData.payListDepartmentId ?? undefined,
@@ -445,6 +450,15 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     );
   };
 
+  const switchStep = async (step: number) => {
+    setCurrentStep(step);
+    if (positionRequestId)
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: step,
+      });
+  };
+
   if (!allLocations) return <LoadingSpinnerWithMessage />;
 
   // console.log('firstActivePosition:', firstActivePosition);
@@ -490,7 +504,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           </Button>,
         ]}
       >
-        <WizardSteps current={4}></WizardSteps>
+        <WizardSteps
+          onStepClick={switchStep}
+          current={4}
+          maxStepCompleted={positionRequest?.max_step_completed}
+        ></WizardSteps>
 
         <div
           style={{

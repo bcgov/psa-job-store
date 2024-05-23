@@ -21,6 +21,7 @@ interface WizardPageProps {
   onNext?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 interface JobProfileSearchResultsRef {
@@ -32,6 +33,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   onBack,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // const { id } = useParams();
   const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
@@ -82,7 +84,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     return pathParts.join('/');
   };
 
-  const onSubmit = async (action = 'next'): Promise<boolean> => {
+  const onSubmit = async (action = 'next', switchStep = true): Promise<string> => {
     if (
       positionRequestData?.parent_job_profile_id &&
       positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '')
@@ -103,8 +105,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           cancelText: 'Cancel',
           onOk: () => {
             setWizardData(null); // this ensures that any previous edits are cleared
-            handleNext(action);
-            resolve(true);
+            handleNext(action, switchStep);
+            resolve('CHANGED_PROFILE');
           },
           onCancel: () => {
             // re-select profile on the correct page
@@ -127,18 +129,18 @@ export const WizardPage: React.FC<WizardPageProps> = ({
                 { replace: true },
               );
             }
-            resolve(false);
+            resolve('CANCELLED');
           },
         });
       });
     }
 
     // user is not changing from previous profile
-    handleNext(action);
-    return true;
+    handleNext(action, switchStep);
+    return 'NO_CHANGE';
   };
 
-  const handleNext = async (action = 'next') => {
+  const handleNext = async (action = 'next', switchStep = true) => {
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
@@ -148,11 +150,14 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           await updatePositionRequest({
             id: positionRequestId,
             step: action === 'next' ? 2 : 1,
+            // increment max step only if it's not incremented
+            ...(action === 'next' && positionRequest?.max_step_completed != 2 ? { max_step_completed: 2 } : {}),
             // if user selected same profile as before, do not clear profile_json_updated
             // also do not update title to default
             ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
               profile_json_updated: null,
               title: selectedProfileName ?? undefined,
+              max_step_completed: 2,
             }),
             parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
             classification_id: selectedClassificationId,
@@ -161,7 +166,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         setPositionRequestProfileId(parseInt(selectedProfileId));
 
         if (action === 'next') {
-          if (onNext) onNext();
+          if (onNext && switchStep) onNext();
           setSearchParams({}, { replace: true });
         }
       } else {
@@ -229,7 +234,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
   const saveAndQuit = async () => {
     const res = await onSubmit('quit');
-    if (res !== false) disableBlockingAndNavigateHome();
+    if (res !== 'CANCELLED') disableBlockingAndNavigateHome();
   };
 
   const getMenuContent = () => {
@@ -256,6 +261,20 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         </Menu.ItemGroup>
       </Menu>
     );
+  };
+
+  const switchStep = async (step: number) => {
+    const code = await onSubmit('next', false);
+    if (code == 'NO_CHANGE') setCurrentStep(step); // if the user didn't change the supervisor, just switch the step
+    else if (code != 'CANCELLED') setCurrentStep(2); // if the user changed the supervisor, switch to step 2, even if user selected something else
+
+    // setCurrentStep(step);
+    // if (positionRequestId)
+    //   await updatePositionRequest({
+    //     id: positionRequestId,
+    //     step: step,
+    //   });
+    // setSearchParams({}, { replace: true });
   };
 
   if (!departmentData) return <LoadingComponent></LoadingComponent>;
@@ -304,7 +323,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         </Button>,
       ]}
     >
-      <WizardSteps current={1}></WizardSteps>
+      <WizardSteps
+        current={1}
+        //  onStepClick={handleStepClick}
+        //   hasUnsavedChanges={hasUnsavedChanges}
+        maxStepCompleted={positionRequest?.max_step_completed}
+        onStepClick={switchStep}
+      ></WizardSteps>
       <div
         style={{
           overflow: 'hidden',

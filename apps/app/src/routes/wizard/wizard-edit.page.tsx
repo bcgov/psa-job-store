@@ -26,6 +26,7 @@ interface WizardEditPageProps {
   onNext?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export const WizardEditPage: React.FC<WizardEditPageProps> = ({
@@ -33,6 +34,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   onNext,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
@@ -181,6 +183,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
           await updatePositionRequest({
             id: positionRequestId,
             step: action === 'next' ? 3 : action === 'back' ? 1 : 2,
+            // increment max step only if it's not incremented
+            ...(action === 'next' && positionRequest?.max_step_completed != 3 ? { max_step_completed: 3 } : {}),
             profile_json_updated: transformedData,
             title: formData.title.text,
             // classification_code: classification ? classification.code : '',
@@ -282,6 +286,15 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     );
   };
 
+  const switchStep = async (step: number) => {
+    setCurrentStep(step);
+    if (positionRequestId)
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: step,
+      });
+  };
+
   return (
     <WizardPageWrapper
       title={
@@ -313,7 +326,11 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         </Button>,
       ]}
     >
-      <WizardSteps current={2}></WizardSteps>
+      <WizardSteps
+        current={2}
+        onStepClick={switchStep}
+        maxStepCompleted={positionRequest?.max_step_completed}
+      ></WizardSteps>
       {/* <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
         onNext={onNextCallback}
