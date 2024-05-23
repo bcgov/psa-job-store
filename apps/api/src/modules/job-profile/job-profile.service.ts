@@ -755,6 +755,16 @@ export class JobProfileService {
     return result;
   }
 
+  async updateJobProfileState(jobProfileId: number, jobProfileState: string) {
+    await this.prisma.jobProfile.update({
+      where: { id: jobProfileId || -1 },
+      data: {
+        state: jobProfileState as JobProfileState,
+      },
+    });
+    return true;
+  }
+
   async duplicateJobProfile(jobProfileId: number, userId: string): Promise<number> {
     const jobProfileToDuplicate = await this.prisma.jobProfile.findUnique({
       where: { id: jobProfileId },

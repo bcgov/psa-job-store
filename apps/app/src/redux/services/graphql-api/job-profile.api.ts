@@ -21,6 +21,7 @@ import {
   JobProfilesMinistriesResponse,
   NextAvailableJobProfileNumberResponse,
   UnarchiveJobProfileResponse,
+  UpdateJobProfileResponse,
 } from './job-profile-types';
 
 export const jobProfileApi = graphqlApi.injectEndpoints({
@@ -499,6 +500,19 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       },
     }),
 
+    updateJobProfileState: build.mutation<UpdateJobProfileResponse, { jobProfileId: number; state: string }>({
+      query: (args) => {
+        return {
+          document: gql`
+            mutation UpdateJobProfileState($jobProfileId: Int!, $state: String!) {
+              updateJobProfileState(jobProfileId: $jobProfileId, state: $state)
+            }
+          `,
+          variables: args,
+        };
+      },
+    }),
+
     getJobProfilesCareerGroups: build.query<JobProfilesCareerGroupsResponse, void>({
       query: () => {
         return {
@@ -642,4 +656,5 @@ export const {
   useLazyGetJobProfilesArchivedQuery,
 
   useUnarchiveJobProfileMutation,
+  useUpdateJobProfileStateMutation,
 } = jobProfileApi;

@@ -14,12 +14,14 @@ import {
   UploadOutlined,
 } from '@ant-design/icons';
 import { SerializedError } from '@reduxjs/toolkit';
-import { Button, Card, Col, Menu, Modal, Popover, Result, Row, Table, Tooltip } from 'antd';
+import { Button, Card, Col, Menu, Modal, Result, Row, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
+import copy from 'copy-to-clipboard';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
 import { ErrorResponse, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
+import AcessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import {
@@ -34,6 +36,7 @@ import {
   useLazyGetJobProfilesDraftsQuery,
   useLazyGetJobProfilesQuery,
   useUnarchiveJobProfileMutation,
+  useUpdateJobProfileStateMutation,
 } from '../../../redux/services/graphql-api/job-profile.api';
 import { formatDateTime } from '../../../utils/Utils';
 
@@ -92,7 +95,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
   const [error, setError] = useState<string | null>(null);
-
+  const [selectedKeys, setSelectedKeys] = useState([]);
   // Callback function to be called when table properties change
   const handleTableChangeCallback = (pagination: any, _filters: any, sorter: any) => {
     const newPage = pagination.current;
@@ -291,9 +294,13 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       align: 'center',
       key: 'action',
       render: (_text: any, record: any) => (
-        <Popover content={getMenuContent(record)} trigger="click" placement="bottomRight">
-          <EllipsisOutlined />
-        </Popover>
+        // <Popover content={getMenuContent(record)} trigger="click" placement="bottomRight">
+        //   <EllipsisOutlined />
+        // </Popover>
+        <AcessiblePopoverMenu
+          triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
+          content={getMenuContent(record)}
+        ></AcessiblePopoverMenu>
       ),
     },
   ];
@@ -478,6 +485,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const [duplicateJobProfile] = useDuplicateJobProfileMutation();
   const [deleteJobProfile] = useDeleteJobProfileMutation();
   const [unarchiveJobProfile] = useUnarchiveJobProfileMutation();
+  const [updateJobProfileState] = useUpdateJobProfileStateMutation();
 
   const navigate = useNavigate();
   const duplicate = async (record: any) => {
@@ -485,6 +493,14 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     const res = await duplicateJobProfile({ jobProfileId: record.id }).unwrap();
     // console.log('res: ', res);
     navigate(`${link}${res.duplicateJobProfile}`);
+  };
+
+  const update = async (record: any, state: string) => {
+    // console.log('duplicate', record);
+    await updateJobProfileState({ jobProfileId: record.id, state: state }).unwrap();
+    message.success('Job Profile published!');
+    setSelectedKeys([]);
+    updateData();
   };
 
   const deleteDraft = async (record: any) => {
@@ -515,24 +531,46 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       },
     });
   };
+  const handleCopyLink = (record: any) => {
+    // Dynamically construct the link to include the current base URL
+    const linkToCopy = `${window.location.origin}${link}${record.id}`;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // Use the Clipboard API to copy the link to the clipboard
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    message.success('Link copied to clipboard!');
+    setSelectedKeys([]);
+  };
   const getMenuContent = (_record: any) => {
     return (
-      <Menu>
+      <Menu selectedKeys={selectedKeys} className={`popover-selector-${_record.id}`}>
         <>
           {state === 'PUBLISHED' && (
             <>
-              <Menu.Item key="view" icon={<EyeOutlined />}>
+              <Menu.Item
+                data-testid="menu-option-view"
+                key="view"
+                icon={<EyeOutlined aria-hidden />}
+                onClick={() => navigate(`${link}${_record.id}`)}
+              >
                 View
               </Menu.Item>
-              <Menu.Item key="unpublish" icon={<ArrowDownOutlined />}>
+              <Menu.Item
+                key="unpublish"
+                icon={<ArrowDownOutlined />}
+                onClick={() => update(_record, 'DRAFT')}
+                data-testid="menu-option-unpublish link"
+              >
                 Unpublish
               </Menu.Item>
               <Menu.Item key="duplicate" icon={<CopyOutlined />} onClick={() => duplicate(_record)}>
                 Duplicate
               </Menu.Item>
-              <Menu.Item key="copy" icon={<LinkOutlined />}>
+              <Menu.Item
+                key="copy"
+                icon={<LinkOutlined aria-hidden />}
+                onClick={() => handleCopyLink(_record)}
+                data-testid="menu-option-copy link"
+              >
                 Copy link
               </Menu.Item>
             </>
@@ -540,19 +578,45 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
           {state === 'DRAFT' && !is_archived && (
             <>
-              <Menu.Item key="edit" icon={<EditOutlined />}>
+              <Menu.Item
+                data-testid="menu-option-edit"
+                key="edit"
+                icon={<EditOutlined aria-hidden />}
+                onClick={() => navigate(`${link}${_record.id}`)}
+              >
+                {' '}
                 Edit
               </Menu.Item>
-              <Menu.Item key="publish" icon={<DownloadOutlined />}>
+              <Menu.Item
+                key="publish"
+                icon={<DownloadOutlined />}
+                onClick={() => update(_record, 'PUBLISHED')}
+                data-testid="menu-option-publish link"
+              >
                 Publish
               </Menu.Item>
-              <Menu.Item key="duplicate" icon={<CopyOutlined />} onClick={() => duplicate(_record)}>
+              <Menu.Item
+                key="duplicate"
+                icon={<CopyOutlined />}
+                onClick={() => duplicate(_record)}
+                data-testid="menu-option-duplicate link"
+              >
                 Duplicate
               </Menu.Item>
-              <Menu.Item key="copy" icon={<LinkOutlined />}>
+              <Menu.Item
+                key="copy"
+                icon={<LinkOutlined aria-hidden />}
+                onClick={() => handleCopyLink(_record)}
+                data-testid="menu-option-copy link"
+              >
                 Copy link
               </Menu.Item>
-              <Menu.Item key="delete" icon={<DeleteOutlined />} onClick={() => deleteDraft(_record)}>
+              <Menu.Item
+                key="delete"
+                icon={<DeleteOutlined />}
+                onClick={() => deleteDraft(_record)}
+                data-testid="menu-option-delete link"
+              >
                 Delete
               </Menu.Item>
             </>
@@ -560,7 +624,12 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
           {state === 'DRAFT' && is_archived && (
             <>
-              <Menu.Item key="publish" icon={<UploadOutlined />} onClick={() => unarchive(_record)}>
+              <Menu.Item
+                key="unarchive"
+                icon={<UploadOutlined />}
+                onClick={() => unarchive(_record)}
+                data-testid="menu-option-unarchive link"
+              >
                 Unarchive
               </Menu.Item>
             </>
