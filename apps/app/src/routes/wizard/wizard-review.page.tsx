@@ -11,6 +11,7 @@ import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardEditControlBar from './components/wizard-edit-control-bar';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 import './wizard-review.page.css';
 
@@ -107,7 +108,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Positions' page.
+              Saves your progress. You can access this position request from the 'My Position Requests' page.
             </Typography.Text>
           </div>
         </Menu.Item>
@@ -117,7 +118,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
             <div style={{ padding: '5px 0' }}>
               Delete
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Positions'. This action is irreversible.
+                Removes this position request from 'My Position Requests'. This action is irreversible.
               </Typography.Text>
             </div>
           </Menu.Item>
@@ -151,6 +152,9 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
+          <div style={{ marginRight: '1rem' }}>
+            <StatusIndicator status={positionRequest?.status ?? ''} />
+          </div>,
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
             <Button icon={<EllipsisOutlined />}></Button>
           </Popover>,

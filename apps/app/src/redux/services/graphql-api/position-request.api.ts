@@ -17,7 +17,7 @@ interface JobProfileConnectItem {
 export interface CreatePositionRequestInput {
   step: number;
   reports_to_position_id: number;
-  profile_json?: any;
+  profile_json_updated?: any;
   orgchart_json?: any;
   parent_job_profile?: JobProfileConnectItem;
   title?: string;
@@ -35,7 +35,7 @@ export interface GetPositionRequestResponseContent {
   step?: number;
   reports_to_position_id?: number;
   orgchart_json?: any;
-  profile_json?: any;
+  profile_json_updated?: any;
   user_id?: string;
   user_name?: string;
   parent_job_profile_id?: number;
@@ -57,6 +57,7 @@ export interface GetPositionRequestResponseContent {
   additional_info?: AdditionalInfo;
 
   crm_id?: string;
+  crm_lookup_name?: string;
 }
 
 export interface AdditionalInfo {
@@ -89,7 +90,7 @@ export interface PositionNeedsReviewResponseContent {
 export interface PositionRequestStatusCounts {
   draft: number;
   completed: number;
-  inReview: number;
+  verification: number;
   total: number;
 }
 
@@ -116,7 +117,7 @@ export interface UpdatePositionRequestInput {
   step?: number;
   reports_to_position_id?: number;
   orgchart_json?: any;
-  profile_json?: any;
+  profile_json_updated?: any;
   user_id?: string;
   title?: string | null;
   position_number?: number;
@@ -227,11 +228,12 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   number
                 }
                 crm_id
+                crm_lookup_name
               }
               positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
                 draft
                 completed
-                inReview
+                verification
                 total
               }
             }
@@ -261,7 +263,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   step
                   reports_to_position_id
                   parent_job_profile_id
-                  profile_json
+                  profile_json_updated
                   orgchart_json
                   user_id
                   user_name
@@ -280,6 +282,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   }
                   additional_info
                   crm_id
+                  crm_lookup_name
                   shareUUID
               }
           }
@@ -301,7 +304,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   step
                   reports_to_position_id
                   parent_job_profile_id
-                  profile_json
+                  profile_json_updated
                   orgchart_json
                   user_id
                   user_name
@@ -320,6 +323,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   }
                   additional_info
                   crm_id
+                  crm_lookup_name
               }
           }
           `,
@@ -374,7 +378,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 reports_to_position_id
                 department_id
                 parent_job_profile_id
-                profile_json
+                profile_json_updated
                 user_id
                 title
                 position_number
@@ -486,7 +490,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               positionRequestsCount(search: $search, where: $where) {
                 draft
                 completed
-                inReview
+                verification
                 total
               }
             }

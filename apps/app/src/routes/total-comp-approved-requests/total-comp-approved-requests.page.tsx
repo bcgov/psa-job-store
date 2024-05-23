@@ -4,7 +4,7 @@ import { useState } from 'react';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import ContentWrapper from '../home/components/content-wrapper.component';
-import MyPositionsTable from '../my-positions/components/my-positions-table.component';
+import MyPositionsTable from '../my-position-requests/components/my-position-requests-table.component';
 import { PositionRequestsSearch } from './components/position-requests-search.component';
 
 export const TotalCompApprovedRequestsPage = () => {
@@ -36,7 +36,7 @@ export const TotalCompApprovedRequestsPage = () => {
         <MyPositionsTable
           tableTitle={'Requests'}
           mode="total-compensation"
-          style={{ marginTop: '1rem' }}
+          style={{ marginTop: '1rem', flexGrow: '1', display: 'flex', flexDirection: 'column' }}
           // handleTableChangeCallback={handleTableChangeCallback}
         ></MyPositionsTable>
       </ContentWrapper>

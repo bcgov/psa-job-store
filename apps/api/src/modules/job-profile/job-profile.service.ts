@@ -4,14 +4,12 @@ import { JobProfile, JobProfileState, JobProfileType, Prisma } from '@prisma/cli
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { AlexandriaError } from '../../utils/alexandria-error';
-import { ClassificationService } from '../classification/classification.service';
 import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 
 @Injectable()
 export class JobProfileService {
   constructor(
-    private readonly classificationService: ClassificationService,
     private readonly prisma: PrismaService,
     private readonly searchService: SearchService,
   ) {}
@@ -39,7 +37,7 @@ export class JobProfileService {
         ...where,
       },
       ...args,
-      orderBy: [...(args.orderBy || []), { id: 'desc' }],
+      orderBy: [...(args.orderBy || []), { title: 'asc' }],
       include: {
         owner: true,
         behavioural_competencies: true,
@@ -60,6 +58,11 @@ export class JobProfileService {
         },
         reports_to: true,
         role: true,
+        scopes: {
+          include: {
+            scope: true,
+          },
+        },
         streams: {
           include: {
             stream: true,
@@ -432,7 +435,7 @@ export class JobProfileService {
   }
 
   async getJobProfile(id: number) {
-    return this.prisma.jobProfile.findUnique({
+    const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
         classifications: {
@@ -450,7 +453,11 @@ export class JobProfileService {
             organization: true,
           },
         },
-        scope: true,
+        scopes: {
+          include: {
+            scope: true,
+          },
+        },
         role: true,
         role_type: true,
         streams: {
@@ -459,8 +466,14 @@ export class JobProfileService {
           },
         },
         context: true,
+        behavioural_competencies: {
+          include: {
+            behavioural_competency: true,
+          },
+        },
       },
     });
+    return jobProfile;
   }
 
   async getJobProfileCount({ search, where }: FindManyJobProfileWithSearch) {
@@ -584,9 +597,13 @@ export class JobProfileService {
           connect: { id: data.role_type.connect.id },
         },
 
-        ...(data.scope && {
-          scope: {
-            connect: { id: data.scope.connect.id },
+        ...(data.scopes && {
+          scopes: {
+            create: data.scopes.create.map((item) => ({
+              scope: {
+                connect: { id: item.scope.connect.id },
+              },
+            })),
           },
         }),
         state: data.state ? data.state : JobProfileState.DRAFT,
@@ -682,9 +699,12 @@ export class JobProfileService {
 
         role_type: { connect: { id: data.role_type.connect.id } },
 
-        ...(data.scope && {
-          scope: {
-            connect: { id: data.scope.connect.id },
+        ...(data.scopes && {
+          scopes: {
+            deleteMany: {},
+            create: data.scopes.create.map((item) => ({
+              scope: { connect: { id: item.scope.connect.id } },
+            })),
           },
         }),
 
@@ -759,7 +779,11 @@ export class JobProfileService {
             organization: true,
           },
         },
-        scope: true,
+        scopes: {
+          include: {
+            scope: true,
+          },
+        },
         role: true,
         role_type: true,
         streams: {
@@ -781,7 +805,7 @@ export class JobProfileService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, role_id, role_type_id, scope_id, owner_id, title, ...jobProfileDataWithoutId } = jobProfileToDuplicate;
+    const { id, role_id, role_type_id, scopes, owner_id, title, ...jobProfileDataWithoutId } = jobProfileToDuplicate;
 
     // Modify fields that should be unique for the new record
     // Create a new JobProfileCreateInput object
@@ -819,7 +843,12 @@ export class JobProfileService {
           organization: { connect: { id: org.organization.id } },
         })),
       },
-      scope: jobProfileToDuplicate.scope ? { connect: { id: jobProfileToDuplicate.scope.id } } : undefined,
+      scopes: {
+        create: jobProfileToDuplicate.scopes.map((rt) => ({
+          scope: { connect: { id: rt.scope_id } },
+        })),
+      },
+      //jobProfileToDuplicate.scope ? { connect: { id: jobProfileToDuplicate.scope.id } } : undefined,
       role: jobProfileToDuplicate.role ? { connect: { id: jobProfileToDuplicate.role.id } } : undefined,
       role_type: jobProfileToDuplicate.role_type ? { connect: { id: jobProfileToDuplicate.role_type.id } } : undefined,
       streams: {

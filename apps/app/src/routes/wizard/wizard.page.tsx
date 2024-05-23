@@ -72,7 +72,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   }, [positionRequestData, setSearchParams, searchParams]);
 
   const getBasePath = (path: string) => {
-    if (positionRequestId) return `/my-positions/${positionRequestId}`;
+    if (positionRequestId) return `/my-position-requests/${positionRequestId}`;
 
     const pathParts = path.split('/');
     // Check if the last part is a number (ID), if so, remove it
@@ -148,10 +148,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           await updatePositionRequest({
             id: positionRequestId,
             step: action === 'next' ? 2 : 1,
-            // if user selected same profile as before, do not clear profile_json
+            // if user selected same profile as before, do not clear profile_json_updated
             // also do not update title to default
             ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
-              profile_json: null,
+              profile_json_updated: null,
               title: selectedProfileName ?? undefined,
             }),
             parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
@@ -239,7 +239,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Positions' page.
+              Saves your progress. You can access this position request from the 'My Position Requests' page.
             </Typography.Text>
           </div>
         </Menu.Item>
@@ -249,7 +249,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
             <div style={{ padding: '5px 0' }}>
               Delete
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Positions'. This action is irreversible.
+                Removes this position request from 'My Position Requests'. This action is irreversible.
               </Typography.Text>
             </div>
           </Menu.Item>

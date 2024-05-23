@@ -1,11 +1,13 @@
-import { CopyOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typography } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typography, message } from 'antd';
+import copy from 'copy-to-clipboard';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
@@ -65,7 +67,7 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'jobTitle',
       label: 'Job title',
-      children: <div>{data?.positionRequest?.profile_json?.title?.value}</div>,
+      children: <div>{data?.positionRequest?.profile_json_updated?.title?.text}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -84,11 +86,15 @@ export const TotalCompApprovedRequestPage = () => {
       key: 'reportsTo',
       label: 'Reports to',
       children: (
-        <div>
-          TEST DATA Hill, Nathan CITZ:EX <br />
-          Sr. Director, Digital Portfolio, Band 4 <br />
-          Position No.: 00012345
-        </div>
+        <PositionProfile
+          positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          orgChartData={data?.positionRequest?.orgchart_json}
+        ></PositionProfile>
+        // <div>
+        //   TEST DATA Hill, Nathan CITZ:EX <br />
+        //   Sr. Director, Digital Portfolio, Band 4 <br />
+        //   Position No.: 00012345
+        // </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
@@ -96,11 +102,15 @@ export const TotalCompApprovedRequestPage = () => {
       key: 'firstLevelExcludedManager',
       label: 'First level excluded manager for this position',
       children: (
-        <div>
-          TEST DATA Hill, Nathan CITZ:EX <br />
-          Sr. Director, Digital Portfolio, Band 4 <br />
-          Position No.: 00012345
-        </div>
+        <PositionProfile
+          positionNumber={data?.positionRequest?.reports_to_position_id}
+          orgChartData={data?.positionRequest?.orgchart_json}
+        ></PositionProfile>
+        // <div>
+        //   TEST DATA Hill, Nathan CITZ:EX <br />
+        //   Sr. Director, Digital Portfolio, Band 4 <br />
+        //   Position No.: 00012345
+        // </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
@@ -196,13 +206,20 @@ export const TotalCompApprovedRequestPage = () => {
   };
 
   // END PROFILE TAB INFO
-  const handleDownload = () => {
-    // Implement download functionality here
-  };
+  // const handleDownload = () => {
+  //   // Implement download functionality here
+  // };
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
+    const linkToCopy = `${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`;
+
+    // Use the Clipboard API to copy the link to the clipboard
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    message.success('Link copied to clipboard!');
   };
+
+  console.log('data?.positionRequest: ', data?.positionRequest);
 
   const tabItems = [
     {
@@ -315,7 +332,7 @@ export const TotalCompApprovedRequestPage = () => {
               </Collapse> */}
               <JobProfile
                 style={{ marginTop: '1rem' }}
-                profileData={data?.positionRequest?.profile_json}
+                profileData={data?.positionRequest?.profile_json_updated}
                 showBackToResults={false}
                 showDiff={showDiff}
                 id={data?.positionRequest?.parent_job_profile_id?.toString() ?? undefined}
@@ -335,10 +352,8 @@ export const TotalCompApprovedRequestPage = () => {
             title="Position was created!"
             subTitle={
               <div>
-                <div>Position: Program Assistant (L9)</div>
-                <br />
-                <div>Position #: 12345678</div>
-                <br />
+                <div>Position: {data?.positionRequest?.title}</div>
+                <div>Position #: {data?.positionRequest?.position_number}</div>
               </div>
             }
             extra={[
@@ -349,42 +364,79 @@ export const TotalCompApprovedRequestPage = () => {
                       <p>Reach out to the hiring manager or reporting managers for feedback.</p>
                       <Descriptions bordered column={2}>
                         <Descriptions.Item label="Hiring Manager" span={3}>
-                          Schrute, Dwight CITZ:EX - dwight.schrute@gov.bc.ca
+                          {data?.positionRequest?.user_name} -{' '}
+                          <a href={`mailto:${data?.positionRequest?.email}`}>{data?.positionRequest?.email}</a>
+                          <CopyOutlined
+                            onClick={() => {
+                              navigator.clipboard.writeText(data?.positionRequest?.email || '');
+                              message.success('Email copied to clipboard');
+                            }}
+                            style={{ cursor: 'pointer' }}
+                          />
                         </Descriptions.Item>
                         <Descriptions.Item label="Reporting Manager" span={3}>
-                          Hill, Nathan CITZ:EX - nathan.hill@gov.bc.ca
+                          <PositionProfile
+                            positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+                            orgChartData={data?.positionRequest?.orgchart_json}
+                            mode="compact"
+                          ></PositionProfile>
                         </Descriptions.Item>
                         <Descriptions.Item label="First Band Manager" span={3}>
-                          Hill, Nathan CITZ:EX - nathan.hill@gov.bc.ca
+                          <PositionProfile
+                            positionNumber={data?.positionRequest?.reports_to_position_id}
+                            orgChartData={data?.positionRequest?.orgchart_json}
+                            mode="compact"
+                          ></PositionProfile>
                         </Descriptions.Item>
                       </Descriptions>
                     </Card>
 
                     <Card title="Other Actions" style={{ marginBottom: '1rem' }}>
                       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                        <div>
+                        {/* <div>
                           <strong>Download attachments</strong>
                           <p>Download the job profile & org chart related to the Job Profile.</p>
                           <Button icon={<DownloadOutlined />} onClick={handleDownload}>
                             Download attachments
                           </Button>
+                        </div> */}
+                        <div>
+                          <strong>Download job profile</strong>
+                          {/* <Button onClick={handleDownload}>Download job profile</Button> */}
+                          <br></br>
+                          <br></br>
+                          <div>
+                            <DownloadJobProfileComponent jobProfile={data?.positionRequest?.profile_json_updated} />
+                          </div>
                         </div>
                         <Divider />
                         <div>
-                          <strong>Invite others to review</strong>
+                          <div>
+                            <strong>Invite others to review</strong>
+                            <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
+                            <Space>
+                              <Text>{`${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`}</Text>
+                              <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
+                                Copy URL
+                              </Button>
+                            </Space>
+                          </div>
+                          {/* <strong>Invite others to review</strong>
                           <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                           <Space>
                             <Text>http://pjs-dev.apps.silver.devops.gov.bc.ca/wizard/review/1</Text>
                             <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                               Copy URL
                             </Button>
-                          </Space>
+                          </Space> */}
                         </div>
                         <Divider />
                         <div>
                           <Text strong>View all approved requests</Text>
                           <p>View all approved requests in JobStore.</p>
-                          <Button>Go to Approved requests</Button>
+                          <Link to="/approved-requests">
+                            <Button>Go to Approved requests</Button>
+                          </Link>
                         </div>
                       </Space>
                     </Card>

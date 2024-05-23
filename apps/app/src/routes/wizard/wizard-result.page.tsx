@@ -22,6 +22,7 @@ import {
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 
 interface WizardResultPageProps {
@@ -116,8 +117,17 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       return;
     }
 
-    // if it's in IN_REVIEW;, set mode to sentForVerification
-    if (positionRequestData?.positionRequest?.status === 'IN_REVIEW') {
+    // if state is CANCELLED, then set parent to readonly mode
+    // Will show "Your position has been created" screen
+    if (positionRequestData?.positionRequest?.status === 'CANCELLED') {
+      switchParentMode && switchParentMode('readonly');
+      switchParentReadonlyMode && switchParentReadonlyMode('cancelled');
+      setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+      return;
+    }
+
+    // if it's in VERIFICATION;, set mode to sentForVerification
+    if (positionRequestData?.positionRequest?.status === 'VERIFICATION') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -130,9 +140,12 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       return;
     }
 
-    // if it's in ESCALATED status, show "classification review required" screen
-    if (positionRequestData?.positionRequest?.status === 'ESCALATED') {
-      setMode('classificationReviewRequired');
+    // if it's in REVIEW status, show "classification review required" screen
+    if (positionRequestData?.positionRequest?.status === 'REVIEW') {
+      switchParentMode && switchParentMode('readonly');
+      // setMode('classificationReviewRequired');
+      switchParentReadonlyMode && switchParentReadonlyMode('inQueue');
+      setReadOnlySelectedTab && setReadOnlySelectedTab('4');
       return;
     }
   }, [
@@ -188,7 +201,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           switchParentMode && switchParentMode('readonly');
           switchParentReadonlyMode && switchParentReadonlyMode('completed');
           setReadOnlySelectedTab && setReadOnlySelectedTab('4');
-        } else if (result?.submitPositionRequest.status === 'IN_REVIEW') {
+        } else if (result?.submitPositionRequest.status === 'VERIFICATION') {
           switchParentMode && switchParentMode('readonly');
           switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
           setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -238,21 +251,25 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Positions' page.
+              Saves your progress. You can access this position request from the 'My Position Requests' page.
             </Typography.Text>
           </div>
         </Menu.Item>
-        <Menu.Divider />
-        <Menu.ItemGroup key="others" title={<b>Others</b>}>
-          <Menu.Item key="delete" onClick={deleteRequest}>
-            <div style={{ padding: '5px 0' }}>
-              Delete
-              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Positions'. This action is irreversible.
-              </Typography.Text>
-            </div>
-          </Menu.Item>
-        </Menu.ItemGroup>
+        {positionRequest?.status === 'DRAFT' && (
+          <>
+            <Menu.Divider />
+            <Menu.ItemGroup key="others" title={<b>Others</b>}>
+              <Menu.Item key="delete" onClick={deleteRequest}>
+                <div style={{ padding: '5px 0' }}>
+                  Delete
+                  <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                    Removes this position request from 'My Position Requests'. This action is irreversible.
+                  </Typography.Text>
+                </div>
+              </Menu.Item>
+            </Menu.ItemGroup>
+          </>
+        )}
       </Menu>
     );
   };
@@ -268,26 +285,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   return (
     <>
-      {/* <WizardPageWrapper
-        title="Result"
-        subTitle="Find out the result of your request"
-        pageHeaderExtra={[
-          <Button key="back" onClick={back}>
-            Back
-          </Button>,
-        ]}
-        grayBg={true}
-      >
-        <div style={{ background: 'white', margin: '0 -16px', padding: '10px 24px' }}>
-          <Row justify="center" style={{ padding: '0 1rem' }}>
-            <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-              <div style={{ background: 'white' }}>
-                <WizardSteps current={5} xl={24}></WizardSteps>
-              </div>
-            </Col>
-          </Row>
-        </div> */}
-
       <div data-testid="result-page">
         <WizardPageWrapper
           // title="Edit profile" subTitle="You may now edit the profile." xxl={20} xl={20} lg={20}
@@ -309,12 +306,27 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           hpad={false}
           grayBg={false}
           pageHeaderExtra={[
+            <div style={{ marginRight: '1rem' }}>
+              <StatusIndicator status={positionRequest?.status ?? ''} />
+            </div>,
             <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
               <Button icon={<EllipsisOutlined />}></Button>
             </Popover>,
             <Button onClick={back} key="back" data-testid="back-button">
               Back
             </Button>,
+            <>
+              {mode === 'readyToCreatePositionNumber' && (
+                <Button onClick={showModal} key="back" type="primary" loading={submitPositionRequestIsLoading}>
+                  Generate position number
+                </Button>
+              )}
+              {(mode === 'verificationRequired_edits' || mode === 'verificationRequired_retry') && (
+                <Button key="back" type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
+                  Submit for verification
+                </Button>
+              )}
+            </>,
           ]}
         >
           <WizardSteps current={5}></WizardSteps>
@@ -589,7 +601,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       icon={<ExclamationCircleFilled />}
                       style={{ marginBottom: '24px' }}
                     />
-
+                    {/* 
                     <Card
                       title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Send for verification</h3>}
                       bordered={false}
@@ -602,7 +614,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
                         Send for classification review
                       </Button>
-                    </Card>
+                    </Card> */}
 
                     <Card
                       title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Other actions</h3>}

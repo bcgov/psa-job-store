@@ -31,6 +31,8 @@ services:
         - CRM_USERNAME=${CRM_USERNAME}
     ports:
       - 4000:4000
+    networks:
+      elastic:
     depends_on:
       - postgres
     volumes:
@@ -41,6 +43,8 @@ services:
     image: postgres:latest
     ports:
       - 5432:5432
+    networks:
+      elastic:
     env_file:
       - .env.docker
   elasticsearch:

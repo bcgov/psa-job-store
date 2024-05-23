@@ -29,6 +29,7 @@ interface JobProfilesContentProps {
   previousSearchState?: MutableRefObject<string>;
   organizationFilterExtra?: OrganizationModel;
   positionRequestId?: number;
+  loadProfileIds?: number[];
 }
 
 interface JobProfilesRef {
@@ -37,7 +38,15 @@ interface JobProfilesRef {
 
 const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
   (
-    { searchParams, onSelectProfile, selectProfileId, previousSearchState, organizationFilterExtra, page_size = 10 },
+    {
+      searchParams,
+      onSelectProfile,
+      selectProfileId,
+      previousSearchState,
+      organizationFilterExtra,
+      loadProfileIds,
+      page_size = 10,
+    },
     ref,
   ) => {
     const dispatch = useAppDispatch();
@@ -98,7 +107,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     const getBasePath = useCallback(
       (path: string) => {
-        if (positionRequestId) return `/my-positions/${positionRequestId}`;
+        if (positionRequestId) return `/my-position-requests/${positionRequestId}`;
 
         const pathParts = path.split('/');
         // Check if the last part is a number (ID), if so, remove it
@@ -171,20 +180,51 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         applyOrgFilter = organizationFilter;
       }
 
+      // if (loadProfileIds) {
+      //   // If loadProfileIds is provided, fetch only those job profiles
+      //   trigger({
+      //     where: {
+      //       id: {
+      //         in: loadProfileIds,
+      //       },
+      //     },
+      //     skip: (currentPage - 1) * pageSize,
+      //     take: pageSize,
+      //   });
+      // } else {
+
       trigger({
         ...(search != null && { search }),
         where: {
           AND: [
+            ...(loadProfileIds
+              ? [
+                  {
+                    id: {
+                      in: loadProfileIds,
+                    },
+                  },
+                ]
+              : []),
             ...(classificationIdFilter != null
               ? [
                   {
-                    reports_to: {
-                      some: {
-                        classification_id: {
-                          in: [classificationIdFilter],
+                    OR: [
+                      {
+                        all_reports_to: {
+                          equals: true,
                         },
                       },
-                    },
+                      {
+                        reports_to: {
+                          some: {
+                            classification_id: {
+                              in: [classificationIdFilter],
+                            },
+                          },
+                        },
+                      },
+                    ],
                   },
                 ]
               : []),
@@ -245,6 +285,9 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         // it will also ignore filters and search query
         selectProfile: !selectProfileIdRan.current ? selectProfileId : null,
       });
+
+      // Fetch job profiles based on other filters and search query
+      // }
     }, [
       searchParams,
       trigger,
@@ -257,6 +300,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       getBasePath,
       navigate,
       organizationFilterExtra,
+      loadProfileIds,
     ]);
 
     // Update totalResults based on the response (if applicable)

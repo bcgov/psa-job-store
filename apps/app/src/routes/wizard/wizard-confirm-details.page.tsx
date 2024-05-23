@@ -38,6 +38,7 @@ import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redu
 import { findExcludedManager } from '../org-chart/utils/find-excluded-manager.util';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
+import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
 import './wizard-confirm-details.page.css';
 
@@ -394,7 +395,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         setValue('confirmation', true);
       }
     }
-  }, [departmentsData, positionRequestData, setValue]);
+  }, [departmentsData, positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
 
   const confirmation = watch('confirmation');
 
@@ -425,7 +426,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Positions' page.
+              Saves your progress. You can access this position request from the 'My Position Requests' page.
             </Typography.Text>
           </div>
         </Menu.Item>
@@ -435,7 +436,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
             <div style={{ padding: '5px 0' }}>
               Delete
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Positions'. This action is irreversible.
+                Removes this position request from 'My Position Requests'. This action is irreversible.
               </Typography.Text>
             </div>
           </Menu.Item>
@@ -468,6 +469,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
+          <div style={{ marginRight: '1rem' }}>
+            <StatusIndicator status={positionRequest?.status ?? ''} />
+          </div>,
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
             <Button data-testid="ellipsis-menu" icon={<EllipsisOutlined />}></Button>
           </Popover>,
@@ -815,7 +819,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     colon={false}
                   >
                     <div style={{ margin: 0 }}>
-                      {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.value}
+                      {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.text}
                     </div>
                   </Form.Item>
 

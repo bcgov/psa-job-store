@@ -13,7 +13,7 @@ Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one soluti
 
 ### 📈 Create & Edit Positions Instantly
 
-- Create New Positions: Add new roles to your organization in real-time, customizing as per your needs.
+- Create New Positions: Add new roles to your organization in real-time, customizing as per your needs or using provided job profiles.
 
 ### 📚 Library of Job Profiles
 
@@ -39,11 +39,45 @@ Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one soluti
 
 ## Running the project
 
-### Build common-kit
+### Requirements
+
+- node >=20.11.1 <21.0.0
+
+### Installation
+
+First, clone the repository:
+
+`git clone https://github.com/bcgov/psa-job-store.git`
+
+Install dependencies:
+
+`npm i`
+
+Rename `/sample.env` to `.env` and configure the variables
+
+Start elastic search and postgres containers:
+
+`docker compose up`
+
+Build common-kit:
 
 `npm -w common-kit run build`
 
-More instructions coming soon..
+Setup the database and seed it with test data:
+
+`npx -w api npm run migrate:reset:e2e-test`
+
+Rename `/apps/app/sample.env` to `.env` and configure the environment.
+
+Start API project:
+
+`npm -w api run start:dev`
+
+Start the web project:
+
+`npm -w app run dev`
+
+Visit [http://localhost:5173/](http://localhost:5173/) to see the application!
 
 ## Running end-to-end tests
 
@@ -80,9 +114,24 @@ When completing a feature, run
 
 in the project root and follow the prompts. This info is going to be automatically included in change log.
 
+## To publish a hotfix to production
+
+- Make a hotfix branch off main
+- Create pull request from hotfix into develop to test it on develop
+- Create pull request from develop to stage to test on stage
+- If looks good, create a pull request from hotfix to main
+
+If there's a conflict because develop is ahead of main:
+
+- Create a branch off develop
+- Merge hotfix into this branch and resolve conflicts
+- Make a pull request from this branch into develop
+
 ## @generated files and slow commits
 
 To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)
+
+If above doesn't work, use `lacroixdavid1.vscode-format-context-menu` VS Code extension. After installing, right click on the @generated folder and click `Format`
 
 ## To apply a db change via db migration
 
@@ -135,15 +184,33 @@ Login to sql, and clear all data:
 
 `psql -d DB_NAME -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`
 
+If importing to local:
+
+`psql -d api -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" -h localhost -p 5432 -U admin`
+
+`docker cp backup.sql api-postgres-1:/home/backup.sql`
+
 Import production data:
 
 `psql -U postgres -d api -f backup.sql`
+
+If on local:
+
+`psql -U postgres -d api -f /home/backup.sql -h localhost -p 5432 -U admin`
 
 Clear position requests:
 
 `TRUNCATE TABLE position_request;`
 
+## To connect to local db
+
+Open container terminal and enter:
+
+`psql -h localhost -p 5432 -U admin -d api`
+
 ## To accelerate new image uptake on openshift after publishing
+
+NOTE: these changes have been integrated into the pipeline and now happen automatically on every publish
 
 Openshift may take up to 15 minutes to pick a new image from artifactory. There is no way to change this frequency. If needed, as a workaround
 perform these operations to get openshift to pick up the image from artifactory faster:
@@ -185,6 +252,8 @@ oc get secret/artifacts-default-[random] -o json | jq '.data.password' | tr -d "
 ```
 
 ## Run Prisma Studio with a remote database
+
+NOTE: this no longer works since OS installation now uses crunchy postgresql cluster configuration instead of standalone configuration.
 
 To run Prisma Studio that is connected to a remote database follow these steps:
 

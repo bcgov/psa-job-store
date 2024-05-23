@@ -25,15 +25,17 @@ interface WizardOrgChartPageProps {
 export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: WizardOrgChartPageProps) => {
   const { positionRequestDepartmentId, resetWizardContext, positionRequestData } = useWizardContext();
 
-  // this page gets displayed on two routes: /my-positions/create and /my-positions/:id
-  // if we navigate to /my-positions/create, wipe all wizard context info
+  // this page gets displayed on two routes: /my-position-requests/create and /my-position-requests/:id
+  // if we navigate to /my-position-requests/create, wipe all wizard context info
+  const [locationProcessed, setLocationProcessed] = useState(false);
   const location = useLocation();
   useEffect(() => {
-    if (location.pathname === '/my-positions/create') {
+    if (location.pathname === '/my-position-requests/create') {
       resetWizardContext();
       setSelectedDepartment(null);
       setSelectedPositionId(null);
     }
+    setLocationProcessed(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
@@ -91,6 +93,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
   const { createNewPosition } = usePosition();
   const next = async () => {
     if (selectedDepartment == null || selectedPositionId == null) return;
+
     setIsLoading(true);
     try {
       const result = await createNewPosition(
@@ -100,6 +103,7 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
         positionRequestData?.reports_to_position_id,
         reSelectSupervisor,
       );
+
       if (result) onCreateNewPosition?.();
       else {
         setIsResetting(true);
@@ -117,6 +121,10 @@ export const WizardOrgChartPage = ({ onCreateNewPosition, positionRequest }: Wiz
     setSelectedPositionId(positionRequestData?.reports_to_position_id?.toString());
     setSelectedDepartment(positionRequestData?.department_id);
   };
+
+  if (locationProcessed === false) {
+    return <LoadingComponent />;
+  }
 
   return (
     <WizardPageWrapper

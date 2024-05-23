@@ -20,6 +20,7 @@ interface PositionContextProps {
 
 const PositionContext = React.createContext<PositionContextProps | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePosition = (): PositionContextProps => {
   const context = useContext(PositionContext);
   if (!context) {
@@ -33,7 +34,7 @@ interface PositionProviderProps {
 }
 
 export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) => {
-  const { setPositionRequestId, positionRequestId, resetWizardContext } = useWizardContext();
+  const { positionRequestId, resetWizardContext } = useWizardContext();
   const [createPositionRequest] = useCreatePositionRequestMutation();
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const navigate = useNavigate();
@@ -46,9 +47,9 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
     reSelectSupervisor?: () => void,
   ): Promise<boolean> => {
     // we are not editing a draft position request (creatign position from dashboard or from org chart page)
-    // we can create a new position from the my-positions org chart view, or directly from the org chart, or from home page
+    // we can create a new position from the my-position-requests org chart view, or directly from the org chart, or from home page
     if (
-      location.pathname.startsWith('/my-positions/create') ||
+      location.pathname.startsWith('/my-position-requests/create') ||
       location.pathname.startsWith('/org-chart') ||
       location.pathname == '/' || // home page
       location.pathname == '' // home page
@@ -60,10 +61,10 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         department: { connect: { id: selectedDepartment ?? '' } },
         orgchart_json: orgChartData,
       };
-      // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
+      // 'CreatePositionRequestInput': profile_json_updated, parent_job_profile, title, classification_code
       const resp = await createPositionRequest(positionRequestInput).unwrap();
-      setPositionRequestId(resp.createPositionRequest);
-      navigate(`/my-positions/${resp.createPositionRequest}`, { replace: true });
+      // setPositionRequestId(resp.createPositionRequest);
+      navigate(`/my-position-requests/${resp.createPositionRequest}`, { replace: true });
       return true;
     } else {
       // we are editing a draft position request - update existing position request
@@ -92,7 +93,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   department: { connect: { id: selectedDepartment } },
                   orgchart_json: orgChartData,
                   // clear previous data
-                  profile_json: null,
+                  profile_json_updated: null,
                   parent_job_profile: { connect: { id: null } },
                   additional_info: null,
                   title: null,

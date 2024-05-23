@@ -11,6 +11,7 @@ import {
   MenuUnfoldOutlined,
   PartitionOutlined,
   PlusCircleFilled,
+  TagOutlined,
   UserAddOutlined,
 } from '@ant-design/icons';
 import { Button, Layout, Menu, MenuProps } from 'antd';
@@ -59,7 +60,6 @@ export const AppLayout = () => {
   // Function to handle menu item click
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     // Update the selectedKeys when a menu item is clicked
-    console.log(e.keyPath);
     setSelectedKeys([e.key]);
   };
 
@@ -97,7 +97,7 @@ export const AppLayout = () => {
   const hiringManagerMenuItems: MenuProps['items'] = [
     getItem('Hiring Manager', 'sub1', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
       getItem(
-        <Link to="/my-positions/create">Create new position</Link>,
+        <Link to="/my-position-requests/create">Create new position</Link>,
         '3',
         <PlusCircleFilled style={{ fontSize: '1.25rem' }} />,
       ),
@@ -107,11 +107,16 @@ export const AppLayout = () => {
         <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
       ),
       getItem(
-        <Link to="/job-profiles">Explore job profiles</Link>,
+        <Link to="/my-position-requests">My position requests</Link>,
         '6',
+        <UserAddOutlined style={{ fontSize: '1.25rem' }} />,
+      ),
+      getItem(
+        <Link to="/job-profiles">Explore job profiles</Link>,
+        '7',
         <FileSearchOutlined style={{ fontSize: '1.25rem' }} />,
       ),
-      getItem(<Link to="/my-positions">My positions</Link>, '7', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
+      getItem(<Link to="/saved-profiles">Saved profiles</Link>, '8', <TagOutlined style={{ fontSize: '1.25rem' }} />),
     ]),
   ];
 
@@ -169,12 +174,12 @@ export const AppLayout = () => {
                         }
                         key={'Create new position'}
                         title={'Create new position'}
-                        to={'/my-positions/create'}
+                        to={'/my-position-requests/create'}
                         hideTitle={true}
                       />
                     ) : (
                       <div style={{ textAlign: 'center', padding: '10px 0' }}>
-                        <Link to="/my-positions/create">
+                        <Link to="/my-position-requests/create">
                           <Button type="primary" tabIndex={-1} data-testid="create-new-position-btn-expanded">
                             Create new position
                           </Button>
@@ -196,14 +201,19 @@ export const AppLayout = () => {
                           to: '/org-chart',
                         },
                         {
+                          icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'My position requests',
+                          to: '/my-position-requests',
+                        },
+                        {
                           icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                           title: 'Explore job profiles',
                           to: '/job-profiles',
                         },
                         {
-                          icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'My positions',
-                          to: '/my-positions',
+                          icon: <TagOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Saved profiles',
+                          to: '/saved-profiles',
                         },
                       ]}
                     />
@@ -242,7 +252,7 @@ export const AppLayout = () => {
                           {
                             icon: <PlusCircleFilled aria-hidden style={{ fontSize: '1.25rem' }} />,
                             title: 'Create new position',
-                            to: '/my-positions/create',
+                            to: '/my-position-requests/create',
                             hideTitle: true,
                           },
                           {
@@ -252,16 +262,21 @@ export const AppLayout = () => {
                             hideTitle: true,
                           },
                           {
+                            icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'My position requests',
+                            to: '/my-position-requests',
+                            hideTitle: true,
+                          },
+                          {
                             icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                             title: 'Explore job profiles',
                             to: '/job-profiles',
                             hideTitle: true,
                           },
                           {
-                            icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'My positions',
-                            to: '/my-positions',
-                            hideTitle: true,
+                            icon: <TagOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'Saved profiles',
+                            to: '/saved-profiles',
                           },
                         ]}
                       />
@@ -323,6 +338,16 @@ export const AppLayout = () => {
                           icon: <CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                           title: 'My tasks',
                           to: '/',
+                        },
+                        {
+                          icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Explore job profiles',
+                          to: '/job-profiles',
+                        },
+                        {
+                          icon: <TagOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                          title: 'Saved profiles',
+                          to: '/saved-profiles',
                         },
                       ]}
                     />

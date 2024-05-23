@@ -77,6 +77,10 @@ export class AuthService {
         contact_id: null,
       };
 
+      let orgChartMetadata: Record<string, any> = {
+        department_ids: null,
+      };
+
       let peoplesoftMetadata: Record<string, any> = {
         department_id: null,
         employee_id: null,
@@ -85,38 +89,43 @@ export class AuthService {
       };
 
       const userFromDb = await this.prisma.user.findUnique({ where: { id: idir_user_guid } });
-      if (userFromDb != null) {
-        // Update CRM IDs
-        if (
-          userFromDb?.metadata?.['crm']['account_id'] == null ||
-          userFromDb?.metadata?.['crm']['contact_id'] == null
-        ) {
-          const accountId = await this.crmService.getAccountId(idir_username);
-          const contactId = await this.crmService.getContactId(idir_username);
 
-          crmMetadata = {
-            account_id: accountId ?? null,
-            contact_id: contactId ?? null,
-          };
-        }
+      // Update CRM IDs
+      const accountId = await this.crmService.getAccountId(idir_username);
+      const contactId = await this.crmService.getContactId(idir_username);
 
-        // Update Peoplesoft IDs
-        const peoplesoftProfile = (await this.peoplesoftService.getProfile(userFromDb.username))?.data?.query?.rows;
-        const peoplesoftProfileData = (peoplesoftProfile ?? []).length > 0 ? peoplesoftProfile[0] : null;
+      crmMetadata = {
+        account_id: accountId ?? null,
+        contact_id: contactId ?? null,
+      };
+      // // Update Peoplesoft IDs
+      const peoplesoftProfile = (await this.peoplesoftService.getProfile(idir_username))?.data?.query?.rows;
+      const peoplesoftProfileData = (peoplesoftProfile ?? []).length > 0 ? peoplesoftProfile[0] : null;
 
-        let employeeRows = [];
-        let employee: Record<string, any> | null = null;
-        if (peoplesoftProfileData != null && !isEmpty(peoplesoftProfileData.EMPLID)) {
-          employeeRows = (await this.peoplesoftService.getEmployee(peoplesoftProfileData.EMPLID))?.data?.query?.rows;
-          employee = (employeeRows ?? []).length > 0 ? employeeRows[0] : null;
-        }
+      let employeeRows = [];
+      let employee: Record<string, any> | null = null;
+      if (peoplesoftProfileData != null && !isEmpty(peoplesoftProfileData.EMPLID)) {
+        employeeRows = (await this.peoplesoftService.getEmployee(peoplesoftProfileData.EMPLID))?.data?.query?.rows;
+        employee = (employeeRows ?? []).length > 0 ? employeeRows[0] : null;
+      }
 
-        peoplesoftMetadata = {
-          department_id: employee?.DEPTID,
-          employee_id: peoplesoftProfileData?.EMPLID,
-          organization_id: employee?.BUSINESS_UNIT,
-          position_id: employee?.POSITION_NBR,
+      // console.log('employee: ', employee);
+      peoplesoftMetadata = {
+        department_id: employee?.DEPTID,
+        employee_id: peoplesoftProfileData?.EMPLID,
+        organization_id: employee?.BUSINESS_UNIT,
+        position_id: employee?.POSITION_NBR,
+      };
+
+      // // Update Org Chart Department IDs
+      if (!userFromDb || userFromDb?.metadata?.['org_chart']?.['department_ids'] == null) {
+        // user is not in db, or department_ids is not set
+        orgChartMetadata = {
+          department_ids: peoplesoftMetadata.department_id != null ? [peoplesoftMetadata.department_id] : null,
         };
+      } else if (userFromDb.metadata['org_chart']['department_ids'] != null) {
+        // department_ids is already set - continue using existing data
+        orgChartMetadata = userFromDb.metadata['org_chart'];
       }
 
       const user = {
@@ -127,14 +136,15 @@ export class AuthService {
         roles: ((client_roles as string[]) ?? []).sort(),
         metadata: {
           crm: crmMetadata,
+          org_chart: orgChartMetadata,
           peoplesoft: peoplesoftMetadata,
         },
       };
 
-      await this.upsertUser(user);
+      const upsertedUser = await this.upsertUser(user);
 
       // Add user to cache
-      await this.cacheManager.set(CACHE_KEY, user, (exp ?? 0) * 1000 - Date.now());
+      await this.cacheManager.set(CACHE_KEY, upsertedUser, (exp ?? 0) * 1000 - Date.now());
       match = await this.cacheManager.get<Express.User>(CACHE_KEY);
     }
 
@@ -152,10 +162,13 @@ export class AuthService {
       }),
     ];
     await this.prisma.$transaction(queries);
+
+    const upsertedUser = await this.prisma.user.findUnique({ where: { id } });
+    return upsertedUser;
   }
 
   async logoutUser(idir_user_guid: string): Promise<void> {
-    const CACHE_KEY = `${CACHE_USER_PREFIX}${idir_user_guid}`;
+    const CACHE_KEY = `${CACHE_USER_PREFIX}${idir_user_guid.replaceAll('-', '').toUpperCase()}`;
 
     // Check if the user is in the cache
     const userInCache = await this.cacheManager.get<Express.User>(CACHE_KEY);

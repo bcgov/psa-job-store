@@ -43,7 +43,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'ticketId',
       label: 'CRM service request',
-      children: <div>{positionRequestData?.positionRequest?.crm_id}</div>,
+      children: <div>{positionRequestData?.positionRequest?.crm_lookup_name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -77,7 +77,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'jobTitle',
       label: 'Job title',
-      children: <div>{positionRequestData?.positionRequest?.profile_json?.title?.value}</div>,
+      children: <div>{positionRequestData?.positionRequest?.profile_json_updated?.title?.text}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {

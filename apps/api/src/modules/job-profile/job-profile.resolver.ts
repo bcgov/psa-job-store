@@ -86,7 +86,8 @@ export class JobProfileResolver {
   @Query(() => JobProfile, { name: 'jobProfile' })
   @AllowNoRoles() // so that share position request feature can fetch relevant data
   async getJobProfile(@Args('id') id: string) {
-    return this.jobProfileService.getJobProfile(+id);
+    const res = await this.jobProfileService.getJobProfile(+id);
+    return res;
   }
 
   // @Query(() => [JobProfileCareerGroup], { name: 'jobProfilesCareerGroups' })
