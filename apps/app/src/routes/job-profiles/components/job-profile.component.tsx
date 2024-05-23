@@ -69,12 +69,12 @@ export class TitleField extends TrackedFieldArrayItem {
 }
 
 export class OverviewField extends TrackedFieldArrayItem {
-  @Length(5, 320, { message: 'Overview must be between 5 and 320 characters.' })
+  @Length(5, 500, { message: 'Overview must be between 5 and 500 characters.' })
   declare text: string;
 }
 
 export class ProgramOverviewField extends TrackedFieldArrayItem {
-  @Length(0, 320, { message: 'Program overview must be between 0 and 320 characters.' })
+  @Length(0, 500, { message: 'Program overview must be between 0 and 500 characters.' })
   declare text: string;
 }
 
