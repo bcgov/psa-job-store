@@ -180,6 +180,17 @@ export class JobProfileResolver {
     return this.jobProfileService.unarchiveJobProfile(jobProfileId, userId);
   }
 
+  @Mutation(() => Boolean)
+  @Roles('total-compensation')
+  @UseGuards(RoleGuard)
+  async updateJobProfileState(
+    // @CurrentUser() { id: userId }: Express.User,
+    @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
+    @Args('state') state: string,
+  ) {
+    return this.jobProfileService.updateJobProfileState(jobProfileId, state);
+  }
+
   @ResolveField(() => JobProfileReportsTo)
   async reports_to(@Parent() { id }: JobProfile) {
     return this.jobProfileService.getReportsTo(id);

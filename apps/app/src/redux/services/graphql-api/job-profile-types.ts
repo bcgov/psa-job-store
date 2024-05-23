@@ -361,6 +361,10 @@ export interface UnarchiveJobProfileResponse {
   deleteJobProfile: number;
 }
 
+export interface UpdateJobProfileResponse {
+  updateJobProfile: number;
+}
+
 export interface GetJobProfilesArgs {
   search?: string;
   where?: Record<string, any>;

@@ -535,21 +535,24 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       title: <SettingOutlined aria-label="actions" />,
       align: 'center',
       key: 'action',
-      render: (_text: any, record: any) => (
-        <>
-          <AcessiblePopoverMenu
-            triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
-            content={
-              <MenuContent
-                record={record}
-                onCopyLink={handleCopyLink}
-                onDeleteConfirm={showDeleteConfirm}
-                selectedKeys={selectedKeys}
-              />
-            }
-          ></AcessiblePopoverMenu>
+      render: (_text: any, record: any) =>
+        record.status === 'CANCELLED' ? (
+          <></>
+        ) : (
+          <>
+            <AcessiblePopoverMenu
+              triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
+              content={
+                <MenuContent
+                  record={record}
+                  onCopyLink={handleCopyLink}
+                  onDeleteConfirm={showDeleteConfirm}
+                  selectedKeys={selectedKeys}
+                />
+              }
+            ></AcessiblePopoverMenu>
 
-          {/* <Popover
+            {/* <Popover
             open={popoverVisible[record.id]}
             onOpenChange={(visible) => {
               handleVisibleChange(record.id, visible);
@@ -571,8 +574,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               className={`ellipsis-${record.id}`}
             />
           </Popover> */}
-        </>
-      ),
+          </>
+        ),
     },
   ];
 
