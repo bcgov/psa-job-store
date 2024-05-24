@@ -150,6 +150,7 @@ export interface JobProfileModel {
   all_organizations: boolean;
   all_reports_to: boolean;
   state?: string;
+  is_archived: boolean;
 }
 
 export interface ProfessionsModel {
