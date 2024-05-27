@@ -69,12 +69,12 @@ export class TitleField extends TrackedFieldArrayItem {
 }
 
 export class OverviewField extends TrackedFieldArrayItem {
-  @Length(5, 1000, { message: 'Overview must be between 5 and 1000 characters.' })
+  @Length(5, 2000, { message: 'Overview must be between 5 and 2000 characters.' })
   declare text: string;
 }
 
 export class ProgramOverviewField extends TrackedFieldArrayItem {
-  @Length(0, 1000, { message: 'Program overview must be between 0 and 1000 characters.' })
+  @Length(0, 2000, { message: 'Program overview must be between 0 and 2000 characters.' })
   declare text: string;
 }
 
@@ -308,7 +308,7 @@ export class JobProfileValidationModel {
 
   preferences: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @CustomItemCountValidator(1, 5, 'knowledge, skills or abilities', {
+  @CustomItemCountValidator(1, 20, 'knowledge, skills or abilities', {
     // 1-5, 3-20
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
