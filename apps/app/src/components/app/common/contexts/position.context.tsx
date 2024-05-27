@@ -15,6 +15,7 @@ interface PositionContextProps {
     orgChartData: any,
     current_reports_to_position_id?: number | undefined,
     reSelectSupervisor?: () => void,
+    changeStep?: boolean,
   ) => Promise<string>;
 }
 
@@ -45,6 +46,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
     orgChartData: any,
     current_reports_to_position_id?: number | undefined,
     reSelectSupervisor?: () => void,
+    changeStep: boolean = true,
   ): Promise<string> => {
     // we are not editing a draft position request (creatign position from dashboard or from org chart page)
     // we can create a new position from the my-position-requests org chart view, or directly from the org chart, or from home page
@@ -112,12 +114,14 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         } else {
           // user is updating existing position request, but did not change supervisor
           // do not show the modal, just update the step
-          return updatePositionRequest({
-            id: positionRequestId,
-            step: 1,
-          })
-            .unwrap()
-            .then(() => 'NO_CHANGE');
+          if (changeStep)
+            return updatePositionRequest({
+              id: positionRequestId,
+              step: 1,
+            })
+              .unwrap()
+              .then(() => 'NO_CHANGE');
+          else return 'NO_CHANGE';
         }
       }
       return 'DEFAULT';

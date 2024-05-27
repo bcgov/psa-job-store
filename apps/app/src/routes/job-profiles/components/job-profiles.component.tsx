@@ -72,6 +72,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     //  - Use classification_id and filter jobProfilesQuery
   */
 
+    // todo: this should not be needed, get this info from the wizard context
     const [prTrigger, { data: prData }] = useLazyGetPositionRequestQuery();
     const [pTrigger, { data: pData }] = useLazyGetPositionQuery();
     const [positionFilteringProcessActive, setPositionFilteringProcessActive] = useState<boolean>(true);
@@ -80,6 +81,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     useEffect(() => {
       // If we have a positionRequestId and no position request data, get the position request data
       if (positionRequestId != null && prData == null) {
+        // console.log('prTrigger!');
         prTrigger({ id: +positionRequestId });
       }
 

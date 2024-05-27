@@ -48,6 +48,8 @@ export const WizardOrgChartPage = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [nextButtonTooltipTitle, setNextButtonTooltipTitle] = useState<string>('');
+  const [positionVacant, setPositionVacant] = useState<boolean>(false);
+  const positionVacantTooltipText = "You can't create a new position which reports to a vacant position.";
 
   const {
     data: profileData,
@@ -83,9 +85,8 @@ export const WizardOrgChartPage = ({
       setNextButtonTooltipTitle('Select a supervisor position to continue');
     } else {
       const positionIsVacant = selectedNodes[0].data.employees.length === 0;
-      setNextButtonTooltipTitle(
-        positionIsVacant ? "You can't create a new position which reports to a vacant position." : '',
-      );
+      setNextButtonTooltipTitle(positionIsVacant ? positionVacantTooltipText : '');
+      setPositionVacant(positionIsVacant);
     }
 
     // if (nextButtonIsDisabled() === true) {
@@ -107,6 +108,7 @@ export const WizardOrgChartPage = ({
         orgChartData,
         positionRequestData?.reports_to_position_id,
         reSelectSupervisor,
+        switchStep,
       );
 
       if (result != 'CANCELLED' && switchStep)
@@ -131,6 +133,7 @@ export const WizardOrgChartPage = ({
 
   const switchStep = async (step: number) => {
     const code = await next({ switchStep: false });
+
     if (code == 'NO_CHANGE') setCurrentStep(step); // if the user didn't change the supervisor, just switch the step
     else if (code != 'CANCELLED') setCurrentStep(2); // if the user changed the supervisor, switch to step 2, even if user selected something else
   };
@@ -177,6 +180,9 @@ export const WizardOrgChartPage = ({
         // hasUnsavedChanges={hasUnsavedChanges}
         maxStepCompleted={positionRequest?.max_step_completed}
         onStepClick={switchStep}
+        disabledTooltip={
+          positionVacant ? positionVacantTooltipText : nextButtonTooltipTitle != '' ? nextButtonTooltipTitle : null
+        }
       ></WizardSteps>
       <div
         style={{

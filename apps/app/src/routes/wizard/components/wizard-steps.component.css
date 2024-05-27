@@ -16,12 +16,15 @@
     font-weight: 500;
   }
 
-  .custom-steps.max-step-2 .ant-steps-item:nth-child(3) .ant-steps-item-title,
-  .custom-steps.max-step-2 .ant-steps-item:nth-child(2) .ant-steps-item-title{
+  .custom-steps.max-step-2 .ant-steps-item:nth-child(2) .ant-steps-item-title,
+  .custom-steps.max-step-3 .ant-steps-item:nth-child(3) .ant-steps-item-title,
+  .custom-steps.max-step-4 .ant-steps-item:nth-child(4) .ant-steps-item-title,
+  .custom-steps.max-step-5 .ant-steps-item:nth-child(5) .ant-steps-item-title
+  {
     color: rgba(0, 0, 0, 0.88);
   }
   
-  .custom-steps .clickable:hover *{
+  .custom-steps .clickable:not(.no-click):hover *{
     cursor: pointer !important;
     color: #3470B1 !important;
   }
@@ -34,19 +37,23 @@
   .custom-steps.max-step-1 .ant-steps-item:nth-child(1):not(.ant-steps-item-active) .ant-steps-icon-dot,
   .custom-steps.max-step-1 .ant-steps-item:nth-child(2):not(.ant-steps-item-active) .ant-steps-icon-dot,
 
-  .custom-steps.max-step-2 .ant-steps-item:nth-child(2) .ant-steps-item-tail::after,
-  .custom-steps.max-step-2 .ant-steps-item:nth-child(3):not(.ant-steps-item-active) .ant-steps-icon-dot,
+  .custom-steps.max-step-2 .ant-steps-item:nth-child(1) .ant-steps-item-tail::after,
+  .custom-steps.max-step-2 .ant-steps-item:nth-child(2):not(.ant-steps-item-active) .ant-steps-icon-dot,
 
-  .custom-steps.max-step-3 .ant-steps-item:nth-child(3) .ant-steps-item-tail::after,
-  .custom-steps.max-step-3 .ant-steps-item:nth-child(4):not(.ant-steps-item-active) .ant-steps-icon-dot,
+  .custom-steps.max-step-3 .ant-steps-item:nth-child(2) .ant-steps-item-tail::after,
+  .custom-steps.max-step-3 .ant-steps-item:nth-child(3):not(.ant-steps-item-active) .ant-steps-icon-dot,
 
-  .custom-steps.max-step-4 .ant-steps-item:nth-child(4) .ant-steps-item-tail::after,
-  .custom-steps.max-step-4 .ant-steps-item:nth-child(5):not(.ant-steps-item-active) .ant-steps-icon-dot,
+  .custom-steps.max-step-4 .ant-steps-item:nth-child(3) .ant-steps-item-tail::after,
+  .custom-steps.max-step-4 .ant-steps-item:nth-child(4):not(.ant-steps-item-active) .ant-steps-icon-dot,
 
-  .custom-steps.max-step-5 .ant-steps-item:nth-child(5) .ant-steps-item-tail::after,
-  .custom-steps.max-step-5 .ant-steps-item:nth-child(6):not(.ant-steps-item-active) .ant-steps-icon-dot
+  .custom-steps.max-step-5 .ant-steps-item:nth-child(4) .ant-steps-item-tail::after,
+  .custom-steps.max-step-5 .ant-steps-item:nth-child(5):not(.ant-steps-item-active) .ant-steps-icon-dot
   {
     background-color: #A8D0FB !important;
+  }
+
+  .no-click .ant-steps-item-content, .no-click .ant-steps-item-title, .no-click .ant-steps-item-description, .no-click .ant-steps-item-container, .no-click{
+    cursor: not-allowed !important;
   }
 
 

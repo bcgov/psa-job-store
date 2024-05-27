@@ -546,4 +546,5 @@ export const {
   usePositionNeedsRivewQuery,
   useLazyPositionNeedsRivewQuery,
   useGetSharedPositionRequestQuery,
+  useLazyGetSharedPositionRequestQuery,
 } = positionRequestApi;

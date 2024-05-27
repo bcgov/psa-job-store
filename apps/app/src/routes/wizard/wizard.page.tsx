@@ -84,7 +84,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     return pathParts.join('/');
   };
 
-  const onSubmit = async (action = 'next', switchStep = true): Promise<string> => {
+  const onSubmit = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1): Promise<string> => {
     if (
       positionRequestData?.parent_job_profile_id &&
       positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '')
@@ -103,9 +103,9 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           ),
           okText: 'Change profile',
           cancelText: 'Cancel',
-          onOk: () => {
+          onOk: async () => {
             setWizardData(null); // this ensures that any previous edits are cleared
-            handleNext(action, switchStep);
+            await handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step);
             resolve('CHANGED_PROFILE');
           },
           onCancel: () => {
@@ -136,11 +136,11 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     }
 
     // user is not changing from previous profile
-    handleNext(action, switchStep);
+    handleNext(action, switchStep, alertNoProfile, step);
     return 'NO_CHANGE';
   };
 
-  const handleNext = async (action = 'next', switchStep = true) => {
+  const handleNext = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1) => {
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
@@ -149,12 +149,15 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         if (positionRequestId) {
           await updatePositionRequest({
             id: positionRequestId,
-            step: action === 'next' ? 2 : 1,
+            step: step == -1 ? (action === 'next' ? 2 : 1) : step,
             // increment max step only if it's not incremented
-            ...(action === 'next' && positionRequest?.max_step_completed != 2 ? { max_step_completed: 2 } : {}),
+            ...(action === 'next' && positionRequest?.max_step_completed != 2 && step == -1
+              ? { max_step_completed: 2 }
+              : {}),
             // if user selected same profile as before, do not clear profile_json_updated
             // also do not update title to default
             ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
+              additional_info: null,
               profile_json_updated: null,
               title: selectedProfileName ?? undefined,
               max_step_completed: 2,
@@ -171,7 +174,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         }
       } else {
         // Here you can display an error message.
-        alert('Please select a profile before proceeding.');
+        if (alertNoProfile) alert('Please select a profile before proceeding.');
       }
     } finally {
       setIsLoading(false);
@@ -263,18 +266,22 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     );
   };
 
-  const switchStep = async (step: number) => {
-    const code = await onSubmit('next', false);
-    if (code == 'NO_CHANGE') setCurrentStep(step); // if the user didn't change the supervisor, just switch the step
-    else if (code != 'CANCELLED') setCurrentStep(2); // if the user changed the supervisor, switch to step 2, even if user selected something else
+  const updatePositionRequestAndSetStep = async (step: number) => {
+    if (positionRequestId) {
+      setCurrentStep(step);
+      // await updatePositionRequest({
+      //   id: positionRequestId,
+      //   step: step,
+      // });
+      // refetchPositionRequest();
+    }
+  };
 
-    // setCurrentStep(step);
-    // if (positionRequestId)
-    //   await updatePositionRequest({
-    //     id: positionRequestId,
-    //     step: step,
-    //   });
-    // setSearchParams({}, { replace: true });
+  const switchStep = async (step: number) => {
+    const code = await onSubmit('next', false, false, step);
+    if (code == 'NO_CHANGE') updatePositionRequestAndSetStep(step);
+    else if (code != 'CANCELLED') updatePositionRequestAndSetStep(2);
+    else if (code == 'CANCELLED') return;
   };
 
   if (!departmentData) return <LoadingComponent></LoadingComponent>;
