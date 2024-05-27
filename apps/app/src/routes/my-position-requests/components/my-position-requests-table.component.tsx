@@ -316,11 +316,21 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
         {mode == 'classification' && (
           <>
-            <Menu.Item key="view" data-testid="menu-option-view" icon={<EyeOutlined aria-hidden />}>
+            <Menu.Item
+              data-testid="menu-option-view"
+              key="view"
+              icon={<EyeOutlined aria-hidden />}
+              onClick={() => navigate(`/my-position-requests/${record.id}`)}
+            >
               View
             </Menu.Item>
-            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
-              Download attachements
+            <Menu.Item
+              data-testid="menu-option-download"
+              key="download"
+              icon={<FilePdfOutlined aria-hidden />}
+              onClick={() => fetchJobProfileAndParent(record.id)}
+            >
+              <span>{isLoadingPositionRequest || isLoadingJobProfile ? 'Loading...' : 'Download'}</span>
             </Menu.Item>
           </>
         )}
