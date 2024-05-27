@@ -498,7 +498,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const update = async (record: any, state: string) => {
     // console.log('duplicate', record);
     await updateJobProfileState({ jobProfileId: record.id, state: state }).unwrap();
-    message.success('Job Profile published!');
+    message.success(state === 'PUBLISHED' ? 'Job Profile published!' : 'Job Profile unpublished!');
     setSelectedKeys([]);
     updateData();
   };
@@ -625,12 +625,20 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
           {state === 'DRAFT' && is_archived && (
             <>
               <Menu.Item
-                key="unarchive"
+                key="restore"
                 icon={<UploadOutlined />}
                 onClick={() => unarchive(_record)}
                 data-testid="menu-option-unarchive link"
               >
                 Unarchive
+              </Menu.Item>
+              <Menu.Item
+                key="duplicate"
+                icon={<CopyOutlined />}
+                onClick={() => duplicate(_record)}
+                data-testid="menu-option-duplicate link"
+              >
+                Duplicate
               </Menu.Item>
             </>
           )}

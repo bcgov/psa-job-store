@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { EllipsisOutlined } from '@ant-design/icons';
 import { PageHeader as AntdProPageHeader, PageHeaderProps } from '@ant-design/pro-layout';
-import { Button } from 'antd';
+import { Button, Popover } from 'antd';
+import { ReactNode } from 'react';
 import { Link, useLocation, useMatches, useParams } from 'react-router-dom';
 import './page-header.component.css';
 
@@ -16,6 +17,7 @@ interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
   button1Text?: string;
   button1Callback?: () => void;
   showButton1?: boolean;
+  button1Content?: () => ReactNode;
   button2Text?: string;
   button2Callback?: () => void;
   showButton2?: boolean;
@@ -26,6 +28,7 @@ export const PageHeader = ({
   button1Text,
   button1Callback,
   showButton1,
+  button1Content,
   button2Text,
   button2Callback,
   showButton2,
@@ -125,9 +128,11 @@ export const PageHeader = ({
   const renderButtons = () => (
     <div style={{ display: 'flex', gap: '10px' }}>
       {showButton1 && (
-        <Button icon={<EllipsisOutlined></EllipsisOutlined>} onClick={button1Callback}>
-          {button1Text}
-        </Button>
+        <Popover content={button1Content} trigger="click" placement="bottomRight">
+          <Button icon={<EllipsisOutlined />} onClick={button1Callback}>
+            {button1Text}
+          </Button>
+        </Popover>
       )}
       {showButton2 && (
         <Button type="primary" onClick={button2Callback}>

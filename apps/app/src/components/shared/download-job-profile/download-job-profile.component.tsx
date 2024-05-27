@@ -5,7 +5,10 @@ import { generateJobProfile } from 'common-kit';
 import { Packer } from 'docx';
 import { saveAs } from 'file-saver';
 import React, { useEffect, useState } from 'react';
-import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import {
+  useLazyGetJobProfilesArchivedQuery,
+  useLazyGetJobProfilesQuery,
+} from '../../../redux/services/graphql-api/job-profile.api';
 
 export interface DownloadJobProfileComponentProps {
   jobProfile: Record<string, any> | null;
@@ -24,18 +27,24 @@ export const DownloadJobProfileComponent = ({
   renderTrigger,
 }: DownloadJobProfileComponentProps & React.PropsWithChildren & any) => {
   const [trigger, { data, isLoading }] = useLazyGetJobProfilesQuery();
+  const [archiveTrigger, { data: archiveData, isLoading: archiveIsLoading }] = useLazyGetJobProfilesArchivedQuery();
   const [parentJobProfile, setParentJobProfile] = useState<Record<string, any> | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
-    if (jobProfile && !data) {
+    if (jobProfile && !data && !jobProfile.is_archived) {
       trigger({ where: { number: { equals: jobProfile.number } } });
+    } else {
+      archiveTrigger({ where: { number: { equals: jobProfile.number } } });
     }
 
     if (data && data.jobProfilesCount > 0) {
       setParentJobProfile(data.jobProfiles[0]);
     }
-  }, [jobProfile, data, trigger]);
+    if (archiveData && archiveData.jobProfilesArchivedCount > 0) {
+      setParentJobProfile(archiveData.jobProfilesArchived[0]);
+    }
+  }, [jobProfile, data, trigger, archiveData, archiveTrigger]);
 
   const doc = () =>
     jobProfile != null
@@ -66,13 +75,13 @@ export const DownloadJobProfileComponent = ({
 
   // Custom trigger rendering
   if (renderTrigger) {
-    return <>{renderTrigger(generate, isLoading)}</>;
+    return <>{renderTrigger(generate, isLoading || archiveIsLoading)}</>;
   }
 
   if (useModal) {
     return children != null ? (
-      isLoading ? (
-        <Spin spinning={isLoading} />
+      archiveIsLoading || isLoading ? (
+        <Spin spinning={isLoading || archiveIsLoading} />
       ) : parentJobProfile == null ? (
         <span>disabled</span>
       ) : (
@@ -104,7 +113,7 @@ export const DownloadJobProfileComponent = ({
         <Button
           style={style}
           icon={<DownloadOutlined />}
-          loading={isLoading}
+          loading={isLoading || archiveIsLoading}
           disabled={parentJobProfile == null && !ignoreAbsentParent}
           onClick={() => setIsModalVisible(true)}
         >
@@ -135,7 +144,7 @@ export const DownloadJobProfileComponent = ({
 
   return children != null ? (
     isLoading ? (
-      <Spin spinning={isLoading} />
+      <Spin spinning={isLoading || archiveIsLoading} />
     ) : parentJobProfile == null ? (
       <span>disabled</span>
     ) : (
@@ -145,7 +154,7 @@ export const DownloadJobProfileComponent = ({
     <Button
       style={style}
       icon={<DownloadOutlined />}
-      loading={isLoading}
+      loading={isLoading || archiveIsLoading}
       disabled={parentJobProfile == null && !ignoreAbsentParent}
       onClick={generate}
     >

@@ -439,6 +439,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     code
                   }
                 }
+                is_archived
               }
             }
           `,
