@@ -135,6 +135,7 @@ export class PositionRequestApiService {
         department: data.department,
         additional_info: data.additional_info === null ? Prisma.DbNull : data.additional_info,
         step: data.step,
+        max_step_completed: data.max_step_completed,
         reports_to_position_id: data.reports_to_position_id,
         profile_json_updated: data.profile_json_updated === null ? Prisma.DbNull : data.profile_json_updated,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
@@ -493,7 +494,6 @@ export class PositionRequestApiService {
   }
 
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
-    // console.log('getPositionRequest!', userRoles);
     let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
     // If the user does not have the "total-compesation" or "classification" role, the filter will include the requesting user id
@@ -783,6 +783,10 @@ export class PositionRequestApiService {
 
     if (updateData.step !== undefined) {
       updatePayload.step = updateData.step;
+    }
+
+    if (updateData.max_step_completed !== undefined) {
+      updatePayload.max_step_completed = updateData.max_step_completed;
     }
 
     if (updateData.reports_to_position_id !== undefined) {

@@ -18,6 +18,7 @@ import {
   useGetPositionRequestQuery,
   usePositionNeedsRivewQuery,
   useSubmitPositionRequestMutation,
+  useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
@@ -33,6 +34,7 @@ interface WizardResultPageProps {
   setReadOnlySelectedTab?: (tab: string) => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export const WizardResultPage: React.FC<WizardResultPageProps> = ({
@@ -43,6 +45,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   setReadOnlySelectedTab,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // let mode = 'readyToCreatePositionNumber';
   // mode = 'verificationRequired_edits'; // verification is needed because user made edits to significant sections
@@ -275,9 +278,19 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
 
   const [comment, setComment] = useState('');
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
   const handleCommentChange = (e: any) => {
     setComment(e.target.value);
+  };
+
+  const switchStep = async (step: number) => {
+    setCurrentStep(step);
+    if (positionRequestId)
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: step,
+      });
   };
 
   if (positionRequestLoading || positionNeedsRivewLoading || isFetchingPositionNeedsRivew || isFetchingPositionRequest)
@@ -329,7 +342,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             </>,
           ]}
         >
-          <WizardSteps current={5}></WizardSteps>
+          <WizardSteps
+            onStepClick={switchStep}
+            current={5}
+            maxStepCompleted={positionRequest?.max_step_completed}
+          ></WizardSteps>
 
           <div
             style={{

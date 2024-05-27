@@ -47,6 +47,7 @@ interface WizardConfirmPageProps {
   onBack?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 function IsTrue(validationOptions?: ValidationOptions) {
@@ -118,10 +119,16 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   onBack,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // const [createJobProfile] = useCreateJobProfileMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  const [isFormModified, setIsFormModified] = useState(false);
+
+  const handleFormChange = () => {
+    setIsFormModified(true);
+  };
 
   // this is for the first level excluded manager
   const [
@@ -210,7 +217,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
   const { data: allLocations } = useGetLocationsQuery();
 
-  const showModal = async ({ skipValidation = false, updateStep = true } = {}) => {
+  const showModal = async ({ skipValidation = false, updateStep = true, step = -1 } = {}) => {
     // console.log('showModal', skipValidation, updateStep);
 
     if (isFetchingPositionProfile) return; // Do not show the modal while fetching position profile
@@ -251,7 +258,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
     if (skipValidation) {
       // console.log('handleOk 2');
-      await handleOk(updateStep);
+      await handleOk(updateStep, step);
       return false;
     }
 
@@ -260,7 +267,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         // If the form is valid, show the modal
         // setIsModalVisible(true);
         // console.log('handleOk 1');
-        handleOk(updateStep);
+        handleOk(updateStep, step);
       },
       () => {
         Modal.error({
@@ -280,7 +287,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     return false; // Prevents default behavior until validation is passed
   };
 
-  const handleOk = async (updateStep = true) => {
+  const handleOk = async (updateStep = true, step = -1) => {
     // console.log('handleOK');
 
     // User pressed next on the review screen
@@ -296,9 +303,12 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         // console.log('updatePositionRequest');
         await updatePositionRequest({
           id: positionRequestId,
-          step: updateStep ? 5 : 4,
+          step: step == -1 ? (updateStep ? 5 : 4) : step,
           // status: 'COMPLETED',
           // position_number: 123456,
+
+          // increment max step only if it's not incremented, and we're not moving back
+          ...(updateStep && positionRequest?.max_step_completed != 5 && step == -1 ? { max_step_completed: 5 } : {}),
 
           // attach additional information
           additional_info: {
@@ -445,6 +455,31 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     );
   };
 
+  const switchStep = async (step: number) => {
+    if (isFormModified) {
+      Modal.confirm({
+        title: 'Unsaved Changes',
+        content: 'You have unsaved changes. Do you want to save them before switching steps?',
+        okText: 'Save',
+        cancelText: 'Cancel',
+        onOk: async () => {
+          showModal({ step: step });
+          setIsFormModified(false);
+        },
+        onCancel: () => {
+          // Do nothing if the user cancels
+        },
+      });
+    } else {
+      setCurrentStep(step);
+      if (positionRequestId)
+        await updatePositionRequest({
+          id: positionRequestId,
+          step: step,
+        });
+    }
+  };
+
   if (!allLocations) return <LoadingSpinnerWithMessage />;
 
   // console.log('firstActivePosition:', firstActivePosition);
@@ -490,7 +525,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           </Button>,
         ]}
       >
-        <WizardSteps current={4}></WizardSteps>
+        <WizardSteps
+          onStepClick={switchStep}
+          current={4}
+          maxStepCompleted={positionRequest?.max_step_completed}
+        ></WizardSteps>
 
         <div
           style={{
@@ -513,6 +552,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     onFinish={handleSubmit(() => {
                       // console.log(data);
                     })}
+                    onChange={handleFormChange}
                   >
                     <Card
                       title={<h3 style={{ fontWeight: '600', fontSize: '16px' }}>Confirmation</h3>}

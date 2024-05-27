@@ -17,7 +17,6 @@ import {
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useGetJobProfileQuery, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import AccountabilitiesSection from './wizard-edit-profile-accountabilities-section';
@@ -40,6 +39,7 @@ interface WizardEditProfileProps {
   submitText?: string;
   showBackButton?: boolean;
   onVerificationRequiredChange?: (verificationRequired: boolean) => void;
+  handleFormChange: () => void;
 }
 
 enum reasons {
@@ -54,7 +54,7 @@ type sectionMap = {
 };
 
 const WizardEditProfile = forwardRef(
-  ({ id, profileData, config, onVerificationRequiredChange }: WizardEditProfileProps, ref) => {
+  ({ id, profileData, config, onVerificationRequiredChange, handleFormChange }: WizardEditProfileProps, ref) => {
     const {
       originalValuesSet,
       setOriginalValuesSet,
@@ -437,7 +437,6 @@ const WizardEditProfile = forwardRef(
           optional_requirements: getInitialFieldValue(effectiveData.optional_requirements),
         });
         setResetComplete(true);
-        console.log('reset complete');
 
         trigger();
       }
@@ -544,9 +543,11 @@ const WizardEditProfile = forwardRef(
       setFormErrors(formState.errors);
     }, [formState.errors]);
 
-    const { data: positionRequestData } = useGetPositionRequestQuery({
-      id: positionRequestId ? positionRequestId : -1,
-    });
+    const { positionRequestData } = useWizardContext();
+
+    // const { data: positionRequestData } = useGetPositionRequestQuery({
+    //   id: positionRequestId ? positionRequestId : -1,
+    // });
 
     if (isLoading || !resetComplete) {
       return <LoadingSpinnerWithMessage />;
@@ -636,15 +637,15 @@ const WizardEditProfile = forwardRef(
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
                 <PositionProfile
-                  positionNumber={positionRequestData?.positionRequest?.reports_to_position_id?.toString()}
-                  orgChartData={positionRequestData?.positionRequest?.orgchart_json}
+                  positionNumber={positionRequestData?.reports_to_position_id?.toString()}
+                  orgChartData={positionRequestData?.orgchart_json}
                 ></PositionProfile>
               </Descriptions.Item>
               <Descriptions.Item label="Job Store #">{effectiveData?.number}</Descriptions.Item>
             </Descriptions>
           </Col>
           <Col xs={24} sm={24} lg={16}>
-            <Form form={form} onFinish={handleSubmit((_data) => {})}>
+            <Form form={form} onFinish={handleSubmit((_data) => {})} onChange={handleFormChange}>
               <FormItem name="id" control={control} hidden>
                 <Input />
               </FormItem>

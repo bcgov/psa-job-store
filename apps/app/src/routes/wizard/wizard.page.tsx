@@ -21,6 +21,7 @@ interface WizardPageProps {
   onNext?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 interface JobProfileSearchResultsRef {
@@ -32,6 +33,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   onBack,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // const { id } = useParams();
   const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
@@ -82,7 +84,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     return pathParts.join('/');
   };
 
-  const onSubmit = async (action = 'next'): Promise<boolean> => {
+  const onSubmit = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1): Promise<string> => {
     if (
       positionRequestData?.parent_job_profile_id &&
       positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '')
@@ -101,10 +103,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           ),
           okText: 'Change profile',
           cancelText: 'Cancel',
-          onOk: () => {
+          onOk: async () => {
             setWizardData(null); // this ensures that any previous edits are cleared
-            handleNext(action);
-            resolve(true);
+            await handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step);
+            resolve('CHANGED_PROFILE');
           },
           onCancel: () => {
             // re-select profile on the correct page
@@ -127,18 +129,18 @@ export const WizardPage: React.FC<WizardPageProps> = ({
                 { replace: true },
               );
             }
-            resolve(false);
+            resolve('CANCELLED');
           },
         });
       });
     }
 
     // user is not changing from previous profile
-    handleNext(action);
-    return true;
+    handleNext(action, switchStep, alertNoProfile, step);
+    return 'NO_CHANGE';
   };
 
-  const handleNext = async (action = 'next') => {
+  const handleNext = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1) => {
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
@@ -147,12 +149,18 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         if (positionRequestId) {
           await updatePositionRequest({
             id: positionRequestId,
-            step: action === 'next' ? 2 : 1,
+            step: step == -1 ? (action === 'next' ? 2 : 1) : step,
+            // increment max step only if it's not incremented
+            ...(action === 'next' && positionRequest?.max_step_completed != 2 && step == -1
+              ? { max_step_completed: 2 }
+              : {}),
             // if user selected same profile as before, do not clear profile_json_updated
             // also do not update title to default
             ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
+              additional_info: null,
               profile_json_updated: null,
               title: selectedProfileName ?? undefined,
+              max_step_completed: 2,
             }),
             parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
             classification_id: selectedClassificationId,
@@ -161,12 +169,12 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         setPositionRequestProfileId(parseInt(selectedProfileId));
 
         if (action === 'next') {
-          if (onNext) onNext();
+          if (onNext && switchStep) onNext();
           setSearchParams({}, { replace: true });
         }
       } else {
         // Here you can display an error message.
-        alert('Please select a profile before proceeding.');
+        if (alertNoProfile) alert('Please select a profile before proceeding.');
       }
     } finally {
       setIsLoading(false);
@@ -229,7 +237,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
   const saveAndQuit = async () => {
     const res = await onSubmit('quit');
-    if (res !== false) disableBlockingAndNavigateHome();
+    if (res !== 'CANCELLED') disableBlockingAndNavigateHome();
   };
 
   const getMenuContent = () => {
@@ -256,6 +264,24 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         </Menu.ItemGroup>
       </Menu>
     );
+  };
+
+  const updatePositionRequestAndSetStep = async (step: number) => {
+    if (positionRequestId) {
+      setCurrentStep(step);
+      // await updatePositionRequest({
+      //   id: positionRequestId,
+      //   step: step,
+      // });
+      // refetchPositionRequest();
+    }
+  };
+
+  const switchStep = async (step: number) => {
+    const code = await onSubmit('next', false, false, step);
+    if (code == 'NO_CHANGE') updatePositionRequestAndSetStep(step);
+    else if (code != 'CANCELLED') updatePositionRequestAndSetStep(2);
+    else if (code == 'CANCELLED') return;
   };
 
   if (!departmentData) return <LoadingComponent></LoadingComponent>;
@@ -304,7 +330,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         </Button>,
       ]}
     >
-      <WizardSteps current={1}></WizardSteps>
+      <WizardSteps
+        current={1}
+        //  onStepClick={handleStepClick}
+        //   hasUnsavedChanges={hasUnsavedChanges}
+        maxStepCompleted={positionRequest?.max_step_completed}
+        onStepClick={switchStep}
+      ></WizardSteps>
       <div
         style={{
           overflow: 'hidden',

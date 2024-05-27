@@ -50,7 +50,8 @@ model PositionRequest {
   crm_id                     Int?                   @unique
   crm_assigned_to_account_id Int? // CRM account id of the classifications user who is assigned to the incident
   crm_lookup_name            String?
-  step                       Int
+  step                       Int // Keeps track of the current step in the wizard
+  max_step_completed         Int? // Keeps track of the highest step completed in the wizard
   reports_to_position_id     String
   department_id              String // this is department id that user selected in org chart
   parent_job_profile_id      Int?
