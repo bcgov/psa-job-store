@@ -68,6 +68,7 @@ import {
 } from '../../../redux/services/graphql-api/job-profile-types';
 import {
   useCreateOrUpdateJobProfileMutation,
+  useDuplicateJobProfileMutation,
   useGetJobProfilesDraftsMinistriesQuery,
   useLazyGetJobProfileQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
@@ -153,6 +154,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     message.success('Link copied to clipboard!');
     setSelectedKeys([]);
   };
+  const [duplicateJobProfile] = useDuplicateJobProfileMutation();
+
+  const duplicate = async () => {
+    // console.log('duplicate', record);
+    if (jobProfileData?.jobProfile.id) {
+      const res = await duplicateJobProfile({ jobProfileId: jobProfileData?.jobProfile.id }).unwrap();
+      // console.log('res: ', res);
+      navigate(`${link}${res.duplicateJobProfile}`);
+    }
+  };
   const getMenuContent = () => {
     return (
       <Menu selectedKeys={selectedKeys} className={`popover-selector-${jobProfileData?.jobProfile.id}`}>
@@ -186,7 +197,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     Copy link <LinkOutlined />
                   </div>
                   <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                    Invite others to review this request.{' '}
+                    Invite others to review this profile.{' '}
                   </Typography.Text>
                 </div>
               </Menu.Item>
@@ -208,7 +219,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     Copy link <LinkOutlined />
                   </div>
                   <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                    Invite others to review this request.{' '}
+                    Invite others to review this profile.{' '}
                   </Typography.Text>
                 </div>
               </Menu.Item>
@@ -217,21 +228,27 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           {state === 'DRAFT' && profileJson?.jobProfile.is_archived && (
             <>
               <Menu.Item key="create" onClick={showPublishConfirm}>
-                <div style={{ padding: '5px 0' }}>
-                  Unarchive
-                  <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                    Unarchive the job profile.{' '}
-                  </Typography.Text>
-                </div>
+                Restore
+                <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                  Unarchive the job profile.{' '}
+                </Typography.Text>
               </Menu.Item>
-              <Menu.Item key="copy" onClick={() => handleCopyLink()}>
+              <Menu.Item key="duplicate" onClick={() => duplicate()}>
+                Duplicate
+                <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                  Create a copy of this job profile.{' '}
+                </Typography.Text>
+              </Menu.Item>
+              <Menu.Item key="save">
                 <div style={{ padding: '5px 0' }}>
-                  <div>
-                    Copy link <LinkOutlined />
-                  </div>
-                  <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                    Invite others to review this request.{' '}
-                  </Typography.Text>
+                  <DownloadJobProfileComponent jobProfile={profileJson?.jobProfile} ignoreAbsentParent={true}>
+                    <div style={{ padding: '5px 0' }}>
+                      Download
+                      <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                        Download a copy of this job profile.{' '}
+                      </Typography.Text>
+                    </div>
+                  </DownloadJobProfileComponent>
                 </div>
               </Menu.Item>
             </>
