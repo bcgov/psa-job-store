@@ -316,11 +316,21 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
         {mode == 'classification' && (
           <>
-            <Menu.Item key="view" data-testid="menu-option-view" icon={<EyeOutlined aria-hidden />}>
+            <Menu.Item
+              data-testid="menu-option-view"
+              key="view"
+              icon={<EyeOutlined aria-hidden />}
+              onClick={() => navigate(`/my-position-requests/${record.id}`)}
+            >
               View
             </Menu.Item>
-            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
-              Download attachements
+            <Menu.Item
+              data-testid="menu-option-download"
+              key="download"
+              icon={<FilePdfOutlined aria-hidden />}
+              onClick={() => fetchJobProfileAndParent(record.id)}
+            >
+              <span>{isLoadingPositionRequest || isLoadingJobProfile ? 'Loading...' : 'Download'}</span>
             </Menu.Item>
           </>
         )}
@@ -535,21 +545,24 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       title: <SettingOutlined aria-label="actions" />,
       align: 'center',
       key: 'action',
-      render: (_text: any, record: any) => (
-        <>
-          <AcessiblePopoverMenu
-            triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
-            content={
-              <MenuContent
-                record={record}
-                onCopyLink={handleCopyLink}
-                onDeleteConfirm={showDeleteConfirm}
-                selectedKeys={selectedKeys}
-              />
-            }
-          ></AcessiblePopoverMenu>
+      render: (_text: any, record: any) =>
+        record.status === 'CANCELLED' ? (
+          <></>
+        ) : (
+          <>
+            <AcessiblePopoverMenu
+              triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
+              content={
+                <MenuContent
+                  record={record}
+                  onCopyLink={handleCopyLink}
+                  onDeleteConfirm={showDeleteConfirm}
+                  selectedKeys={selectedKeys}
+                />
+              }
+            ></AcessiblePopoverMenu>
 
-          {/* <Popover
+            {/* <Popover
             open={popoverVisible[record.id]}
             onOpenChange={(visible) => {
               handleVisibleChange(record.id, visible);
@@ -571,8 +584,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               className={`ellipsis-${record.id}`}
             />
           </Popover> */}
-        </>
-      ),
+          </>
+        ),
     },
   ];
 
