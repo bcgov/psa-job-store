@@ -310,7 +310,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
     const organizationFilter = searchParams.get('ministry_id__in');
     // const careerGroupFilter = searchParams.get('career_group_id__in');
-    const jobRoleFilter = searchParams.get('job_role_id__in');
+    const jobRoleFilter = searchParams.get('job_role_type_id__in');
     const classificationFilter = searchParams.get('classification_id__in');
     const jobFamilyFilter = searchParams.get('job_family_id__in');
     const jobStreamFilter = searchParams.get('job_stream_id__in');
@@ -412,7 +412,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
           ...(jobRoleFilter !== null
             ? [
                 {
-                  role_id: {
+                  role_type_id: {
                     in: JSON.parse(`[${jobRoleFilter}]`),
                   },
                 },

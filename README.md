@@ -129,6 +129,8 @@ If there's a conflict because develop is ahead of main:
 
 ## @generated files and slow commits
 
+NOTE: this is no longer necessary - generated files were added to .gitignore and are no longer source controlled
+
 To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)
 
 If above doesn't work, use `lacroixdavid1.vscode-format-context-menu` VS Code extension. After installing, right click on the @generated folder and click `Format`
