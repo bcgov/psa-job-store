@@ -184,11 +184,11 @@ export class JobProfileResolver {
   @Roles('total-compensation')
   @UseGuards(RoleGuard)
   async updateJobProfileState(
-    // @CurrentUser() { id: userId }: Express.User,
+    @CurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
     @Args('state') state: string,
   ) {
-    return this.jobProfileService.updateJobProfileState(jobProfileId, state);
+    return this.jobProfileService.updateJobProfileState(jobProfileId, state, userId);
   }
 
   @ResolveField(() => JobProfileReportsTo)

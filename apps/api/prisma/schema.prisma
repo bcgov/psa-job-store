@@ -107,8 +107,10 @@ model User {
 
   // TODO: AL-146
   // PositionRequest PositionRequest[]
-  JobProfile      JobProfile[]
-  SavedJobProfile SavedJobProfile[]
+  JobProfile           JobProfile[]
+  SavedJobProfile      SavedJobProfile[]
+  draftedJobProfiles   JobProfile[]      @relation(name: "updatedByRelation")
+  publishedJobProfiles JobProfile[]      @relation(name: "PublishedByRelation")
 
   @@map("user")
 }
@@ -166,17 +168,22 @@ model JobProfile {
   all_organizations        Boolean                           @default(true)
   all_reports_to           Boolean                           @default(false)
 
-  context          JobProfileContext?
-  role             JobProfileRole?           @relation(fields: [role_id], references: [id])
-  role_id          Int?
-  role_type        JobProfileRoleType?       @relation(fields: [role_type_id], references: [id])
-  role_type_id     Int?
-  scopes           JobProfileScopeLink[]
-  state            JobProfileState           @default(DRAFT)
-  type             JobProfileType
-  updated_at       DateTime?                 @default(now()) @updatedAt
-  owner_id         String?                   @db.Uuid
-  owner            User?                     @relation(fields: [owner_id], references: [id])
+  context         JobProfileContext?
+  role            JobProfileRole?       @relation(fields: [role_id], references: [id])
+  role_id         Int?
+  role_type       JobProfileRoleType?   @relation(fields: [role_type_id], references: [id])
+  role_type_id    Int?
+  scopes          JobProfileScopeLink[]
+  state           JobProfileState       @default(DRAFT)
+  type            JobProfileType
+  updated_at      DateTime?             @default(now()) @updatedAt
+  owner_id        String?               @db.Uuid
+  owner           User?                 @relation(fields: [owner_id], references: [id]) //  @relation(name: "OwnerRelation", fields: [owner_id], references: [id])
+  updated_by_id   String?               @db.Uuid
+  updated_by      User?                 @relation(name: "updatedByRelation", fields: [updated_by_id], references: [id])
+  published_by_id String?               @db.Uuid
+  published_by    User?                 @relation(name: "PublishedByRelation", fields: [published_by_id], references: [id])
+
   jobFamilies      JobProfileJobFamilyLink[]
   streams          JobProfileStreamLink[]
   program_overview String?

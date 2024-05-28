@@ -118,6 +118,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 owner {
                   name
                 }
+                updated_by {
+                  name
+                }
+                published_by {
+                  name
+                }
               }
               jobProfilesCount(search: $search, where: $where)
               pageNumberForSelectProfile(
@@ -233,6 +239,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 owner {
                   name
                 }
+                updated_by {
+                  name
+                }
+                published_by {
+                  name
+                }
               }
               jobProfilesDraftsCount(search: $search, where: $where)
             }
@@ -334,6 +346,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 updated_at
                 owner {
+                  name
+                }
+                updated_by {
+                  name
+                }
+                published_by {
                   name
                 }
               }
@@ -439,7 +457,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     code
                   }
                 }
-                is_archived
               }
             }
           `,

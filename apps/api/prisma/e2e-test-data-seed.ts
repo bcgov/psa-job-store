@@ -1122,6 +1122,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile194: JobProfile = {
@@ -1224,6 +1226,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile200: JobProfile = {
@@ -1356,6 +1360,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile208: JobProfile = {
@@ -1474,6 +1480,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile210: JobProfile = {
@@ -1607,6 +1615,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile212: JobProfile = {
@@ -1744,6 +1754,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile247: JobProfile = {
@@ -1908,6 +1920,8 @@ async function seed() {
       'Professional registration requirement 1',
       'Professional registration requirement 2',
     ],
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const jobProfiles = [profile189, profile194, profile200, profile208, profile210, profile212, profile247];
