@@ -248,7 +248,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const jobStreamParams = decodeURIComponent(searchParams.get('job_stream_id__in') || '')
       .split(',')
       .filter(Boolean);
-    const jobRoleTypeParams = decodeURIComponent(searchParams.get('job_role_id__in') || '')
+    const jobRoleTypeParams = decodeURIComponent(searchParams.get('job_role_type_id__in') || '')
       .split(',')
       .filter(Boolean);
     const classificationParams = decodeURIComponent(searchParams.get('classification_id__in') || '')
@@ -327,7 +327,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     if (sortOrderFromURL) newSearchParams.set('sortOrder', sortOrderFromURL.toString());
 
     if (jobFamilyValues) newSearchParams.set('job_family_id__in', jobFamilyValues);
-    if (jobRoleTypeValues) newSearchParams.set('job_role_id__in', jobRoleTypeValues);
+    if (jobRoleTypeValues) newSearchParams.set('job_role_type_id__in', jobRoleTypeValues);
     if (jobStreamValues) newSearchParams.set('job_stream_id__in', jobStreamValues);
     if (classificationValues) newSearchParams.set('classification_id__in', classificationValues);
     // if (careerGroupValues) newSearchParams.set('career_group_id__in', careerGroupValues);
@@ -335,7 +335,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
     const jobFamilyChanged = newSearchParams.get('job_family_id__in') != searchParams.get('job_family_id__in');
     const jobStreamChanged = newSearchParams.get('job_stream_id__in') != searchParams.get('job_stream_id__in');
-    const jobRoleTypeChanged = newSearchParams.get('job_role_id__in') != searchParams.get('job_role_id__in');
+    const jobRoleTypeChanged = newSearchParams.get('job_role_type_id__in') != searchParams.get('job_role_type_id__in');
     const classificationChanged =
       newSearchParams.get('classification_id__in') != searchParams.get('classification_id__in');
 
