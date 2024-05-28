@@ -89,7 +89,6 @@ const WizardEditProfile = forwardRef(
       setOriginalProvisosFields,
       originalBehaviouralCompetenciesFields,
       setOriginalBehaviouralCompetenciesFields,
-      positionRequestId,
       positionRequestProfileId,
       // errors,
       currentSection,
