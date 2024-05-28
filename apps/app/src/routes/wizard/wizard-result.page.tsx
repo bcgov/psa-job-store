@@ -713,6 +713,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       I will abide by the Public Service Act and all Human Resources policies for hiring decisions
                       related to this position.
                     </li>
+                    <li>I have confirmed budget is approved to support this request.</li>
                   </ul>
                 </div>
               </div>
