@@ -92,7 +92,11 @@ export const PositionRequestPage = () => {
   }, [classificationsFetched, triggerGetClassificationData]);
 
   useEffect(() => {
-    setRequiresVerification(positionNeedsReviewData?.positionNeedsRivew?.result ?? false);
+    if (
+      positionNeedsReviewData?.positionNeedsRivew?.result == true ||
+      positionNeedsReviewData?.positionNeedsRivew?.result == false
+    )
+      setRequiresVerification(positionNeedsReviewData?.positionNeedsRivew?.result);
   }, [positionNeedsReviewData, setRequiresVerification]);
 
   const { positionRequestId } = useParams();

@@ -186,6 +186,18 @@ const WizardEditProfile = forwardRef(
     const [form] = Form.useForm();
 
     const validateVerification = useCallback(() => {
+      if (!resetComplete) return;
+
+      // console.log(
+      //   'checking: ',
+      //   editedAccReqFields,
+      //   editedMinReqFields,
+      //   editedRelWorkFields,
+      //   editedSecurityScreeningsFields,
+      //   originalMinReqFields,
+      //   originalRelWorkFields,
+      // );
+      // console.log('resetComplete:', resetComplete);
       // check if the form in its current state would require verification
 
       // check if any flags are true in editedAccReqFieldsArray
@@ -225,6 +237,7 @@ const WizardEditProfile = forwardRef(
       isAdmin,
       originalMinReqFields,
       originalRelWorkFields,
+      resetComplete,
     ]);
 
     useEffect(() => {

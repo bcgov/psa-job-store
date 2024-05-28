@@ -384,6 +384,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                       classNamePrefix="react-select"
                       isMulti
                       placeholder="Status"
+                      aria-label="Status"
                       options={statusFilterData}
                       onChange={(selectedItems) => {
                         const newValues = selectedItems.map((item) => item.value);
@@ -421,6 +422,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                     classNamePrefix="react-select"
                     isMulti
                     placeholder="Classification"
+                    aria-label="Classification"
                     options={classificationFilterData}
                     onChange={(selectedItems) => {
                       const newValues = selectedItems.map((item) => item.value);
@@ -460,6 +462,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                         classNamePrefix="react-select"
                         isMulti
                         placeholder="JobStore number"
+                        aria-label="JobStore number"
                         options={jobStoreNumberFilterData}
                         onChange={(selectedItems) => {
                           const newValues = selectedItems.map((item) => item.value);
@@ -513,6 +516,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                       classNamePrefix="react-select"
                       isMulti
                       placeholder="Submitted by"
+                      aria-label="Submitted by"
                       options={submittedByFilterData}
                       onChange={(selectedItems) => {
                         const newValues = selectedItems.map((item) => item.value);
