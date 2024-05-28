@@ -20,7 +20,7 @@ import { useWizardContext } from './components/wizard.provider';
 interface WizardOrgChartPageProps {
   onCreateNewPosition?: () => void;
   positionRequest?: GetPositionRequestResponseContent | null;
-  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
+  setCurrentStep?: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export const WizardOrgChartPage = ({
@@ -134,8 +134,8 @@ export const WizardOrgChartPage = ({
   const switchStep = async (step: number) => {
     const code = await next({ switchStep: false });
 
-    if (code == 'NO_CHANGE') setCurrentStep(step); // if the user didn't change the supervisor, just switch the step
-    else if (code != 'CANCELLED') setCurrentStep(2); // if the user changed the supervisor, switch to step 2, even if user selected something else
+    if (code == 'NO_CHANGE') setCurrentStep?.(step); // if the user didn't change the supervisor, just switch the step
+    else if (code != 'CANCELLED') setCurrentStep?.(2); // if the user changed the supervisor, switch to step 2, even if user selected something else
   };
 
   if (locationProcessed === false) {
