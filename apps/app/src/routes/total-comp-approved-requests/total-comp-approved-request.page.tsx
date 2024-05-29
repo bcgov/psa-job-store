@@ -67,7 +67,7 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'jobTitle',
       label: 'Job title',
-      children: <div>{data?.positionRequest?.profile_json_updated?.title?.text}</div>,
+      children: <div>{data?.positionRequest?.profile_json?.title?.text}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -332,7 +332,7 @@ export const TotalCompApprovedRequestPage = () => {
               </Collapse> */}
               <JobProfile
                 style={{ marginTop: '1rem' }}
-                profileData={data?.positionRequest?.profile_json_updated}
+                profileData={data?.positionRequest?.profile_json}
                 showBackToResults={false}
                 showDiff={showDiff}
                 id={data?.positionRequest?.parent_job_profile_id?.toString() ?? undefined}
@@ -406,7 +406,7 @@ export const TotalCompApprovedRequestPage = () => {
                           <br></br>
                           <br></br>
                           <div>
-                            <DownloadJobProfileComponent jobProfile={data?.positionRequest?.profile_json_updated} />
+                            <DownloadJobProfileComponent jobProfile={data?.positionRequest?.profile_json} />
                           </div>
                         </div>
                         <Divider />

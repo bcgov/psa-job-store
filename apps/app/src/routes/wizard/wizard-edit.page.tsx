@@ -192,7 +192,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
             ...(action === 'next' && positionRequest?.max_step_completed != 3 && !step && step != 0
               ? { max_step_completed: 3 }
               : {}),
-            profile_json_updated: transformedData,
+            profile_json: transformedData,
             title: formData.title.text,
             // classification_code: classification ? classification.code : '',
           }).unwrap();

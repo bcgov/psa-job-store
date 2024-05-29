@@ -66,7 +66,7 @@ export const JobProfileWithDiff = ({ positionRequestData }: JobProfileTabProps) 
         </Collapse> */}
         <JobProfile
           style={{ marginTop: '1rem' }}
-          profileData={positionRequestData?.positionRequest?.profile_json_updated}
+          profileData={positionRequestData?.positionRequest?.profile_json}
           showBackToResults={false}
           showDiff={showDiff}
           id={positionRequestData?.positionRequest?.parent_job_profile_id?.toString() ?? undefined}
