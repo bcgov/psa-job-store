@@ -319,7 +319,7 @@ export const AppLayout = () => {
                               icon={<CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />}
                               key="/approved-requests"
                             >
-                              Approved Reqs
+                              Approved Requests
                             </Menu.Item>
                           </Menu>
                         </Link>

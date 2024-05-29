@@ -146,6 +146,8 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   const selectedJobStoreNumber = allSelections.filter((s) => s.type === 'jobStoreNumber').map((s) => s.value);
   const selectedStatus = allSelections.filter((s) => s.type === 'status').map((s) => s.value);
   const selectedSubmittedBy = allSelections.filter((s) => s.type === 'submittedBy').map((s) => s.value);
+  const selectedStartDate = allSelections.filter((s) => s.type === 'startDate').map((s) => s.value)[0];
+  const selectedEndDate = allSelections.filter((s) => s.type === 'endDate').map((s) => s.value)[0];
 
   // Find the label for a given value
   const findLabel = (value: any, type: any) => {
@@ -178,12 +180,20 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
     const submittedByParams = decodeURIComponent(searchParams.get('submitted_by__in') || '')
       .split(',')
       .filter(Boolean);
+    const startDateParams = decodeURIComponent(searchParams.get('startDate') || '')
+      .split(',')
+      .filter(Boolean);
+    const endDateParams = decodeURIComponent(searchParams.get('endDate') || '')
+      .split(',')
+      .filter(Boolean);
 
     const initialSelections = [
       ...jobStoreNumberParams.map((value) => ({ value, type: 'jobStoreNumber' })),
       ...classificationParams.map((value) => ({ value, type: 'classification' })),
       ...statusParams.map((value) => ({ value, type: 'status' })),
       ...submittedByParams.map((value) => ({ value, type: 'submittedBy' })),
+      ...startDateParams.map((value) => ({ value, type: 'startDate' })),
+      ...endDateParams.map((value) => ({ value, type: 'endDate' })),
     ];
     if (!initialSelectionSet) {
       setAllSelections(initialSelections);
@@ -484,7 +494,11 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                     </Button>
                   </Dropdown> */}
                       <RangePicker
-                        value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : undefined}
+                        value={
+                          selectedStartDate && selectedEndDate
+                            ? [dayjs(selectedStartDate), dayjs(selectedEndDate)]
+                            : undefined
+                        }
                         onChange={(dates) => {
                           setDateRange(dates || []);
                         }}

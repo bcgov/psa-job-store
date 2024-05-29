@@ -604,6 +604,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const statusFilter = searchParams.get('status') || searchParams.get('status__in');
     const classificationFilter = searchParams.get('classification') || searchParams.get('classification_id__in');
     const submittedByFilter = searchParams.get('submitted_by__in');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
 
     if (search || statusFilter || classificationFilter || submittedByFilter) {
       setHasSearched(true);
@@ -656,6 +658,16 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                 {
                   user_id: {
                     in: JSON.parse(`[${submittedByFilter.split(',').map((v) => `"${v}"`)}]`),
+                  },
+                },
+              ]
+            : []),
+          ...(startDate != null && endDate != null
+            ? [
+                {
+                  updated_at: {
+                    gte: startDate,
+                    lte: endDate,
                   },
                 },
               ]
