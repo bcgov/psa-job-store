@@ -303,6 +303,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       navigate,
       organizationFilterExtra,
       loadProfileIds,
+      id,
     ]);
 
     // Update totalResults based on the response (if applicable)
