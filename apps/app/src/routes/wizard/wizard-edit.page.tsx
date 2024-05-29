@@ -180,7 +180,24 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       const transformedData = transformFormData(formData);
       // console.log('transformedData: ', transformedData);
 
-      // return;
+      // Check if any classification is undefined or if the array is empty
+      const hasUndefinedClassification = transformedData?.classifications?.some(
+        (item) => item.classification === undefined,
+      );
+      const isClassificationsEmpty = transformedData?.classifications?.length === 0;
+
+      if (
+        (hasUndefinedClassification || isClassificationsEmpty || !transformedData?.classifications) &&
+        action === 'next'
+      ) {
+        Modal.error({
+          title: 'Error',
+          content: 'Could not find classification, please try again later or contact an administrator.',
+        });
+        return;
+      }
+
+      // if (transformedData.classifications == [{}]) console.log('whhoops');
 
       setWizardData(transformedData);
       try {
