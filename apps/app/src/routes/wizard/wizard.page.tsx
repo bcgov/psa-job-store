@@ -154,11 +154,11 @@ export const WizardPage: React.FC<WizardPageProps> = ({
             ...(action === 'next' && positionRequest?.max_step_completed != 2 && step == -1
               ? { max_step_completed: 2 }
               : {}),
-            // if user selected same profile as before, do not clear profile_json_updated
+            // if user selected same profile as before, do not clear profile_json
             // also do not update title to default
             ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
               additional_info: null,
-              profile_json_updated: null,
+              profile_json: null,
               title: selectedProfileName ?? undefined,
               max_step_completed: 2,
             }),

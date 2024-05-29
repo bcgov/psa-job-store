@@ -175,8 +175,7 @@ export const PositionRequestPage = () => {
       setPositionRequestId(unwrappedPositionRequestData?.id);
     }
 
-    if (unwrappedPositionRequestData?.profile_json_updated)
-      setWizardData(unwrappedPositionRequestData?.profile_json_updated);
+    if (unwrappedPositionRequestData?.profile_json) setWizardData(unwrappedPositionRequestData?.profile_json);
 
     if (unwrappedPositionRequestData?.parent_job_profile_id)
       setPositionRequestProfileId(unwrappedPositionRequestData?.parent_job_profile_id);
@@ -332,7 +331,7 @@ export const PositionRequestPage = () => {
         </div>
       ),
     },
-    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json_updated)
+    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json)
       ? [
           {
             key: '3',
@@ -502,7 +501,7 @@ export const PositionRequestPage = () => {
                             <Descriptions.Item label="Job profile">
                               <Button type="link">
                                 <DownloadJobProfileComponent
-                                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
+                                  jobProfile={positionRequestData?.positionRequest?.profile_json}
                                 >
                                   Download
                                 </DownloadJobProfileComponent>
@@ -561,7 +560,7 @@ export const PositionRequestPage = () => {
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
                               <DownloadJobProfileComponent
-                                jobProfile={unwrappedPositionRequestData?.profile_json_updated}
+                                jobProfile={unwrappedPositionRequestData?.profile_json}
                                 useModal={true}
                               >
                                 <a href="#">Download</a>
@@ -630,7 +629,7 @@ export const PositionRequestPage = () => {
               </div>,
               (readonlyMode === 'completed' || readonlyMode === 'inQueue') && (
                 <DownloadJobProfileComponent
-                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
+                  jobProfile={positionRequestData?.positionRequest?.profile_json}
                   useModal={readonlyMode === 'completed'}
                 >
                   <Button type="primary">Download profile</Button>

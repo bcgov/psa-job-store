@@ -64,7 +64,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         department: { connect: { id: selectedDepartment ?? '' } },
         orgchart_json: orgChartData,
       };
-      // 'CreatePositionRequestInput': profile_json_updated, parent_job_profile, title, classification_code
+      // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
       const resp = await createPositionRequest(positionRequestInput).unwrap();
       // setPositionRequestId(resp.createPositionRequest);
       navigate(`/my-position-requests/${resp.createPositionRequest}`, { replace: true });
@@ -97,7 +97,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   department: { connect: { id: selectedDepartment } },
                   orgchart_json: orgChartData,
                   // clear previous data
-                  profile_json_updated: null,
+                  profile_json: null,
                   parent_job_profile: { connect: { id: null } },
                   additional_info: null,
                   title: null,

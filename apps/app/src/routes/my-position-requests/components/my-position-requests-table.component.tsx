@@ -135,7 +135,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       }
       // else {
       //   // If there's no parent, proceed to generate the document with the current profile data
-      //   generateAndDownloadDocument(profile_json_updated, null);
+      //   generateAndDownloadDocument(profile_json, null);
       // }
     }
   }, [prData, jpData, jpTrigger]);
@@ -145,9 +145,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     if (jpData && jpData.jobProfiles && jpData.jobProfiles.length > 0) {
       const parentProfile = jpData.jobProfiles[0];
 
-      if (prData && prData.positionRequest && prData.positionRequest.profile_json_updated) {
+      if (prData && prData.positionRequest && prData.positionRequest.profile_json) {
         // Generate and download the document with both job and parent job profiles
-        generateAndDownloadDocument(prData.positionRequest.profile_json_updated, parentProfile);
+        generateAndDownloadDocument(prData.positionRequest.profile_json, parentProfile);
       }
     }
   }, [jpData, prData, generateAndDownloadDocument]);

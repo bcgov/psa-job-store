@@ -53,7 +53,7 @@ export class PositionRequestResponse {
   parent_job_profile_id: number;
 
   @Field(() => GraphQLJSON)
-  profile_json_updated: any;
+  profile_json: any;
 
   @Field(() => GraphQLJSON)
   orgchart_json: any;
@@ -137,7 +137,7 @@ export class PositionRequestApiService {
         step: data.step,
         max_step_completed: data.max_step_completed,
         reports_to_position_id: data.reports_to_position_id,
-        profile_json_updated: data.profile_json_updated === null ? Prisma.DbNull : data.profile_json_updated,
+        profile_json: data.profile_json === null ? Prisma.DbNull : data.profile_json,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
         // TODO: AL-146
         // user: data.user,
@@ -793,13 +793,12 @@ export class PositionRequestApiService {
       updatePayload.reports_to_position_id = updateData.reports_to_position_id;
     }
 
-    if (updateData.profile_json_updated !== undefined) {
-      updatePayload.profile_json_updated =
-        updateData.profile_json_updated === null ? Prisma.DbNull : updateData.profile_json_updated;
+    if (updateData.profile_json !== undefined) {
+      updatePayload.profile_json = updateData.profile_json === null ? Prisma.DbNull : updateData.profile_json;
       // attach original profile json
-      if (updateData.profile_json_updated !== null) {
-        const originalProfile = await this.jobProfileService.getJobProfile(updateData.profile_json_updated.id);
-        updateData.profile_json_updated.original_profile_json = originalProfile;
+      if (updateData.profile_json !== null) {
+        const originalProfile = await this.jobProfileService.getJobProfile(updateData.profile_json.id);
+        updateData.profile_json.original_profile_json = originalProfile;
       }
     }
 
@@ -1049,7 +1048,7 @@ export class PositionRequestApiService {
     }
 
     // If the job profile is _not_ denoted as requiring review, it must be reviewed _only_ if significant sections have been changed
-    const prJobProfile = positionRequest.profile_json_updated as Record<string, any>;
+    const prJobProfile = positionRequest.profile_json as Record<string, any>;
 
     // Find position request job profile signficant sections
     const prJobProfileSignificantSections = {
@@ -1176,9 +1175,9 @@ export class PositionRequestApiService {
     });
 
     const jobProfileDocument =
-      positionRequest.profile_json_updated != null
+      positionRequest.profile_json != null
         ? generateJobProfile({
-            jobProfile: positionRequest.profile_json_updated as Record<string, any>,
+            jobProfile: positionRequest.profile_json as Record<string, any>,
             parentJobProfile: parentJobProfile,
           })
         : null;
@@ -1370,7 +1369,7 @@ export class PositionRequestApiService {
           DESCR: positionRequest.title,
           REG_TEMP: PositionDuration.Regular,
           FULL_PART_TIME: PositionType.FullTime,
-          TGB_E_CLASS: `P${(positionRequest.profile_json_updated as Record<string, any>).number}`,
+          TGB_E_CLASS: `P${(positionRequest.profile_json as Record<string, any>).number}`,
           TGB_APPRV_MGR: employeeId,
         };
 
