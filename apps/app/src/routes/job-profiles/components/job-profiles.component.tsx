@@ -57,7 +57,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const [pageSize, setPageSize] = useState(page_size); // Default page size, adjust as needed
     const [totalResults, setTotalResults] = useState(0); // Total results count from API
     const navigate = useNavigate();
-    const { positionRequestId } = useParams();
+    const { positionRequestId, id } = useParams();
     const params = useParams();
     const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
 
@@ -141,7 +141,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       }
 
       // this prevents fetching of job profiles when user selects a different profile
-      if (searchParams.get('selectedProfile') && initialFetchDone && !searchParams.get('fetch')) {
+      if ((searchParams.get('selectedProfile') || id != null) && initialFetchDone && !searchParams.get('fetch')) {
         return;
       }
 
