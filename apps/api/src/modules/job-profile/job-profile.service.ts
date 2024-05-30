@@ -994,6 +994,9 @@ export class JobProfileService {
         this.prisma.jobProfileReportsTo.deleteMany({
           where: { job_profile_id: jobProfileId },
         }),
+        this.prisma.jobProfileScopeLink.deleteMany({
+          where: { job_profile_id: jobProfileId },
+        }),
         this.prisma.jobProfile.delete({
           where: { id: jobProfileId },
         }),
