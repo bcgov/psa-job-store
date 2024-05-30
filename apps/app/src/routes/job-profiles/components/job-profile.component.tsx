@@ -279,7 +279,7 @@ export class JobProfileValidationModel {
   program_overview: ProgramOverviewField | string;
 
   // @AllDisabled({ message: 'There must be at least one accountability.' })
-  @AccountabilitiesCountValidator(1, 30, 'required accountabilities', {
+  @AccountabilitiesCountValidator(1, 40, 'required accountabilities', {
     // 1, 5
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
