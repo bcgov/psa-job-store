@@ -55,19 +55,19 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
   };
 
   // console.log('card data: ', data, searchParams);
-  let { id } = useParams();
-  if (!id) id = searchParams.get('selectedProfile') ?? '';
+  let { number } = useParams();
+  if (!number) number = searchParams.get('selectedProfile') ?? '';
 
   return (
     <Space
       direction="vertical"
       data-testid="job-profile-card"
-      className={data.id === +id ? 'testid-selectedProfile' : ''}
+      className={data.number === +number ? 'testid-selectedProfile' : ''}
       style={{
         width: '100%',
         cursor: 'pointer',
-        borderLeft: data.id === +id ? '4px solid #0070E0' : '4px solid transparent',
-        background: data.id === +id ? '#F0F8FF' : 'white',
+        borderLeft: data.number === +number ? '4px solid #0070E0' : '4px solid transparent',
+        background: data.number === +number ? '#F0F8FF' : 'white',
         padding: '1rem',
       }}
     >

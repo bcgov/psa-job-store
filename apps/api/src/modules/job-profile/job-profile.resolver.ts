@@ -90,6 +90,13 @@ export class JobProfileResolver {
     return res;
   }
 
+  @Query(() => JobProfile, { name: 'jobProfileByNumber' })
+  @AllowNoRoles() // so that share position request feature can fetch relevant data
+  async getJobProfileByNumber(@Args('number') number: string) {
+    const res = await this.jobProfileService.getJobProfileByNumber(+number);
+    return res;
+  }
+
   // @Query(() => [JobProfileCareerGroup], { name: 'jobProfilesCareerGroups' })
   // async getJobProfilesCareerGroups() {
   //   return this.jobProfileService.getJobProfilesCareerGroups();

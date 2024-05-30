@@ -170,7 +170,7 @@ export const router = createBrowserRouter([
                 element: <JobProfilesPage />,
               },
               {
-                path: ':id',
+                path: ':number',
                 element: <JobProfilesPage />,
                 handle: {
                   icon: <FileTextOutlined />,
@@ -191,7 +191,7 @@ export const router = createBrowserRouter([
                 element: <SavedJobProfilesPage />,
               },
               {
-                path: ':id',
+                path: ':number',
                 element: <SavedJobProfilesPage />,
                 handle: {
                   icon: <FileTextOutlined />,
