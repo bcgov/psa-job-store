@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Empty, Pagination, Skeleton, Typography } from 'antd';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileCard } from './job-profile-card.component';
 import styles from './job-profile-search-results.module.css';
@@ -45,50 +45,25 @@ export const JobProfileSearchResults = ({
     return pathParts.join('/');
   };
 
-  const getLinkPath = (profileId: number) => {
+  const getLinkPath = (profileNumber: number) => {
     // `${getBasePath(location.pathname)}/${d.id}${
     //   searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
     // }`
 
     // Check if we're on /saved-profiles route
     if (location.pathname.includes('/saved-profiles')) {
-      return `/saved-profiles/${profileId}`;
+      return `/saved-profiles/${profileNumber}`;
     }
 
     // Check if we're on the position-request route
     const newSearchParams = new URLSearchParams(searchParams.toString());
     if (positionRequestId) {
-      newSearchParams.set('selectedProfile', profileId.toString());
+      newSearchParams.set('selectedProfile', profileNumber.toString());
       return `/my-position-requests/${positionRequestId}?${newSearchParams.toString()}`;
     } else {
       // If not on the position-request route, use the standard job-profiles path
-      return `/job-profiles/${profileId}?${newSearchParams.toString()}`;
+      return `/job-profiles/${profileNumber}?${newSearchParams.toString()}`;
     }
-  };
-
-  const scrollToTop = () => {
-    // todo: this doesn't work, likely because of overflow hidden somewhere
-    // console.log('scrolltop!');
-    // window.scrollTo({
-    //   top: 0,
-    //   behavior: 'smooth', // for a smooth scrolling
-    // });
-  };
-
-  const ReplaceLink = ({ to, children, tabIndex }: any) => {
-    const navigate = useNavigate();
-
-    const handleClick = (event: any) => {
-      event.preventDefault(); // Prevent default link behavior
-      navigate(to, { replace: true }); // Use replace navigation
-      scrollToTop();
-    };
-
-    return (
-      <a href={to} onClick={handleClick} tabIndex={tabIndex}>
-        {children}
-      </a>
-    );
   };
 
   return (
@@ -118,14 +93,14 @@ export const JobProfileSearchResults = ({
         <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list" style={{ padding: '0' }}>
           {(data?.jobProfiles ?? []).map((d) => (
             <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d)}>
-              <ReplaceLink tabIndex={-1} to={getLinkPath(d.id)}>
+              <Link to={getLinkPath(d.number)} replace>
                 <JobProfileCard
                   data={d}
-                  link={`${getBasePath(location.pathname)}/${d.id}${
+                  link={`${getBasePath(location.pathname)}/${d.number}${
                     searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
                   }`}
                 />
-              </ReplaceLink>
+              </Link>
             </li>
           ))}
         </ul>

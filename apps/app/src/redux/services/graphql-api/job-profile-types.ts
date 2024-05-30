@@ -403,3 +403,7 @@ export interface GetJobProfileArgs {
 export interface GetJobProfileResponse {
   jobProfile: JobProfileModel;
 }
+
+export interface GetJobProfileByNumberResponse {
+  jobProfileByNumber: JobProfileModel;
+}

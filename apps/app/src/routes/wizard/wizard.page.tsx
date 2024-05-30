@@ -38,9 +38,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   // const { id } = useParams();
   const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileNumber, setSelectedProfileNumber] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | null>(null);
 
-  const [selectProfileId, setSelectProfileId] = useState<string | null>(null);
+  const [selectProfileNumber, setSelectProfileNumber] = useState<string | null>(null);
 
   // stores searchParams for when user navigates back from edit page
   // used when user presses "cancel" on the "chage profile?" dialog
@@ -62,12 +63,12 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
   // if positionRequestData.parent_job_profile is not null, change searchParams to include selectedProfile
   useEffect(() => {
-    if (positionRequestData?.parent_job_profile_id) {
+    if (positionRequestData?.parent_job_profile?.number) {
       // check if searchparams already has selectedProfile
       // removed this to make reloading on thepage work after user selected a different profile and reloaded the page
       // if (!searchParams.get('selectedProfile')) {
       // determine what page we need to switch to
-      setSelectProfileId(positionRequestData.parent_job_profile_id.toString());
+      setSelectProfileNumber(positionRequestData?.parent_job_profile?.number.toString());
       // setSearchParams({ selectedProfile: positionRequestData.parent_job_profile_id.toString() }, { replace: true });
       // }
     }
@@ -86,8 +87,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
   const onSubmit = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1): Promise<string> => {
     if (
-      positionRequestData?.parent_job_profile_id &&
-      positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '')
+      positionRequestData?.parent_job_profile?.number &&
+      positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '')
     ) {
       return new Promise((resolve) => {
         Modal.confirm({
@@ -144,8 +145,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
-      if (selectedProfileId) {
-        // navigate(`/wizard/edit/${selectedProfileId}`);
+      if (selectedProfileNumber && selectedProfileId) {
         if (positionRequestId) {
           await updatePositionRequest({
             id: positionRequestId,
@@ -156,7 +156,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               : {}),
             // if user selected same profile as before, do not clear profile_json
             // also do not update title to default
-            ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
+            ...(positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
               additional_info: null,
               profile_json: null,
               title: selectedProfileName ?? undefined,
@@ -180,18 +180,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       setIsLoading(false);
     }
   };
-  // useEffect(() => {
-  //   if (id) {
-  //     setSelectedProfileId(id);
-  //   }
-  // }, [id]); // picks up profile id from params
 
   useEffect(() => {
     const selectedProfile = searchParams.get('selectedProfile');
     if (selectedProfile) {
-      setSelectedProfileId(selectedProfile);
+      setSelectedProfileNumber(selectedProfile);
     } else {
-      setSelectedProfileId(null);
+      setSelectedProfileNumber(null);
     }
   }, [searchParams]); // picks up profile id from search params
 
@@ -217,6 +212,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     // if there is a profile already associated with the position request, show a warning
     setSelectedProfileName(profile.title.toString());
     setSelectedProfileId(profile.id.toString());
+    setSelectedProfileNumber(profile.number.toString());
     if (profile?.classifications != null) setSelectedClassificationId(profile?.classifications[0].classification.id);
   };
 
@@ -354,7 +350,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           searchParams={searchParams}
           onSelectProfile={onSelectProfile}
           page_size={page_size}
-          selectProfileId={selectProfileId}
+          selectProfileNumber={selectProfileNumber}
           previousSearchState={previousSearchState}
           // this will filter job profiles by organization in which this position is being created in
           organizationFilterExtra={departmentData?.department?.organization}

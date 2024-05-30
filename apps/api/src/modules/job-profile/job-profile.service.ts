@@ -214,7 +214,7 @@ export class JobProfileService {
       // Find the index of the selected profile within the sorted job profiles
 
       const selectedProfileIndex = (sortedJobProfiles as any[]).findIndex(
-        (profile) => profile.id === parseInt(selectProfile),
+        (profile) => profile.number === parseInt(selectProfile),
       );
 
       if (selectedProfileIndex !== -1) {
@@ -301,9 +301,9 @@ export class JobProfileService {
       );
 
       // Find the index of the selected profile within the sorted job profiles
-      const selectedProfileIndex = (sortedJobProfiles as any[]).findIndex(
-        (profile) => profile.id === parseInt(selectProfile),
-      );
+      const selectedProfileIndex = (sortedJobProfiles as any[]).findIndex((profile) => {
+        return profile.number === parseInt(selectProfile);
+      });
 
       if (selectedProfileIndex !== -1) {
         // Calculate the page number based on the selected profile index and take value
@@ -437,6 +437,48 @@ export class JobProfileService {
   async getJobProfile(id: number) {
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id },
+      include: {
+        classifications: {
+          include: {
+            classification: true,
+          },
+        },
+        jobFamilies: {
+          include: {
+            jobFamily: true,
+          },
+        },
+        organizations: {
+          include: {
+            organization: true,
+          },
+        },
+        scopes: {
+          include: {
+            scope: true,
+          },
+        },
+        role: true,
+        role_type: true,
+        streams: {
+          include: {
+            stream: true,
+          },
+        },
+        context: true,
+        behavioural_competencies: {
+          include: {
+            behavioural_competency: true,
+          },
+        },
+      },
+    });
+    return jobProfile;
+  }
+
+  async getJobProfileByNumber(number: number) {
+    const jobProfile = await this.prisma.jobProfile.findUnique({
+      where: { number },
       include: {
         classifications: {
           include: {
