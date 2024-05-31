@@ -26,6 +26,7 @@ interface WizardEditPageProps {
   onNext?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export const WizardEditPage: React.FC<WizardEditPageProps> = ({
@@ -33,6 +34,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   onNext,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
@@ -47,6 +49,11 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingBack, setIsLoadingBack] = useState(false);
   const [saveAndQuitLoading, setSaveAndQuitLoading] = useState(false);
+  const [isFormModified, setIsFormModified] = useState(false);
+
+  const handleFormChange = () => {
+    setIsFormModified(true);
+  };
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
@@ -130,7 +137,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   // const navigate = useNavigate();
 
-  const saveData = async (action: string) => {
+  const saveData = async (action: string, step?: number) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errors = Object.values(wizardEditProfileRef.current?.getFormErrors()).map((error: any) => {
       const message =
@@ -173,15 +180,36 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       const transformedData = transformFormData(formData);
       // console.log('transformedData: ', transformedData);
 
-      // return;
+      // Check if any classification is undefined or if the array is empty
+      const hasUndefinedClassification = transformedData?.classifications?.some(
+        (item) => item.classification === undefined,
+      );
+      const isClassificationsEmpty = transformedData?.classifications?.length === 0;
+
+      if (
+        (hasUndefinedClassification || isClassificationsEmpty || !transformedData?.classifications) &&
+        action === 'next'
+      ) {
+        Modal.error({
+          title: 'Error',
+          content: 'Could not find classification, please try again later or contact an administrator.',
+        });
+        return;
+      }
+
+      // if (transformedData.classifications == [{}]) console.log('whhoops');
 
       setWizardData(transformedData);
       try {
         if (positionRequestId)
           await updatePositionRequest({
             id: positionRequestId,
-            step: action === 'next' ? 3 : action === 'back' ? 1 : 2,
-            profile_json_updated: transformedData,
+            step: !step && step != 0 ? (action === 'next' ? 3 : action === 'back' ? 1 : 2) : step,
+            // increment max step only if it's not incremented
+            ...(action === 'next' && positionRequest?.max_step_completed != 3 && !step && step != 0
+              ? { max_step_completed: 3 }
+              : {}),
+            profile_json: transformedData,
             title: formData.title.text,
             // classification_code: classification ? classification.code : '',
           }).unwrap();
@@ -195,7 +223,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       }
 
       if (action === 'next') {
-        if (onNext) onNext();
+        if (step || step == 0) setCurrentStep(step);
+        else if (onNext) onNext();
       } else if (action === 'back') {
         if (onBack) {
           // console.log('onback');
@@ -213,8 +242,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     }
   };
 
-  const onNextCallback = async () => {
-    await saveData('next');
+  const onNextCallback = async ({ step }: { step?: number } = {}) => {
+    await saveData('next', step);
   };
 
   const onBackCallback = async () => {
@@ -282,6 +311,31 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     );
   };
 
+  const switchStep = async (step: number) => {
+    if (isFormModified) {
+      Modal.confirm({
+        title: 'Unsaved Changes',
+        content: 'You have unsaved changes. Do you want to save them before switching steps?',
+        okText: 'Save',
+        cancelText: 'Cancel',
+        onOk: async () => {
+          onNextCallback({ step: step });
+          setIsFormModified(false);
+        },
+        onCancel: () => {
+          // Do nothing if the user cancels
+        },
+      });
+    } else {
+      setCurrentStep(step);
+      if (positionRequestId)
+        await updatePositionRequest({
+          id: positionRequestId,
+          step: step,
+        });
+    }
+  };
+
   return (
     <WizardPageWrapper
       title={
@@ -308,12 +362,24 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         <Button onClick={onBackCallback} key="back" data-testid="back-button" loading={isLoadingBack}>
           Back
         </Button>,
-        <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button" loading={isLoading}>
+        <Button
+          key="next"
+          type="primary"
+          onClick={() => {
+            onNextCallback();
+          }}
+          data-testid="next-button"
+          loading={isLoading}
+        >
           Save and next
         </Button>,
       ]}
     >
-      <WizardSteps current={2}></WizardSteps>
+      <WizardSteps
+        current={2}
+        onStepClick={switchStep}
+        maxStepCompleted={positionRequest?.max_step_completed}
+      ></WizardSteps>
       {/* <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
         onNext={onNextCallback}
@@ -343,6 +409,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
               id={profileId?.toString()}
               submitText="Review Profile"
               showBackButton={true}
+              handleFormChange={handleFormChange}
             ></WizardEditProfile>
           </Col>
         </Row>

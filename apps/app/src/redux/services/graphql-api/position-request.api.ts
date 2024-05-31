@@ -17,7 +17,7 @@ interface JobProfileConnectItem {
 export interface CreatePositionRequestInput {
   step: number;
   reports_to_position_id: number;
-  profile_json_updated?: any;
+  profile_json?: any;
   orgchart_json?: any;
   parent_job_profile?: JobProfileConnectItem;
   title?: string;
@@ -33,9 +33,10 @@ export interface CreatePositionRequestInput {
 export interface GetPositionRequestResponseContent {
   id: number;
   step?: number;
+  max_step_completed?: number;
   reports_to_position_id?: number;
   orgchart_json?: any;
-  profile_json_updated?: any;
+  profile_json?: any;
   user_id?: string;
   user_name?: string;
   parent_job_profile_id?: number;
@@ -115,9 +116,10 @@ export interface CreatePositionRequestResponse {
 export interface UpdatePositionRequestInput {
   id: number;
   step?: number;
+  max_step_completed?: number;
   reports_to_position_id?: number;
   orgchart_json?: any;
-  profile_json_updated?: any;
+  profile_json?: any;
   user_id?: string;
   title?: string | null;
   position_number?: number;
@@ -210,6 +212,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               ) {
                 id
                 step
+                max_step_completed
                 reports_to_position_id
                 parent_job_profile_id
                 user_id
@@ -261,9 +264,10 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               positionRequest(id: ${args.id}) {
                   id
                   step
+                  max_step_completed
                   reports_to_position_id
                   parent_job_profile_id
-                  profile_json_updated
+                  profile_json
                   orgchart_json
                   user_id
                   user_name
@@ -302,9 +306,10 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               sharedPositionRequest(uuid: "${args.uuid}") {
                   id
                   step
+                  max_step_completed
                   reports_to_position_id
                   parent_job_profile_id
-                  profile_json_updated
+                  profile_json
                   orgchart_json
                   user_id
                   user_name
@@ -375,10 +380,11 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               submitPositionRequest(id: $id, comment: $comment) {
                 id
                 step
+                max_step_completed
                 reports_to_position_id
                 department_id
                 parent_job_profile_id
-                profile_json_updated
+                profile_json
                 user_id
                 title
                 position_number
@@ -540,4 +546,5 @@ export const {
   usePositionNeedsRivewQuery,
   useLazyPositionNeedsRivewQuery,
   useGetSharedPositionRequestQuery,
+  useLazyGetSharedPositionRequestQuery,
 } = positionRequestApi;

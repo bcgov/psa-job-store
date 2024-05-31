@@ -1,14 +1,62 @@
 .custom-steps .ant-steps-item-title {
-    font-weight: bold;
+    font-weight: 400;
   }
 
-  .ant-steps-item-finish .ant-steps-item-title, .ant-steps-item-finish .ant-steps-item-description {
+  /* .ant-steps-item-finish .ant-steps-item-description {
     color: #6E6E6E !important;
-  }
+  } */
   
   .custom-steps h2{
     line-height: 1.5714285714285714 !important;
     font-size: 16px !important;
     margin: 0 !important;
-    font-weight: bold;
   }
+
+  .custom-steps h2.current{
+    font-weight: 500;
+  }
+
+  .custom-steps.max-step-2 .ant-steps-item:nth-child(2) .ant-steps-item-title,
+  .custom-steps.max-step-3 .ant-steps-item:nth-child(3) .ant-steps-item-title,
+  .custom-steps.max-step-4 .ant-steps-item:nth-child(4) .ant-steps-item-title,
+  .custom-steps.max-step-5 .ant-steps-item:nth-child(5) .ant-steps-item-title
+  {
+    color: rgba(0, 0, 0, 0.88);
+  }
+  
+  .custom-steps .clickable:not(.no-click):hover *{
+    cursor: pointer !important;
+    color: #3470B1 !important;
+  }
+
+  .custom-steps .ant-steps-item-finish .ant-steps-item-tail::after{
+    background-color: #1890FF !important;
+  }
+
+  
+
+  .custom-steps.max-step-2 .ant-steps-item:nth-child(1) .ant-steps-item-tail::after,
+  .custom-steps.max-step-2 .ant-steps-item:nth-child(2):not(.ant-steps-item-active) .ant-steps-icon-dot,
+
+  .custom-steps.max-step-3 .ant-steps-item:nth-child(2) .ant-steps-item-tail::after,
+  .custom-steps.max-step-3 .ant-steps-item:nth-child(3):not(.ant-steps-item-active) .ant-steps-icon-dot,
+
+  .custom-steps.max-step-4 .ant-steps-item:nth-child(3) .ant-steps-item-tail::after,
+  .custom-steps.max-step-4 .ant-steps-item:nth-child(4):not(.ant-steps-item-active) .ant-steps-icon-dot,
+
+  .custom-steps.max-step-5 .ant-steps-item:nth-child(4) .ant-steps-item-tail::after,
+  .custom-steps.max-step-5 .ant-steps-item:nth-child(5):not(.ant-steps-item-active) .ant-steps-icon-dot,
+
+  .custom-steps.max-step-6 .ant-steps-item:nth-child(5) .ant-steps-item-tail::after,
+  .custom-steps.max-step-6 .ant-steps-item:nth-child(6):not(.ant-steps-item-active) .ant-steps-icon-dot
+  {
+    background-color: #A8D0FB !important;
+  }
+
+  .no-click .ant-steps-item-content, .no-click .ant-steps-item-title, .no-click .ant-steps-item-description, .no-click .ant-steps-item-container, .no-click{
+    cursor: not-allowed !important;
+  }
+
+
+
+  

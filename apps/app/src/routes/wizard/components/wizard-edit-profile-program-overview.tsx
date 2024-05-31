@@ -20,7 +20,7 @@ const WizardProgramOverview: React.FC<SingleTextFieldProps> = ({ useFormReturn, 
       formErrors={formErrors}
       useFormReturn={useFormReturn}
       isTextArea={true}
-      maxCharacterCount={320}
+      maxCharacterCount={2000}
       showCharacterCount={true}
     />
   );

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Checkbox, Divider, Form, Select, Tag } from 'antd';
+import { Checkbox, Divider, Form, Select, Tag, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { Controller } from 'react-hook-form';
 
@@ -77,36 +77,39 @@ const JobStreamDiscipline: React.FC<JobStreamDisciplineProps> = ({
           }, [value, jobStreams]);
 
           return (
-            <Select
-              mode="multiple"
-              placeholder="Select the job streams this role is part of"
-              style={{ width: '100%' }}
-              onChange={(selectedStreams) => handleOptionChange(selectedStreams, onChange, jobStreams)}
-              value={value}
-              onBlur={onBlur}
-              tagRender={tagRender}
-            >
-              <Option key="all" value="all" style={{ position: 'relative', marginBottom: '10px' }}>
-                <Checkbox
-                  style={{ marginRight: '5px' }}
-                  checked={isAllSelected}
-                  onChange={(e) => handleSelectAll(e.target.checked, onChange, jobStreams)}
-                ></Checkbox>
-                Select All
-                <Divider style={{ margin: '5px -15px', bottom: '-10px', position: 'absolute' }} />
-              </Option>
-
-              {jobStreams.map((stream) => (
-                <Option key={stream.id} value={stream.id}>
+            <div>
+              <Select
+                mode="multiple"
+                placeholder="Select the job streams this role is part of"
+                style={{ width: '100%' }}
+                onChange={(selectedStreams) => handleOptionChange(selectedStreams, onChange, jobStreams)}
+                value={value}
+                onBlur={onBlur}
+                tagRender={tagRender}
+              >
+                <Option key="all" value="all" style={{ position: 'relative', marginBottom: '10px' }}>
                   <Checkbox
-                    id={`stream-${stream.id}`}
-                    checked={value?.includes(stream.id)}
                     style={{ marginRight: '5px' }}
+                    checked={isAllSelected}
+                    onChange={(e) => handleSelectAll(e.target.checked, onChange, jobStreams)}
                   ></Checkbox>
-                  {stream.name}
+                  Select All
+                  <Divider style={{ margin: '5px -15px', bottom: '-10px', position: 'absolute' }} />
                 </Option>
-              ))}
-            </Select>
+
+                {jobStreams.map((stream) => (
+                  <Option key={stream.id} value={stream.id}>
+                    <Checkbox
+                      id={`stream-${stream.id}`}
+                      checked={value?.includes(stream.id)}
+                      style={{ marginRight: '5px' }}
+                    ></Checkbox>
+                    {stream.name}
+                  </Option>
+                ))}
+              </Select>
+              <Typography.Text type="secondary">You can enter multiple disciplines in this field.</Typography.Text>
+            </div>
           );
         }}
       />

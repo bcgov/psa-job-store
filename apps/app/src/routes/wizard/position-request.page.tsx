@@ -19,8 +19,8 @@ import { useLazyGetClassificationsQuery } from '../../redux/services/graphql-api
 import {
   GetPositionRequestResponse,
   GetPositionRequestResponseContent,
-  useGetPositionRequestQuery,
-  useGetSharedPositionRequestQuery,
+  useLazyGetPositionRequestQuery,
+  useLazyGetSharedPositionRequestQuery,
   useLazyPositionNeedsRivewQuery,
 } from '../../redux/services/graphql-api/position-request.api';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
@@ -92,7 +92,11 @@ export const PositionRequestPage = () => {
   }, [classificationsFetched, triggerGetClassificationData]);
 
   useEffect(() => {
-    setRequiresVerification(positionNeedsReviewData?.positionNeedsRivew?.result ?? false);
+    if (
+      positionNeedsReviewData?.positionNeedsRivew?.result == true ||
+      positionNeedsReviewData?.positionNeedsRivew?.result == false
+    )
+      setRequiresVerification(positionNeedsReviewData?.positionNeedsRivew?.result);
   }, [positionNeedsReviewData, setRequiresVerification]);
 
   const { positionRequestId } = useParams();
@@ -105,18 +109,32 @@ export const PositionRequestPage = () => {
     }
   }, [positionRequestId, wizardPositionRequestId, resetWizardContext]);
 
+  const [currentStep, setCurrentStep] = useState<number | null>(null);
   const location = useLocation();
 
   // Determine if the current path is a shared URL
   const isSharedRoute = location.pathname.includes('/my-position-requests/share/');
   // Use state or other logic to determine which query hook to use
   // This could be a piece of state that determines which query to run, for example
-  const queryHook = isSharedRoute ? useGetSharedPositionRequestQuery : useGetPositionRequestQuery;
+  // const queryHook = isSharedRoute ? useLazyGetSharedPositionRequestQuery : useLazyGetPositionRequestQuery;
+
+  const [getPositionRequest, { data: positionRequestData }] = isSharedRoute
+    ? // eslint-disable-next-line react-hooks/rules-of-hooks
+      useLazyGetSharedPositionRequestQuery()
+    : // eslint-disable-next-line react-hooks/rules-of-hooks
+      useLazyGetPositionRequestQuery();
 
   // Use the determined query hook with the positionRequestId
-  const { data: positionRequestData } = isSharedRoute
-    ? queryHook({ uuid: positionRequestId ?? '' })
-    : queryHook({ id: parseInt(positionRequestId ?? '') });
+  // const { data: positionRequestData, refetch } = isSharedRoute
+  //   ? queryHook({ uuid: positionRequestId ?? '' })
+  //   : queryHook({ id: parseInt(positionRequestId ?? '') });
+
+  useEffect(() => {
+    getPositionRequest({
+      ...(isSharedRoute ? { uuid: positionRequestId ?? '' } : { id: parseInt(positionRequestId ?? '') }),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!positionRequestId) throw new Error('No position request provided');
@@ -142,12 +160,12 @@ export const PositionRequestPage = () => {
     isSharedRoute,
   ]);
 
-  const [currentStep, setCurrentStep] = useState<number | null>(null);
-
   useEffect(() => {
     const step = unwrappedPositionRequestData?.step;
 
-    if (step != null) setCurrentStep(step);
+    if (step != null) {
+      setCurrentStep(step);
+    }
 
     if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: unwrappedPositionRequestData?.id });
 
@@ -157,8 +175,7 @@ export const PositionRequestPage = () => {
       setPositionRequestId(unwrappedPositionRequestData?.id);
     }
 
-    if (unwrappedPositionRequestData?.profile_json_updated)
-      setWizardData(unwrappedPositionRequestData?.profile_json_updated);
+    if (unwrappedPositionRequestData?.profile_json) setWizardData(unwrappedPositionRequestData?.profile_json);
 
     if (unwrappedPositionRequestData?.parent_job_profile_id)
       setPositionRequestProfileId(unwrappedPositionRequestData?.parent_job_profile_id);
@@ -219,10 +236,17 @@ export const PositionRequestPage = () => {
   const renderStepComponent = () => {
     switch (currentStep) {
       case 0:
-        return <WizardOrgChartPage onCreateNewPosition={onNext} positionRequest={unwrappedPositionRequestData} />;
+        return (
+          <WizardOrgChartPage
+            setCurrentStep={setCurrentStep}
+            onCreateNewPosition={onNext}
+            positionRequest={unwrappedPositionRequestData}
+          />
+        );
       case 1:
         return (
           <WizardPage
+            setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
@@ -232,6 +256,7 @@ export const PositionRequestPage = () => {
       case 2:
         return (
           <WizardEditPage
+            setCurrentStep={setCurrentStep}
             onBack={onBack}
             onNext={onNext}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
@@ -242,6 +267,7 @@ export const PositionRequestPage = () => {
       case 3:
         return (
           <WizardReviewPage
+            setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
@@ -251,6 +277,7 @@ export const PositionRequestPage = () => {
       case 4:
         return (
           <WizardConfirmDetailsPage
+            setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
@@ -260,6 +287,7 @@ export const PositionRequestPage = () => {
       case 5:
         return (
           <WizardResultPage
+            setCurrentStep={setCurrentStep}
             onBack={onBack}
             setStep={setStep}
             switchParentMode={switchParentMode}
@@ -303,7 +331,7 @@ export const PositionRequestPage = () => {
         </div>
       ),
     },
-    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json_updated)
+    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json)
       ? [
           {
             key: '3',
@@ -473,7 +501,7 @@ export const PositionRequestPage = () => {
                             <Descriptions.Item label="Job profile">
                               <Button type="link">
                                 <DownloadJobProfileComponent
-                                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
+                                  jobProfile={positionRequestData?.positionRequest?.profile_json}
                                 >
                                   Download
                                 </DownloadJobProfileComponent>
@@ -532,7 +560,7 @@ export const PositionRequestPage = () => {
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
                               <DownloadJobProfileComponent
-                                jobProfile={unwrappedPositionRequestData?.profile_json_updated}
+                                jobProfile={unwrappedPositionRequestData?.profile_json}
                                 useModal={true}
                               >
                                 <a href="#">Download</a>
@@ -601,7 +629,7 @@ export const PositionRequestPage = () => {
               </div>,
               (readonlyMode === 'completed' || readonlyMode === 'inQueue') && (
                 <DownloadJobProfileComponent
-                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
+                  jobProfile={positionRequestData?.positionRequest?.profile_json}
                   useModal={readonlyMode === 'completed'}
                 >
                   <Button type="primary">Download profile</Button>

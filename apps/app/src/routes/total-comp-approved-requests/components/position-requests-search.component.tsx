@@ -38,6 +38,8 @@ interface JobProfileSearchProps {
   searchButtonText?: string;
   fullWidth?: boolean;
   mode?: string | null;
+  allSelections: Selection[];
+  setAllSelections: React.Dispatch<React.SetStateAction<Selection[]>>;
 }
 
 // Unified state for all selections
@@ -56,11 +58,12 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   searchPlaceHolderText = 'Search by job title or keyword',
   fullWidth = false,
   mode = null,
+  allSelections,
+  setAllSelections,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [dateRange, setDateRange] = useState<any>([]);
   // const isPositionRequestRoute = location.pathname.includes('/position-request/');
 
   // get unique classifications for approved position requests
@@ -79,7 +82,6 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   const submittedByData = useGetPositionRequestSubmittedByQuery().data?.positionRequestSubmittedBy;
   // }
 
-  const [allSelections, setAllSelections] = useState<Selection[]>([]); // holds tags from all filters
   const [classificationFilterData, setClassificationOptions] = useState<SelectionOption[]>([]);
   const [jobStoreNumberFilterData, setJobStoreNumberOptions] = useState<SelectionOption[]>([]);
   const [statusFilterData, setStatusOptions] = useState<SelectionOption[]>([]);
@@ -146,6 +148,8 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   const selectedJobStoreNumber = allSelections.filter((s) => s.type === 'jobStoreNumber').map((s) => s.value);
   const selectedStatus = allSelections.filter((s) => s.type === 'status').map((s) => s.value);
   const selectedSubmittedBy = allSelections.filter((s) => s.type === 'submittedBy').map((s) => s.value);
+  const selectedStartDate = allSelections.filter((s) => s.type === 'startDate').map((s) => s.value)[0];
+  const selectedEndDate = allSelections.filter((s) => s.type === 'endDate').map((s) => s.value)[0];
 
   // Find the label for a given value
   const findLabel = (value: any, type: any) => {
@@ -160,6 +164,9 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
     }
     if (type === 'submittedBy') {
       return submittedByFilterData.find((option) => option.value === value)?.label || value;
+    }
+    if (type === 'startDate' || type === 'endDate') {
+      return null;
     }
     return value;
   };
@@ -178,18 +185,26 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
     const submittedByParams = decodeURIComponent(searchParams.get('submitted_by__in') || '')
       .split(',')
       .filter(Boolean);
+    const startDateParams = decodeURIComponent(searchParams.get('startDate') || '')
+      .split(',')
+      .filter(Boolean);
+    const endDateParams = decodeURIComponent(searchParams.get('endDate') || '')
+      .split(',')
+      .filter(Boolean);
 
     const initialSelections = [
       ...jobStoreNumberParams.map((value) => ({ value, type: 'jobStoreNumber' })),
       ...classificationParams.map((value) => ({ value, type: 'classification' })),
       ...statusParams.map((value) => ({ value, type: 'status' })),
       ...submittedByParams.map((value) => ({ value, type: 'submittedBy' })),
+      ...startDateParams.map((value) => ({ value, type: 'startDate' })),
+      ...endDateParams.map((value) => ({ value, type: 'endDate' })),
     ];
     if (!initialSelectionSet) {
       setAllSelections(initialSelections);
       setInitialSelectionSet(true);
     }
-  }, [searchParams, initialSelectionSet, setInitialSelectionSet]);
+  }, [searchParams, initialSelectionSet, setInitialSelectionSet, setAllSelections]);
 
   useEffect(() => {
     const classificationValues = allSelections
@@ -206,6 +221,15 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
       .join(',');
     const submittedByValues = allSelections
       .filter((s) => s.type === 'submittedBy')
+      .map((s) => s.value)
+      .join(',');
+
+    const startDateValue = allSelections
+      .filter((s) => s.type === 'startDate')
+      .map((s) => s.value)
+      .join(',');
+    const endDateValue = allSelections
+      .filter((s) => s.type === 'endDate')
       .map((s) => s.value)
       .join(',');
 
@@ -231,9 +255,9 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
     if (statusValues) newSearchParams.set('status__in', statusValues);
     if (submittedByValues) newSearchParams.set('submitted_by__in', submittedByValues);
 
-    if (dateRange.length === 2) {
-      newSearchParams.set('startDate', dateRange[0].format('YYYY-MM-DD'));
-      newSearchParams.set('endDate', dateRange[1].format('YYYY-MM-DD'));
+    if (startDateValue && endDateValue) {
+      newSearchParams.set('startDate', startDateValue);
+      newSearchParams.set('endDate', endDateValue);
     } else {
       newSearchParams.delete('startDate');
       newSearchParams.delete('endDate');
@@ -254,7 +278,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
         { replace: true },
       );
     }
-  }, [allSelections, searchParams, setSearchParams, location.pathname, navigate, getBasePath, dateRange]);
+  }, [allSelections, searchParams, setSearchParams, location.pathname, navigate, getBasePath]);
 
   // Add a new tag from any of the filters
   const addSelection = (value: any, type: any) => {
@@ -264,12 +288,13 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
 
   // Remove a tag
   const removeSelection = (removedValue: any, type: any) => {
+    let selections = allSelections;
     if (type === 'dateRange') {
-      setDateRange([]);
+      selections = allSelections.filter(
+        (selection) => !(selection.type === 'startDate' || selection.type === 'endDate'),
+      );
     }
-    setAllSelections(
-      allSelections.filter((selection) => !(selection.value === removedValue && selection.type === type)),
-    );
+    setAllSelections(selections.filter((selection) => !(selection.value === removedValue && selection.type === type)));
   };
 
   const handleSearch = (value: string) => {
@@ -317,24 +342,6 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
       { replace: true },
     );
   };
-
-  useEffect(() => {
-    if (dateRange.length === 2) {
-      const dateRangeString = `${dateRange[0].format('YYYY-MM-DD')} to ${dateRange[1].format('YYYY-MM-DD')}`;
-      setAllSelections((prevSelections) => {
-        const existingIndex = prevSelections.findIndex((selection) => selection.type === 'dateRange');
-        if (existingIndex >= 0) {
-          // Update existing date range
-          const updatedSelections = [...prevSelections];
-          updatedSelections[existingIndex] = { value: dateRangeString, type: 'dateRange' };
-          return updatedSelections;
-        } else {
-          // Add new date range
-          return [...prevSelections, { value: dateRangeString, type: 'dateRange' }];
-        }
-      });
-    }
-  }, [dateRange, setAllSelections, allSelections]);
 
   return (
     <Row
@@ -384,6 +391,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                       classNamePrefix="react-select"
                       isMulti
                       placeholder="Status"
+                      aria-label="Status"
                       options={statusFilterData}
                       onChange={(selectedItems) => {
                         const newValues = selectedItems.map((item) => item.value);
@@ -421,6 +429,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                     classNamePrefix="react-select"
                     isMulti
                     placeholder="Classification"
+                    aria-label="Classification"
                     options={classificationFilterData}
                     onChange={(selectedItems) => {
                       const newValues = selectedItems.map((item) => item.value);
@@ -460,6 +469,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                         classNamePrefix="react-select"
                         isMulti
                         placeholder="JobStore number"
+                        aria-label="JobStore number"
                         options={jobStoreNumberFilterData}
                         onChange={(selectedItems) => {
                           const newValues = selectedItems.map((item) => item.value);
@@ -481,9 +491,48 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                     </Button>
                   </Dropdown> */}
                       <RangePicker
-                        value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : undefined}
+                        value={
+                          selectedStartDate && selectedEndDate
+                            ? [dayjs(selectedStartDate), dayjs(selectedEndDate)]
+                            : undefined
+                        }
                         onChange={(dates) => {
-                          setDateRange(dates || []);
+                          const dateRange = dates ?? [];
+                          if (dateRange[0] && dateRange[1]) {
+                            const startDate = dateRange[0].format('YYYY-MM-DD');
+                            const endDate = dateRange[1].format('YYYY-MM-DD');
+                            const dateRangeString = `${startDate} to ${endDate}`;
+                            setAllSelections((prevSelections) => {
+                              let existingIndex = prevSelections.findIndex(
+                                (selection) => selection.type === 'dateRange',
+                              );
+                              if (existingIndex >= 0) {
+                                // Update existing date range
+                                const updatedSelections = [...prevSelections];
+                                updatedSelections[existingIndex] = { value: dateRangeString, type: 'dateRange' };
+                                existingIndex = prevSelections.findIndex((selection) => selection.type === 'startDate');
+                                updatedSelections[existingIndex] = {
+                                  value: startDate,
+                                  type: 'startDate',
+                                };
+                                existingIndex = prevSelections.findIndex((selection) => selection.type === 'endDate');
+                                updatedSelections[existingIndex] = {
+                                  value: endDate,
+                                  type: 'endDate',
+                                };
+                                return updatedSelections;
+                              } else {
+                                // Add new date range
+                                return [
+                                  ...prevSelections,
+
+                                  { value: dateRangeString, type: 'dateRange' },
+                                  { value: startDate, type: 'startDate' },
+                                  { value: endDate, type: 'endDate' },
+                                ];
+                              }
+                            });
+                          }
                         }}
                       />
                     </Col>
@@ -513,6 +562,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                       classNamePrefix="react-select"
                       isMulti
                       placeholder="Submitted by"
+                      aria-label="Submitted by"
                       options={submittedByFilterData}
                       onChange={(selectedItems) => {
                         const newValues = selectedItems.map((item) => item.value);
@@ -557,18 +607,20 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
           </Row>
           <Row>
             <Col data-testid="filters-tags-section">
-              {allSelections.map((selection) => (
-                <Tag
-                  style={{ marginTop: '10px' }}
-                  key={`${selection.type}-${selection.value}`}
-                  closable
-                  onClose={() => removeSelection(selection.value, selection.type)}
-                >
-                  {selection.type === 'dateRange'
-                    ? `Date: ${selection.value}`
-                    : findLabel(selection.value, selection.type)}
-                </Tag>
-              ))}
+              {allSelections
+                .filter((selection) => selection.type != 'startDate' && selection.type != 'endDate')
+                .map((selection) => (
+                  <Tag
+                    style={{ marginTop: '10px' }}
+                    key={`${selection.type}-${selection.value}`}
+                    closable
+                    onClose={() => removeSelection(selection.value, selection.type)}
+                  >
+                    {selection.type === 'dateRange'
+                      ? `Date: ${selection.value}`
+                      : findLabel(selection.value, selection.type)}
+                  </Tag>
+                ))}
             </Col>
           </Row>
         </Card>

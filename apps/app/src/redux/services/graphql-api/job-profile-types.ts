@@ -150,6 +150,7 @@ export interface JobProfileModel {
   all_organizations: boolean;
   all_reports_to: boolean;
   state?: string;
+  is_archived?: boolean;
 }
 
 export interface ProfessionsModel {
@@ -361,6 +362,10 @@ export interface UnarchiveJobProfileResponse {
   deleteJobProfile: number;
 }
 
+export interface UpdateJobProfileResponse {
+  updateJobProfile: number;
+}
+
 export interface GetJobProfilesArgs {
   search?: string;
   where?: Record<string, any>;
@@ -397,4 +402,8 @@ export interface GetJobProfileArgs {
 
 export interface GetJobProfileResponse {
   jobProfile: JobProfileModel;
+}
+
+export interface GetJobProfileByNumberResponse {
+  jobProfileByNumber: JobProfileModel;
 }
