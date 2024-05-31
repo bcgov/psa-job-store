@@ -11,7 +11,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Modal, Result, Row, Table, Tooltip, message } from 'antd';
+import { Button, Card, Col, Menu, Modal, Row, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import { generateJobProfile } from 'common-kit';
 import copy from 'copy-to-clipboard';
@@ -21,6 +21,7 @@ import React, { CSSProperties, ReactNode, useCallback, useEffect, useState } fro
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
+import NoResultsGraphic from '../../../assets/search_empty.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import AcessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -46,6 +47,7 @@ interface MyPositionsTableProps {
   tableTitle?: string;
   mode?: string | null;
   onDataAvailable?: (isDataAvailable: boolean) => void;
+  clearFilters?: () => void;
 }
 
 type ColumnTypes = {
@@ -70,6 +72,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   tableTitle = 'My Position Requests',
   mode = null,
   onDataAvailable,
+  clearFilters,
   ...props
 }) => {
   const [trigger, { data, isLoading, error: fetchError, isFetching }] = useLazyGetPositionRequestsQuery();
@@ -607,7 +610,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    if (search || statusFilter || classificationFilter || submittedByFilter) {
+    if (search || statusFilter || classificationFilter || submittedByFilter || startDate || endDate) {
       setHasSearched(true);
     }
 
@@ -814,42 +817,91 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                 marginBottom: '1rem',
               }}
             >
-              <Result
-                status="404"
-                title="No search results"
-                subTitle="Sorry, no results returned for your query."
-                // extra={<Button type="primary">Back Home</Button>}
-              />
+              <>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    padding: '2rem',
+                    flexGrow: 1, // Expand to take available space
+                    background: 'white',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <img src={NoResultsGraphic} alt="No positions" />
+                  <div>No results found! Try adjusting your search or filters</div>
+                  <Button
+                    type="link"
+                    style={{ marginTop: '1rem' }}
+                    icon={<ReloadOutlined aria-hidden />}
+                    onClick={clearFilters}
+                  >
+                    Reset Filters
+                  </Button>
+                </div>
+              </>
             </div>
           ) : (
             <>
               {mode == 'classification' || mode == 'total-compensation' ? (
-                <>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      textAlign: 'center',
-                      padding: '2rem',
-                      flexGrow: 1, // Expand to take available space
-                      background: 'white',
-                      marginBottom: '1rem',
-                    }}
-                  >
-                    <img src={TasksCompleteGraphic} alt="No positions" />
-                    <div>All good! It looks like you don't have any assigned tasks.</div>
-                    <Button
-                      type="link"
-                      style={{ marginTop: '1rem' }}
-                      icon={<ReloadOutlined aria-hidden />}
-                      onClick={updateData}
+                !hasPositionRequests && !hasSearched ? (
+                  <>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        padding: '2rem',
+                        flexGrow: 1, // Expand to take available space
+                        background: 'white',
+                        marginBottom: '1rem',
+                      }}
                     >
-                      Refresh
-                    </Button>
-                  </div>
-                </>
+                      <img src={TasksCompleteGraphic} alt="No positions" />
+                      <div>No results</div>
+                      <Button
+                        type="link"
+                        style={{ marginTop: '1rem' }}
+                        icon={<ReloadOutlined aria-hidden />}
+                        onClick={updateData}
+                      >
+                        Refresh
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        padding: '2rem',
+                        flexGrow: 1, // Expand to take available space
+                        background: 'white',
+                        marginBottom: '1rem',
+                      }}
+                    >
+                      <img src={TasksCompleteGraphic} alt="No positions" />
+                      <div>All good! It looks like you don't have any assigned tasks.</div>
+                      <Button
+                        type="link"
+                        style={{ marginTop: '1rem' }}
+                        icon={<ReloadOutlined aria-hidden />}
+                        onClick={updateData}
+                      >
+                        Refresh
+                      </Button>
+                    </div>
+                  </>
+                )
               ) : (
                 <>
                   <div
