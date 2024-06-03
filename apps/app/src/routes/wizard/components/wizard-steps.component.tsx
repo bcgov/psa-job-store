@@ -13,7 +13,7 @@ interface WizardStepsProps {
 
 export const WizardSteps: React.FC<WizardStepsProps> = ({
   current,
-  xl = 14,
+  xl = 16,
   maxStepCompleted = 0,
   onStepClick,
   disabledTooltip,
