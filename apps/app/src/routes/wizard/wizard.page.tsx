@@ -46,7 +46,9 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const jobProfileSearchResultsRef = useRef<JobProfileSearchResultsRef>(null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedClassificationId, setSelectedClassificationId] = useState<string | undefined>();
+  const [selectedClassification, setSelectedClassification] = useState<
+    { id: string; employee_group_id: string; peoplesoft_id: string } | undefined
+  >();
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { positionRequestId, positionRequestData } = useWizardContext();
@@ -155,7 +157,9 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               title: selectedProfileName ?? undefined,
             }),
             parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
-            classification_id: selectedClassificationId,
+            classification_id: selectedClassification?.id,
+            classification_employee_group_id: selectedClassification?.employee_group_id,
+            classification_peoplesoft_id: selectedClassification?.peoplesoft_id,
           }).unwrap();
         }
         setPositionRequestProfileId(parseInt(selectedProfileId));
@@ -209,7 +213,15 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     // if there is a profile already associated with the position request, show a warning
     setSelectedProfileName(profile.title.toString());
     setSelectedProfileId(profile.id.toString());
-    if (profile?.classifications != null) setSelectedClassificationId(profile?.classifications[0].classification.id);
+
+    if (profile?.classifications != null)
+      setSelectedClassification({
+        ...{
+          id: profile.classifications[0].classification.id,
+          employee_group_id: profile.classifications[0].classification.employee_group_id,
+          peoplesoft_id: profile.classifications[0].classification.peoplesoft_id,
+        },
+      });
   };
 
   const [deletePositionRequest] = useDeletePositionRequestMutation();

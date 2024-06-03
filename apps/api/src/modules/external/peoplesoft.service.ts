@@ -107,7 +107,13 @@ export class PeoplesoftService {
 
     for await (const row of sortedRows) {
       await this.prisma.classification.upsert({
-        where: { id: row.JOBCODE },
+        where: {
+          id_employee_group_id_peoplesoft_id: {
+            id: row.JOBCODE,
+            employee_group_id: row.SAL_ADMIN_PLAN,
+            peoplesoft_id: row.SETID,
+          },
+        },
         create: {
           id: row.JOBCODE,
           peoplesoft_id: row.SETID,

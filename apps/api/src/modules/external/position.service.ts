@@ -5,6 +5,7 @@ import { ClassificationService } from './classification.service';
 import { DepartmentService } from './department.service';
 import { Employee } from './models/employee.model';
 import { FindUniquePositionArgs } from './models/find-unique-position.args';
+import { PeoplesoftPosition } from './models/peoplesoft-position.model';
 import { PositionProfile } from './models/position-profile.model';
 import { Position } from './models/position.model';
 import { OrganizationService } from './organization.service';
@@ -34,12 +35,9 @@ export class PositionService {
     let position: Position | null = null;
 
     if (rows?.length > 0) {
-      const raw = rows[0];
+      const raw = rows[0] as PeoplesoftPosition;
 
-      const classification =
-        raw['A.JOBCODE'] != null
-          ? await this.classificationService.getClassification({ where: { id: raw['A.JOBCODE'] } })
-          : null;
+      const classification = await this.classificationService.getClassificationForPeoplesoftPosition(raw);
 
       const department =
         raw['A.DEPTID'] != null ? await this.departmentService.getDepartment({ where: { id: raw['A.DEPTID'] } }) : null;
