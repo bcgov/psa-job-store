@@ -39,7 +39,7 @@ interface WizardEditProfileProps {
   submitText?: string;
   showBackButton?: boolean;
   onVerificationRequiredChange?: (verificationRequired: boolean) => void;
-  handleFormChange: () => void;
+  handleFormChange: (state: boolean) => void;
 }
 
 enum reasons {
@@ -174,6 +174,11 @@ const WizardEditProfile = forwardRef(
     });
 
     const { control, reset, handleSubmit, getValues, formState, trigger } = useFormReturn;
+    const { isDirty } = formState;
+
+    useEffect(() => {
+      handleFormChange(isDirty);
+    }, [isDirty, handleFormChange]);
 
     useEffect(() => {
       if (!profileData && data && !isLoading) {
@@ -653,7 +658,7 @@ const WizardEditProfile = forwardRef(
             </Descriptions>
           </Col>
           <Col xs={24} sm={24} lg={16}>
-            <Form form={form} onFinish={handleSubmit((_data) => {})} onChange={handleFormChange}>
+            <Form form={form} onFinish={handleSubmit((_data) => {})}>
               <FormItem name="id" control={control} hidden>
                 <Input />
               </FormItem>
