@@ -15,7 +15,6 @@ import LoadingSpinnerWithMessage from '../../components/app/common/components/lo
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
-  useGetPositionRequestQuery,
   usePositionNeedsRivewQuery,
   useSubmitPositionRequestMutation,
   useUpdatePositionRequestMutation,
@@ -58,17 +57,17 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   const [mode, setMode] = useState('');
   const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
-  const { positionRequestId, setCurrentSection } = useWizardContext();
+  const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData } = useWizardContext();
 
-  const {
-    data: positionRequestData,
-    isLoading: positionRequestLoading,
-    // isError: positionRequestLoadingError,
-    refetch: refetchPositionRequest,
-    isFetching: isFetchingPositionRequest,
-  } = useGetPositionRequestQuery({
-    id: positionRequestId ?? -1,
-  });
+  // const {
+  //   data: positionRequestData,
+  //   isLoading: positionRequestLoading,
+  //   // isError: positionRequestLoadingError,
+  //   refetch: refetchPositionRequest,
+  //   isFetching: isFetchingPositionRequest,
+  // } = useGetPositionRequestQuery({
+  //   id: positionRequestId ?? -1,
+  // });
 
   const {
     data: positionNeedsRivew,
@@ -83,29 +82,29 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   useEffect(() => {
     // Fetch position request and needs review data when positionRequestId changes
     if (positionRequestId) {
-      refetchPositionRequest();
+      // refetchPositionRequest();
       refetchPositionNeedsRivew();
     }
-  }, [positionRequestId, refetchPositionRequest, refetchPositionNeedsRivew]);
+  }, [positionRequestId, refetchPositionNeedsRivew]);
 
   useEffect(() => {
     // if loading
-    if (positionRequestLoading || positionNeedsRivewLoading) return;
+    if (positionNeedsRivewLoading) return;
 
     // load comment if prevsiously entered
-    if (positionRequestData?.positionRequest?.additional_info?.comments) {
-      setComment(positionRequestData.positionRequest?.additional_info.comments);
+    if (positionRequestData?.additional_info?.comments) {
+      setComment(positionRequestData?.additional_info.comments);
     }
 
     // if state is draft and position doesn't need review, set mode to readyToCreatePositionNumber
-    if (positionRequestData?.positionRequest?.status === 'DRAFT' && !positionNeedsRivew?.positionNeedsRivew.result) {
+    if (positionRequestData?.status === 'DRAFT' && !positionNeedsRivew?.positionNeedsRivew.result) {
       setMode('readyToCreatePositionNumber');
       return;
     }
 
     // if state is draft and position needs review, set mode to verificationRequired_edits
     // Will show a warning message and a links that take user to the sections that if changes will not require verification
-    if (positionRequestData?.positionRequest?.status === 'DRAFT' && positionNeedsRivew?.positionNeedsRivew.result) {
+    if (positionRequestData?.status === 'DRAFT' && positionNeedsRivew?.positionNeedsRivew.result) {
       setVerificationNeededReasons(positionNeedsRivew.positionNeedsRivew.reasons);
       setMode('verificationRequired_edits');
       return;
@@ -113,7 +112,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
     // if state is COMPLETE, then set parent to readonly mode
     // Will show "Your position has been created" screen
-    if (positionRequestData?.positionRequest?.status === 'COMPLETED') {
+    if (positionRequestData?.status === 'COMPLETED') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('completed');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -122,7 +121,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
     // if state is CANCELLED, then set parent to readonly mode
     // Will show "Your position has been created" screen
-    if (positionRequestData?.positionRequest?.status === 'CANCELLED') {
+    if (positionRequestData?.status === 'CANCELLED') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('cancelled');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -130,7 +129,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
 
     // if it's in VERIFICATION;, set mode to sentForVerification
-    if (positionRequestData?.positionRequest?.status === 'VERIFICATION') {
+    if (positionRequestData?.status === 'VERIFICATION') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -138,13 +137,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
 
     // if it's in ACTION_REQUIRED show alternate verification required screen
-    if (positionRequestData?.positionRequest?.status === 'ACTION_REQUIRED') {
+    if (positionRequestData?.status === 'ACTION_REQUIRED') {
       setMode('verificationRequired_retry');
       return;
     }
 
     // if it's in REVIEW status, show "classification review required" screen
-    if (positionRequestData?.positionRequest?.status === 'REVIEW') {
+    if (positionRequestData?.status === 'REVIEW') {
       switchParentMode && switchParentMode('readonly');
       // setMode('classificationReviewRequired');
       switchParentReadonlyMode && switchParentReadonlyMode('inQueue');
@@ -154,7 +153,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   }, [
     positionNeedsRivew,
     positionRequestData,
-    positionRequestLoading,
     positionNeedsRivewLoading,
     switchParentMode,
     switchParentReadonlyMode,
@@ -209,6 +207,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
           setReadOnlySelectedTab && setReadOnlySelectedTab('4');
         }
+
+        setPositionRequestData(result?.submitPositionRequest ?? null);
       } else {
         throw Error('Position request not found');
       }
@@ -293,8 +293,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       });
   };
 
-  if (positionRequestLoading || positionNeedsRivewLoading || isFetchingPositionNeedsRivew || isFetchingPositionRequest)
-    return <LoadingSpinnerWithMessage />;
+  if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew) return <LoadingSpinnerWithMessage />;
 
   return (
     <>
@@ -713,7 +712,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       I will abide by the Public Service Act and all Human Resources policies for hiring decisions
                       related to this position.
                     </li>
-                    <li>I have confirmed budget is approved to support this request.</li>
                   </ul>
                 </div>
               </div>

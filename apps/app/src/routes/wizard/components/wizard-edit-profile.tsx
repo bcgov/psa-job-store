@@ -557,10 +557,6 @@ const WizardEditProfile = forwardRef(
 
     const { positionRequestData } = useWizardContext();
 
-    // const { data: positionRequestData } = useGetPositionRequestQuery({
-    //   id: positionRequestId ? positionRequestId : -1,
-    // });
-
     if (isLoading || !resetComplete) {
       return <LoadingSpinnerWithMessage />;
     }

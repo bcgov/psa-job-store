@@ -114,9 +114,9 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                   </div>
                 </Tooltip>
               ),
-              onClick: () => (maxStepCompleted >= 1 && current != 1 ? handleStepClick(1) : {}),
+              onClick: () => (maxStepCompleted >= 1 && current != 1 && !disabledTooltip ? handleStepClick(1) : {}),
               className: `${maxStepCompleted >= 1 && current != 1 ? 'clickable' : 'waiting'} ${
-                disabledTooltip ? 'no-click' : ''
+                disabledTooltip && maxStepCompleted >= 1 && current != 1 ? 'no-click' : ''
               }`,
             },
             {
@@ -132,9 +132,9 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
               ),
               // title: current == 2 ? <h2 className={current == 2 ? 'current' : ''}>Edit</h2> : 'Edit',
               // description: requiresVerification ? 'Changes will need to be verified' : 'Make changes if needed',
-              onClick: () => (maxStepCompleted >= 2 && current != 2 ? handleStepClick(2) : {}),
+              onClick: () => (maxStepCompleted >= 2 && current != 2 && !disabledTooltip ? handleStepClick(2) : {}),
               className: `${maxStepCompleted >= 2 && current != 2 ? 'clickable' : 'waiting'} ${
-                disabledTooltip ? 'no-click' : ''
+                disabledTooltip && maxStepCompleted >= 2 && current != 2 ? 'no-click' : ''
               }`,
             },
             {
@@ -146,9 +146,9 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                   </div>
                 </Tooltip>
               ),
-              onClick: () => (maxStepCompleted >= 3 && current != 3 ? handleStepClick(3) : {}),
+              onClick: () => (maxStepCompleted >= 3 && current != 3 && !disabledTooltip ? handleStepClick(3) : {}),
               className: `${maxStepCompleted >= 3 && current != 3 ? 'clickable' : 'waiting'} ${
-                disabledTooltip ? 'no-click' : ''
+                disabledTooltip && maxStepCompleted >= 3 && current != 3 ? 'no-click' : ''
               }`,
             },
             {
@@ -164,9 +164,9 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                   </div>
                 </Tooltip>
               ),
-              onClick: () => (maxStepCompleted >= 4 && current != 4 ? handleStepClick(4) : {}),
+              onClick: () => (maxStepCompleted >= 4 && current != 4 && !disabledTooltip ? handleStepClick(4) : {}),
               className: `${maxStepCompleted >= 4 && current != 4 ? 'clickable' : 'waiting'} ${
-                disabledTooltip ? 'no-click' : ''
+                disabledTooltip && maxStepCompleted >= 4 && current != 4 ? 'no-click' : ''
               }`,
             },
             {
@@ -178,9 +178,9 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                   </div>
                 </Tooltip>
               ),
-              onClick: () => (maxStepCompleted >= 5 && current != 5 ? handleStepClick(5) : {}),
+              onClick: () => (maxStepCompleted >= 5 && current != 5 && !disabledTooltip ? handleStepClick(5) : {}),
               className: `${maxStepCompleted >= 5 && current != 5 ? 'clickable' : 'waiting'} ${
-                disabledTooltip ? 'no-click' : ''
+                disabledTooltip && maxStepCompleted >= 5 && current != 5 ? 'no-click' : ''
               }`,
             },
           ]}

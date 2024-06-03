@@ -9,9 +9,8 @@ import { graphqlApi } from '../../../redux/services/graphql-api';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { OrganizationModel } from '../../../redux/services/graphql-api/organization';
-import { useLazyGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
-import { WizardProvider } from '../../wizard/components/wizard.provider';
+import { WizardProvider, useWizardContext } from '../../wizard/components/wizard.provider';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 import { JobProfileSearch } from './job-profile-search.component';
 import { JobProfile } from './job-profile.component';
@@ -60,6 +59,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const { positionRequestId, number } = useParams();
     const params = useParams();
     const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
+    const { positionRequestData: prData } = useWizardContext();
 
     // useref to keep track of whether we fetched with selectProfileId
     const selectProfileIdRan = useRef(false);
@@ -73,24 +73,24 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
   */
 
     // todo: this should not be needed, get this info from the wizard context
-    const [prTrigger, { data: prData }] = useLazyGetPositionRequestQuery();
+    // const [prTrigger, { data: prData }] = useLazyGetPositionRequestQuery();
     const [pTrigger, { data: pData }] = useLazyGetPositionQuery();
     const [positionFilteringProcessActive, setPositionFilteringProcessActive] = useState<boolean>(true);
     // TODO: Add useLazyGetPositionQuery(<id>)
 
     useEffect(() => {
       // If we have a positionRequestId and no position request data, get the position request data
-      if (positionRequestId != null && prData == null) {
-        // console.log('prTrigger!');
-        prTrigger({ id: +positionRequestId });
-      }
+      // if (positionRequestId != null && prData == null) {
+      //   // console.log('prTrigger!');
+      //   prTrigger({ id: +positionRequestId });
+      // }
 
       if (positionRequestId == null) {
         setPositionFilteringProcessActive(false);
       }
 
       // If we have a positionRequestId and prData, get the position data
-      const reportsToPositionId = prData?.positionRequest?.reports_to_position_id;
+      const reportsToPositionId = prData?.reports_to_position_id;
       if (reportsToPositionId != null && pData == null) {
         dispatch(graphqlApi.util.invalidateTags(['jobProfiles']));
         pTrigger({ where: { id: `${reportsToPositionId}` } });
@@ -103,7 +103,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         // set classificationIdFilter from the position data to filter job profiles by classification
         setClassificationIdFilter(classificationId);
       }
-    }, [positionRequestId, prData, pData, classificationIdFilter, dispatch, pTrigger, prTrigger]);
+    }, [positionRequestId, prData, pData, classificationIdFilter, dispatch, pTrigger]);
 
     const [initialFetchDone, setInitialFetchDone] = useState(false);
 

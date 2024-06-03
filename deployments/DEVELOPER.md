@@ -178,6 +178,10 @@ To do so:
 3. Apply changes by running `oc apply -k deployments/openshift/kustomize/overlays/api/<ENV>` and
    `oc apply -k deployments/openshift/kustomize/overlays/app/<ENV>`
 
+NOTE: Perform a rollout on the sidecar deployment - this will reload the secrets and prevent
+`Can't reach database server at...` and `Please make sure your database server is running at...` GitHub Actions errors during
+subsequent migrations.
+
 Once the new cluster is connected, verify the application is working. You can then delete the old cluster (although a waiting period of a few days might not be a bad idea!). Before deleting, RECORD THE NAME OF THE PERSISTANT VOLUME (PV) ATTACHED TO THE BACKUP PVC BELOW, AND ENSURE THAT YOU ARE REFERENCING THE CORRECT CLUSTER. In the metadata section of the postgrescluster.yml file, it must be set to the resource name you want to delete (Similarily, if you testing out backup and restore, make sure this is set to your cloned cluster's name when cleaning up!):
 
 ```
