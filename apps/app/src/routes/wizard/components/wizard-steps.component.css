@@ -24,6 +24,14 @@
   color: rgba(0, 0, 0, 0.88);
 }
 
+.custom-steps.max-step-2 .ant-steps-item:nth-child(2) .ant-steps-item-description,
+.custom-steps.max-step-3 .ant-steps-item:nth-child(3) .ant-steps-item-description,
+.custom-steps.max-step-4 .ant-steps-item:nth-child(4) .ant-steps-item-description,
+.custom-steps.max-step-5 .ant-steps-item:nth-child(5) .ant-steps-item-description
+{
+  color: #4e4e4e;
+}
+
 .custom-steps .clickable:not(.no-click):hover *{
   cursor: pointer !important;
   color: #3470B1 !important;
@@ -34,22 +42,21 @@
 }
 
 
+.custom-steps.max-step-2 .ant-steps-item:nth-child(1):not(.ant-steps-item-finish) .ant-steps-item-tail::after,
+.custom-steps.max-step-2 .ant-steps-item:nth-child(1):not(.ant-steps-item-active):not(.ant-steps-item-finish) .ant-steps-icon-dot,
+.custom-steps.max-step-2 .ant-steps-item:nth-child(2):not(.ant-steps-item-active):not(.ant-steps-item-finish) .ant-steps-icon-dot,
 
-.custom-steps.max-step-2 .ant-steps-item:nth-child(1) .ant-steps-item-tail::after,
-.custom-steps.max-step-2 .ant-steps-item:nth-child(1):not(.ant-steps-item-active) .ant-steps-icon-dot,
-.custom-steps.max-step-2 .ant-steps-item:nth-child(2):not(.ant-steps-item-active) .ant-steps-icon-dot,
+.custom-steps.max-step-3 .ant-steps-item:nth-child(2):not(.ant-steps-item-finish) .ant-steps-item-tail::after,
+.custom-steps.max-step-3 .ant-steps-item:nth-child(3):not(.ant-steps-item-active):not(.ant-steps-item-finish) .ant-steps-icon-dot,
 
-.custom-steps.max-step-3 .ant-steps-item:nth-child(2) .ant-steps-item-tail::after,
-.custom-steps.max-step-3 .ant-steps-item:nth-child(3):not(.ant-steps-item-active) .ant-steps-icon-dot,
+.custom-steps.max-step-4 .ant-steps-item:nth-child(3):not(.ant-steps-item-finish) .ant-steps-item-tail::after,
+.custom-steps.max-step-4 .ant-steps-item:nth-child(4):not(.ant-steps-item-active):not(.ant-steps-item-finish) .ant-steps-icon-dot,
 
-.custom-steps.max-step-4 .ant-steps-item:nth-child(3) .ant-steps-item-tail::after,
-.custom-steps.max-step-4 .ant-steps-item:nth-child(4):not(.ant-steps-item-active) .ant-steps-icon-dot,
+.custom-steps.max-step-5 .ant-steps-item:nth-child(4):not(.ant-steps-item-finish) .ant-steps-item-tail::after,
+.custom-steps.max-step-5 .ant-steps-item:nth-child(5):not(.ant-steps-item-active):not(.ant-steps-item-finish) .ant-steps-icon-dot,
 
-.custom-steps.max-step-5 .ant-steps-item:nth-child(4) .ant-steps-item-tail::after,
-.custom-steps.max-step-5 .ant-steps-item:nth-child(5):not(.ant-steps-item-active) .ant-steps-icon-dot,
-
-.custom-steps.max-step-6 .ant-steps-item:nth-child(5) .ant-steps-item-tail::after,
-.custom-steps.max-step-6 .ant-steps-item:nth-child(6):not(.ant-steps-item-active) .ant-steps-icon-dot
+.custom-steps.max-step-6 .ant-steps-item:nth-child(5):not(.ant-steps-item-finish) .ant-steps-item-tail::after,
+.custom-steps.max-step-6 .ant-steps-item:nth-child(6):not(.ant-steps-item-active):not(.ant-steps-item-finish) .ant-steps-icon-dot
 {
   background-color: #A8D0FB !important;
 }
@@ -60,3 +67,15 @@
 
 
 
+/* .custom-steps .ant-steps-item-finish .ant-steps-item-tail::after {
+  background-color: #1890FF !important;
+}
+
+.custom-steps .ant-steps-item:not(.ant-steps-item-active):not(.ant-steps-item-finish) .ant-steps-icon-dot {
+  background-color: #A8D0FB !important;
+} */
+
+/* .custom-steps .ant-steps-item:not(.ant-steps-item-finish) .ant-steps-item-tail::after, 
+.custom-steps .ant-steps-item:not(.ant-steps-item-active):not(.ant-steps-item-finish) .ant-steps-icon-dot  {
+  background-color: #A8D0FB !important;
+} */

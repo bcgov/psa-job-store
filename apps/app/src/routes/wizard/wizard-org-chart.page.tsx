@@ -182,7 +182,7 @@ export const WizardOrgChartPage = ({
             }}
             loading={isLoading}
           >
-            Next
+            Save and next
           </Button>
         </Tooltip>,
       ]}
