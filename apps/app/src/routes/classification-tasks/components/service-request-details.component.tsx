@@ -11,8 +11,6 @@ type ServiceRequestDetailsProps = {
 };
 
 export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ positionRequestData }) => {
-  // console.log('ServiceRequestDetails positionRequestData: ', positionRequestData);
-
   const { data: locationInfo, isLoading: locationLoading } = useGetLocationQuery(
     {
       id: positionRequestData?.positionRequest?.additional_info?.work_location_id,
@@ -97,9 +95,10 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'Reports to',
       children: (
         <PositionProfile
-          positionNumber={positionRequestData?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          positionNumber={positionRequestData?.positionRequest?.reports_to_position_id}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
+
         // <div>
         //   {reportsToLoading && <LoadingComponent mode="small" />}
         //   {firstActivePosition2 && reportsToInfo?.positionProfile && reportsToInfo?.positionProfile?.length > 0 && (
@@ -130,7 +129,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'First level excluded manager for this position',
       children: (
         <PositionProfile
-          positionNumber={positionRequestData?.positionRequest?.reports_to_position_id}
+          positionNumber={positionRequestData?.positionRequest?.additional_info?.excluded_mgr_position_number}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>

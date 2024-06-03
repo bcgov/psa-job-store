@@ -6,7 +6,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import 'reactflow/dist/style.css';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import { usePosition } from '../../components/app/common/contexts/position.context';
-import { GetPositionRequestResponseContent } from '../../redux/services/graphql-api/position-request.api';
+import {
+  GetPositionRequestResponseContent,
+  useUpdatePositionRequestMutation,
+} from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
@@ -28,7 +31,9 @@ export const WizardOrgChartPage = ({
   positionRequest,
   setCurrentStep,
 }: WizardOrgChartPageProps) => {
-  const { positionRequestDepartmentId, resetWizardContext, positionRequestData } = useWizardContext();
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  const { positionRequestDepartmentId, resetWizardContext, positionRequestData, positionRequestId } =
+    useWizardContext();
 
   // this page gets displayed on two routes: /my-position-requests/create and /my-position-requests/:id
   // if we navigate to /my-position-requests/create, wipe all wizard context info
@@ -134,8 +139,16 @@ export const WizardOrgChartPage = ({
   const switchStep = async (step: number) => {
     const code = await next({ switchStep: false });
 
-    if (code == 'NO_CHANGE') setCurrentStep?.(step); // if the user didn't change the supervisor, just switch the step
-    else if (code != 'CANCELLED') setCurrentStep?.(2); // if the user changed the supervisor, switch to step 2, even if user selected something else
+    if (code == 'NO_CHANGE') {
+      setCurrentStep?.(step); // if the user didn't change the supervisor, just switch the step
+      if (positionRequestId)
+        updatePositionRequest({
+          id: positionRequestId,
+          step: step,
+        });
+    } else if (code != 'CANCELLED') {
+      setCurrentStep?.(2); // if the user changed the supervisor, switch to step 2, even if user selected something else
+    }
   };
 
   if (locationProcessed === false) {

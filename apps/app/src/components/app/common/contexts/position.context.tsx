@@ -35,7 +35,7 @@ interface PositionProviderProps {
 }
 
 export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) => {
-  const { positionRequestId, resetWizardContext } = useWizardContext();
+  const { positionRequestId, resetWizardContext, setPositionRequestData } = useWizardContext();
   const [createPositionRequest] = useCreatePositionRequestMutation();
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const navigate = useNavigate();
@@ -89,7 +89,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
               cancelText: 'Cancel',
               onOk: async () => {
                 resetWizardContext(); // this ensures that any previous edits are cleared
-                await updatePositionRequest({
+                const resp = await updatePositionRequest({
                   id: positionRequestId,
                   step: 1,
                   max_step_completed: 1, // reset max step
@@ -101,7 +101,10 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   parent_job_profile: { connect: { id: null } },
                   additional_info: null,
                   title: null,
+                  returnFullObject: true,
                 }).unwrap();
+
+                setPositionRequestData(resp.updatePositionRequest ?? null);
                 resolve('CHANGED_SUPERVISOR');
               },
               onCancel: () => {

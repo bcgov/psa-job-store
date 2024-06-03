@@ -1044,7 +1044,7 @@ export class PositionRequestApiService {
     // If the Job Profile is denoted as requiring review, it _must_ be reviewed every time
     if (jobProfile.review_required === true) {
       reasons.push('Job Profile is denoted as requiring review');
-      return { result: true, reasons: reasons };
+      // return { result: true, reasons: reasons };
     }
 
     // If the job profile is _not_ denoted as requiring review, it must be reviewed _only_ if significant sections have been changed

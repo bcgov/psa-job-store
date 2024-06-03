@@ -75,6 +75,10 @@ export interface GetPositionRequestResponse {
   sharedPositionRequest?: GetPositionRequestResponseContent; // this is for GetSharedPositionRequestResponse
 }
 
+export interface UpdatePositionRequestResponse {
+  updatePositionRequest: GetPositionRequestResponseContent;
+}
+
 export interface SubmitPositionRequestResponse {
   submitPositionRequest: GetPositionRequestResponseContent;
 }
@@ -137,6 +141,7 @@ export interface UpdatePositionRequestInput {
       id: string;
     };
   };
+  returnFullObject?: boolean;
 }
 
 export interface SubmitPositionRequestInput {
@@ -253,7 +258,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     getPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
-      providesTags: ['positionRequest'],
+      // providesTags: ['positionRequest'],
       // result
       //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
       //   : [{ type: 'PositionRequest' as const, id: 'id' }],
@@ -295,7 +300,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     getSharedPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
-      providesTags: ['positionRequest'],
+      // providesTags: ['positionRequest'],
       // result
       //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
       //   : [{ type: 'PositionRequest' as const, id: 'id' }],
@@ -350,14 +355,43 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    updatePositionRequest: build.mutation<GetPositionRequestResponse, UpdatePositionRequestInput>({
-      invalidatesTags: ['positionRequest'],
+    updatePositionRequest: build.mutation<UpdatePositionRequestResponse, UpdatePositionRequestInput>({
+      // invalidatesTags: ['positionRequest'],
       query: (input: UpdatePositionRequestInput) => {
         return {
           document: gql`
-            mutation UpdatePositionRequest($id: Int!, $updateInput: PositionRequestUpdateInput!) {
-              updatePositionRequest(id: $id, updateInput: $updateInput) {
+            mutation UpdatePositionRequest(
+              $id: Int!
+              $updateInput: PositionRequestUpdateInput!
+              $returnFullObject: Boolean
+            ) {
+              updatePositionRequest(id: $id, updateInput: $updateInput, returnFullObject: $returnFullObject) {
                 id
+                step
+                max_step_completed
+                reports_to_position_id
+                parent_job_profile_id
+                profile_json
+                orgchart_json
+                user_id
+                user_name
+                email
+                title
+                position_number
+                classification_code
+                submission_id
+                status
+                updated_at
+                submitted_at
+                department_id
+                approved_at
+                parent_job_profile {
+                  number
+                }
+                additional_info
+                crm_id
+                crm_lookup_name
+                shareUUID
               }
             }
           `,
@@ -366,7 +400,9 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
             updateInput: {
               ...input,
               id: undefined,
+              returnFullObject: undefined,
             },
+            returnFullObject: input.returnFullObject || false,
           },
         };
       },
@@ -382,20 +418,28 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 step
                 max_step_completed
                 reports_to_position_id
-                department_id
                 parent_job_profile_id
                 profile_json
+                orgchart_json
                 user_id
-                title
-                position_number
-                classification_id
-                classification_code
                 user_name
                 email
+                title
+                position_number
+                classification_code
                 submission_id
-                approved_at
                 status
                 updated_at
+                submitted_at
+                department_id
+                approved_at
+                parent_job_profile {
+                  number
+                }
+                additional_info
+                crm_id
+                crm_lookup_name
+                shareUUID
               }
             }
           `,
