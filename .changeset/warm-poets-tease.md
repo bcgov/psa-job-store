@@ -3,3 +3,4 @@
 ---
 
 AL-264 Add context menu options for job profiles
+AL-738 Verification warning doesn't display other messages for profiles that always require verification

@@ -45,6 +45,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     positionRequestProfileId,
     positionRequestId,
     setRequiresVerification,
+    setPositionRequestData,
   } = useWizardContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingBack, setIsLoadingBack] = useState(false);
@@ -201,8 +202,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
       setWizardData(transformedData);
       try {
-        if (positionRequestId)
-          await updatePositionRequest({
+        if (positionRequestId) {
+          const resp = await updatePositionRequest({
             id: positionRequestId,
             step: !step && step != 0 ? (action === 'next' ? 3 : action === 'back' ? 1 : 2) : step,
             // increment max step only if it's not incremented
@@ -211,8 +212,11 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
               : {}),
             profile_json: transformedData,
             title: formData.title.text,
+            returnFullObject: true,
             // classification_code: classification ? classification.code : '',
           }).unwrap();
+          setPositionRequestData(resp.updatePositionRequest ?? null);
+        }
       } catch (error) {
         // Handle the error, possibly showing another modal
         Modal.error({

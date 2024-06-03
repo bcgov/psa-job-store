@@ -52,7 +52,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const [selectedClassificationId, setSelectedClassificationId] = useState<string | undefined>();
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
-  const { positionRequestId, positionRequestData } = useWizardContext();
+  const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const { setPositionRequestProfileId } = useWizardContext();
   const navigate = useNavigate();
@@ -106,7 +106,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           cancelText: 'Cancel',
           onOk: async () => {
             setWizardData(null); // this ensures that any previous edits are cleared
-            await handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step);
+            await handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step, 'CHANGED_PROFILE');
             resolve('CHANGED_PROFILE');
           },
           onCancel: () => {
@@ -137,34 +137,39 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     }
 
     // user is not changing from previous profile
-    handleNext(action, switchStep, alertNoProfile, step);
+    handleNext(action, switchStep, alertNoProfile, step, 'NO_CHANGE');
     return 'NO_CHANGE';
   };
 
-  const handleNext = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1) => {
+  const handleNext = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1, state = '') => {
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
       if (selectedProfileNumber && selectedProfileId) {
         if (positionRequestId) {
-          await updatePositionRequest({
-            id: positionRequestId,
-            step: step == -1 ? (action === 'next' ? 2 : 1) : step,
-            // increment max step only if it's not incremented
-            ...(action === 'next' && positionRequest?.max_step_completed != 2 && step == -1
-              ? { max_step_completed: 2 }
-              : {}),
-            // if user selected same profile as before, do not clear profile_json
-            // also do not update title to default
-            ...(positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
-              additional_info: null,
-              profile_json: null,
-              title: selectedProfileName ?? undefined,
-              max_step_completed: 2,
-            }),
-            parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
-            classification_id: selectedClassificationId,
-          }).unwrap();
+          if (state == 'CHANGED_PROFILE' || (state == 'NO_CHANGE' && switchStep)) {
+            const resp = await updatePositionRequest({
+              id: positionRequestId,
+              step: step == -1 ? (action === 'next' ? 2 : 1) : step,
+              // increment max step only if it's not incremented
+              ...(action === 'next' && positionRequest?.max_step_completed != 2 && step == -1
+                ? { max_step_completed: 2 }
+                : {}),
+              // if user selected same profile as before, do not clear profile_json
+              // also do not update title to default
+              ...(positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
+                additional_info: null,
+                profile_json: null,
+                title: selectedProfileName ?? undefined,
+                max_step_completed: 2,
+              }),
+              parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
+              classification_id: selectedClassificationId,
+              returnFullObject: true,
+            }).unwrap();
+
+            setPositionRequestData(resp.updatePositionRequest ?? null);
+          }
         }
         setPositionRequestProfileId(parseInt(selectedProfileId));
 
@@ -186,6 +191,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     if (selectedProfile) {
       setSelectedProfileNumber(selectedProfile);
     } else {
+      setSelectedProfileId(null);
       setSelectedProfileNumber(null);
     }
   }, [searchParams]); // picks up profile id from search params
@@ -265,19 +271,21 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const updatePositionRequestAndSetStep = async (step: number) => {
     if (positionRequestId) {
       setCurrentStep(step);
-      // await updatePositionRequest({
-      //   id: positionRequestId,
-      //   step: step,
-      // });
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: step,
+      });
       // refetchPositionRequest();
     }
   };
 
   const switchStep = async (step: number) => {
     const code = await onSubmit('next', false, false, step);
-    if (code == 'NO_CHANGE') updatePositionRequestAndSetStep(step);
-    else if (code != 'CANCELLED') updatePositionRequestAndSetStep(2);
-    else if (code == 'CANCELLED') return;
+    if (code == 'NO_CHANGE') {
+      updatePositionRequestAndSetStep(step);
+    } else if (code != 'CANCELLED') {
+      updatePositionRequestAndSetStep(2);
+    } else if (code == 'CANCELLED') return;
   };
 
   if (!departmentData) return <LoadingComponent></LoadingComponent>;
@@ -332,6 +340,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         //   hasUnsavedChanges={hasUnsavedChanges}
         maxStepCompleted={positionRequest?.max_step_completed}
         onStepClick={switchStep}
+        disabledTooltip={selectedProfileId == null ? 'Please select a profile before proceeding.' : null}
       ></WizardSteps>
       <div
         style={{

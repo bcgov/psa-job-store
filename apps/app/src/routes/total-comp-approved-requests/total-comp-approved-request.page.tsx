@@ -87,9 +87,10 @@ export const TotalCompApprovedRequestPage = () => {
       label: 'Reports to',
       children: (
         <PositionProfile
-          positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          positionNumber={data?.positionRequest?.reports_to_position_id}
           orgChartData={data?.positionRequest?.orgchart_json}
         ></PositionProfile>
+
         // <div>
         //   TEST DATA Hill, Nathan CITZ:EX <br />
         //   Sr. Director, Digital Portfolio, Band 4 <br />
@@ -103,7 +104,7 @@ export const TotalCompApprovedRequestPage = () => {
       label: 'First level excluded manager for this position',
       children: (
         <PositionProfile
-          positionNumber={data?.positionRequest?.reports_to_position_id}
+          positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
           orgChartData={data?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>
@@ -335,7 +336,7 @@ export const TotalCompApprovedRequestPage = () => {
                 profileData={data?.positionRequest?.profile_json}
                 showBackToResults={false}
                 showDiff={showDiff}
-                id={data?.positionRequest?.parent_job_profile_id?.toString() ?? undefined}
+                id={data?.positionRequest?.parent_job_profile?.number?.toString() ?? undefined}
               />
             </Col>
           </Row>

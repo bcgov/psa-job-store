@@ -31,20 +31,22 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   setCurrentStep,
 }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
-  const { wizardData, positionRequestId } = useWizardContext();
+  const { wizardData, positionRequestId, setPositionRequestData } = useWizardContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const onNextCallback = async () => {
     setIsLoading(true);
     try {
       if (positionRequestId) {
-        await updatePositionRequest({
+        const resp = await updatePositionRequest({
           id: positionRequestId,
           step: 4,
 
           // increment max step only if it's not incremented
           ...(positionRequest?.max_step_completed != 4 ? { max_step_completed: 4 } : {}),
+          returnFullObject: true,
         }).unwrap();
+        setPositionRequestData(resp.updatePositionRequest ?? null);
         if (onNext) onNext();
         // navigate('/wizard/confirm');
       }
@@ -229,7 +231,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
                 profileData={wizardData}
                 showBackToResults={false}
                 showDiff={showDiff}
-                id={wizardData?.id.toString()}
+                id={wizardData?.number.toString()}
                 showBasicInfo={false}
               />
             </Col>
