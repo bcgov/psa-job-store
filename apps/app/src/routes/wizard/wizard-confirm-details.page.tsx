@@ -308,7 +308,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           // position_number: 123456,
 
           // increment max step only if it's not incremented, and we're not moving back
-          ...(updateStep && action == 'next' && positionRequest?.max_step_completed != 5 && step == -1
+          ...(updateStep && action == 'next' && (positionRequest?.max_step_completed ?? 0) < 5 && step == -1
             ? { max_step_completed: 5 }
             : {}),
 

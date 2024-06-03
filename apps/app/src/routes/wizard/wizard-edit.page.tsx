@@ -52,8 +52,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   const [saveAndQuitLoading, setSaveAndQuitLoading] = useState(false);
   const [isFormModified, setIsFormModified] = useState(false);
 
-  const handleFormChange = () => {
-    setIsFormModified(true);
+  const handleFormChange = (state: boolean) => {
+    setIsFormModified(state);
   };
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
@@ -207,7 +207,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
             id: positionRequestId,
             step: !step && step != 0 ? (action === 'next' ? 3 : action === 'back' ? 1 : 2) : step,
             // increment max step only if it's not incremented
-            ...(action === 'next' && positionRequest?.max_step_completed != 3 && !step && step != 0
+            ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 3 && !step && step != 0
               ? { max_step_completed: 3 }
               : {}),
             profile_json: transformedData,
@@ -315,16 +315,30 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     );
   };
 
+  // const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
+
   const switchStep = async (step: number) => {
     if (isFormModified) {
       Modal.confirm({
         title: 'Unsaved Changes',
-        content: 'You have unsaved changes. Do you want to save them before switching steps?',
+        content: (
+          <div>
+            <p>You have unsaved changes. Do you want to save them before switching steps?</p>
+          </div>
+        ),
+        // okButtonProps: {
+        //   loading: isSwitchStepLoading,
+        // },
+        // cancelButtonProps: {
+        //   loading: isSwitchStepLoading,
+        // },
         okText: 'Save',
         cancelText: 'Cancel',
         onOk: async () => {
+          // setIsSwitchStepLoading(true);
           onNextCallback({ step: step });
           setIsFormModified(false);
+          // setIsSwitchStepLoading(false);
         },
         onCancel: () => {
           // Do nothing if the user cancels
