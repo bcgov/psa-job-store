@@ -85,6 +85,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 classifications {
                   classification {
                     id
+                    employee_group_id
+                    peoplesoft_id
                     code
                     name
                   }
@@ -210,6 +212,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 classifications {
                   classification {
                     id
+                    employee_group_id
+                    peoplesoft_id
                     code
                     name
                   }
@@ -319,6 +323,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 classifications {
                   classification {
                     id
+                    employee_group_id
+                    peoplesoft_id
                     code
                     name
                   }
@@ -524,6 +530,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 classifications {
                   classification {
                     id
+                    employee_group_id
+                    peoplesoft_id
                     code
                     name
                   }
@@ -661,10 +669,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfilesClassifications {
               jobProfilesClassifications {
                 id
+                employee_group_id
+                peoplesoft_id
                 code
                 name
                 grade
-                employee_group_id
               }
             }
           `,
@@ -692,10 +701,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query JobProfilesDraftsClassifications {
               jobProfilesDraftsClassifications {
                 id
+                employee_group_id
+                peoplesoft_id
                 code
                 name
                 grade
-                employee_group_id
               }
             }
           `,

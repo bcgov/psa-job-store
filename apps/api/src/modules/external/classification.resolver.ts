@@ -30,13 +30,16 @@ class ClassificationItem {
   id?: string;
 
   @Field({ nullable: true })
+  employee_group_id?: string;
+
+  @Field({ nullable: true })
+  peoplesoft_id?: string;
+
+  @Field({ nullable: true })
   name?: string;
 
   @Field({ nullable: true })
   groupName?: string;
-
-  @Field({ nullable: true })
-  employee_group_id?: string;
 
   @Field(() => [ClassificationItem], { nullable: true })
   items?: ClassificationItem[];

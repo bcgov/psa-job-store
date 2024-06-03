@@ -128,6 +128,8 @@ export interface UpdatePositionRequestInput {
   title?: string | null;
   position_number?: number;
   classification_id?: string;
+  classification_employee_group_id?: string;
+  classification_peoplesoft_id?: string;
   submission_id?: string;
   status?: string;
   additional_info?: AdditionalInfo | null;

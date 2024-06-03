@@ -5,9 +5,10 @@ import { GetClassificationsResponse } from './job-profile-types';
 
 interface ClassificationItem {
   id: string | null;
+  employee_group_id: string | null;
+  peoplesoft_id: string | null;
   name: string | null;
   groupName: string;
-  employee_group_id: string | null;
   items: ClassificationItem[] | null;
 }
 
@@ -34,10 +35,11 @@ export const classificationApi = graphqlApi.injectEndpoints({
             query Classifications {
               classifications(orderBy: [{ code: asc }, { id: asc }]) {
                 id
+                employee_group_id
+                peoplesoft_id
                 name
                 code
                 grade
-                employee_group_id
               }
             }
           `,
@@ -54,10 +56,11 @@ export const classificationApi = graphqlApi.injectEndpoints({
                 where: { effective_status: { equals: "Active" }, peoplesoft_id: { equals: "BCSET" } }
               ) {
                 id
+                employee_group_id
+                peoplesoft_id
                 name
                 code
                 grade
-                employee_group_id
               }
             }
           `,
@@ -99,6 +102,7 @@ export const classificationApi = graphqlApi.injectEndpoints({
                           groupName
                           items {
                             id
+                            peoplesoft_id
                             name
                             groupName
                             employee_group_id
