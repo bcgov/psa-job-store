@@ -85,6 +85,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     return pathParts.join('/');
   };
 
+  const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
+
   const onSubmit = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1): Promise<string> => {
     if (
       positionRequestData?.parent_job_profile?.number &&
@@ -102,12 +104,28 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               <p>This action is irreversible. Are you sure you wish to proceed?</p>
             </div>
           ),
+          okButtonProps: {
+            loading: isSwitchStepLoading,
+          },
+          cancelButtonProps: {
+            loading: isSwitchStepLoading,
+          },
           okText: 'Change profile',
           cancelText: 'Cancel',
           onOk: async () => {
-            setWizardData(null); // this ensures that any previous edits are cleared
-            await handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step, 'CHANGED_PROFILE');
-            resolve('CHANGED_PROFILE');
+            setIsSwitchStepLoading(true);
+            // setWizardData(null); // this ensures that any previous edits are cleared
+            // await handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step, 'CHANGED_PROFILE');
+            // setIsSwitchStepLoading(false);
+            // resolve('CHANGED_PROFILE');
+            return new Promise((resolveOk) => {
+              setWizardData(null); // this ensures that any previous edits are cleared
+              handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step, 'CHANGED_PROFILE').then(() => {
+                setIsSwitchStepLoading(false);
+                resolve('CHANGED_PROFILE');
+                resolveOk(undefined);
+              });
+            });
           },
           onCancel: () => {
             // re-select profile on the correct page
@@ -152,7 +170,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               id: positionRequestId,
               step: step == -1 ? (action === 'next' ? 2 : 1) : step,
               // increment max step only if it's not incremented
-              ...(action === 'next' && positionRequest?.max_step_completed != 2 && step == -1
+              ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 2 && step == -1
                 ? { max_step_completed: 2 }
                 : {}),
               // if user selected same profile as before, do not clear profile_json

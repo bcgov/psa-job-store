@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Modal } from 'antd';
-import React, { ReactNode, useContext } from 'react';
+import React, { ReactNode, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   useCreatePositionRequestMutation,
@@ -38,6 +38,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
   const { positionRequestId, resetWizardContext, setPositionRequestData } = useWizardContext();
   const [createPositionRequest] = useCreatePositionRequestMutation();
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
   const navigate = useNavigate();
 
   const createNewPosition = async (
@@ -87,7 +88,14 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
               ),
               okText: 'Change supervisor',
               cancelText: 'Cancel',
+              okButtonProps: {
+                loading: isSwitchStepLoading,
+              },
+              cancelButtonProps: {
+                loading: isSwitchStepLoading,
+              },
               onOk: async () => {
+                setIsSwitchStepLoading(true);
                 resetWizardContext(); // this ensures that any previous edits are cleared
                 const resp = await updatePositionRequest({
                   id: positionRequestId,
@@ -105,6 +113,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                 }).unwrap();
 
                 setPositionRequestData(resp.updatePositionRequest ?? null);
+                setIsSwitchStepLoading(false);
                 resolve('CHANGED_SUPERVISOR');
               },
               onCancel: () => {

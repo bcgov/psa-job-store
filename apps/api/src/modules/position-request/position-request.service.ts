@@ -271,6 +271,7 @@ export class PositionRequestApiService {
                 `Failed to map to an internal status for crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, crm status:  ${crm_status}, crm category: ${crm_category}, ps status: ${positionObj['A.POSN_STATUS']}`,
               );
             }
+
             // we will potentially create PRs with UNKNOWN status if there is an issue with CRM or PS creation
             positionRequest = await this.prisma.positionRequest.update({
               where: { id },
