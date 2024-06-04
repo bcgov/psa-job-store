@@ -1206,10 +1206,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   const updateMinimumRequirementsFromClassification = (classId: string | null) => {
     if (classId) {
+      const [id, employee_group_id, peoplesoft_id] = classId.split('.');
+
       const selectedClassification = classificationsData?.classifications.find(
-        (classification) => classification.id === classId,
+        (classification) =>
+          classification.id === id &&
+          classification.employee_group_id === employee_group_id &&
+          classification.peoplesoft_id === peoplesoft_id,
       );
-      // console.log('selectedClassification: ', selectedClassification);
+
       if (jobProfileMinimumRequirements && selectedClassification) {
         const filteredRequirements = jobProfileMinimumRequirements.jobProfileMinimumRequirements
           .filter((req) => req.grade === selectedClassification.grade)
