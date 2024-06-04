@@ -1,5 +1,17 @@
 # api
 
+## 0.1.1
+
+### Patch Changes
+
+- [#490](https://github.com/bcgov/psa-job-store/pull/490) [`c1e5770a3ca11ce92bcedc7f9d8a5b9f60b8a0d8`](https://github.com/bcgov/psa-job-store/commit/c1e5770a3ca11ce92bcedc7f9d8a5b9f60b8a0d8) Thanks [@kmandryk](https://github.com/kmandryk)! - add updated_by and published_by fields
+
+- [#473](https://github.com/bcgov/psa-job-store/pull/473) [`5f742a9ef90e80d3f52c7fc346bc9f9e2f713aa7`](https://github.com/bcgov/psa-job-store/commit/5f742a9ef90e80d3f52c7fc346bc9f9e2f713aa7) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-263 add ellipses menu actions for total comp view
+  AL-253 Total Comp - display grade in report-to box to disambiguate entries
+
+- [#494](https://github.com/bcgov/psa-job-store/pull/494) [`8e58c75e0a8753f53b3dea6a99e51e0b90a08e66`](https://github.com/bcgov/psa-job-store/commit/8e58c75e0a8753f53b3dea6a99e51e0b90a08e66) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-669 Create a migration for db cleanup
+  AL-727 Total comp unable to delete draft profiles
+
 ## 0.1.0
 
 ### Minor Changes
