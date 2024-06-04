@@ -681,6 +681,15 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       skip: (currentPage - 1) * pageSize,
       take: pageSize,
       onlyCompletedForAll: mode === 'total-compensation',
+      ...(mode == null || mode === 'classification'
+        ? {
+            orderBy: [
+              {
+                updated_at: 'desc',
+              },
+            ],
+          }
+        : {}),
     });
   }, [searchParams, trigger, currentPage, pageSize, sortField, sortOrder, mode]);
 
