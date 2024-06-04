@@ -32,6 +32,12 @@ export class PositionRequestUserClassification {
   id!: string;
 
   @Field(() => String, { nullable: false })
+  employee_group_id!: string;
+
+  @Field(() => String, { nullable: false })
+  peoplesoft_id!: string;
+
+  @Field(() => String, { nullable: false })
   code!: string;
 }
 
