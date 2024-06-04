@@ -63,7 +63,44 @@ export class ClassificationService {
     // console.log('tree before sort: ', JSON.stringify(tree));
     tree = this.sortItemsByName(tree);
     // console.log('tree after sort: ', JSON.stringify(tree));
+
+    // add (Grade - X) to entries that have same names but different grades so they are not confused
+    tree = await this.includeDuplicateGrades(tree);
+
     return tree;
+  }
+
+  private async includeDuplicateGrades(nodes: any[]): Promise<any[]> {
+    const duplicateGrades: { id: string; name: string; grade: string }[] = await this.prisma.$queryRaw`
+      SELECT c1.id, c1.name, c1.grade
+      FROM classification c1
+      WHERE c1.effective_status = 'Active'
+        AND EXISTS (
+          SELECT 1
+          FROM classification c2
+          WHERE c2.name = c1.name
+            AND c2.grade <> c1.grade
+            AND c2.effective_status = 'Active'
+        )
+      ORDER BY c1.name, c1.grade;
+    `;
+
+    const duplicateGradesMap = new Map(duplicateGrades.map((entry) => [entry.id, entry]));
+
+    const processNode = (node: any) => {
+      if (node.items) {
+        node.items = node.items.map((item: any) => {
+          if (duplicateGradesMap.has(item.id)) {
+            const { name, grade } = duplicateGradesMap.get(item.id);
+            item.name = `${name} (Grade - ${grade})`;
+          }
+          return processNode(item);
+        });
+      }
+      return node;
+    };
+
+    return nodes.map(processNode);
   }
 
   private sortItemsByName(nodes) {

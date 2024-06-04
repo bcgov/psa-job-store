@@ -9,9 +9,8 @@ import { graphqlApi } from '../../../redux/services/graphql-api';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { OrganizationModel } from '../../../redux/services/graphql-api/organization';
-import { useLazyGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
-import { WizardProvider } from '../../wizard/components/wizard.provider';
+import { WizardProvider, useWizardContext } from '../../wizard/components/wizard.provider';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 import { JobProfileSearch } from './job-profile-search.component';
 import { JobProfile } from './job-profile.component';
@@ -25,7 +24,7 @@ interface JobProfilesContentProps {
   onSelectProfile?: (profile: JobProfileModel) => void;
   // onUseProfile?: () => void;
   page_size?: number;
-  selectProfileId?: string | null;
+  selectProfileNumber?: string | null;
   previousSearchState?: MutableRefObject<string>;
   organizationFilterExtra?: OrganizationModel;
   positionRequestId?: number;
@@ -41,7 +40,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     {
       searchParams,
       onSelectProfile,
-      selectProfileId,
+      selectProfileNumber,
       previousSearchState,
       organizationFilterExtra,
       loadProfileIds,
@@ -57,9 +56,10 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const [pageSize, setPageSize] = useState(page_size); // Default page size, adjust as needed
     const [totalResults, setTotalResults] = useState(0); // Total results count from API
     const navigate = useNavigate();
-    const { positionRequestId } = useParams();
+    const { positionRequestId, number } = useParams();
     const params = useParams();
     const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
+    const { positionRequestData: prData } = useWizardContext();
 
     // useref to keep track of whether we fetched with selectProfileId
     const selectProfileIdRan = useRef(false);
@@ -72,23 +72,25 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     //  - Use classification_id and filter jobProfilesQuery
   */
 
-    const [prTrigger, { data: prData }] = useLazyGetPositionRequestQuery();
+    // todo: this should not be needed, get this info from the wizard context
+    // const [prTrigger, { data: prData }] = useLazyGetPositionRequestQuery();
     const [pTrigger, { data: pData }] = useLazyGetPositionQuery();
     const [positionFilteringProcessActive, setPositionFilteringProcessActive] = useState<boolean>(true);
     // TODO: Add useLazyGetPositionQuery(<id>)
 
     useEffect(() => {
       // If we have a positionRequestId and no position request data, get the position request data
-      if (positionRequestId != null && prData == null) {
-        prTrigger({ id: +positionRequestId });
-      }
+      // if (positionRequestId != null && prData == null) {
+      //   // console.log('prTrigger!');
+      //   prTrigger({ id: +positionRequestId });
+      // }
 
       if (positionRequestId == null) {
         setPositionFilteringProcessActive(false);
       }
 
       // If we have a positionRequestId and prData, get the position data
-      const reportsToPositionId = prData?.positionRequest?.reports_to_position_id;
+      const reportsToPositionId = prData?.reports_to_position_id;
       if (reportsToPositionId != null && pData == null) {
         dispatch(graphqlApi.util.invalidateTags(['jobProfiles']));
         pTrigger({ where: { id: `${reportsToPositionId}` } });
@@ -101,7 +103,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         // set classificationIdFilter from the position data to filter job profiles by classification
         setClassificationIdFilter(classificationId);
       }
-    }, [positionRequestId, prData, pData, classificationIdFilter, dispatch, pTrigger, prTrigger]);
+    }, [positionRequestId, prData, pData, classificationIdFilter, dispatch, pTrigger]);
 
     const [initialFetchDone, setInitialFetchDone] = useState(false);
 
@@ -125,7 +127,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
       const search = searchParams.get('search');
       const organizationFilter = searchParams.get('ministry_id__in');
-      const jobRoleFilter = searchParams.get('job_role_id__in');
+      const jobRoleFilter = searchParams.get('job_role_type_id__in');
       const classificationFilter = searchParams.get('classification_id__in');
       const jobFamilyFilter = searchParams.get('job_family_id__in');
       const jobStreamFilter = searchParams.get('job_stream_id__in');
@@ -139,7 +141,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       }
 
       // this prevents fetching of job profiles when user selects a different profile
-      if (searchParams.get('selectedProfile') && initialFetchDone && !searchParams.get('fetch')) {
+      if ((searchParams.get('selectedProfile') || number != null) && initialFetchDone && !searchParams.get('fetch')) {
         return;
       }
 
@@ -153,7 +155,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       // however we need to select the profile that was originally selected for this position request
       // (for case where user pressed "back" from edit page)
       // - clear filters and search, this will trigger re-run of this function with no filters or search
-      if (!selectProfileIdRan.current && filtersOrSearchApplied && selectProfileId) {
+      if (!selectProfileIdRan.current && filtersOrSearchApplied && selectProfileNumber) {
         const basePath = getBasePath(location.pathname);
         const searchParams = new URLSearchParams();
         if (searchParams.get('search')) searchParams.delete('search');
@@ -264,7 +266,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             ...(jobRoleFilter !== null
               ? [
                   {
-                    role_id: {
+                    role_type_id: {
                       in: JSON.parse(`[${jobRoleFilter}]`),
                     },
                   },
@@ -283,7 +285,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         take: pageSize,
         // if we need to have a specific profile selected, the server will ignore take and skip to get correct frame
         // it will also ignore filters and search query
-        selectProfile: !selectProfileIdRan.current ? selectProfileId : null,
+        selectProfile: !selectProfileIdRan.current ? selectProfileNumber : null,
       });
 
       // Fetch job profiles based on other filters and search query
@@ -296,11 +298,12 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       classificationIdFilter,
       positionFilteringProcessActive,
       initialFetchDone,
-      selectProfileId,
+      selectProfileNumber,
       getBasePath,
       navigate,
       organizationFilterExtra,
       loadProfileIds,
+      number,
     ]);
 
     // Update totalResults based on the response (if applicable)
@@ -310,9 +313,9 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       }
       // if search params has selected profile, ensure we call back to parent
       if (searchParams.get('selectedProfile')) {
-        const profileId = searchParams.get('selectedProfile');
-        if (profileId) {
-          const jobProfile = useData?.jobProfiles.find((p: any) => p.id === parseInt(profileId));
+        const profileNumber = searchParams.get('selectedProfile');
+        if (profileNumber) {
+          const jobProfile = useData?.jobProfiles.find((p: any) => p.number === parseInt(profileNumber));
           if (jobProfile) onSelectProfile?.(jobProfile);
         }
       }
@@ -337,7 +340,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           const newPage = data.pageNumberForSelectProfile;
           setCurrentPage(newPage);
           searchParams.set('page', newPage.toString());
-          searchParams.set('selectedProfile', selectProfileId ?? '');
+          searchParams.set('selectedProfile', selectProfileNumber ?? '');
 
           const basePath = getBasePath(location.pathname);
 
@@ -384,7 +387,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     };
 
     const renderJobProfile = () => {
-      return params.id || searchParams.get('selectedProfile') ? (
+      return params.number || searchParams.get('selectedProfile') ? (
         <JobProfile />
       ) : (
         <div style={{ marginTop: '16rem' }} data-testid="job-profile-empty">

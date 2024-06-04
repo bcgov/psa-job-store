@@ -15,9 +15,9 @@ import LoadingSpinnerWithMessage from '../../components/app/common/components/lo
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
-  useGetPositionRequestQuery,
   usePositionNeedsRivewQuery,
   useSubmitPositionRequestMutation,
+  useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
@@ -33,6 +33,7 @@ interface WizardResultPageProps {
   setReadOnlySelectedTab?: (tab: string) => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export const WizardResultPage: React.FC<WizardResultPageProps> = ({
@@ -43,6 +44,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   setReadOnlySelectedTab,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // let mode = 'readyToCreatePositionNumber';
   // mode = 'verificationRequired_edits'; // verification is needed because user made edits to significant sections
@@ -55,17 +57,17 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   const [mode, setMode] = useState('');
   const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
-  const { positionRequestId, setCurrentSection } = useWizardContext();
+  const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData } = useWizardContext();
 
-  const {
-    data: positionRequestData,
-    isLoading: positionRequestLoading,
-    // isError: positionRequestLoadingError,
-    refetch: refetchPositionRequest,
-    isFetching: isFetchingPositionRequest,
-  } = useGetPositionRequestQuery({
-    id: positionRequestId ?? -1,
-  });
+  // const {
+  //   data: positionRequestData,
+  //   isLoading: positionRequestLoading,
+  //   // isError: positionRequestLoadingError,
+  //   refetch: refetchPositionRequest,
+  //   isFetching: isFetchingPositionRequest,
+  // } = useGetPositionRequestQuery({
+  //   id: positionRequestId ?? -1,
+  // });
 
   const {
     data: positionNeedsRivew,
@@ -80,29 +82,29 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   useEffect(() => {
     // Fetch position request and needs review data when positionRequestId changes
     if (positionRequestId) {
-      refetchPositionRequest();
+      // refetchPositionRequest();
       refetchPositionNeedsRivew();
     }
-  }, [positionRequestId, refetchPositionRequest, refetchPositionNeedsRivew]);
+  }, [positionRequestId, refetchPositionNeedsRivew]);
 
   useEffect(() => {
     // if loading
-    if (positionRequestLoading || positionNeedsRivewLoading) return;
+    if (positionNeedsRivewLoading) return;
 
     // load comment if prevsiously entered
-    if (positionRequestData?.positionRequest?.additional_info?.comments) {
-      setComment(positionRequestData.positionRequest?.additional_info.comments);
+    if (positionRequestData?.additional_info?.comments) {
+      setComment(positionRequestData?.additional_info.comments);
     }
 
     // if state is draft and position doesn't need review, set mode to readyToCreatePositionNumber
-    if (positionRequestData?.positionRequest?.status === 'DRAFT' && !positionNeedsRivew?.positionNeedsRivew.result) {
+    if (positionRequestData?.status === 'DRAFT' && !positionNeedsRivew?.positionNeedsRivew.result) {
       setMode('readyToCreatePositionNumber');
       return;
     }
 
     // if state is draft and position needs review, set mode to verificationRequired_edits
     // Will show a warning message and a links that take user to the sections that if changes will not require verification
-    if (positionRequestData?.positionRequest?.status === 'DRAFT' && positionNeedsRivew?.positionNeedsRivew.result) {
+    if (positionRequestData?.status === 'DRAFT' && positionNeedsRivew?.positionNeedsRivew.result) {
       setVerificationNeededReasons(positionNeedsRivew.positionNeedsRivew.reasons);
       setMode('verificationRequired_edits');
       return;
@@ -110,7 +112,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
     // if state is COMPLETE, then set parent to readonly mode
     // Will show "Your position has been created" screen
-    if (positionRequestData?.positionRequest?.status === 'COMPLETED') {
+    if (positionRequestData?.status === 'COMPLETED') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('completed');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -119,7 +121,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
     // if state is CANCELLED, then set parent to readonly mode
     // Will show "Your position has been created" screen
-    if (positionRequestData?.positionRequest?.status === 'CANCELLED') {
+    if (positionRequestData?.status === 'CANCELLED') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('cancelled');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -127,7 +129,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
 
     // if it's in VERIFICATION;, set mode to sentForVerification
-    if (positionRequestData?.positionRequest?.status === 'VERIFICATION') {
+    if (positionRequestData?.status === 'VERIFICATION') {
       switchParentMode && switchParentMode('readonly');
       switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
       setReadOnlySelectedTab && setReadOnlySelectedTab('4');
@@ -135,13 +137,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     }
 
     // if it's in ACTION_REQUIRED show alternate verification required screen
-    if (positionRequestData?.positionRequest?.status === 'ACTION_REQUIRED') {
+    if (positionRequestData?.status === 'ACTION_REQUIRED') {
       setMode('verificationRequired_retry');
       return;
     }
 
     // if it's in REVIEW status, show "classification review required" screen
-    if (positionRequestData?.positionRequest?.status === 'REVIEW') {
+    if (positionRequestData?.status === 'REVIEW') {
       switchParentMode && switchParentMode('readonly');
       // setMode('classificationReviewRequired');
       switchParentReadonlyMode && switchParentReadonlyMode('inQueue');
@@ -151,7 +153,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   }, [
     positionNeedsRivew,
     positionRequestData,
-    positionRequestLoading,
     positionNeedsRivewLoading,
     switchParentMode,
     switchParentReadonlyMode,
@@ -206,6 +207,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
           setReadOnlySelectedTab && setReadOnlySelectedTab('4');
         }
+
+        setPositionRequestData(result?.submitPositionRequest ?? null);
       } else {
         throw Error('Position request not found');
       }
@@ -275,13 +278,22 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
 
   const [comment, setComment] = useState('');
+  const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
   const handleCommentChange = (e: any) => {
     setComment(e.target.value);
   };
 
-  if (positionRequestLoading || positionNeedsRivewLoading || isFetchingPositionNeedsRivew || isFetchingPositionRequest)
-    return <LoadingSpinnerWithMessage />;
+  const switchStep = async (step: number) => {
+    setCurrentStep(step);
+    if (positionRequestId)
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: step,
+      });
+  };
+
+  if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew) return <LoadingSpinnerWithMessage />;
 
   return (
     <>
@@ -329,7 +341,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             </>,
           ]}
         >
-          <WizardSteps current={5}></WizardSteps>
+          <WizardSteps
+            onStepClick={switchStep}
+            current={5}
+            maxStepCompleted={positionRequest?.max_step_completed}
+          ></WizardSteps>
 
           <div
             style={{
@@ -418,14 +434,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
                 <Row justify="center" style={{ padding: '0 1rem' }}>
                   <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-                    <Alert
+                    {/* <Alert
                       data-testid="verification-warning-message"
                       message=""
                       description={
                         <span>
                           Some of your amendments to the generic profile require verification. If you would like to
                           revisit some of your amendments, please click these links:
-                          {/* loop over reasons */}
                           <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
                             {verificationNeededReasons.map((reason, index) => (
                               <li key={index}>
@@ -439,8 +454,45 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       showIcon
                       icon={<ExclamationCircleFilled />}
                       style={{ marginBottom: '24px' }}
-                    />
+                    /> */}
 
+                    {verificationNeededReasons.includes('Job Profile is denoted as requiring review') && (
+                      <Alert
+                        message={<b>Will require verification</b>}
+                        description="This profile will need to be verified by the classification team before a position number is generated."
+                        type="warning"
+                        showIcon
+                        icon={<ExclamationCircleFilled />}
+                        style={{ marginBottom: '24px' }}
+                      />
+                    )}
+                    {verificationNeededReasons.filter(
+                      (reason) => reason !== 'Job Profile is denoted as requiring review',
+                    ).length > 0 && (
+                      <Alert
+                        data-testid="verification-warning-message"
+                        message=""
+                        description={
+                          <span>
+                            Some of your amendments to the generic profile require verification. If you would like to
+                            revisit some of your amendments, please click these links:
+                            <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
+                              {verificationNeededReasons
+                                .filter((reason) => reason !== 'Job Profile is denoted as requiring review')
+                                .map((reason, index) => (
+                                  <li key={index}>
+                                    <a onClick={() => handleVerificationClick(reason)}>{reason}</a>
+                                  </li>
+                                ))}
+                            </ul>
+                          </span>
+                        }
+                        type="warning"
+                        showIcon
+                        icon={<ExclamationCircleFilled />}
+                        style={{ marginBottom: '24px' }}
+                      />
+                    )}
                     <Card
                       title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Send for verification</h3>}
                       bordered={false}

@@ -80,17 +80,29 @@ export class PositionRequestApiResolver {
   @Mutation(() => PositionRequest)
   async submitPositionRequest(
     @Args('id', { type: () => Int }) id: number,
+    @CurrentUser() user: Express.User,
     @Args('comment', { nullable: true }) comment?: string,
   ) {
-    return this.positionRequestService.submitPositionRequest(id, comment);
+    await this.positionRequestService.submitPositionRequest(id, comment);
+
+    // this ensures that returned object is the same as the one returned by getPositionRequest
+    return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
   }
 
-  @Mutation(() => PositionRequestResponse)
+  @Mutation(() => PositionRequest)
   async updatePositionRequest(
     @Args('id', { type: () => Int }) id: number,
     @Args('updateInput') updateInput: PositionRequestUpdateInput,
+    @Args('returnFullObject', { type: () => Boolean, defaultValue: false }) returnFullObject: boolean,
+    @CurrentUser() user: Express.User,
   ) {
-    return this.positionRequestService.updatePositionRequest(id, updateInput);
+    const updatedPositionRequest = await this.positionRequestService.updatePositionRequest(id, updateInput);
+
+    if (returnFullObject) {
+      return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
+    }
+
+    return updatedPositionRequest;
   }
 
   @Query(() => PositionRequestStatusCounts, { name: 'positionRequestsCount' })
@@ -171,6 +183,7 @@ export class PositionRequestApiResolver {
   }
 
   @Mutation(() => Boolean)
+  //deprecated - if we want to use this in the future, update to check Peoplesoft status as well
   async updatePositionRequestStatus(
     @Args('id', { type: () => Int }) id: number,
     @Args('status', { type: () => Int }) status: number,

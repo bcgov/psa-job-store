@@ -1122,6 +1122,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile194: JobProfile = {
@@ -1224,6 +1226,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile200: JobProfile = {
@@ -1356,6 +1360,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile208: JobProfile = {
@@ -1474,6 +1480,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile210: JobProfile = {
@@ -1607,6 +1615,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile212: JobProfile = {
@@ -1744,6 +1754,8 @@ async function seed() {
     job_experience: [],
     updated_at: undefined,
     owner_id: undefined,
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const profile247: JobProfile = {
@@ -1908,6 +1920,8 @@ async function seed() {
       'Professional registration requirement 1',
       'Professional registration requirement 2',
     ],
+    updated_by_id: undefined,
+    published_by_id: undefined,
   };
 
   const jobProfiles = [profile189, profile194, profile200, profile208, profile210, profile212, profile247];
@@ -2558,7 +2572,7 @@ async function seed() {
         department_id: '112-0072',
         parent_job_profile_id: 7,
         crm_json: null,
-        profile_json_updated: null,
+        profile_json: null,
         orgchart_json: {
           edges: [
             { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
@@ -2756,10 +2770,10 @@ async function seed() {
         approved_at: new Date(),
         status: 'DRAFT',
         updated_at: new Date(),
-        additional_info_work_location_id: 'LOC01',
-        additional_info_department_id: 'DEPT01',
-        additional_info_excluded_mgr_position_number: 'MG1001',
-        additional_info_comments: 'Urgent requirement due to project needs.',
+        // additional_info_work_location_id: 'LOC01',
+        // additional_info_department_id: 'DEPT01',
+        // additional_info_excluded_mgr_position_number: 'MG1001',
+        // additional_info_comments: 'Urgent requirement due to project needs.',
       },
       {
         crm_id: 54322,
@@ -2769,7 +2783,7 @@ async function seed() {
         department_id: '112-0072',
         parent_job_profile_id: profile200.id,
         crm_json: null,
-        profile_json_updated: {
+        profile_json: {
           id: 7,
           role: { id: null },
           type: 'USER',
@@ -3171,10 +3185,10 @@ async function seed() {
         approved_at: new Date(),
         status: 'DRAFT',
         updated_at: new Date(),
-        additional_info_work_location_id: null,
-        additional_info_department_id: null,
-        additional_info_excluded_mgr_position_number: null,
-        additional_info_comments: null,
+        // additional_info_work_location_id: null,
+        // additional_info_department_id: null,
+        // additional_info_excluded_mgr_position_number: null,
+        // additional_info_comments: null,
       },
       {
         crm_id: 54321,
@@ -3184,7 +3198,7 @@ async function seed() {
         department_id: 'DEPT02',
         parent_job_profile_id: profile200.id,
         crm_json: null,
-        profile_json_updated: {
+        profile_json: {
           id: 7,
           role: { id: null },
           type: 'USER',
@@ -3572,10 +3586,10 @@ async function seed() {
         approved_at: new Date(),
         status: 'VERIFICATION',
         updated_at: new Date(),
-        additional_info_work_location_id: 'LOC02',
-        additional_info_department_id: 'DEPT02',
-        additional_info_excluded_mgr_position_number: 'MG2002',
-        additional_info_comments: 'Needs experienced individual for leadership.',
+        // additional_info_work_location_id: 'LOC02',
+        // additional_info_department_id: 'DEPT02',
+        // additional_info_excluded_mgr_position_number: 'MG2002',
+        // additional_info_comments: 'Needs experienced individual for leadership.',
       },
       {
         crm_id: 67890,
@@ -3585,7 +3599,7 @@ async function seed() {
         department_id: 'DEPT03',
         parent_job_profile_id: profile208.id,
         crm_json: null,
-        profile_json_updated: {
+        profile_json: {
           id: 7,
           role: { id: null },
           type: 'USER',
@@ -3973,10 +3987,10 @@ async function seed() {
         approved_at: new Date(),
         status: 'COMPLETED',
         updated_at: new Date(),
-        additional_info_work_location_id: 'LOC03',
-        additional_info_department_id: 'DEPT03',
-        additional_info_excluded_mgr_position_number: 'MG3003',
-        additional_info_comments: 'Looking for a specialist in machine learning.',
+        // additional_info_work_location_id: 'LOC03',
+        // additional_info_department_id: 'DEPT03',
+        // additional_info_excluded_mgr_position_number: 'MG3003',
+        // additional_info_comments: 'Looking for a specialist in machine learning.',
       },
     ],
   });

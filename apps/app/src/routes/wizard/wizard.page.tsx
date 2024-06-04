@@ -21,6 +21,7 @@ interface WizardPageProps {
   onNext?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 interface JobProfileSearchResultsRef {
@@ -32,13 +33,15 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   onBack,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // const { id } = useParams();
   const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileNumber, setSelectedProfileNumber] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | null>(null);
 
-  const [selectProfileId, setSelectProfileId] = useState<string | null>(null);
+  const [selectProfileNumber, setSelectProfileNumber] = useState<string | null>(null);
 
   // stores searchParams for when user navigates back from edit page
   // used when user presses "cancel" on the "chage profile?" dialog
@@ -49,7 +52,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const [selectedClassificationId, setSelectedClassificationId] = useState<string | undefined>();
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
-  const { positionRequestId, positionRequestData } = useWizardContext();
+  const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const { setPositionRequestProfileId } = useWizardContext();
   const navigate = useNavigate();
@@ -60,12 +63,12 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
   // if positionRequestData.parent_job_profile is not null, change searchParams to include selectedProfile
   useEffect(() => {
-    if (positionRequestData?.parent_job_profile_id) {
+    if (positionRequestData?.parent_job_profile?.number) {
       // check if searchparams already has selectedProfile
       // removed this to make reloading on thepage work after user selected a different profile and reloaded the page
       // if (!searchParams.get('selectedProfile')) {
       // determine what page we need to switch to
-      setSelectProfileId(positionRequestData.parent_job_profile_id.toString());
+      setSelectProfileNumber(positionRequestData?.parent_job_profile?.number.toString());
       // setSearchParams({ selectedProfile: positionRequestData.parent_job_profile_id.toString() }, { replace: true });
       // }
     }
@@ -82,10 +85,12 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     return pathParts.join('/');
   };
 
-  const onSubmit = async (action = 'next'): Promise<boolean> => {
+  const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
+
+  const onSubmit = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1): Promise<string> => {
     if (
-      positionRequestData?.parent_job_profile_id &&
-      positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '')
+      positionRequestData?.parent_job_profile?.number &&
+      positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '')
     ) {
       return new Promise((resolve) => {
         Modal.confirm({
@@ -99,12 +104,28 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               <p>This action is irreversible. Are you sure you wish to proceed?</p>
             </div>
           ),
+          okButtonProps: {
+            loading: isSwitchStepLoading,
+          },
+          cancelButtonProps: {
+            loading: isSwitchStepLoading,
+          },
           okText: 'Change profile',
           cancelText: 'Cancel',
-          onOk: () => {
-            setWizardData(null); // this ensures that any previous edits are cleared
-            handleNext(action);
-            resolve(true);
+          onOk: async () => {
+            setIsSwitchStepLoading(true);
+            // setWizardData(null); // this ensures that any previous edits are cleared
+            // await handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step, 'CHANGED_PROFILE');
+            // setIsSwitchStepLoading(false);
+            // resolve('CHANGED_PROFILE');
+            return new Promise((resolveOk) => {
+              setWizardData(null); // this ensures that any previous edits are cleared
+              handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step, 'CHANGED_PROFILE').then(() => {
+                setIsSwitchStepLoading(false);
+                resolve('CHANGED_PROFILE');
+                resolveOk(undefined);
+              });
+            });
           },
           onCancel: () => {
             // re-select profile on the correct page
@@ -127,63 +148,69 @@ export const WizardPage: React.FC<WizardPageProps> = ({
                 { replace: true },
               );
             }
-            resolve(false);
+            resolve('CANCELLED');
           },
         });
       });
     }
 
     // user is not changing from previous profile
-    handleNext(action);
-    return true;
+    handleNext(action, switchStep, alertNoProfile, step, 'NO_CHANGE');
+    return 'NO_CHANGE';
   };
 
-  const handleNext = async (action = 'next') => {
+  const handleNext = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1, state = '') => {
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
-      if (selectedProfileId) {
-        // navigate(`/wizard/edit/${selectedProfileId}`);
+      if (selectedProfileNumber && selectedProfileId) {
         if (positionRequestId) {
-          await updatePositionRequest({
-            id: positionRequestId,
-            step: action === 'next' ? 2 : 1,
-            // if user selected same profile as before, do not clear profile_json_updated
-            // also do not update title to default
-            ...(positionRequestData?.parent_job_profile_id !== parseInt(selectedProfileId ?? '') && {
-              profile_json_updated: null,
-              title: selectedProfileName ?? undefined,
-            }),
-            parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
-            classification_id: selectedClassificationId,
-          }).unwrap();
+          if (state == 'CHANGED_PROFILE' || (state == 'NO_CHANGE' && switchStep)) {
+            const resp = await updatePositionRequest({
+              id: positionRequestId,
+              step: step == -1 ? (action === 'next' ? 2 : 1) : step,
+              // increment max step only if it's not incremented
+              ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 2 && step == -1
+                ? { max_step_completed: 2 }
+                : {}),
+              // if user selected same profile as before, do not clear profile_json
+              // also do not update title to default
+              ...(positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
+                additional_info: null,
+                profile_json: null,
+                title: selectedProfileName ?? undefined,
+                max_step_completed: 2,
+              }),
+              parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
+              classification_id: selectedClassificationId,
+              returnFullObject: true,
+            }).unwrap();
+
+            setPositionRequestData(resp.updatePositionRequest ?? null);
+          }
         }
         setPositionRequestProfileId(parseInt(selectedProfileId));
 
         if (action === 'next') {
-          if (onNext) onNext();
+          if (onNext && switchStep) onNext();
           setSearchParams({}, { replace: true });
         }
       } else {
         // Here you can display an error message.
-        alert('Please select a profile before proceeding.');
+        if (alertNoProfile) alert('Please select a profile before proceeding.');
       }
     } finally {
       setIsLoading(false);
     }
   };
-  // useEffect(() => {
-  //   if (id) {
-  //     setSelectedProfileId(id);
-  //   }
-  // }, [id]); // picks up profile id from params
 
   useEffect(() => {
     const selectedProfile = searchParams.get('selectedProfile');
     if (selectedProfile) {
-      setSelectedProfileId(selectedProfile);
+      setSelectedProfileNumber(selectedProfile);
     } else {
       setSelectedProfileId(null);
+      setSelectedProfileNumber(null);
     }
   }, [searchParams]); // picks up profile id from search params
 
@@ -209,6 +236,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     // if there is a profile already associated with the position request, show a warning
     setSelectedProfileName(profile.title.toString());
     setSelectedProfileId(profile.id.toString());
+    setSelectedProfileNumber(profile.number.toString());
     if (profile?.classifications != null) setSelectedClassificationId(profile?.classifications[0].classification.id);
   };
 
@@ -229,7 +257,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
   const saveAndQuit = async () => {
     const res = await onSubmit('quit');
-    if (res !== false) disableBlockingAndNavigateHome();
+    if (res !== 'CANCELLED') disableBlockingAndNavigateHome();
   };
 
   const getMenuContent = () => {
@@ -256,6 +284,26 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         </Menu.ItemGroup>
       </Menu>
     );
+  };
+
+  const updatePositionRequestAndSetStep = async (step: number) => {
+    if (positionRequestId) {
+      setCurrentStep(step);
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: step,
+      });
+      // refetchPositionRequest();
+    }
+  };
+
+  const switchStep = async (step: number) => {
+    const code = await onSubmit('next', false, false, step);
+    if (code == 'NO_CHANGE') {
+      updatePositionRequestAndSetStep(step);
+    } else if (code != 'CANCELLED') {
+      updatePositionRequestAndSetStep(2);
+    } else if (code == 'CANCELLED') return;
   };
 
   if (!departmentData) return <LoadingComponent></LoadingComponent>;
@@ -304,7 +352,14 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         </Button>,
       ]}
     >
-      <WizardSteps current={1}></WizardSteps>
+      <WizardSteps
+        current={1}
+        //  onStepClick={handleStepClick}
+        //   hasUnsavedChanges={hasUnsavedChanges}
+        maxStepCompleted={positionRequest?.max_step_completed}
+        onStepClick={switchStep}
+        disabledTooltip={selectedProfileId == null ? 'Please select a profile before proceeding.' : null}
+      ></WizardSteps>
       <div
         style={{
           overflow: 'hidden',
@@ -322,7 +377,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           searchParams={searchParams}
           onSelectProfile={onSelectProfile}
           page_size={page_size}
-          selectProfileId={selectProfileId}
+          selectProfileNumber={selectProfileNumber}
           previousSearchState={previousSearchState}
           // this will filter job profiles by organization in which this position is being created in
           organizationFilterExtra={departmentData?.department?.organization}

@@ -50,13 +50,13 @@ model PositionRequest {
   crm_id                     Int?                   @unique
   crm_assigned_to_account_id Int? // CRM account id of the classifications user who is assigned to the incident
   crm_lookup_name            String?
-  step                       Int
+  step                       Int // Keeps track of the current step in the wizard
+  max_step_completed         Int? // Keeps track of the highest step completed in the wizard
   reports_to_position_id     String
   department_id              String // this is department id that user selected in org chart
   parent_job_profile_id      Int?
   crm_json                   Json?                  @db.JsonB
   profile_json               Json?                  @db.JsonB
-  profile_json_updated       Json?                  @db.JsonB
   orgchart_json              Json?                  @db.JsonB
   user_id                    String?                @db.Uuid
   title                      String?
@@ -73,11 +73,10 @@ model PositionRequest {
   shareUUID                  String?                @default(uuid()) @db.Uuid
 
   // additional information form data
-  additional_info_work_location_id             String?
-  additional_info_department_id                String? // this is department id collected from the additional information form
-  additional_info_excluded_mgr_position_number String?
-  additional_info_comments                     String?
-
+  // additional_info_work_location_id             String?
+  // additional_info_department_id                String? // this is department id collected from the additional information form
+  // additional_info_excluded_mgr_position_number String?
+  // additional_info_comments                     String?
   additional_info Json? @db.JsonB
 
   // TODO: AL-146
@@ -85,8 +84,6 @@ model PositionRequest {
   // classification     Classification @relation(fields: [classification_id], references: [id])
   parent_job_profile JobProfile? @relation(fields: [parent_job_profile_id], references: [id])
   department         Department  @relation(fields: [department_id], references: [id])
-  workLocation       Location?   @relation(fields: [additional_info_work_location_id], references: [id])
-  paylist_department Department? @relation(name: "PositionRequestPaylistDepartment", fields: [additional_info_department_id], references: [id])
 
   @@map("position_request")
 }
@@ -106,8 +103,10 @@ model User {
 
   // TODO: AL-146
   // PositionRequest PositionRequest[]
-  JobProfile      JobProfile[]
-  SavedJobProfile SavedJobProfile[]
+  JobProfile           JobProfile[]
+  SavedJobProfile      SavedJobProfile[]
+  draftedJobProfiles   JobProfile[]      @relation(name: "updatedByRelation")
+  publishedJobProfiles JobProfile[]      @relation(name: "PublishedByRelation")
 
   @@map("user")
 }
@@ -165,17 +164,22 @@ model JobProfile {
   all_organizations        Boolean                           @default(true)
   all_reports_to           Boolean                           @default(false)
 
-  context          JobProfileContext?
-  role             JobProfileRole?           @relation(fields: [role_id], references: [id])
-  role_id          Int?
-  role_type        JobProfileRoleType?       @relation(fields: [role_type_id], references: [id])
-  role_type_id     Int?
-  scopes           JobProfileScopeLink[]
-  state            JobProfileState           @default(DRAFT)
-  type             JobProfileType
-  updated_at       DateTime?                 @default(now()) @updatedAt
-  owner_id         String?                   @db.Uuid
-  owner            User?                     @relation(fields: [owner_id], references: [id])
+  context         JobProfileContext?
+  role            JobProfileRole?       @relation(fields: [role_id], references: [id])
+  role_id         Int?
+  role_type       JobProfileRoleType?   @relation(fields: [role_type_id], references: [id])
+  role_type_id    Int?
+  scopes          JobProfileScopeLink[]
+  state           JobProfileState       @default(DRAFT)
+  type            JobProfileType
+  updated_at      DateTime?             @default(now()) @updatedAt
+  owner_id        String?               @db.Uuid
+  owner           User?                 @relation(fields: [owner_id], references: [id]) //  @relation(name: "OwnerRelation", fields: [owner_id], references: [id])
+  updated_by_id   String?               @db.Uuid
+  updated_by      User?                 @relation(name: "updatedByRelation", fields: [updated_by_id], references: [id])
+  published_by_id String?               @db.Uuid
+  published_by    User?                 @relation(name: "PublishedByRelation", fields: [published_by_id], references: [id])
+
   jobFamilies      JobProfileJobFamilyLink[]
   streams          JobProfileStreamLink[]
   program_overview String?
@@ -420,8 +424,7 @@ model Department {
   effective_status String // EFF_STATUS
   effective_date   DateTime     @db.Date // EFFDT
 
-  PositionRequest                     PositionRequest[]
-  PositionRequestsByPaylistDepartment PositionRequest[] @relation(name: "PositionRequestPaylistDepartment")
+  PositionRequest PositionRequest[]
 
   @@map("department")
 }
@@ -434,8 +437,7 @@ model Location {
   effective_status String // EFF_STATUS
   effective_date   DateTime @db.Date // EFFDT
 
-  departments      Department[]
-  positionRequests PositionRequest[]
+  departments Department[]
 
   @@map("location")
 }

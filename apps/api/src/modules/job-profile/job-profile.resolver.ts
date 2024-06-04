@@ -90,6 +90,13 @@ export class JobProfileResolver {
     return res;
   }
 
+  @Query(() => JobProfile, { name: 'jobProfileByNumber' })
+  @AllowNoRoles() // so that share position request feature can fetch relevant data
+  async getJobProfileByNumber(@Args('number') number: string) {
+    const res = await this.jobProfileService.getJobProfileByNumber(+number);
+    return res;
+  }
+
   // @Query(() => [JobProfileCareerGroup], { name: 'jobProfilesCareerGroups' })
   // async getJobProfilesCareerGroups() {
   //   return this.jobProfileService.getJobProfilesCareerGroups();
@@ -178,6 +185,17 @@ export class JobProfileResolver {
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
   ) {
     return this.jobProfileService.unarchiveJobProfile(jobProfileId, userId);
+  }
+
+  @Mutation(() => Boolean)
+  @Roles('total-compensation')
+  @UseGuards(RoleGuard)
+  async updateJobProfileState(
+    @CurrentUser() { id: userId }: Express.User,
+    @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
+    @Args('state') state: string,
+  ) {
+    return this.jobProfileService.updateJobProfileState(jobProfileId, state, userId);
   }
 
   @ResolveField(() => JobProfileReportsTo)
