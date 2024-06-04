@@ -1044,7 +1044,9 @@ export class PositionRequestApiService {
     });
 
     // If the Job Profile is denoted as requiring review, it _must_ be reviewed every time
+    let profilesRequiresReview = false;
     if (jobProfile.review_required === true) {
+      profilesRequiresReview = true;
       reasons.push('Job Profile is denoted as requiring review');
       // return { result: true, reasons: reasons };
     }
@@ -1146,7 +1148,10 @@ export class PositionRequestApiService {
       }
     }
 
-    return { result: significantSectionChanges.some((value) => value === true), reasons: reasons };
+    return {
+      result: significantSectionChanges.some((value) => value === true) || profilesRequiresReview,
+      reasons: reasons,
+    };
   }
 
   async createOrUpdateCrmIncidentForPositionRequest(id: number) {
