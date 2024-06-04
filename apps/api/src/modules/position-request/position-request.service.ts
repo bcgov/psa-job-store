@@ -398,17 +398,23 @@ export class PositionRequestApiService {
     // Get classification code for the position requeset classification id, employdd_group_id, peoplesoft_id
     const classificationMap = new Map();
     for await (const pr of positionRequests) {
-      const classification = await this.classificationService.getClassification({
-        where: {
-          id_employee_group_id_peoplesoft_id: {
-            id: pr.classification_id,
-            employee_group_id: pr.classification_employee_group_id,
-            peoplesoft_id: pr.classification_peoplesoft_id,
+      if (
+        pr.classification_id != null &&
+        pr.classification_employee_group_id != null &&
+        pr.classification_peoplesoft_id != null
+      ) {
+        const classification = await this.classificationService.getClassification({
+          where: {
+            id_employee_group_id_peoplesoft_id: {
+              id: pr.classification_id,
+              employee_group_id: pr.classification_employee_group_id,
+              peoplesoft_id: pr.classification_peoplesoft_id,
+            },
           },
-        },
-      });
+        });
 
-      classificationMap.set(pr.id, classification.code);
+        classificationMap.set(pr.id, classification.code);
+      }
     }
 
     // Collect all unique user IDs from the position requests
@@ -689,30 +695,28 @@ export class PositionRequestApiService {
       },
     });
 
-    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
-
-    // Collect all unique classification IDs from the position requests
-    // const classificationIds = [
-    //   ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id != null)),
-    // ];
-
-    // if (!classificationIds) return [];
-
     const classificationIds = Array.from(
       new Set(
-        positionRequests.map((req) => {
-          const {
-            classification_id: id,
-            classification_employee_group_id: employee_group_id,
-            classification_peoplesoft_id: peoplesoft_id,
-          } = req;
+        positionRequests
+          .filter(
+            (req) =>
+              req.classification_id != null &&
+              req.classification_employee_group_id != null &&
+              req.classification_peoplesoft_id != null,
+          )
+          .map((req) => {
+            const {
+              classification_id: id,
+              classification_employee_group_id: employee_group_id,
+              classification_peoplesoft_id: peoplesoft_id,
+            } = req;
 
-          return {
-            id,
-            employee_group_id,
-            peoplesoft_id,
-          };
-        }),
+            return {
+              id,
+              employee_group_id,
+              peoplesoft_id,
+            };
+          }),
       ),
     );
 
