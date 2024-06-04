@@ -112,6 +112,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 reports_to {
                   classification {
                     id
+                    employee_group_id
+                    peoplesoft_id
                     code
                   }
                 }
@@ -229,6 +231,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 reports_to {
                   classification {
                     id
+                    employee_group_id
+                    peoplesoft_id
                     code
                   }
                 }
@@ -334,6 +338,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 reports_to {
                   classification {
                     id
+                    employee_group_id
+                    peoplesoft_id
                     code
                   }
                 }
@@ -443,6 +449,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 reports_to {
                   classification {
                     id
+                    employee_group_id
+                    peoplesoft_id
                     code
                   }
                 }

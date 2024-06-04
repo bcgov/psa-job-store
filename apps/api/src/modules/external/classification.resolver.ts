@@ -53,6 +53,12 @@ class GroupedClassification {
   @Field({ nullable: true })
   id?: string;
 
+  @Field({ nullable: true })
+  employee_group_id?: string;
+
+  @Field({ nullable: true })
+  peoplesoft_id?: string;
+
   @Field(() => [ClassificationItem], { nullable: true })
   items?: ClassificationItem[];
 }

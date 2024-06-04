@@ -487,9 +487,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
       return {
         title: (item.groupName || item.name) + (item.employee_group_id ? ' (' + item.employee_group_id + ')' : ''),
-        value: item.id || item.groupName,
-        key: item.id || item.groupName,
-        id: item.id,
+        value: item.id != null ? `${item.id}.${item.employee_group_id}.${item.peoplesoft_id}` : item.groupName,
+        key: item.id != null ? `${item.id}.${item.employee_group_id}.${item.peoplesoft_id}` : item.groupName,
+        id: item.id != null ? `${item.id}.${item.employee_group_id}.${item.peoplesoft_id}` : null,
         children: item.items?.map(transformItem),
       };
     };
@@ -541,7 +541,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
 
       setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup ?? null);
-      setValue('classification', jobProfileData.jobProfile?.classifications?.[0]?.classification.id ?? null);
+      const rawClassification = jobProfileData.jobProfile?.classifications?.[0]?.classification ?? null;
+      if (rawClassification != null) {
+        const { id, employee_group_id, peoplesoft_id } = rawClassification;
+        setValue('classification', `${id}.${employee_group_id}.${peoplesoft_id}`);
+      } else {
+        setValue('classification', null);
+      }
+
       setValue('jobRole', jobProfileData.jobProfile?.role?.id);
 
       if (jobProfileData.jobProfile.role_type) setValue('role', jobProfileData.jobProfile.role_type.id);
@@ -671,7 +678,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         // If 'all_reports_to' is false, set 'reportToRelationship' to specific values
         setValue(
           'reportToRelationship',
-          jobProfileData.jobProfile.reports_to.map((r) => r.classification.id),
+          jobProfileData.jobProfile.reports_to.map((r) => {
+            const { id, employee_group_id, peoplesoft_id } = r.classification;
+            return `${id}.${employee_group_id}.${peoplesoft_id}`;
+          }),
         );
       }
 
@@ -1166,7 +1176,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           classifications: {
             create: [
               {
-                classification: { connect: { id: formData.classification } },
+                classification: {
+                  connect: {
+                    id_employee_group_id_peoplesoft_id: {
+                      id: formData.classification.split('.')[0],
+                      employee_group_id: formData.classification.split('.')[1],
+                      peoplesoft_id: formData.classification.split('.')[2],
+                    },
+                  },
+                },
               },
             ],
           },
@@ -1208,9 +1226,21 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         reports_to: formData.all_reports_to
           ? { create: [] as ClassificationConnectInput[] }
           : {
-              create: formData.reportToRelationship.map((classificationId: any) => ({
-                classification: { connect: { id: classificationId } },
-              })),
+              create: formData.reportToRelationship.map((classificationId: any) => {
+                const [id, employee_group_id, peoplesoft_id] = classificationId.split('.');
+
+                return {
+                  classification: {
+                    connect: {
+                      id_employee_group_id_peoplesoft_id: {
+                        id: id,
+                        employee_group_id: employee_group_id,
+                        peoplesoft_id: peoplesoft_id,
+                      },
+                    },
+                  },
+                };
+              }),
             },
       },
       id: parseInt(id ?? ''),
@@ -1592,10 +1622,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 //   label: classification.name,
                                 //   value: classification.id,
                                 // }))}
-                                options={filteredClassifications.map((classification) => ({
-                                  label: classification.name,
-                                  value: classification.id,
-                                }))}
+                                options={filteredClassifications.map(
+                                  ({ id, employee_group_id, peoplesoft_id, name }) => ({
+                                    label: name,
+                                    value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+                                  }),
+                                )}
                               ></Select>
                             );
                           }}

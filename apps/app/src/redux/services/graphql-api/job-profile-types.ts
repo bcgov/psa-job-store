@@ -243,7 +243,11 @@ interface NumberConnectInput {
 export interface ClassificationConnectInput {
   classification: {
     connect: {
-      id: string;
+      id_employee_group_id_peoplesoft_id: {
+        id: string;
+        employee_group_id: string;
+        peoplesoft_id: string;
+      };
     };
   };
 }
