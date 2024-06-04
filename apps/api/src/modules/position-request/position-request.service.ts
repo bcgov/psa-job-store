@@ -259,7 +259,7 @@ export class PositionRequestApiService {
           const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
           const { crm_id, crm_lookup_name, crm_status, crm_category } = incident;
           if (positionObj) {
-            const incomingPositionRequestStatus = getALStatus({
+            let incomingPositionRequestStatus = getALStatus({
               category: crm_category,
               crm_status: crm_status,
               ps_status: positionObj['A.POSN_STATUS'],
@@ -268,8 +268,9 @@ export class PositionRequestApiService {
 
             if (incomingPositionRequestStatus === 'UNKNOWN') {
               this.logger.warn(
-                `Failed to map to an internal status for crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, crm status:  ${crm_status}, crm category: ${crm_category}, ps status: ${positionObj['A.POSN_STATUS']}`,
+                `Failed to map to an internal status for position request id ${id}: crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, crm status:  ${crm_status}, crm category: ${crm_category}, ps status: ${positionObj['A.POSN_STATUS']}`,
               );
+              incomingPositionRequestStatus = 'DRAFT';
             }
 
             // we will potentially create PRs with UNKNOWN status if there is an issue with CRM or PS creation
