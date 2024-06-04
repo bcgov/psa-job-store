@@ -617,7 +617,9 @@ export class JobProfileService {
           classifications: {
             create: data.classifications.create.map((item) => ({
               classification: {
-                connect: { id: item.classification.connect.id },
+                connect: {
+                  id_employee_group_id_peoplesoft_id: item.classification.connect.id_employee_group_id_peoplesoft_id,
+                },
               },
             })),
           },
@@ -688,7 +690,9 @@ export class JobProfileService {
         reports_to: {
           create: data.reports_to.create.map((item) => ({
             classification: {
-              connect: { id: item.classification.connect.id },
+              connect: {
+                id_employee_group_id_peoplesoft_id: item.classification.connect.id_employee_group_id_peoplesoft_id,
+              },
             },
           })),
         },

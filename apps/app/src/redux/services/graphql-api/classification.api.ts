@@ -80,42 +80,49 @@ export const classificationApi = graphqlApi.injectEndpoints({
               ) {
                 groupName
                 id
+                employee_group_id
+                peoplesoft_id
                 items {
                   id
+                  employee_group_id
+                  peoplesoft_id
                   name
                   groupName
                   items {
                     id
+                    employee_group_id
+                    peoplesoft_id
                     name
                     groupName
                     items {
                       id
+                      employee_group_id
+                      peoplesoft_id
                       name
                       groupName
                       items {
                         id
+                        employee_group_id
+                        peoplesoft_id
                         name
                         groupName
                         items {
                           id
+                          employee_group_id
+                          peoplesoft_id
                           name
                           groupName
                           items {
                             id
+                            employee_group_id
                             peoplesoft_id
                             name
                             groupName
-                            employee_group_id
                           }
-                          employee_group_id
                         }
-                        employee_group_id
                       }
-                      employee_group_id
                     }
-                    employee_group_id
                   }
-                  employee_group_id
                 }
               }
             }
