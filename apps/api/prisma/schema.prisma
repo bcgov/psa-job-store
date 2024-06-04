@@ -57,7 +57,6 @@ model PositionRequest {
   parent_job_profile_id            Int?
   crm_json                         Json?                  @db.JsonB
   profile_json                     Json?                  @db.JsonB
-  profile_json_updated             Json?                  @db.JsonB
   orgchart_json                    Json?                  @db.JsonB
   user_id                          String?                @db.Uuid
   title                            String?
@@ -74,7 +73,6 @@ model PositionRequest {
   status                           PositionRequestStatus?
   updated_at                       DateTime               @default(now()) @updatedAt
   shareUUID                        String?                @default(uuid()) @db.Uuid
-
 
   // additional information form data
   // additional_info_work_location_id             String?

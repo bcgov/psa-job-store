@@ -138,7 +138,7 @@ export class PositionRequestApiService {
         step: data.step,
         max_step_completed: data.max_step_completed,
         reports_to_position_id: data.reports_to_position_id,
-        profile_json_updated: data.profile_json_updated === null ? Prisma.DbNull : data.profile_json_updated,
+        profile_json: data.profile_json === null ? Prisma.DbNull : data.profile_json,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
         // TODO: AL-146
         // user: data.user,
