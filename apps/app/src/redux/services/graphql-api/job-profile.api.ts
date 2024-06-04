@@ -7,6 +7,7 @@ import {
   DeleteJobProfileResponse,
   DuplicateJobProfileResponse,
   GetJobProfileArgs,
+  GetJobProfileByNumberResponse,
   GetJobProfileResponse,
   GetJobProfilesArchivedResponse,
   GetJobProfilesArgs,
@@ -21,6 +22,7 @@ import {
   JobProfilesMinistriesResponse,
   NextAvailableJobProfileNumberResponse,
   UnarchiveJobProfileResponse,
+  UpdateJobProfileResponse,
 } from './job-profile-types';
 
 export const jobProfileApi = graphqlApi.injectEndpoints({
@@ -119,6 +121,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 updated_at
                 owner {
+                  name
+                }
+                updated_by {
+                  name
+                }
+                published_by {
                   name
                 }
               }
@@ -240,6 +248,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 owner {
                   name
                 }
+                updated_by {
+                  name
+                }
+                published_by {
+                  name
+                }
               }
               jobProfilesDraftsCount(search: $search, where: $where)
             }
@@ -347,6 +361,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 owner {
                   name
                 }
+                updated_by {
+                  name
+                }
+                published_by {
+                  name
+                }
               }
               jobProfilesArchivedCount(search: $search, where: $where)
             }
@@ -362,6 +382,98 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             sortByOrganization: args.sortByOrganization,
             sortOrder: args.sortOrder,
           },
+        };
+      },
+    }),
+
+    GetJobProfileByNumber: build.query<GetJobProfileByNumberResponse, GetJobProfileArgs>({
+      query: (args: GetJobProfileArgs) => {
+        return {
+          document: gql`
+            query JobProfileByNumber {
+              jobProfileByNumber(number: "${args.number}") {
+                id
+                updated_at
+                streams {
+                  stream {
+                      id
+                      name
+                      job_family_id
+                  }
+                }
+                title
+                number
+                context {
+                  id,
+                  description
+                }
+                state
+                security_screenings
+                all_reports_to
+                all_organizations
+                willingness_statements
+                knowledge_skills_abilities
+                professional_registration_requirements
+                optional_requirements
+                program_overview
+                review_required
+                overview
+                accountabilities
+                preferences
+                education
+                job_experience
+                scopes {
+                  scope {
+                    id
+                    name
+                    description
+                  }
+                }
+                total_comp_create_form_misc
+                role_type {
+                  id
+                  name
+                }
+                behavioural_competencies {
+                  behavioural_competency {
+                    id
+                    name
+                    description
+                  }
+                }
+                classifications {
+                  classification {
+                    id
+                    code
+                    name
+                  }
+                }
+                jobFamilies {
+                  jobFamily {
+                      id
+                      name
+                  }
+                }
+                role {
+                  id
+                  name
+                }
+                organizations {
+                  organization{
+                    id
+                    name
+                  }
+                }
+                reports_to {
+                  classification {
+                    id
+                    code
+                  }
+                }
+                is_archived
+              }
+            }
+          `,
         };
       },
     }),
@@ -515,6 +627,19 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       },
     }),
 
+    updateJobProfileState: build.mutation<UpdateJobProfileResponse, { jobProfileId: number; state: string }>({
+      query: (args) => {
+        return {
+          document: gql`
+            mutation UpdateJobProfileState($jobProfileId: Int!, $state: String!) {
+              updateJobProfileState(jobProfileId: $jobProfileId, state: $state)
+            }
+          `,
+          variables: args,
+        };
+      },
+    }),
+
     getJobProfilesCareerGroups: build.query<JobProfilesCareerGroupsResponse, void>({
       query: () => {
         return {
@@ -660,4 +785,8 @@ export const {
   useLazyGetJobProfilesArchivedQuery,
 
   useUnarchiveJobProfileMutation,
+  useUpdateJobProfileStateMutation,
+
+  useGetJobProfileByNumberQuery,
+  useLazyGetJobProfileByNumberQuery,
 } = jobProfileApi;

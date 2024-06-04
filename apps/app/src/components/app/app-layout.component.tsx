@@ -244,6 +244,12 @@ export const AppLayout = () => {
                             hideTitle: true,
                           },
                           {
+                            icon: <HistoryOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
+                            title: 'Archived job profiles',
+                            to: '/archived-job-profiles',
+                            hideTitle: true,
+                          },
+                          {
                             icon: <CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
                             title: 'Approved requests',
                             to: '/approved-requests',
@@ -313,7 +319,7 @@ export const AppLayout = () => {
                               icon={<CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />}
                               key="/approved-requests"
                             >
-                              Approved Reqs
+                              Approved Requests
                             </Menu.Item>
                           </Menu>
                         </Link>

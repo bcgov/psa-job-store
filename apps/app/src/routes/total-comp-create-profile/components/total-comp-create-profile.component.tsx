@@ -5,6 +5,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   InfoCircleOutlined,
+  LinkOutlined,
   LoadingOutlined,
   PlusOutlined,
   ReloadOutlined,
@@ -20,6 +21,7 @@ import {
   Form,
   Input,
   List,
+  Menu,
   Modal,
   Radio,
   Row,
@@ -33,6 +35,7 @@ import {
   notification,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
+import copy from 'copy-to-clipboard';
 import debounce from 'lodash.debounce';
 import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
@@ -65,6 +68,7 @@ import {
 } from '../../../redux/services/graphql-api/job-profile-types';
 import {
   useCreateOrUpdateJobProfileMutation,
+  useDuplicateJobProfileMutation,
   useGetJobProfilesDraftsMinistriesQuery,
   useLazyGetJobProfileQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
@@ -129,7 +133,130 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [profileJson, setProfileJson] = useState<any>(null);
 
   const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
+  let link: string;
+  const [selectedKeys, setSelectedKeys] = useState([]);
 
+  if (jobProfileData?.jobProfile.state === 'DRAFT') {
+    if (jobProfileData?.jobProfile.is_archived === false) {
+      link = '/draft-job-profiles/';
+    } else {
+      link = '/archived-job-profiles/';
+    }
+  } else {
+    link = '/published-job-profiles/';
+  }
+  const handleCopyLink = () => {
+    // Dynamically construct the link to include the current base URL
+    const linkToCopy = `${window.location.origin}${link}${jobProfileData?.jobProfile.id}`;
+
+    // Use the Clipboard API to copy the link to the clipboard
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    message.success('Link copied to clipboard!');
+    setSelectedKeys([]);
+  };
+  const [duplicateJobProfile] = useDuplicateJobProfileMutation();
+
+  const duplicate = async () => {
+    // console.log('duplicate', record);
+    if (jobProfileData?.jobProfile.id) {
+      const res = await duplicateJobProfile({ jobProfileId: jobProfileData?.jobProfile.id }).unwrap();
+      // console.log('res: ', res);
+      navigate(`${link}${res.duplicateJobProfile}`);
+    }
+  };
+  const getMenuContent = () => {
+    return (
+      <Menu selectedKeys={selectedKeys} className={`popover-selector-${jobProfileData?.jobProfile.id}`}>
+        <>
+          {' '}
+          {state === 'PUBLISHED' && (
+            <>
+              <Menu.Item key="save">
+                <div style={{ padding: '5px 0' }}>
+                  <DownloadJobProfileComponent jobProfile={profileJson?.jobProfile} ignoreAbsentParent={true}>
+                    <div style={{ padding: '5px 0' }}>
+                      Download
+                      <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                        Download a copy of this job profile.{' '}
+                      </Typography.Text>
+                    </div>
+                  </DownloadJobProfileComponent>
+                </div>
+              </Menu.Item>
+              <Menu.Item key="delete" onClick={showUnPublishConfirm}>
+                <div style={{ padding: '5px 0' }}>
+                  Unpublish
+                  <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                    Remove the job profile from the Job Store.{' '}
+                  </Typography.Text>
+                </div>
+              </Menu.Item>
+              <Menu.Item key="copy" onClick={() => handleCopyLink()}>
+                <div style={{ padding: '5px 0' }}>
+                  <div>
+                    Copy link <LinkOutlined />
+                  </div>
+                  <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                    Invite others to review this profile.{' '}
+                  </Typography.Text>
+                </div>
+              </Menu.Item>
+            </>
+          )}
+          {state === 'DRAFT' && !profileJson?.jobProfile.is_archived && (
+            <>
+              <Menu.Item key="create" onClick={showPublishConfirm}>
+                <div style={{ padding: '5px 0' }}>
+                  Publish
+                  <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                    Publish the job profile to the Job Store.{' '}
+                  </Typography.Text>
+                </div>
+              </Menu.Item>
+              <Menu.Item key="copy" onClick={() => handleCopyLink()}>
+                <div style={{ padding: '5px 0' }}>
+                  <div>
+                    Copy link <LinkOutlined />
+                  </div>
+                  <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                    Invite others to review this profile.{' '}
+                  </Typography.Text>
+                </div>
+              </Menu.Item>
+            </>
+          )}
+          {state === 'DRAFT' && profileJson?.jobProfile.is_archived && (
+            <>
+              <Menu.Item key="create" onClick={showPublishConfirm}>
+                Restore
+                <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                  Unarchive the job profile.{' '}
+                </Typography.Text>
+              </Menu.Item>
+              <Menu.Item key="duplicate" onClick={() => duplicate()}>
+                Duplicate
+                <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                  Create a copy of this job profile.{' '}
+                </Typography.Text>
+              </Menu.Item>
+              <Menu.Item key="save">
+                <div style={{ padding: '5px 0' }}>
+                  <DownloadJobProfileComponent jobProfile={profileJson?.jobProfile} ignoreAbsentParent={true}>
+                    <div style={{ padding: '5px 0' }}>
+                      Download
+                      <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                        Download a copy of this job profile.{' '}
+                      </Typography.Text>
+                    </div>
+                  </DownloadJobProfileComponent>
+                </div>
+              </Menu.Item>
+            </>
+          )}
+        </>
+      </Menu>
+    );
+  };
   useEffect(() => {
     if (lazyJobProfile) {
       setProfileJson(lazyJobProfile);
@@ -1443,10 +1570,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   const showUnPublishConfirm = () => {
     Modal.confirm({
-      title: 'Un-publish Profile',
+      title: 'Unpublish Profile',
       content:
-        'Un-publishing the job profile from the Job Store will remove public access to the profile. Are you sure you want to continue?',
-      okText: 'Un-publish profile',
+        'Unpublishing the job profile from the Job Store will remove public access to the profile. Are you sure you want to continue?',
+      okText: 'Unpublish profile',
       cancelText: 'Cancel',
       onOk() {
         // Call the function to handle the publish action
@@ -3355,14 +3482,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 {state == 'PUBLISHED' && (
                   <>
-                    <Typography.Title level={5}>Un-publish</Typography.Title>
+                    <Typography.Title level={5}>Unpublish</Typography.Title>
                     <Typography.Text>
-                      Un-publishing the job profile from the Job Store will remove public access to the profile. After
+                      Unpublishing the job profile from the Job Store will remove public access to the profile. After
                       which you can access the profile from the ‘Drafts’ section.
                     </Typography.Text>
                     <br></br>
                     <Button style={{ marginTop: 10 }} onClick={showUnPublishConfirm}>
-                      Un-publish profile
+                      Unpublish profile
                     </Button>
                     <Divider></Divider>
                   </>
@@ -3435,6 +3562,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         }
         showButton1
         showButton2
+        button1Content={getMenuContent}
         button2Text={state == 'PUBLISHED' ? 'Save and publish' : 'Save as draft'}
         button2Callback={async () => {
           await save();

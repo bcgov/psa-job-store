@@ -138,7 +138,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
 
   const resetWizardContext = () => {
     setWizardData(null);
-    setClassificationsData(null);
+    // setClassificationsData(null); // do not reset this - it just stores the cache of all classifications, otherwise can't find proper classification later
     setMinReqAlertShown(false);
     setReqAlertShown(false);
     setOptionalAccountabilitiesAlertShown(false);

@@ -25,7 +25,7 @@ import {
   ProfessionsModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
-import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import { useLazyGetJobProfileByNumberQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import './job-profile.component.css';
 
 const { Text } = Typography;
@@ -69,12 +69,12 @@ export class TitleField extends TrackedFieldArrayItem {
 }
 
 export class OverviewField extends TrackedFieldArrayItem {
-  @Length(5, 1000, { message: 'Overview must be between 5 and 1000 characters.' })
+  @Length(5, 2000, { message: 'Overview must be between 5 and 2000 characters.' })
   declare text: string;
 }
 
 export class ProgramOverviewField extends TrackedFieldArrayItem {
-  @Length(0, 1000, { message: 'Program overview must be between 0 and 1000 characters.' })
+  @Length(0, 2000, { message: 'Program overview must be between 0 and 2000 characters.' })
   declare text: string;
 }
 
@@ -279,7 +279,7 @@ export class JobProfileValidationModel {
   program_overview: ProgramOverviewField | string;
 
   // @AllDisabled({ message: 'There must be at least one accountability.' })
-  @AccountabilitiesCountValidator(1, 30, 'required accountabilities', {
+  @AccountabilitiesCountValidator(1, 40, 'required accountabilities', {
     // 1, 5
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
@@ -308,7 +308,7 @@ export class JobProfileValidationModel {
 
   preferences: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
-  @CustomItemCountValidator(1, 5, 'knowledge, skills or abilities', {
+  @CustomItemCountValidator(1, 20, 'knowledge, skills or abilities', {
     // 1-5, 3-20
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
@@ -354,7 +354,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 }) => {
   const [searchParams] = useSearchParams();
   const params = useParams();
-  const resolvedId = id ?? params.id ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
+  const resolvedId = id ?? params.number ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
   // console.log('resolvedId: ', resolvedId);
   const screens = useBreakpoint();
 
@@ -365,7 +365,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
   // Using the lazy query to have control over when the fetch action is dispatched
   // (not dispatching if profileData was already provided)
-  const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
+  const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileByNumberQuery();
 
   // State to hold the effectiveData which can be from profileData prop or fetched from API
   const initialData = profileData ?? null;
@@ -382,7 +382,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     } else if ((!profileData && resolvedId) || (profileData && showDiff && resolvedId)) {
       // If no profileData is provided and an id exists, fetch the data
       // OR profileData was provided, but we also want to run a diff
-      triggerGetJobProfile({ id: +resolvedId });
+      triggerGetJobProfile({ number: +resolvedId });
     }
   }, [resolvedId, profileData, triggerGetJobProfile, showDiff]);
 
@@ -390,13 +390,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   useEffect(() => {
     if (!profileData && data && !isLoading) {
       // Only set effectiveData from fetched data if profileData is not provided
-      if (onProfileLoad) onProfileLoad(data.jobProfile);
-      setEffectiveData(data.jobProfile);
-      setEffectiveDataExtra(data.jobProfile);
+      if (onProfileLoad) onProfileLoad(data.jobProfileByNumber);
+      setEffectiveData(data.jobProfileByNumber);
+      setEffectiveDataExtra(data.jobProfileByNumber);
     } else if (profileData && showDiff && data && !isLoading) {
-      if (onProfileLoad) onProfileLoad(data.jobProfile);
+      if (onProfileLoad) onProfileLoad(data.jobProfileByNumber);
       // do diff between profile as it was submitted at the time, otherwise compare to the latest
-      setOriginalData(profileData?.original_profile_json ?? data.jobProfile); // for diff
+      setOriginalData(profileData?.original_profile_json ?? data.jobProfileByNumber); // for diff
     }
   }, [data, isLoading, profileData, onProfileLoad, showDiff]);
 
