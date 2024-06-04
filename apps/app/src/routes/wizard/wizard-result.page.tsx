@@ -434,14 +434,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
                 <Row justify="center" style={{ padding: '0 1rem' }}>
                   <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
-                    <Alert
+                    {/* <Alert
                       data-testid="verification-warning-message"
                       message=""
                       description={
                         <span>
                           Some of your amendments to the generic profile require verification. If you would like to
                           revisit some of your amendments, please click these links:
-                          {/* loop over reasons */}
                           <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
                             {verificationNeededReasons.map((reason, index) => (
                               <li key={index}>
@@ -455,8 +454,45 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       showIcon
                       icon={<ExclamationCircleFilled />}
                       style={{ marginBottom: '24px' }}
-                    />
+                    /> */}
 
+                    {verificationNeededReasons.includes('Job Profile is denoted as requiring review') && (
+                      <Alert
+                        message={<b>Will require verification</b>}
+                        description="This profile will need to be verified by the classification team before a position number is generated."
+                        type="warning"
+                        showIcon
+                        icon={<ExclamationCircleFilled />}
+                        style={{ marginBottom: '24px' }}
+                      />
+                    )}
+                    {verificationNeededReasons.filter(
+                      (reason) => reason !== 'Job Profile is denoted as requiring review',
+                    ).length > 0 && (
+                      <Alert
+                        data-testid="verification-warning-message"
+                        message=""
+                        description={
+                          <span>
+                            Some of your amendments to the generic profile require verification. If you would like to
+                            revisit some of your amendments, please click these links:
+                            <ul style={{ marginTop: '1rem' }} data-testid="edit-form-link">
+                              {verificationNeededReasons
+                                .filter((reason) => reason !== 'Job Profile is denoted as requiring review')
+                                .map((reason, index) => (
+                                  <li key={index}>
+                                    <a onClick={() => handleVerificationClick(reason)}>{reason}</a>
+                                  </li>
+                                ))}
+                            </ul>
+                          </span>
+                        }
+                        type="warning"
+                        showIcon
+                        icon={<ExclamationCircleFilled />}
+                        style={{ marginBottom: '24px' }}
+                      />
+                    )}
                     <Card
                       title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Send for verification</h3>}
                       bordered={false}
