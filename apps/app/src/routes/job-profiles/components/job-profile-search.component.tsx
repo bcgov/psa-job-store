@@ -9,6 +9,7 @@ import {
   JobProfileStreamModel,
   useGetJobProfileStreamsQuery,
 } from '../../../redux/services/graphql-api/job-profile-stream';
+import { ClassificationModel } from '../../../redux/services/graphql-api/job-profile-types';
 import {
   useGetJobProfilesClassificationsQuery,
   useGetJobProfilesMinistriesQuery,
@@ -38,7 +39,7 @@ interface JobProfileSearchProps {
   additionalFilters?: boolean;
   fullWidth?: boolean;
   ministriesData?: any;
-  classificationData?: any;
+  classificationData?: ClassificationModel[] | undefined;
   positionRequestId?: number;
 }
 
@@ -64,7 +65,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // additionalFilters = false,
   fullWidth = false,
   ministriesData = null,
-  classificationData = null,
+  classificationData = undefined,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -163,10 +164,14 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // Update the classification Select components when data changes
   useEffect(() => {
     if (classificationData) {
-      const newOptions = classificationData.map((classification: { name: any; id: any }) => ({
-        label: classification.name,
-        value: classification.id,
-      }));
+      const newOptions = classificationData.map((classification) => {
+        const { id, employee_group_id, peoplesoft_id, name } = classification;
+
+        return {
+          label: name,
+          value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+        };
+      });
       setClassificationOptions(newOptions);
     }
   }, [classificationData]);
