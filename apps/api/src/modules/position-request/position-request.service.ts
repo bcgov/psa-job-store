@@ -782,23 +782,51 @@ export class PositionRequestApiService {
       },
       select: {
         classification_id: true,
+        classification_employee_group_id: true,
+        classification_peoplesoft_id: true,
       },
     });
 
-    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
+    const classificationIds = Array.from(
+      new Set(
+        positionRequests
+          .filter(
+            (req) =>
+              req.classification_id != null &&
+              req.classification_employee_group_id != null &&
+              req.classification_peoplesoft_id != null,
+          )
+          .map((req) => {
+            const {
+              classification_id: id,
+              classification_employee_group_id: employee_group_id,
+              classification_peoplesoft_id: peoplesoft_id,
+            } = req;
 
-    // Collect all unique classification IDs from the position requests
-    const classificationIds = [
-      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id !== null)),
-    ];
+            return {
+              id,
+              employee_group_id,
+              peoplesoft_id,
+            };
+          }),
+      ),
+    );
 
     // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
       where: {
-        id: { in: classificationIds },
+        OR: [
+          ...classificationIds.map(({ id, employee_group_id, peoplesoft_id }) => ({
+            id,
+            employee_group_id,
+            peoplesoft_id,
+          })),
+        ],
       },
       select: {
         id: true,
+        employee_group_id: true,
+        peoplesoft_id: true,
         code: true,
       },
     });
