@@ -1171,7 +1171,14 @@ export class JobProfileService {
 
     // Flatten the array of organizations and deduplicate
     const allClassifications = jobProfiles.flatMap((profile) => profile.classifications.map((o) => o.classification));
-    const uniqueClassifications = Array.from(new Map(allClassifications.map((org) => [org['id'], org])).values());
+    const uniqueClassifications = Array.from(
+      new Map(
+        allClassifications.map((classification) => {
+          const { id, employee_group_id, peoplesoft_id } = classification;
+          return [`${id}.${employee_group_id}.${peoplesoft_id}`, classification];
+        }),
+      ).values(),
+    );
 
     return uniqueClassifications;
   }
@@ -1190,7 +1197,14 @@ export class JobProfileService {
 
     // Flatten the array of organizations and deduplicate
     const allClassifications = jobProfiles.flatMap((profile) => profile.classifications.map((o) => o.classification));
-    const uniqueClassifications = Array.from(new Map(allClassifications.map((org) => [org['id'], org])).values());
+    const uniqueClassifications = Array.from(
+      new Map(
+        allClassifications.map((classification) => {
+          const { id, employee_group_id, peoplesoft_id } = classification;
+          return [`${id}.${employee_group_id}.${peoplesoft_id}`, classification];
+        }),
+      ).values(),
+    );
 
     return uniqueClassifications;
   }

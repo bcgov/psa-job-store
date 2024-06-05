@@ -53,7 +53,7 @@ export const classificationApi = graphqlApi.injectEndpoints({
             query Classifications {
               classifications(
                 orderBy: [{ code: asc }, { id: asc }]
-                where: { effective_status: { equals: "Active" }, peoplesoft_id: { equals: "BCSET" } }
+                where: { effective_status: { equals: "Active" } }
               ) {
                 id
                 employee_group_id

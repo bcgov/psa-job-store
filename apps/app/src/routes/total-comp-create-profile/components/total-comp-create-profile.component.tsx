@@ -91,6 +91,8 @@ import ReorderButtons from './reorder-buttons';
 const { Option } = Select;
 const { Text } = Typography;
 
+const employeeGroupIds: string[] = ['MGT', 'GEU', 'OEX', 'NUR', 'PEA'];
+
 // Define a custom clipboard to handle paste events
 class PlainTextClipboard extends Quill.import('modules/clipboard') {
   onPaste(event: any) {
@@ -581,7 +583,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   ]);
 
   const { data: treeData } = useGetGroupedClassificationsQuery({
-    employee_group_ids: ['MGT', 'GEU', 'OEX', 'NUR', 'PEA'],
+    employee_group_ids: employeeGroupIds,
     effective_status: 'Active',
   });
 
@@ -1154,13 +1156,18 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const { SHOW_CHILD } = TreeSelect;
 
   //employee group selector
-  const { data: employeeGroupData } = useGetEmployeeGroupsQuery();
+  const { data: employeeGroupData } = useGetEmployeeGroupsQuery({
+    ids: employeeGroupIds,
+  });
 
   // classifications selector data
   const { data: classificationsData } = useGetFilteredClassificationsQuery();
 
   // useEffect to update the filteredClassifications when employeeGroup changes
   useEffect(() => {
+    console.log('employeeGroup: ', employeeGroup);
+    console.log('classificationsData?.classifications: ', classificationsData?.classifications);
+
     if (employeeGroup && classificationsData?.classifications) {
       const filtered = classificationsData.classifications.filter((c) => c.employee_group_id === employeeGroup);
       setFilteredClassifications(filtered);

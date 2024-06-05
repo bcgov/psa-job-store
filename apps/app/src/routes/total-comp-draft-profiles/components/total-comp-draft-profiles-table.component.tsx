@@ -404,9 +404,14 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
                 {
                   classifications: {
                     some: {
-                      classification_id: {
-                        in: classificationFilter.split(',').map((v) => v.trim()),
-                      },
+                      OR: classificationFilter?.split(',').flatMap((c) => {
+                        const [id, employee_group_id, peoplesoft_id] = c.split('.');
+                        return {
+                          classification_id: { equals: id },
+                          classification_employee_group_id: { equals: employee_group_id },
+                          classification_peoplesoft_id: { equals: peoplesoft_id },
+                        };
+                      }),
                     },
                   },
                 },
