@@ -355,6 +355,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 published_by {
                   name
                 }
+                is_archived
               }
               jobProfilesArchivedCount(search: $search, where: $where)
             }

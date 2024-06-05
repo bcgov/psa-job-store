@@ -158,7 +158,10 @@ export const ClassificationTaskPage = () => {
                           <strong>Download job profile</strong>
                           <p>Attached copy of the job profile that needs review.</p>
                           {/* <Button onClick={handleDownload}>Download job profile</Button> */}
-                          <DownloadJobProfileComponent jobProfile={data?.positionRequest?.profile_json} />
+                          <DownloadJobProfileComponent
+                            positionRequest={data?.positionRequest}
+                            jobProfile={data?.positionRequest?.profile_json}
+                          />
                           <Button type="link" onClick={() => setActiveTabKey('3')}>
                             View job profile
                           </Button>
@@ -220,7 +223,10 @@ export const ClassificationTaskPage = () => {
     {
       label: (
         <div>
-          <DownloadJobProfileComponent jobProfile={data.positionRequest?.profile_json}>
+          <DownloadJobProfileComponent
+            positionRequest={data?.positionRequest}
+            jobProfile={data.positionRequest?.profile_json}
+          >
             <>
               Download job profile
               <Text type="secondary" style={{ display: 'block' }}>
