@@ -50,6 +50,8 @@ export class PositionService {
       position = {
         id: raw['A.POSITION_NBR'],
         classification_id: raw['A.JOBCODE'],
+        classification_employee_group_id: classification.employee_group_id,
+        classification_peoplesoft_id: classification.peoplesoft_id,
         classification: classification,
         department_id: raw['A.DEPTID'],
         department: department,
