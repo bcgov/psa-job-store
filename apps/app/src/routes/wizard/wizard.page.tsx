@@ -214,14 +214,21 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     setSelectedProfileName(profile.title.toString());
     setSelectedProfileId(profile.id.toString());
 
-    if (profile?.classifications != null)
-      setSelectedClassification({
-        ...{
+    if (profile?.classifications != null) {
+      const classification = {
+        id: profile.classifications[0].classification.id,
+        employee_group_id: profile.classifications[0].classification.employee_group_id,
+        peoplesoft_id: profile.classifications[0].classification.peoplesoft_id,
+      };
+
+      if (JSON.stringify(selectedClassification) !== JSON.stringify(classification)) {
+        setSelectedClassification({
           id: profile.classifications[0].classification.id,
           employee_group_id: profile.classifications[0].classification.employee_group_id,
           peoplesoft_id: profile.classifications[0].classification.peoplesoft_id,
-        },
-      });
+        });
+      }
+    }
   };
 
   const [deletePositionRequest] = useDeletePositionRequestMutation();
