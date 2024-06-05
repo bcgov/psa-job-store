@@ -179,46 +179,37 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     // Hide the modal
     setIsModalVisible(false);
 
-    try {
-      if (positionRequestId) {
-        // await updatePositionRequest({
-        //   id: positionRequestId,
-        //   status: 'COMPLETE',
-        //   step: 6,
-        // }).unwrap();
+    if (positionRequestId) {
+      // await updatePositionRequest({
+      //   id: positionRequestId,
+      //   status: 'COMPLETE',
+      //   step: 6,
+      // }).unwrap();
 
-        const result = await submitPositionRequest({
-          id: positionRequestId,
-          comment: comment,
-        }).unwrap();
+      const result = await submitPositionRequest({
+        id: positionRequestId,
+        comment: comment,
+      }).unwrap();
 
-        // console.log('submitPositionRequest result: ', result);
-        // todo - change check for position_number
-        if (!result?.submitPositionRequest.id) throw new Error('API failure');
+      // console.log('submitPositionRequest result: ', result);
+      // todo - change check for position_number
+      if (!result?.submitPositionRequest.id) throw new Error('API failure');
 
-        // if successfull, switch parent to readonly mode and show success message
-        // switchParentMode, switchParentReadonlyMode
-        if (result?.submitPositionRequest.status === 'COMPLETED') {
-          switchParentMode && switchParentMode('readonly');
-          switchParentReadonlyMode && switchParentReadonlyMode('completed');
-          setReadOnlySelectedTab && setReadOnlySelectedTab('4');
-        } else if (result?.submitPositionRequest.status === 'VERIFICATION') {
-          switchParentMode && switchParentMode('readonly');
-          switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
-          setReadOnlySelectedTab && setReadOnlySelectedTab('4');
-        }
-
-        setPositionRequestData(result?.submitPositionRequest ?? null);
-      } else {
-        throw Error('Position request not found');
+      // if successfull, switch parent to readonly mode and show success message
+      // switchParentMode, switchParentReadonlyMode
+      if (result?.submitPositionRequest.status === 'COMPLETED') {
+        switchParentMode && switchParentMode('readonly');
+        switchParentReadonlyMode && switchParentReadonlyMode('completed');
+        setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+      } else if (result?.submitPositionRequest.status === 'VERIFICATION') {
+        switchParentMode && switchParentMode('readonly');
+        switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
+        setReadOnlySelectedTab && setReadOnlySelectedTab('4');
       }
-    } catch (error) {
-      console.log('submitPositionRequest error: ', error);
-      // Handle the error, possibly showing another modal
-      // Modal.error({
-      //   title: 'Error Creating Position',
-      //   content: 'An unknown error occurred', //error.data?.message ||
-      // });
+
+      setPositionRequestData(result?.submitPositionRequest ?? null);
+    } else {
+      throw Error('Position request not found');
     }
   };
 
