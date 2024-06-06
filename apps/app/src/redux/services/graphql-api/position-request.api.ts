@@ -49,6 +49,7 @@ export interface GetPositionRequestResponseContent {
   department_id?: string;
   approved_at?: string;
   updated_at?: string;
+  submitted_at?: string;
   email?: string;
   shareUUID?: string;
   parent_job_profile?: {
