@@ -10,15 +10,18 @@ export interface IsJobProfileNumberAvailableResponse {
 
 export interface ClassificationModel {
   id: string;
+  employee_group_id: string;
+  peoplesoft_id: string;
   code: string;
   name: string;
   grade: string;
-  employee_group_id: string;
 }
 
 export interface ClassificationModelWrapped {
   classification: {
     id: string;
+    employee_group_id: string;
+    peoplesoft_id: string;
     code: string;
     name: string;
   };
@@ -241,7 +244,11 @@ interface NumberConnectInput {
 export interface ClassificationConnectInput {
   classification: {
     connect: {
-      id: string;
+      id_employee_group_id_peoplesoft_id: {
+        id: string;
+        employee_group_id: string;
+        peoplesoft_id: string;
+      };
     };
   };
 }

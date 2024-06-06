@@ -91,13 +91,21 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       // If we have a positionRequestId and prData, get the position data
       const reportsToPositionId = prData?.reports_to_position_id;
+
       if (reportsToPositionId != null && pData == null) {
         dispatch(graphqlApi.util.invalidateTags(['jobProfiles']));
         pTrigger({ where: { id: `${reportsToPositionId}` } });
       }
 
       // If we have a positionRequestId, position request data, and position data, get the classification ID for the position
-      const classificationId = pData?.position?.classification_id;
+      const { classification_id, classification_employee_group_id, classification_peoplesoft_id } =
+        pData?.position ?? {};
+      // const classificationId = pData?.position?.classification_id;
+      const classificationId =
+        classification_id != null
+          ? `${classification_id}.${classification_employee_group_id}.${classification_peoplesoft_id}`
+          : null;
+
       if (classificationId != null && classificationIdFilter == null) {
         setPositionFilteringProcessActive(false);
         // set classificationIdFilter from the position data to filter job profiles by classification
@@ -220,9 +228,14 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                       {
                         reports_to: {
                           some: {
-                            classification_id: {
-                              in: [classificationIdFilter],
-                            },
+                            OR: classificationIdFilter?.split(',').flatMap((c) => {
+                              const [id, employee_group_id, peoplesoft_id] = c.split('.');
+                              return {
+                                classification_id: { equals: id },
+                                classification_employee_group_id: { equals: employee_group_id },
+                                classification_peoplesoft_id: { equals: peoplesoft_id },
+                              };
+                            }),
                           },
                         },
                       },
@@ -248,9 +261,14 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                   {
                     classifications: {
                       some: {
-                        classification_id: {
-                          in: classificationFilter.split(',').map((v) => v.trim()),
-                        },
+                        OR: classificationFilter?.split(',').flatMap((c) => {
+                          const [id, employee_group_id, peoplesoft_id] = c.split('.');
+                          return {
+                            classification_id: { equals: id },
+                            classification_employee_group_id: { equals: employee_group_id },
+                            classification_peoplesoft_id: { equals: peoplesoft_id },
+                          };
+                        }),
                       },
                     },
                   },

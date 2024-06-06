@@ -7,6 +7,8 @@ import { OrganizationModel } from './organization';
 export interface PositionModel {
   id: string;
   classification_id: string;
+  classification_employee_group_id: string;
+  classification_peoplesoft_id: string;
   department_id: string;
   organization_id: string;
   supervisor_id: string;
@@ -58,6 +60,8 @@ export const positionApi = graphqlApi.injectEndpoints({
               position(where: $where) {
                 classification_id
                 effective_date
+                classification_employee_group_id
+                classification_peoplesoft_id
               }
             }
           `,

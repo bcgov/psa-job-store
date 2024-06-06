@@ -626,7 +626,9 @@ export class JobProfileService {
           classifications: {
             create: data.classifications.create.map((item) => ({
               classification: {
-                connect: { id: item.classification.connect.id },
+                connect: {
+                  id_employee_group_id_peoplesoft_id: item.classification.connect.id_employee_group_id_peoplesoft_id,
+                },
               },
             })),
           },
@@ -697,7 +699,9 @@ export class JobProfileService {
         reports_to: {
           create: data.reports_to.create.map((item) => ({
             classification: {
-              connect: { id: item.classification.connect.id },
+              connect: {
+                id_employee_group_id_peoplesoft_id: item.classification.connect.id_employee_group_id_peoplesoft_id,
+              },
             },
           })),
         },
@@ -724,7 +728,9 @@ export class JobProfileService {
               deleteMany: {}, // Clear existing classifications
               create: data.classifications.create.map((item) => ({
                 classification: {
-                  connect: { id: item.classification.connect.id },
+                  connect: {
+                    id_employee_group_id_peoplesoft_id: item.classification.connect.id_employee_group_id_peoplesoft_id,
+                  },
                 },
               })),
             }
@@ -795,7 +801,11 @@ export class JobProfileService {
         reports_to: {
           deleteMany: {},
           create: data.reports_to.create.map((item) => ({
-            classification: { connect: { id: item.classification.connect.id } },
+            classification: {
+              connect: {
+                id_employee_group_id_peoplesoft_id: item.classification.connect.id_employee_group_id_peoplesoft_id,
+              },
+            },
           })),
         },
 
@@ -914,7 +924,15 @@ export class JobProfileService {
       },
       classifications: {
         create: jobProfileToDuplicate.classifications.map((cl) => ({
-          classification: { connect: { id: cl.classification.id } },
+          classification: {
+            connect: {
+              id_employee_group_id_peoplesoft_id: {
+                id: cl.classification.id,
+                employee_group_id: cl.classification.employee_group_id,
+                peoplesoft_id: cl.classification.peoplesoft_id,
+              },
+            },
+          },
         })),
       },
       jobFamilies: {
@@ -942,7 +960,15 @@ export class JobProfileService {
       },
       reports_to: {
         create: jobProfileToDuplicate.reports_to.map((rt) => ({
-          classification: { connect: { id: rt.classification.id } },
+          classification: {
+            connect: {
+              id_employee_group_id_peoplesoft_id: {
+                id: rt.classification.id,
+                employee_group_id: rt.classification.employee_group_id,
+                peoplesoft_id: rt.classification.peoplesoft_id,
+              },
+            },
+          },
         })),
       },
       context: { create: { description: jobProfileToDuplicate.context.description } },
@@ -1154,7 +1180,14 @@ export class JobProfileService {
 
     // Flatten the array of organizations and deduplicate
     const allClassifications = jobProfiles.flatMap((profile) => profile.classifications.map((o) => o.classification));
-    const uniqueClassifications = Array.from(new Map(allClassifications.map((org) => [org['id'], org])).values());
+    const uniqueClassifications = Array.from(
+      new Map(
+        allClassifications.map((classification) => {
+          const { id, employee_group_id, peoplesoft_id } = classification;
+          return [`${id}.${employee_group_id}.${peoplesoft_id}`, classification];
+        }),
+      ).values(),
+    );
 
     return uniqueClassifications;
   }
@@ -1173,7 +1206,14 @@ export class JobProfileService {
 
     // Flatten the array of organizations and deduplicate
     const allClassifications = jobProfiles.flatMap((profile) => profile.classifications.map((o) => o.classification));
-    const uniqueClassifications = Array.from(new Map(allClassifications.map((org) => [org['id'], org])).values());
+    const uniqueClassifications = Array.from(
+      new Map(
+        allClassifications.map((classification) => {
+          const { id, employee_group_id, peoplesoft_id } = classification;
+          return [`${id}.${employee_group_id}.${peoplesoft_id}`, classification];
+        }),
+      ).values(),
+    );
 
     return uniqueClassifications;
   }
