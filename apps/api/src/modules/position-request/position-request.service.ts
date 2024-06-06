@@ -26,7 +26,6 @@ import {
   IncidentThreadContentType,
   IncidentThreadEntryType,
 } from '../external/models/incident-create.input';
-import { PeoplesoftPosition } from '../external/models/peoplesoft-position.model';
 import {
   PositionCreateInput,
   PositionDuration,
@@ -1359,14 +1358,14 @@ export class PositionRequestApiService {
 
       const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
       const classification = await this.classificationService.getClassification({
-      where: {
-        id_employee_group_id_peoplesoft_id: {
-          id: positionRequest.classification_id,
-          employee_group_id: positionRequest.classification_employee_group_id,
-          peoplesoft_id: positionRequest.classification_peoplesoft_id,
+        where: {
+          id_employee_group_id_peoplesoft_id: {
+            id: positionRequest.classification_id,
+            employee_group_id: positionRequest.classification_employee_group_id,
+            peoplesoft_id: positionRequest.classification_peoplesoft_id,
+          },
         },
-      },
-    });
+      });
       const { metadata } = await this.prisma.user.findUnique({ where: { id: positionRequest.user_id } });
       const contactId =
         ((metadata ?? {}) as Record<string, any>).crm?.contact_id ?? (process.env.TEST_ENV === 'true' ? 231166 : null);
@@ -1567,18 +1566,6 @@ export class PositionRequestApiService {
     let data: PositionCreateInput;
 
     switch (classification.employee_group_id) {
-      case 'MGT':
-        data = {
-          BUSINESS_UNIT: paylist_department.organization.id,
-          DEPTID: paylist_department.id,
-          JOBCODE: positionRequest.classification_id,
-          REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
-          DESCR: positionRequest.title,
-          REG_TEMP: PositionDuration.Regular,
-          FULL_PART_TIME: PositionType.FullTime,
-        };
-        break;
       case 'GEU':
       case 'OEX':
       case 'PEA': {
@@ -1600,6 +1587,19 @@ export class PositionRequestApiService {
           TGB_APPRV_MGR: employeeId,
         };
 
+        break;
+      }
+      default: {
+        data = {
+          BUSINESS_UNIT: paylist_department.organization.id,
+          DEPTID: paylist_department.id,
+          JOBCODE: positionRequest.classification_id,
+          REPORTS_TO: positionRequest.reports_to_position_id,
+          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
+          DESCR: positionRequest.title,
+          REG_TEMP: PositionDuration.Regular,
+          FULL_PART_TIME: PositionType.FullTime,
+        };
         break;
       }
     }
