@@ -131,26 +131,6 @@ export class PositionRequestApiService {
   async createPositionRequest(data: PositionRequestCreateInput, userId: string) {
     const uniqueSubmissionId = await this.generateUniqueShortId(10);
 
-    const obj = {
-      department: data.department,
-      additional_info: data.additional_info === null ? Prisma.DbNull : data.additional_info,
-      step: data.step,
-      reports_to_position_id: data.reports_to_position_id,
-      profile_json_updated: data.profile_json_updated === null ? Prisma.DbNull : data.profile_json_updated,
-      orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
-      // TODO: AL-146
-      // user: data.user,
-      user_id: userId,
-      parent_job_profile: data.parent_job_profile,
-      submission_id: uniqueSubmissionId,
-      status: 'DRAFT',
-      title: data.title,
-      // TODO: AL-146
-      // classification: data.classification,
-      classification_id: data.classification_id,
-    } as any as Prisma.PositionRequestCreateInput;
-    console.log('createPositionRequest: ', obj);
-
     return this.prisma.positionRequest.create({
       data: {
         department: data.department,
