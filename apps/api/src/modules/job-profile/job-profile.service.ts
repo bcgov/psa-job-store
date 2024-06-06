@@ -435,7 +435,7 @@ export class JobProfileService {
     });
   }
 
-  async getJobProfile(id: number) {
+  async getJobProfile(id: number, userRoles: string[] = []) {
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
@@ -474,10 +474,15 @@ export class JobProfileService {
         },
       },
     });
+
+    // if profile is not published and user is not total compensation, deny access
+    if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
+      throw AlexandriaError('You do not have permission to view this job profile');
+    }
     return jobProfile;
   }
 
-  async getJobProfileByNumber(number: number) {
+  async getJobProfileByNumber(number: number, userRoles: string[] = []) {
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { number },
       include: {
@@ -516,6 +521,10 @@ export class JobProfileService {
         },
       },
     });
+    // if profile is not published and user is not total compensation, deny access
+    if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
+      throw AlexandriaError('You do not have permission to view this job profile');
+    }
     return jobProfile;
   }
 
