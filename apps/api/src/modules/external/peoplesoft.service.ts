@@ -83,23 +83,37 @@ export class PeoplesoftService {
 
     // Filter by applicable employee groups
     // Sort rows by effective date ASC
-    const sortedRows = (response?.data?.query?.rows ?? [])
-      .filter(
-        (row) => ['BCSET'].includes(row.SETID) && ['GEU', 'MGT', 'OEX', 'PEA', 'NUR'].includes(row.SAL_ADMIN_PLAN),
-      )
-      .sort((a, b) => {
-        if (a.EFFDT > b.EFFDT) {
-          return -1;
-        } else if (b.EFFDT > a.EFFDT) {
-          return 1;
-        } else {
-          return 0;
-        }
+    const sortedRows = (response?.data?.query?.rows ?? []).sort((a, b) => {
+      if (a.EFFDT > b.EFFDT) {
+        return -1;
+      } else if (b.EFFDT > a.EFFDT) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+
+    const employeeGroups: string[] = sortedRows.flatMap((row) => row.SAL_ADMIN_PLAN as string);
+    for await (const id of new Set(employeeGroups)) {
+      await this.prisma.employeeGroup.upsert({
+        where: { id },
+        create: {
+          id,
+          name: id,
+        },
+        update: {},
       });
+    }
 
     for await (const row of sortedRows) {
       await this.prisma.classification.upsert({
-        where: { id: row.JOBCODE },
+        where: {
+          id_employee_group_id_peoplesoft_id: {
+            id: row.JOBCODE,
+            employee_group_id: row.SAL_ADMIN_PLAN,
+            peoplesoft_id: row.SETID,
+          },
+        },
         create: {
           id: row.JOBCODE,
           peoplesoft_id: row.SETID,

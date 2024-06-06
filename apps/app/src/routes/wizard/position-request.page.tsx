@@ -515,6 +515,7 @@ export const PositionRequestPage = () => {
                             <Descriptions.Item label="Job profile">
                               <Button type="link">
                                 <DownloadJobProfileComponent
+                                  positionRequest={wizardContextPositionRequestData}
                                   jobProfile={wizardContextPositionRequestData?.profile_json}
                                 >
                                   Download
@@ -574,6 +575,7 @@ export const PositionRequestPage = () => {
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
                               <DownloadJobProfileComponent
+                                positionRequest={wizardContextPositionRequestData}
                                 jobProfile={wizardContextPositionRequestData?.profile_json}
                                 useModal={true}
                               >
@@ -642,6 +644,7 @@ export const PositionRequestPage = () => {
               </div>,
               (readonlyMode === 'completed' || readonlyMode === 'inQueue') && (
                 <DownloadJobProfileComponent
+                  positionRequest={wizardContextPositionRequestData}
                   jobProfile={wizardContextPositionRequestData?.profile_json}
                   useModal={readonlyMode === 'completed'}
                 >

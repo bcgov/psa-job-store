@@ -14,6 +14,12 @@ export class Position {
   classification_id!: string;
 
   @Field(() => String, { nullable: false })
+  classification_employee_group_id!: string;
+
+  @Field(() => String, { nullable: false })
+  classification_peoplesoft_id!: string;
+
+  @Field(() => String, { nullable: false })
   department_id!: string;
 
   @Field(() => String, { nullable: false })

@@ -1,5 +1,35 @@
 # app
 
+## 0.2.0
+
+### Minor Changes
+
+- [#489](https://github.com/bcgov/psa-job-store/pull/489) [`6ffa1bfd785a84899a86a6d6d86e4277e8aa5e4a`](https://github.com/bcgov/psa-job-store/commit/6ffa1bfd785a84899a86a6d6d86e4277e8aa5e4a) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-178 HM Views - Modify wizard flow, add ability to skip
+  AL-697 Matching URL with Job Store Profile number?
+
+### Patch Changes
+
+- [#489](https://github.com/bcgov/psa-job-store/pull/489) [`6ffa1bfd785a84899a86a6d6d86e4277e8aa5e4a`](https://github.com/bcgov/psa-job-store/commit/6ffa1bfd785a84899a86a6d6d86e4277e8aa5e4a) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-722 Role filter not working properly
+  AL-593 Classifications - home page accessibility
+  AL-716 Selecting job profile for the first time reloads the feed, scrolls up
+  AL-717 Catch classifications having value of [{}]
+  AL-726 Profile does not get selected on first click after searching
+  AL-739 "Reports to" and "first level excluded manager" need to be flipped on read-only HM view
+  AL-743 Profiles requiring verification show wrong message on results screen
+
+- [#490](https://github.com/bcgov/psa-job-store/pull/490) [`c1e5770a3ca11ce92bcedc7f9d8a5b9f60b8a0d8`](https://github.com/bcgov/psa-job-store/commit/c1e5770a3ca11ce92bcedc7f9d8a5b9f60b8a0d8) Thanks [@kmandryk](https://github.com/kmandryk)! - add updated_by and published_by fields
+
+- [#497](https://github.com/bcgov/psa-job-store/pull/497) [`12460c3dd62257f7d213eee4705d8551f546a5ab`](https://github.com/bcgov/psa-job-store/commit/12460c3dd62257f7d213eee4705d8551f546a5ab) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-272 implement date picker functionality on approved requests
+
+- [#482](https://github.com/bcgov/psa-job-store/pull/482) [`a4a3321057b39e3c1d647a275465393342164218`](https://github.com/bcgov/psa-job-store/commit/a4a3321057b39e3c1d647a275465393342164218) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-298 add context menu functionality for classifications
+
+- [#473](https://github.com/bcgov/psa-job-store/pull/473) [`5f742a9ef90e80d3f52c7fc346bc9f9e2f713aa7`](https://github.com/bcgov/psa-job-store/commit/5f742a9ef90e80d3f52c7fc346bc9f9e2f713aa7) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-263 add ellipses menu actions for total comp view
+  AL-253 Total Comp - display grade in report-to box to disambiguate entries
+
+- [#481](https://github.com/bcgov/psa-job-store/pull/481) [`d466c1089c8ad8fe5362e1ef51c75333edf16f21`](https://github.com/bcgov/psa-job-store/commit/d466c1089c8ad8fe5362e1ef51c75333edf16f21) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-264 Add context menu options for job profiles
+  AL-738 Verification warning doesn't display other messages for profiles that always require verification
+  AL-702 Returned PR should be moved to the top of the 'My Positions' table
+
 ## 0.1.0
 
 ### Minor Changes

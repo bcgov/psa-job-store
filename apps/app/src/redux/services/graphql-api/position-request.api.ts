@@ -49,6 +49,7 @@ export interface GetPositionRequestResponseContent {
   department_id?: string;
   approved_at?: string;
   updated_at?: string;
+  submitted_at?: string;
   email?: string;
   shareUUID?: string;
   parent_job_profile?: {
@@ -128,6 +129,8 @@ export interface UpdatePositionRequestInput {
   title?: string | null;
   position_number?: number;
   classification_id?: string;
+  classification_employee_group_id?: string;
+  classification_peoplesoft_id?: string;
   submission_id?: string;
   status?: string;
   additional_info?: AdditionalInfo | null;

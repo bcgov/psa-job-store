@@ -89,9 +89,8 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
       // if it's unauthorized, do not show the error toast -  the system will handle the redirect to login page
       if (errorCode == 'UNAUTHENTICATED') return result;
 
-      isToastShown = true;
-
       if (errorMessage.startsWith('ALEXANDRIA_ERROR:') && !suppressErrorToast) {
+        isToastShown = true;
         errorToastShown = true;
         const messageParts = errorMessage.split(':');
         const errorDescription = messageParts[1];
