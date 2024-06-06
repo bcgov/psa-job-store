@@ -139,7 +139,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const linkToCopy = `${window.location.origin}/my-position-requests/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    // if (import.meta.env.VITE_TEST_ENV !== 'true')
+    copy(linkToCopy);
     message.success('Link copied to clipboard!');
     setSelectedKeys([]);
   };
@@ -295,22 +296,23 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
       render: (text: any, record: any) => {
+        const renderText = text || 'New position';
         if (mode == null)
           return (
             <Link to={`/my-position-requests/${record.id}`} data-testid={`job-position-${record.id}`}>
-              <div data-testid="job-title">{text}</div>
+              <div data-testid="job-title">{renderText}</div>
             </Link>
           );
         else if (mode == 'total-compensation') {
           return (
             <Link to={`/approved-requests/${record.id}`}>
-              <div data-testid="job-title">{text}</div>
+              <div data-testid="job-title">{renderText}</div>
             </Link>
           );
         } else if (mode == 'classification') {
           return (
             <Link to={`/classification-tasks/${record.id}`}>
-              <div data-testid="job-title">{text}</div>
+              <div data-testid="job-title">{renderText}</div>
             </Link>
           );
         }

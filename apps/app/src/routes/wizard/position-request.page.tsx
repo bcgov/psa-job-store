@@ -115,19 +115,25 @@ export const PositionRequestPage = () => {
 
   const { positionRequestId } = useParams();
 
+  const location = useLocation();
+  // Determine if the current path is a shared URL
+  const isSharedRoute = location.pathname.includes('/my-position-requests/share/');
+
   // position request id changed from what's being stored in the context,
   // clear context
   useEffect(() => {
-    if (positionRequestId && wizardPositionRequestId && positionRequestId !== wizardPositionRequestId?.toString()) {
+    if (
+      positionRequestId &&
+      wizardPositionRequestId &&
+      positionRequestId !== wizardPositionRequestId?.toString() &&
+      !isSharedRoute
+    ) {
       resetWizardContext();
     }
-  }, [positionRequestId, wizardPositionRequestId, resetWizardContext]);
+  }, [positionRequestId, wizardPositionRequestId, resetWizardContext, isSharedRoute]);
 
   const [currentStep, setCurrentStep] = useState<number | null>(null);
-  const location = useLocation();
 
-  // Determine if the current path is a shared URL
-  const isSharedRoute = location.pathname.includes('/my-position-requests/share/');
   // Use state or other logic to determine which query hook to use
   // This could be a piece of state that determines which query to run, for example
   // const queryHook = isSharedRoute ? useLazyGetSharedPositionRequestQuery : useLazyGetPositionRequestQuery;
