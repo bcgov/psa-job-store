@@ -760,7 +760,7 @@ export class PositionRequestApiService {
       },
     });
 
-    const classificationIds = Array.from(
+    const idStrings = Array.from(
       new Set(
         positionRequests
           .filter(
@@ -776,14 +776,19 @@ export class PositionRequestApiService {
               classification_peoplesoft_id: peoplesoft_id,
             } = req;
 
-            return {
-              id,
-              employee_group_id,
-              peoplesoft_id,
-            };
+            return `${id}.${employee_group_id}.${peoplesoft_id}`;
           }),
       ),
     );
+    const classificationIds = idStrings.map((str) => {
+      const [id, employee_group_id, peoplesoft_id] = str.split('.');
+
+      return {
+        id,
+        employee_group_id,
+        peoplesoft_id,
+      };
+    });
 
     // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
