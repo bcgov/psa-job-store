@@ -324,9 +324,7 @@ export class PositionRequestApiService {
 
   private async submitPositionRequest_updateOrgChart(positionObj, positionRequest, id) {
     // get classification for this new position
-    const classification = await this.classificationService.getClassification({
-      where: { id: positionObj['A.JOBCODE'] },
-    });
+    const classification = await this.classificationService.getClassificationForPeoplesoftPosition(positionObj);
 
     // get department in which this position was created
     const department = await this.departmentService.getDepartment({ where: { id: positionObj['A.DEPTID'] } });
@@ -468,6 +466,8 @@ export class PositionRequestApiService {
         title: true,
         position_number: true,
         classification_id: true,
+        classification_employee_group_id: true,
+        classification_peoplesoft_id: true,
         submission_id: true,
         status: true,
         updated_at: true,
@@ -483,24 +483,27 @@ export class PositionRequestApiService {
 
     // todo: AL-146 this should not be needed if the foreign key relationship is working properly in schema.prisma
 
-    // Collect all unique classification IDs from the position requests
-    const classificationIds = [
-      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id != null)), // Filters out null values
-    ];
+    // Get classification code for the position requeset classification id, employdd_group_id, peoplesoft_id
+    const classificationMap = new Map();
+    for await (const pr of positionRequests) {
+      if (
+        pr.classification_id != null &&
+        pr.classification_employee_group_id != null &&
+        pr.classification_peoplesoft_id != null
+      ) {
+        const classification = await this.classificationService.getClassification({
+          where: {
+            id_employee_group_id_peoplesoft_id: {
+              id: pr.classification_id,
+              employee_group_id: pr.classification_employee_group_id,
+              peoplesoft_id: pr.classification_peoplesoft_id,
+            },
+          },
+        });
 
-    // Fetch classifications based on the collected IDs
-    const classifications = await this.prisma.classification.findMany({
-      where: {
-        id: { in: classificationIds },
-      },
-      select: {
-        id: true,
-        code: true,
-      },
-    });
-
-    // Create a map for easy lookup
-    const classificationMap = new Map(classifications.map((c) => [c.id, c.code]));
+        classificationMap.set(pr.id, classification.code);
+      }
+    }
 
     // Collect all unique user IDs from the position requests
     const userIds = [...new Set(positionRequests.map((pr) => pr.user_id).filter((id) => id != null))];
@@ -522,7 +525,7 @@ export class PositionRequestApiService {
     // Merge position requests with classification codes
     const mergedResults = positionRequests.map((pr) => ({
       ...pr,
-      classification_code: classificationMap.get(pr.classification_id),
+      classification_code: classificationMap.get(pr.id),
       user_name: userMap.get(pr.user_id),
     }));
 
@@ -580,7 +583,13 @@ export class PositionRequestApiService {
       positionRequest.classification_id == null
         ? null
         : await this.prisma.classification.findUnique({
-            where: { id: positionRequest.classification_id },
+            where: {
+              id_employee_group_id_peoplesoft_id: {
+                id: positionRequest.classification_id,
+                employee_group_id: positionRequest.classification_employee_group_id,
+                peoplesoft_id: positionRequest.classification_peoplesoft_id,
+              },
+            },
             select: {
               code: true, // Assuming 'code' is the field you want from the classification
             },
@@ -640,9 +649,18 @@ export class PositionRequestApiService {
       positionRequest.classification_id == null
         ? null
         : await this.prisma.classification.findUnique({
-            where: { id: positionRequest.classification_id },
+            where: {
+              id_employee_group_id_peoplesoft_id: {
+                id: positionRequest.classification_id,
+                employee_group_id: positionRequest.classification_employee_group_id,
+                peoplesoft_id: positionRequest.classification_peoplesoft_id,
+              },
+            },
             select: {
+              id: true,
               code: true, // Assuming 'code' is the field you want from the classification
+              employee_group_id: true,
+              peoplesoft_id: true,
             },
           });
 
@@ -657,6 +675,8 @@ export class PositionRequestApiService {
 
     return {
       ...positionRequest,
+      classification_employee_group_id: classification?.employee_group_id,
+      classification_peoplesoft_id: classification?.peoplesoft_id,
       classification_code: classification?.code,
       user_name: user?.name,
       email: user?.email,
@@ -756,27 +776,53 @@ export class PositionRequestApiService {
         title: true,
         position_number: true,
         classification_id: true,
+        classification_employee_group_id: true,
+        classification_peoplesoft_id: true,
         submission_id: true,
         status: true,
       },
     });
 
-    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
+    const classificationIds = Array.from(
+      new Set(
+        positionRequests
+          .filter(
+            (req) =>
+              req.classification_id != null &&
+              req.classification_employee_group_id != null &&
+              req.classification_peoplesoft_id != null,
+          )
+          .map((req) => {
+            const {
+              classification_id: id,
+              classification_employee_group_id: employee_group_id,
+              classification_peoplesoft_id: peoplesoft_id,
+            } = req;
 
-    // Collect all unique classification IDs from the position requests
-    const classificationIds = [
-      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id != null)),
-    ];
-
-    if (!classificationIds) return [];
+            return {
+              id,
+              employee_group_id,
+              peoplesoft_id,
+            };
+          }),
+      ),
+    );
 
     // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
       where: {
-        id: { in: classificationIds },
+        OR: [
+          ...classificationIds.map(({ id, employee_group_id, peoplesoft_id }) => ({
+            id,
+            employee_group_id,
+            peoplesoft_id,
+          })),
+        ],
       },
       select: {
         id: true,
+        employee_group_id: true,
+        peoplesoft_id: true,
         code: true,
       },
     });
@@ -824,23 +870,56 @@ export class PositionRequestApiService {
       },
       select: {
         classification_id: true,
+        classification_employee_group_id: true,
+        classification_peoplesoft_id: true,
       },
     });
 
-    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
+    const idStrings = Array.from(
+      new Set(
+        positionRequests
+          .filter(
+            (req) =>
+              req.classification_id != null &&
+              req.classification_employee_group_id != null &&
+              req.classification_peoplesoft_id != null,
+          )
+          .map((req) => {
+            const {
+              classification_id: id,
+              classification_employee_group_id: employee_group_id,
+              classification_peoplesoft_id: peoplesoft_id,
+            } = req;
 
-    // Collect all unique classification IDs from the position requests
-    const classificationIds = [
-      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id !== null)),
-    ];
+            return `${id}.${employee_group_id}.${peoplesoft_id}`;
+          }),
+      ),
+    );
+    const classificationIds = idStrings.map((str) => {
+      const [id, employee_group_id, peoplesoft_id] = str.split('.');
+
+      return {
+        id,
+        employee_group_id,
+        peoplesoft_id,
+      };
+    });
 
     // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
       where: {
-        id: { in: classificationIds },
+        OR: [
+          ...classificationIds.map(({ id, employee_group_id, peoplesoft_id }) => ({
+            id,
+            employee_group_id,
+            peoplesoft_id,
+          })),
+        ],
       },
       select: {
         id: true,
+        employee_group_id: true,
+        peoplesoft_id: true,
         code: true,
       },
     });
@@ -920,17 +999,20 @@ export class PositionRequestApiService {
       updatePayload.title = updateData.title;
     }
 
-    if (updateData.classification_id !== undefined) {
-      updatePayload.classification_id = updateData.classification_id;
-    }
-
-    // if (updateData.status !== undefined) {
-    //   updatePayload.status = updateData.status;
-    // }
-
     if (updateData.parent_job_profile !== undefined) {
-      if (updateData.parent_job_profile.connect.id == null) updatePayload.parent_job_profile = { disconnect: true };
-      else updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
+      if (updateData.parent_job_profile.connect.id == null) {
+        updatePayload.parent_job_profile = { disconnect: true };
+      } else {
+        updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
+
+        const parentJobProfile = await this.jobProfileService.getJobProfile(updateData.parent_job_profile.connect.id);
+
+        // Set Classification IDs on positionRequest
+        updatePayload.classification_id = parentJobProfile.classifications[0].classification.id;
+        updatePayload.classification_employee_group_id =
+          parentJobProfile.classifications[0].classification.employee_group_id;
+        updatePayload.classification_peoplesoft_id = parentJobProfile.classifications[0].classification.peoplesoft_id;
+      }
     }
 
     if (updateData.department !== undefined) {
@@ -1276,7 +1358,13 @@ export class PositionRequestApiService {
 
       const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
       const classification = await this.classificationService.getClassification({
-        where: { id: positionRequest.classification_id },
+        where: {
+          id_employee_group_id_peoplesoft_id: {
+            id: positionRequest.classification_id,
+            employee_group_id: positionRequest.classification_employee_group_id,
+            peoplesoft_id: positionRequest.classification_peoplesoft_id,
+          },
+        },
       });
       const { metadata } = await this.prisma.user.findUnique({ where: { id: positionRequest.user_id } });
       const contactId =
@@ -1462,7 +1550,13 @@ export class PositionRequestApiService {
     const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
 
     const classification = await this.prisma.classification.findUnique({
-      where: { id: positionRequest.classification_id },
+      where: {
+        id_employee_group_id_peoplesoft_id: {
+          id: positionRequest.classification_id,
+          employee_group_id: positionRequest.classification_employee_group_id,
+          peoplesoft_id: positionRequest.classification_peoplesoft_id,
+        },
+      },
     });
     const paylist_department = await this.prisma.department.findUnique({
       select: { id: true, organization: { select: { id: true } } },
@@ -1472,18 +1566,6 @@ export class PositionRequestApiService {
     let data: PositionCreateInput;
 
     switch (classification.employee_group_id) {
-      case 'MGT':
-        data = {
-          BUSINESS_UNIT: paylist_department.organization.id,
-          DEPTID: paylist_department.id,
-          JOBCODE: positionRequest.classification_id,
-          REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
-          DESCR: positionRequest.title,
-          REG_TEMP: PositionDuration.Regular,
-          FULL_PART_TIME: PositionType.FullTime,
-        };
-        break;
       case 'GEU':
       case 'OEX':
       case 'PEA': {
@@ -1505,6 +1587,19 @@ export class PositionRequestApiService {
           TGB_APPRV_MGR: employeeId,
         };
 
+        break;
+      }
+      default: {
+        data = {
+          BUSINESS_UNIT: paylist_department.organization.id,
+          DEPTID: paylist_department.id,
+          JOBCODE: positionRequest.classification_id,
+          REPORTS_TO: positionRequest.reports_to_position_id,
+          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
+          DESCR: positionRequest.title,
+          REG_TEMP: PositionDuration.Regular,
+          FULL_PART_TIME: PositionType.FullTime,
+        };
         break;
       }
     }
