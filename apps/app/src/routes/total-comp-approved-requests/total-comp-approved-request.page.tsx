@@ -3,12 +3,18 @@ import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typ
 import copy from 'copy-to-clipboard';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import {
+  default as LoadingComponent,
+  default as LoadingSpinnerWithMessage,
+} from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
+import { useGetLocationQuery } from '../../redux/services/graphql-api/location.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
+import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
+import { formatDateTime } from '../../utils/Utils';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { OrgChart } from '../org-chart/components/org-chart';
@@ -29,6 +35,18 @@ export const TotalCompApprovedRequestPage = () => {
   const { data } = useGetPositionRequestQuery({
     id: parseInt(positionRequestId),
   });
+
+  const { data: locationInfo, isLoading: locationLoading } = useGetLocationQuery(
+    {
+      id: data?.positionRequest?.additional_info?.work_location_id,
+    },
+    { skip: !data?.positionRequest?.additional_info?.work_location_id },
+  );
+
+  const { data: positionInfo, isLoading: positionLoading } = useGetPositionQuery(
+    { where: { id: `${data?.positionRequest?.position_number?.toString().padStart(8, '0')}` } },
+    { skip: !data?.positionRequest?.position_number },
+  );
 
   const submissionDetailsItems = [
     {
@@ -154,13 +172,23 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'positionLocation',
       label: 'Position location',
-      children: <div>Victoria</div>,
+      children: (
+        <div>
+          {locationLoading && <LoadingComponent mode="small" />}
+          {locationInfo?.location?.name}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'effectiveDate',
       label: 'Effective Date',
-      children: <div>Dec 31, 2023</div>,
+      children: (
+        <div>
+          {positionLoading && <LoadingComponent mode="small" />}
+          {formatDateTime(positionInfo?.position.effective_date, true)}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -219,8 +247,6 @@ export const TotalCompApprovedRequestPage = () => {
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
     message.success('Link copied to clipboard!');
   };
-
-  console.log('data?.positionRequest: ', data?.positionRequest);
 
   const tabItems = [
     {
