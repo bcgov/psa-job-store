@@ -85,15 +85,15 @@ export class JobProfileResolver {
 
   @Query(() => JobProfile, { name: 'jobProfile' })
   @AllowNoRoles() // so that share position request feature can fetch relevant data
-  async getJobProfile(@Args('id') id: string) {
-    const res = await this.jobProfileService.getJobProfile(+id);
+  async getJobProfile(@Args('id') id: string, @CurrentUser() user: Express.User) {
+    const res = await this.jobProfileService.getJobProfile(+id, user.roles);
     return res;
   }
 
   @Query(() => JobProfile, { name: 'jobProfileByNumber' })
   @AllowNoRoles() // so that share position request feature can fetch relevant data
-  async getJobProfileByNumber(@Args('number') number: string) {
-    const res = await this.jobProfileService.getJobProfileByNumber(+number);
+  async getJobProfileByNumber(@Args('number') number: string, @CurrentUser() user: Express.User) {
+    const res = await this.jobProfileService.getJobProfileByNumber(+number, user.roles);
     return res;
   }
 
