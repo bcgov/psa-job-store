@@ -1377,20 +1377,21 @@ export class PositionRequestApiService {
       }
 
       const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
-
+      const jobProfile = positionRequest.profile_json as Record<string, any>;
       const paylist_department = await this.prisma.department.findUnique({
         where: { id: additionalInfo.department_id },
       });
       const location = await this.prisma.location.findUnique({ where: { id: paylist_department.location_id } });
-      const parentJobProfile = await this.prisma.jobProfile.findUnique({
-        where: { id: positionRequest.parent_job_profile_id },
-      });
+      const supervisorProfile = await this.positionService.getPositionProfile(
+        additionalInfo.excluded_mgr_position_number.toString(),
+      );
 
       const jobProfileDocument =
         positionRequest.profile_json != null
           ? generateJobProfile({
-              jobProfile: positionRequest.profile_json as Record<string, any>,
-              parentJobProfile: parentJobProfile,
+              jobProfile,
+              positionRequest,
+              supervisorProfile: supervisorProfile.length > 0 ? supervisorProfile[0] : null,
             })
           : null;
       const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
@@ -1484,7 +1485,7 @@ export class PositionRequestApiService {
               <li>Where is the position location?    ${location.name}</li>
               <li>Which position number will the position report to?    ${positionRequest.reports_to_position_id}</li>
               <li>Is a Job Store profile being used? If so, what is the Job Store profile number?    ${
-                parentJobProfile.number
+                jobProfile.number
               }</li>
               <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
               <li>Please attach a copy of the job profile you will be using.    Attached</li>
