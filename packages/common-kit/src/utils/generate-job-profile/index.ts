@@ -100,11 +100,11 @@ function mapToFlatRecord(input: any): Record<string, any> {
 }
 
 const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: GenerateJobProfileProps) => {
-  console.log('jobProfile: ', jobProfile);
   const transformedJobProfile = mapToFlatRecord(jobProfile);
-  console.log(transformedJobProfile);
-  console.log('supervisorProfile', supervisorProfile);
-  console.log('supervisorProfile', positionRequest);
+  // console.log('jobProfile: ', jobProfile);
+  // console.log('transformedJobProfile',transformedJobProfile);
+  // console.log('supervisorProfile', supervisorProfile);
+  // console.log('positionRequest', positionRequest);
   return new Document({
     sections: [
       {
