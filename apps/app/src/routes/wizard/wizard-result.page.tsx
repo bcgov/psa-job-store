@@ -6,12 +6,13 @@ import {
   ExclamationCircleFilled,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
+import { Alert, Button, Card, Col, Collapse, Form, Input, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import { useGetCommentsQuery } from '../../redux/services/graphql-api/comment.api';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -79,6 +80,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     id: positionRequestId ?? -1,
   });
 
+  const { data: comments } = useGetCommentsQuery(positionRequestId ?? -1);
   useEffect(() => {
     // Fetch position request and needs review data when positionRequestId changes
     if (positionRequestId) {
@@ -535,7 +537,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         Submit for verification
                       </Button>
                     </Card>
-
                     <Card
                       title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Other actions</h3>}
                       bordered={false}
@@ -590,8 +591,120 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       <Paragraph>
                         There are changes to the profile which needs to be verified by the classifications team.
                       </Paragraph>
+                      <Form.Item name="comments">
+                        <label htmlFor="comments" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                          <b>Comments</b>
+                        </label>
+                        <>
+                          <Input.TextArea
+                            id="comments"
+                            data-testid="comments-input"
+                            autoSize
+                            maxLength={1000}
+                            value={comment}
+                            onChange={handleCommentChange}
+                            placeholder="Add comments"
+                          />
+                          <Row>
+                            <Col span={18}>
+                              <Typography.Paragraph type="secondary" style={{ margin: '0' }}>
+                                (Optional) Add some context related to changes you made. This will help the reviewer
+                                assess your edits.
+                              </Typography.Paragraph>
+                            </Col>
+                            <Col span={6} style={{ textAlign: 'right' }}>
+                              <Typography.Paragraph
+                                type="secondary"
+                                style={{ textAlign: 'right', width: '100%', margin: '0' }}
+                              >
+                                {comment.length} / 1000
+                              </Typography.Paragraph>
+                            </Col>
+                          </Row>
+
+                          <div
+                            style={{
+                              width: '100%',
+                              justifyContent: 'center',
+                              marginTop: '10px',
+                            }}
+                          >
+                            <Collapse
+                              style={{
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              // style={{
+                              //   padding: '12px 16px',
+                              //   alignItems: 'center',
+                              //   gap: '4px',
+                              //   alignSelf: 'stretch',
+                              // }}
+                              items={
+                                comments
+                                  ? [
+                                      {
+                                        key: '1',
+                                        label: (
+                                          <div
+                                            style={{
+                                              justifyContent: 'space-between',
+                                              alignItems: 'center',
+                                              width: '100%',
+                                            }}
+                                          >
+                                            <Paragraph
+                                              style={{
+                                                margin: 0,
+                                                fontSize: 14,
+                                              }}
+                                            >
+                                              Previous Comments
+                                            </Paragraph>
+                                          </div>
+                                        ),
+                                        children: (
+                                          <div style={{ maxHeight: 200, overflowY: 'auto', padding: '12px 16px' }}>
+                                            {comments.comments.map((comment) => (
+                                              <div key={comment.id} style={{ marginBottom: 16, width: '100%' }}>
+                                                <Paragraph
+                                                  style={{
+                                                    width: '100%',
+                                                    color: 'rgba(0, 0, 0, 0.88)',
+                                                    fontSize: 14,
+                                                    fontWeight: '400',
+                                                    wordWrap: 'break-word',
+                                                    marginBottom: '2px',
+                                                  }}
+                                                >
+                                                  {comment.text}
+                                                </Paragraph>
+                                                <Paragraph
+                                                  type="secondary"
+                                                  style={{
+                                                    color: '#6E6E6E',
+                                                    fontSize: 12,
+                                                    fontWeight: '400',
+                                                    wordWrap: 'break-word',
+                                                  }}
+                                                >
+                                                  {new Date(comment?.updated_at ?? '-1').toLocaleString('en-CA')}
+                                                </Paragraph>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        ),
+                                      },
+                                    ]
+                                  : []
+                              }
+                              defaultActiveKey={['1']}
+                            />
+                          </div>
+                        </>
+                      </Form.Item>
                       <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
-                        Submit for verification
+                        Re-submit for verification
                       </Button>
                     </Card>
 
