@@ -11,6 +11,7 @@ export class CommentService {
       include: {
         author: true,
       },
+      orderBy: [{ updated_at: 'desc' }],
     });
   }
 
