@@ -21,7 +21,6 @@ import { OrgChart } from '../org-chart/components/org-chart';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import WizardEditControlBar from '../wizard/components/wizard-edit-control-bar';
-import '../wizard/wizard-review.page.css';
 import './total-comp-approved-request.page.css';
 const { Text } = Typography;
 

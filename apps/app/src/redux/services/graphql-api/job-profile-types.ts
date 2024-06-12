@@ -17,6 +17,16 @@ export interface ClassificationModel {
   grade: string;
 }
 
+export interface CommentModel {
+  id: string;
+  author_id: string;
+  record_id: string;
+  record_type: string;
+  text: string;
+  created_at: string;
+  updated_at?: string;
+}
+
 export interface ClassificationModelWrapped {
   classification: {
     id: string;
@@ -74,6 +84,14 @@ export interface GetClassificationsResponse {
 
 export interface GetClassificationResponse {
   classification: ClassificationModel;
+}
+
+export interface GetCommentsResponse {
+  comments: CommentModel[];
+}
+
+export interface GetCommentResponse {
+  comment: CommentModel;
 }
 
 interface JobFamilyDetail {

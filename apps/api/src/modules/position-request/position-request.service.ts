@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JsonObject } from '@prisma/client/runtime/library';
 import { btoa } from 'buffer';
 import { Elements, autolayout, generateJobProfile, getALStatus } from 'common-kit';
 import dayjs from 'dayjs';
@@ -157,7 +156,7 @@ export class PositionRequestApiService {
     });
   }
 
-  async submitPositionRequest(id: number, comment: string) {
+  async submitPositionRequest(id: number, comment: string, userId: string) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
     if (!positionRequest) throw AlexandriaError('Position request not found');
@@ -165,15 +164,15 @@ export class PositionRequestApiService {
     // ensure comments are saved
     try {
       if (comment != null && comment.length > 0) {
-        positionRequest = await this.prisma.positionRequest.update({
-          where: { id },
+        const c = await this.prisma.comment.create({
           data: {
-            additional_info: {
-              ...(positionRequest.additional_info as JsonObject),
-              comments: comment,
-            },
+            author_id: userId,
+            record_id: positionRequest.id,
+            record_type: 'PositionRequest',
+            text: comment,
           },
         });
+        console.log('comment ', c);
       }
     } catch (error) {
       this.logger.error(error);
