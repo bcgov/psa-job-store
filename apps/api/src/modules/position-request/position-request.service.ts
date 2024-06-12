@@ -275,7 +275,7 @@ export class PositionRequestApiService {
       await this.prisma.positionRequest.update({
         where: { id },
         data: {
-          crm_id: incident.id,
+          crm_id: incident.crm_id,
         },
       });
     } catch (error) {
