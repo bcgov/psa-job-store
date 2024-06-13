@@ -7,6 +7,7 @@ import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-a
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-position-requests/components/my-position-requests-table.component';
 import { OrgChart } from '../org-chart/components/org-chart';
+import { OrgChartHelpButton } from '../org-chart/components/org-chart-help-button.component';
 import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import ContentWrapper from './components/content-wrapper.component';
@@ -126,11 +127,14 @@ export const HomePage = () => {
           }}
           title={<h2 style={{ marginBottom: 0 }}>My organization</h2>}
           extra={
-            <Link to="/org-chart">
-              <Button type="link" style={{ padding: '0' }}>
-                View all organizations
-              </Button>
-            </Link>
+            <Space direction="horizontal">
+              <Link to="/org-chart">
+                <Button type="link" style={{ padding: '0' }}>
+                  View all organizations
+                </Button>
+              </Link>
+              <OrgChartHelpButton />
+            </Space>
           }
         >
           <div style={{ height: '100%' }}>
