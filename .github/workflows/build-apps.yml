@@ -1,8 +1,9 @@
 name: Build Docker Images
 
 on:
-  repository_dispatch:
-    types: [build-apps-trigger]
+  push:
+    branches: [main, stage, develop]
+  workflow_dispatch:
 jobs:
   metadata:
     name: Get Metadata
@@ -14,13 +15,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: ${{ github.ref }}
       - name: Get Changed Apps
         id: get-changed-apps
         uses: dorny/paths-filter@v2
         with:
-          base: ${{ github.event.client_payload.ref }}
-          ref: ${{ github.event.client_payload.ref }}
+          base: ${{ github.ref }}
+          ref: ${{ github.ref }}
           filters: |
             api:
               - 'apps/api/**'
@@ -35,7 +36,7 @@ jobs:
     if: ${{needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != ''}}
     runs-on: ubuntu-20.04
     environment:
-      name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     strategy:
       fail-fast: false # Continue with other matrix jobs even if one fails
       matrix:
@@ -48,7 +49,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: ${{ github.ref }}
       - name: Login to Artifactory
         uses: docker/login-action@v2
         with:
@@ -68,10 +69,9 @@ jobs:
           images: |
             ${{ env.ARTIFACTORY_URL }}/af3c-gen-docker-local/${{ matrix.app }}
           tags: |
-            type=raw,value=latest,enable=${{ github.event.client_payload.ref == github.event.repository.default_branch }}
-            type=raw,value=${{ steps.app-version.outputs.prop }},enable=${{ github.event.client_payload.ref == github.event.repository.default_branch }}
-            type=raw,value=${{ github.event.client_payload.ref_name }}-latest,enable=${{ github.event.client_payload.ref != github.event.repository.default_branch }}
-      - name: Build and Push
+          type=raw,value=latest,enable=${{ github.ref_name == github.event.repository.default_branch }}
+          type=raw,value=${{ steps.app-version.outputs.prop }},enable=${{ github.ref_name == github.event.repository.default_branch }}
+          type=raw,value=${{ github.ref_name }}-latest      - name: Build and Push
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -89,8 +89,16 @@ jobs:
             VITE_KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
             VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
             KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
-      - name: Trigger Deployments
-        uses: ./.github/actions/trigger-deploy
-        with:
-          openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
-          api-token: ${{ secrets.OPENSHIFT_TOOLS_API_TOKEN }}
+  trigger_migration:
+    needs: build-apps
+    if: ${{ !failure() }} # Ensures this runs only if previous steps were successful
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Migration
+        run: |
+          curl \
+            -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/dispatches \
+            -d '{"event_type": "migrate-trigger", "client_payload": { "ref": "${{ github.ref }}", "ref_name": "${{ github.ref_name }}"}}"'

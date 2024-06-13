@@ -1,8 +1,8 @@
 name: Migrate DB Schema
 on:
-  push:
-    branches: [main, stage, develop]
-  workflow_dispatch:
+  repository_dispatch:
+    types: [migrate-trigger]
+
 jobs:
   metadata:
     name: Get Metadata
@@ -13,12 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ github.event.client_payload.ref }}
       - name: Get Changed Apps
         id: get-changed-apps
         uses: dorny/paths-filter@v2
         with:
-          base: ${{ github.ref }}
+          base: ${{ github.event.client_payload.ref }}
           filters: |
             api:
               - 'apps/api/prisma/migrations/**'
@@ -28,40 +28,32 @@ jobs:
     if: ${{ needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != '' }}
     runs-on: ubuntu-20.04
     environment:
-      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+      name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ github.event.client_payload.ref }}
       - name: 'migrate db'
         uses: ./.github/actions/migrate-db
         with:
-            environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-            openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
-            api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
+          environment: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
+          openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
+          api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
       - name: Create Version Changeset
         run: npm install @changesets/cli && npx changeset version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit Version
-        if: ${{ github.ref_name == 'main' }}
+        if: ${{ github.event.client_payload.ref_name == 'main' }}
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: 'Update version [skip ci]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  trigger_build_apps:
-    needs: migrate
-    if: ${{ !failure() }} # Ensures this runs only if previous steps were successful
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Build Apps Workflow
-        run: |
-          curl \
-            -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/dispatches \
-            -d '{"event_type": "build-apps-trigger", "client_payload": { "ref": "${{ github.ref }}", "ref_name": "${{ github.ref_name }}"}}"'
+      - name: Trigger Deployments
+        uses: ./.github/actions/trigger-deploy
+        with:
+          openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
+          api-token: ${{ secrets.OPENSHIFT_TOOLS_API_TOKEN }}
