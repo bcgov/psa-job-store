@@ -275,7 +275,7 @@ export class PositionRequestApiService {
       await this.prisma.positionRequest.update({
         where: { id },
         data: {
-          crm_id: incident.crm_id,
+          crm_id: +incident.crm_id,
         },
       });
     } catch (error) {
@@ -1411,7 +1411,11 @@ export class PositionRequestApiService {
         },
         statusWithType: {
           status: {
-            id: needsReview ? IncidentStatus.Unresolved : IncidentStatus.Solved,
+            id: needsReview
+              ? positionRequest.status === PositionRequestStatus.ACTION_REQUIRED
+                ? IncidentStatus.Updated
+                : IncidentStatus.Unresolved
+              : IncidentStatus.Solved,
           },
         },
         // Need to determine usage of this block
@@ -1521,7 +1525,9 @@ export class PositionRequestApiService {
         await this.crmService.updateIncident(positionRequest.crm_id, data);
       }
       // re-fetch the data in the structure we need
-      incident = await this.crmService.getIncident(incident.id);
+      incident = await this.crmService.getIncident(
+        positionRequest.crm_id != null ? positionRequest.crm_id : incident.id,
+      );
 
       if (incident.crm_lookup_name != null) {
         await this.prisma.positionRequest.update({
