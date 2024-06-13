@@ -92,7 +92,6 @@ jobs:
             KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
   trigger_migration:
     needs: build-apps
-    if: ${{ !failure() }} # Ensures this runs only if previous steps were successful
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Migration
