@@ -69,12 +69,9 @@ jobs:
           images: |
             ${{ env.ARTIFACTORY_URL }}/af3c-gen-docker-local/${{ matrix.app }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            # type=raw,value=latest,enable=${{ github.ref == github.event.repository.default_branch }}
-            type=raw,value=${{ steps.app-version.outputs.prop }},enable=${{ github.ref == github.event.repository.default_branch }}
-            type=raw,value=${{ github.ref_name }}-latest,enable=${{ github.ref != github.event.repository.default_branch }}
-            # type=raw,value=${{ github.ref_name }}-latest,enable=${{ github.ref != github.event.repository.default_branch }}
-      - name: Build and Push
+          type=raw,value=latest,enable=${{ github.ref_name == github.event.repository.default_branch }}
+          type=raw,value=${{ steps.app-version.outputs.prop }},enable=${{ github.ref_name == github.event.repository.default_branch }}
+          type=raw,value=${{ github.ref_name }}-latest      - name: Build and Push
         uses: docker/build-push-action@v4
         with:
           context: .
