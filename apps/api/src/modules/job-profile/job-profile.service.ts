@@ -1213,7 +1213,7 @@ export class JobProfileService {
           return [`${id}.${employee_group_id}.${peoplesoft_id}`, classification];
         }),
       ).values(),
-    );
+    ).sort((a, b) => (a.name > b.name ? 1 : -1));
 
     return uniqueClassifications;
   }
