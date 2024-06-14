@@ -211,40 +211,20 @@ const OptionalAccountabilities: React.FC<OptionalAccountabilitiesProps> = ({ use
 
   return (
     <>
-      <Form.Item
-        label="Optional accountabilities"
-        labelCol={{ className: 'card-label' }}
-        className="label-only"
-        colon={false}
-      ></Form.Item>
-      <Typography.Paragraph type="secondary">Choose from optional accountabilities.</Typography.Paragraph>
-      <>
-        {fields.length > 0 && (
-          <AccessibleList dataSource={fields} renderItem={renderOptReqFields} ariaLabel="Optional Accountabilities" />
-        )}
-        {/* <Button
-          data-testid="add-optional-accountability-button"
-          type="link"
-          icon={<PlusOutlined aria-hidden />}
-          className="addButton"
-          onClick={() => {
-            WizardModal(
-              'Do you want to make changes to optional accountabilities?',
-              optionalAccountabilitiesAlertShown,
-              setOptionalAccountabilitiesAlertShown,
-              () => {
-                handleOptReqAddNew();
-              },
-              true,
-              undefined,
-              'optional-accountabilities-warning',
-            );
-            // setRenderKey((prevKey) => prevKey + 1);
-          }}
-        >
-          Add optional accountability
-        </Button> */}
-      </>
+      {fields.length > 0 && (
+        <>
+          <Form.Item
+            label="Optional accountabilities"
+            labelCol={{ className: 'card-label' }}
+            className="label-only"
+            colon={false}
+          ></Form.Item>
+          <Typography.Paragraph type="secondary">Choose from optional accountabilities.</Typography.Paragraph>
+          <>
+            <AccessibleList dataSource={fields} renderItem={renderOptReqFields} ariaLabel="Optional Accountabilities" />
+          </>
+        </>
+      )}
     </>
   );
 };

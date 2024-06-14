@@ -10,7 +10,7 @@ interface CommentsCollapseProps {
     text: string;
     updated_at?: string;
   }[];
-  showCollapse: boolean;
+  showCollapse?: boolean;
 }
 
 const CommentsCollapse: React.FC<CommentsCollapseProps> = ({ comments, showCollapse = true }) => {
@@ -99,7 +99,7 @@ const CommentsCollapse: React.FC<CommentsCollapseProps> = ({ comments, showColla
   );
 };
 
-const CommentsList: React.FC<{ positionRequestId: number; showCollapse: boolean }> = ({
+const CommentsList: React.FC<{ positionRequestId: number; showCollapse?: boolean }> = ({
   positionRequestId,
   showCollapse,
 }) => {
