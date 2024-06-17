@@ -80,7 +80,7 @@ import { FormItem } from '../../../utils/FormItem';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
 import { IsIndigenousCompetency } from '../../wizard/components/is-indigenous-competency.component';
-import BehaviouralComptencyPicker from '../../wizard/components/wizard-behavioural-comptency-picker';
+import BehaviouralComptencyPicker2 from '../../wizard/components/wizard-behavioural-comptency-picker2';
 import WizardOverview from '../../wizard/components/wizard-edit-profile-overview';
 import WizardProgramOverview from '../../wizard/components/wizard-edit-profile-program-overview';
 import WizardTitle from '../../wizard/components/wizard-edit-profile-title';
@@ -1165,9 +1165,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   // useEffect to update the filteredClassifications when employeeGroup changes
   useEffect(() => {
-    console.log('employeeGroup: ', employeeGroup);
-    console.log('classificationsData?.classifications: ', classificationsData?.classifications);
-
     if (employeeGroup && classificationsData?.classifications) {
       const filtered = classificationsData.classifications.filter((c) => c.employee_group_id === employeeGroup);
       setFilteredClassifications(filtered);
@@ -3318,7 +3315,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <>
-                        <Typography.Text type="secondary">
+                        {/* <Typography.Text type="secondary">
                           * denotes an Indigenous Behavioural Competency
                         </Typography.Text>
                         <BehaviouralComptencyPicker
@@ -3331,7 +3328,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             triggerProfileValidation();
                           }}
                           behavioural_competencies_fields={behavioural_competencies_fields}
-                        />
+                        /> */}
 
                         <List
                           style={{ marginTop: '7px' }}
@@ -3398,16 +3395,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           )}
                         />
 
-                        {/* ) : ( */}
-                        {/* <Button
-                            type="link"
-                            icon={<PlusOutlined />}
-                            style={{ marginTop: '10px' }}
-                            onClick={() => setPickerVisible(true)} // Show picker when "Add" button is clicked
-                          >
-                            Add a behavioural competency
-                          </Button>
-                        )} */}
+                        <BehaviouralComptencyPicker2
+                          behavioural_competencies_fields={behavioural_competencies_fields}
+                          addAction={behavioural_competencies_append}
+                          removeAction={behavioural_competencies_remove}
+                        ></BehaviouralComptencyPicker2>
                       </>
                       <WizardValidationError formErrors={profileFormErrors} fieldName="behavioural_competencies" />
                     </Col>

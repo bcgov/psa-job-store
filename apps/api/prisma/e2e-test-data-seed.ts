@@ -1021,6 +1021,7 @@ async function seed() {
       { id: 'MGT', name: 'Management' },
       { id: 'OEX', name: 'Schedule A' },
       { id: 'PEA', name: 'Professional Employees Association' },
+      { id: '805G', name: '805G' },
     ],
   });
 
@@ -1963,43 +1964,63 @@ async function seed() {
   const jobProfileClassifications = [
     {
       classification_id: '551052',
+      classification_employee_group_id: 'GEU',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
     },
     {
       classification_id: '551103',
+      classification_employee_group_id: 'GEU',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
     },
     {
       classification_id: '551104',
+      classification_employee_group_id: 'GEU',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
     },
     {
       classification_id: '551105',
+      classification_employee_group_id: 'GEU',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
     },
     {
       classification_id: '551401',
+      classification_employee_group_id: 'GEU',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
     },
     {
       classification_id: '551402',
+      classification_employee_group_id: 'GEU',
+      classification_peoplesoft_id: 'STTSS',
       job_profile_id: profile212.id,
     },
     {
       classification_id: '551404',
+      classification_employee_group_id: '805G',
+      classification_peoplesoft_id: 'ST805',
       job_profile_id: profile247.id,
     },
   ];
 
   for await (const jobProfileClassification of jobProfileClassifications) {
     await prisma.classification.upsert({
-      where: { id: jobProfileClassification.classification_id },
+      where: {
+        id_employee_group_id_peoplesoft_id: {
+          id: jobProfileClassification.classification_id,
+          employee_group_id: jobProfileClassification.classification_employee_group_id,
+          peoplesoft_id: jobProfileClassification.classification_peoplesoft_id,
+        },
+      },
       create: {
         id: jobProfileClassification.classification_id,
-        peoplesoft_id: '',
+        peoplesoft_id: jobProfileClassification.classification_peoplesoft_id,
         code: '',
         name: '',
-        employee_group_id: 'GEU',
+        employee_group_id: jobProfileClassification.classification_employee_group_id,
         grade: '',
         effective_status: '',
         effective_date: new Date('1900-01-01'),
@@ -2188,186 +2209,277 @@ async function seed() {
   const jobProfileReportsTo = [
     {
       classification_id: '185001',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
     },
     {
       classification_id: '185002',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
     },
     {
       classification_id: '185003',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
     },
     {
       classification_id: '185004',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
     },
     {
       classification_id: '185005',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
     },
     {
       classification_id: '185006',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
     },
     {
       classification_id: '185001',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
     },
     {
       classification_id: '185002',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
     },
     {
       classification_id: '185003',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
     },
     {
       classification_id: '185004',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
     },
     {
       classification_id: '185005',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
     },
     {
       classification_id: '185006',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
     },
     {
       classification_id: '185001',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
     },
     {
       classification_id: '185002',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
     },
     {
       classification_id: '185003',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
     },
     {
       classification_id: '185004',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
     },
     {
       classification_id: '185005',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
     },
     {
       classification_id: '185006',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
     },
     {
       classification_id: '185001',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
     },
     {
       classification_id: '185002',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
     },
     {
       classification_id: '185003',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
     },
     {
       classification_id: '185004',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
     },
     {
       classification_id: '185005',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
     },
     {
       classification_id: '185006',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
     },
     {
       classification_id: '185001',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
     },
     {
       classification_id: '185002',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
     },
     {
       classification_id: '185003',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
     },
     {
       classification_id: '185004',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
     },
     {
       classification_id: '185005',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
     },
     {
       classification_id: '185006',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
     },
 
     {
       classification_id: '185001',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
     },
     {
       classification_id: '185002',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
     },
     {
       classification_id: '185003',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
     },
     {
       classification_id: '185004',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
     },
     {
       classification_id: '185005',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
     },
     {
       classification_id: '185006',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
     },
     {
       classification_id: '185001',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
     },
     {
       classification_id: '185002',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
     },
     {
       classification_id: '185003',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
     },
     {
       classification_id: '185004',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
     },
     {
       classification_id: '185005',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
     },
     {
       classification_id: '185006',
+      classification_employee_group_id: 'MGT',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
     },
   ];
 
   for await (const reportsTo of jobProfileReportsTo) {
-    const { classification_id, job_profile_id } = reportsTo;
+    const { classification_id, classification_employee_group_id, classification_peoplesoft_id, job_profile_id } =
+      reportsTo;
 
     await prisma.classification.upsert({
-      where: { id: classification_id },
+      where: {
+        id_employee_group_id_peoplesoft_id: {
+          id: classification_id,
+          employee_group_id: classification_employee_group_id,
+          peoplesoft_id: classification_peoplesoft_id,
+        },
+      },
       create: {
         id: classification_id,
-        peoplesoft_id: '',
+        peoplesoft_id: classification_peoplesoft_id,
         code: '',
         name: '',
-        employee_group_id: 'GEU',
+        employee_group_id: classification_employee_group_id,
         grade: '',
         effective_status: '',
         effective_date: new Date('1900-01-01'),
@@ -2376,9 +2488,18 @@ async function seed() {
     });
 
     await prisma.jobProfileReportsTo.upsert({
-      where: { classification_id_job_profile_id: { classification_id, job_profile_id } },
+      where: {
+        job_profile_id_classification_id_classification_employee_group_id_classification_peoplesoft_id: {
+          job_profile_id,
+          classification_id,
+          classification_employee_group_id,
+          classification_peoplesoft_id,
+        },
+      },
       create: {
         classification_id,
+        classification_employee_group_id,
+        classification_peoplesoft_id,
         job_profile_id,
       },
       update: {},
