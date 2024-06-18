@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove } from 'react-hook-form';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -72,16 +73,21 @@ const BehaviouralComptencyPicker2: React.FC<BehaviouralComptencyPickerProps> = (
   if (isLoading) return <LoadingSpinnerWithMessage mode="small" />;
   if (error) return <p>An error occurred</p>;
 
-  // console.log('selectedValues: ', selectedValues);
-
-  console.log('behavioural_competencies_fields: ', behavioural_competencies_fields);
-  console.log('selectedOptions:', selectedOptions);
   const renderOption = (option: SelectableOption) => {
     return (
-      <>
+      <div>
         <strong>{option.object.name}</strong>
         <div>{option.object.description}</div>
-      </>
+      </div>
+    );
+  };
+
+  const renderOptionExtra = (option: SelectableOption) => {
+    return (
+      <div style={{ marginBottom: '0.5rem' }}>
+        <Tag>{formatEnumString(option.object.category)}</Tag>
+        {option.object.type == 'INDIGENOUS' && <Tag color="blue">Indigenous Behavioural Competency</Tag>}
+      </div>
     );
   };
 
@@ -103,8 +109,6 @@ const BehaviouralComptencyPicker2: React.FC<BehaviouralComptencyPickerProps> = (
       })
       .filter((item): item is { behavioural_competency: BehaviouralCompetency } => item !== null);
 
-    console.log('onAdd: ', selectedBehaviouralCompetencies);
-
     // Remove all existing items by index
     removeAction();
 
@@ -117,12 +121,16 @@ const BehaviouralComptencyPicker2: React.FC<BehaviouralComptencyPickerProps> = (
   return (
     <EditFormOptionsPicker
       renderOption={renderOption}
+      renderOptionExtra={renderOptionExtra}
       filterOptions={options}
       buttonText="Browse and add behavioural competencies"
       selectableOptions={selectableOptions}
       title="Behavioural competencies"
       selectedOptions={selectedOptions}
       onAdd={onAdd}
+      infoContent={
+        'It is highly recommended that there be at least one Indigenous Behavioural Competency in a job profile.'
+      }
     ></EditFormOptionsPicker>
   );
 };

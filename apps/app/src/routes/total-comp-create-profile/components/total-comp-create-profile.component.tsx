@@ -3394,7 +3394,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </List.Item>
                           )}
                         />
-
+                        <Typography.Text type="secondary">
+                          <div style={{ margin: '0.5rem 0' }}>* denotes an Indigenous Behavioural Competency</div>
+                        </Typography.Text>
                         <BehaviouralComptencyPicker2
                           behavioural_competencies_fields={behavioural_competencies_fields}
                           addAction={behavioural_competencies_append}

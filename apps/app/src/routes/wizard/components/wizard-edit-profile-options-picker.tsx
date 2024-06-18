@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CheckSquareOutlined, CloseCircleFilled, CloseOutlined } from '@ant-design/icons';
-import { Button, Card, Checkbox, Col, Drawer, Form, Input, Row, Tag, Tooltip } from 'antd';
+import { Alert, Button, Card, Checkbox, Col, Drawer, Form, Input, Row, Tag, Tooltip } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import Select, { components } from 'react-select';
 import './wizard-edit-profile-options-picker.css';
@@ -14,6 +14,8 @@ interface EditFormOptionsPickerProps {
   title: string;
   selectedOptions: string[];
   onAdd: (selectedItems: string[]) => void;
+  infoContent?: React.ReactNode;
+  renderOptionExtra?: (option: SelectableOption) => React.ReactNode;
 }
 
 export interface OptionsPickerOption {
@@ -50,14 +52,15 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
   filterOptions,
   selectableOptions,
   renderOption,
+  renderOptionExtra,
   title,
   selectedOptions,
   onAdd,
+  infoContent,
 }) => {
   const [selectedItems, setSelectedItems] = useState<string[]>(selectedOptions);
   const [allSelections, setAllSelections] = useState<OptionsPickerOption[]>([]); // holds tags from all filters
   const [filteredOptions, setFilteredOptions] = useState<SelectableOption[]>([]);
-
   useEffect(() => {
     setFilteredOptions(selectableOptions);
   }, [selectableOptions]);
@@ -79,15 +82,19 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
   const handleSearchAndFilter = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (_value: string) => {
-      let filtered = selectableOptions.filter(
-        (option) => option.searchText?.toLowerCase().includes(searchText.toLowerCase()),
-      );
+      const searchTermLower = searchText.toLowerCase();
+      let filtered = selectableOptions.filter((option) => option.searchText?.toLowerCase().includes(searchTermLower));
+
+      // Sort the filtered options based on the position of the search term
+      filtered.sort((a, b) => {
+        const aIndex = a.searchText?.toLowerCase().indexOf(searchTermLower) ?? -1;
+        const bIndex = b.searchText?.toLowerCase().indexOf(searchTermLower) ?? -1;
+        return aIndex - bIndex;
+      });
 
       const selectedCategories = allSelections
         .filter((selection) => selection.type === 'jobRoleType')
         .map((selection) => selection.value);
-
-      console.log('selectedCategories:', selectedCategories, allSelections);
 
       if (selectedCategories.length !== 0) {
         filtered = filtered.filter((option) => selectedCategories.includes(option.object.category));
@@ -157,6 +164,8 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
             </>
           }
         >
+          {/* Render the Alert component with the infoContent */}
+          {infoContent && <Alert message={infoContent} type="info" />}
           <Row
             className="wizardOptionsPicker"
             justify="center"
@@ -205,7 +214,7 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
                   </Col>
                   <Col xl={12} lg={12} md={12} sm={24}>
                     <Row gutter={8} justify="end">
-                      <Col data-testid="Job role type-filter" data-cy="Job role type-filter">
+                      <Col data-testid="category-filter" data-cy="category-filter">
                         <Select
                           closeMenuOnSelect={false}
                           isClearable={false}
@@ -226,8 +235,8 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
                           }}
                           classNamePrefix="react-select"
                           isMulti
-                          placeholder="Role"
-                          aria-label="Role"
+                          placeholder="Category"
+                          aria-label="Category"
                           options={filterOptions}
                           onChange={(selectedItems) => {
                             const newValues = selectedItems.map((item) => item.value);
@@ -292,6 +301,7 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
                 {filteredOptions.map((option) => (
                   <Col key={option.value} span={24} style={{ marginBottom: '0.5rem' }}>
                     <Card>
+                      {renderOptionExtra && <div style={{ marginLeft: '2rem' }}>{renderOptionExtra(option)}</div>}
                       <Checkbox
                         checked={selectedItems.includes(option.value.toString())}
                         onChange={(e: any) => {
