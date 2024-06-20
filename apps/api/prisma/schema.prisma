@@ -193,7 +193,7 @@ model JobProfile {
   accountabilities                       Json?                 @db.JsonB
   education                              Json?                 @db.JsonB
   job_experience                         Json?                 @db.JsonB
-  professional_registration_requirements String[]
+  professional_registration_requirements Json?                 @db.JsonB
   preferences                            String[]
   knowledge_skills_abilities             String[]
   willingness_statements                 String[]

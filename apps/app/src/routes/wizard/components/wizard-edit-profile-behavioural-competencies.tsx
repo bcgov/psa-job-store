@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeleteOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Divider, Input, List, Row, Typography } from 'antd';
+import { Button, Card, Col, Input, List, Row, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { UseFormReturn, useFieldArray } from 'react-hook-form';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
-import BehaviouralComptencyPicker from './wizard-behavioural-comptency-picker';
+import BehaviouralComptencyPicker2 from './wizard-behavioural-comptency-picker2';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 
 interface WizardBehaviouralCompetenciesProps {
@@ -35,7 +35,7 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
       title={
         <Row justify="start">
           <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-            Behavioural competencies
+            <span style={{ fontWeight: '600', fontSize: '16px' }}>Behavioural competencies</span>
             <Button
               data-testid={`reset-behavioral-competencies`}
               type="link" // No button styling, just the icon
@@ -53,9 +53,7 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
       className="custom-card"
       style={{ marginTop: 16 }}
     >
-      {' '}
-      <Divider className="hr-reduced-margin" />
-      <Row justify="start">
+      {/* <Row justify="start">
         <Col xs={24} sm={24} md={24} lg={18} xl={16}>
           <label
             style={{
@@ -71,24 +69,23 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
             Add behavioural competencies
           </label>
         </Col>
-      </Row>
+      </Row> */}
       <section aria-label="Behavioural competencies" role="region">
         <Row justify="start">
           <Col xs={24} sm={24} md={24} lg={18} xl={16}>
             <>
-              <Typography.Text type="secondary">
+              {/* <Typography.Text type="secondary">
                 * denotes an Indigenous Relations Behavioural Competency
-              </Typography.Text>
-              <div data-testid="behavioral-competencies-selector">
+              </Typography.Text> */}
+              {/* <div data-testid="behavioral-competencies-selector">
                 <BehaviouralComptencyPicker
                   onAdd={behavioural_competencies_append}
                   onRemove={behavioural_competencies_remove}
                   behavioural_competencies_fields={behavioural_competencies_fields}
                 />
-              </div>
+              </div> */}
 
               <List
-                style={{ marginTop: '7px' }}
                 locale={{ emptyText: ' ' }}
                 dataSource={behavioural_competencies_fields}
                 renderItem={(field, index) => (
@@ -155,6 +152,16 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
                   </List.Item>
                 )}
               />
+
+              <Typography.Text type="secondary">
+                <div style={{ margin: '0.5rem 0' }}>* denotes an Indigenous Behavioural Competency</div>
+              </Typography.Text>
+
+              <BehaviouralComptencyPicker2
+                behavioural_competencies_fields={behavioural_competencies_fields}
+                addAction={behavioural_competencies_append}
+                removeAction={behavioural_competencies_remove}
+              ></BehaviouralComptencyPicker2>
             </>
 
             <WizardValidationError formErrors={formErrors} fieldName="behavioural_competencies" />
