@@ -6,7 +6,7 @@ import { UseFormReturn, useFieldArray } from 'react-hook-form';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
-import BehaviouralComptencyPicker2 from './wizard-behavioural-comptency-picker2';
+import BehaviouralComptencyPicker from './wizard-behavioural-comptency-picker';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 
 interface WizardBehaviouralCompetenciesProps {
@@ -53,38 +53,10 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
       className="custom-card"
       style={{ marginTop: 16 }}
     >
-      {/* <Row justify="start">
-        <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-          <label
-            style={{
-              position: 'relative',
-              display: 'inline-flex',
-              alignItems: 'center',
-              maxWidth: '100%',
-              height: '32px',
-              fontWeight: 500,
-            }}
-            title="Add behavioural competencies"
-          >
-            Add behavioural competencies
-          </label>
-        </Col>
-      </Row> */}
       <section aria-label="Behavioural competencies" role="region">
         <Row justify="start">
           <Col xs={24} sm={24} md={24} lg={18} xl={16}>
             <>
-              {/* <Typography.Text type="secondary">
-                * denotes an Indigenous Relations Behavioural Competency
-              </Typography.Text> */}
-              {/* <div data-testid="behavioral-competencies-selector">
-                <BehaviouralComptencyPicker
-                  onAdd={behavioural_competencies_append}
-                  onRemove={behavioural_competencies_remove}
-                  behavioural_competencies_fields={behavioural_competencies_fields}
-                />
-              </div> */}
-
               <List
                 locale={{ emptyText: ' ' }}
                 dataSource={behavioural_competencies_fields}
@@ -157,11 +129,11 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
                 <div style={{ margin: '0.5rem 0' }}>* denotes an Indigenous Behavioural Competency</div>
               </Typography.Text>
 
-              <BehaviouralComptencyPicker2
+              <BehaviouralComptencyPicker
                 behavioural_competencies_fields={behavioural_competencies_fields}
                 addAction={behavioural_competencies_append}
                 removeAction={behavioural_competencies_remove}
-              ></BehaviouralComptencyPicker2>
+              ></BehaviouralComptencyPicker>
             </>
 
             <WizardValidationError formErrors={formErrors} fieldName="behavioural_competencies" />
