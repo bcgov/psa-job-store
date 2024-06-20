@@ -1283,21 +1283,23 @@ export class JobProfileService {
 
     jobProfiles.forEach((profile) => {
       const requirements = profile.professional_registration_requirements as any[];
-      requirements
-        .filter((requirement) => !requirement.is_readonly)
-        .forEach((requirement) => {
-          const text = requirement.text;
-          if (!requirementsMap.has(text)) {
-            requirementsMap.set(text, {
-              text,
-              jobFamilies: [],
-              streams: [],
-            });
-          }
-          const entry = requirementsMap.get(text);
-          entry.jobFamilies.push(...profile.jobFamilies.map((jf) => ({ id: jf.jobFamily.id })));
-          entry.streams.push(...profile.streams.map((s) => ({ id: s.stream.id })));
-        });
+      if (requirements) {
+        requirements
+          .filter((requirement) => !requirement.is_readonly)
+          .forEach((requirement) => {
+            const text = requirement.text;
+            if (!requirementsMap.has(text)) {
+              requirementsMap.set(text, {
+                text,
+                jobFamilies: [],
+                streams: [],
+              });
+            }
+            const entry = requirementsMap.get(text);
+            entry.jobFamilies.push(...profile.jobFamilies.map((jf) => ({ id: jf.jobFamily.id })));
+            entry.streams.push(...profile.streams.map((s) => ({ id: s.stream.id })));
+          });
+      }
     });
 
     const result = Array.from(requirementsMap.values()).map((entry) => ({
