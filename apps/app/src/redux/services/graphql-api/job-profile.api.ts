@@ -762,6 +762,27 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         },
       }),
     }),
+
+    getRequirementsWithoutReadOnly: build.query({
+      query: (args: { jobFamilyIds: number[]; jobFamilyStreamIds: number[] }) => {
+        return {
+          document: gql`
+            query RequirementsWithoutReadOnly($jobFamilyIds: [Int!]!, $jobFamilyStreamIds: [Int!]!) {
+              requirementsWithoutReadOnly(jobFamilyIds: $jobFamilyIds, jobFamilyStreamIds: $jobFamilyStreamIds) {
+                text
+                jobFamilies {
+                  id
+                }
+                streams {
+                  id
+                }
+              }
+            }
+          `,
+          variables: args,
+        };
+      },
+    }),
   }),
 });
 
@@ -794,4 +815,6 @@ export const {
 
   useGetJobProfileByNumberQuery,
   useLazyGetJobProfileByNumberQuery,
+
+  useGetRequirementsWithoutReadOnlyQuery,
 } = jobProfileApi;

@@ -15,6 +15,7 @@ import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-rou
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
+import { useLazyGetClassificationsQuery } from '../../redux/services/graphql-api/classification.api';
 import {
   GetPositionRequestResponse,
   useLazyGetPositionRequestQuery,
@@ -63,11 +64,31 @@ export const PositionRequestPage = () => {
     resetWizardContext,
     setRequiresVerification,
     positionRequestData: wizardContextPositionRequestData,
+    setClassificationsData,
   } = useWizardContext();
 
   // check if this position currently requires review
   // do this only if it's past the edit page
   const [triggerPositionNeedsReviewQuery, { data: positionNeedsReviewData }] = useLazyPositionNeedsRivewQuery();
+
+  const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataLoading }] =
+    useLazyGetClassificationsQuery();
+
+  // Fetch all classifications - thiw will be used throughout the wizard via the wizardContext
+  const [classificationsFetched, setClassificationsFetched] = useState(false);
+
+  useEffect(() => {
+    if (classificationsData) {
+      setClassificationsData(classificationsData);
+      setClassificationsFetched(true);
+    }
+  }, [classificationsData, setClassificationsData]);
+
+  useEffect(() => {
+    if (!classificationsFetched) {
+      triggerGetClassificationData();
+    }
+  }, [classificationsFetched, triggerGetClassificationData]);
 
   useEffect(() => {
     if (
@@ -595,6 +616,8 @@ export const PositionRequestPage = () => {
         ]
       : []),
   ];
+
+  if (classificationsDataLoading) return <LoadingSpinnerWithMessage />;
 
   return (
     <>

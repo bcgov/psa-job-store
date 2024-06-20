@@ -1918,8 +1918,8 @@ async function seed() {
     willingness_statements: ['Proviso 1', 'Proviso 2'],
     knowledge_skills_abilities: ['Knowledge, Skills, and Abilities 1', 'Knowledge, Skills, and Abilities 2'],
     professional_registration_requirements: [
-      'Professional registration requirement 1',
-      'Professional registration requirement 2',
+      { text: 'Professional registration requirement 1' },
+      { text: 'Professional registration requirement 2' },
     ],
     updated_by_id: undefined,
     published_by_id: undefined,

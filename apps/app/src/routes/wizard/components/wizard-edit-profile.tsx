@@ -448,6 +448,9 @@ const WizardEditProfile = forwardRef(
           professional_registration_requirements: getInitialFieldValue(
             effectiveData.professional_registration_requirements,
           ),
+          // professional_registration_requirements: getInitialFieldValue(
+          //   effectiveData.professional_registration_requirements,
+          // ).map((item) => ({professional_registration_requirement:item})),
           preferences: getInitialFieldValue(effectiveData.preferences),
           knowledge_skills_abilities: getInitialFieldValue(effectiveData.knowledge_skills_abilities),
           willingness_statements: getInitialFieldValue(effectiveData.willingness_statements),

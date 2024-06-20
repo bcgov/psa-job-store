@@ -1235,4 +1235,81 @@ export class JobProfileService {
     });
     return count === 0;
   }
+
+  async getRequirementsWithoutReadOnly(jobFamilyIds: number[], jobFamilyStreamIds: number[]) {
+    const jobProfiles = await this.prisma.jobProfile.findMany({
+      where: {
+        AND: [
+          {
+            jobFamilies: {
+              some: {
+                jobFamily: {
+                  id: { in: jobFamilyIds },
+                },
+              },
+            },
+          },
+          {
+            streams: {
+              some: {
+                stream: {
+                  id: { in: jobFamilyStreamIds },
+                },
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        professional_registration_requirements: true,
+        jobFamilies: {
+          select: {
+            jobFamily: true,
+          },
+        },
+        streams: {
+          select: {
+            stream: true,
+          },
+        },
+      },
+    });
+
+    const requirementsMap = new Map<
+      string,
+      { text: string; jobFamilies: { id: number }[]; streams: { id: number }[] }
+    >();
+
+    jobProfiles.forEach((profile) => {
+      const requirements = profile.professional_registration_requirements as any[];
+      requirements
+        .filter((requirement) => !requirement.is_readonly)
+        .forEach((requirement) => {
+          const text = requirement.text;
+          if (!requirementsMap.has(text)) {
+            requirementsMap.set(text, {
+              text,
+              jobFamilies: [],
+              streams: [],
+            });
+          }
+          const entry = requirementsMap.get(text);
+          entry.jobFamilies.push(...profile.jobFamilies.map((jf) => ({ id: jf.jobFamily.id })));
+          entry.streams.push(...profile.streams.map((s) => ({ id: s.stream.id })));
+        });
+    });
+
+    const result = Array.from(requirementsMap.values()).map((entry) => ({
+      ...entry,
+      jobFamilies: Array.from(new Set(entry.jobFamilies.map((jf) => jf.id)))
+        .filter((id) => jobFamilyIds.includes(id))
+        .map((id) => ({ id })),
+      streams: Array.from(new Set(entry.streams.map((s) => s.id)))
+        .filter((id) => jobFamilyStreamIds.includes(id))
+        .map((id) => ({ id })),
+    }));
+
+    return result;
+  }
 }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Checkbox, Divider, Form, Select, Tag, Typography } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { Checkbox, Divider, Form, Modal, Select, Tag, Typography } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
 import { Controller } from 'react-hook-form';
 
 const { Option } = Select;
@@ -19,6 +19,8 @@ const JobStreamDiscipline: React.FC<JobStreamDisciplineProps> = ({
   selectedProfession,
 }) => {
   const [isAllSelected, setIsAllSelected] = useState(false);
+  // use ref for tag closed state
+  const tagClosed = useRef(false);
 
   const handleSelectAll = (checked: boolean, onChange: (value: any[]) => void, jobStreams: any[]) => {
     if (checked) {
@@ -29,12 +31,58 @@ const JobStreamDiscipline: React.FC<JobStreamDisciplineProps> = ({
     setIsAllSelected(checked);
   };
 
-  const handleOptionChange = (selectedStreams: any[], onChange: (value: any[]) => void, jobStreams: any[]) => {
+  const showConfirmationModal = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      Modal.confirm({
+        title: 'Confirmation',
+        content:
+          'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
+        onOk: () => {
+          resolve(true);
+        },
+        onCancel: () => {
+          resolve(false);
+        },
+      });
+    });
+  };
+
+  const handleOptionChange = async (
+    selectedStreams: any[],
+    onChange: (value: any[]) => void,
+    jobStreams: any[],
+    value: any,
+  ) => {
     if (selectedStreams.includes('all')) {
-      handleSelectAll(!isAllSelected, onChange, jobStreams);
+      if (isAllSelected) {
+        const confirmed = await showConfirmationModal();
+        if (confirmed) {
+          handleSelectAll(!isAllSelected, onChange, jobStreams);
+        }
+      } else {
+        handleSelectAll(!isAllSelected, onChange, jobStreams);
+      }
     } else {
-      onChange(selectedStreams);
-      setIsAllSelected(selectedStreams.length === jobStreams.length);
+      if (selectedStreams.length < value.length) {
+        // user pressed close tag, and already confirmed they want to proceed,
+        // do not show confirmation modal again
+        let confirmed = true;
+        if (tagClosed.current) {
+          tagClosed.current = false;
+        } else {
+          confirmed = await showConfirmationModal();
+        }
+        if (confirmed) {
+          onChange(selectedStreams);
+          setIsAllSelected(selectedStreams.length === jobStreams.length);
+        } else {
+          // If the user cancels the removal, revert the selectedStreams to the previous value
+          onChange(value);
+        }
+      } else {
+        onChange(selectedStreams);
+        setIsAllSelected(selectedStreams.length === jobStreams.length);
+      }
     }
   };
 
@@ -47,10 +95,19 @@ const JobStreamDiscipline: React.FC<JobStreamDisciplineProps> = ({
       event.stopPropagation();
     };
 
+    const handleClose = async (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      const confirmed = await showConfirmationModal();
+      if (confirmed) {
+        tagClosed.current = true;
+        onClose();
+      }
+    };
+
     return (
       <Tag
         closable={closable}
-        onClose={onClose}
+        onClose={handleClose}
         style={{ margin: '3px 3px 3px 0px', fontSize: '110%' }}
         onMouseDown={onPreventMouseDown}
       >
@@ -82,7 +139,7 @@ const JobStreamDiscipline: React.FC<JobStreamDisciplineProps> = ({
                 mode="multiple"
                 placeholder="Select the job streams this role is part of"
                 style={{ width: '100%' }}
-                onChange={(selectedStreams) => handleOptionChange(selectedStreams, onChange, jobStreams)}
+                onChange={(selectedStreams) => handleOptionChange(selectedStreams, onChange, jobStreams, value)}
                 value={value}
                 onBlur={onBlur}
                 tagRender={tagRender}
@@ -91,7 +148,14 @@ const JobStreamDiscipline: React.FC<JobStreamDisciplineProps> = ({
                   <Checkbox
                     style={{ marginRight: '5px' }}
                     checked={isAllSelected}
-                    onChange={(e) => handleSelectAll(e.target.checked, onChange, jobStreams)}
+                    // onChange={(e) => {
+                    // console.log('e.target.checked: ', e.target.checked);
+                    // if (!e.target.checked)
+                    //   showConfirmationModal(() => {
+                    //     handleSelectAll(e.target.checked, onChange, jobStreams);
+                    //   });
+                    // else handleSelectAll(e.target.checked, onChange, jobStreams);
+                    // }}
                   ></Checkbox>
                   Select All
                   <Divider style={{ margin: '5px -15px', bottom: '-10px', position: 'absolute' }} />
