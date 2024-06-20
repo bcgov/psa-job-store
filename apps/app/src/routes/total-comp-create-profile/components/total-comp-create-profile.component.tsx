@@ -81,7 +81,7 @@ import { FormItem } from '../../../utils/FormItem';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
 import { IsIndigenousCompetency } from '../../wizard/components/is-indigenous-competency.component';
-import BehaviouralComptencyPicker2 from '../../wizard/components/wizard-behavioural-comptency-picker2';
+import BehaviouralComptencyPicker from '../../wizard/components/wizard-behavioural-comptency-picker';
 import WizardOverview from '../../wizard/components/wizard-edit-profile-overview';
 import WizardProgramOverview from '../../wizard/components/wizard-edit-profile-program-overview';
 import WizardTitle from '../../wizard/components/wizard-edit-profile-title';
@@ -3387,21 +3387,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <>
-                        {/* <Typography.Text type="secondary">
-                          * denotes an Indigenous Behavioural Competency
-                        </Typography.Text>
-                        <BehaviouralComptencyPicker
-                          onAdd={(item) => {
-                            behavioural_competencies_append(item);
-                            triggerProfileValidation();
-                          }}
-                          onRemove={(item) => {
-                            behavioural_competencies_remove(item);
-                            triggerProfileValidation();
-                          }}
-                          behavioural_competencies_fields={behavioural_competencies_fields}
-                        /> */}
-
                         <List
                           style={{ marginTop: '7px' }}
                           locale={{ emptyText: ' ' }}
@@ -3469,11 +3454,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         <Typography.Text type="secondary">
                           <div style={{ margin: '0.5rem 0' }}>* denotes an Indigenous Behavioural Competency</div>
                         </Typography.Text>
-                        <BehaviouralComptencyPicker2
+                        <BehaviouralComptencyPicker
                           behavioural_competencies_fields={behavioural_competencies_fields}
                           addAction={behavioural_competencies_append}
                           removeAction={behavioural_competencies_remove}
-                        ></BehaviouralComptencyPicker2>
+                        ></BehaviouralComptencyPicker>
                       </>
                       <WizardValidationError formErrors={profileFormErrors} fieldName="behavioural_competencies" />
                     </Col>
