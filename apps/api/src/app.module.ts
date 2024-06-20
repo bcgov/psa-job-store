@@ -31,6 +31,7 @@ import { apolloPinoLoggingPlugin } from './utils/logging/apolloPinoLoggingPlugin
 import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerOptions } from './utils/logging/logger.factory';
 import { validateAppConfig } from './utils/validate-app-config.util';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     // AppLogModule,
     ScheduledTaskModule,
     SavedJobProfileModule,
+    UserModule,
   ],
   controllers: [],
   providers: [
