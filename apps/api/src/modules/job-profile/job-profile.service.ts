@@ -1236,7 +1236,12 @@ export class JobProfileService {
     return count === 0;
   }
 
-  async getRequirementsWithoutReadOnly(jobFamilyIds: number[], jobFamilyStreamIds: number[]) {
+  async getRequirementsWithoutReadOnly(
+    jobFamilyIds: number[],
+    jobFamilyStreamIds: number[],
+    classificationId?: string,
+    classificationEmployeeGroupId?: string,
+  ) {
     const jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
         AND: [
@@ -1278,8 +1283,70 @@ export class JobProfileService {
 
     const requirementsMap = new Map<
       string,
-      { text: string; jobFamilies: { id: number }[]; streams: { id: number }[] }
+      {
+        text: string;
+        jobFamilies: { id: number }[];
+        streams: { id: number }[];
+        classification: { id: string; employee_group_id: string } | null;
+      }
     >();
+
+    // get professional registration requirements for auto-population based on classification and job family
+    // professional registrations always have classifications but may or may not have job family id (null)
+    const professionalRegistrationRequirements = await this.prisma.professionalRegistrationRequirement.findMany({
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                classification_id: classificationId,
+                classification_employee_group_id: classificationEmployeeGroupId,
+              },
+              {
+                job_family_id: null,
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                classification_id: classificationId,
+                classification_employee_group_id: classificationEmployeeGroupId,
+              },
+              {
+                job_family_id: { in: jobFamilyIds },
+              },
+            ],
+          },
+        ],
+      },
+      include: {
+        requirement: true,
+      },
+    });
+
+    // todo: we selected by job family and classification above, include the job family in response here, if applicable
+    professionalRegistrationRequirements.forEach((registration) => {
+      const text = registration.requirement.text;
+      if (!requirementsMap.has(text)) {
+        requirementsMap.set(text, {
+          text,
+          jobFamilies: registration.job_family_id ? [{ id: registration.job_family_id }] : [],
+          streams: [],
+          classification: registration.classification_id
+            ? {
+                id: registration.classification_id,
+                employee_group_id: registration.classification_employee_group_id,
+              }
+            : null,
+        });
+      } else {
+        const entry = requirementsMap.get(text);
+        if (registration.job_family_id && !entry.jobFamilies.some((jf) => jf.id === registration.job_family_id)) {
+          entry.jobFamilies.push({ id: registration.job_family_id });
+        }
+      }
+    });
 
     jobProfiles.forEach((profile) => {
       const requirements = profile.professional_registration_requirements as any[];
@@ -1293,6 +1360,7 @@ export class JobProfileService {
                 text,
                 jobFamilies: [],
                 streams: [],
+                classification: null,
               });
             }
             const entry = requirementsMap.get(text);
@@ -1302,15 +1370,18 @@ export class JobProfileService {
       }
     });
 
-    const result = Array.from(requirementsMap.values()).map((entry) => ({
-      ...entry,
-      jobFamilies: Array.from(new Set(entry.jobFamilies.map((jf) => jf.id)))
-        .filter((id) => jobFamilyIds.includes(id))
-        .map((id) => ({ id })),
-      streams: Array.from(new Set(entry.streams.map((s) => s.id)))
-        .filter((id) => jobFamilyStreamIds.includes(id))
-        .map((id) => ({ id })),
-    }));
+    const result = Array.from(requirementsMap.values())
+      .map((entry) => ({
+        ...entry,
+        jobFamilies: Array.from(new Set(entry.jobFamilies.map((jf) => jf.id)))
+          .filter((id) => jobFamilyIds.includes(id))
+          .map((id) => ({ id })),
+        streams: Array.from(new Set(entry.streams.map((s) => s.id)))
+          .filter((id) => jobFamilyStreamIds.includes(id))
+          .map((id) => ({ id })),
+        classification: entry.classification,
+      }))
+      .sort((a, b) => a.text.localeCompare(b.text));
 
     return result;
   }

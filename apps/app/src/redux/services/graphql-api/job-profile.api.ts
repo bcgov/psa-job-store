@@ -764,17 +764,36 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
     }),
 
     getRequirementsWithoutReadOnly: build.query({
-      query: (args: { jobFamilyIds: number[]; jobFamilyStreamIds: number[] }) => {
+      query: (args: {
+        jobFamilyIds: number[];
+        jobFamilyStreamIds: number[];
+        classificationId?: string | null;
+        classificationEmployeeGroupId?: string | null;
+      }) => {
         return {
           document: gql`
-            query RequirementsWithoutReadOnly($jobFamilyIds: [Int!]!, $jobFamilyStreamIds: [Int!]!) {
-              requirementsWithoutReadOnly(jobFamilyIds: $jobFamilyIds, jobFamilyStreamIds: $jobFamilyStreamIds) {
+            query RequirementsWithoutReadOnly(
+              $jobFamilyIds: [Int!]!
+              $jobFamilyStreamIds: [Int!]!
+              $classificationId: String
+              $classificationEmployeeGroupId: String
+            ) {
+              requirementsWithoutReadOnly(
+                jobFamilyIds: $jobFamilyIds
+                jobFamilyStreamIds: $jobFamilyStreamIds
+                classificationId: $classificationId
+                classificationEmployeeGroupId: $classificationEmployeeGroupId
+              ) {
                 text
                 jobFamilies {
                   id
                 }
                 streams {
                   id
+                }
+                classification {
+                  id
+                  employee_group_id
                 }
               }
             }

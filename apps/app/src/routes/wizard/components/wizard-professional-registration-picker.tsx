@@ -59,6 +59,7 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
           object: comp,
         }));
       // console.log('newSelectableOptions: ', newSelectableOptions);
+
       setSelectableOptions(newSelectableOptions);
     }
   }, [data, fields]);

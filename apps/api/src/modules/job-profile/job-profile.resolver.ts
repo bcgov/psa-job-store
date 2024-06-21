@@ -29,6 +29,12 @@ class RequirementWithoutReadOnly {
 
   @Field(() => [JobProfileStream])
   streams: JobProfileStream[];
+
+  @Field(() => Classification, { nullable: true })
+  classification?: {
+    id: string;
+    employee_group_id: string;
+  };
 }
 
 @Resolver(() => JobProfile)
@@ -231,7 +237,15 @@ export class JobProfileResolver {
   async getRequirementsWithoutReadOnly(
     @Args('jobFamilyIds', { type: () => [Int] }) jobFamilyIds: number[],
     @Args('jobFamilyStreamIds', { type: () => [Int] }) jobFamilyStreamIds: number[],
+    @Args('classificationId', { type: () => String, nullable: true }) classificationId?: string,
+    @Args('classificationEmployeeGroupId', { type: () => String, nullable: true })
+    classificationEmployeeGroupId?: string,
   ) {
-    return this.jobProfileService.getRequirementsWithoutReadOnly(jobFamilyIds, jobFamilyStreamIds);
+    return this.jobProfileService.getRequirementsWithoutReadOnly(
+      jobFamilyIds,
+      jobFamilyStreamIds,
+      classificationId,
+      classificationEmployeeGroupId,
+    );
   }
 }
