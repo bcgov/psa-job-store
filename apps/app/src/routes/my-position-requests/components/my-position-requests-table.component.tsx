@@ -6,17 +6,13 @@ import {
   EditOutlined,
   EllipsisOutlined,
   EyeOutlined,
-  FilePdfOutlined,
   LinkOutlined,
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Col, Menu, Modal, Row, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
-import { generateJobProfile } from 'common-kit';
 import copy from 'copy-to-clipboard';
-import { Packer } from 'docx';
-import saveAs from 'file-saver';
 import React, { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
@@ -26,10 +22,9 @@ import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import AcessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
-import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
 import {
   useDeletePositionRequestMutation,
-  useLazyGetPositionRequestQuery,
   useLazyGetPositionRequestsQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
@@ -106,54 +101,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     }
     return undefined;
   };
-
-  // This is for downloading of the job profile
-  const [prTrigger, { data: prData, isLoading: isLoadingPositionRequest }] = useLazyGetPositionRequestQuery();
-  const [jpTrigger, { data: jpData, isLoading: isLoadingJobProfile }] = useLazyGetJobProfilesQuery();
-
-  // Fetch the position request which includes the job profile and potentially a parent job profile ID
-  const fetchJobProfileAndParent = async (id: any) => {
-    prTrigger({ id: +id });
-  };
-
-  const generateAndDownloadDocument = useCallback((jobProfile: any, parentProfile: any) => {
-    const document = generateJobProfile({
-      jobProfile: jobProfile,
-      parentJobProfile: parentProfile,
-    });
-    Packer.toBlob(document).then((blob) => {
-      saveAs(blob, 'job-profile.docx');
-      message.success('Your document is downloading!');
-    });
-  }, []);
-
-  useEffect(() => {
-    // When the position request data is received
-    if (prData && prData.positionRequest) {
-      const { parent_job_profile_id } = prData.positionRequest;
-
-      // If there's a parent job profile ID, fetch the parent job profile
-      if (parent_job_profile_id) {
-        jpTrigger({ where: { id: { equals: parent_job_profile_id } } });
-      }
-      // else {
-      //   // If there's no parent, proceed to generate the document with the current profile data
-      //   generateAndDownloadDocument(profile_json, null);
-      // }
-    }
-  }, [prData, jpData, jpTrigger]);
-
-  useEffect(() => {
-    // When the parent job profile data is received
-    if (jpData && jpData.jobProfiles && jpData.jobProfiles.length > 0) {
-      const parentProfile = jpData.jobProfiles[0];
-
-      if (prData && prData.positionRequest && prData.positionRequest.profile_json) {
-        // Generate and download the document with both job and parent job profiles
-        generateAndDownloadDocument(prData.positionRequest.profile_json, parentProfile);
-      }
-    }
-  }, [jpData, prData, generateAndDownloadDocument]);
 
   // Check if data is available and call the callback function to notify the parent component
   useEffect(() => {
@@ -245,13 +192,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                     View
                   </Link>
                 </Menu.Item>
-                <Menu.Item
-                  data-testid="menu-option-download"
-                  key="download"
-                  icon={<FilePdfOutlined aria-hidden />}
-                  onClick={() => fetchJobProfileAndParent(record.id)}
-                >
-                  <span>{isLoadingPositionRequest || isLoadingJobProfile ? 'Loading...' : 'Download'}</span>
+                <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
+                  <DownloadJobProfileComponent positionRequestId={record.id}>Download</DownloadJobProfileComponent>
                 </Menu.Item>
                 <Menu.Item
                   key="copy"
@@ -304,7 +246,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               View
             </Menu.Item>
             <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
-              Download attachements
+              <DownloadJobProfileComponent positionRequestId={record.id}>Download</DownloadJobProfileComponent>
             </Menu.Item>
             <Menu.Item
               key="copy"
@@ -327,13 +269,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             >
               View
             </Menu.Item>
-            <Menu.Item
-              data-testid="menu-option-download"
-              key="download"
-              icon={<FilePdfOutlined aria-hidden />}
-              onClick={() => fetchJobProfileAndParent(record.id)}
-            >
-              <span>{isLoadingPositionRequest || isLoadingJobProfile ? 'Loading...' : 'Download'}</span>
+            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
+              <DownloadJobProfileComponent positionRequestId={record.id}>Download</DownloadJobProfileComponent>
             </Menu.Item>
           </>
         )}
@@ -388,7 +325,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('status'),
             render: (status: any) => {
-              console.log('status ', status);
               return (
                 <StatusIndicator status={status} colorText={false} />
                 // <Space>

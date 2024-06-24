@@ -407,7 +407,10 @@ export const TotalCompApprovedRequestPage = () => {
                           <br></br>
                           <br></br>
                           <div>
-                            <DownloadJobProfileComponent jobProfile={data?.positionRequest?.profile_json} />
+                            <DownloadJobProfileComponent
+                              positionRequest={data?.positionRequest}
+                              jobProfile={data?.positionRequest?.profile_json}
+                            />
                           </div>
                         </div>
                         <Divider />

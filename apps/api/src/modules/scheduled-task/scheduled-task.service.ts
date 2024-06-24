@@ -6,10 +6,12 @@ import dayjs from 'dayjs';
 import { CrmService } from '../external/crm.service';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
 
 export enum ScheduledTask {
-  PeoplesoftSync = 'peoplesoft-sync',
   CrmSync = 'crm-sync',
+  PeoplesoftSync = 'peoplesoft-sync',
+  UserSync = 'user-sync',
 }
 
 @Injectable()
@@ -20,6 +22,7 @@ export class ScheduledTaskService {
     private readonly crmService: CrmService,
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
+    private readonly userService: UserService,
   ) {}
 
   private async isMetadataOutdated(task: ScheduledTask) {
@@ -54,6 +57,7 @@ export class ScheduledTaskService {
   @Cron('*/5 * * * * *')
   async syncPeoplesoftData() {
     const needsUpdate = await this.isMetadataOutdated(ScheduledTask.PeoplesoftSync);
+
     if (needsUpdate === true) {
       await this.updateMetadata(ScheduledTask.PeoplesoftSync, 86400);
       await this.peoplesoftService.syncClassifications();
@@ -126,6 +130,20 @@ export class ScheduledTaskService {
         }
       });
       this.logger.log(`End syncPositionStatus @ ${new Date()}`);
+    }
+  }
+
+  @Cron('*/5 * * * * *')
+  async syncUsers() {
+    const needsUpdate = await this.isMetadataOutdated(ScheduledTask.UserSync);
+
+    if (needsUpdate === true) {
+      this.logger.log(`Start syncUsers @ ${new Date()}`);
+
+      await this.updateMetadata(ScheduledTask.UserSync, 86400);
+      await this.userService.syncUsers();
+
+      this.logger.log(`End syncUsers @ ${new Date()}`);
     }
   }
 }
