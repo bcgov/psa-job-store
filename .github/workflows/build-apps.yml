@@ -82,14 +82,21 @@ jobs:
           labels: ${{ steps.docker-metadata.outputs.labels }}
           build-args: |
             VITE_KEYCLOAK_REDIRECT_URL=${{ secrets.KEYCLOAK_REDIRECT_URL }}
-            KEYCLOAK_CLIENT_ID_PRIVATE=${{ secrets.KEYCLOAK_CLIENT_ID_PRIVATE }}
-            KEYCLOAK_CLIENT_ID_PUBLIC=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
             VITE_KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
-            KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
-            KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
             VITE_KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
             VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
+            KEYCLOAK_API_URL=${{ secrets.KEYCLOAK_API_URL }}
+            KEYCLOAK_API_TOKEN_URL=${{ secrets.KEYCLOAK_API_TOKEN_URL }}
+            KEYCLOAK_API_ENVIRONMENT=${{ secrets.KEYCLOAK_API_ENVIRONMENT }}
+            KEYCLOAK_API_INTEGRATION_ID=${{ secrets.KEYCLOAK_API_INTEGRATION_ID }}
+            KEYCLOAK_API_SERVICE_ACCOUNT_CLIENT_ID=${{ secrets.KEYCLOAK_API_SERVICE_ACCOUNT_CLIENT_ID }}
+            KEYCLOAK_API_SERVICE_ACCOUNT_CLIENT_SECRET=${{ secrets.KEYCLOAK_API_SERVICE_ACCOUNT_CLIENT_SECRET }}
             KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
+            KEYCLOAK_CLIENT_ID_PRIVATE=${{ secrets.KEYCLOAK_CLIENT_ID_PRIVATE }}
+            KEYCLOAK_CLIENT_ID_PUBLIC=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
+            KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+            KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
+
   trigger_migration:
     needs: build-apps
     runs-on: ubuntu-latest
