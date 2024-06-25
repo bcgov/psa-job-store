@@ -27,7 +27,6 @@ export class OrgChartService {
       (row) => row['A.EFF_STATUS'] === 'Active' && row['A.POSN_STATUS'] !== 'Frozen',
     );
 
-    const classifications = await this.classificationService.getClassifications({});
     const departments = await this.departmentService.getDepartments();
 
     const positionsWithIncumbentsIds = filteredPositions.map((row) => row['A.POSITION_NBR']);
@@ -37,7 +36,7 @@ export class OrgChartService {
     );
 
     // Loop through response and generate the tree for everyone in the _current department_
-    filteredPositions.forEach((position) => {
+    for await (const position of filteredPositions) {
       // In rare cases, positions do _not_ include a value for A.REPORTS_TO, which causes the org chart to crash.
       // This workaround prevents a crash and allows positions to float in space with no reporting relationship
       const reportsTo = position['A.REPORTS_TO'].length > 0 ? position['A.REPORTS_TO'] : '-1';
@@ -54,7 +53,7 @@ export class OrgChartService {
       }
 
       const classification = !isEmpty(position['A.JOBCODE'])
-        ? classifications.find((classification) => classification.id === position['A.JOBCODE'])
+        ? await this.classificationService.getClassificationForPeoplesoftPosition(position)
         : null;
 
       const department = !isEmpty(position['A.DEPTID'])
@@ -78,7 +77,7 @@ export class OrgChartService {
           y: 0,
         },
       });
-    });
+    }
   }
 
   async getOrgChart(args?: FindUniqueOrgChartArgs) {
