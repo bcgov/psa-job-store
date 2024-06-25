@@ -129,9 +129,9 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
 
   return (
     <EditFormOptionsPicker
-      buttonText="Browse and add professional registration requirements"
+      buttonText="Browse and add professional registrations and certifications"
       selectableOptions={selectableOptions}
-      title="Professional registration requirements"
+      title="Professional registrations and certifications"
       selectedOptions={selectedOptions}
       onAdd={onAdd}
     ></EditFormOptionsPicker>

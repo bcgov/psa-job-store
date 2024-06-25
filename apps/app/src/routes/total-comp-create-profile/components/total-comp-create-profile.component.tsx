@@ -1229,26 +1229,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const filteredReportToRelationship = currentReportToRelationship.filter((r: string) => r !== newValue);
     setValue('reportToRelationship', filteredReportToRelationship);
 
-    if (selectedClassificationId) {
-      setIsModalVisible(true);
-    } else {
-      updateMinimumRequirementsFromClassification(newValue);
+    // if (selectedClassificationId) {
+    //   setIsModalVisible(true);
+    // } else {
+    updateMinimumRequirementsFromClassification(newValue);
 
-      setTimeout(() => {
+    setTimeout(() => {
+      // console.log(
+      //   'refetching with: ',
+      //   selectedProfession.map((p) => p.jobFamily),
+      // );
+      refetchProfessionalRequirementsPickerData().then((r) => {
         // console.log(
-        //   'refetching with: ',
-        //   selectedProfession.map((p) => p.jobFamily),
+        //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
+        //   professionalRequirementsPickerData,
+        //   r,
         // );
-        refetchProfessionalRequirementsPickerData().then((r) => {
-          // console.log(
-          //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
-          //   professionalRequirementsPickerData,
-          //   r,
-          // );
-          updateProfessionalRegistrationrequirements(r.data);
-        });
-      }, 0);
-    }
+        updateProfessionalRegistrationrequirements(r.data);
+      });
+    }, 0);
+    // }
   };
 
   const handleJobFamilyChange = async () => {
@@ -1866,13 +1866,30 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   //   if (counter == 1) removeProfessionalRegistrationRequirement(2);
   // }, [counter, removeProfessionalRegistrationRequirement]);
 
+  const showWarningModal = (onOk: any, onCancel: any) => {
+    Modal.confirm({
+      title: 'Warning',
+      content:
+        "Changing 'Classification' would result in updates to some of the system generated fields in the 'Job Profile' page. Report-to relationship may also get updated to exclude this classification. Are you sure you want to continue?",
+      onOk,
+      onCancel,
+    });
+  };
+
   const tabItems = [
     {
       key: '1',
       label: 'Basic details',
       children: (
         <>
-          <Modal
+          {/* <Button
+            onClick={() => {
+              triggerProfileValidation();
+            }}
+          >
+            Validate
+          </Button> */}
+          {/* <Modal
             title="Confirm change"
             open={isModalVisible}
             onOk={handleConfirmChange}
@@ -1885,7 +1902,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               Profile’ page. Report-to relationship may also get updated to exclude this classification. Are you sure
               you want to continue?
             </p>
-          </Modal>
+          </Modal> */}
           <Row justify="center" style={{ margin: '1rem 0' }}>
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
               <Form
@@ -1961,13 +1978,21 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               <Select
                                 placeholder="Choose an employee group"
                                 onChange={(arg) => {
-                                  // console.log('arg employee group: ', arg);
-                                  // Filter classifications based on the selected employee group
-                                  // Clear the classification selection
-                                  setValue('classification', null);
-
-                                  // Call the original onChange to update the form state
-                                  onChange(arg);
+                                  if (selectedClassificationId) {
+                                    showWarningModal(
+                                      () => {
+                                        // User confirmed the change
+                                        setValue('classification', null);
+                                        onChange(arg);
+                                      },
+                                      () => {
+                                        // User canceled the change
+                                      },
+                                    );
+                                  } else {
+                                    // Call the original onChange to update the form state
+                                    onChange(arg);
+                                  }
                                 }}
                                 onBlur={onBlur}
                                 value={value}
@@ -1999,8 +2024,23 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               <Select
                                 placeholder="Choose a classification"
                                 onChange={(newValue) => {
-                                  onChange(newValue);
-                                  handleClassificationChange(newValue);
+                                  // onChange(newValue);
+                                  // handleClassificationChange(newValue);
+
+                                  if (selectedClassificationId) {
+                                    showWarningModal(
+                                      () => {
+                                        onChange(newValue);
+                                        handleClassificationChange(newValue);
+                                      },
+                                      () => {
+                                        // User canceled the change
+                                      },
+                                    );
+                                  } else {
+                                    onChange(newValue);
+                                    handleClassificationChange(newValue);
+                                  }
                                 }}
                                 onBlur={onBlur} // notify when input is touched/blur
                                 value={value}
@@ -2339,6 +2379,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       label: 'Job profile',
       children: (
         <>
+          {/* <Button
+            onClick={() => {
+              triggerProfileValidation();
+            }}
+          >
+            Validate
+          </Button> */}
           <Row justify="center" style={{ margin: '1rem 0' }}>
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
               <Form layout="vertical">
@@ -2921,7 +2968,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
                           <Row justify="space-between" align="middle">
-                            <Col>Professional registration requirements</Col>
+                            <Col>Professional registrations and certifications</Col>
                           </Row>
                         }
                       >
@@ -2956,7 +3003,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         return (
                                           <TextArea
                                             autoSize
-                                            placeholder="Add a professional registration requirement"
+                                            placeholder="Add a professional registration or certification"
                                             onChange={(event) => {
                                               onChange(event);
                                               debounce(triggerProfileValidation, 300)();

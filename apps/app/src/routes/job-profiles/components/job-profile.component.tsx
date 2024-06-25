@@ -212,15 +212,17 @@ function CustomItemCountValidator(min: number, max: number, label: string, valid
         validate(value: any[]) {
           if (!value) return false;
 
-          const defaultFields = value.filter((item) => !item.isCustom);
-          if (defaultFields.length === 0) {
-            return true; // No default items, so minimum count is 0
-          }
+          // const nonCustomFields = value.filter((item) => !item.isCustom);
+          // console.log('defaultFields: ', nonCustomFields);
+          // if (nonCustomFields.length === 0) {
+          //   return true; // No default items, so minimum count is 0
+          // }
 
           const validItems = value.filter(
             (item) =>
               !item.disabled && ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
           );
+
           return validItems.length >= min && validItems.length <= max;
         },
         defaultMessage(args: ValidationArguments): string {
