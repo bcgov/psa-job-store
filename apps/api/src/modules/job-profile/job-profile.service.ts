@@ -1263,6 +1263,9 @@ export class JobProfileService {
               },
             },
           },
+          {
+            state: 'PUBLISHED',
+          },
         ],
       },
       select: {

@@ -7,7 +7,7 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const ministriesData = data?.organizations.map((d) => ({ ...d, filterString: `${d.id} ${d.name}` })) || [];
 
-  console.log('ministriesData: ', ministriesData);
+  // console.log('ministriesData: ', ministriesData);
   // console.log('ministriesData: ', ministriesData, value);
   // const [selectedMinistries, setSelectedMinistries] = useState([] as number[]);
 
