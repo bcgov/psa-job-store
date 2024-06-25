@@ -3,6 +3,7 @@ import { CheckSquareOutlined, CloseCircleFilled, CloseOutlined } from '@ant-desi
 import { Alert, Button, Card, Checkbox, Col, Drawer, Form, Input, Row, Tag, Tooltip } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import Select, { components } from 'react-select';
+import NoResultsView from '../../my-position-requests/components/no-results.component';
 import './wizard-edit-profile-options-picker.css';
 const { Search } = Input;
 
@@ -126,7 +127,10 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
     handleSearchAndFilter('');
   }, [allSelections, handleSearchAndFilter]);
 
-  const clearFilters = () => {};
+  const clearFilters = () => {
+    setAllSelections([]);
+    setSearchText('');
+  };
 
   const selectedJobRoleType = allSelections.filter((s) => s.type === 'jobRoleType').map((s) => s.value);
 
@@ -148,9 +152,17 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
   return (
     <div>
       <Form.Item>
-        <Button style={{ paddingLeft: 0 }} type="link" onClick={showDrawer} icon={<CheckSquareOutlined />}>
-          {buttonText}
-        </Button>
+        <Tooltip title={filteredOptions.length == 0 ? 'No items available' : ''}>
+          <Button
+            style={{ paddingLeft: 0 }}
+            type="link"
+            onClick={showDrawer}
+            icon={<CheckSquareOutlined />}
+            disabled={filteredOptions.length == 0}
+          >
+            {buttonText}
+          </Button>
+        </Tooltip>
         <Drawer
           title={title}
           placement="right"
@@ -306,7 +318,7 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
               <Row>
                 {filteredOptions.length == 0 && (
                   <Col span={24}>
-                    <Card>No items found</Card>
+                    <NoResultsView onClearFilters={clearFilters} />
                   </Col>
                 )}
                 {filteredOptions.map((option) => (
