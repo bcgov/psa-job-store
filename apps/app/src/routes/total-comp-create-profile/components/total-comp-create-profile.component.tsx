@@ -3525,72 +3525,76 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <>
-                        <List
-                          style={{ marginTop: '7px' }}
-                          locale={{ emptyText: ' ' }}
-                          dataSource={behavioural_competencies_fields}
-                          renderItem={(field, index) => (
-                            <List.Item
-                              style={{
-                                display: 'flex',
-                                alignItems: 'flex-start', // Align items to the top
-                                marginBottom: '0px',
-                                borderBottom: 'none',
-
-                                padding: '5px 0',
-                              }}
-                              key={field.id} // Ensure this is a unique value
-                            >
-                              <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
-                                <strong>
-                                  {field.behavioural_competency.name}
-                                  <IsIndigenousCompetency competency={field.behavioural_competency} />
-                                </strong>
-                                : {field.behavioural_competency.description}
-                              </p>
-
-                              <Button
-                                type="text" // No button styling, just the icon
-                                icon={<DeleteOutlined />}
-                                onClick={() => {
-                                  behavioural_competencies_remove(index);
-                                  triggerProfileValidation();
-                                }}
+                        {behavioural_competencies_fields.length > 0 && (
+                          <List
+                            style={{ marginTop: '7px' }}
+                            locale={{ emptyText: ' ' }}
+                            dataSource={behavioural_competencies_fields}
+                            renderItem={(field, index) => (
+                              <List.Item
                                 style={{
-                                  marginLeft: '10px',
-                                  border: '1px solid',
-                                  borderColor: '#d9d9d9',
-                                }}
-                              />
+                                  display: 'flex',
+                                  alignItems: 'flex-start', // Align items to the top
+                                  marginBottom: '0px',
+                                  borderBottom: 'none',
 
-                              <FormItem
-                                name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                                control={profileControl}
-                                hidden
+                                  padding: '5px 0',
+                                }}
+                                key={field.id} // Ensure this is a unique value
                               >
-                                <Input />
-                              </FormItem>
-                              <FormItem
-                                hidden
-                                name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                                control={profileControl}
-                                style={{ flex: 1, marginRight: '10px' }}
-                              >
-                                <Input placeholder="Name" style={{ width: '100%' }} />
-                              </FormItem>
-                              <FormItem
-                                hidden
-                                name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                                control={profileControl}
-                                style={{ flex: 2, marginRight: '10px' }}
-                              >
-                                <TextArea placeholder="Description" style={{ width: '100%' }} />
-                              </FormItem>
-                            </List.Item>
-                          )}
-                        />
+                                <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
+                                  <strong>
+                                    {field.behavioural_competency.name}
+                                    <IsIndigenousCompetency competency={field.behavioural_competency} />
+                                  </strong>
+                                  : {field.behavioural_competency.description}
+                                </p>
+
+                                <Button
+                                  type="text" // No button styling, just the icon
+                                  icon={<DeleteOutlined />}
+                                  onClick={() => {
+                                    behavioural_competencies_remove(index);
+                                    triggerProfileValidation();
+                                  }}
+                                  style={{
+                                    marginLeft: '10px',
+                                    border: '1px solid',
+                                    borderColor: '#d9d9d9',
+                                  }}
+                                />
+
+                                <FormItem
+                                  name={`behavioural_competencies.${index}.behavioural_competency.id`}
+                                  control={profileControl}
+                                  hidden
+                                >
+                                  <Input />
+                                </FormItem>
+                                <FormItem
+                                  hidden
+                                  name={`behavioural_competencies.${index}.behavioural_competency.name`}
+                                  control={profileControl}
+                                  style={{ flex: 1, marginRight: '10px' }}
+                                >
+                                  <Input placeholder="Name" style={{ width: '100%' }} />
+                                </FormItem>
+                                <FormItem
+                                  hidden
+                                  name={`behavioural_competencies.${index}.behavioural_competency.description`}
+                                  control={profileControl}
+                                  style={{ flex: 2, marginRight: '10px' }}
+                                >
+                                  <TextArea placeholder="Description" style={{ width: '100%' }} />
+                                </FormItem>
+                              </List.Item>
+                            )}
+                          />
+                        )}
                         <Typography.Text type="secondary">
-                          <div style={{ margin: '0.5rem 0' }}>* denotes an Indigenous Behavioural Competency</div>
+                          <div style={{ margin: '0.5rem 0' }}>
+                            * denotes an Indigenous relations behavioural competency
+                          </div>
                         </Typography.Text>
                         <BehaviouralComptencyPicker
                           behavioural_competencies_fields={behavioural_competencies_fields}
