@@ -86,7 +86,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     return (
       <div style={{ marginBottom: '0.5rem' }}>
         <Tag>{formatEnumString(option.object.category)}</Tag>
-        {option.object.type == 'INDIGENOUS' && <Tag color="blue">Indigenous Behavioural Competency</Tag>}
+        {option.object.type == 'INDIGENOUS' && <Tag color="blue">Indigenous relations behavioural competencies</Tag>}
       </div>
     );
   };
@@ -129,7 +129,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
       selectedOptions={selectedOptions}
       onAdd={onAdd}
       infoContent={
-        'It is highly recommended that there be at least one Indigenous Behavioural Competency in a job profile.'
+        'It is highly recommended that there be at least one Indigenous relations behavioural competency in a job profile.'
       }
     ></EditFormOptionsPicker>
   );

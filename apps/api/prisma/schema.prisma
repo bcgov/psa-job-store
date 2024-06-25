@@ -280,6 +280,27 @@ model JobProfileMinimumRequirements {
   @@map("job_profile_minimum_requirements")
 }
 
+model ProfessionalRegistrationRequirementBase {
+  id            Int                                   @id @default(autoincrement())
+  text          String                                @unique
+  registrations ProfessionalRegistrationRequirement[]
+
+  @@map("professional_registration_requirement_base")
+}
+
+model ProfessionalRegistrationRequirement {
+  id                               Int                                     @id @default(autoincrement())
+  requirement                      ProfessionalRegistrationRequirementBase @relation(fields: [requirement_id], references: [id])
+  requirement_id                   Int
+  classification_id                String?
+  classification_employee_group_id String?
+  job_family                       JobProfileJobFamily?                    @relation(fields: [job_family_id], references: [id])
+  job_family_id                    Int?
+
+  @@unique([requirement_id, classification_id, classification_employee_group_id, job_family_id])
+  @@map("professional_registration_requirement")
+}
+
 model JobProfileOrganization {
   organization    Organization @relation(fields: [organization_id], references: [id])
   organization_id String
@@ -301,11 +322,12 @@ model JobProfileContext {
 }
 
 model JobProfileJobFamily {
-  id               Int                       @id @default(autoincrement())
-  name             String
+  id                                  Int                                   @id @default(autoincrement())
+  name                                String
   // job_profiles     JobProfile[]
-  jobProfiles      JobProfileJobFamilyLink[]
-  JobProfileStream JobProfileStream[]
+  jobProfiles                         JobProfileJobFamilyLink[]
+  JobProfileStream                    JobProfileStream[]
+  ProfessionalRegistrationRequirement ProfessionalRegistrationRequirement[]
 
   @@map("job_profile_job_family")
 }
