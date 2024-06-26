@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { User, UserUpdateInput } from '../../@generated/prisma-nestjs-graphql';
+import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../../@generated/prisma-nestjs-graphql';
 import { CrmService } from '../external/crm.service';
 import { KeycloakService } from '../external/keycloak.service';
 import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
@@ -14,6 +14,23 @@ export class UserService {
     private readonly peoplesoftService: PeoplesoftV2Service,
     private readonly prisma: PrismaService,
   ) {}
+
+  async getUser(args: FindUniqueUserArgs) {
+    const user = await this.prisma.user.findUnique(args);
+    return user;
+  }
+
+  async getUsers({ where, orderBy = [{ name: { sort: 'asc' } }], take = 50, skip = 0, distinct }: FindManyUserArgs) {
+    const users = await this.prisma.user.findMany({
+      where,
+      orderBy,
+      take,
+      skip,
+      distinct,
+    });
+
+    return users;
+  }
 
   async syncUsers() {
     const users = await this.keycloakService.getUsers();
@@ -75,11 +92,6 @@ export class UserService {
         roles: [],
       },
     });
-  }
-
-  async getUser(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    return user;
   }
 
   async upsertUser(user: UserUpdateInput) {
