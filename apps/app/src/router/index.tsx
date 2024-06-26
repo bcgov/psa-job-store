@@ -17,6 +17,8 @@ import { MyPositionsRoute } from '../routes/my-position-requests';
 import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
 import { OrgChartRoute as OrgChartOldRoute, OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage as OrgChartOldPage, OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { SettingsRoute } from '../routes/settings';
+import { UserListPage } from '../routes/settings/user/user-list.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
@@ -84,7 +86,20 @@ export const router = createBrowserRouter([
               },
             ],
           },
-
+          {
+            path: 'settings',
+            element: (
+              <RoleGuard roles={['super-admin']}>
+                <SettingsRoute />
+              </RoleGuard>
+            ),
+            children: [
+              {
+                path: 'users',
+                element: <UserListPage />,
+              },
+            ],
+          },
           {
             path: '/my-position-requests',
             element: <MyPositionsRoute />,
