@@ -203,7 +203,7 @@ export const router = createBrowserRouter([
           {
             path: '/draft-job-profiles',
             element: (
-              <RoleGuard requiredRole="total-compensation">
+              <RoleGuard roles={['total-compensation']}>
                 <TotalCompDraftProfilesRoute />
               </RoleGuard>
             ),
@@ -214,7 +214,7 @@ export const router = createBrowserRouter([
               {
                 path: 'create',
                 element: (
-                  <RoleGuard requiredRole="total-compensation">
+                  <RoleGuard roles={['total-compensation']}>
                     <TotalCompDraftProfilesRoute />
                   </RoleGuard>
                 ),
@@ -245,7 +245,7 @@ export const router = createBrowserRouter([
           {
             path: '/published-job-profiles',
             element: (
-              <RoleGuard requiredRole="total-compensation">
+              <RoleGuard roles={['total-compensation']}>
                 <TotalCompPublishedProfilesRoute />
               </RoleGuard>
             ),
@@ -266,7 +266,7 @@ export const router = createBrowserRouter([
           {
             path: '/archived-job-profiles',
             element: (
-              <RoleGuard requiredRole="total-compensation">
+              <RoleGuard roles={['total-compensation']}>
                 <TotalCompPublishedProfilesRoute />
               </RoleGuard>
             ),
@@ -287,7 +287,7 @@ export const router = createBrowserRouter([
           {
             path: '/approved-requests',
             element: (
-              <RoleGuard requiredRole="total-compensation">
+              <RoleGuard roles={['total-compensation']}>
                 <TotalCompApprovedRequestsRoute />
               </RoleGuard>
             ),
@@ -309,7 +309,7 @@ export const router = createBrowserRouter([
           {
             path: '/classification-tasks',
             element: (
-              <RoleGuard requiredRole="classification">
+              <RoleGuard roles={['classification']}>
                 <ClassificationTasksRoute />
               </RoleGuard>
             ),
