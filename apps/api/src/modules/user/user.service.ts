@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../../@generated/prisma-nestjs-graphql';
+import { AlexandriaError } from '../../utils/alexandria-error';
 import { CrmService } from '../external/crm.service';
 import { KeycloakService } from '../external/keycloak.service';
 import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.input';
 
 @Injectable()
 export class UserService {
@@ -17,6 +19,10 @@ export class UserService {
 
   async getUser(args: FindUniqueUserArgs) {
     const user = await this.prisma.user.findUnique(args);
+    if (!user) {
+      throw AlexandriaError(`Could not find user: ${args}`);
+    }
+
     return user;
   }
 
@@ -30,6 +36,18 @@ export class UserService {
     });
 
     return users;
+  }
+
+  async setUserOrgChartAccess({ id, department_ids }: SetUserOrgChartAccessInput) {
+    await this.prisma.$queryRaw(Prisma.sql`
+      UPDATE
+        "user"
+      SET
+        metadata = jsonb_set(metadata, '{org_chart,department_ids}'::text[], ${JSON.stringify(department_ids)}::jsonb)
+      WHERE
+        id = ${id}::uuid`);
+
+    return await this.getUser({ where: { id } });
   }
 
   async syncUsers() {
