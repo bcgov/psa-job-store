@@ -662,6 +662,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     return treeData ? transformToTreeData(treeData.groupedClassifications) : [];
   }, [treeData, transformToTreeData]);
 
+  const [maxReportsTo, setMaxReportsTo] = useState<number>(0);
   const setAllReportToRelationships = useCallback(
     (isChecked: boolean) => {
       // Get all values for 'reportToRelationship' if isChecked is true, else an empty array
@@ -671,7 +672,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       let filteredReportToRelationship = allValues;
       if (selectedClassificationId)
         filteredReportToRelationship = allValues.filter((r: string) => r !== selectedClassificationId);
-
+      isChecked ? setMaxReportsTo(filteredReportToRelationship.length) : setMaxReportsTo(0);
       // Update the 'reportToRelationship' form variable
       setValue('reportToRelationship', filteredReportToRelationship);
     },
@@ -2286,7 +2287,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               <TreeSelect
                                 {...field}
                                 onChange={(selectedItems) => {
-                                  setValue('all_reports_to', false);
+                                  setValue('all_reports_to', maxReportsTo == selectedItems.length);
                                   field.onChange(selectedItems); // Continue with the original onChange
                                 }}
                                 autoClearSearchValue={false}
