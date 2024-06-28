@@ -13,7 +13,6 @@ import WizardEditControlBar from './components/wizard-edit-control-bar';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
-import './wizard-review.page.css';
 
 interface WizardReviewPageProps {
   onNext?: () => void;

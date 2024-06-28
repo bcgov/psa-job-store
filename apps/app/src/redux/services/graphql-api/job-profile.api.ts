@@ -762,6 +762,55 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         },
       }),
     }),
+
+    getRequirementsWithoutReadOnly: build.query({
+      query: (args: {
+        jobFamilyIds: number[];
+        jobFamilyStreamIds: number[];
+        classificationId?: string | null;
+        classificationEmployeeGroupId?: string | null;
+        ministryIds?: string[];
+        jobFamilyWithNoStream?: number[];
+      }) => {
+        return {
+          document: gql`
+            query RequirementsWithoutReadOnly(
+              $jobFamilyIds: [Int!]!
+              $jobFamilyStreamIds: [Int!]!
+              $classificationId: String
+              $classificationEmployeeGroupId: String
+              $ministryIds: [String!]
+              $jobFamilyWithNoStream: [Int!]
+            ) {
+              requirementsWithoutReadOnly(
+                jobFamilyIds: $jobFamilyIds
+                jobFamilyStreamIds: $jobFamilyStreamIds
+                classificationId: $classificationId
+                classificationEmployeeGroupId: $classificationEmployeeGroupId
+                ministryIds: $ministryIds
+                jobFamilyWithNoStream: $jobFamilyWithNoStream
+              ) {
+                text
+                jobFamilies {
+                  id
+                }
+                streams {
+                  id
+                }
+                classification {
+                  id
+                  employee_group_id
+                }
+                organization {
+                  id
+                }
+              }
+            }
+          `,
+          variables: args,
+        };
+      },
+    }),
   }),
 });
 
@@ -794,4 +843,6 @@ export const {
 
   useGetJobProfileByNumberQuery,
   useLazyGetJobProfileByNumberQuery,
+
+  useGetRequirementsWithoutReadOnlyQuery,
 } = jobProfileApi;

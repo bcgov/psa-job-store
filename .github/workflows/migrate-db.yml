@@ -19,6 +19,7 @@ jobs:
         uses: dorny/paths-filter@v2
         with:
           base: ${{ github.event.client_payload.ref }}
+          ref: ${{ github.event.client_payload.ref }}
           filters: |
             api:
               - 'apps/api/prisma/migrations/**'

@@ -1,11 +1,13 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Field, Int, Mutation, ObjectType, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import {
   Classification,
   JobProfile,
   JobProfileBehaviouralCompetency,
   JobProfileCreateInput,
+  JobProfileJobFamily,
   JobProfileReportsTo,
+  JobProfileStream,
   Organization,
 } from '../../@generated/prisma-nestjs-graphql';
 import { AlexandriaError } from '../../utils/alexandria-error';
@@ -16,6 +18,29 @@ import { RoleGuard } from '../auth/guards/role.guard';
 import { JobFamilyService } from '../job-family/job-family.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 import { JobProfileService } from './job-profile.service';
+
+@ObjectType()
+class RequirementWithoutReadOnly {
+  @Field(() => String)
+  text: string;
+
+  @Field(() => [JobProfileJobFamily])
+  jobFamilies: JobProfileJobFamily[];
+
+  @Field(() => [JobProfileStream])
+  streams: JobProfileStream[];
+
+  @Field(() => Classification, { nullable: true })
+  classification?: {
+    id: string;
+    employee_group_id: string;
+  };
+
+  @Field(() => Organization, { nullable: true })
+  organization?: {
+    id: string;
+  };
+}
 
 @Resolver(() => JobProfile)
 export class JobProfileResolver {
@@ -85,15 +110,15 @@ export class JobProfileResolver {
 
   @Query(() => JobProfile, { name: 'jobProfile' })
   @AllowNoRoles() // so that share position request feature can fetch relevant data
-  async getJobProfile(@Args('id') id: string) {
-    const res = await this.jobProfileService.getJobProfile(+id);
+  async getJobProfile(@Args('id') id: string, @CurrentUser() user: Express.User) {
+    const res = await this.jobProfileService.getJobProfile(+id, user.roles);
     return res;
   }
 
   @Query(() => JobProfile, { name: 'jobProfileByNumber' })
   @AllowNoRoles() // so that share position request feature can fetch relevant data
-  async getJobProfileByNumber(@Args('number') number: string) {
-    const res = await this.jobProfileService.getJobProfileByNumber(+number);
+  async getJobProfileByNumber(@Args('number') number: string, @CurrentUser() user: Express.User) {
+    const res = await this.jobProfileService.getJobProfileByNumber(+number, user.roles);
     return res;
   }
 
@@ -211,5 +236,25 @@ export class JobProfileResolver {
   @Query(() => Boolean, { name: 'isJobProfileNumberAvailable' })
   async checkJobProfileNumberAvailability(@Args('number', { type: () => Int }) number: number) {
     return this.jobProfileService.isNumberAvailable(number);
+  }
+
+  @Query(() => [RequirementWithoutReadOnly], { name: 'requirementsWithoutReadOnly' })
+  async getRequirementsWithoutReadOnly(
+    @Args('jobFamilyIds', { type: () => [Int] }) jobFamilyIds: number[],
+    @Args('jobFamilyStreamIds', { type: () => [Int] }) jobFamilyStreamIds: number[],
+    @Args('classificationId', { type: () => String, nullable: true }) classificationId?: string,
+    @Args('classificationEmployeeGroupId', { type: () => String, nullable: true })
+    classificationEmployeeGroupId?: string,
+    @Args('ministryIds', { type: () => [String], nullable: true }) ministryIds?: string[],
+    @Args('jobFamilyWithNoStream', { type: () => [Int], nullable: true }) jobFamilyWithNoStream?: number[],
+  ) {
+    return this.jobProfileService.getRequirementsWithoutReadOnly(
+      jobFamilyIds,
+      jobFamilyStreamIds,
+      classificationId,
+      classificationEmployeeGroupId,
+      ministryIds,
+      jobFamilyWithNoStream ?? [],
+    );
   }
 }

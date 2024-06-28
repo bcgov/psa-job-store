@@ -89,7 +89,7 @@ export class PositionRequestApiResolver {
     @CurrentUser() user: Express.User,
     @Args('comment', { nullable: true }) comment?: string,
   ) {
-    await this.positionRequestService.submitPositionRequest(id, comment);
+    await this.positionRequestService.submitPositionRequest(id, comment, user.id);
 
     // this ensures that returned object is the same as the one returned by getPositionRequest
     return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
@@ -102,7 +102,7 @@ export class PositionRequestApiResolver {
     @Args('returnFullObject', { type: () => Boolean, defaultValue: false }) returnFullObject: boolean,
     @CurrentUser() user: Express.User,
   ) {
-    const updatedPositionRequest = await this.positionRequestService.updatePositionRequest(id, updateInput);
+    const updatedPositionRequest = await this.positionRequestService.updatePositionRequest(id, updateInput, user.roles);
 
     if (returnFullObject) {
       return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
