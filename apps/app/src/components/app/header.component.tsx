@@ -1,11 +1,12 @@
-import { LogoutOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Button, Col, Layout, Menu, Row, Tooltip, Typography } from 'antd';
+import { LogoutOutlined } from '@ant-design/icons';
+import { Button, Col, Layout, Menu, Row, Typography } from 'antd';
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { useLazyLogoutQuery } from '../../redux/services/graphql-api/profile.api';
 import { InitialsAvatar } from '../../routes/home/components/initials-avatar.component';
 import AcessiblePopoverMenu from './common/components/accessible-popover-menu';
 import styles from './header.module.css';
+import { HelpButton } from './help-button.component';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -67,11 +68,7 @@ export const AppHeader = () => {
           {auth.isAuthenticated && (
             <div className={styles.headerToolbar}>
               <div className={styles.iconWrapper} style={{ marginTop: '7px' }}>
-                <a href="#" aria-label="Help - under construction">
-                  <Tooltip title="Help - under construction" trigger={'hover'}>
-                    <QuestionCircleOutlined style={{ color: 'white' }} aria-hidden />
-                  </Tooltip>
-                </a>
+                <HelpButton />
               </div>
 
               <AcessiblePopoverMenu

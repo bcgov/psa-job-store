@@ -5,6 +5,7 @@ import PositionProfile from '../../../components/app/common/components/positionP
 import { useGetLocationQuery } from '../../../redux/services/graphql-api/location.api';
 import { GetPositionRequestResponse } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
+import CommentsList from '../../wizard/components/comments-list.component';
 
 type ServiceRequestDetailsProps = {
   positionRequestData: GetPositionRequestResponse;
@@ -201,6 +202,14 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       key: 'receivedExecutiveApproval',
       label: 'Received executive approval (Deputy Minister or delegate)',
       children: <div>Yes</div>,
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
+    },
+    {
+      key: 'comments',
+      label: 'Comments',
+      children: (
+        <CommentsList positionRequestId={positionRequestData?.positionRequest?.id ?? -1} showCollapse={false} />
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
   ];

@@ -58,6 +58,8 @@ export interface ValueString {
 
   // total comp
   nonEditable?: boolean;
+  is_readonly?: boolean;
+  text?: string;
 }
 
 export class TitleField extends TrackedFieldArrayItem {
@@ -173,28 +175,6 @@ function ItemCountValidator(min: number, max: number, label: string, validationO
   };
 }
 
-// function AtLeastOneItem(validationOptions?: ValidationOptions) {
-//   return function (object: object, propertyName: string) {
-//     registerDecorator({
-//       name: 'atLeastOneRelatedExperience',
-//       target: object.constructor,
-//       propertyName: propertyName,
-//       options: validationOptions,
-//       validator: {
-//         validate(value: any[]) {
-//           return value.some(
-//             (item) =>
-//               !item.disabled && ((item.text && item?.text.trim() != '') || (item.value && item?.value.trim() != '')),
-//           );
-//         },
-//         defaultMessage(): string {
-//           return 'There must be at least one related experience.';
-//         },
-//       },
-//     });
-//   };
-// }
-
 function MinItemsValidator(min: number, validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
@@ -232,15 +212,17 @@ function CustomItemCountValidator(min: number, max: number, label: string, valid
         validate(value: any[]) {
           if (!value) return false;
 
-          const defaultFields = value.filter((item) => !item.isCustom);
-          if (defaultFields.length === 0) {
-            return true; // No default items, so minimum count is 0
-          }
+          // const nonCustomFields = value.filter((item) => !item.isCustom);
+          // console.log('defaultFields: ', nonCustomFields);
+          // if (nonCustomFields.length === 0) {
+          //   return true; // No default items, so minimum count is 0
+          // }
 
           const validItems = value.filter(
             (item) =>
               !item.disabled && ((item.text && item?.text.trim() !== '') || (item.value && item?.value.trim() !== '')),
           );
+
           return validItems.length >= min && validItems.length <= max;
         },
         defaultMessage(args: ValidationArguments): string {
@@ -252,6 +234,50 @@ function CustomItemCountValidator(min: number, max: number, label: string, valid
     });
   };
 }
+
+// function ItemCountValidatorWithInnerProperty(
+//   min: number,
+//   max: number,
+//   label: string,
+//   pName: string,
+//   validationOptions?: ValidationOptions,
+// ) {
+//   return function (object: object, propertyName: string) {
+//     registerDecorator({
+//       name: 'behaviouralCompetencyValidator',
+//       target: object.constructor,
+//       propertyName: propertyName,
+//       options: validationOptions,
+//       validator: {
+//         validate(value: any[]) {
+//           console.log('ItemCountValidator2: ', value, pName);
+
+//           if (!value) return false;
+
+//           // const defaultFields = value.filter((item) => !item.isCustom);
+//           // if (defaultFields.length === 0) {
+//           //   return true; // No default items, so minimum count is 0
+//           // }
+
+//           const validItems = value.filter(
+//             (item) =>
+//               item[pName] &&
+//               !item[pName].disabled &&
+//               ((item[pName].text && item[pName].text.trim() !== '') ||
+//                 (item[pName].value && item[pName].value.trim() !== '')),
+//           );
+//           return validItems.length >= min && validItems.length <= max;
+//         },
+
+//         defaultMessage(args: ValidationArguments): string {
+//           const [relatedMin, relatedMax, relatedLabel] = args.constraints;
+//           return `There should be between ${relatedMin} and ${relatedMax} custom ${relatedLabel}.`;
+//         },
+//       },
+//       constraints: [min, max, label],
+//     });
+//   };
+// }
 
 class ClassificationField {
   classification: string;
@@ -301,9 +327,21 @@ export class JobProfileValidationModel {
   @BehaviouralCompetencyValidator({ message: 'The profile should have between 3 and 10 behavioural competencies' })
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 
-  @CustomItemCountValidator(1, 10, 'professional registration requirements', {
+  @CustomItemCountValidator(1, 10, 'professional registration and certification requirements', {
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
+  // @ItemCountValidatorWithInnerProperty(
+  //   1,
+  //   10,
+  //   'professional registration requirements',
+  //   'professional_registration_requirement',
+  //   {
+  //     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
+  //   },
+  // )
+  // professional_registration_requirements: {
+  //   professional_registration_requirement: TrackedFieldArrayItem | ValueString | AccountabilitiesModel;
+  // }[];
   professional_registration_requirements: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   preferences: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
@@ -322,6 +360,8 @@ export class JobProfileValidationModel {
   markAllSignificant: boolean;
   markAllNonEditableEdu: boolean;
   markAllSignificantEdu: boolean;
+  markAllNonEditableProReg: boolean;
+  markAllSignificantProReg: boolean;
   markAllNonEditableJob_experience: boolean;
   markAllSignificantJob_experience: boolean;
   markAllNonEditableSec: boolean;
@@ -851,7 +891,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 (effectiveData?.professional_registration_requirements.filter((ed) => !ed.disabled)?.length ?? 0) >
                   0)) && (
               <>
-                <h4>Professional registration requirements</h4>
+                <h4>Professional registration and certification requirements</h4>
                 <ul data-testid="professional-registration">
                   {showDiff && originalData
                     ? compareLists(

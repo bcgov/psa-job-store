@@ -17,7 +17,6 @@ import React, { CSSProperties, ReactNode, useCallback, useEffect, useState } fro
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
-import NoResultsGraphic from '../../../assets/search_empty.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import AcessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -29,6 +28,7 @@ import {
 } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
 import StatusIndicator from '../../wizard/components/wizard-position-request-status-indicator';
+import NoResultsView from './no-results.component';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -139,7 +139,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const linkToCopy = `${window.location.origin}/my-position-requests/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    // if (import.meta.env.VITE_TEST_ENV !== 'true')
+    copy(linkToCopy);
     message.success('Link copied to clipboard!');
     setSelectedKeys([]);
   };
@@ -295,22 +296,23 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
       render: (text: any, record: any) => {
+        const renderText = text || 'New position';
         if (mode == null)
           return (
             <Link to={`/my-position-requests/${record.id}`} data-testid={`job-position-${record.id}`}>
-              <div data-testid="job-title">{text}</div>
+              <div data-testid="job-title">{renderText}</div>
             </Link>
           );
         else if (mode == 'total-compensation') {
           return (
             <Link to={`/approved-requests/${record.id}`}>
-              <div data-testid="job-title">{text}</div>
+              <div data-testid="job-title">{renderText}</div>
             </Link>
           );
         } else if (mode == 'classification') {
           return (
             <Link to={`/classification-tasks/${record.id}`}>
-              <div data-testid="job-title">{text}</div>
+              <div data-testid="job-title">{renderText}</div>
             </Link>
           );
         }
@@ -763,7 +765,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               }}
             >
               <>
-                <div
+                {/* <div
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -775,8 +777,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                     background: 'white',
                     marginBottom: '1rem',
                   }}
-                >
-                  <img src={NoResultsGraphic} alt="No positions" />
+                > */}
+                <NoResultsView onClearFilters={clearFilters} />
+                {/* <img src={NoResultsGraphic} alt="No positions" />
                   <div>No results found! Try adjusting your search or filters</div>
                   <Button
                     type="link"
@@ -785,8 +788,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                     onClick={clearFilters}
                   >
                     Reset Filters
-                  </Button>
-                </div>
+                  </Button> */}
+                {/* </div> */}
               </>
             </div>
           ) : (

@@ -1,0 +1,13 @@
+.wizardOptionsPicker .ant-checkbox{
+    align-self:flex-start !important;
+    margin-top: 5px;
+}
+
+.ant-drawer-header{
+    background: white;
+    border-bottom: 1px solid rgb(217 217 217);
+}
+
+.ant-drawer-close{
+    display:none !important;
+}

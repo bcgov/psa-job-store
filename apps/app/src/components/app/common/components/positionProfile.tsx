@@ -113,7 +113,9 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
           )}
         </>
       ) : (
-        <div>{unOccupiedText === undefined ? `Position ${positionNumber} is unoccupied` : unOccupiedText}</div>
+        positionNumber && (
+          <div>{unOccupiedText === undefined ? `Position ${positionNumber} is unoccupied` : unOccupiedText}</div>
+        )
       )}
     </>
   );

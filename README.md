@@ -341,3 +341,17 @@ To expire from the archive pod (there needs to be space on the volume to perform
 `psql`
 `\l` - get a list of dbs
 `SELECT pg_size_pretty( pg_database_size('api') );`
+
+## Husky pre-commit hook issues on windows with GitHub desktop
+
+If getting this type of error when commiting changes:
+
+```
+.husky/pre-commit: line 13: npx: command not found
+husky - pre-commit hook exited with code 127 (error)
+husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bin...:undefined
+``
+
+- Reinstall GitHub desktop
+- Check that system PATH variable contains `C:\Program Files\Git\bin` (path containing sh.exe) AND that it's first in the list
+```
