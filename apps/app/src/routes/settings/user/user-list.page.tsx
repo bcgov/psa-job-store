@@ -3,7 +3,7 @@ import { Button, Table, Tag, Tooltip, Typography } from 'antd';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
-import { useLazyGetUsersQuery } from '../../../redux/services/graphql-api/user.api';
+import { useLazyGetUsersQuery } from '../../../redux/services/graphql-api/settings/settings.api';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 
 const { Text } = Typography;

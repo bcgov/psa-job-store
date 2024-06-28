@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
 import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
-import { useLazyGetUserQuery } from '../../../redux/services/graphql-api/user.api';
+import { useLazyGetUserQuery } from '../../../redux/services/graphql-api/settings/settings.api';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 import { OrgChartAccessForm } from './components/org-chart-access-form.component';
 
