@@ -1,5 +1,19 @@
 # api
 
+## 0.2.0
+
+### Minor Changes
+
+- [#518](https://github.com/bcgov/psa-job-store/pull/518) [`88ff93754a8543b8b1d2ba07b6eba6f798ef743e`](https://github.com/bcgov/psa-job-store/commit/88ff93754a8543b8b1d2ba07b6eba6f798ef743e) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-654 Improve error handling for position creation
+
+### Patch Changes
+
+- [#519](https://github.com/bcgov/psa-job-store/pull/519) [`a28b6d1c5970196bccd030afbdb1ed91f3ca3ccd`](https://github.com/bcgov/psa-job-store/commit/a28b6d1c5970196bccd030afbdb1ed91f3ca3ccd) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-707 add titles to downloads. Change all downloads to use same component
+
+- [#520](https://github.com/bcgov/psa-job-store/pull/520) [`b3e0b6020a17ce8d59d613c8dc7b3f14e079f715`](https://github.com/bcgov/psa-job-store/commit/b3e0b6020a17ce8d59d613c8dc7b3f14e079f715) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Expand application to allow for additional classifications.
+
+- [#545](https://github.com/bcgov/psa-job-store/pull/545) [`cb5a8883f0652177b93018cd6cbdb27d2c45f5c8`](https://github.com/bcgov/psa-job-store/commit/cb5a8883f0652177b93018cd6cbdb27d2c45f5c8) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Improve API performance by consolidating user sync into its own standalone process.
+
 ## 0.1.1
 
 ### Patch Changes

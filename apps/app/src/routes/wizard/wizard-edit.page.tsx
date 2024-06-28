@@ -47,6 +47,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     setRequiresVerification,
     setPositionRequestData,
   } = useWizardContext();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingBack, setIsLoadingBack] = useState(false);
   const [saveAndQuitLoading, setSaveAndQuitLoading] = useState(false);
@@ -62,6 +63,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   function getClassificationById(id: string): ClassificationModel | undefined {
     // If data is loaded, find the classification by ID
+    // console.log('classificationsData: ', classificationsData, id);
     if (classificationsData) {
       return classificationsData.classifications.find(
         (classification: ClassificationModel) => classification.id === id,

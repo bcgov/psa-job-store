@@ -1,10 +1,12 @@
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/app/page-header.component';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import JobProfiles from './components/job-profiles.component';
 
 export const JobProfilesPage = () => {
+  const { number } = useParams();
   const [searchParams] = useSearchParams();
+  const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
 
   return (
     <>
@@ -15,7 +17,7 @@ export const JobProfilesPage = () => {
       />
       {/* <div style={{ padding: '0 1rem' }}> */}
       <ContentWrapper>
-        <JobProfiles searchParams={searchParams} />
+        <JobProfiles searchParams={searchParams} page_size={page_size} selectProfileNumber={number} />
       </ContentWrapper>
       {/* </div> */}
       {/* </Space> */}

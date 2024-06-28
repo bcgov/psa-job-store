@@ -17,6 +17,9 @@ export class ClassificationService {
       where: {
         ...where,
       },
+      orderBy: {
+        name: 'asc',
+      },
       ...args,
       include: {},
     });

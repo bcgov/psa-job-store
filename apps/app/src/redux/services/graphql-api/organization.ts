@@ -34,7 +34,7 @@ export const organizationApi = graphqlApi.injectEndpoints({
         return {
           document: gql`
             query GetOrganizations {
-              organizations(orderBy: { name: asc }) {
+              organizations(orderBy: { name: asc }, where: { effective_status: { equals: "Active" } }) {
                 id
                 name
               }

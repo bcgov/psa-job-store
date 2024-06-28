@@ -1,5 +1,19 @@
 # app
 
+## 0.3.0
+
+### Minor Changes
+
+- [#518](https://github.com/bcgov/psa-job-store/pull/518) [`88ff93754a8543b8b1d2ba07b6eba6f798ef743e`](https://github.com/bcgov/psa-job-store/commit/88ff93754a8543b8b1d2ba07b6eba6f798ef743e) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-654 Improve error handling for position creation
+
+### Patch Changes
+
+- [#519](https://github.com/bcgov/psa-job-store/pull/519) [`a28b6d1c5970196bccd030afbdb1ed91f3ca3ccd`](https://github.com/bcgov/psa-job-store/commit/a28b6d1c5970196bccd030afbdb1ed91f3ca3ccd) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-707 add titles to downloads. Change all downloads to use same component
+
+- [#520](https://github.com/bcgov/psa-job-store/pull/520) [`b3e0b6020a17ce8d59d613c8dc7b3f14e079f715`](https://github.com/bcgov/psa-job-store/commit/b3e0b6020a17ce8d59d613c8dc7b3f14e079f715) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Expand application to allow for additional classifications.
+
+- [#518](https://github.com/bcgov/psa-job-store/pull/518) [`88ff93754a8543b8b1d2ba07b6eba6f798ef743e`](https://github.com/bcgov/psa-job-store/commit/88ff93754a8543b8b1d2ba07b6eba6f798ef743e) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-748 Client errors are not always displayed
+
 ## 0.2.0
 
 ### Minor Changes

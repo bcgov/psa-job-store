@@ -21,6 +21,7 @@ import {
 } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import CommentsList from './components/comments-list.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
@@ -535,7 +536,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         Submit for verification
                       </Button>
                     </Card>
-
                     <Card
                       title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Other actions</h3>}
                       bordered={false}
@@ -590,8 +590,42 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       <Paragraph>
                         There are changes to the profile which needs to be verified by the classifications team.
                       </Paragraph>
+                      <Form.Item name="comments">
+                        <label htmlFor="comments" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                          <b>Comments</b>
+                        </label>
+                        <>
+                          <Input.TextArea
+                            id="comments"
+                            data-testid="comments-input"
+                            autoSize
+                            maxLength={1000}
+                            value={comment}
+                            onChange={handleCommentChange}
+                            placeholder="Add comments"
+                          />
+                          <Row>
+                            <Col span={18}>
+                              <Typography.Paragraph type="secondary" style={{ margin: '0' }}>
+                                (Optional) Add some context related to changes you made. This will help the reviewer
+                                assess your edits.
+                              </Typography.Paragraph>
+                            </Col>
+                            <Col span={6} style={{ textAlign: 'right' }}>
+                              <Typography.Paragraph
+                                type="secondary"
+                                style={{ textAlign: 'right', width: '100%', margin: '0' }}
+                              >
+                                {comment.length} / 1000
+                              </Typography.Paragraph>
+                            </Col>
+                          </Row>
+
+                          <CommentsList positionRequestId={positionRequestId ?? -1} />
+                        </>
+                      </Form.Item>
                       <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
-                        Submit for verification
+                        Re-submit for verification
                       </Button>
                     </Card>
 
