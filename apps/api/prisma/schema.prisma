@@ -297,7 +297,10 @@ model ProfessionalRegistrationRequirement {
   job_family                       JobProfileJobFamily?                    @relation(fields: [job_family_id], references: [id])
   job_family_id                    Int?
 
-  @@unique([requirement_id, classification_id, classification_employee_group_id, job_family_id])
+  organization    Organization? @relation(fields: [organization_id], references: [id])
+  organization_id String?
+
+  @@unique([requirement_id, classification_id, classification_employee_group_id, job_family_id, organization_id])
   @@map("professional_registration_requirement")
 }
 
@@ -479,8 +482,9 @@ model Organization {
   effective_status String // EFF_STATUS
   effective_date   DateTime @db.Date // EFFDT
 
-  departments            Department[]
-  JobProfileOrganization JobProfileOrganization[]
+  departments                         Department[]
+  JobProfileOrganization              JobProfileOrganization[]
+  ProfessionalRegistrationRequirement ProfessionalRegistrationRequirement[]
 
   @@map("organization")
 }

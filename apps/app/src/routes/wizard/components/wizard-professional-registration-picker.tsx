@@ -12,6 +12,8 @@ interface WizardProfessionalRegistrationPickerProps {
   removeAction: UseFieldArrayRemove;
   data: any;
   triggerValidation: () => void;
+  markAllNonEditableProReg: boolean;
+  markAllSignificantProReg: boolean;
 }
 
 const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrationPickerProps> = ({
@@ -20,6 +22,8 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
   removeAction,
   data,
   triggerValidation,
+  markAllNonEditableProReg,
+  markAllSignificantProReg,
 }) => {
   // Fetching data from the API
   // console.log('data: ', data);
@@ -78,6 +82,8 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
           const { text } = selectedOption.object;
           return {
             is_readonly: true,
+            nonEditable: markAllNonEditableProReg,
+            is_significant: markAllSignificantProReg,
             text,
           };
         }
@@ -97,7 +103,10 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
             return item && field.text === item.text && field.is_readonly === true;
           }),
       )
-      .filter((item): item is { is_readonly: boolean; text: any } => item !== null);
+      .filter(
+        (item): item is { is_readonly: boolean; text: any; nonEditable: boolean; is_significant: boolean } =>
+          item !== null,
+      );
 
     // console.log('newItems: ', newItems);
 
@@ -129,9 +138,9 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
 
   return (
     <EditFormOptionsPicker
-      buttonText="Browse and add professional registrations and certifications"
+      buttonText="Browse and add professional registration and certification requirements"
       selectableOptions={selectableOptions}
-      title="Professional registrations and certifications"
+      title="Professional registration and certification requirements"
       selectedOptions={selectedOptions}
       onAdd={onAdd}
     ></EditFormOptionsPicker>

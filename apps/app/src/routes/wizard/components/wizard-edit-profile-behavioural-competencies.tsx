@@ -128,13 +128,14 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
               )}
 
               <Typography.Text type="secondary">
-                <div style={{ margin: '0.5rem 0' }}>* denotes an Indigenous relations behavioural competency</div>
+                <div style={{ margin: '0.5rem 0' }}>* denotes an Indigenous Relations Behavioural Competency</div>
               </Typography.Text>
 
               <BehaviouralComptencyPicker
                 behavioural_competencies_fields={behavioural_competencies_fields}
                 addAction={behavioural_competencies_append}
                 removeAction={behavioural_competencies_remove}
+                validateFunction={useFormReturn.trigger}
               ></BehaviouralComptencyPicker>
             </>
 

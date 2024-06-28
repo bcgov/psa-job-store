@@ -415,6 +415,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   });
 
   const selectedProfession = watch('professions'); // This will watch the change of profession's value
+  const selectedMinistry = watch('ministries');
   const employeeGroup = watch('employeeGroup');
   // State to hold filtered classifications
   const [filteredClassifications, setFilteredClassifications] = useState([] as ClassificationModel[]);
@@ -486,6 +487,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   // END BASIC DETAILS FORM
 
   const selectedClassificationId = watch('classification');
+  const allOrganizations = watch('all_organizations');
 
   // PICKER DATA
   const { data: professionalRequirementsPickerData, refetch: refetchProfessionalRequirementsPickerData } =
@@ -495,6 +497,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         jobFamilyStreamIds: selectedProfession.map((p) => p.jobStreams).flat(),
         classificationId: selectedClassificationId && selectedClassificationId.split('.')[0],
         classificationEmployeeGroupId: employeeGroup,
+        ministryIds: !allOrganizations ? selectedMinistry : undefined,
+        jobFamilyWithNoStream: selectedProfession.filter((p) => p.jobStreams.length === 0).map((p) => p.jobFamily),
       },
       {
         skip: !selectedClassificationId || !employeeGroup,
@@ -566,6 +570,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       markAllSignificant: false,
       markAllNonEditableEdu: false,
       markAllSignificantEdu: false,
+      markAllNonEditableProReg: false,
+      markAllSignificantProReg: false,
       markAllNonEditableJob_experience: false,
       markAllSignificantJob_experience: false,
       markAllNonEditableSec: false,
@@ -877,6 +883,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantEdu ?? false,
       );
       profileSetValue(
+        'markAllNonEditableProReg',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableProReg ?? false,
+      );
+      profileSetValue(
+        'markAllSignificantProReg',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantProReg ?? false,
+      );
+      profileSetValue(
         'markAllNonEditableJob_experience',
         jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableJob_experience ?? false,
       );
@@ -963,6 +977,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     profileSetValue('education', updatedExperiences as AccountabilityItem[]);
   };
 
+  const updateSignificantProReg = (is_significant: boolean) => {
+    const updated = professionalRegistrations?.map((field) => ({
+      ...field,
+      is_significant: is_significant,
+    }));
+    profileSetValue('professional_registration_requirements', updated as AccountabilityItem[]);
+  };
+
   const updateNonEditableEdu = (nonEditable: boolean) => {
     const updatedExperiences = educations?.map((field) => ({
       ...field,
@@ -970,6 +992,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       is_significant: nonEditable ? true : false,
     }));
     profileSetValue('education', updatedExperiences as AccountabilityItem[]);
+  };
+
+  const updateNonEditableProReg = (nonEditable: boolean) => {
+    const updated = professionalRegistrations?.map((field) => ({
+      ...field,
+      nonEditable: nonEditable,
+      is_significant: nonEditable ? true : false,
+    }));
+    profileSetValue('professional_registration_requirements', updated as AccountabilityItem[]);
   };
 
   const updateSignificantJob_experience = (is_significant: boolean) => {
@@ -997,12 +1028,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     profileSetValue('security_screenings', securityScreeningsUpdated as SecurityScreeningItem[]);
   };
 
-  const allOrganizations = watch('all_organizations');
-
   const state = profileWatch('state');
   const markAllNonEditable = profileWatch('markAllNonEditable');
   const markAllNonEditableEdu = profileWatch('markAllNonEditableEdu');
   const markAllSignificantEdu = profileWatch('markAllSignificantEdu');
+  const markAllNonEditableProReg = profileWatch('markAllNonEditableProReg');
+  const markAllSignificantProReg = profileWatch('markAllSignificantProReg');
   const markAllNonEditableJob_experience = profileWatch('markAllNonEditableJob_experience');
   const markAllSignificantJob_experience = profileWatch('markAllSignificantJob_experience');
 
@@ -1013,6 +1044,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const accountabilities = profileWatch('accountabilities');
   const securityScreenings = profileWatch('security_screenings');
   const educations = profileWatch('education');
+  const professionalRegistrations = profileWatch('professional_registration_requirements');
   const job_experiences = profileWatch('job_experience');
 
   // education
@@ -1216,10 +1248,24 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       .join(', ');
   }, [selectedScopeId, jobProfileScopes]);
 
-  // minimum requirements that change in reponse to classification changes
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
   const { data: jobProfileMinimumRequirements } = useGetJobProfileMinimumRequirementsQuery();
+
+  const handleMinistriesChange = () => {
+    setTimeout(() => {
+      // console.log(
+      //   'refetching with: ',
+      //   selectedProfession.map((p) => p.jobFamily),
+      // );
+      refetchProfessionalRequirementsPickerData().then((r) => {
+        // console.log(
+        //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
+        //   professionalRequirementsPickerData,
+        //   r,
+        // );
+        updateProfessionalRegistrationrequirements(r.data);
+      });
+    }, 0);
+  };
 
   // Handler for classification change
   const handleClassificationChange = (newValue: string | null) => {
@@ -1291,19 +1337,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       }
     }
   };
-  // Handler for confirming classification change
-  const handleConfirmChange = async () => {
-    console.log('handleConfirmChange');
-    setIsModalVisible(false);
-    updateMinimumRequirementsFromClassification(selectedClassificationId);
-    refetchProfessionalRequirementsPickerData().then(() => {
-      console.log(
-        'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
-        professionalRequirementsPickerData,
-      );
-      updateProfessionalRegistrationrequirements();
-    });
-  };
+
   // END PROFILE FORM
 
   const [createJobProfile] = useCreateOrUpdateJobProfileMutation();
@@ -1343,9 +1377,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             is_significant: a.is_significant,
           }))
           .filter((acc: { text: string }) => acc.text.trim() !== ''),
-        professional_registration_requirements: formData.professional_registration_requirements.filter(
-          (acc: any) => acc.text.trim() !== '',
-        ),
+        professional_registration_requirements: formData.professional_registration_requirements
+          .map((a: any) => ({
+            text: a.text,
+            is_readonly: a.nonEditable,
+            is_significant: a.is_significant,
+          }))
+          .filter((acc: any) => acc.text.trim() !== ''),
         optional_requirements: formData.optional_requirements
           .map((o: any) => o.text)
           .filter((acc: string) => acc.trim() !== ''),
@@ -1369,6 +1407,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           markAllSignificant: formData.markAllSignificant,
           markAllNonEditableEdu: formData.markAllNonEditableEdu,
           markAllSignificantEdu: formData.markAllSignificantEdu,
+          markAllNonEditableProReg: formData.markAllNonEditableProReg,
+          markAllSignificantProReg: formData.markAllSignificantProReg,
           markAllNonEditableJob_experience: formData.markAllNonEditableJob_experience,
           markAllSignificantJob_experience: formData.markAllSignificantJob_experience,
 
@@ -1706,6 +1746,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // console.log('jobFamilyIds: ', jobFamilyIds);
     // console.log('jobFamilyStreamIds: ', jobFamilyStreamIds);
 
+    // console.log('calculating idsToRemove');
     const idsToRemove = professionalRegistrationRequirementsFields
       .filter((field) => {
         // console.log('checking field: ', field);
@@ -1721,14 +1762,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             const itemJobFamilies = item.jobFamilies.map((jf: any) => jf.id);
             const itemStreams = item.streams.map((s: any) => s.id);
 
-            // console.log('itemJobFamilies: ', itemJobFamilies);
-            // console.log('itemStreams: ', itemStreams);
+            // console.log('itemJobFamilies: ', itemJobFamilies, jobFamilyIds);
+            // console.log('itemStreams: ', itemStreams, jobFamilyStreamIds);
+
+            const jobFamilyWithNoStream = selectedProfession
+              .filter((p) => p.jobStreams.length === 0)
+              .map((p) => p.jobFamily);
+            // console.log('jobFamilyWithNoStream: ', jobFamilyWithNoStream);
 
             const isJobFamilyAllowed = itemJobFamilies.some((jf: any) => jobFamilyIds.includes(jf));
-            const isStreamAllowed = itemStreams.some((s: any) => jobFamilyStreamIds.includes(s));
+            let isStreamAllowed = itemStreams.some((s: any) => jobFamilyStreamIds.includes(s));
 
             // console.log('isJobFamilyAllowed: ', isJobFamilyAllowed);
             // console.log('isStreamAllowed: ', isStreamAllowed);
+
+            // make an exception for job family with no stream
+            if (!isStreamAllowed) {
+              // console.log('checking jobFamilyWithNoStream');
+              isStreamAllowed = jobFamilyWithNoStream.some((jf: any) => itemJobFamilies.includes(jf));
+              // console.log('isStreamAllowed now: ', isStreamAllowed);
+            }
 
             // if this item has classification set, then it was auto-added
             // check separately if classification matches
@@ -2310,7 +2363,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               </Text>
                               <MinistriesSelect
                                 isMultiSelect={true}
-                                onChange={onChange}
+                                onChange={() => {
+                                  onChange();
+                                  handleMinistriesChange();
+                                }}
                                 onBlur={onBlur}
                                 value={value}
                                 setValue={setValue}
@@ -2967,8 +3023,65 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
-                          <Row justify="space-between" align="middle">
-                            <Col>Professional registrations and certifications</Col>
+                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                            <Col>Professional registration and certification requirements</Col>
+                            {/* NEW */}
+
+                            <Col>
+                              <Form.Item style={{ margin: 0 }}>
+                                <Row>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllNonEditableProReg"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllNonEditableProReg}
+                                          disabled={professionalRegistrationRequirementsFields.length === 0}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateNonEditableProReg(e.target.checked);
+                                          }}
+                                        >
+                                          Mark all as non-editable
+                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllSignificantProReg"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllSignificantProReg || markAllNonEditableProReg}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateSignificantProReg(e.target.checked);
+                                          }}
+                                          disabled={
+                                            markAllNonEditableProReg ||
+                                            professionalRegistrationRequirementsFields.length === 0
+                                          }
+                                        >
+                                          Mark all as significant
+                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
+
+                            {/* END NEW */}
                           </Row>
                         }
                       >
@@ -2984,7 +3097,54 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               />
                             </Col>
                             <Col flex="auto">
-                              <Row>{/* Non-editable checkbox */}</Row>
+                              <Row>
+                                {/* NEW Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`professional_registration_requirements.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(
+                                              `professional_registration_requirements.${index}.is_significant`,
+                                              true,
+                                            );
+                                          }
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableProReg', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
+                                  <Controller
+                                    name={`professional_registration_requirements.${index}.is_significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantProReg', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={professionalRegistrations?.[index].nonEditable}
+                                        checked={value || professionalRegistrations?.[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                                {/* END NEW Non-editable checkbox */}
+                              </Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
                                   {field.is_readonly && (
@@ -2999,11 +3159,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       control={profileControl}
                                       name={`professional_registration_requirements.${index}.text`}
                                       render={({ field: { onChange, onBlur, value } }) => {
-                                        console.log('value: ', value);
                                         return (
                                           <TextArea
                                             autoSize
-                                            placeholder="Add a professional registration or certification"
+                                            placeholder="Add a professional registration or certification requirement"
                                             onChange={(event) => {
                                               onChange(event);
                                               debounce(triggerProfileValidation, 300)();
@@ -3043,12 +3202,20 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 addAction={appendProfessionalRegistrationRequirement}
                                 removeAction={removeProfessionalRegistrationRequirement}
                                 triggerValidation={triggerProfileValidation}
+                                markAllNonEditableProReg={markAllNonEditableProReg}
+                                markAllSignificantProReg={markAllSignificantProReg}
                               />
                             </Col>
                             <Col>
                               <Button
                                 type="link"
-                                onClick={() => appendProfessionalRegistrationRequirement({ text: '' })}
+                                onClick={() =>
+                                  appendProfessionalRegistrationRequirement({
+                                    text: '',
+                                    nonEditable: markAllNonEditableProReg,
+                                    is_significant: markAllSignificantProReg,
+                                  })
+                                }
                                 icon={<PlusOutlined />}
                               >
                                 Add a custom requirement
@@ -3640,13 +3807,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         )}
                         <Typography.Text type="secondary">
                           <div style={{ margin: '0.5rem 0' }}>
-                            * denotes an Indigenous relations behavioural competency
+                            * denotes an Indigenous Relations Behavioural Competency
                           </div>
                         </Typography.Text>
                         <BehaviouralComptencyPicker
                           behavioural_competencies_fields={behavioural_competencies_fields}
                           addAction={behavioural_competencies_append}
                           removeAction={behavioural_competencies_remove}
+                          validateFunction={triggerProfileValidation}
                         ></BehaviouralComptencyPicker>
                       </>
                       <WizardValidationError formErrors={profileFormErrors} fieldName="behavioural_competencies" />

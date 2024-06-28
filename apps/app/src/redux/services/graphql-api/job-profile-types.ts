@@ -150,6 +150,8 @@ export interface JobProfileModel {
     markAllSignificant: boolean;
     markAllNonEditableEdu: boolean;
     markAllSignificantEdu: boolean;
+    markAllNonEditableProReg: boolean;
+    markAllSignificantProReg: boolean;
     markAllNonEditableJob_experience: boolean;
     markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;

@@ -558,7 +558,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
           ...(transformedJobProfile.professional_registration_requirements &&
           transformedJobProfile.professional_registration_requirements.length > 0
             ? [
-                createHeading('Professional Registration Requirements', false),
+                createHeading('Professional Registration and Certification Requirements', false),
                 ...transformedJobProfile.professional_registration_requirements.map(
                   (obj: string) =>
                     new Paragraph({

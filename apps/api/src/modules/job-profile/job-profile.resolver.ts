@@ -35,6 +35,11 @@ class RequirementWithoutReadOnly {
     id: string;
     employee_group_id: string;
   };
+
+  @Field(() => Organization, { nullable: true })
+  organization?: {
+    id: string;
+  };
 }
 
 @Resolver(() => JobProfile)
@@ -240,12 +245,16 @@ export class JobProfileResolver {
     @Args('classificationId', { type: () => String, nullable: true }) classificationId?: string,
     @Args('classificationEmployeeGroupId', { type: () => String, nullable: true })
     classificationEmployeeGroupId?: string,
+    @Args('ministryIds', { type: () => [String], nullable: true }) ministryIds?: string[],
+    @Args('jobFamilyWithNoStream', { type: () => [Int], nullable: true }) jobFamilyWithNoStream?: number[],
   ) {
     return this.jobProfileService.getRequirementsWithoutReadOnly(
       jobFamilyIds,
       jobFamilyStreamIds,
       classificationId,
       classificationEmployeeGroupId,
+      ministryIds,
+      jobFamilyWithNoStream ?? [],
     );
   }
 }
