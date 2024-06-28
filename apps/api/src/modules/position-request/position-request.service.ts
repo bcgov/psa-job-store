@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { JsonObject } from '@prisma/client/runtime/library';
 import { btoa } from 'buffer';
 import { Elements, autolayout, generateJobProfile, getALStatus } from 'common-kit';
 import dayjs from 'dayjs';
@@ -157,7 +156,7 @@ export class PositionRequestApiService {
     });
   }
 
-  async submitPositionRequest(id: number, comment: string) {
+  async submitPositionRequest(id: number, comment: string, userId: string) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
     if (!positionRequest) throw AlexandriaError('Position request not found');
@@ -165,15 +164,15 @@ export class PositionRequestApiService {
     // ensure comments are saved
     try {
       if (comment != null && comment.length > 0) {
-        positionRequest = await this.prisma.positionRequest.update({
-          where: { id },
+        const c = await this.prisma.comment.create({
           data: {
-            additional_info: {
-              ...(positionRequest.additional_info as JsonObject),
-              comments: comment,
-            },
+            author_id: userId,
+            record_id: positionRequest.id,
+            record_type: 'PositionRequest',
+            text: comment,
           },
         });
+        console.log('comment ', c);
       }
     } catch (error) {
       this.logger.error(error);
@@ -276,7 +275,7 @@ export class PositionRequestApiService {
       await this.prisma.positionRequest.update({
         where: { id },
         data: {
-          crm_id: incident.id,
+          crm_id: +incident.crm_id,
         },
       });
     } catch (error) {
@@ -963,7 +962,7 @@ export class PositionRequestApiService {
     return isDifferent;
   }
 
-  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
+  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput, userRoles: string[] = []) {
     // todo: AL-146 - tried to do this with a spread operator, but getting an error
     let updatingAdditionalInfo = false;
     const updatePayload: Prisma.PositionRequestUpdateInput = {
@@ -986,7 +985,7 @@ export class PositionRequestApiService {
       updatePayload.profile_json = updateData.profile_json === null ? Prisma.DbNull : updateData.profile_json;
       // attach original profile json
       if (updateData.profile_json !== null) {
-        const originalProfile = await this.jobProfileService.getJobProfile(updateData.profile_json.id);
+        const originalProfile = await this.jobProfileService.getJobProfile(updateData.profile_json.id, userRoles);
         updateData.profile_json.original_profile_json = originalProfile;
       }
     }
@@ -1274,6 +1273,12 @@ export class PositionRequestApiService {
             obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
         )
         .map((obj) => obj.text),
+      professional_registration_requirements: prJobProfile.professional_registration_requirements
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
+        .map((obj) => obj.text),
       security_screenings: prJobProfile.security_screenings // all security screenings are significant - there is no is_significant flag
         .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
         .map((obj) => obj.text),
@@ -1294,6 +1299,12 @@ export class PositionRequestApiService {
         )
         .map((obj) => obj.text),
       job_experience: (jobProfile.job_experience as Record<string, any>)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
+        .map((obj) => obj.text),
+      professional_registration_requirements: (jobProfile.professional_registration_requirements as Record<string, any>)
         .filter(
           (obj) =>
             obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
@@ -1323,6 +1334,11 @@ export class PositionRequestApiService {
         JSON.stringify(jobProfileSignficantSections.job_experience),
         JSON.stringify(prJobProfileSignificantSections.job_experience),
       ),
+      // Professional Registration Requirements
+      this.dataHasChanges(
+        JSON.stringify(jobProfileSignficantSections.professional_registration_requirements),
+        JSON.stringify(prJobProfileSignificantSections.professional_registration_requirements),
+      ),
       // Security Screenings
       this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.security_screenings),
@@ -1342,6 +1358,9 @@ export class PositionRequestApiService {
         reasons.push('Changes in Job Experience');
       }
       if (significantSectionChanges[3]) {
+        reasons.push('Changes in Professional Registration and Certification Requirements');
+      }
+      if (significantSectionChanges[4]) {
         reasons.push('Changes in Security Screenings');
       }
     }
@@ -1377,20 +1396,21 @@ export class PositionRequestApiService {
       }
 
       const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
-
+      const jobProfile = positionRequest.profile_json as Record<string, any>;
       const paylist_department = await this.prisma.department.findUnique({
         where: { id: additionalInfo.department_id },
       });
       const location = await this.prisma.location.findUnique({ where: { id: paylist_department.location_id } });
-      const parentJobProfile = await this.prisma.jobProfile.findUnique({
-        where: { id: positionRequest.parent_job_profile_id },
-      });
+      const supervisorProfile = await this.positionService.getPositionProfile(
+        additionalInfo.excluded_mgr_position_number.toString(),
+      );
 
       const jobProfileDocument =
         positionRequest.profile_json != null
           ? generateJobProfile({
-              jobProfile: positionRequest.profile_json as Record<string, any>,
-              parentJobProfile: parentJobProfile,
+              jobProfile,
+              positionRequest,
+              supervisorProfile: supervisorProfile.length > 0 ? supervisorProfile[0] : null,
             })
           : null;
       const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
@@ -1411,7 +1431,11 @@ export class PositionRequestApiService {
         },
         statusWithType: {
           status: {
-            id: needsReview ? IncidentStatus.Unresolved : IncidentStatus.Solved,
+            id: needsReview
+              ? positionRequest.status === PositionRequestStatus.ACTION_REQUIRED
+                ? IncidentStatus.Updated
+                : IncidentStatus.Unresolved
+              : IncidentStatus.Solved,
           },
         },
         // Need to determine usage of this block
@@ -1484,7 +1508,7 @@ export class PositionRequestApiService {
               <li>Where is the position location?    ${location.name}</li>
               <li>Which position number will the position report to?    ${positionRequest.reports_to_position_id}</li>
               <li>Is a Job Store profile being used? If so, what is the Job Store profile number?    ${
-                parentJobProfile.number
+                jobProfile.number
               }</li>
               <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
               <li>Please attach a copy of the job profile you will be using.    Attached</li>
@@ -1521,7 +1545,9 @@ export class PositionRequestApiService {
         await this.crmService.updateIncident(positionRequest.crm_id, data);
       }
       // re-fetch the data in the structure we need
-      incident = await this.crmService.getIncident(incident.id);
+      incident = await this.crmService.getIncident(
+        positionRequest.crm_id != null ? positionRequest.crm_id : incident.id,
+      );
 
       if (incident.crm_lookup_name != null) {
         await this.prisma.positionRequest.update({

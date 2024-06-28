@@ -59,6 +59,7 @@ export const positionApi = graphqlApi.injectEndpoints({
             query Position($where: PositionWhereUniqueInput!) {
               position(where: $where) {
                 classification_id
+                effective_date
                 classification_employee_group_id
                 classification_peoplesoft_id
               }

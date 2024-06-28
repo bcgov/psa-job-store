@@ -435,7 +435,7 @@ export class JobProfileService {
     });
   }
 
-  async getJobProfile(id: number) {
+  async getJobProfile(id: number, userRoles: string[] = []) {
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
@@ -474,10 +474,15 @@ export class JobProfileService {
         },
       },
     });
+
+    // if profile is not published and user is not total compensation, deny access
+    if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
+      throw AlexandriaError('You do not have permission to view this job profile');
+    }
     return jobProfile;
   }
 
-  async getJobProfileByNumber(number: number) {
+  async getJobProfileByNumber(number: number, userRoles: string[] = []) {
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { number },
       include: {
@@ -516,6 +521,10 @@ export class JobProfileService {
         },
       },
     });
+    // if profile is not published and user is not total compensation, deny access
+    if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
+      throw AlexandriaError('You do not have permission to view this job profile');
+    }
     return jobProfile;
   }
 
@@ -1204,7 +1213,7 @@ export class JobProfileService {
           return [`${id}.${employee_group_id}.${peoplesoft_id}`, classification];
         }),
       ).values(),
-    );
+    ).sort((a, b) => (a.name > b.name ? 1 : -1));
 
     return uniqueClassifications;
   }
@@ -1225,5 +1234,231 @@ export class JobProfileService {
       },
     });
     return count === 0;
+  }
+
+  async getRequirementsWithoutReadOnly(
+    jobFamilyIds: number[],
+    jobFamilyStreamIds: number[],
+    classificationId?: string,
+    classificationEmployeeGroupId?: string,
+    ministryIds?: string[],
+    jobFamilyWithNoStream?: number[],
+  ) {
+    // get job profiles from which to draw the requirements
+    const jobProfiles = await this.prisma.jobProfile.findMany({
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                jobFamilies: {
+                  some: {
+                    jobFamily: {
+                      id: { in: jobFamilyIds },
+                    },
+                  },
+                },
+              },
+              {
+                streams: {
+                  some: {
+                    stream: {
+                      id: { in: jobFamilyStreamIds },
+                    },
+                  },
+                },
+              },
+              {
+                state: 'PUBLISHED',
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                jobFamilies: {
+                  some: {
+                    jobFamily: {
+                      id: { in: jobFamilyWithNoStream },
+                    },
+                  },
+                },
+              },
+              {
+                state: 'PUBLISHED',
+              },
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        professional_registration_requirements: true,
+        jobFamilies: {
+          select: {
+            jobFamily: true,
+          },
+        },
+        streams: {
+          select: {
+            stream: true,
+          },
+        },
+      },
+    });
+
+    const requirementsMap = new Map<
+      string,
+      {
+        text: string;
+        jobFamilies: { id: number }[];
+        streams: { id: number }[];
+        classification: { id: string; employee_group_id: string } | null;
+        organization: { id: string };
+      }
+    >();
+
+    // get professional registration requirements for auto-population based on classification and job family
+    // professional registrations always have classifications but may or may not have job family id (null)
+    let professionalRegistrationRequirements = await this.prisma.professionalRegistrationRequirement.findMany({
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                classification_id: classificationId,
+                classification_employee_group_id: classificationEmployeeGroupId,
+              },
+              {
+                job_family_id: null,
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                classification_id: classificationId,
+                classification_employee_group_id: classificationEmployeeGroupId,
+              },
+              {
+                job_family_id: { in: jobFamilyIds },
+              },
+            ],
+          },
+        ],
+      },
+      include: {
+        requirement: true,
+      },
+    });
+
+    // if ministries were provided, select profiles with those ministries
+    if (ministryIds) {
+      const professionalRegistrationRequirements2 = await this.prisma.professionalRegistrationRequirement.findMany({
+        where: {
+          OR: [
+            {
+              AND: [
+                {
+                  classification_id: classificationId,
+                  classification_employee_group_id: classificationEmployeeGroupId,
+                },
+                {
+                  job_family_id: null,
+                },
+                {
+                  organization_id: { in: ministryIds },
+                },
+              ],
+            },
+            {
+              AND: [
+                {
+                  classification_id: classificationId,
+                  classification_employee_group_id: classificationEmployeeGroupId,
+                },
+                {
+                  job_family_id: { in: jobFamilyIds },
+                },
+                {
+                  organization_id: { in: ministryIds },
+                },
+              ],
+            },
+          ],
+        },
+        include: {
+          requirement: true,
+        },
+      });
+
+      console.log('professionalRegistrationRequirements2: ', professionalRegistrationRequirements2);
+      // merge with initial job profiles and remove duplicates
+      professionalRegistrationRequirements = [
+        ...new Set([...professionalRegistrationRequirements, ...professionalRegistrationRequirements2]),
+      ];
+    }
+
+    // we selected by job family and classification above, include the job family in response here, if applicable
+    professionalRegistrationRequirements.forEach((registration) => {
+      const text = registration.requirement.text;
+      if (!requirementsMap.has(text)) {
+        requirementsMap.set(text, {
+          text,
+          jobFamilies: registration.job_family_id ? [{ id: registration.job_family_id }] : [],
+          streams: [],
+          classification: registration.classification_id
+            ? {
+                id: registration.classification_id,
+                employee_group_id: registration.classification_employee_group_id,
+              }
+            : null,
+          organization: registration.organization_id ? { id: registration.organization_id } : null,
+        });
+      } else {
+        const entry = requirementsMap.get(text);
+        if (registration.job_family_id && !entry.jobFamilies.some((jf) => jf.id === registration.job_family_id)) {
+          entry.jobFamilies.push({ id: registration.job_family_id });
+        }
+      }
+    });
+
+    jobProfiles.forEach((profile) => {
+      const requirements = profile.professional_registration_requirements as any[];
+      if (requirements) {
+        requirements
+          .filter((requirement) => !requirement.is_readonly)
+          .forEach((requirement) => {
+            const text = requirement.text;
+            if (!requirementsMap.has(text)) {
+              requirementsMap.set(text, {
+                text,
+                jobFamilies: [],
+                streams: [],
+                classification: null,
+                organization: null,
+              });
+            }
+            const entry = requirementsMap.get(text);
+            entry.jobFamilies.push(...profile.jobFamilies.map((jf) => ({ id: jf.jobFamily.id })));
+            entry.streams.push(...profile.streams.map((s) => ({ id: s.stream.id })));
+          });
+      }
+    });
+
+    const result = Array.from(requirementsMap.values())
+      .map((entry) => ({
+        ...entry,
+        jobFamilies: Array.from(new Set(entry.jobFamilies.map((jf) => jf.id)))
+          .filter((id) => jobFamilyIds.includes(id))
+          .map((id) => ({ id })),
+        streams: Array.from(new Set(entry.streams.map((s) => s.id)))
+          .filter((id) => jobFamilyStreamIds.includes(id))
+          .map((id) => ({ id })),
+        classification: entry.classification,
+      }))
+      .sort((a, b) => a.text.localeCompare(b.text));
+
+    return result;
   }
 }
