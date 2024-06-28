@@ -18,6 +18,7 @@ import { MyPositionsPage } from '../routes/my-position-requests/my-position-requ
 import { OrgChartRoute as OrgChartOldRoute, OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage as OrgChartOldPage, OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { SettingsRoute } from '../routes/settings';
+import { UserDetailPage } from '../routes/settings/user/user-detail.page';
 import { UserListPage } from '../routes/settings/user/user-list.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
@@ -96,7 +97,19 @@ export const router = createBrowserRouter([
             children: [
               {
                 path: 'users',
-                element: <UserListPage />,
+                handle: {
+                  breadcrumb: () => 'Users',
+                },
+                children: [
+                  {
+                    index: true,
+                    element: <UserListPage />,
+                  },
+                  {
+                    path: ':id',
+                    element: <UserDetailPage />,
+                  },
+                ],
               },
             ],
           },
