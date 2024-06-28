@@ -1,11 +1,30 @@
 import { gql } from 'graphql-request';
 import { graphqlApi } from '..';
+import { GetOrganizationsResponse } from './dtos/get-organizations-response.dto';
 import { GetUserResponse } from './dtos/get-user-response.dto';
 import { GetUsersResponse } from './dtos/get-users-response.dto';
 
 export const settingsApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
-    getUsers: build.query<GetUsersResponse, Record<string, never> | undefined>({
+    getOrganizations: build.query<GetOrganizationsResponse, undefined>({
+      query: () => ({
+        document: gql`
+          query Organizations {
+            organizations {
+              id
+              name
+              effective_status
+              departments {
+                id
+                name
+                effective_status
+              }
+            }
+          }
+        `,
+      }),
+    }),
+    getUsers: build.query<GetUsersResponse, undefined>({
       query: () => ({
         document: gql`
           query Users {
@@ -45,4 +64,11 @@ export const settingsApi = graphqlApi.injectEndpoints({
   }),
 });
 
-export const { useLazyGetUserQuery, useLazyGetUsersQuery } = settingsApi;
+export const {
+  useLazyGetOrganizationsQuery,
+  useGetOrganizationsQuery,
+  useLazyGetUserQuery,
+  useGetUserQuery,
+  useLazyGetUsersQuery,
+  useGetUsersQuery,
+} = settingsApi;
