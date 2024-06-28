@@ -1241,30 +1241,53 @@ export class JobProfileService {
     jobFamilyStreamIds: number[],
     classificationId?: string,
     classificationEmployeeGroupId?: string,
+    ministryIds?: string[],
+    jobFamilyWithNoStream?: number[],
   ) {
+    // get job profiles from which to draw the requirements
     const jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
-        AND: [
+        OR: [
           {
-            jobFamilies: {
-              some: {
-                jobFamily: {
-                  id: { in: jobFamilyIds },
+            AND: [
+              {
+                jobFamilies: {
+                  some: {
+                    jobFamily: {
+                      id: { in: jobFamilyIds },
+                    },
+                  },
                 },
               },
-            },
-          },
-          {
-            streams: {
-              some: {
-                stream: {
-                  id: { in: jobFamilyStreamIds },
+              {
+                streams: {
+                  some: {
+                    stream: {
+                      id: { in: jobFamilyStreamIds },
+                    },
+                  },
                 },
               },
-            },
+              {
+                state: 'PUBLISHED',
+              },
+            ],
           },
           {
-            state: 'PUBLISHED',
+            AND: [
+              {
+                jobFamilies: {
+                  some: {
+                    jobFamily: {
+                      id: { in: jobFamilyWithNoStream },
+                    },
+                  },
+                },
+              },
+              {
+                state: 'PUBLISHED',
+              },
+            ],
           },
         ],
       },
@@ -1291,12 +1314,13 @@ export class JobProfileService {
         jobFamilies: { id: number }[];
         streams: { id: number }[];
         classification: { id: string; employee_group_id: string } | null;
+        organization: { id: string };
       }
     >();
 
     // get professional registration requirements for auto-population based on classification and job family
     // professional registrations always have classifications but may or may not have job family id (null)
-    const professionalRegistrationRequirements = await this.prisma.professionalRegistrationRequirement.findMany({
+    let professionalRegistrationRequirements = await this.prisma.professionalRegistrationRequirement.findMany({
       where: {
         OR: [
           {
@@ -1328,7 +1352,54 @@ export class JobProfileService {
       },
     });
 
-    // todo: we selected by job family and classification above, include the job family in response here, if applicable
+    // if ministries were provided, select profiles with those ministries
+    if (ministryIds) {
+      const professionalRegistrationRequirements2 = await this.prisma.professionalRegistrationRequirement.findMany({
+        where: {
+          OR: [
+            {
+              AND: [
+                {
+                  classification_id: classificationId,
+                  classification_employee_group_id: classificationEmployeeGroupId,
+                },
+                {
+                  job_family_id: null,
+                },
+                {
+                  organization_id: { in: ministryIds },
+                },
+              ],
+            },
+            {
+              AND: [
+                {
+                  classification_id: classificationId,
+                  classification_employee_group_id: classificationEmployeeGroupId,
+                },
+                {
+                  job_family_id: { in: jobFamilyIds },
+                },
+                {
+                  organization_id: { in: ministryIds },
+                },
+              ],
+            },
+          ],
+        },
+        include: {
+          requirement: true,
+        },
+      });
+
+      console.log('professionalRegistrationRequirements2: ', professionalRegistrationRequirements2);
+      // merge with initial job profiles and remove duplicates
+      professionalRegistrationRequirements = [
+        ...new Set([...professionalRegistrationRequirements, ...professionalRegistrationRequirements2]),
+      ];
+    }
+
+    // we selected by job family and classification above, include the job family in response here, if applicable
     professionalRegistrationRequirements.forEach((registration) => {
       const text = registration.requirement.text;
       if (!requirementsMap.has(text)) {
@@ -1342,6 +1413,7 @@ export class JobProfileService {
                 employee_group_id: registration.classification_employee_group_id,
               }
             : null,
+          organization: registration.organization_id ? { id: registration.organization_id } : null,
         });
       } else {
         const entry = requirementsMap.get(text);
@@ -1364,6 +1436,7 @@ export class JobProfileService {
                 jobFamilies: [],
                 streams: [],
                 classification: null,
+                organization: null,
               });
             }
             const entry = requirementsMap.get(text);

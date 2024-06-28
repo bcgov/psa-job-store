@@ -19,6 +19,7 @@ interface BehaviouralComptencyPickerProps {
   behavioural_competencies_fields: FieldArrayWithId<JobProfileValidationModel, 'behavioural_competencies', 'id'>[];
   addAction: UseFieldArrayAppend<JobProfileValidationModel, 'behavioural_competencies'>;
   removeAction: UseFieldArrayRemove;
+  validateFunction: () => void;
 }
 
 const formatEnumString = (str: string): string => {
@@ -32,6 +33,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   behavioural_competencies_fields,
   addAction,
   removeAction,
+  validateFunction,
 }) => {
   // Fetching data from the API
   const { data, error, isLoading } = useGetBehaviouralCompetenciesQuery();
@@ -86,7 +88,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     return (
       <div style={{ marginBottom: '0.5rem' }}>
         <Tag>{formatEnumString(option.object.category)}</Tag>
-        {option.object.type == 'INDIGENOUS' && <Tag color="blue">Indigenous relations behavioural competencies</Tag>}
+        {option.object.type == 'INDIGENOUS' && <Tag color="blue">Indigenous Relations Behavioural Competencies</Tag>}
       </div>
     );
   };
@@ -116,6 +118,8 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     selectedBehaviouralCompetencies.forEach((item) => {
       addAction(item);
     });
+
+    validateFunction();
   };
 
   return (
@@ -129,7 +133,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
       selectedOptions={selectedOptions}
       onAdd={onAdd}
       infoContent={
-        'It is highly recommended that there be at least one Indigenous relations behavioural competency in a job profile.'
+        'It is highly recommended that there be at least one Indigenous Relations Behavioural Competency in a job profile.'
       }
     ></EditFormOptionsPicker>
   );

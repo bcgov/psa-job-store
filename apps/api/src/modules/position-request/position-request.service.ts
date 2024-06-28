@@ -1273,6 +1273,12 @@ export class PositionRequestApiService {
             obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
         )
         .map((obj) => obj.text),
+      professional_registration_requirements: prJobProfile.professional_registration_requirements
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
+        .map((obj) => obj.text),
       security_screenings: prJobProfile.security_screenings // all security screenings are significant - there is no is_significant flag
         .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
         .map((obj) => obj.text),
@@ -1293,6 +1299,12 @@ export class PositionRequestApiService {
         )
         .map((obj) => obj.text),
       job_experience: (jobProfile.job_experience as Record<string, any>)
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
+        .map((obj) => obj.text),
+      professional_registration_requirements: (jobProfile.professional_registration_requirements as Record<string, any>)
         .filter(
           (obj) =>
             obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
@@ -1322,6 +1334,11 @@ export class PositionRequestApiService {
         JSON.stringify(jobProfileSignficantSections.job_experience),
         JSON.stringify(prJobProfileSignificantSections.job_experience),
       ),
+      // Professional Registration Requirements
+      this.dataHasChanges(
+        JSON.stringify(jobProfileSignficantSections.professional_registration_requirements),
+        JSON.stringify(prJobProfileSignificantSections.professional_registration_requirements),
+      ),
       // Security Screenings
       this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.security_screenings),
@@ -1341,6 +1358,9 @@ export class PositionRequestApiService {
         reasons.push('Changes in Job Experience');
       }
       if (significantSectionChanges[3]) {
+        reasons.push('Changes in Professional Registration and Certification Requirements');
+      }
+      if (significantSectionChanges[4]) {
         reasons.push('Changes in Security Screenings');
       }
     }

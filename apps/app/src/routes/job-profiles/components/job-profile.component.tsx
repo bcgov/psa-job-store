@@ -327,7 +327,7 @@ export class JobProfileValidationModel {
   @BehaviouralCompetencyValidator({ message: 'The profile should have between 3 and 10 behavioural competencies' })
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 
-  @CustomItemCountValidator(1, 10, 'professional registration requirements', {
+  @CustomItemCountValidator(1, 10, 'professional registration and certification requirements', {
     message: 'There should be between $constraint1 and $constraint2 $constraint3.',
   })
   // @ItemCountValidatorWithInnerProperty(
@@ -360,6 +360,8 @@ export class JobProfileValidationModel {
   markAllSignificant: boolean;
   markAllNonEditableEdu: boolean;
   markAllSignificantEdu: boolean;
+  markAllNonEditableProReg: boolean;
+  markAllSignificantProReg: boolean;
   markAllNonEditableJob_experience: boolean;
   markAllSignificantJob_experience: boolean;
   markAllNonEditableSec: boolean;
@@ -889,7 +891,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 (effectiveData?.professional_registration_requirements.filter((ed) => !ed.disabled)?.length ?? 0) >
                   0)) && (
               <>
-                <h4>Professional registration requirements</h4>
+                <h4>Professional registration and certification requirements</h4>
                 <ul data-testid="professional-registration">
                   {showDiff && originalData
                     ? compareLists(
