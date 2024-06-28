@@ -58,3 +58,4 @@ jobs:
         with:
           openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
           api-token: ${{ secrets.OPENSHIFT_TOOLS_API_TOKEN }}
+# test
