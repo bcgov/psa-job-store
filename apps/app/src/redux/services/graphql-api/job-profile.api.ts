@@ -771,6 +771,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         classificationEmployeeGroupId?: string | null;
         ministryIds?: string[];
         jobFamilyWithNoStream?: number[];
+        excludeProfileId?: number;
       }) => {
         return {
           document: gql`
@@ -781,6 +782,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               $classificationEmployeeGroupId: String
               $ministryIds: [String!]
               $jobFamilyWithNoStream: [Int!]
+              $excludeProfileId: Int
             ) {
               requirementsWithoutReadOnly(
                 jobFamilyIds: $jobFamilyIds
@@ -789,6 +791,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 classificationEmployeeGroupId: $classificationEmployeeGroupId
                 ministryIds: $ministryIds
                 jobFamilyWithNoStream: $jobFamilyWithNoStream
+                excludeProfileId: $excludeProfileId
               ) {
                 text
                 jobFamilies {

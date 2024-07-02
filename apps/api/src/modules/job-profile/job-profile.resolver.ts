@@ -247,6 +247,7 @@ export class JobProfileResolver {
     classificationEmployeeGroupId?: string,
     @Args('ministryIds', { type: () => [String], nullable: true }) ministryIds?: string[],
     @Args('jobFamilyWithNoStream', { type: () => [Int], nullable: true }) jobFamilyWithNoStream?: number[],
+    @Args('excludeProfileId', { type: () => Int, nullable: true }) excludeProfileId?: number,
   ) {
     return this.jobProfileService.getRequirementsWithoutReadOnly(
       jobFamilyIds,
@@ -255,6 +256,7 @@ export class JobProfileResolver {
       classificationEmployeeGroupId,
       ministryIds,
       jobFamilyWithNoStream ?? [],
+      excludeProfileId,
     );
   }
 }

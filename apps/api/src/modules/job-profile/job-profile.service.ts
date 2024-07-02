@@ -1243,49 +1243,55 @@ export class JobProfileService {
     classificationEmployeeGroupId?: string,
     ministryIds?: string[],
     jobFamilyWithNoStream?: number[],
+    excludeProfileId?: number,
   ) {
     // get job profiles from which to draw the requirements
     const jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
-        OR: [
+        AND: [
+          { id: { not: excludeProfileId ?? -1 } },
           {
-            AND: [
+            OR: [
               {
-                jobFamilies: {
-                  some: {
-                    jobFamily: {
-                      id: { in: jobFamilyIds },
+                AND: [
+                  {
+                    jobFamilies: {
+                      some: {
+                        jobFamily: {
+                          id: { in: jobFamilyIds },
+                        },
+                      },
                     },
                   },
-                },
-              },
-              {
-                streams: {
-                  some: {
-                    stream: {
-                      id: { in: jobFamilyStreamIds },
+                  {
+                    streams: {
+                      some: {
+                        stream: {
+                          id: { in: jobFamilyStreamIds },
+                        },
+                      },
                     },
                   },
-                },
+                  {
+                    state: 'PUBLISHED',
+                  },
+                ],
               },
               {
-                state: 'PUBLISHED',
-              },
-            ],
-          },
-          {
-            AND: [
-              {
-                jobFamilies: {
-                  some: {
-                    jobFamily: {
-                      id: { in: jobFamilyWithNoStream },
+                AND: [
+                  {
+                    jobFamilies: {
+                      some: {
+                        jobFamily: {
+                          id: { in: jobFamilyWithNoStream },
+                        },
+                      },
                     },
                   },
-                },
-              },
-              {
-                state: 'PUBLISHED',
+                  {
+                    state: 'PUBLISHED',
+                  },
+                ],
               },
             ],
           },
@@ -1392,7 +1398,6 @@ export class JobProfileService {
         },
       });
 
-      console.log('professionalRegistrationRequirements2: ', professionalRegistrationRequirements2);
       // merge with initial job profiles and remove duplicates
       professionalRegistrationRequirements = [
         ...new Set([...professionalRegistrationRequirements, ...professionalRegistrationRequirements2]),
@@ -1457,6 +1462,10 @@ export class JobProfileService {
           .map((id) => ({ id })),
         classification: entry.classification,
       }))
+      .filter((entry) => {
+        // Exclude requirements that are only associated with the excluded profile
+        return entry.jobFamilies.length > 0 || entry.streams.length > 0 || entry.classification !== null;
+      })
       .sort((a, b) => a.text.localeCompare(b.text));
 
     return result;

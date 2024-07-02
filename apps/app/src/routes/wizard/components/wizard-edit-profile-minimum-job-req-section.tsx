@@ -163,20 +163,6 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               />
             </div>
 
-            {/* <WizardEditProfileArrayField
-              useFormReturn={useFormReturn}
-              originalFields={originalProfessionalRegistrationFields}
-              validateVerification={validateVerification}
-              label="Professional registration requirements"
-              description="Professional registration is required for a number of positions in the BC Public Service. You can add those requirements here."
-              fieldName="professional_registration_requirements"
-              testId="professional-registration"
-              addButtonText="Add a professional registration requirement"
-              formErrors={formErrors}
-              setEditedFields={setEditedProfessionalRegistrationFields}
-              editedFields={editedProfessionalRegistrationFields}
-            /> */}
-
             <Divider className="hr-reduced-margin" />
 
             <WizardEditProfileArrayField
