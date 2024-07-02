@@ -1,3 +1,10 @@
+// TODO:
+//  The instead of injecting endpoints into graphqlApi, create settingsApi so endpoints can be named properly
+//    - getOrganizations
+//    - getUsers
+//    - getUser
+//      etc...
+
 import { gql } from 'graphql-request';
 import { graphqlApi } from '..';
 import { GetOrganizationsResponse } from './dtos/get-organizations-response.dto';
@@ -8,7 +15,7 @@ import { SetUserOrgChartAccessResponse } from './dtos/set-user-org-chart-access-
 
 export const settingsApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
-    getOrganizations: build.query<GetOrganizationsResponse, undefined>({
+    getOrganizationsForSettings: build.query<GetOrganizationsResponse, void>({
       query: () => ({
         document: gql`
           query Organizations {
@@ -26,7 +33,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
         `,
       }),
     }),
-    getUsers: build.query<GetUsersResponse, undefined>({
+    getUsersForSettings: build.query<GetUsersResponse, void>({
       query: () => ({
         document: gql`
           query Users {
@@ -36,12 +43,13 @@ export const settingsApi = graphqlApi.injectEndpoints({
               username
               email
               roles
+              metadata
             }
           }
         `,
       }),
     }),
-    getUser: build.query<GetUserResponse, string>({
+    getUserForSettings: build.query<GetUserResponse, string>({
       query: (id: string) => ({
         document: gql`
           query User($id: String) {
@@ -89,11 +97,11 @@ export const settingsApi = graphqlApi.injectEndpoints({
 });
 
 export const {
-  useLazyGetOrganizationsQuery,
-  useLazyGetUserQuery,
-  useLazyGetUsersQuery,
-  useGetOrganizationsQuery,
-  useGetUserQuery,
-  useGetUsersQuery,
+  useLazyGetOrganizationsForSettingsQuery,
+  useLazyGetUserForSettingsQuery,
+  useLazyGetUsersForSettingsQuery,
+  useGetOrganizationsForSettingsQuery,
+  useGetUserForSettingsQuery,
+  useGetUsersForSettingsQuery,
   useSetUserOrgChartAccessMutation,
 } = settingsApi;

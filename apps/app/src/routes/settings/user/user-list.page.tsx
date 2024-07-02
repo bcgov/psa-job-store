@@ -1,19 +1,17 @@
 import { SettingOutlined } from '@ant-design/icons';
-import { Button, Table, Tag, Tooltip, Typography } from 'antd';
-import { useEffect } from 'react';
+import { Button, Spin, Table, Tag, Tooltip, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
-import { useLazyGetUsersQuery } from '../../../redux/services/graphql-api/settings/settings.api';
+import { useGetUsersForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
 import ContentWrapper from '../../home/components/content-wrapper.component';
+import { useSettingsContext } from '../hooks/use-settings-context.hook';
 
 const { Text } = Typography;
 
 export const UserListPage = () => {
-  const [trigger, { data, isFetching }] = useLazyGetUsersQuery();
+  const { organizations } = useSettingsContext();
 
-  useEffect(() => {
-    trigger({});
-  }, []);
+  const { data, isFetching } = useGetUsersForSettingsQuery();
 
   return (
     <>
@@ -57,6 +55,21 @@ export const UserListPage = () => {
               sorter: true,
               render: (value) => <div style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>{value}</div>,
               width: '25%',
+            },
+            {
+              key: 'metadata.org_chart.department_ids',
+              title: 'Departments',
+              dataIndex: ['metadata', 'org_chart', 'department_ids'],
+              sorter: false,
+              render: (value: string[]) => {
+                return organizations.isLoading ? (
+                  <Spin size="small" spinning />
+                ) : (
+                  <div>
+                    {(value ?? []).map((v) => organizations.departments?.find((d) => d.id === v)?.name).join(', ')}
+                  </div>
+                );
+              },
             },
             {
               title: 'Actions',
