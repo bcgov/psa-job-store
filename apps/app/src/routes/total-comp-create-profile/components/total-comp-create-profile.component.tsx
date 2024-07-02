@@ -80,6 +80,7 @@ import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/or
 import { FormItem } from '../../../utils/FormItem';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
+import { ContextOptionsReadonly } from '../../wizard/components/context-options-readonly.component';
 import { IsIndigenousCompetency } from '../../wizard/components/is-indigenous-competency.component';
 import BehaviouralComptencyPicker from '../../wizard/components/wizard-behavioural-comptency-picker';
 import WizardOverview from '../../wizard/components/wizard-edit-profile-overview';
@@ -499,6 +500,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         classificationEmployeeGroupId: employeeGroup,
         ministryIds: !allOrganizations ? selectedMinistry : undefined,
         jobFamilyWithNoStream: selectedProfession.filter((p) => p.jobStreams.length === 0).map((p) => p.jobFamily),
+        excludeProfileId: jobProfileData?.jobProfile.id,
       },
       {
         skip: !selectedClassificationId || !employeeGroup,
@@ -1092,6 +1094,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     append: appendProfessionalRegistrationRequirement,
     remove: removeProfessionalRegistrationRequirement,
     move: moveProfessionalRegistrationRequirement,
+    update: updateProfessionalRegistrationRequirement,
   } = useFieldArray({
     control: profileControl,
     name: 'professional_registration_requirements',
@@ -1838,6 +1841,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     if (indexesToRemove.length > 0) {
       const timeoutId = setTimeout(() => {
         removeProfessionalRegistrationRequirement(indexesToRemove);
+        triggerProfileValidation();
       }, 0);
       return () => {
         clearTimeout(timeoutId);
@@ -1851,6 +1855,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     removeProfessionalRegistrationRequirement,
     selectedProfession,
     selectedClassificationId,
+    triggerProfileValidation,
   ]);
 
   useEffect(() => {
@@ -1899,6 +1904,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const timeoutId = setTimeout(() => {
       // console.log('append: ', uniqueNewFields);
       appendProfessionalRegistrationRequirement(uniqueNewFields);
+      triggerProfileValidation();
     }, 0);
     return () => {
       clearTimeout(timeoutId);
@@ -2364,8 +2370,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               </Text>
                               <MinistriesSelect
                                 isMultiSelect={true}
-                                onChange={() => {
-                                  onChange();
+                                onChange={(args) => {
+                                  onChange(args);
                                   handleMinistriesChange();
                                 }}
                                 onBlur={onBlur}
@@ -3161,16 +3167,18 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       name={`professional_registration_requirements.${index}.text`}
                                       render={({ field: { onChange, onBlur, value } }) => {
                                         return (
-                                          <TextArea
-                                            autoSize
-                                            placeholder="Add a professional registration or certification requirement"
-                                            onChange={(event) => {
-                                              onChange(event);
-                                              debounce(triggerProfileValidation, 300)();
-                                            }}
-                                            onBlur={onBlur}
-                                            value={value?.toString()}
-                                          />
+                                          <>
+                                            <TextArea
+                                              autoSize
+                                              placeholder="Add a professional registration or certification requirement"
+                                              onChange={(event) => {
+                                                onChange(event);
+                                                debounce(triggerProfileValidation, 300)();
+                                              }}
+                                              onBlur={onBlur}
+                                              value={value?.toString()}
+                                            />
+                                          </>
                                         );
                                       }}
                                     />
@@ -3178,13 +3186,29 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button
+                                  <ContextOptionsReadonly
+                                    isReadonly={field.is_readonly ?? false}
+                                    onEdit={() => {
+                                      console.log('switch out of readonly: ', index);
+
+                                      updateProfessionalRegistrationRequirement(index, {
+                                        ...professionalRegistrationRequirementsFields[index],
+                                        is_readonly: false,
+                                      });
+                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                    }}
+                                    onRemove={() => {
+                                      removeProfessionalRegistrationRequirement(index);
+                                      triggerProfileValidation();
+                                    }}
+                                  />
+                                  {/* <Button
                                     icon={<DeleteOutlined />}
                                     onClick={() => {
                                       removeProfessionalRegistrationRequirement(index);
                                       triggerProfileValidation();
                                     }}
-                                  />
+                                  /> */}
                                 </Col>
                               </Row>
                             </Col>
@@ -3199,7 +3223,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             <Col>
                               <WizardProfessionalRegistrationPicker
                                 data={professionalRequirementsPickerData}
-                                fields={professionalRegistrationRequirementsFields}
+                                fields={professionalRegistrations}
                                 addAction={appendProfessionalRegistrationRequirement}
                                 removeAction={removeProfessionalRegistrationRequirement}
                                 triggerValidation={triggerProfileValidation}

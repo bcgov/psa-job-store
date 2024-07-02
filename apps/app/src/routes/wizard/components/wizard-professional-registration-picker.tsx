@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove } from 'react-hook-form';
-import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
+import { UseFieldArrayAppend, UseFieldArrayRemove } from 'react-hook-form';
+import { AccountabilitiesModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
+import { JobProfileValidationModel, ValueString } from '../../job-profiles/components/job-profile.component';
 import './wizard-behavioural-comptency-picker.css';
 import EditFormOptionsPicker, { SelectableOption } from './wizard-edit-profile-options-picker';
 
 interface WizardProfessionalRegistrationPickerProps {
   // style?: CSSProperties;
-  fields: FieldArrayWithId<JobProfileValidationModel, 'professional_registration_requirements', 'id'>[];
+  fields: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
   addAction: UseFieldArrayAppend<JobProfileValidationModel, 'professional_registration_requirements'>;
   removeAction: UseFieldArrayRemove;
   data: any;
@@ -49,14 +50,17 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
 
   useEffect(() => {
     if (data) {
+      // console.log('building newSelectableOptions, fields: ', fields, data.requirementsWithoutReadOnly);
+
       // Generate selectable options based on the current options
       const newSelectableOptions = data.requirementsWithoutReadOnly
-        .filter((comp: any) => {
-          // Check if the item exists in the fields array and has readOnly set to false
-          const existingField = fields.find((field) => field.text === comp.text && !field.is_readonly);
-          // If the item doesn't exist or has readOnly set to true, include it in the selectable options
-          return !existingField;
-        })
+        // .filter((comp: any) => {
+        //   // Check if the item exists in the fields array and has readOnly set to false
+        //   const include = !fields.find((field) => field.text === comp.text && !field.is_readonly);
+        //   // console.log('comp/include: ', comp, include);
+        //   // If the item doesn't exist or has readOnly set to true, include it in the selectable options
+        //   return include;
+        // })
         .map((comp: any) => ({
           value: comp.text,
           text: comp.text,
