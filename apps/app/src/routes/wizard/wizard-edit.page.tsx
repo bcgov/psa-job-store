@@ -141,6 +141,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   // const navigate = useNavigate();
 
   const saveData = async (action: string, step?: number) => {
+    console.log('saveData');
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errors = Object.values(wizardEditProfileRef.current?.getFormErrors()).map((error: any) => {
       const message =
@@ -153,6 +155,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
               : 'Error';
       return message;
     });
+
+    console.log('errors: ', errors);
 
     if (errors.length && action == 'next') {
       Modal.error({
@@ -170,6 +174,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       return;
     }
 
+    console.log('action: ', action);
+
     if (action === 'next') setIsLoading(true);
     else if (action == 'back') setIsLoadingBack(true);
     else setSaveAndQuitLoading(true);
@@ -178,16 +184,18 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       // Create an entry in My Position Requests
 
       const formData = wizardEditProfileRef.current?.getFormData();
-      // console.log('formData: ', formData);
+      console.log('formData: ', formData);
 
       const transformedData = transformFormData(formData);
-      // console.log('transformedData: ', transformedData);
+      console.log('transformedData: ', transformedData);
 
       // Check if any classification is undefined or if the array is empty
       const hasUndefinedClassification = transformedData?.classifications?.some(
         (item) => item.classification === undefined,
       );
       const isClassificationsEmpty = transformedData?.classifications?.length === 0;
+
+      console.log('isClassificationsEmpty: ', isClassificationsEmpty);
 
       if (
         (hasUndefinedClassification || isClassificationsEmpty || !transformedData?.classifications) &&
@@ -204,6 +212,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
       setWizardData(transformedData);
       try {
+        console.log('positionRequestId: ', positionRequestId);
+
         if (positionRequestId) {
           const resp = await updatePositionRequest({
             id: positionRequestId,
@@ -240,6 +250,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       return true;
     } catch (e) {
       // throw e;
+      console.log('error: ', e);
       return false;
     } finally {
       if (action === 'next') setIsLoading(false);
@@ -249,6 +260,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   };
 
   const onNextCallback = async ({ step }: { step?: number } = {}) => {
+    console.log('onNextCallback');
     await saveData('next', step);
   };
 
