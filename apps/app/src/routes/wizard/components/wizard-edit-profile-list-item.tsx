@@ -68,7 +68,7 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
   const handleFieldChange = debounce((index, updatedValue) => {
     // if (field.is_significant || forceSignificant)
     setEditedFields &&
-      setEditedFields((prev) => ({ ...prev, [index]: updatedValue !== originalFields[index]?.['text'] }));
+      setEditedFields((prev) => ({ ...prev, [index]: updatedValue !== originalFields?.[index]?.['text'] }));
     useFormReturn.trigger();
   }, 300);
 
