@@ -1245,8 +1245,8 @@ export class JobProfileService {
     jobFamilyWithNoStream?: number[],
     excludeProfileId?: number,
   ) {
-    // get job profiles from which to draw the requirements
-    const jobProfiles = await this.prisma.jobProfile.findMany({
+    // get job profiles from which to draw the requirements from based on job family and stream
+    let jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
         AND: [
           { id: { not: excludeProfileId ?? -1 } },
@@ -1274,6 +1274,7 @@ export class JobProfileService {
                   },
                   {
                     state: 'PUBLISHED',
+                    professional_registration_requirements: { not: null },
                   },
                 ],
               },
@@ -1290,6 +1291,7 @@ export class JobProfileService {
                   },
                   {
                     state: 'PUBLISHED',
+                    professional_registration_requirements: { not: null },
                   },
                 ],
               },
@@ -1313,6 +1315,28 @@ export class JobProfileService {
       },
     });
 
+    // filter job profiles by either matching job profile + stream criteria
+    // or by looking at profiles that have family and no streams (jobFamilyWithNoStream)
+    jobProfiles = jobProfiles.filter((profile) => {
+      // Check if the profile matches jobFamilyWithNoStream criteria
+      const matchesNoStreamCriteria =
+        jobFamilyWithNoStream?.some(
+          (familyId) =>
+            profile.jobFamilies.some((jf) => jf.jobFamily.id === familyId) &&
+            !profile.streams.some((s) => s.stream.job_family_id === familyId),
+        ) ?? false;
+
+      // Check if the profile matches jobFamilyIds and jobFamilyStreamIds criteria
+      const matchesFamilyAndStreamCriteria =
+        jobFamilyIds.some((familyId) => profile.jobFamilies.some((jf) => jf.jobFamily.id === familyId)) &&
+        jobFamilyStreamIds.length != 0 &&
+        jobFamilyStreamIds.some((streamId) => profile.streams.some((s) => s.stream.id === streamId));
+
+      // Keep the profile if it matches either criteria
+      return matchesNoStreamCriteria || matchesFamilyAndStreamCriteria;
+    });
+
+    // this will be the return value
     const requirementsMap = new Map<
       string,
       {
@@ -1330,6 +1354,7 @@ export class JobProfileService {
       where: {
         OR: [
           {
+            // select based on classification only
             AND: [
               {
                 classification_id: classificationId,
@@ -1340,6 +1365,7 @@ export class JobProfileService {
               },
             ],
           },
+          // select by classification and job family
           {
             AND: [
               {
@@ -1358,7 +1384,7 @@ export class JobProfileService {
       },
     });
 
-    // if ministries were provided, select profiles with those ministries
+    // if ministries were provided, select profiles with those ministries (with and without job family)
     if (ministryIds) {
       const professionalRegistrationRequirements2 = await this.prisma.professionalRegistrationRequirement.findMany({
         where: {
@@ -1404,6 +1430,7 @@ export class JobProfileService {
       ];
     }
 
+    // build return for auto-populated requirements
     // we selected by job family and classification above, include the job family in response here, if applicable
     professionalRegistrationRequirements.forEach((registration) => {
       const text = registration.requirement.text;
@@ -1428,6 +1455,7 @@ export class JobProfileService {
       }
     });
 
+    // build return for pick list requirements from job family and stream
     jobProfiles.forEach((profile) => {
       const requirements = profile.professional_registration_requirements as any[];
       if (requirements) {
@@ -1451,6 +1479,9 @@ export class JobProfileService {
       }
     });
 
+    // log requirementsMap, which is a Map
+    // console.log('requirementsMap: ', JSON.stringify(Array.from(requirementsMap.entries()), null, 2));
+
     const result = Array.from(requirementsMap.values())
       .map((entry) => ({
         ...entry,
@@ -1462,10 +1493,6 @@ export class JobProfileService {
           .map((id) => ({ id })),
         classification: entry.classification,
       }))
-      .filter((entry) => {
-        // Exclude requirements that are only associated with the excluded profile
-        return entry.jobFamilies.length > 0 || entry.streams.length > 0 || entry.classification !== null;
-      })
       .sort((a, b) => a.text.localeCompare(b.text));
 
     return result;

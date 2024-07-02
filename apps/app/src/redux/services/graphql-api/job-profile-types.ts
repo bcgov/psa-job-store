@@ -211,6 +211,7 @@ export interface EditFieldModel {
 export interface AccountabilitiesModel {
   text: string | TrackedFieldArrayItem;
   is_readonly?: boolean;
+  tc_is_readonly?: boolean;
   is_significant?: boolean;
 
   // HM view
@@ -236,6 +237,7 @@ export class TrackedFieldArrayItem {
   isCustom?: boolean;
   is_significant?: boolean;
   is_readonly?: boolean;
+  tc_is_readonly?: boolean;
 
   // total comp
   nonEditable?: boolean;

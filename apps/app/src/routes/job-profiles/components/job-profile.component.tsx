@@ -59,6 +59,7 @@ export interface ValueString {
   // total comp
   nonEditable?: boolean;
   is_readonly?: boolean;
+  tc_is_readonly?: boolean;
   text?: string;
 }
 
