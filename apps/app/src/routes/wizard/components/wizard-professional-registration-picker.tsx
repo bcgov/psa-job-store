@@ -36,7 +36,7 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
   useEffect(() => {
     // console.log('fields for selectedOptions: ', fields);
     const selectedOptions = fields
-      .filter((field) => field.is_readonly)
+      .filter((field) => field.tc_is_readonly)
       .map((field) => {
         // console.log('field: ', field);
         return field.text;
@@ -85,6 +85,7 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
         if (selectedOption) {
           const { text } = selectedOption.object;
           return {
+            tc_is_readonly: true,
             is_readonly: true,
             nonEditable: markAllNonEditableProReg,
             is_significant: markAllSignificantProReg,
@@ -104,12 +105,19 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
         (item) =>
           !fields.some((field) => {
             // console.log('building newItems, field, item: ', field, item);
-            return item && field.text === item.text && field.is_readonly === true;
+            return item && field.text === item.text && field.tc_is_readonly === true;
           }),
       )
       .filter(
-        (item): item is { is_readonly: boolean; text: any; nonEditable: boolean; is_significant: boolean } =>
-          item !== null,
+        (
+          item,
+        ): item is {
+          is_readonly: boolean;
+          text: any;
+          nonEditable: boolean;
+          is_significant: boolean;
+          tc_is_readonly: boolean;
+        } => item !== null,
       );
 
     // console.log('newItems: ', newItems);
@@ -118,7 +126,7 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
     const idsToRemove = fields
       .filter((field) => {
         // console.log('building idsToRemove, field, selectedItems: ', field, selectedItems);
-        const res = field.is_readonly == true && !selectedItems.includes(field.text?.toString() ?? '');
+        const res = field.tc_is_readonly == true && !selectedItems.includes(field.text?.toString() ?? '');
         return res;
       })
       .map((field) => field.text);
@@ -127,7 +135,7 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
 
     // Convert idsToRemove to an array of indexes
     const indexesToRemove = idsToRemove.map((text) =>
-      fields.findIndex((field) => field.is_readonly == true && field.text === text),
+      fields.findIndex((field) => field.tc_is_readonly == true && field.text === text),
     );
     // console.log('indexesToremove: ', indexesToRemove);
     indexesToRemove.length > 0 && removeAction(indexesToRemove);
