@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // TODO:
 //  The instead of injecting endpoints into graphqlApi, create settingsApi so endpoints can be named properly
 //    - getOrganizations
@@ -8,6 +9,7 @@
 import { gql } from 'graphql-request';
 import { graphqlApi } from '..';
 import { GetOrganizationsResponse } from './dtos/get-organizations-response.dto';
+import { GetUserPositionResponse } from './dtos/get-user-position-response.dto';
 import { GetUserResponse } from './dtos/get-user-response.dto';
 import { GetUsersResponse } from './dtos/get-users-response.dto';
 import { SetUserOrgChartAccessInput } from './dtos/set-user-org-chart-access-input.dto';
@@ -71,6 +73,37 @@ export const settingsApi = graphqlApi.injectEndpoints({
         },
       }),
     }),
+    getUserPositionForSettings: build.query<GetUserPositionResponse, string>({
+      query: (id: string) => ({
+        document: gql`
+          query Position($id: String) {
+            position(where: { id: $id }) {
+              id
+              supervisor_id
+              title
+              classification {
+                id
+                employee_group_id
+                peoplesoft_id
+                code
+                name
+              }
+              organization {
+                id
+                name
+              }
+              department {
+                id
+                name
+              }
+            }
+          }
+        `,
+        variables: {
+          id,
+        },
+      }),
+    }),
     setUserOrgChartAccess: build.mutation<SetUserOrgChartAccessResponse, SetUserOrgChartAccessInput>({
       query: (input: SetUserOrgChartAccessInput) => ({
         document: gql`
@@ -102,6 +135,7 @@ export const {
   useLazyGetUsersForSettingsQuery,
   useGetOrganizationsForSettingsQuery,
   useGetUserForSettingsQuery,
+  useLazyGetUserPositionForSettingsQuery,
   useGetUsersForSettingsQuery,
   useSetUserOrgChartAccessMutation,
 } = settingsApi;
