@@ -2369,7 +2369,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               </Text>
                               <MinistriesSelect
                                 isMultiSelect={true}
-                                onChange={(args) => {
+                                onChange={(args: any) => {
                                   onChange(args);
                                   handleMinistriesChange();
                                 }}
