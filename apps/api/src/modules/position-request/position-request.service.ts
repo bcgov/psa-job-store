@@ -1304,12 +1304,13 @@ export class PositionRequestApiService {
             obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
         )
         .map((obj) => obj.text),
-      professional_registration_requirements: (jobProfile.professional_registration_requirements as Record<string, any>)
-        .filter(
-          (obj) =>
-            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
-        )
-        .map((obj) => obj.text),
+      professional_registration_requirements:
+        (jobProfile.professional_registration_requirements as Record<string, any>)
+          ?.filter(
+            (obj) =>
+              obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+          )
+          ?.map((obj) => obj.text) ?? [],
       security_screenings: (jobProfile.security_screenings as Record<string, any>) // all security screenings are significant - there is no is_significant flag
         .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
         .map((obj) => obj.text),
