@@ -36,7 +36,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
     fieldName: 'professional_registration_requirements',
     setEditedFields: setEditedFields,
     originalFields: originalFields,
-    significant: true,
+    // significant: true, // professional registrations are not significant when user adds a new item
   });
 
   const handleProfRegRemoveModal = (index: number) => {

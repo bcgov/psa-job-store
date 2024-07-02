@@ -229,7 +229,7 @@ const WizardEditProfile = forwardRef(
 
       const anyProfRegTrue = Object.entries(editedProfessionalRegistrationFields).some(([index, item]) => {
         const originalItem = originalProfessionalRegistrationFields[Number(index)];
-        if (!originalItem) return item === true;
+        // if (!originalItem) return item === true; // new prof regs are not significant
         return item === true && originalItem && originalItem.is_significant;
       });
 

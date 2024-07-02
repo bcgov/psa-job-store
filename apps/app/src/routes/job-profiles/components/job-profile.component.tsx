@@ -888,7 +888,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
             {((showDiff && (effectiveData?.professional_registration_requirements?.length ?? 0) > 0) ||
               (!showDiff &&
-                (effectiveData?.professional_registration_requirements.filter((ed) => !ed.disabled)?.length ?? 0) >
+                (effectiveData?.professional_registration_requirements?.filter((ed) => !ed.disabled)?.length ?? 0) >
                   0)) && (
               <>
                 <h4>Professional registration and certification requirements</h4>
