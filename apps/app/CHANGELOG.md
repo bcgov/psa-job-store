@@ -1,5 +1,40 @@
 # app
 
+## 0.4.0
+
+### Minor Changes
+
+- [#551](https://github.com/bcgov/psa-job-store/pull/551) [`8909cb3e463874bc25db8de83a6f7f4f36ecf954`](https://github.com/bcgov/psa-job-store/commit/8909cb3e463874bc25db8de83a6f7f4f36ecf954) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-741 🔴 Automatically populate professional registration fields based on classification
+
+- [#522](https://github.com/bcgov/psa-job-store/pull/522) [`32ea70490aab3e345febeb2ec348d87266157381`](https://github.com/bcgov/psa-job-store/commit/32ea70490aab3e345febeb2ec348d87266157381) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-662 Customize classifications share link to include classification specific info
+
+- [#538](https://github.com/bcgov/psa-job-store/pull/538) [`0ac02e70f893b5ceb7bde3b8aaee43a1bad71fd5`](https://github.com/bcgov/psa-job-store/commit/0ac02e70f893b5ceb7bde3b8aaee43a1bad71fd5) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-444 Total comp - pre populate values from pick lists
+
+### Patch Changes
+
+- [#548](https://github.com/bcgov/psa-job-store/pull/548) [`eaeb341015b496bc4dae2f657b1282b8acd731b9`](https://github.com/bcgov/psa-job-store/commit/eaeb341015b496bc4dae2f657b1282b8acd731b9) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Add help menu to global header.
+
+- [#522](https://github.com/bcgov/psa-job-store/pull/522) [`32ea70490aab3e345febeb2ec348d87266157381`](https://github.com/bcgov/psa-job-store/commit/32ea70490aab3e345febeb2ec348d87266157381) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-750 Share link no longer works properly
+
+- [#524](https://github.com/bcgov/psa-job-store/pull/524) [`866fdaf08947042a279f13442dc11c1147a723e2`](https://github.com/bcgov/psa-job-store/commit/866fdaf08947042a279f13442dc11c1147a723e2) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-703 add comment submission for re-validation, store comments in comment table
+
+- [#522](https://github.com/bcgov/psa-job-store/pull/522) [`a07706767c10380fefb47a4214e89ccc7a5c85ad`](https://github.com/bcgov/psa-job-store/commit/a07706767c10380fefb47a4214e89ccc7a5c85ad) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-752 Navigating to profile on page > 1 does not select correct page
+
+- [#535](https://github.com/bcgov/psa-job-store/pull/535) [`1d6cdd7ae2969eca1f4a8fe15285c941f2353d07`](https://github.com/bcgov/psa-job-store/commit/1d6cdd7ae2969eca1f4a8fe15285c941f2353d07) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-746 change sort order of classifications
+
+- [#523](https://github.com/bcgov/psa-job-store/pull/523) [`df0af1b67228c3264c9ead3c10117ccfd75f848f`](https://github.com/bcgov/psa-job-store/commit/df0af1b67228c3264c9ead3c10117ccfd75f848f) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-720 Added missing position request information to downloaded job profile
+
+  - Fixed job profile downloads from total comp
+
+- [#534](https://github.com/bcgov/psa-job-store/pull/534) [`59fe25cb739b6b5efb6cd2afe34d7d53c09c89ff`](https://github.com/bcgov/psa-job-store/commit/59fe25cb739b6b5efb6cd2afe34d7d53c09c89ff) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Add help menu to org chart
+
+- [#522](https://github.com/bcgov/psa-job-store/pull/522) [`1d9e58058a82b0267c3b1e3abe564e7c3d4f8d00`](https://github.com/bcgov/psa-job-store/commit/1d9e58058a82b0267c3b1e3abe564e7c3d4f8d00) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-749 Total comp hardcoded data
+
+- [#526](https://github.com/bcgov/psa-job-store/pull/526) [`54478478a94d8dc56273d7f58874580ddde0d86c`](https://github.com/bcgov/psa-job-store/commit/54478478a94d8dc56273d7f58874580ddde0d86c) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-706 add comments to classification SR details
+
+- Updated dependencies [[`866fdaf08947042a279f13442dc11c1147a723e2`](https://github.com/bcgov/psa-job-store/commit/866fdaf08947042a279f13442dc11c1147a723e2), [`df0af1b67228c3264c9ead3c10117ccfd75f848f`](https://github.com/bcgov/psa-job-store/commit/df0af1b67228c3264c9ead3c10117ccfd75f848f)]:
+  - common-kit@0.0.1
+
 ## 0.3.0
 
 ### Minor Changes
