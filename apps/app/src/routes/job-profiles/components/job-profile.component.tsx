@@ -479,7 +479,21 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     hideDisabled?: boolean,
   ): JSX.Element[] => {
     const comparisonResult: JSX.Element[] = [];
-    if (!modified || !original) return comparisonResult;
+    if (!modified) return comparisonResult;
+
+    // Add this check to handle null original
+    if (original === null) {
+      // If original is null, treat all modified items as additions
+      return modified.map((item) => {
+        const itemValue = getItemValue(item);
+        return (
+          <span style={{ backgroundColor: 'yellow' }}>
+            <span className="sr-only">Added: {itemValue}. End added.</span>
+            {itemValue}
+          </span>
+        );
+      });
+    }
 
     const maxLength = Math.max(original.length, modified.length);
     const dmp = new diff_match_patch();

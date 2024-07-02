@@ -228,7 +228,7 @@ const WizardEditProfile = forwardRef(
       });
 
       const anyProfRegTrue = Object.entries(editedProfessionalRegistrationFields).some(([index, item]) => {
-        const originalItem = originalProfessionalRegistrationFields[Number(index)];
+        const originalItem = originalProfessionalRegistrationFields?.[Number(index)];
         // if (!originalItem) return item === true; // new prof regs are not significant
         return item === true && originalItem && originalItem.is_significant;
       });
@@ -408,7 +408,7 @@ const WizardEditProfile = forwardRef(
               isSignificant !== undefined
                 ? (item.text !== originalFieldValue[index]?.text && item.is_significant === isSignificant) ||
                   (item.disabled === true && item.is_significant === isSignificant)
-                : item.text !== originalFieldValue[index]?.text || item.disabled === true;
+                : item.text !== originalFieldValue?.[index]?.text || item.disabled === true;
             initialEditStatus[index] = isEdited;
           });
 

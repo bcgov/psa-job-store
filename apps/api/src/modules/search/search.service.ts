@@ -318,7 +318,7 @@ export class SearchService {
         ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
         professional_registration_requirements: (
           profile.professional_registration_requirements as Prisma.JsonObject[]
-        ).map((pr) => pr.text),
+        )?.map((pr) => pr.text),
         preferences: profile.preferences,
         knowledge_skills_abilities: profile.knowledge_skills_abilities,
         willingness_statements: profile.willingness_statements,
