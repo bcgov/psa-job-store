@@ -37,7 +37,7 @@ import {
 import TextArea from 'antd/es/input/TextArea';
 import copy from 'copy-to-clipboard';
 import debounce from 'lodash.debounce';
-import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
+import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -293,6 +293,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       .filter((stream) => stream.stream.job_family_id === family.jobFamily.id)
       .map((stream) => stream.stream.id),
   }));
+  const prevProfessionsData = useRef(professionsData);
 
   const basicUseFormReturn = useForm<JobProfileValidationModel>({
     resolver: classValidatorResolver(JobProfileValidationModel),
@@ -730,105 +731,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         setValue('jobContext', jobProfileData.jobProfile.context.description);
       }
 
-      // Professions (assuming it's an array of jobFamily and jobStreams)
-      // if (jobProfileData.jobProfile.jobFamilies && jobProfileData.jobProfile.streams) {
-      //   const professionsData = jobProfileData.jobProfile.jobFamilies.map((family) => ({
-      //     jobFamily: family.jobFamily.id,
-      //     jobStreams: jobProfileData.jobProfile.streams
-      //       .filter((stream) => stream.stream.job_family_id === family.jobFamily.id)
-      //       .map((stream) => stream.stream.id),
-      //   }));
-
-      //   if (professionsData.length == 0) {
-      //     // set to [{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[]
-      //     setValue('professions', [{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[]);
-      //   } else {
-      //     setValue('professions', professionsData);
-      //   }
-
-      //   // professions: ,
-      // }
-
       // Profile Form
       if (jobProfileData.jobProfile.state) profileSetValue('state', jobProfileData.jobProfile.state);
 
       profileSetValue('overview.text', jobProfileData.jobProfile.overview as string);
       profileSetValue('program_overview.text', jobProfileData.jobProfile.program_overview as string);
-
-      // console.log(
-      //   'setting accountabilities: ',
-      //   jobProfileData.jobProfile.accountabilities.map(
-      //     (a) =>
-      //       ({
-      //         text: a.text,
-      //         nonEditable: a.is_readonly,
-      //         significant: a.is_significant,
-      //       }) as AccountabilityItem,
-      //   ),
-      // );
-      // profileSetValue(
-      //   'accountabilities',
-      //   jobProfileData.jobProfile.accountabilities.map(
-      //     (a) =>
-      //       ({
-      //         text: a.text,
-      //         nonEditable: a.is_readonly,
-      //         significant: a.is_significant,
-      //       }) as AccountabilityItem,
-      //   ),
-      // );
-      // profileSetValue(
-      //   'education',
-      //   jobProfileData.jobProfile.education?.map(
-      //     (r) =>
-      //       ({
-      //         text: r.text,
-      //         nonEditable: r.is_readonly,
-      //         significant: r.is_significant,
-      //       }) as AccountabilityItem,
-      //   ),
-      // );
-      // profileSetValue(
-      //   'job_experience',
-      //   jobProfileData.jobProfile.job_experience?.map(
-      //     (r) =>
-      //       ({
-      //         text: r.text,
-      //         nonEditable: r.is_readonly,
-      //         significant: r.is_significant,
-      //       }) as AccountabilityItem,
-      //   ),
-      // );
-      // profileSetValue(
-      //   'professional_registration_requirements',
-      //   jobProfileData.jobProfile.professional_registration_requirements.map((r: any) => ({ text: r })),
-      // );
-      // profileSetValue(
-      //   'optional_requirements',
-      //   jobProfileData.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
-      // );
-      // profileSetValue(
-      //   'preferences',
-      //   jobProfileData.jobProfile.preferences.map((p: any) => ({ text: p })),
-      // );
-      // profileSetValue(
-      //   'optional_requirements',
-      //   jobProfileData.jobProfile.knowledge_skills_abilities.map((k: any) => ({ text: k })),
-      // );
-      // profileSetValue(
-      //   'willingness_statements',
-      //   jobProfileData.jobProfile.willingness_statements.map((w: any) => ({ text: w })),
-      // );
-      // profileSetValue(
-      //   'security_screenings',
-      //   jobProfileData.jobProfile.security_screenings.map(
-      //     (s) =>
-      //       ({
-      //         text: s.text,
-      //         nonEditable: s.is_readonly,
-      //       }) as SecurityScreeningItem,
-      //   ),
-      // );
 
       const allReportsToValue = jobProfileData.jobProfile.all_reports_to;
       setValue('all_reports_to', allReportsToValue);
@@ -1346,10 +1253,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [createJobProfile] = useCreateOrUpdateJobProfileMutation();
 
   function transformFormDataToApiSchema(formData: any): CreateJobProfileInput {
-    // console.log(
-    //   'transformFormDataToApiSchema, formData.professional_registration_requirements: ',
-    //   formData.professional_registration_requirements,
-    // );
     return {
       data: {
         state: formData.state,
@@ -1385,6 +1288,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             text: a.text,
             is_readonly: a.nonEditable,
             is_significant: a.is_significant,
+            tc_is_readonly: a.tc_is_readonly,
           }))
           .filter((acc: any) => acc.text.trim() !== ''),
         optional_requirements: formData.optional_requirements
@@ -1732,6 +1636,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   //   selectedProfession.map((p) => p.jobStreams).flat(),
   // );
 
+  // user removed family or stream - remove the professional requirements that no longer apply
   const handleStreamOrFamilyRemoval = useCallback(() => {
     if (!professionalRequirementsPickerData) return;
 
@@ -1753,7 +1658,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const idsToRemove = professionalRegistrationRequirementsFields
       .filter((field) => {
         // console.log('checking field: ', field);
-        if (field.is_readonly) {
+        if (field.tc_is_readonly) {
           // console.log('is readonly');
           const item = professionalRequirementsPickerData.requirementsWithoutReadOnly.find(
             (data: any) => data.text === field.text,
@@ -1830,7 +1735,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // console.log('idsToRemove: ', idsToRemove);
 
     const indexesToRemove = idsToRemove.map((text) =>
-      professionalRegistrationRequirementsFields.findIndex((field) => field.is_readonly && field.text === text),
+      professionalRegistrationRequirementsFields.findIndex((field) => field.tc_is_readonly && field.text === text),
     );
 
     // console.log('REMOVING indexesToRemove: ', indexesToRemove);
@@ -1858,8 +1763,30 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   ]);
 
   useEffect(() => {
-    handleStreamOrFamilyRemoval();
-  }, [handleStreamOrFamilyRemoval]);
+    // console.log('selectedProfession change');
+    const hasRemoval = (prev: any, current: any) => {
+      if (!prev || !current) return false;
+      if (prev.length > current.length) return true;
+      return prev.some((prevItem: any, index: any) => {
+        const currentItem = current[index];
+        if (!currentItem) return true;
+        if (prevItem.jobFamily !== currentItem.jobFamily) return true;
+        return prevItem.jobStreams.length > currentItem.jobStreams.length;
+      });
+    };
+
+    const removed = hasRemoval(prevProfessionsData.current, selectedProfession);
+    // console.log('removed: ', prevProfessionsData.current, selectedProfession, removed);
+    if (removed) {
+      handleStreamOrFamilyRemoval();
+    }
+
+    // Update the ref with the new value
+    // console.log('SET: ', prevProfessionsData.current, selectedProfession);
+    prevProfessionsData.current = JSON.parse(JSON.stringify(selectedProfession));
+  }, [selectedProfession, handleStreamOrFamilyRemoval]);
+
+  // console.log('selectedProfession:', selectedProfession);
 
   // user changed classificaiton or job family - update the professional requirements based on the new selection
   const updateProfessionalRegistrationrequirements = (professionalRequirementsPickerDataIn?: any) => {
@@ -1882,6 +1809,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
     // Add items with non-null classification to the fields array
     const newFields = itemsWithClassification.map((item: any) => ({
+      tc_is_readonly: true,
       is_readonly: true,
       text: item.text,
     }));
@@ -1893,7 +1821,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const uniqueNewFields = newFields.filter(
       (newField: any) =>
         !professionalRegistrationRequirementsFields.some(
-          (field) => field.text === newField.text && field.is_readonly === true,
+          (field) => field.text === newField.text && field.tc_is_readonly === true,
         ),
     );
     // console.log('addAction: ', uniqueNewFields);
@@ -3115,7 +3043,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           // set this item as significant as well
                                           if (args.target.checked) {
                                             profileSetValue(
-                                              `professional_registration_requirements.${index}.is_significant`,
+                                              `professional_registration_requirements.${index}.nonEditable`,
                                               true,
                                             );
                                           }
@@ -3153,14 +3081,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               </Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  {field.is_readonly && (
+                                  {field.tc_is_readonly && (
                                     <div style={{ display: 'flex' }}>
                                       <Typography.Text style={{ flexGrow: 1, width: 0 }}>
                                         {field.text?.toString()}
                                       </Typography.Text>
                                     </div>
                                   )}
-                                  <Form.Item style={{ display: field.is_readonly ? 'none' : 'block' }}>
+                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
                                     <Controller
                                       control={profileControl}
                                       name={`professional_registration_requirements.${index}.text`}
@@ -3186,13 +3114,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                                 <Col flex="none">
                                   <ContextOptionsReadonly
-                                    isReadonly={field.is_readonly ?? false}
+                                    isReadonly={field.tc_is_readonly ?? false}
                                     onEdit={() => {
-                                      console.log('switch out of readonly: ', index);
-
                                       updateProfessionalRegistrationRequirement(index, {
                                         ...professionalRegistrationRequirementsFields[index],
-                                        is_readonly: false,
+                                        tc_is_readonly: false,
                                       });
                                       // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
                                     }}
