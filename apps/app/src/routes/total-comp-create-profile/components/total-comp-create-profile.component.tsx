@@ -575,6 +575,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       markAllSignificantEdu: false,
       markAllNonEditableProReg: false,
       markAllSignificantProReg: false,
+      markAllNonEditableSecurityScreenings: false,
+      markAllSignificantSecurityScreenings: false,
       markAllNonEditableJob_experience: false,
       markAllSignificantJob_experience: false,
       markAllNonEditableSec: false,
@@ -801,6 +803,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantProReg ?? false,
       );
       profileSetValue(
+        'markAllSignificantSecurityScreenings',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantSecurityScreenings ?? false,
+      );
+      profileSetValue(
         'markAllNonEditableJob_experience',
         jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableJob_experience ?? false,
       );
@@ -895,6 +901,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     profileSetValue('professional_registration_requirements', updated as AccountabilityItem[]);
   };
 
+  const updateSignificantSecurityScreenings = (is_significant: boolean) => {
+    const updated = securityScreenings?.map((field) => ({
+      ...field,
+      is_significant: is_significant,
+    }));
+    profileSetValue('security_screenings', updated as AccountabilityItem[]);
+  };
+
   const updateNonEditableEdu = (nonEditable: boolean) => {
     const updatedExperiences = educations?.map((field) => ({
       ...field,
@@ -944,6 +958,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const markAllSignificantEdu = profileWatch('markAllSignificantEdu');
   const markAllNonEditableProReg = profileWatch('markAllNonEditableProReg');
   const markAllSignificantProReg = profileWatch('markAllSignificantProReg');
+  const markAllNonEditableSecurityScreenings = profileWatch('markAllNonEditableSecurityScreenings');
+  const markAllSignificantSecurityScreenings = profileWatch('markAllSignificantSecurityScreenings');
   const markAllNonEditableJob_experience = profileWatch('markAllNonEditableJob_experience');
   const markAllSignificantJob_experience = profileWatch('markAllSignificantJob_experience');
 
@@ -1106,6 +1122,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     append: appendSecurityScreening,
     remove: removeSecurityScreening,
     move: moveSecurityScreening,
+    update: updateSecurityScreeining,
   } = useFieldArray({
     control: profileControl,
     name: 'security_screenings',
@@ -1334,6 +1351,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           markAllSignificantEdu: formData.markAllSignificantEdu,
           markAllNonEditableProReg: formData.markAllNonEditableProReg,
           markAllSignificantProReg: formData.markAllSignificantProReg,
+          markAllNonEditableSecurityScreenings: formData.markAllNonEditableSecurityScreenings,
+          markAllSignificantSecurityScreenings: formData.markAllSignificantSecurityScreenings,
           markAllNonEditableJob_experience: formData.markAllNonEditableJob_experience,
           markAllSignificantJob_experience: formData.markAllSignificantJob_experience,
 
@@ -1678,7 +1697,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         // console.log('checking field: ', field);
         if (field.tc_is_readonly) {
           // console.log('is readonly');
-          const item = pickerData.requirementsWithoutReadOnly.find((data: any) => data.text === field.text);
+          const item = pickerData.requirementsWithoutReadOnly.professionalRegistrationRequirements.find(
+            (data: any) => data.text === field.text,
+          );
 
           // console.log('found item by text: ', item);
 
@@ -3501,12 +3522,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   <Col>
                                     <Controller
                                       control={profileControl}
-                                      name="markAllNonEditableSec"
+                                      name="markAllNonEditableSecurityScreenings"
                                       render={({ field }) => (
                                         <Checkbox
                                           {...field}
-                                          checked={markAllNonEditableSec}
-                                          disabled={securityScreeningsFields.length === 0}
+                                          checked={markAllNonEditableSecurityScreenings}
+                                          disabled={professionalRegistrationRequirementsFields.length === 0}
                                           onChange={(e) => {
                                             field.onChange(e.target.checked);
                                             updateNonEditableSec(e.target.checked);
@@ -3514,6 +3535,33 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         >
                                           Mark all as non-editable
                                           <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllSignificantSecurityScreenings"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={
+                                            markAllSignificantSecurityScreenings || markAllNonEditableSecurityScreenings
+                                          }
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateSignificantSecurityScreenings(e.target.checked);
+                                          }}
+                                          disabled={
+                                            markAllNonEditableSecurityScreenings ||
+                                            securityScreeningsFields.length === 0
+                                          }
+                                        >
+                                          Mark all as significant
+                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
                                             <InfoCircleOutlined style={{ marginLeft: 8 }} />
                                           </Tooltip>
                                         </Checkbox>
@@ -3558,11 +3606,37 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       </Checkbox>
                                     )}
                                   />
+
+                                  <Controller
+                                    name={`security_screenings.${index}.is_significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantSecurityScreenings', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={securityScreenings?.[index].nonEditable}
+                                        checked={value || securityScreenings?.[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
                                 </div>
                               </Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  <Form.Item>
+                                  {field.tc_is_readonly && (
+                                    <div style={{ display: 'flex' }}>
+                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                        {field.text?.toString()}
+                                      </Typography.Text>
+                                    </div>
+                                  )}
+                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
                                     <Controller
                                       control={profileControl}
                                       name={`security_screenings.${index}.text`}
@@ -3583,13 +3657,27 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button
+                                  <ContextOptionsReadonly
+                                    isReadonly={field.tc_is_readonly ?? false}
+                                    onEdit={() => {
+                                      updateSecurityScreeining(index, {
+                                        ...securityScreeningsFields[index],
+                                        tc_is_readonly: false,
+                                      });
+                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                    }}
+                                    onRemove={() => {
+                                      removeSecurityScreening(index);
+                                      triggerProfileValidation();
+                                    }}
+                                  />
+                                  {/* <Button
                                     icon={<DeleteOutlined />}
                                     onClick={() => {
                                       removeSecurityScreening(index);
                                       triggerProfileValidation();
                                     }}
-                                  />
+                                  /> */}
                                 </Col>
                               </Row>
                             </Col>
@@ -3597,18 +3685,33 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         ))}
                         <WizardValidationError formErrors={profileFormErrors} fieldName="security_screenings" />
                         <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() =>
-                              appendSecurityScreening({
-                                text: '',
-                                nonEditable: markAllNonEditableSec,
-                              })
-                            }
-                            icon={<PlusOutlined />}
-                          >
-                            Add a security screenings requirement
-                          </Button>
+                          <Row>
+                            <Col>
+                              <WizardPicker
+                                data={pickerData?.requirementsWithoutReadOnly?.securityScreenings}
+                                fields={securityScreenings}
+                                addAction={appendSecurityScreening}
+                                removeAction={removeSecurityScreening}
+                                triggerValidation={triggerProfileValidation}
+                                title="Security screenings"
+                                buttonText="Browse and add security screenings"
+                              />
+                            </Col>
+                            <Col>
+                              <Button
+                                type="link"
+                                onClick={() =>
+                                  appendSecurityScreening({
+                                    text: '',
+                                    nonEditable: markAllNonEditableSec,
+                                  })
+                                }
+                                icon={<PlusOutlined />}
+                              >
+                                Add a custom requirement
+                              </Button>
+                            </Col>
+                          </Row>
                         </Form.Item>
                       </Form.Item>
                     </Col>

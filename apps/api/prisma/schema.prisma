@@ -304,6 +304,28 @@ model ProfessionalRegistrationRequirement {
   @@map("professional_registration_requirement")
 }
 
+model SecurityScreeningBase {
+  id         Int                 @id @default(autoincrement())
+  text       String              @unique
+  screenings SecurityScreening[]
+
+  @@map("security_screenings_base")
+}
+
+model SecurityScreening {
+  id            Int                   @id @default(autoincrement())
+  screening     SecurityScreeningBase @relation(fields: [screening_id], references: [id])
+  screening_id  Int
+  job_family    JobProfileJobFamily?  @relation(fields: [job_family_id], references: [id])
+  job_family_id Int?
+
+  organization    Organization? @relation(fields: [organization_id], references: [id])
+  organization_id String?
+
+  @@unique([screening_id, job_family_id, organization_id])
+  @@map("security_screening")
+}
+
 model JobProfileOrganization {
   organization    Organization @relation(fields: [organization_id], references: [id])
   organization_id String
@@ -331,6 +353,7 @@ model JobProfileJobFamily {
   jobProfiles                         JobProfileJobFamilyLink[]
   JobProfileStream                    JobProfileStream[]
   ProfessionalRegistrationRequirement ProfessionalRegistrationRequirement[]
+  SecurityScreening                   SecurityScreening[]
 
   @@map("job_profile_job_family")
 }
@@ -485,6 +508,7 @@ model Organization {
   departments                         Department[]
   JobProfileOrganization              JobProfileOrganization[]
   ProfessionalRegistrationRequirement ProfessionalRegistrationRequirement[]
+  SecurityScreening                   SecurityScreening[]
 
   @@map("organization")
 }

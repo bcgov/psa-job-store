@@ -32,6 +32,9 @@ class RequirementsWithoutReadOnlyResult {
 
   @Field(() => [RequirementWithoutReadOnly], { nullable: true })
   willingnessStatements?: RequirementWithoutReadOnly[];
+
+  @Field(() => [RequirementWithoutReadOnly], { nullable: true })
+  securityScreenings?: RequirementWithoutReadOnly[];
 }
 
 @ObjectType()

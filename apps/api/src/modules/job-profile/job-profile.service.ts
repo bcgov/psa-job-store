@@ -1340,6 +1340,7 @@ export class JobProfileService {
     });
 
     // this will be the return value
+    const securityScreeningMap = new Map<string, RequirementEntry>();
     const professionalRegistrationMap = new Map<string, RequirementEntry>();
     const preferencesMap = new Map<string, RequirementEntry>();
     const ksaMap = new Map<string, RequirementEntry>();
@@ -1435,6 +1436,47 @@ export class JobProfileService {
       ];
     }
 
+    // Get security screenings by matching family/ministry
+    const securityScreenings = await this.prisma.securityScreening.findMany({
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                organization_id: null,
+              },
+              {
+                job_family_id: null,
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                organization_id: null,
+              },
+              {
+                job_family_id: { in: jobFamilyIds },
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                organization_id: { in: ministryIds },
+              },
+              {
+                job_family_id: { in: jobFamilyIds },
+              },
+            ],
+          },
+        ],
+      },
+      include: {
+        screening: true,
+      },
+    });
+
     // build return for auto-populated requirements
     // we selected by job family and classification above, include the job family in response here, if applicable
     professionalRegistrationRequirements.forEach((registration) => {
@@ -1456,6 +1498,25 @@ export class JobProfileService {
         const entry = professionalRegistrationMap.get(text);
         if (registration.job_family_id && !entry.jobFamilies.some((jf) => jf.id === registration.job_family_id)) {
           entry.jobFamilies.push({ id: registration.job_family_id });
+        }
+      }
+    });
+
+    // build return for security screenings
+    securityScreenings.forEach((screening) => {
+      const text = screening.screening.text;
+      if (!securityScreeningMap.has(text)) {
+        securityScreeningMap.set(text, {
+          text,
+          jobFamilies: screening.job_family_id ? [{ id: screening.job_family_id }] : [],
+          streams: [],
+          classification: null,
+          organization: screening.organization_id ? { id: screening.organization_id } : null,
+        });
+      } else {
+        const entry = securityScreeningMap.get(text);
+        if (screening.job_family_id && !entry.jobFamilies.some((jf) => jf.id === screening.job_family_id)) {
+          entry.jobFamilies.push({ id: screening.job_family_id });
         }
       }
     });
@@ -1502,6 +1563,7 @@ export class JobProfileService {
       preferences: processMapToResult(preferencesMap),
       knowledgeSkillsAbilities: processMapToResult(ksaMap),
       willingnessStatements: processMapToResult(willingnessStatementsMap),
+      securityScreenings: processMapToResult(securityScreeningMap),
     };
 
     function processMapToResult(map: Map<string, RequirementEntry>) {

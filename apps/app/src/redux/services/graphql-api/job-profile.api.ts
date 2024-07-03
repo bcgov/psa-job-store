@@ -857,6 +857,22 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     id
                   }
                 }
+                securityScreenings {
+                  text
+                  jobFamilies {
+                    id
+                  }
+                  streams {
+                    id
+                  }
+                  classification {
+                    id
+                    employee_group_id
+                  }
+                  organization {
+                    id
+                  }
+                }
               }
             }
           `,
