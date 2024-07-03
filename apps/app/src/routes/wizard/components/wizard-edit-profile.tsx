@@ -44,9 +44,10 @@ interface WizardEditProfileProps {
 
 enum reasons {
   ACCOUNTABILITIES = 'Changes in Accountabilities',
-  EDUCATION = 'Changes in Education', // Added for demonstration
-  JOB_EXPERIENCE = 'Changes in Job Experience', // Added for demonstration
-  SECURITY_SCREENINGS = 'Changes in Security Screenings', // Added for demonstration
+  EDUCATION = 'Changes in Education',
+  JOB_EXPERIENCE = 'Changes in Job Experience',
+  SECURITY_SCREENINGS = 'Changes in Security Screenings',
+  PROFESSIONAL_REGISTRATIONS = 'Changes in Professional Registration and Certification Requirements',
 }
 
 type sectionMap = {
@@ -98,12 +99,14 @@ const WizardEditProfile = forwardRef(
     const acctSection = useRef<null | HTMLDivElement>(null);
     const educationSection = useRef<null | HTMLDivElement>(null);
     const workExperienceSection = useRef<null | HTMLDivElement>(null);
+    const professionalRegSection = useRef<null | HTMLDivElement>(null);
     const securitySection = useRef<null | HTMLDivElement>(null);
     const sections: sectionMap = {
       [reasons.ACCOUNTABILITIES]: acctSection,
       [reasons.EDUCATION]: educationSection,
       [reasons.JOB_EXPERIENCE]: workExperienceSection,
       [reasons.SECURITY_SCREENINGS]: securitySection,
+      [reasons.PROFESSIONAL_REGISTRATIONS]: professionalRegSection,
     };
     const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
 
@@ -223,12 +226,19 @@ const WizardEditProfile = forwardRef(
         return item === true && originalItem && originalItem.is_significant;
       });
 
+      const anyProfRegTrue = Object.entries(editedProfessionalRegistrationFields).some(([index, item]) => {
+        const originalItem = originalProfessionalRegistrationFields?.[Number(index)];
+        // if (!originalItem) return item === true; // new prof regs are not significant
+        return item === true && originalItem && originalItem.is_significant;
+      });
+
       const anySsecurityScreeningsTrue = Object.values(editedSecurityScreeningsFields).some((item) => item === true);
       const verificationReasons = [];
       anyReqAccsTrue && verificationReasons.push(reasons.ACCOUNTABILITIES);
       anyEducationTrue && verificationReasons.push(reasons.EDUCATION);
       anyRelWorkTrue && verificationReasons.push(reasons.JOB_EXPERIENCE);
       anySsecurityScreeningsTrue && verificationReasons.push(reasons.SECURITY_SCREENINGS);
+      anyProfRegTrue && verificationReasons.push(reasons.PROFESSIONAL_REGISTRATIONS);
       const verificationRequired = verificationReasons.length > 0;
       setVerificationNeededReasons(verificationReasons);
       setRequiresVerification(verificationRequired);
@@ -243,6 +253,8 @@ const WizardEditProfile = forwardRef(
       originalMinReqFields,
       originalRelWorkFields,
       resetComplete,
+      editedProfessionalRegistrationFields,
+      originalProfessionalRegistrationFields,
     ]);
 
     useEffect(() => {
@@ -395,7 +407,7 @@ const WizardEditProfile = forwardRef(
               isSignificant !== undefined
                 ? (item.text !== originalFieldValue[index]?.text && item.is_significant === isSignificant) ||
                   (item.disabled === true && item.is_significant === isSignificant)
-                : item.text !== originalFieldValue[index]?.text || item.disabled === true;
+                : item.text !== originalFieldValue?.[index]?.text || item.disabled === true;
             initialEditStatus[index] = isEdited;
           });
 
@@ -448,6 +460,9 @@ const WizardEditProfile = forwardRef(
           professional_registration_requirements: getInitialFieldValue(
             effectiveData.professional_registration_requirements,
           ),
+          // professional_registration_requirements: getInitialFieldValue(
+          //   effectiveData.professional_registration_requirements,
+          // ).map((item) => ({professional_registration_requirement:item})),
           preferences: getInitialFieldValue(effectiveData.preferences),
           knowledge_skills_abilities: getInitialFieldValue(effectiveData.knowledge_skills_abilities),
           willingness_statements: getInitialFieldValue(effectiveData.willingness_statements),
@@ -747,6 +762,7 @@ const WizardEditProfile = forwardRef(
                 editedEducationFields={editedMinReqFields}
                 setEditedEducationFields={setEditedMinReqFields}
                 originalRelatedExperienceFields={originalRelWorkFields}
+                professionalRegSectionRef={professionalRegSection}
                 relatedExperienceSectionRef={workExperienceSection}
                 editedRelatedExperienceFields={editedRelWorkFields}
                 setEditedRelatedExperienceFields={setEditedRelWorkFields}

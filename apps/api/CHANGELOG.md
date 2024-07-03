@@ -1,5 +1,44 @@
 # api
 
+## 0.3.0
+
+### Minor Changes
+
+- [#551](https://github.com/bcgov/psa-job-store/pull/551) [`8909cb3e463874bc25db8de83a6f7f4f36ecf954`](https://github.com/bcgov/psa-job-store/commit/8909cb3e463874bc25db8de83a6f7f4f36ecf954) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-741 🔴 Automatically populate professional registration fields based on classification
+
+### Patch Changes
+
+- [#524](https://github.com/bcgov/psa-job-store/pull/524) [`866fdaf08947042a279f13442dc11c1147a723e2`](https://github.com/bcgov/psa-job-store/commit/866fdaf08947042a279f13442dc11c1147a723e2) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-703 add comment submission for re-validation, store comments in comment table
+
+- [#522](https://github.com/bcgov/psa-job-store/pull/522) [`bf5c9d6b9e2a061e1dcd073ab42d1740fbae70bf`](https://github.com/bcgov/psa-job-store/commit/bf5c9d6b9e2a061e1dcd073ab42d1740fbae70bf) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-753 HM users can access draft profiles through direct URL
+
+- [#535](https://github.com/bcgov/psa-job-store/pull/535) [`1d6cdd7ae2969eca1f4a8fe15285c941f2353d07`](https://github.com/bcgov/psa-job-store/commit/1d6cdd7ae2969eca1f4a8fe15285c941f2353d07) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-746 change sort order of classifications
+
+- [#547](https://github.com/bcgov/psa-job-store/pull/547) [`1465310f7ead81362ea15f431f486182179bb15c`](https://github.com/bcgov/psa-job-store/commit/1465310f7ead81362ea15f431f486182179bb15c) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Improve API performance by consolidating user sync into its own standalone process.
+
+- [#523](https://github.com/bcgov/psa-job-store/pull/523) [`df0af1b67228c3264c9ead3c10117ccfd75f848f`](https://github.com/bcgov/psa-job-store/commit/df0af1b67228c3264c9ead3c10117ccfd75f848f) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-720 Added missing position request information to downloaded job profile
+
+  - Fixed job profile downloads from total comp
+
+- [#526](https://github.com/bcgov/psa-job-store/pull/526) [`54478478a94d8dc56273d7f58874580ddde0d86c`](https://github.com/bcgov/psa-job-store/commit/54478478a94d8dc56273d7f58874580ddde0d86c) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-706 add comments to classification SR details
+
+- Updated dependencies [[`866fdaf08947042a279f13442dc11c1147a723e2`](https://github.com/bcgov/psa-job-store/commit/866fdaf08947042a279f13442dc11c1147a723e2), [`df0af1b67228c3264c9ead3c10117ccfd75f848f`](https://github.com/bcgov/psa-job-store/commit/df0af1b67228c3264c9ead3c10117ccfd75f848f)]:
+  - common-kit@0.0.1
+
+## 0.2.0
+
+### Minor Changes
+
+- [#518](https://github.com/bcgov/psa-job-store/pull/518) [`88ff93754a8543b8b1d2ba07b6eba6f798ef743e`](https://github.com/bcgov/psa-job-store/commit/88ff93754a8543b8b1d2ba07b6eba6f798ef743e) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-654 Improve error handling for position creation
+
+### Patch Changes
+
+- [#519](https://github.com/bcgov/psa-job-store/pull/519) [`a28b6d1c5970196bccd030afbdb1ed91f3ca3ccd`](https://github.com/bcgov/psa-job-store/commit/a28b6d1c5970196bccd030afbdb1ed91f3ca3ccd) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-707 add titles to downloads. Change all downloads to use same component
+
+- [#520](https://github.com/bcgov/psa-job-store/pull/520) [`b3e0b6020a17ce8d59d613c8dc7b3f14e079f715`](https://github.com/bcgov/psa-job-store/commit/b3e0b6020a17ce8d59d613c8dc7b3f14e079f715) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Expand application to allow for additional classifications.
+
+- [#545](https://github.com/bcgov/psa-job-store/pull/545) [`cb5a8883f0652177b93018cd6cbdb27d2c45f5c8`](https://github.com/bcgov/psa-job-store/commit/cb5a8883f0652177b93018cd6cbdb27d2c45f5c8) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Improve API performance by consolidating user sync into its own standalone process.
+
 ## 0.1.1
 
 ### Patch Changes

@@ -17,6 +17,16 @@ export interface ClassificationModel {
   grade: string;
 }
 
+export interface CommentModel {
+  id: string;
+  author_id: string;
+  record_id: string;
+  record_type: string;
+  text: string;
+  created_at: string;
+  updated_at?: string;
+}
+
 export interface ClassificationModelWrapped {
   classification: {
     id: string;
@@ -76,6 +86,14 @@ export interface GetClassificationResponse {
   classification: ClassificationModel;
 }
 
+export interface GetCommentsResponse {
+  comments: CommentModel[];
+}
+
+export interface GetCommentResponse {
+  comment: CommentModel;
+}
+
 interface JobFamilyDetail {
   id: number;
   name: string;
@@ -132,6 +150,8 @@ export interface JobProfileModel {
     markAllSignificant: boolean;
     markAllNonEditableEdu: boolean;
     markAllSignificantEdu: boolean;
+    markAllNonEditableProReg: boolean;
+    markAllSignificantProReg: boolean;
     markAllNonEditableJob_experience: boolean;
     markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;
@@ -191,6 +211,7 @@ export interface EditFieldModel {
 export interface AccountabilitiesModel {
   text: string | TrackedFieldArrayItem;
   is_readonly?: boolean;
+  tc_is_readonly?: boolean;
   is_significant?: boolean;
 
   // HM view
@@ -216,6 +237,7 @@ export class TrackedFieldArrayItem {
   isCustom?: boolean;
   is_significant?: boolean;
   is_readonly?: boolean;
+  tc_is_readonly?: boolean;
 
   // total comp
   nonEditable?: boolean;

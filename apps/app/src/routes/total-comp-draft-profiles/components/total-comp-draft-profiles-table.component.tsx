@@ -274,23 +274,14 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
         }
       },
     },
-    state === 'DRAFT'
-      ? {
-          sorter: allowSorting,
-          defaultSortOrder: getSortOrder('updated_by'),
-          title: 'Modified By',
-          dataIndex: 'updated_by',
-          key: 'updated_by',
-          render: (updated_by: any) => updated_by?.name,
-        }
-      : {
-          sorter: allowSorting,
-          defaultSortOrder: getSortOrder('published_by'),
-          title: 'Published by',
-          dataIndex: 'published_by',
-          key: 'published_by',
-          render: (published_by: any) => published_by?.name,
-        },
+    {
+      sorter: allowSorting,
+      defaultSortOrder: getSortOrder('updated_by'),
+      title: 'Modified By',
+      dataIndex: 'updated_by',
+      key: 'updated_by',
+      render: (updated_by: any) => updated_by?.name,
+    },
     {
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('updated_at'),

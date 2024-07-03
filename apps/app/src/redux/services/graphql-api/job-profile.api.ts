@@ -762,6 +762,58 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         },
       }),
     }),
+
+    getRequirementsWithoutReadOnly: build.query({
+      query: (args: {
+        jobFamilyIds: number[];
+        jobFamilyStreamIds: number[];
+        classificationId?: string | null;
+        classificationEmployeeGroupId?: string | null;
+        ministryIds?: string[];
+        jobFamilyWithNoStream?: number[];
+        excludeProfileId?: number;
+      }) => {
+        return {
+          document: gql`
+            query RequirementsWithoutReadOnly(
+              $jobFamilyIds: [Int!]!
+              $jobFamilyStreamIds: [Int!]!
+              $classificationId: String
+              $classificationEmployeeGroupId: String
+              $ministryIds: [String!]
+              $jobFamilyWithNoStream: [Int!]
+              $excludeProfileId: Int
+            ) {
+              requirementsWithoutReadOnly(
+                jobFamilyIds: $jobFamilyIds
+                jobFamilyStreamIds: $jobFamilyStreamIds
+                classificationId: $classificationId
+                classificationEmployeeGroupId: $classificationEmployeeGroupId
+                ministryIds: $ministryIds
+                jobFamilyWithNoStream: $jobFamilyWithNoStream
+                excludeProfileId: $excludeProfileId
+              ) {
+                text
+                jobFamilies {
+                  id
+                }
+                streams {
+                  id
+                }
+                classification {
+                  id
+                  employee_group_id
+                }
+                organization {
+                  id
+                }
+              }
+            }
+          `,
+          variables: args,
+        };
+      },
+    }),
   }),
 });
 
@@ -794,4 +846,6 @@ export const {
 
   useGetJobProfileByNumberQuery,
   useLazyGetJobProfileByNumberQuery,
+
+  useGetRequirementsWithoutReadOnlyQuery,
 } = jobProfileApi;

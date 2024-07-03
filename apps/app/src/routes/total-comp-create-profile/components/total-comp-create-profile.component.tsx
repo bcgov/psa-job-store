@@ -37,7 +37,7 @@ import {
 import TextArea from 'antd/es/input/TextArea';
 import copy from 'copy-to-clipboard';
 import debounce from 'lodash.debounce';
-import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
+import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -70,6 +70,7 @@ import {
   useCreateOrUpdateJobProfileMutation,
   useDuplicateJobProfileMutation,
   useGetJobProfilesDraftsMinistriesQuery,
+  useGetRequirementsWithoutReadOnlyQuery,
   useLazyGetJobProfileQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
   useLazyIsJobProfileNumberAvailableQuery,
@@ -79,12 +80,14 @@ import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/or
 import { FormItem } from '../../../utils/FormItem';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
+import { ContextOptionsReadonly } from '../../wizard/components/context-options-readonly.component';
 import { IsIndigenousCompetency } from '../../wizard/components/is-indigenous-competency.component';
 import BehaviouralComptencyPicker from '../../wizard/components/wizard-behavioural-comptency-picker';
 import WizardOverview from '../../wizard/components/wizard-edit-profile-overview';
 import WizardProgramOverview from '../../wizard/components/wizard-edit-profile-program-overview';
 import WizardTitle from '../../wizard/components/wizard-edit-profile-title';
 import WizardValidationError from '../../wizard/components/wizard-edit-profile-validation-error';
+import WizardProfessionalRegistrationPicker from '../../wizard/components/wizard-professional-registration-picker';
 import JobStreamDiscipline from './jobstream-discipline.component';
 import ReorderButtons from './reorder-buttons';
 
@@ -290,6 +293,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       .filter((stream) => stream.stream.job_family_id === family.jobFamily.id)
       .map((stream) => stream.stream.id),
   }));
+  const prevProfessionsData = useRef(professionsData);
 
   const basicUseFormReturn = useForm<JobProfileValidationModel>({
     resolver: classValidatorResolver(JobProfileValidationModel),
@@ -413,6 +417,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   });
 
   const selectedProfession = watch('professions'); // This will watch the change of profession's value
+  const selectedMinistry = watch('ministries');
   const employeeGroup = watch('employeeGroup');
   // State to hold filtered classifications
   const [filteredClassifications, setFilteredClassifications] = useState([] as ClassificationModel[]);
@@ -483,9 +488,36 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   // END BASIC DETAILS FORM
 
+  const selectedClassificationId = watch('classification');
+  const allOrganizations = watch('all_organizations');
+
+  // PICKER DATA
+  const { data: professionalRequirementsPickerData, refetch: refetchProfessionalRequirementsPickerData } =
+    useGetRequirementsWithoutReadOnlyQuery(
+      {
+        jobFamilyIds: selectedProfession.map((p) => p.jobFamily),
+        jobFamilyStreamIds: selectedProfession.map((p) => p.jobStreams).flat(),
+        classificationId: selectedClassificationId && selectedClassificationId.split('.')[0],
+        classificationEmployeeGroupId: employeeGroup,
+        ministryIds: !allOrganizations ? selectedMinistry : undefined,
+        jobFamilyWithNoStream: selectedProfession.filter((p) => p.jobStreams.length === 0).map((p) => p.jobFamily),
+        excludeProfileId: jobProfileData?.jobProfile.id,
+      },
+      {
+        skip: !selectedClassificationId || !employeeGroup,
+      },
+    );
+  // console.log('render, selectedClassificationId: ', selectedClassificationId);
+  // console.log('professionalRequirementsPickerData:', professionalRequirementsPickerData);
+
   // PROFILE FORM
 
   // console.log('useForm? : ', jobProfileData?.jobProfile.accountabilities);
+
+  // console.log(
+  //   'jobProfileData?.jobProfile.professional_registration_requirements: ',
+  //   jobProfileData?.jobProfile.professional_registration_requirements,
+  // );
 
   const jobProfileUseFormReturn = useForm<JobProfileValidationModel>({
     resolver: classValidatorResolver(JobProfileValidationModel),
@@ -517,9 +549,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             is_significant: r.is_significant,
           }) as AccountabilityItem,
       ),
-      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements.map(
-        (r: any) => ({ text: r }),
-      ),
+      // professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements.map(
+      //   (bc) => ({
+      //     professional_registration_requirement: bc,
+      //   }),
+      // ),
+      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements,
       optional_requirements: jobProfileData?.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
       preferences: jobProfileData?.jobProfile.preferences.map((p: any) => ({ text: p })),
       knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities.map((k: any) => ({ text: k })),
@@ -538,6 +573,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       markAllSignificant: false,
       markAllNonEditableEdu: false,
       markAllSignificantEdu: false,
+      markAllNonEditableProReg: false,
+      markAllSignificantProReg: false,
       markAllNonEditableJob_experience: false,
       markAllSignificantJob_experience: false,
       markAllNonEditableSec: false,
@@ -586,8 +623,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     employee_group_ids: employeeGroupIds,
     effective_status: 'Active',
   });
-
-  const selectedClassificationId = watch('classification');
 
   const getAllTreeValues = useCallback((tree: any) => {
     const values: any = [];
@@ -696,105 +731,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         setValue('jobContext', jobProfileData.jobProfile.context.description);
       }
 
-      // Professions (assuming it's an array of jobFamily and jobStreams)
-      // if (jobProfileData.jobProfile.jobFamilies && jobProfileData.jobProfile.streams) {
-      //   const professionsData = jobProfileData.jobProfile.jobFamilies.map((family) => ({
-      //     jobFamily: family.jobFamily.id,
-      //     jobStreams: jobProfileData.jobProfile.streams
-      //       .filter((stream) => stream.stream.job_family_id === family.jobFamily.id)
-      //       .map((stream) => stream.stream.id),
-      //   }));
-
-      //   if (professionsData.length == 0) {
-      //     // set to [{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[]
-      //     setValue('professions', [{ jobFamily: -1, jobStreams: [] }] as ProfessionsModel[]);
-      //   } else {
-      //     setValue('professions', professionsData);
-      //   }
-
-      //   // professions: ,
-      // }
-
       // Profile Form
       if (jobProfileData.jobProfile.state) profileSetValue('state', jobProfileData.jobProfile.state);
 
       profileSetValue('overview.text', jobProfileData.jobProfile.overview as string);
       profileSetValue('program_overview.text', jobProfileData.jobProfile.program_overview as string);
-
-      // console.log(
-      //   'setting accountabilities: ',
-      //   jobProfileData.jobProfile.accountabilities.map(
-      //     (a) =>
-      //       ({
-      //         text: a.text,
-      //         nonEditable: a.is_readonly,
-      //         significant: a.is_significant,
-      //       }) as AccountabilityItem,
-      //   ),
-      // );
-      // profileSetValue(
-      //   'accountabilities',
-      //   jobProfileData.jobProfile.accountabilities.map(
-      //     (a) =>
-      //       ({
-      //         text: a.text,
-      //         nonEditable: a.is_readonly,
-      //         significant: a.is_significant,
-      //       }) as AccountabilityItem,
-      //   ),
-      // );
-      // profileSetValue(
-      //   'education',
-      //   jobProfileData.jobProfile.education?.map(
-      //     (r) =>
-      //       ({
-      //         text: r.text,
-      //         nonEditable: r.is_readonly,
-      //         significant: r.is_significant,
-      //       }) as AccountabilityItem,
-      //   ),
-      // );
-      // profileSetValue(
-      //   'job_experience',
-      //   jobProfileData.jobProfile.job_experience?.map(
-      //     (r) =>
-      //       ({
-      //         text: r.text,
-      //         nonEditable: r.is_readonly,
-      //         significant: r.is_significant,
-      //       }) as AccountabilityItem,
-      //   ),
-      // );
-      // profileSetValue(
-      //   'professional_registration_requirements',
-      //   jobProfileData.jobProfile.professional_registration_requirements.map((r: any) => ({ text: r })),
-      // );
-      // profileSetValue(
-      //   'optional_requirements',
-      //   jobProfileData.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
-      // );
-      // profileSetValue(
-      //   'preferences',
-      //   jobProfileData.jobProfile.preferences.map((p: any) => ({ text: p })),
-      // );
-      // profileSetValue(
-      //   'optional_requirements',
-      //   jobProfileData.jobProfile.knowledge_skills_abilities.map((k: any) => ({ text: k })),
-      // );
-      // profileSetValue(
-      //   'willingness_statements',
-      //   jobProfileData.jobProfile.willingness_statements.map((w: any) => ({ text: w })),
-      // );
-      // profileSetValue(
-      //   'security_screenings',
-      //   jobProfileData.jobProfile.security_screenings.map(
-      //     (s) =>
-      //       ({
-      //         text: s.text,
-      //         nonEditable: s.is_readonly,
-      //       }) as SecurityScreeningItem,
-      //   ),
-      // );
 
       const allReportsToValue = jobProfileData.jobProfile.all_reports_to;
       setValue('all_reports_to', allReportsToValue);
@@ -849,6 +790,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       profileSetValue(
         'markAllSignificantEdu',
         jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantEdu ?? false,
+      );
+      profileSetValue(
+        'markAllNonEditableProReg',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableProReg ?? false,
+      );
+      profileSetValue(
+        'markAllSignificantProReg',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantProReg ?? false,
       );
       profileSetValue(
         'markAllNonEditableJob_experience',
@@ -937,6 +886,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     profileSetValue('education', updatedExperiences as AccountabilityItem[]);
   };
 
+  const updateSignificantProReg = (is_significant: boolean) => {
+    const updated = professionalRegistrations?.map((field) => ({
+      ...field,
+      is_significant: is_significant,
+    }));
+    profileSetValue('professional_registration_requirements', updated as AccountabilityItem[]);
+  };
+
   const updateNonEditableEdu = (nonEditable: boolean) => {
     const updatedExperiences = educations?.map((field) => ({
       ...field,
@@ -944,6 +901,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       is_significant: nonEditable ? true : false,
     }));
     profileSetValue('education', updatedExperiences as AccountabilityItem[]);
+  };
+
+  const updateNonEditableProReg = (nonEditable: boolean) => {
+    const updated = professionalRegistrations?.map((field) => ({
+      ...field,
+      nonEditable: nonEditable,
+      is_significant: nonEditable ? true : false,
+    }));
+    profileSetValue('professional_registration_requirements', updated as AccountabilityItem[]);
   };
 
   const updateSignificantJob_experience = (is_significant: boolean) => {
@@ -971,12 +937,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     profileSetValue('security_screenings', securityScreeningsUpdated as SecurityScreeningItem[]);
   };
 
-  const allOrganizations = watch('all_organizations');
-
   const state = profileWatch('state');
   const markAllNonEditable = profileWatch('markAllNonEditable');
   const markAllNonEditableEdu = profileWatch('markAllNonEditableEdu');
   const markAllSignificantEdu = profileWatch('markAllSignificantEdu');
+  const markAllNonEditableProReg = profileWatch('markAllNonEditableProReg');
+  const markAllSignificantProReg = profileWatch('markAllSignificantProReg');
   const markAllNonEditableJob_experience = profileWatch('markAllNonEditableJob_experience');
   const markAllSignificantJob_experience = profileWatch('markAllSignificantJob_experience');
 
@@ -987,6 +953,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const accountabilities = profileWatch('accountabilities');
   const securityScreenings = profileWatch('security_screenings');
   const educations = profileWatch('education');
+  const professionalRegistrations = profileWatch('professional_registration_requirements');
   const job_experiences = profileWatch('job_experience');
 
   // education
@@ -1033,10 +1000,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     append: appendProfessionalRegistrationRequirement,
     remove: removeProfessionalRegistrationRequirement,
     move: moveProfessionalRegistrationRequirement,
+    update: updateProfessionalRegistrationRequirement,
   } = useFieldArray({
     control: profileControl,
     name: 'professional_registration_requirements',
   });
+
+  // console.log('professionalRegistrationRequirementsFields:', professionalRegistrationRequirementsFields);
 
   const handleProfessionalRegistrationRequirementsMove = (index: number, direction: 'up' | 'down') => {
     if (direction === 'up') {
@@ -1165,9 +1135,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   // useEffect to update the filteredClassifications when employeeGroup changes
   useEffect(() => {
-    console.log('employeeGroup: ', employeeGroup);
-    console.log('classificationsData?.classifications: ', classificationsData?.classifications);
-
     if (employeeGroup && classificationsData?.classifications) {
       const filtered = classificationsData.classifications.filter((c) => c.employee_group_id === employeeGroup);
       setFilteredClassifications(filtered);
@@ -1191,10 +1158,24 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       .join(', ');
   }, [selectedScopeId, jobProfileScopes]);
 
-  // minimum requirements that change in reponse to classification changes
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
   const { data: jobProfileMinimumRequirements } = useGetJobProfileMinimumRequirementsQuery();
+
+  const handleMinistriesChange = () => {
+    setTimeout(() => {
+      // console.log(
+      //   'refetching with: ',
+      //   selectedProfession.map((p) => p.jobFamily),
+      // );
+      refetchProfessionalRequirementsPickerData().then((r) => {
+        // console.log(
+        //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
+        //   professionalRequirementsPickerData,
+        //   r,
+        // );
+        updateProfessionalRegistrationrequirements(r.data);
+      });
+    }, 0);
+  };
 
   // Handler for classification change
   const handleClassificationChange = (newValue: string | null) => {
@@ -1204,11 +1185,44 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const filteredReportToRelationship = currentReportToRelationship.filter((r: string) => r !== newValue);
     setValue('reportToRelationship', filteredReportToRelationship);
 
-    if (selectedClassificationId) {
-      setIsModalVisible(true);
-    } else {
-      updateMinimumRequirementsFromClassification(newValue);
-    }
+    // if (selectedClassificationId) {
+    //   setIsModalVisible(true);
+    // } else {
+    updateMinimumRequirementsFromClassification(newValue);
+
+    setTimeout(() => {
+      // console.log(
+      //   'refetching with: ',
+      //   selectedProfession.map((p) => p.jobFamily),
+      // );
+      refetchProfessionalRequirementsPickerData().then((r) => {
+        // console.log(
+        //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
+        //   professionalRequirementsPickerData,
+        //   r,
+        // );
+        updateProfessionalRegistrationrequirements(r.data);
+      });
+    }, 0);
+    // }
+  };
+
+  const handleJobFamilyChange = async () => {
+    // console.log('handleJobFamilyChange');
+    setTimeout(() => {
+      // console.log(
+      //   'refetching with: ',
+      //   selectedProfession.map((p) => p.jobFamily),
+      // );
+      refetchProfessionalRequirementsPickerData().then((r) => {
+        // console.log(
+        //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
+        //   professionalRequirementsPickerData,
+        //   r,
+        // );
+        updateProfessionalRegistrationrequirements(r.data);
+      });
+    }, 0);
   };
 
   const updateMinimumRequirementsFromClassification = (classId: string | null) => {
@@ -1233,11 +1247,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       }
     }
   };
-  // Handler for confirming classification change
-  const handleConfirmChange = async () => {
-    setIsModalVisible(false);
-    updateMinimumRequirementsFromClassification(selectedClassificationId);
-  };
+
   // END PROFILE FORM
 
   const [createJobProfile] = useCreateOrUpdateJobProfileMutation();
@@ -1274,8 +1284,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           }))
           .filter((acc: { text: string }) => acc.text.trim() !== ''),
         professional_registration_requirements: formData.professional_registration_requirements
-          .map((p: any) => p.text)
-          .filter((acc: string) => acc.trim() !== ''),
+          .map((a: any) => ({
+            text: a.text,
+            is_readonly: a.nonEditable,
+            is_significant: a.is_significant,
+            tc_is_readonly: a.tc_is_readonly,
+          }))
+          .filter((acc: any) => acc.text.trim() !== ''),
         optional_requirements: formData.optional_requirements
           .map((o: any) => o.text)
           .filter((acc: string) => acc.trim() !== ''),
@@ -1299,6 +1314,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           markAllSignificant: formData.markAllSignificant,
           markAllNonEditableEdu: formData.markAllNonEditableEdu,
           markAllSignificantEdu: formData.markAllSignificantEdu,
+          markAllNonEditableProReg: formData.markAllNonEditableProReg,
+          markAllSignificantProReg: formData.markAllSignificantProReg,
           markAllNonEditableJob_experience: formData.markAllNonEditableJob_experience,
           markAllSignificantJob_experience: formData.markAllSignificantJob_experience,
 
@@ -1612,13 +1629,254 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   // console.log('basicFormState.errors: ', basicFormState.errors);
   // console.log('profileFormState.errors: ', profileFormState.errors);
 
+  // console.log(
+  //   'selectedProfession:',
+  //   selectedProfession,
+  //   selectedProfession.map((p) => p.jobFamily),
+  //   selectedProfession.map((p) => p.jobStreams).flat(),
+  // );
+
+  // user removed family or stream - remove the professional requirements that no longer apply
+  const handleStreamOrFamilyRemoval = useCallback(() => {
+    if (!professionalRequirementsPickerData) return;
+
+    // console.log('==REMOVAL handleStreamOrFamilyRemoval');
+
+    // // Get the updated list of professional registrations that would appear in the pick list
+    // console.log('professionalRequirementsPickerData:', professionalRequirementsPickerData);
+    // console.log('professionalRegistrationRequirementsFields: ', professionalRegistrationRequirementsFields);
+
+    // console.log('professionsFields??:', professionsFields);
+
+    const jobFamilyIds = selectedProfession.map((p) => p.jobFamily);
+    const jobFamilyStreamIds = selectedProfession.map((p) => p.jobStreams).flat();
+
+    // console.log('jobFamilyIds: ', jobFamilyIds);
+    // console.log('jobFamilyStreamIds: ', jobFamilyStreamIds);
+
+    // console.log('calculating idsToRemove');
+    const idsToRemove = professionalRegistrationRequirementsFields
+      .filter((field) => {
+        // console.log('checking field: ', field);
+        if (field.tc_is_readonly) {
+          // console.log('is readonly');
+          const item = professionalRequirementsPickerData.requirementsWithoutReadOnly.find(
+            (data: any) => data.text === field.text,
+          );
+
+          // console.log('found item by text: ', item);
+
+          if (item) {
+            const itemJobFamilies = item.jobFamilies.map((jf: any) => jf.id);
+            const itemStreams = item.streams.map((s: any) => s.id);
+
+            // console.log('itemJobFamilies: ', itemJobFamilies, jobFamilyIds);
+            // console.log('itemStreams: ', itemStreams, jobFamilyStreamIds);
+
+            const jobFamilyWithNoStream = selectedProfession
+              .filter((p) => p.jobStreams.length === 0)
+              .map((p) => p.jobFamily);
+            // console.log('jobFamilyWithNoStream: ', jobFamilyWithNoStream);
+
+            const isJobFamilyAllowed = itemJobFamilies.some((jf: any) => jobFamilyIds.includes(jf));
+            let isStreamAllowed = itemStreams.some((s: any) => jobFamilyStreamIds.includes(s));
+
+            // console.log('isJobFamilyAllowed: ', isJobFamilyAllowed);
+            // console.log('isStreamAllowed: ', isStreamAllowed);
+
+            // make an exception for job family with no stream
+            if (!isStreamAllowed) {
+              // console.log('checking jobFamilyWithNoStream');
+              isStreamAllowed = jobFamilyWithNoStream.some((jf: any) => itemJobFamilies.includes(jf));
+              // console.log('isStreamAllowed now: ', isStreamAllowed);
+            }
+
+            // if this item has classification set, then it was auto-added
+            // check separately if classification matches
+            // additionally, if the item also has job family set, ensure that matches as well
+
+            if (item.classification) {
+              // console.log('classificaiton present');
+              const itemClassificationId = item.classification.id;
+              const itemClassificationEmployeeGroup = item.classification.employee_group_id;
+              const itemJobFamilies = item.jobFamilies;
+
+              const selectedClassification = selectedClassificationId?.split('.')[0];
+              const selectedEmployeeGroup = selectedClassificationId?.split('.')[1];
+
+              // console.log('itemClassificationId: ', itemClassificationId);
+              // console.log('selectedClassification: ', selectedClassification);
+
+              const isClassificationAllowed = itemClassificationId === selectedClassification;
+              const isEmployeeGroupAllowed = itemClassificationEmployeeGroup === selectedEmployeeGroup;
+
+              // if job families are present, check that
+              const isJobFamilyAllowed =
+                itemJobFamilies.length === 0 || itemJobFamilies.some((jf: any) => jobFamilyIds.includes(jf.id));
+
+              // console.log('isClassificationAllowed: ', isClassificationAllowed);
+              // console.log('isEmployeeGroupAllowed: ', isEmployeeGroupAllowed);
+              // console.log('isJobFamilyAllowed: ', isJobFamilyAllowed);
+
+              return !(isClassificationAllowed && isEmployeeGroupAllowed && isJobFamilyAllowed);
+            }
+
+            return !(isJobFamilyAllowed && isStreamAllowed);
+          } else {
+            // console.log('item not found');
+            // item was not found - likely because we re-fetched the picklist data and it's no longer in the list
+            return true;
+          }
+        }
+        return false;
+      })
+      .map((field) => field.text);
+
+    // console.log('idsToRemove: ', idsToRemove);
+
+    const indexesToRemove = idsToRemove.map((text) =>
+      professionalRegistrationRequirementsFields.findIndex((field) => field.tc_is_readonly && field.text === text),
+    );
+
+    // console.log('REMOVING indexesToRemove: ', indexesToRemove);
+    // Remove the professional registrations that no longer apply
+    // per documentaion this should work without timeout, however for some reason it doesn't
+    // delay removal
+    if (indexesToRemove.length > 0) {
+      const timeoutId = setTimeout(() => {
+        removeProfessionalRegistrationRequirement(indexesToRemove);
+        triggerProfileValidation();
+      }, 0);
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+    // refetchProfessionalRequirementsPickerData();
+  }, [
+    professionalRegistrationRequirementsFields,
+    professionalRequirementsPickerData,
+    // professionsFields,
+    removeProfessionalRegistrationRequirement,
+    selectedProfession,
+    selectedClassificationId,
+    triggerProfileValidation,
+  ]);
+
+  useEffect(() => {
+    // console.log('selectedProfession change');
+    const hasRemoval = (prev: any, current: any) => {
+      if (!prev || !current) return false;
+      if (prev.length > current.length) return true;
+      return prev.some((prevItem: any, index: any) => {
+        const currentItem = current[index];
+        if (!currentItem) return true;
+        if (prevItem.jobFamily !== currentItem.jobFamily) return true;
+        return prevItem.jobStreams.length > currentItem.jobStreams.length;
+      });
+    };
+
+    const removed = hasRemoval(prevProfessionsData.current, selectedProfession);
+    // console.log('removed: ', prevProfessionsData.current, selectedProfession, removed);
+    if (removed) {
+      handleStreamOrFamilyRemoval();
+    }
+
+    // Update the ref with the new value
+    // console.log('SET: ', prevProfessionsData.current, selectedProfession);
+    prevProfessionsData.current = JSON.parse(JSON.stringify(selectedProfession));
+  }, [selectedProfession, handleStreamOrFamilyRemoval]);
+
+  // console.log('selectedProfession:', selectedProfession);
+
+  // user changed classificaiton or job family - update the professional requirements based on the new selection
+  const updateProfessionalRegistrationrequirements = (professionalRequirementsPickerDataIn?: any) => {
+    const useProfessionalRequirementsPickerData =
+      professionalRequirementsPickerDataIn || professionalRequirementsPickerData;
+
+    if (!useProfessionalRequirementsPickerData) return;
+
+    // NEW
+
+    // console.log('NEW - adding automatically');
+
+    // Find items with non-null classification - these should be added automatically based on classification selection
+    const itemsWithClassification = useProfessionalRequirementsPickerData.requirementsWithoutReadOnly.filter(
+      (comp: any) => comp.classification !== null,
+    );
+
+    // console.log('data.requirementsWithoutReadOnly: ', useProfessionalRequirementsPickerData.requirementsWithoutReadOnly);
+    // console.log('itemsWithClassification: ', itemsWithClassification);
+
+    // Add items with non-null classification to the fields array
+    const newFields = itemsWithClassification.map((item: any) => ({
+      tc_is_readonly: true,
+      is_readonly: true,
+      text: item.text,
+    }));
+
+    // console.log('newFields: ', newFields);
+
+    // console.log('filtering new fields over fields: ', professionalRegistrationRequirementsFields);
+    // Filter out items that already exist in the fields array
+    const uniqueNewFields = newFields.filter(
+      (newField: any) =>
+        !professionalRegistrationRequirementsFields.some(
+          (field) => field.text === newField.text && field.tc_is_readonly === true,
+        ),
+    );
+    // console.log('addAction: ', uniqueNewFields);
+
+    // Add the unique new fields to the existing fields array
+
+    const timeoutId = setTimeout(() => {
+      // console.log('append: ', uniqueNewFields);
+      appendProfessionalRegistrationRequirement(uniqueNewFields);
+      triggerProfileValidation();
+    }, 0);
+    return () => {
+      clearTimeout(timeoutId);
+    };
+
+    // END NEW
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  };
+  // , [
+  //   appendProfessionalRegistrationRequirement,
+  //   // professionalRegistrationRequirementsFields,
+  //   professionalRequirementsPickerData,
+  // ]);
+
+  // console.log('professionalRegistrationRequirementsFields: ', professionalRegistrationRequirementsFields);
+
+  // useEffect(() => {
+  //   // console.log('counter: ', counter);
+  //   if (counter == 1) removeProfessionalRegistrationRequirement(2);
+  // }, [counter, removeProfessionalRegistrationRequirement]);
+
+  const showWarningModal = (onOk: any, onCancel: any) => {
+    Modal.confirm({
+      title: 'Warning',
+      content:
+        "Changing 'Classification' would result in updates to some of the system generated fields in the 'Job Profile' page. Report-to relationship may also get updated to exclude this classification. Are you sure you want to continue?",
+      onOk,
+      onCancel,
+    });
+  };
+
   const tabItems = [
     {
       key: '1',
       label: 'Basic details',
       children: (
         <>
-          <Modal
+          {/* <Button
+            onClick={() => {
+              triggerProfileValidation();
+            }}
+          >
+            Validate
+          </Button> */}
+          {/* <Modal
             title="Confirm change"
             open={isModalVisible}
             onOk={handleConfirmChange}
@@ -1631,7 +1889,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               Profile’ page. Report-to relationship may also get updated to exclude this classification. Are you sure
               you want to continue?
             </p>
-          </Modal>
+          </Modal> */}
           <Row justify="center" style={{ margin: '1rem 0' }}>
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
               <Form
@@ -1707,13 +1965,21 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               <Select
                                 placeholder="Choose an employee group"
                                 onChange={(arg) => {
-                                  // console.log('arg employee group: ', arg);
-                                  // Filter classifications based on the selected employee group
-                                  // Clear the classification selection
-                                  setValue('classification', null);
-
-                                  // Call the original onChange to update the form state
-                                  onChange(arg);
+                                  if (selectedClassificationId) {
+                                    showWarningModal(
+                                      () => {
+                                        // User confirmed the change
+                                        setValue('classification', null);
+                                        onChange(arg);
+                                      },
+                                      () => {
+                                        // User canceled the change
+                                      },
+                                    );
+                                  } else {
+                                    // Call the original onChange to update the form state
+                                    onChange(arg);
+                                  }
                                 }}
                                 onBlur={onBlur}
                                 value={value}
@@ -1745,8 +2011,23 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               <Select
                                 placeholder="Choose a classification"
                                 onChange={(newValue) => {
-                                  onChange(newValue);
-                                  handleClassificationChange(newValue);
+                                  // onChange(newValue);
+                                  // handleClassificationChange(newValue);
+
+                                  if (selectedClassificationId) {
+                                    showWarningModal(
+                                      () => {
+                                        onChange(newValue);
+                                        handleClassificationChange(newValue);
+                                      },
+                                      () => {
+                                        // User canceled the change
+                                      },
+                                    );
+                                  } else {
+                                    onChange(newValue);
+                                    handleClassificationChange(newValue);
+                                  }
                                 }}
                                 onBlur={onBlur} // notify when input is touched/blur
                                 value={value}
@@ -1828,6 +2109,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         // When profession changes, clear the jobStreams for this profession
                                         setValue(`professions.${index}.jobStreams`, []);
                                         onChange(v);
+                                        handleJobFamilyChange();
                                       }}
                                     >
                                       {/* Dynamically render profession options based on your data */}
@@ -1848,11 +2130,19 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     <Button
                                       disabled={index === 0 && selectedProfession?.[index]?.jobFamily === -1}
                                       onClick={() => {
-                                        remove(index);
-                                        // removing last one - append blank
-                                        if (selectedProfession?.length === 1) {
-                                          append({ jobFamily: -1, jobStreams: [] });
-                                        }
+                                        Modal.confirm({
+                                          title: 'Confirmation',
+                                          content:
+                                            'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
+                                          onOk: () => {
+                                            remove(index);
+                                            // removing last one - append blank
+                                            if (selectedProfession?.length === 1) {
+                                              append({ jobFamily: -1, jobStreams: [] });
+                                            }
+                                            handleJobFamilyChange();
+                                          },
+                                        });
                                       }}
                                       icon={<DeleteOutlined />}
                                     ></Button>
@@ -1864,91 +2154,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                           {/* Second level for job family/profession selector (select job stream/discipline) */}
                           {selectedProfession?.[index]?.jobFamily != -1 && (
-                            // <Form.Item
-                            //   label="Job Streams / Disciplines"
-                            //   labelCol={{ className: 'card-label' }}
-                            //   style={{ borderLeft: '2px solid rgba(5, 5, 5, 0.06)', paddingLeft: '1rem' }}
-                            // >
-                            //   <Controller
-                            //     control={control}
-                            //     name={`professions.${index}.jobStreams`}
-                            //     render={({
-                            //       field: { onChange: onChangeInner, onBlur: onBlurInner, value: valueInner },
-                            //     }) => {
-                            //       // console.log('valueInner: ', valueInner);
-                            //       return (
-                            //         <Select
-                            //           // {...field2}
-                            //           mode="multiple"
-                            //           placeholder="Select the job streams this role is part of"
-                            //           style={{ width: '100%' }}
-                            //           onChange={onChangeInner}
-                            //           value={valueInner}
-                            //           onBlur={onBlurInner}
-                            //           // onChange={(selectedStreams) => {
-                            //           //   field2.onChange(selectedStreams);
-                            //           // }}
-                            //           options={getJobStreamsForFamily(selectedProfession?.[index]?.jobFamily ?? -1).map(
-                            //             (stream) => ({ label: stream.name, value: stream.id }),
-                            //           )}
-                            //         ></Select>
-                            //       );
-                            //     }}
-                            //   />
-                            // </Form.Item>
-
                             <JobStreamDiscipline
                               index={index}
                               control={control}
                               getJobStreamsForFamily={getJobStreamsForFamily}
                               selectedProfession={selectedProfession}
                             ></JobStreamDiscipline>
-
-                            // <Form.Item
-                            //   label="Job Streams / Disciplines"
-                            //   labelCol={{ className: 'card-label' }}
-                            //   style={{ borderLeft: '2px solid rgba(5, 5, 5, 0.06)', paddingLeft: '1rem' }}
-                            // >
-                            //   <Controller
-                            //     control={control}
-                            //     name={`professions.${index}.jobStreams`}
-                            //     render={({
-                            //       field: { onChange: onChangeInner, onBlur: onBlurInner, value: valueInner },
-                            //     }) => {
-                            //       const jobStreams = getJobStreamsForFamily(
-                            //         selectedProfession?.[index]?.jobFamily ?? -1,
-                            //       );
-                            //       const isAllSelected = valueInner?.length === jobStreams.length;
-
-                            //       return (
-                            //         <Select
-                            //           mode="multiple"
-                            //           placeholder="Select the job streams this role is part of"
-                            //           style={{ width: '100%' }}
-                            //           onChange={(selectedStreams) => {
-                            //             console.log('selectedStreams: ', selectedStreams);
-                            //             if (selectedStreams.includes('all')) {
-                            //               onChangeInner(isAllSelected ? [] : jobStreams.map((stream) => stream.id));
-                            //             } else {
-                            //               onChangeInner(selectedStreams);
-                            //             }
-                            //           }}
-                            //           value={valueInner}
-                            //           onBlur={onBlurInner}
-                            //         >
-                            //           <Option key="all" value="all">
-                            //             Select All
-                            //           </Option>
-                            //           {jobStreams.map((stream) => (
-                            //             <Option key={stream.id} value={stream.id}>
-                            //               {stream.name}
-                            //             </Option>
-                            //           ))}
-                            //         </Select>
-                            //       );
-                            //     }}
-                            //   />
-                            // </Form.Item>
                           )}
                         </div>
                       ))}
@@ -2086,7 +2297,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               </Text>
                               <MinistriesSelect
                                 isMultiSelect={true}
-                                onChange={onChange}
+                                onChange={(args: any) => {
+                                  onChange(args);
+                                  handleMinistriesChange();
+                                }}
                                 onBlur={onBlur}
                                 value={value}
                                 setValue={setValue}
@@ -2155,6 +2369,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       label: 'Job profile',
       children: (
         <>
+          {/* <Button
+            onClick={() => {
+              triggerProfileValidation();
+            }}
+          >
+            Validate
+          </Button> */}
           <Row justify="center" style={{ margin: '1rem 0' }}>
             <Col xs={24} sm={24} md={24} lg={20} xl={16}>
               <Form layout="vertical">
@@ -2316,7 +2537,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             debounce(triggerProfileValidation, 300)();
                                           }}
                                           onBlur={onBlur}
-                                          value={value.toString()}
+                                          value={value?.toString()}
                                         />
                                       )}
                                     />
@@ -2509,7 +2730,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             debounce(triggerProfileValidation, 300)();
                                           }}
                                           onBlur={onBlur}
-                                          value={value.toString()}
+                                          value={value?.toString()}
                                         />
                                       )}
                                     />
@@ -2686,7 +2907,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             debounce(triggerProfileValidation, 300)();
                                           }}
                                           onBlur={onBlur}
-                                          value={value.toString()}
+                                          value={value?.toString()}
                                         />
                                       )}
                                     />
@@ -2736,8 +2957,65 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
-                          <Row justify="space-between" align="middle">
-                            <Col>Professional registration requirements</Col>
+                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                            <Col>Professional registration and certification requirements</Col>
+                            {/* NEW */}
+
+                            <Col>
+                              <Form.Item style={{ margin: 0 }}>
+                                <Row>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllNonEditableProReg"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllNonEditableProReg}
+                                          disabled={professionalRegistrationRequirementsFields.length === 0}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateNonEditableProReg(e.target.checked);
+                                          }}
+                                        >
+                                          Mark all as non-editable
+                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                  <Col>
+                                    <Controller
+                                      control={profileControl}
+                                      name="markAllSignificantProReg"
+                                      render={({ field }) => (
+                                        <Checkbox
+                                          {...field}
+                                          checked={markAllSignificantProReg || markAllNonEditableProReg}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.checked);
+                                            updateSignificantProReg(e.target.checked);
+                                          }}
+                                          disabled={
+                                            markAllNonEditableProReg ||
+                                            professionalRegistrationRequirementsFields.length === 0
+                                          }
+                                        >
+                                          Mark all as significant
+                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                          </Tooltip>
+                                        </Checkbox>
+                                      )}
+                                    ></Controller>
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
+
+                            {/* END NEW */}
                           </Row>
                         }
                       >
@@ -2753,37 +3031,109 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               />
                             </Col>
                             <Col flex="auto">
-                              <Row>{/* Non-editable checkbox */}</Row>
+                              <Row>
+                                {/* NEW Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`professional_registration_requirements.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(
+                                              `professional_registration_requirements.${index}.nonEditable`,
+                                              true,
+                                            );
+                                          }
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableProReg', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
+                                  <Controller
+                                    name={`professional_registration_requirements.${index}.is_significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantProReg', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={professionalRegistrations?.[index].nonEditable}
+                                        checked={value || professionalRegistrations?.[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                                {/* END NEW Non-editable checkbox */}
+                              </Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  <Form.Item>
+                                  {field.tc_is_readonly && (
+                                    <div style={{ display: 'flex' }}>
+                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                        {field.text?.toString()}
+                                      </Typography.Text>
+                                    </div>
+                                  )}
+                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
                                     <Controller
                                       control={profileControl}
                                       name={`professional_registration_requirements.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add a professional registration requirement"
-                                          onChange={(event) => {
-                                            onChange(event);
-                                            debounce(triggerProfileValidation, 300)();
-                                          }}
-                                          onBlur={onBlur}
-                                          value={value.toString()}
-                                        />
-                                      )}
+                                      render={({ field: { onChange, onBlur, value } }) => {
+                                        return (
+                                          <>
+                                            <TextArea
+                                              autoSize
+                                              placeholder="Add a professional registration or certification requirement"
+                                              onChange={(event) => {
+                                                onChange(event);
+                                                debounce(triggerProfileValidation, 300)();
+                                              }}
+                                              onBlur={onBlur}
+                                              value={value?.toString()}
+                                            />
+                                          </>
+                                        );
+                                      }}
                                     />
                                   </Form.Item>
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button
+                                  <ContextOptionsReadonly
+                                    isReadonly={field.tc_is_readonly ?? false}
+                                    onEdit={() => {
+                                      updateProfessionalRegistrationRequirement(index, {
+                                        ...professionalRegistrationRequirementsFields[index],
+                                        tc_is_readonly: false,
+                                      });
+                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                    }}
+                                    onRemove={() => {
+                                      removeProfessionalRegistrationRequirement(index);
+                                      triggerProfileValidation();
+                                    }}
+                                  />
+                                  {/* <Button
                                     icon={<DeleteOutlined />}
                                     onClick={() => {
                                       removeProfessionalRegistrationRequirement(index);
                                       triggerProfileValidation();
                                     }}
-                                  />
+                                  /> */}
                                 </Col>
                               </Row>
                             </Col>
@@ -2794,13 +3144,33 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           fieldName="professional_registration_requirements"
                         />
                         <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() => appendProfessionalRegistrationRequirement({ text: '' })}
-                            icon={<PlusOutlined />}
-                          >
-                            Add a professional registration requirement
-                          </Button>
+                          <Row>
+                            <Col>
+                              <WizardProfessionalRegistrationPicker
+                                data={professionalRequirementsPickerData}
+                                fields={professionalRegistrations}
+                                addAction={appendProfessionalRegistrationRequirement}
+                                removeAction={removeProfessionalRegistrationRequirement}
+                                triggerValidation={triggerProfileValidation}
+                                markAllSignificantProReg={markAllSignificantProReg}
+                              />
+                            </Col>
+                            <Col>
+                              <Button
+                                type="link"
+                                onClick={() =>
+                                  appendProfessionalRegistrationRequirement({
+                                    text: '',
+                                    nonEditable: markAllNonEditableProReg,
+                                    is_significant: markAllSignificantProReg,
+                                  })
+                                }
+                                icon={<PlusOutlined />}
+                              >
+                                Add a custom requirement
+                              </Button>
+                            </Col>
+                          </Row>
                         </Form.Item>
                       </Form.Item>
                     </Col>
@@ -2959,7 +3329,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           placeholder="Add a preference"
                                           onChange={onChange}
                                           onBlur={onBlur}
-                                          value={value.toString()}
+                                          value={value?.toString()}
                                         />
                                       )}
                                     />
@@ -3022,7 +3392,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             debounce(triggerProfileValidation, 300)();
                                           }}
                                           onBlur={onBlur}
-                                          value={value.toString()}
+                                          value={value?.toString()}
                                         />
                                       )}
                                     />
@@ -3094,7 +3464,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           placeholder="Add a willingness statement or proviso"
                                           onChange={onChange}
                                           onBlur={onBlur}
-                                          value={value.toString()}
+                                          value={value?.toString()}
                                         />
                                       )}
                                     />
@@ -3210,7 +3580,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             debounce(triggerProfileValidation, 300)();
                                           }}
                                           onBlur={onBlur}
-                                          value={value.toString()}
+                                          value={value?.toString()}
                                         />
                                       )}
                                     />
@@ -3286,7 +3656,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           placeholder="Add an optional requirement"
                                           onChange={onChange}
                                           onBlur={onBlur}
-                                          value={value.toString()}
+                                          value={value?.toString()}
                                         />
                                       )}
                                     />
@@ -3318,96 +3688,83 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={16} md={16} lg={16} xl={16}>
                       <>
+                        {behavioural_competencies_fields.length > 0 && (
+                          <List
+                            style={{ marginTop: '7px' }}
+                            locale={{ emptyText: ' ' }}
+                            dataSource={behavioural_competencies_fields}
+                            renderItem={(field, index) => (
+                              <List.Item
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'flex-start', // Align items to the top
+                                  marginBottom: '0px',
+                                  borderBottom: 'none',
+
+                                  padding: '5px 0',
+                                }}
+                                key={field.id} // Ensure this is a unique value
+                              >
+                                <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
+                                  <strong>
+                                    {field.behavioural_competency.name}
+                                    <IsIndigenousCompetency competency={field.behavioural_competency} />
+                                  </strong>
+                                  : {field.behavioural_competency.description}
+                                </p>
+
+                                <Button
+                                  type="text" // No button styling, just the icon
+                                  icon={<DeleteOutlined />}
+                                  onClick={() => {
+                                    behavioural_competencies_remove(index);
+                                    triggerProfileValidation();
+                                  }}
+                                  style={{
+                                    marginLeft: '10px',
+                                    border: '1px solid',
+                                    borderColor: '#d9d9d9',
+                                  }}
+                                />
+
+                                <FormItem
+                                  name={`behavioural_competencies.${index}.behavioural_competency.id`}
+                                  control={profileControl}
+                                  hidden
+                                >
+                                  <Input />
+                                </FormItem>
+                                <FormItem
+                                  hidden
+                                  name={`behavioural_competencies.${index}.behavioural_competency.name`}
+                                  control={profileControl}
+                                  style={{ flex: 1, marginRight: '10px' }}
+                                >
+                                  <Input placeholder="Name" style={{ width: '100%' }} />
+                                </FormItem>
+                                <FormItem
+                                  hidden
+                                  name={`behavioural_competencies.${index}.behavioural_competency.description`}
+                                  control={profileControl}
+                                  style={{ flex: 2, marginRight: '10px' }}
+                                >
+                                  <TextArea placeholder="Description" style={{ width: '100%' }} />
+                                </FormItem>
+                              </List.Item>
+                            )}
+                          />
+                        )}
                         <Typography.Text type="secondary">
-                          * denotes an Indigenous Behavioural Competency
+                          <div style={{ margin: '0.5rem 0' }}>
+                            * denotes an Indigenous Relations Behavioural Competency
+                          </div>
                         </Typography.Text>
                         <BehaviouralComptencyPicker
-                          onAdd={(item) => {
-                            behavioural_competencies_append(item);
-                            triggerProfileValidation();
-                          }}
-                          onRemove={(item) => {
-                            behavioural_competencies_remove(item);
-                            triggerProfileValidation();
-                          }}
                           behavioural_competencies_fields={behavioural_competencies_fields}
-                        />
-
-                        <List
-                          style={{ marginTop: '7px' }}
-                          locale={{ emptyText: ' ' }}
-                          dataSource={behavioural_competencies_fields}
-                          renderItem={(field, index) => (
-                            <List.Item
-                              style={{
-                                display: 'flex',
-                                alignItems: 'flex-start', // Align items to the top
-                                marginBottom: '0px',
-                                borderBottom: 'none',
-
-                                padding: '5px 0',
-                              }}
-                              key={field.id} // Ensure this is a unique value
-                            >
-                              <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
-                                <strong>
-                                  {field.behavioural_competency.name}
-                                  <IsIndigenousCompetency competency={field.behavioural_competency} />
-                                </strong>
-                                : {field.behavioural_competency.description}
-                              </p>
-
-                              <Button
-                                type="text" // No button styling, just the icon
-                                icon={<DeleteOutlined />}
-                                onClick={() => {
-                                  behavioural_competencies_remove(index);
-                                  triggerProfileValidation();
-                                }}
-                                style={{
-                                  marginLeft: '10px',
-                                  border: '1px solid',
-                                  borderColor: '#d9d9d9',
-                                }}
-                              />
-
-                              <FormItem
-                                name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                                control={profileControl}
-                                hidden
-                              >
-                                <Input />
-                              </FormItem>
-                              <FormItem
-                                hidden
-                                name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                                control={profileControl}
-                                style={{ flex: 1, marginRight: '10px' }}
-                              >
-                                <Input placeholder="Name" style={{ width: '100%' }} />
-                              </FormItem>
-                              <FormItem
-                                hidden
-                                name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                                control={profileControl}
-                                style={{ flex: 2, marginRight: '10px' }}
-                              >
-                                <TextArea placeholder="Description" style={{ width: '100%' }} />
-                              </FormItem>
-                            </List.Item>
-                          )}
-                        />
-
-                        {/* ) : ( */}
-                        {/* <Button
-                            type="link"
-                            icon={<PlusOutlined />}
-                            style={{ marginTop: '10px' }}
-                            onClick={() => setPickerVisible(true)} // Show picker when "Add" button is clicked
-                          >
-                            Add a behavioural competency
-                          </Button>
-                        )} */}
+                          addAction={behavioural_competencies_append}
+                          removeAction={behavioural_competencies_remove}
+                          validateFunction={triggerProfileValidation}
+                        ></BehaviouralComptencyPicker>
                       </>
                       <WizardValidationError formErrors={profileFormErrors} fieldName="behavioural_competencies" />
                     </Col>

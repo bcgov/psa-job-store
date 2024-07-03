@@ -4,6 +4,7 @@ import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import WizardEditProfileArrayField from './wizard-edit-profile-array-field';
 import Education from './wizard-edit-profile-min-req-education';
+import ProfessionalRegistrationRequirements from './wizard-edit-profile-professional-reg-req';
 import RelatedExperience from './wizard-edit-profile-related-experience';
 
 interface MinimumRequirementsSectionProps {
@@ -14,6 +15,7 @@ interface MinimumRequirementsSectionProps {
   educationSectionRef: React.RefObject<HTMLDivElement>;
   securityScreeningsSectionRef: React.RefObject<HTMLDivElement>;
   relatedExperienceSectionRef: React.RefObject<HTMLDivElement>;
+  professionalRegSectionRef: React.RefObject<HTMLDivElement>;
 
   editedEducationFields: { [key: number]: boolean };
   editedSecurityScreeningsFields: { [key: number]: boolean };
@@ -57,6 +59,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
   setEditedEducationFields,
 
   relatedExperienceSectionRef,
+  professionalRegSectionRef,
   securityScreeningsSectionRef,
   editedRelatedExperienceFields,
   originalRelatedExperienceFields,
@@ -149,19 +152,16 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
 
             <Divider className="hr-reduced-margin" />
 
-            <WizardEditProfileArrayField
-              useFormReturn={useFormReturn}
-              originalFields={originalProfessionalRegistrationFields}
-              validateVerification={validateVerification}
-              label="Professional registration requirements"
-              description="Professional registration is required for a number of positions in the BC Public Service. You can add those requirements here."
-              fieldName="professional_registration_requirements"
-              testId="professional-registration"
-              addButtonText="Add a professional registration requirement"
-              formErrors={formErrors}
-              setEditedFields={setEditedProfessionalRegistrationFields}
-              editedFields={editedProfessionalRegistrationFields}
-            />
+            <div ref={professionalRegSectionRef}>
+              <ProfessionalRegistrationRequirements
+                useFormReturn={useFormReturn}
+                originalFields={originalProfessionalRegistrationFields}
+                validateVerification={validateVerification}
+                setEditedFields={setEditedProfessionalRegistrationFields}
+                editedFields={editedProfessionalRegistrationFields}
+                formErrors={formErrors}
+              />
+            </div>
 
             <Divider className="hr-reduced-margin" />
 

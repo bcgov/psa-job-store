@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeleteOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Divider, Input, List, Row, Typography } from 'antd';
+import { Button, Card, Col, Input, List, Row, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { UseFormReturn, useFieldArray } from 'react-hook-form';
 import { FormItem } from '../../../utils/FormItem';
@@ -35,7 +35,7 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
       title={
         <Row justify="start">
           <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-            Behavioural competencies
+            <span style={{ fontWeight: '600', fontSize: '16px' }}>Behavioural competencies</span>
             <Button
               data-testid={`reset-behavioral-competencies`}
               type="link" // No button styling, just the icon
@@ -53,108 +53,90 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
       className="custom-card"
       style={{ marginTop: 16 }}
     >
-      {' '}
-      <Divider className="hr-reduced-margin" />
-      <Row justify="start">
-        <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-          <label
-            style={{
-              position: 'relative',
-              display: 'inline-flex',
-              alignItems: 'center',
-              maxWidth: '100%',
-              height: '32px',
-              fontWeight: 500,
-            }}
-            title="Add behavioural competencies"
-          >
-            Add behavioural competencies
-          </label>
-        </Col>
-      </Row>
       <section aria-label="Behavioural competencies" role="region">
         <Row justify="start">
           <Col xs={24} sm={24} md={24} lg={18} xl={16}>
             <>
-              <Typography.Text type="secondary">
-                * denotes an Indigenous Relations Behavioural Competency
-              </Typography.Text>
-              <div data-testid="behavioral-competencies-selector">
-                <BehaviouralComptencyPicker
-                  onAdd={behavioural_competencies_append}
-                  onRemove={behavioural_competencies_remove}
-                  behavioural_competencies_fields={behavioural_competencies_fields}
-                />
-              </div>
-
-              <List
-                style={{ marginTop: '7px' }}
-                locale={{ emptyText: ' ' }}
-                dataSource={behavioural_competencies_fields}
-                renderItem={(field, index) => (
-                  <List.Item
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start', // Align items to the top
-                      marginBottom: '0px',
-                      borderBottom: 'none',
-
-                      padding: '5px 0',
-                    }}
-                    key={field.id} // Ensure this is a unique value
-                  >
-                    {/* Display behavioural competency name and description */}
-                    <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
-                      <strong>
-                        {field.behavioural_competency.name}
-                        <IsIndigenousCompetency competency={field.behavioural_competency} />
-                      </strong>
-                      : {field.behavioural_competency.description}
-                    </p>
-
-                    {/* Trash icon/button for deletion */}
-                    <Button
-                      data-testid={`remove-behavioral-competency-${index}`}
-                      type="text" // No button styling, just the icon
-                      aria-label={`Remove ${field.behavioural_competency.name} behavioural competency`}
-                      icon={<DeleteOutlined aria-hidden />}
-                      onClick={() => {
-                        behavioural_competencies_remove(index);
-                      }}
+              {behavioural_competencies_fields.length > 0 && (
+                <List
+                  locale={{ emptyText: ' ' }}
+                  dataSource={behavioural_competencies_fields}
+                  renderItem={(field, index) => (
+                    <List.Item
                       style={{
-                        marginLeft: '10px',
-                        border: '1px solid',
-                        borderColor: '#d9d9d9',
-                      }}
-                    />
+                        display: 'flex',
+                        alignItems: 'flex-start', // Align items to the top
+                        marginBottom: '0px',
+                        borderBottom: 'none',
 
-                    {/* Hidden fields to submit actual data */}
-                    <FormItem
-                      name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                      control={useFormReturn.control}
-                      hidden
+                        padding: '5px 0',
+                      }}
+                      key={field.id} // Ensure this is a unique value
                     >
-                      <Input />
-                    </FormItem>
-                    <FormItem
-                      hidden
-                      name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                      control={useFormReturn.control}
-                      style={{ flex: 1, marginRight: '10px' }}
-                    >
-                      <Input placeholder="Name" style={{ width: '100%' }} />
-                    </FormItem>
-                    <FormItem
-                      hidden
-                      name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                      control={useFormReturn.control}
-                      style={{ flex: 2, marginRight: '10px' }}
-                    >
-                      <TextArea placeholder="Description" style={{ width: '100%' }} />
-                    </FormItem>
-                  </List.Item>
-                )}
-              />
+                      {/* Display behavioural competency name and description */}
+                      <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
+                        <strong>
+                          {field.behavioural_competency.name}
+                          <IsIndigenousCompetency competency={field.behavioural_competency} />
+                        </strong>
+                        : {field.behavioural_competency.description}
+                      </p>
+
+                      {/* Trash icon/button for deletion */}
+                      <Button
+                        data-testid={`remove-behavioral-competency-${index}`}
+                        type="text" // No button styling, just the icon
+                        aria-label={`Remove ${field.behavioural_competency.name} behavioural competency`}
+                        icon={<DeleteOutlined aria-hidden />}
+                        onClick={() => {
+                          behavioural_competencies_remove(index);
+                        }}
+                        style={{
+                          marginLeft: '10px',
+                          border: '1px solid',
+                          borderColor: '#d9d9d9',
+                        }}
+                      />
+
+                      {/* Hidden fields to submit actual data */}
+                      <FormItem
+                        name={`behavioural_competencies.${index}.behavioural_competency.id`}
+                        control={useFormReturn.control}
+                        hidden
+                      >
+                        <Input />
+                      </FormItem>
+                      <FormItem
+                        hidden
+                        name={`behavioural_competencies.${index}.behavioural_competency.name`}
+                        control={useFormReturn.control}
+                        style={{ flex: 1, marginRight: '10px' }}
+                      >
+                        <Input placeholder="Name" style={{ width: '100%' }} />
+                      </FormItem>
+                      <FormItem
+                        hidden
+                        name={`behavioural_competencies.${index}.behavioural_competency.description`}
+                        control={useFormReturn.control}
+                        style={{ flex: 2, marginRight: '10px' }}
+                      >
+                        <TextArea placeholder="Description" style={{ width: '100%' }} />
+                      </FormItem>
+                    </List.Item>
+                  )}
+                />
+              )}
+
+              <Typography.Text type="secondary">
+                <div style={{ margin: '0.5rem 0' }}>* denotes an Indigenous Relations Behavioural Competency</div>
+              </Typography.Text>
+
+              <BehaviouralComptencyPicker
+                behavioural_competencies_fields={behavioural_competencies_fields}
+                addAction={behavioural_competencies_append}
+                removeAction={behavioural_competencies_remove}
+                validateFunction={useFormReturn.trigger}
+              ></BehaviouralComptencyPicker>
             </>
 
             <WizardValidationError formErrors={formErrors} fieldName="behavioural_competencies" />

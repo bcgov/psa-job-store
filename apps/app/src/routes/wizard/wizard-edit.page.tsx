@@ -47,6 +47,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     setRequiresVerification,
     setPositionRequestData,
   } = useWizardContext();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingBack, setIsLoadingBack] = useState(false);
   const [saveAndQuitLoading, setSaveAndQuitLoading] = useState(false);
@@ -62,6 +63,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   function getClassificationById(id: string): ClassificationModel | undefined {
     // If data is loaded, find the classification by ID
+    // console.log('classificationsData: ', classificationsData, id);
     if (classificationsData) {
       return classificationsData.classifications.find(
         (classification: ClassificationModel) => classification.id === id,
@@ -104,9 +106,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       organizations: [],
       review_required: false,
       professions: [],
-      professional_registration_requirements: originalData.professional_registration_requirements.filter(
-        (reg: { text: string }) => reg.text.trim() !== '',
-      ),
+      professional_registration_requirements: originalData.professional_registration_requirements
+        ? originalData.professional_registration_requirements.filter((reg: { text: string }) => reg.text.trim() !== '')
+        : [], // for some reason in build environment this is undefined, while locally it's []
       optional_requirements: originalData.optional_requirements.filter(
         (req: { text: string }) => req.text.trim() !== '',
       ),
@@ -238,6 +240,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       return true;
     } catch (e) {
       // throw e;
+      console.log('error: ', e);
       return false;
     } finally {
       if (action === 'next') setIsLoading(false);

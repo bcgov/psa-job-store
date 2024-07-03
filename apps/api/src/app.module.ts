@@ -14,6 +14,7 @@ import { RolesGlobalGuard } from './modules/auth/guards/role-global.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
+import { CommentModule } from './modules/comment/comment.module';
 import { EmployeeGroupModule } from './modules/employee-group/employee-group.module';
 import { ExternalModule } from './modules/external/external.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
@@ -55,6 +56,7 @@ import { UserModule } from './modules/user/user.module';
     PositionRequestModule,
     JobProfileModule,
     ClassificationModule,
+    CommentModule,
     JobFamilyModule,
     JobRoleModule,
     BehaviouralComptencyModule,
