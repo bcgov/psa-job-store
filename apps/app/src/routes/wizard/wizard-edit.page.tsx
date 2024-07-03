@@ -250,7 +250,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   };
 
   const onNextCallback = async ({ step }: { step?: number } = {}) => {
-    console.log('onNextCallback');
     await saveData('next', step);
   };
 
