@@ -16,9 +16,9 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: sidecar
-        image: node:18.17.0
-        command: ["node"]
-        args: ["-e", "setInterval(() => console.log('Node.js is running'), 1000 * 60 * 60);"]
+        image: node:alpine
+        command: ["sh"]
+        args: ["-c", "while :; do sleep 3600; done"]
         ports:
         - containerPort: 3000
           protocol: TCP

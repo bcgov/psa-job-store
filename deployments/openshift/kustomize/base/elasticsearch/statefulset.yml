@@ -61,6 +61,12 @@ spec:
                   - name: elasticsearch-data
                     persistentVolumeClaim:
                       claimName: elasticsearch-data
+                  securityContext:
+                        allowPrivilegeEscalation: false
+                        runAsNonRoot: true
+                        capabilities:
+                          drop:
+                            - ALL
     volumeClaimTemplates:
         - metadata:
               name: elasticsearch-data
