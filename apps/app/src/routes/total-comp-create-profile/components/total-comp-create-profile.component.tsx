@@ -3152,7 +3152,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 addAction={appendProfessionalRegistrationRequirement}
                                 removeAction={removeProfessionalRegistrationRequirement}
                                 triggerValidation={triggerProfileValidation}
-                                markAllNonEditableProReg={markAllNonEditableProReg}
                                 markAllSignificantProReg={markAllSignificantProReg}
                               />
                             </Col>
