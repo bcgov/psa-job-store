@@ -194,9 +194,9 @@ model JobProfile {
   education                              Json?                 @db.JsonB
   job_experience                         Json?                 @db.JsonB
   professional_registration_requirements Json?                 @db.JsonB
-  preferences                            String[]
-  knowledge_skills_abilities             String[]
-  willingness_statements                 String[]
+  preferences                            Json?                 @db.JsonB
+  knowledge_skills_abilities             Json?                 @db.JsonB
+  willingness_statements                 Json?                 @db.JsonB
   optional_requirements                  String[]
   security_screenings                    Json?                 @db.JsonB
   reports_to                             JobProfileReportsTo[]

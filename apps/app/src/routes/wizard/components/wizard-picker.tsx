@@ -1,28 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { UseFieldArrayAppend, UseFieldArrayRemove } from 'react-hook-form';
+import { UseFieldArrayRemove } from 'react-hook-form';
 import { AccountabilitiesModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
-import { JobProfileValidationModel, ValueString } from '../../job-profiles/components/job-profile.component';
+import { ValueString } from '../../job-profiles/components/job-profile.component';
 import './wizard-behavioural-comptency-picker.css';
 import EditFormOptionsPicker, { SelectableOption } from './wizard-edit-profile-options-picker';
 
-interface WizardProfessionalRegistrationPickerProps {
+interface WizardPickerProps {
   // style?: CSSProperties;
   fields: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
-  addAction: UseFieldArrayAppend<JobProfileValidationModel, 'professional_registration_requirements'>;
+  addAction: (obj: any) => void;
   removeAction: UseFieldArrayRemove;
   data: any;
   triggerValidation: () => void;
-  markAllSignificantProReg: boolean;
+  title: string;
+  buttonText: string;
 }
 
-const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrationPickerProps> = ({
+const WizardPicker: React.FC<WizardPickerProps> = ({
   fields,
   addAction,
   removeAction,
   data,
   triggerValidation,
-  markAllSignificantProReg,
+  title,
+  buttonText,
 }) => {
   // Fetching data from the API
   // console.log('data: ', data);
@@ -84,8 +86,6 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
           const { text } = selectedOption.object;
           return {
             tc_is_readonly: true,
-            nonEditable: true,
-            is_significant: markAllSignificantProReg,
             text,
           };
         }
@@ -110,8 +110,6 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
           item,
         ): item is {
           text: any;
-          nonEditable: boolean;
-          is_significant: boolean;
           tc_is_readonly: boolean;
         } => item !== null,
       );
@@ -146,13 +144,13 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
 
   return (
     <EditFormOptionsPicker
-      buttonText="Browse and add professional registration and certification requirements"
+      buttonText={buttonText}
       selectableOptions={selectableOptions}
-      title="Professional registration and certification requirements"
+      title={title}
       selectedOptions={selectedOptions}
       onAdd={onAdd}
     ></EditFormOptionsPicker>
   );
 };
 
-export default WizardProfessionalRegistrationPicker;
+export default WizardPicker;

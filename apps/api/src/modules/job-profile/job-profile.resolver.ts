@@ -20,6 +20,21 @@ import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-
 import { JobProfileService } from './job-profile.service';
 
 @ObjectType()
+class RequirementsWithoutReadOnlyResult {
+  @Field(() => [RequirementWithoutReadOnly])
+  professionalRegistrationRequirements: RequirementWithoutReadOnly[];
+
+  @Field(() => [RequirementWithoutReadOnly], { nullable: true })
+  preferences?: RequirementWithoutReadOnly[];
+
+  @Field(() => [RequirementWithoutReadOnly], { nullable: true })
+  knowledgeSkillsAbilities?: RequirementWithoutReadOnly[];
+
+  @Field(() => [RequirementWithoutReadOnly], { nullable: true })
+  willingnessStatements?: RequirementWithoutReadOnly[];
+}
+
+@ObjectType()
 class RequirementWithoutReadOnly {
   @Field(() => String)
   text: string;
@@ -238,7 +253,7 @@ export class JobProfileResolver {
     return this.jobProfileService.isNumberAvailable(number);
   }
 
-  @Query(() => [RequirementWithoutReadOnly], { name: 'requirementsWithoutReadOnly' })
+  @Query(() => RequirementsWithoutReadOnlyResult, { name: 'requirementsWithoutReadOnly' })
   async getRequirementsWithoutReadOnly(
     @Args('jobFamilyIds', { type: () => [Int] }) jobFamilyIds: number[],
     @Args('jobFamilyStreamIds', { type: () => [Int] }) jobFamilyStreamIds: number[],

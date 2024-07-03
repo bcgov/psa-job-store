@@ -87,6 +87,7 @@ import WizardOverview from '../../wizard/components/wizard-edit-profile-overview
 import WizardProgramOverview from '../../wizard/components/wizard-edit-profile-program-overview';
 import WizardTitle from '../../wizard/components/wizard-edit-profile-title';
 import WizardValidationError from '../../wizard/components/wizard-edit-profile-validation-error';
+import WizardPicker from '../../wizard/components/wizard-picker';
 import WizardProfessionalRegistrationPicker from '../../wizard/components/wizard-professional-registration-picker';
 import JobStreamDiscipline from './jobstream-discipline.component';
 import ReorderButtons from './reorder-buttons';
@@ -492,21 +493,20 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const allOrganizations = watch('all_organizations');
 
   // PICKER DATA
-  const { data: professionalRequirementsPickerData, refetch: refetchProfessionalRequirementsPickerData } =
-    useGetRequirementsWithoutReadOnlyQuery(
-      {
-        jobFamilyIds: selectedProfession.map((p) => p.jobFamily),
-        jobFamilyStreamIds: selectedProfession.map((p) => p.jobStreams).flat(),
-        classificationId: selectedClassificationId && selectedClassificationId.split('.')[0],
-        classificationEmployeeGroupId: employeeGroup,
-        ministryIds: !allOrganizations ? selectedMinistry : undefined,
-        jobFamilyWithNoStream: selectedProfession.filter((p) => p.jobStreams.length === 0).map((p) => p.jobFamily),
-        excludeProfileId: jobProfileData?.jobProfile.id,
-      },
-      {
-        skip: !selectedClassificationId || !employeeGroup,
-      },
-    );
+  const { data: pickerData, refetch: refetchPickerData } = useGetRequirementsWithoutReadOnlyQuery(
+    {
+      jobFamilyIds: selectedProfession.map((p) => p.jobFamily),
+      jobFamilyStreamIds: selectedProfession.map((p) => p.jobStreams).flat(),
+      classificationId: selectedClassificationId && selectedClassificationId.split('.')[0],
+      classificationEmployeeGroupId: employeeGroup,
+      ministryIds: !allOrganizations ? selectedMinistry : undefined,
+      jobFamilyWithNoStream: selectedProfession.filter((p) => p.jobStreams.length === 0).map((p) => p.jobFamily),
+      excludeProfileId: jobProfileData?.jobProfile.id,
+    },
+    {
+      skip: !selectedClassificationId || !employeeGroup,
+    },
+  );
   // console.log('render, selectedClassificationId: ', selectedClassificationId);
   // console.log('professionalRequirementsPickerData:', professionalRequirementsPickerData);
 
@@ -556,9 +556,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       // ),
       professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements,
       optional_requirements: jobProfileData?.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
-      preferences: jobProfileData?.jobProfile.preferences.map((p: any) => ({ text: p })),
-      knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities.map((k: any) => ({ text: k })),
-      willingness_statements: jobProfileData?.jobProfile.willingness_statements.map((w: any) => ({ text: w })),
+      preferences: jobProfileData?.jobProfile.preferences,
+      knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities,
+      willingness_statements: jobProfileData?.jobProfile.willingness_statements,
       security_screenings: jobProfileData?.jobProfile.security_screenings.map(
         (s) =>
           ({
@@ -955,6 +955,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const securityScreenings = profileWatch('security_screenings');
   const educations = profileWatch('education');
   const professionalRegistrations = profileWatch('professional_registration_requirements');
+  const preferences = profileWatch('preferences');
+  const knowledgeSkillsAbilities = profileWatch('knowledge_skills_abilities');
+  const willingnessStatements = profileWatch('willingness_statements');
   const job_experiences = profileWatch('job_experience');
 
   // education
@@ -1043,6 +1046,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     append: appendPreference,
     remove: removePreference,
     move: movePreference,
+    update: updatePreference,
   } = useFieldArray({
     control: profileControl,
     name: 'preferences',
@@ -1062,6 +1066,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     append: appendKnowledgeSkillAbility,
     remove: removeKnowledgeSkillAbility,
     move: moveKnowledgeSkillAbility,
+    update: updateKnowledgeSkillAbility,
   } = useFieldArray({
     control: profileControl,
     name: 'knowledge_skills_abilities',
@@ -1081,6 +1086,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     append: appendWillingnessStatement,
     remove: removeWillingnessStatement,
     move: moveWillingnessStatement,
+    update: updateWillingnessStatement,
   } = useFieldArray({
     control: profileControl,
     name: 'willingness_statements',
@@ -1167,7 +1173,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       //   'refetching with: ',
       //   selectedProfession.map((p) => p.jobFamily),
       // );
-      refetchProfessionalRequirementsPickerData().then((r) => {
+      refetchPickerData().then((r) => {
         // console.log(
         //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
         //   professionalRequirementsPickerData,
@@ -1196,7 +1202,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       //   'refetching with: ',
       //   selectedProfession.map((p) => p.jobFamily),
       // );
-      refetchProfessionalRequirementsPickerData().then((r) => {
+      refetchPickerData().then((r) => {
         // console.log(
         //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
         //   professionalRequirementsPickerData,
@@ -1215,7 +1221,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       //   'refetching with: ',
       //   selectedProfession.map((p) => p.jobFamily),
       // );
-      refetchProfessionalRequirementsPickerData().then((r) => {
+      refetchPickerData().then((r) => {
         // console.log(
         //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
         //   professionalRequirementsPickerData,
@@ -1295,13 +1301,24 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         optional_requirements: formData.optional_requirements
           .map((o: any) => o.text)
           .filter((acc: string) => acc.trim() !== ''),
-        preferences: formData.preferences.map((p: any) => p.text).filter((acc: string) => acc.trim() !== ''),
+        preferences: formData.preferences
+          .map((a: any) => ({
+            text: a.text,
+            tc_is_readonly: a.tc_is_readonly,
+          }))
+          .filter((acc: any) => acc.text.trim() !== ''),
         knowledge_skills_abilities: formData.knowledge_skills_abilities
-          .map((k: any) => k.text)
-          .filter((acc: string) => acc.trim() !== ''),
+          .map((a: any) => ({
+            text: a.text,
+            tc_is_readonly: a.tc_is_readonly,
+          }))
+          .filter((acc: any) => acc.text.trim() !== ''),
         willingness_statements: formData.willingness_statements
-          .map((w: any) => w.text)
-          .filter((acc: string) => acc.trim() !== ''),
+          .map((a: any) => ({
+            text: a.text,
+            tc_is_readonly: a.tc_is_readonly,
+          }))
+          .filter((acc: any) => acc.text.trim() !== ''),
         security_screenings: formData.security_screenings
           .map((a: any) => ({
             text: a.text,
@@ -1639,7 +1656,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   // user removed family or stream - remove the professional requirements that no longer apply
   const handleStreamOrFamilyRemoval = useCallback(() => {
-    if (!professionalRequirementsPickerData) return;
+    if (!pickerData) return;
 
     // console.log('==REMOVAL handleStreamOrFamilyRemoval');
 
@@ -1661,9 +1678,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         // console.log('checking field: ', field);
         if (field.tc_is_readonly) {
           // console.log('is readonly');
-          const item = professionalRequirementsPickerData.requirementsWithoutReadOnly.find(
-            (data: any) => data.text === field.text,
-          );
+          const item = pickerData.requirementsWithoutReadOnly.find((data: any) => data.text === field.text);
 
           // console.log('found item by text: ', item);
 
@@ -1755,7 +1770,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // refetchProfessionalRequirementsPickerData();
   }, [
     professionalRegistrationRequirementsFields,
-    professionalRequirementsPickerData,
+    pickerData,
     // professionsFields,
     removeProfessionalRegistrationRequirement,
     selectedProfession,
@@ -1791,8 +1806,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   // user changed classificaiton or job family - update the professional requirements based on the new selection
   const updateProfessionalRegistrationrequirements = (professionalRequirementsPickerDataIn?: any) => {
-    const useProfessionalRequirementsPickerData =
-      professionalRequirementsPickerDataIn || professionalRequirementsPickerData;
+    const useProfessionalRequirementsPickerData = professionalRequirementsPickerDataIn || pickerData;
 
     if (!useProfessionalRequirementsPickerData) return;
 
@@ -1801,9 +1815,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // console.log('NEW - adding automatically');
 
     // Find items with non-null classification - these should be added automatically based on classification selection
-    const itemsWithClassification = useProfessionalRequirementsPickerData.requirementsWithoutReadOnly.filter(
-      (comp: any) => comp.classification !== null,
-    );
+    const itemsWithClassification =
+      useProfessionalRequirementsPickerData.requirementsWithoutReadOnly.professionalRegistrationRequirements.filter(
+        (comp: any) => comp.classification !== null,
+      );
 
     // console.log('data.requirementsWithoutReadOnly: ', useProfessionalRequirementsPickerData.requirementsWithoutReadOnly);
     // console.log('itemsWithClassification: ', itemsWithClassification);
@@ -3128,13 +3143,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       triggerProfileValidation();
                                     }}
                                   />
-                                  {/* <Button
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => {
-                                      removeProfessionalRegistrationRequirement(index);
-                                      triggerProfileValidation();
-                                    }}
-                                  /> */}
                                 </Col>
                               </Row>
                             </Col>
@@ -3148,7 +3156,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           <Row>
                             <Col>
                               <WizardProfessionalRegistrationPicker
-                                data={professionalRequirementsPickerData}
+                                data={pickerData?.requirementsWithoutReadOnly?.professionalRegistrationRequirements}
                                 fields={professionalRegistrations}
                                 addAction={appendProfessionalRegistrationRequirement}
                                 removeAction={removeProfessionalRegistrationRequirement}
@@ -3177,122 +3185,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
-                  {/* Professional registration requirement NEW */}
-                  {/* <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
-                      <Form.Item
-                        style={{ marginBottom: '0' }}
-                        labelCol={{ className: 'full-width-label card-label' }}
-                        label={
-                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
-                            <Col>Professional registration requirements</Col>
-                            <Col>
-                              <Form.Item style={{ margin: 0 }}>
-                                <Row>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllNonEditableProfReg"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllNonEditableProfReg}
-                                          disabled={professionalRegistrationRequirementsFields.length === 0}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateNonEditableProfReg(e.target.checked);
-                                          }}
-                                        >
-                                          Mark all as non-editable
-                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                </Row>
-                              </Form.Item>
-                            </Col>
-                          </Row>
-                        }
-                      >
-                        {professionalRegistrationRequirementsFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleProfessionalRegistrationRequirementsMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === professionalRegistrationRequirementsFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row>
-                                <div style={{ marginBottom: '5px' }}>
-                                  <Controller
-                                    name={`professional_registration_requirements.${index}.nonEditable`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllNonEditableProfReg', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        checked={value}
-                                      >
-                                        Non-editable
-                                      </Checkbox>
-                                    )}
-                                  />
-                                </div>
-                              </Row>
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  <Form.Item>
-                                    <Controller
-                                      control={profileControl}
-                                      name={`professional_registration_requirements.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add a professional registration requirement"
-                                          onChange={onChange}
-                                          onBlur={onBlur}
-                                          value={value.toString()}
-                                        />
-                                      )}
-                                    />
-                                  </Form.Item>
-                                </Col>
-
-                                <Col flex="none">
-                                  <Button icon={<DeleteOutlined />} onClick={() => removeProfessionalRegistrationRequirement(index)} />
-                                </Col>
-                              </Row>
-                            </Col>
-                          </Row>
-                        ))}
-                        <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() =>
-                              appendProfessionalRegistrationRequirement({
-                                text: '',
-                                nonEditable: markAllNonEditableSec,
-                              })
-                            }
-                            icon={<PlusOutlined />}
-                          >
-                            Add a professional registration requirement
-                          </Button>
-                        </Form.Item>
-                      </Form.Item>
-                    </Col>
-                  </Row> */}
-
                   {/* Preferences */}
                   <Row justify="start">
                     <Col xs={24} sm={16} md={16} lg={16} xl={16}>
@@ -3317,10 +3209,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               />
                             </Col>
                             <Col flex="auto">
-                              <Row>{/* Non-editable checkbox */}</Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  <Form.Item>
+                                  {field.tc_is_readonly && (
+                                    <div style={{ display: 'flex' }}>
+                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                        {field.text?.toString()}
+                                      </Typography.Text>
+                                    </div>
+                                  )}
+                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
                                     <Controller
                                       control={profileControl}
                                       name={`preferences.${index}.text`}
@@ -3338,16 +3236,48 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button icon={<DeleteOutlined />} onClick={() => removePreference(index)} />
+                                  <ContextOptionsReadonly
+                                    isReadonly={field.tc_is_readonly ?? false}
+                                    onEdit={() => {
+                                      updatePreference(index, {
+                                        ...preferencesFields[index],
+                                        tc_is_readonly: false,
+                                      });
+                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                    }}
+                                    onRemove={() => {
+                                      removePreference(index);
+                                      triggerProfileValidation();
+                                    }}
+                                  />
                                 </Col>
                               </Row>
                             </Col>
                           </Row>
                         ))}
                         <Form.Item>
-                          <Button type="link" onClick={() => appendPreference({ text: '' })} icon={<PlusOutlined />}>
-                            Add a job preference
-                          </Button>
+                          <Row>
+                            <Col>
+                              <WizardPicker
+                                data={pickerData?.requirementsWithoutReadOnly?.preferences}
+                                fields={preferences}
+                                addAction={appendPreference}
+                                removeAction={removePreference}
+                                triggerValidation={triggerProfileValidation}
+                                title="Preferences"
+                                buttonText="Browse and add preferences"
+                              />
+                            </Col>
+                            <Col>
+                              <Button
+                                type="link"
+                                onClick={() => appendPreference({ text: '' })}
+                                icon={<PlusOutlined />}
+                              >
+                                Add a custom job preference
+                              </Button>
+                            </Col>
+                          </Row>
                         </Form.Item>
                       </Form.Item>
                     </Col>
@@ -3377,10 +3307,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               />
                             </Col>
                             <Col flex="auto">
-                              <Row>{/* Non-editable checkbox */}</Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  <Form.Item>
+                                  {field.tc_is_readonly && (
+                                    <div style={{ display: 'flex' }}>
+                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                        {field.text?.toString()}
+                                      </Typography.Text>
+                                    </div>
+                                  )}
+                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
                                     <Controller
                                       control={profileControl}
                                       name={`knowledge_skills_abilities.${index}.text`}
@@ -3401,9 +3337,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => {
+                                  <ContextOptionsReadonly
+                                    isReadonly={field.tc_is_readonly ?? false}
+                                    onEdit={() => {
+                                      updateKnowledgeSkillAbility(index, {
+                                        ...knowledgeSkillsAbilitiesFields[index],
+                                        tc_is_readonly: false,
+                                      });
+                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                    }}
+                                    onRemove={() => {
                                       removeKnowledgeSkillAbility(index);
                                       triggerProfileValidation();
                                     }}
@@ -3415,13 +3358,28 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         ))}
                         <WizardValidationError formErrors={profileFormErrors} fieldName="knowledge_skills_abilities" />
                         <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() => appendKnowledgeSkillAbility({ text: '' })}
-                            icon={<PlusOutlined />}
-                          >
-                            Add a knowledge, skill or ability requirement
-                          </Button>
+                          <Row>
+                            <Col>
+                              <WizardPicker
+                                data={pickerData?.requirementsWithoutReadOnly?.knowledgeSkillsAbilities}
+                                fields={knowledgeSkillsAbilities}
+                                addAction={appendKnowledgeSkillAbility}
+                                removeAction={removeKnowledgeSkillAbility}
+                                triggerValidation={triggerProfileValidation}
+                                title="Knowledge, skill and ability requirements"
+                                buttonText="Browse and add knowledge, skill and ability requirements"
+                              />
+                            </Col>
+                            <Col>
+                              <Button
+                                type="link"
+                                onClick={() => appendKnowledgeSkillAbility({ text: '' })}
+                                icon={<PlusOutlined />}
+                              >
+                                Add a custom requirement
+                              </Button>
+                            </Col>
+                          </Row>
                         </Form.Item>
                       </Form.Item>
                     </Col>
@@ -3455,7 +3413,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               <Row>{/* Non-editable checkbox */}</Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  <Form.Item>
+                                  {field.tc_is_readonly && (
+                                    <div style={{ display: 'flex' }}>
+                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                        {field.text?.toString()}
+                                      </Typography.Text>
+                                    </div>
+                                  )}
+                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
                                     <Controller
                                       control={profileControl}
                                       name={`willingness_statements.${index}.text`}
@@ -3473,20 +3438,49 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button icon={<DeleteOutlined />} onClick={() => removeWillingnessStatement(index)} />
+                                  {/* <Button icon={<DeleteOutlined />} onClick={() => removeWillingnessStatement(index)} /> */}
+                                  <ContextOptionsReadonly
+                                    isReadonly={field.tc_is_readonly ?? false}
+                                    onEdit={() => {
+                                      updateWillingnessStatement(index, {
+                                        ...willingnessStatementsFields[index],
+                                        tc_is_readonly: false,
+                                      });
+                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                    }}
+                                    onRemove={() => {
+                                      removeWillingnessStatement(index);
+                                      triggerProfileValidation();
+                                    }}
+                                  />
                                 </Col>
                               </Row>
                             </Col>
                           </Row>
                         ))}
                         <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() => appendWillingnessStatement({ text: '' })}
-                            icon={<PlusOutlined />}
-                          >
-                            Add a proviso
-                          </Button>
+                          <Row>
+                            <Col>
+                              <WizardPicker
+                                data={pickerData?.requirementsWithoutReadOnly?.willingnessStatements}
+                                fields={willingnessStatements}
+                                addAction={appendWillingnessStatement}
+                                removeAction={removeWillingnessStatement}
+                                triggerValidation={triggerProfileValidation}
+                                title="Willingness statements or provisos"
+                                buttonText="Browse and add provisos"
+                              />
+                            </Col>
+                            <Col>
+                              <Button
+                                type="link"
+                                onClick={() => appendWillingnessStatement({ text: '' })}
+                                icon={<PlusOutlined />}
+                              >
+                                Add a custom proviso
+                              </Button>
+                            </Col>
+                          </Row>
                         </Form.Item>
                       </Form.Item>
                     </Col>
