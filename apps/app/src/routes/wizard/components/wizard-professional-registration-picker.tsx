@@ -13,7 +13,6 @@ interface WizardProfessionalRegistrationPickerProps {
   removeAction: UseFieldArrayRemove;
   data: any;
   triggerValidation: () => void;
-  markAllNonEditableProReg: boolean;
   markAllSignificantProReg: boolean;
 }
 
@@ -23,7 +22,6 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
   removeAction,
   data,
   triggerValidation,
-  markAllNonEditableProReg,
   markAllSignificantProReg,
 }) => {
   // Fetching data from the API
@@ -86,8 +84,7 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
           const { text } = selectedOption.object;
           return {
             tc_is_readonly: true,
-            is_readonly: true,
-            nonEditable: markAllNonEditableProReg,
+            nonEditable: true,
             is_significant: markAllSignificantProReg,
             text,
           };
@@ -112,7 +109,6 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
         (
           item,
         ): item is {
-          is_readonly: boolean;
           text: any;
           nonEditable: boolean;
           is_significant: boolean;
