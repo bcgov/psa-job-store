@@ -928,7 +928,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             )}
 
             {((showDiff && (effectiveData?.preferences?.length ?? 0) > 0) ||
-              (!showDiff && (effectiveData?.preferences.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
+              (!showDiff && (effectiveData?.preferences?.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Preferences</h4>
                 <ul data-testid="preferences">
@@ -949,7 +949,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
             {((showDiff && (effectiveData?.knowledge_skills_abilities?.length ?? 0) > 0) ||
               (!showDiff &&
-                (effectiveData?.knowledge_skills_abilities.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
+                (effectiveData?.knowledge_skills_abilities?.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Knowledge, skills and abilities</h4>
                 <ul data-testid="knowledge-skills-abilities">
@@ -969,7 +969,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             )}
 
             {((showDiff && (effectiveData?.willingness_statements?.length ?? 0) > 0) ||
-              (!showDiff && (effectiveData?.willingness_statements.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
+              (!showDiff &&
+                (effectiveData?.willingness_statements?.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
                 <h4>Willingness statements or provisos</h4>
                 <ul data-testid="provisos">
