@@ -177,11 +177,8 @@ const WizardEditProfile = forwardRef(
       mode: 'onChange',
     });
 
-    const { control, reset, handleSubmit, getValues, formState, trigger, watch } = useFormReturn;
+    const { control, reset, handleSubmit, getValues, formState, trigger } = useFormReturn;
     const { isDirty } = formState;
-
-    const preferences = watch('preferences');
-    console.log('watched preferences: ', preferences);
 
     useEffect(() => {
       handleFormChange(isDirty);
@@ -471,10 +468,7 @@ const WizardEditProfile = forwardRef(
           }
         });
 
-        console.log('making preferences from data: ', effectiveData.preferences);
         const preferences = getInitialFieldValue(effectiveData.preferences);
-
-        console.log('initial preferences: ', preferences);
 
         reset({
           id: effectiveData?.id,
@@ -554,7 +548,13 @@ const WizardEditProfile = forwardRef(
     const getInitialFieldValue = (
       field: AccountabilitiesModel[] | TrackedFieldArrayItem[],
       isSignificant?: boolean | undefined,
-    ) => {
+    ): Array<{
+      text: string | TrackedFieldArrayItem;
+      isCustom: boolean | undefined;
+      disabled: boolean;
+      is_readonly?: boolean;
+      is_significant?: boolean;
+    }> => {
       // console.log('getInitialFieldValue: ', field, isSignificant);
       const ret = field
         ?.map((item) => {
@@ -565,7 +565,7 @@ const WizardEditProfile = forwardRef(
               (isSignificant === true && item.is_significant === false) ||
               (isSignificant === false && item.is_significant === true)
             )
-              return;
+              return null;
 
             return {
               text: item.text,
@@ -577,9 +577,10 @@ const WizardEditProfile = forwardRef(
             };
           }
         })
-        .filter((item) => item !== undefined);
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
       // console.log('getInitialFieldValue: ', field, ret);
-      return ret;
+      return ret ?? [];
     };
 
     const { fields: classifications_fields } = useFieldArray({

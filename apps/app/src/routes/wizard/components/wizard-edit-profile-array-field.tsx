@@ -47,8 +47,6 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
     setEditedFields,
   });
 
-  if (fieldName === 'preferences') console.log('preferences fields from useFormFields', fields);
-
   const renderFields = (field: any, index: number) => {
     const commonProps = {
       field,
