@@ -73,7 +73,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   }
 
   function transformFormData(originalData: any): JobProfileModel {
-    console.log('originalData.preferences: ', originalData.preferences);
     return {
       id: originalData.id,
       type: 'USER',
@@ -107,29 +106,24 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       organizations: [],
       review_required: false,
       professions: [],
-      professional_registration_requirements: originalData.professional_registration_requirements
-        ? originalData.professional_registration_requirements.filter((reg: { text: string }) => reg.text.trim() !== '')
-        : [], // for some reason in build environment this is undefined, while locally it's []
+      professional_registration_requirements: originalData.professional_registration_requirements.filter(
+        (reg: { text: string }) => reg.text.trim() !== '',
+      ),
       optional_requirements: originalData.optional_requirements.filter(
         (req: { text: string }) => req.text.trim() !== '',
       ),
-      preferences:
-        //  originalData.preferences ?
-        originalData.preferences.filter((reg: { text: string }) => reg.text.trim() !== ''),
-      // : [], // for some reason in build environment this is undefined, while locally it's []
-      knowledge_skills_abilities: originalData.knowledge_skills_abilities
-        ? originalData.knowledge_skills_abilities.filter((reg: { text: string }) => reg.text.trim() !== '')
-        : [], // for some reason in build environment this is undefined, while locally it's []
+      preferences: originalData.preferences.filter((reg: { text: string }) => reg.text.trim() !== ''),
+      knowledge_skills_abilities: originalData.knowledge_skills_abilities.filter(
+        (reg: { text: string }) => reg.text.trim() !== '',
+      ),
 
       willingness_statements: originalData.willingness_statements
-        ? originalData.willingness_statements
-            .map((proviso: any) => ({
-              text: proviso.text,
-              isCustom: proviso.isCustom,
-              disabled: proviso.disabled,
-            }))
-            .filter((stmt: { text: string }) => stmt.text.trim() !== '')
-        : [],
+        .map((proviso: any) => ({
+          text: proviso.text,
+          isCustom: proviso.isCustom,
+          disabled: proviso.disabled,
+        }))
+        .filter((stmt: { text: string }) => stmt.text.trim() !== ''),
       security_screenings: originalData.security_screenings.filter(
         (screening: { text: string }) => screening.text.trim() !== '',
       ),
