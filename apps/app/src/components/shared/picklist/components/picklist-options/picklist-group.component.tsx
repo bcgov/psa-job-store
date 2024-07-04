@@ -11,11 +11,13 @@ export interface PicklistGroupProps {
 }
 
 export const PicklistGroup = ({
+  renderItem,
   setChecked,
   items,
   selectedOptions,
   text,
 }: Omit<PicklistGroupProps, 'type'> & {
+  renderItem?: (item: Omit<PicklistItemProps, 'type'>) => React.ReactNode;
   setChecked: React.Dispatch<React.SetStateAction<string[]>>;
   selectedOptions: string[];
 }) => {
@@ -58,6 +60,7 @@ export const PicklistGroup = ({
                     onChange={(checkedValues) => {
                       setChecked(checkedValues);
                     }}
+                    renderItem={renderItem}
                     checked={selectedOptions.includes(item.value)}
                     selectedOptions={selectedOptions}
                     {...item}

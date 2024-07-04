@@ -8,6 +8,8 @@ import { PicklistItem, PicklistItemProps } from './components/picklist-options/p
 import { PicklistSearch, PicklistSearchProps } from './components/picklist-search.component';
 
 export interface PicklistProps {
+  onSubmit?: (values: string[]) => void;
+  renderItem?: (item: Omit<PicklistItemProps, 'type'>) => React.ReactNode;
   info?: {
     message?: React.ReactNode;
   };
@@ -20,7 +22,16 @@ export interface PicklistProps {
   };
 }
 
-export const Picklist = ({ info, options, searchProps, selectedOptions = [], title, trigger }: PicklistProps) => {
+export const Picklist = ({
+  onSubmit,
+  renderItem,
+  info,
+  options,
+  searchProps,
+  selectedOptions = [],
+  title,
+  trigger,
+}: PicklistProps) => {
   const [checked, setChecked] = useState<string[]>(selectedOptions);
   const [filteredOptions, setFilteredOptions] = useState<PicklistOption[] | undefined>(undefined);
   const [open, setOpen] = useState<boolean>(false);
@@ -37,7 +48,7 @@ export const Picklist = ({ info, options, searchProps, selectedOptions = [], tit
     return result;
   };
 
-  const onSubmit = () => {
+  const handleSubmit = () => {
     const groupedItemIds = [
       ...options
         .filter((o) => o.type === 'group')
@@ -46,9 +57,10 @@ export const Picklist = ({ info, options, searchProps, selectedOptions = [], tit
     ];
 
     // Filter out department IDs which don't exist in `groupItemIds`.
-    const filtered = checked.filter((o) => groupedItemIds.includes(o));
-    console.log(filtered);
-    return filtered;
+    const ids = checked.filter((o) => groupedItemIds.includes(o));
+
+    onSubmit?.(ids);
+    closePicklist();
   };
 
   const openPicklist = () => setOpen(true);
@@ -78,7 +90,7 @@ export const Picklist = ({ info, options, searchProps, selectedOptions = [], tit
         onClose={closePicklist}
         extra={
           <>
-            <Button type="primary" style={{ marginRight: '16px' }} onClick={onSubmit}>
+            <Button type="primary" style={{ marginRight: '16px' }} onClick={handleSubmit}>
               Add
             </Button>
             <Button type="text" icon={<CloseOutlined />} onClick={closePicklist} />
@@ -111,6 +123,7 @@ export const Picklist = ({ info, options, searchProps, selectedOptions = [], tit
                       return (
                         <PicklistGroup
                           key={option.text}
+                          renderItem={renderItem}
                           setChecked={setChecked}
                           items={option.items}
                           selectedOptions={checked}
@@ -127,6 +140,7 @@ export const Picklist = ({ info, options, searchProps, selectedOptions = [], tit
                           renderItem={(item) => (
                             <PicklistItem
                               onChange={setChecked}
+                              renderItem={renderItem}
                               key={item.value}
                               checked={checked.includes(item.value)}
                               selectedOptions={checked}

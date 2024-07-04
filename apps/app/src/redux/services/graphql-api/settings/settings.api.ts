@@ -52,6 +52,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
       }),
     }),
     getUserForSettings: build.query<GetUserResponse, string>({
+      providesTags: ['settingsUser'],
       query: (id: string) => ({
         document: gql`
           query User($id: String) {
@@ -105,6 +106,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
       }),
     }),
     setUserOrgChartAccess: build.mutation<SetUserOrgChartAccessResponse, SetUserOrgChartAccessInput>({
+      invalidatesTags: ['settingsUser'],
       query: (input: SetUserOrgChartAccessInput) => ({
         document: gql`
           mutation SetUserOrgChartAccess($data: SetUserOrgChartAccessInput!) {

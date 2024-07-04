@@ -12,66 +12,22 @@ export interface PicklistItemProps {
 
 export const PicklistItem = ({
   onChange,
-  // renderItem,
-  // checked,
-  // extra,
-  // searchText,
+  renderItem,
   selectedOptions,
-  text,
-  value,
+  ...props
 }: Omit<PicklistItemProps, 'type'> & {
   onChange: (checkedOptions: string[]) => void;
-  renderItem?: (item: PicklistItemProps) => React.ReactNode;
+  renderItem?: (item: Omit<PicklistItemProps, 'type'>) => React.ReactNode;
   checked: boolean;
   selectedOptions: string[];
 }) => {
   return (
     <List.Item style={{ padding: 0 }}>
-      {/* <List.Item.Meta avatar={<input type="checkbox"  />} title={text} /> */}
-      {/* <List.Item.Meta
-        avatar={
-          <input
-            type="checkbox"
-            onChange={() => {
-              const clone = [...selectedOptions];
-              if (clone.includes(value)) {
-                clone.splice(clone.indexOf(value), 1);
-              } else {
-                clone.push(value);
-              }
-
-              onChange(clone);
-            }}
-            checked={selectedOptions.includes(value)}
-          />
-        }
-        title={text}
-      /> */}
-      {/* <Flex gap={4} style={{ backgroundColor: 'red', width: '100%' }}>
-        <input
-          type="checkbox"
-          onChange={() => {
-            const clone = [...selectedOptions];
-
-            if (clone.includes(value)) {
-              clone.splice(clone.indexOf(value), 1);
-            } else {
-              clone.push(value);
-            }
-
-            onChange(clone);
-          }}
-          checked={selectedOptions.includes(value)}
-        />
-        <div>
-          <span>Title</span>
-          <p>Lorem ipsum dolor amut...</p>
-        </div>
-      </Flex> */}
       <div style={{ height: '100%', width: '100%' }}>
         <label
-          htmlFor={value}
+          htmlFor={props.value}
           style={{
+            cursor: 'pointer',
             display: 'flex',
             flexDirection: 'row',
             gap: '1rem',
@@ -85,23 +41,20 @@ export const PicklistItem = ({
               onChange={() => {
                 const clone = [...selectedOptions];
 
-                if (clone.includes(value)) {
-                  clone.splice(clone.indexOf(value), 1);
+                if (clone.includes(props.value)) {
+                  clone.splice(clone.indexOf(props.value), 1);
                 } else {
-                  clone.push(value);
+                  clone.push(props.value);
                 }
 
                 onChange(clone);
               }}
-              checked={selectedOptions.includes(value)}
-              id={value}
+              checked={selectedOptions.includes(props.value)}
+              id={props.value}
               type="checkbox"
             />
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <span>{text}</span>
-            <span>{text}</span>
-          </div>
+          {renderItem ? renderItem(props) : <span>{props.text}</span>}
         </label>
       </div>
     </List.Item>
