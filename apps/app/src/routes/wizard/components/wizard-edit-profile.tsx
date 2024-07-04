@@ -468,6 +468,11 @@ const WizardEditProfile = forwardRef(
           }
         });
 
+        console.log('making preferences from data: ', effectiveData.preferences);
+        const preferences = getInitialFieldValue(effectiveData.preferences);
+
+        console.log('initial preferences: ', preferences);
+
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
@@ -489,7 +494,7 @@ const WizardEditProfile = forwardRef(
           // professional_registration_requirements: getInitialFieldValue(
           //   effectiveData.professional_registration_requirements,
           // ).map((item) => ({professional_registration_requirement:item})),
-          preferences: getInitialFieldValue(effectiveData.preferences),
+          preferences: preferences,
           knowledge_skills_abilities: getInitialFieldValue(effectiveData.knowledge_skills_abilities),
           willingness_statements: getInitialFieldValue(effectiveData.willingness_statements),
           optional_requirements: getInitialFieldValue(effectiveData.optional_requirements),
