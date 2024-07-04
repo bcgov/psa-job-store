@@ -10,7 +10,6 @@ import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { OrganizationModel } from '../../../redux/services/graphql-api/organization';
 import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
-import { WizardProvider, useWizardContext } from '../../wizard/components/wizard.provider';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 import { JobProfileSearch } from './job-profile-search.component';
 import { JobProfile } from './job-profile.component';
@@ -29,6 +28,7 @@ interface JobProfilesContentProps {
   organizationFilterExtra?: OrganizationModel;
   positionRequestId?: number;
   loadProfileIds?: number[];
+  prData?: any;
 }
 
 interface JobProfilesRef {
@@ -44,6 +44,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       previousSearchState,
       organizationFilterExtra,
       loadProfileIds,
+      prData,
       page_size = 10,
     },
     ref,
@@ -59,7 +60,6 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const { positionRequestId, number } = useParams();
     const params = useParams();
     const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
-    const { positionRequestData: prData } = useWizardContext();
 
     // useref to keep track of whether we fetched with selectProfileId
     const selectProfileIdRan = useRef(false);
@@ -436,48 +436,46 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     return (
       <>
-        <WizardProvider>
-          <JobProfileSearch
-            fullWidth={true}
-            positionRequestId={positionRequestId ? parseInt(positionRequestId) : undefined}
-            ministriesData={ministriesData}
-          />
-          <Row justify="center" gutter={16}>
-            {screens['xl'] === true ? (
-              <>
-                <Col span={8}>
-                  <JobProfileSearchResults
-                    data={useData}
-                    //  jobProfilesLoading || isLoading
-                    isLoading={useData == null || positionFilteringProcessActive}
-                    onSelectProfile={onSelectProfile}
-                    currentPage={currentPage}
-                    pageSize={pageSize}
-                    totalResults={totalResults}
-                    onPageChange={handlePageChange}
-                  />{' '}
-                </Col>
-                <Col span={16} role="region" aria-label="Selected job profile contents">
-                  {renderJobProfile()}
-                </Col>
-              </>
-            ) : params.id ? (
-              <Col span={24} role="region" aria-label="Selected job profile contents">
+        <JobProfileSearch
+          fullWidth={true}
+          positionRequestId={positionRequestId ? parseInt(positionRequestId) : undefined}
+          ministriesData={ministriesData}
+        />
+        <Row justify="center" gutter={16}>
+          {screens['xl'] === true ? (
+            <>
+              <Col span={8}>
+                <JobProfileSearchResults
+                  data={useData}
+                  //  jobProfilesLoading || isLoading
+                  isLoading={useData == null || positionFilteringProcessActive}
+                  onSelectProfile={onSelectProfile}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  totalResults={totalResults}
+                  onPageChange={handlePageChange}
+                />{' '}
+              </Col>
+              <Col span={16} role="region" aria-label="Selected job profile contents">
                 {renderJobProfile()}
               </Col>
-            ) : (
-              <JobProfileSearchResults
-                data={useData}
-                isLoading={isLoading}
-                onSelectProfile={onSelectProfile}
-                currentPage={currentPage}
-                pageSize={pageSize}
-                totalResults={totalResults}
-                onPageChange={handlePageChange}
-              />
-            )}
-          </Row>
-        </WizardProvider>
+            </>
+          ) : params.id ? (
+            <Col span={24} role="region" aria-label="Selected job profile contents">
+              {renderJobProfile()}
+            </Col>
+          ) : (
+            <JobProfileSearchResults
+              data={useData}
+              isLoading={isLoading}
+              onSelectProfile={onSelectProfile}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalResults={totalResults}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </Row>
       </>
     );
   },
