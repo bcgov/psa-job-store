@@ -793,19 +793,85 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 jobFamilyWithNoStream: $jobFamilyWithNoStream
                 excludeProfileId: $excludeProfileId
               ) {
-                text
-                jobFamilies {
-                  id
+                professionalRegistrationRequirements {
+                  text
+                  jobFamilies {
+                    id
+                  }
+                  streams {
+                    id
+                  }
+                  classification {
+                    id
+                    employee_group_id
+                  }
+                  organization {
+                    id
+                  }
                 }
-                streams {
-                  id
+                preferences {
+                  text
+                  jobFamilies {
+                    id
+                  }
+                  streams {
+                    id
+                  }
+                  classification {
+                    id
+                    employee_group_id
+                  }
+                  organization {
+                    id
+                  }
                 }
-                classification {
-                  id
-                  employee_group_id
+                knowledgeSkillsAbilities {
+                  text
+                  jobFamilies {
+                    id
+                  }
+                  streams {
+                    id
+                  }
+                  classification {
+                    id
+                    employee_group_id
+                  }
+                  organization {
+                    id
+                  }
                 }
-                organization {
-                  id
+                willingnessStatements {
+                  text
+                  jobFamilies {
+                    id
+                  }
+                  streams {
+                    id
+                  }
+                  classification {
+                    id
+                    employee_group_id
+                  }
+                  organization {
+                    id
+                  }
+                }
+                securityScreenings {
+                  text
+                  jobFamilies {
+                    id
+                  }
+                  streams {
+                    id
+                  }
+                  classification {
+                    id
+                    employee_group_id
+                  }
+                  organization {
+                    id
+                  }
                 }
               }
             }

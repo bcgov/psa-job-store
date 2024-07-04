@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, Col, Descriptions, Row } from 'antd';
+import { Card, Col, Descriptions, Row, Typography } from 'antd';
 import LoadingComponent from '../../../components/app/common/components/loading.component';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
 import { useGetLocationQuery } from '../../../redux/services/graphql-api/location.api';
@@ -153,21 +153,28 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'payListDepartmentIdNumber',
       label: 'Department ID',
-      children: <div>{positionRequestData?.positionRequest?.additional_info?.department_id}</div>,
+      children: (
+        <div>
+          <div>{positionRequestData?.positionRequest?.additional_info?.department_id}</div>
+          {positionRequestData?.positionRequest?.additional_info?.branch && (
+            <div>
+              <Typography.Text type="secondary">
+                Branch: {positionRequestData?.positionRequest?.additional_info?.branch}
+              </Typography.Text>
+            </div>
+          )}
+          {positionRequestData?.positionRequest?.additional_info?.division && (
+            <div>
+              <Typography.Text type="secondary">
+                Division: {positionRequestData?.positionRequest?.additional_info?.division}
+              </Typography.Text>
+            </div>
+          )}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
-    {
-      key: 'branch',
-      label: 'Branch',
-      children: <div>{positionRequestData?.positionRequest?.additional_info?.branch}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'division',
-      label: 'Division',
-      children: <div>{positionRequestData?.positionRequest?.additional_info?.division}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
+
     {
       key: 'includedOrExcluded',
       label: 'Included or excluded?',

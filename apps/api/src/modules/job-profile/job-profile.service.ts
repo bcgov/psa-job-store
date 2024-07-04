@@ -1302,6 +1302,9 @@ export class JobProfileService {
       select: {
         id: true,
         professional_registration_requirements: true,
+        preferences: true,
+        knowledge_skills_abilities: true,
+        willingness_statements: true,
         jobFamilies: {
           select: {
             jobFamily: true,
@@ -1337,16 +1340,19 @@ export class JobProfileService {
     });
 
     // this will be the return value
-    const requirementsMap = new Map<
-      string,
-      {
-        text: string;
-        jobFamilies: { id: number }[];
-        streams: { id: number }[];
-        classification: { id: string; employee_group_id: string } | null;
-        organization: { id: string };
-      }
-    >();
+    const securityScreeningMap = new Map<string, RequirementEntry>();
+    const professionalRegistrationMap = new Map<string, RequirementEntry>();
+    const preferencesMap = new Map<string, RequirementEntry>();
+    const ksaMap = new Map<string, RequirementEntry>();
+    const willingnessStatementsMap = new Map<string, RequirementEntry>();
+
+    interface RequirementEntry {
+      text: string;
+      jobFamilies: { id: number }[];
+      streams: { id: number }[];
+      classification: { id: string; employee_group_id: string } | null;
+      organization: { id: string } | null;
+    }
 
     // get professional registration requirements for auto-population based on classification and job family
     // professional registrations always have classifications but may or may not have job family id (null)
@@ -1430,12 +1436,53 @@ export class JobProfileService {
       ];
     }
 
+    // Get security screenings by matching family/ministry
+    const securityScreenings = await this.prisma.securityScreening.findMany({
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                organization_id: null,
+              },
+              {
+                job_family_id: null,
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                organization_id: null,
+              },
+              {
+                job_family_id: { in: jobFamilyIds },
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                organization_id: { in: ministryIds },
+              },
+              {
+                job_family_id: { in: jobFamilyIds },
+              },
+            ],
+          },
+        ],
+      },
+      include: {
+        screening: true,
+      },
+    });
+
     // build return for auto-populated requirements
     // we selected by job family and classification above, include the job family in response here, if applicable
     professionalRegistrationRequirements.forEach((registration) => {
       const text = registration.requirement.text;
-      if (!requirementsMap.has(text)) {
-        requirementsMap.set(text, {
+      if (!professionalRegistrationMap.has(text)) {
+        professionalRegistrationMap.set(text, {
           text,
           jobFamilies: registration.job_family_id ? [{ id: registration.job_family_id }] : [],
           streams: [],
@@ -1448,23 +1495,52 @@ export class JobProfileService {
           organization: registration.organization_id ? { id: registration.organization_id } : null,
         });
       } else {
-        const entry = requirementsMap.get(text);
+        const entry = professionalRegistrationMap.get(text);
         if (registration.job_family_id && !entry.jobFamilies.some((jf) => jf.id === registration.job_family_id)) {
           entry.jobFamilies.push({ id: registration.job_family_id });
         }
       }
     });
 
+    // build return for security screenings
+    securityScreenings.forEach((screening) => {
+      const text = screening.screening.text;
+      if (!securityScreeningMap.has(text)) {
+        securityScreeningMap.set(text, {
+          text,
+          jobFamilies: screening.job_family_id ? [{ id: screening.job_family_id }] : [],
+          streams: [],
+          classification: null,
+          organization: screening.organization_id ? { id: screening.organization_id } : null,
+        });
+      } else {
+        const entry = securityScreeningMap.get(text);
+        if (screening.job_family_id && !entry.jobFamilies.some((jf) => jf.id === screening.job_family_id)) {
+          entry.jobFamilies.push({ id: screening.job_family_id });
+        }
+      }
+    });
+
     // build return for pick list requirements from job family and stream
     jobProfiles.forEach((profile) => {
-      const requirements = profile.professional_registration_requirements as any[];
+      processRequirements(
+        (profile.professional_registration_requirements as any[]) || [],
+        professionalRegistrationMap,
+        profile,
+      );
+      processRequirements((profile.preferences as any[]) || [], preferencesMap, profile);
+      processRequirements((profile.knowledge_skills_abilities as any[]) || [], ksaMap, profile);
+      processRequirements((profile.willingness_statements as any[]) || [], willingnessStatementsMap, profile);
+    });
+
+    function processRequirements(requirements: any[], map: Map<string, RequirementEntry>, profile: any) {
       if (requirements) {
         requirements
           .filter((requirement) => !requirement.is_readonly)
           .forEach((requirement) => {
             const text = requirement.text;
-            if (!requirementsMap.has(text)) {
-              requirementsMap.set(text, {
+            if (!map.has(text)) {
+              map.set(text, {
                 text,
                 jobFamilies: [],
                 streams: [],
@@ -1472,28 +1548,38 @@ export class JobProfileService {
                 organization: null,
               });
             }
-            const entry = requirementsMap.get(text);
-            entry.jobFamilies.push(...profile.jobFamilies.map((jf) => ({ id: jf.jobFamily.id })));
-            entry.streams.push(...profile.streams.map((s) => ({ id: s.stream.id })));
+            const entry = map.get(text)!;
+            entry.jobFamilies.push(...profile.jobFamilies.map((jf: any) => ({ id: jf.jobFamily.id })));
+            entry.streams.push(...profile.streams.map((s: any) => ({ id: s.stream.id })));
           });
       }
-    });
+    }
 
     // log requirementsMap, which is a Map
     // console.log('requirementsMap: ', JSON.stringify(Array.from(requirementsMap.entries()), null, 2));
 
-    const result = Array.from(requirementsMap.values())
-      .map((entry) => ({
-        ...entry,
-        jobFamilies: Array.from(new Set(entry.jobFamilies.map((jf) => jf.id)))
-          .filter((id) => jobFamilyIds.includes(id))
-          .map((id) => ({ id })),
-        streams: Array.from(new Set(entry.streams.map((s) => s.id)))
-          .filter((id) => jobFamilyStreamIds.includes(id))
-          .map((id) => ({ id })),
-        classification: entry.classification,
-      }))
-      .sort((a, b) => a.text.localeCompare(b.text));
+    const result = {
+      professionalRegistrationRequirements: processMapToResult(professionalRegistrationMap),
+      preferences: processMapToResult(preferencesMap),
+      knowledgeSkillsAbilities: processMapToResult(ksaMap),
+      willingnessStatements: processMapToResult(willingnessStatementsMap),
+      securityScreenings: processMapToResult(securityScreeningMap),
+    };
+
+    function processMapToResult(map: Map<string, RequirementEntry>) {
+      return Array.from(map.values())
+        .map((entry) => ({
+          ...entry,
+          jobFamilies: Array.from(new Set(entry.jobFamilies.map((jf) => jf.id)))
+            .filter((id) => jobFamilyIds.includes(id))
+            .map((id) => ({ id })),
+          streams: Array.from(new Set(entry.streams.map((s) => s.id)))
+            .filter((id) => jobFamilyStreamIds.includes(id))
+            .map((id) => ({ id })),
+          classification: entry.classification,
+        }))
+        .sort((a, b) => a.text.localeCompare(b.text));
+    }
 
     return result;
   }

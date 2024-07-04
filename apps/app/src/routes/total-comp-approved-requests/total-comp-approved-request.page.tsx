@@ -135,7 +135,25 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'payListDepartmentIdNumber',
       label: 'Department ID',
-      children: <div>{data?.positionRequest?.additional_info?.department_id}</div>,
+      children: (
+        <div>
+          <div>{data?.positionRequest?.additional_info?.department_id}</div>
+          {data?.positionRequest?.additional_info?.branch && (
+            <div>
+              <Typography.Text type="secondary">
+                Branch: {data?.positionRequest?.additional_info?.branch}
+              </Typography.Text>
+            </div>
+          )}
+          {data?.positionRequest?.additional_info?.division && (
+            <div>
+              <Typography.Text type="secondary">
+                Division: {data?.positionRequest?.additional_info?.division}
+              </Typography.Text>
+            </div>
+          )}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
