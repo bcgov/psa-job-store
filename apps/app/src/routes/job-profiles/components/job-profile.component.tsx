@@ -363,6 +363,8 @@ export class JobProfileValidationModel {
   markAllSignificantEdu: boolean;
   markAllNonEditableProReg: boolean;
   markAllSignificantProReg: boolean;
+  markAllNonEditableSecurityScreenings: boolean;
+  markAllSignificantSecurityScreenings: boolean;
   markAllNonEditableJob_experience: boolean;
   markAllSignificantJob_experience: boolean;
   markAllNonEditableSec: boolean;

@@ -136,12 +136,13 @@ const WizardEditProfile = forwardRef(
       }
     };
     useEffect(() => {
-      if (effectiveData && sections && currentSection) {
+      // only checking securitySection is set, to ensure those sections have loaded
+      if (effectiveData && currentSection && securitySection.current) {
         handleSectionScroll(currentSection);
         setCurrentSection(null);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [acctSection.current]);
     // get original profile data for comparison to the edited state
     const { data: originalProfileData } = useGetJobProfileQuery({ id: positionRequestProfileId ?? -1 });
     const initialData = profileData ?? null;
