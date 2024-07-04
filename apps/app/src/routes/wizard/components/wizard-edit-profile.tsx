@@ -177,8 +177,11 @@ const WizardEditProfile = forwardRef(
       mode: 'onChange',
     });
 
-    const { control, reset, handleSubmit, getValues, formState, trigger } = useFormReturn;
+    const { control, reset, handleSubmit, getValues, formState, trigger, watch } = useFormReturn;
     const { isDirty } = formState;
+
+    const preferences = watch('preferences');
+    console.log('watched preferences: ', preferences);
 
     useEffect(() => {
       handleFormChange(isDirty);
