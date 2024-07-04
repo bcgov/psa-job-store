@@ -392,6 +392,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         }}
       >
         <JobProfiles
+          key={'WizardProfiles'}
           ref={jobProfileSearchResultsRef}
           searchParams={searchParams}
           onSelectProfile={onSelectProfile}
@@ -400,6 +401,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           previousSearchState={previousSearchState}
           // this will filter job profiles by organization in which this position is being created in
           organizationFilterExtra={departmentData?.department?.organization}
+          prData={positionRequestData}
         />
       </div>
     </WizardPageWrapper>

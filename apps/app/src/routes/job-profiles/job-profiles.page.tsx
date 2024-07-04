@@ -17,7 +17,12 @@ export const JobProfilesPage = () => {
       />
       {/* <div style={{ padding: '0 1rem' }}> */}
       <ContentWrapper>
-        <JobProfiles searchParams={searchParams} page_size={page_size} selectProfileNumber={number} />
+        <JobProfiles
+          key={'SearchProfiles'}
+          searchParams={searchParams}
+          page_size={page_size}
+          selectProfileNumber={number}
+        />
       </ContentWrapper>
       {/* </div> */}
       {/* </Space> */}
