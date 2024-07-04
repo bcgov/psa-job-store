@@ -359,9 +359,9 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           setCurrentPage(newPage);
           searchParams.set('page', newPage.toString());
           // if we are on /job-profiles route, don't set "selectedProfile"
-          if (!location.pathname.startsWith('/job-profiles')) {
-            searchParams.set('selectedProfile', selectProfileNumber ?? '');
-          }
+          // if (!location.pathname.startsWith('/job-profiles')) {
+          searchParams.set('selectedProfile', selectProfileNumber ?? '');
+          // }
 
           const basePath = location.pathname.startsWith('/job-profiles')
             ? location.pathname
