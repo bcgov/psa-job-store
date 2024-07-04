@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { Cache } from 'cache-manager';
 import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../../@generated/prisma-nestjs-graphql';
 import { AlexandriaError } from '../../utils/alexandria-error';
+import { CACHE_USER_PREFIX } from '../auth/auth.constants';
 import { CrmService } from '../external/crm.service';
 import { KeycloakService } from '../external/keycloak.service';
 import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
@@ -11,6 +14,7 @@ import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.i
 @Injectable()
 export class UserService {
   constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly crmService: CrmService,
     private readonly keycloakService: KeycloakService,
     private readonly peoplesoftService: PeoplesoftV2Service,
@@ -47,6 +51,7 @@ export class UserService {
       WHERE
         id = ${id}::uuid`);
 
+    await this.cacheManager.del(`${CACHE_USER_PREFIX}${id}`);
     return await this.getUser({ where: { id } });
   }
 
