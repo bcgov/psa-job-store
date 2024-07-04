@@ -1,5 +1,6 @@
 import { Card, Col, Row, Typography } from 'antd';
-import { useMemo } from 'react';
+import Fuse from 'fuse.js';
+import { useCallback, useMemo } from 'react';
 import { PicklistOption } from '../../../../components/shared/picklist/components/picklist-options';
 import { Picklist } from '../../../../components/shared/picklist/picklist.component';
 import { User } from '../../../../redux/services/graphql-api/settings/dtos/user.dto';
@@ -20,7 +21,7 @@ export const OrgChartAccessCard = ({ user }: OrgChartAccessCardProps) => {
     },
   } = useSettingsContext();
 
-  const picklistOptions: PicklistOption[] = useMemo(() => {
+  const options: PicklistOption[] = useMemo(() => {
     return [
       ...((organizations ? [...organizations] : [])
         .filter((o) => o.departments.filter((d) => d.effective_status === 'Active').length > 0)
@@ -39,58 +40,46 @@ export const OrgChartAccessCard = ({ user }: OrgChartAccessCardProps) => {
               };
             }),
         })) as PicklistOption[]),
+
       {
         type: 'item',
         text: 'Item',
-        value: 'item-value-2',
-      },
-      {
-        type: 'item',
-        text: 'Item',
-        value: 'item-value-1',
-      },
-      {
-        type: 'item',
-        text: 'Item',
-        value: 'item-value-0',
-      },
-      {
-        type: 'item',
-        text: 'Item',
-        value: 'item-value-3',
-      },
-      {
-        type: 'item',
-        text: 'Item',
-        value: 'item-value-4',
-      },
-      {
-        type: 'item',
-        text: 'Item',
-        value: 'item-value-5',
-      },
-      {
-        type: 'item',
-        text: 'Item',
-        value: 'item-value-6',
-      },
-      {
-        type: 'item',
-        text: 'Item',
-        value: 'item-value-7',
-      },
-      {
-        type: 'item',
-        text: 'Item',
-        value: 'item-value-8',
-      },
-      {
-        type: 'item',
-        text: 'Item',
-        value: 'item-value-9',
+        value: '112-0074',
       },
     ];
   }, [organizations]);
+
+  const picklistOnSearch = useCallback(
+    (value: string | undefined): PicklistOption[] => {
+      if (value == null) return [];
+
+      const groupedDepartmentIdSearch = new Fuse(
+        options.filter((option) => option.type === 'group'),
+        {
+          keys: ['items.value'],
+          includeMatches: true,
+          includeScore: true,
+          threshold: 0,
+        },
+      );
+
+      const rootDepartmentIdSearch = new Fuse(
+        options.filter((option) => option.type === 'item'),
+        {
+          keys: ['value'],
+          includeMatches: true,
+          includeScore: true,
+          threshold: 0,
+        },
+      );
+
+      return [
+        ...groupedDepartmentIdSearch.search(value).map((r) => r.item),
+        ...rootDepartmentIdSearch.search(value).map((r) => r.item),
+      ];
+    },
+    [options],
+  );
 
   return (
     <Row justify="center">
@@ -102,7 +91,11 @@ export const OrgChartAccessCard = ({ user }: OrgChartAccessCardProps) => {
             additional departments below.
           </Paragraph>
           <Picklist
-            options={picklistOptions}
+            options={options}
+            searchProps={{
+              onSearch: picklistOnSearch,
+              placeholder: 'Search by Department ID or Name',
+            }}
             selectedOptions={user?.metadata.org_chart.department_ids ?? []}
             title="Update Org Chart Access"
             trigger={{

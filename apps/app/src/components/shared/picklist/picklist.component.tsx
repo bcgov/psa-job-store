@@ -5,12 +5,14 @@ import NoResultsView from '../../../routes/my-position-requests/components/no-re
 import { PicklistOption } from './components/picklist-options';
 import { PicklistGroup, PicklistGroupProps } from './components/picklist-options/picklist-group.component';
 import { PicklistItem, PicklistItemProps } from './components/picklist-options/picklist-item.component';
+import { PicklistSearch, PicklistSearchProps } from './components/picklist-search.component';
 
 export interface PicklistProps {
   info?: {
     message?: React.ReactNode;
   };
   options: PicklistOption[];
+  searchProps?: PicklistSearchProps;
   selectedOptions: string[];
   title: string;
   trigger: {
@@ -18,8 +20,22 @@ export interface PicklistProps {
   };
 }
 
-export const Picklist = ({ info, options, selectedOptions = [], title, trigger }: PicklistProps) => {
+export const Picklist = ({ info, options, searchProps, selectedOptions = [], title, trigger }: PicklistProps) => {
+  const [checked, setChecked] = useState<string[]>(selectedOptions);
+  const [filteredOptions, setFilteredOptions] = useState<PicklistOption[] | undefined>(undefined);
   const [open, setOpen] = useState<boolean>(false);
+
+  const handleSearch = (value: string | undefined) => {
+    if (value == null) {
+      setFilteredOptions(undefined);
+      return undefined;
+    }
+
+    const result = searchProps?.onSearch(value);
+    setFilteredOptions(result);
+
+    return result;
+  };
 
   const onSubmit = () => {
     const groupedItemIds = [
@@ -40,8 +56,6 @@ export const Picklist = ({ info, options, selectedOptions = [], title, trigger }
     setOpen(false);
     setChecked(selectedOptions);
   };
-
-  const [checked, setChecked] = useState<string[]>(selectedOptions);
 
   useEffect(() => {
     setChecked(selectedOptions);
@@ -76,55 +90,60 @@ export const Picklist = ({ info, options, selectedOptions = [], title, trigger }
         title={title}
         width="50%"
       >
-        {/* Info Box */}
-        {info?.message != null && <Alert message={info.message} type="info" />}
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          {/* Info Box */}
+          {info?.message != null && <Alert message={info.message} type="info" />}
 
-        {/* Option List */}
-        <Row>
-          {options.length === 0 ? (
-            <Col span={24}>
-              <NoResultsView />
-            </Col>
-          ) : (
-            <Col span={24}>
-              <Space direction="vertical" style={{ width: '100%' }}>
-                {options.map((option) => {
-                  if (option.type === 'group') {
-                    return (
-                      <PicklistGroup
-                        key={option.text}
-                        setChecked={setChecked}
-                        items={option.items}
-                        selectedOptions={checked}
-                        text={option.text}
-                      />
-                    );
-                  } else if (option.type === 'item') {
-                    return (
-                      <List
-                        key={option.value}
-                        bordered
-                        dataSource={[option]}
-                        itemLayout="horizontal"
-                        renderItem={(item) => (
-                          <PicklistItem
-                            onChange={setChecked}
-                            key={item.value}
-                            checked={checked.includes(item.value)}
-                            selectedOptions={checked}
-                            {...item}
-                          />
-                        )}
-                      />
-                    );
-                  } else {
-                    return <></>;
-                  }
-                })}
-              </Space>
-            </Col>
-          )}
-        </Row>
+          {/* Search Box */}
+          {searchProps && <PicklistSearch {...searchProps} onSearch={handleSearch} />}
+
+          {/* Option List */}
+          <Row>
+            {(filteredOptions ?? options).length === 0 ? (
+              <Col span={24}>
+                <NoResultsView />
+              </Col>
+            ) : (
+              <Col span={24}>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  {(filteredOptions ?? options).map((option) => {
+                    if (option.type === 'group') {
+                      return (
+                        <PicklistGroup
+                          key={option.text}
+                          setChecked={setChecked}
+                          items={option.items}
+                          selectedOptions={checked}
+                          text={option.text}
+                        />
+                      );
+                    } else if (option.type === 'item') {
+                      return (
+                        <List
+                          key={option.value}
+                          bordered
+                          dataSource={[option]}
+                          itemLayout="horizontal"
+                          renderItem={(item) => (
+                            <PicklistItem
+                              onChange={setChecked}
+                              key={item.value}
+                              checked={checked.includes(item.value)}
+                              selectedOptions={checked}
+                              {...item}
+                            />
+                          )}
+                        />
+                      );
+                    } else {
+                      return <></>;
+                    }
+                  })}
+                </Space>
+              </Col>
+            )}
+          </Row>
+        </Space>
       </Drawer>
     </div>
   );
