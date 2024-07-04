@@ -1,4 +1,4 @@
-import { Card, Col, Row, Typography } from 'antd';
+import { Card, Col, Row, Table, Typography } from 'antd';
 import Fuse from 'fuse.js';
 import { useCallback, useMemo } from 'react';
 import { PicklistOption } from '../../../../components/shared/picklist/components/picklist-options';
@@ -16,7 +16,7 @@ export const OrgChartAccessCard = ({ user }: OrgChartAccessCardProps) => {
   const {
     organizations: {
       data: organizations,
-      //  departments,
+      departments,
       //  isLoading
     },
   } = useSettingsContext();
@@ -90,6 +90,38 @@ export const OrgChartAccessCard = ({ user }: OrgChartAccessCardProps) => {
             By default, users have access to their base department as defined in PeopleSoft. You can provide access to
             additional departments below.
           </Paragraph>
+          <Table
+            bordered
+            columns={[
+              {
+                key: 'name',
+                title: 'Name',
+                dataIndex: 'name',
+                render: (text) => text,
+              },
+              {
+                key: 'id',
+                title: 'Department ID',
+                dataIndex: 'id',
+                render: (text) => text,
+              },
+              {
+                key: 'type',
+                title: 'Type',
+                render: (_, record) => {
+                  return record.id === user?.metadata.peoplesoft.department_id ? 'Home' : 'Additional';
+                },
+              },
+            ]}
+            dataSource={
+              user && departments
+                ? departments
+                    .filter((department) => user.metadata.org_chart.department_ids.includes(department.id))
+                    .sort((a, b) => (a.name > b.name ? 1 : -1))
+                : []
+            }
+            size="small"
+          />
           <Picklist
             options={options}
             searchProps={{
