@@ -575,7 +575,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       markAllSignificantEdu: false,
       markAllNonEditableProReg: false,
       markAllSignificantProReg: false,
-      markAllNonEditableSecurityScreenings: false,
       markAllSignificantSecurityScreenings: false,
       markAllNonEditableJob_experience: false,
       markAllSignificantJob_experience: false,
@@ -958,7 +957,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const markAllSignificantEdu = profileWatch('markAllSignificantEdu');
   const markAllNonEditableProReg = profileWatch('markAllNonEditableProReg');
   const markAllSignificantProReg = profileWatch('markAllSignificantProReg');
-  const markAllNonEditableSecurityScreenings = profileWatch('markAllNonEditableSecurityScreenings');
   const markAllSignificantSecurityScreenings = profileWatch('markAllSignificantSecurityScreenings');
   const markAllNonEditableJob_experience = profileWatch('markAllNonEditableJob_experience');
   const markAllSignificantJob_experience = profileWatch('markAllSignificantJob_experience');
@@ -1351,7 +1349,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           markAllSignificantEdu: formData.markAllSignificantEdu,
           markAllNonEditableProReg: formData.markAllNonEditableProReg,
           markAllSignificantProReg: formData.markAllSignificantProReg,
-          markAllNonEditableSecurityScreenings: formData.markAllNonEditableSecurityScreenings,
           markAllSignificantSecurityScreenings: formData.markAllSignificantSecurityScreenings,
           markAllNonEditableJob_experience: formData.markAllNonEditableJob_experience,
           markAllSignificantJob_experience: formData.markAllSignificantJob_experience,
@@ -3522,11 +3519,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   <Col>
                                     <Controller
                                       control={profileControl}
-                                      name="markAllNonEditableSecurityScreenings"
+                                      name="markAllNonEditableSec"
                                       render={({ field }) => (
                                         <Checkbox
                                           {...field}
-                                          checked={markAllNonEditableSecurityScreenings}
+                                          checked={markAllNonEditableSec}
                                           disabled={professionalRegistrationRequirementsFields.length === 0}
                                           onChange={(e) => {
                                             field.onChange(e.target.checked);
@@ -3548,17 +3545,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       render={({ field }) => (
                                         <Checkbox
                                           {...field}
-                                          checked={
-                                            markAllSignificantSecurityScreenings || markAllNonEditableSecurityScreenings
-                                          }
+                                          checked={markAllSignificantSecurityScreenings || markAllNonEditableSec}
                                           onChange={(e) => {
                                             field.onChange(e.target.checked);
                                             updateSignificantSecurityScreenings(e.target.checked);
                                           }}
-                                          disabled={
-                                            markAllNonEditableSecurityScreenings ||
-                                            securityScreeningsFields.length === 0
-                                          }
+                                          disabled={markAllNonEditableSec || securityScreeningsFields.length === 0}
                                         >
                                           Mark all as significant
                                           <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">

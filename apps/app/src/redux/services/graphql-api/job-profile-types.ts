@@ -155,6 +155,7 @@ export interface JobProfileModel {
     markAllNonEditableJob_experience: boolean;
     markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;
+    markAllSignificantSecurityScreenings: boolean;
   };
   role_type: { id: number; name?: string };
   reports_to: ClassificationModelWrapped[];
