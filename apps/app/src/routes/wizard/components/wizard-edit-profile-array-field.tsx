@@ -23,7 +23,6 @@ interface WizardEditProfileArrayFieldProps {
   addButtonText: string;
   editedFields?: { [key: number]: boolean };
   setEditedFields?: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
-  forceSignificant?: boolean;
   formErrors?: any;
 }
 
@@ -39,14 +38,12 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
   addButtonText,
   editedFields,
   setEditedFields,
-  forceSignificant = false,
   formErrors,
 }) => {
   const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
     useFormReturn,
     fieldName,
     originalFields,
-    forceSignificant,
     setEditedFields,
   });
 
@@ -62,7 +59,6 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
       originalFields,
       editedFields,
       setEditedFields,
-      forceSignificant,
     };
 
     return <WizardEditProfileListItem {...commonProps} fieldName={fieldName} testId={testId} />;

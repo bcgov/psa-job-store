@@ -136,12 +136,13 @@ const WizardEditProfile = forwardRef(
       }
     };
     useEffect(() => {
-      if (effectiveData && sections && currentSection) {
+      // only checking securitySection is set, to ensure those sections have loaded
+      if (effectiveData && currentSection && securitySection.current) {
         handleSectionScroll(currentSection);
         setCurrentSection(null);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [acctSection.current]);
     // get original profile data for comparison to the edited state
     const { data: originalProfileData } = useGetJobProfileQuery({ id: positionRequestProfileId ?? -1 });
     const initialData = profileData ?? null;
@@ -232,7 +233,14 @@ const WizardEditProfile = forwardRef(
         return item === true && originalItem && originalItem.is_significant;
       });
 
-      const anySsecurityScreeningsTrue = Object.values(editedSecurityScreeningsFields).some((item) => item === true);
+      const anySsecurityScreeningsTrue = Object.entries(editedSecurityScreeningsFields).some(([index, item]) => {
+        const originalItem = originalSecurityScreeningsFields?.[Number(index)];
+        // check for undefined and treat it as significant, since significant flag was added later
+        // initially all security screenings were treated as significant
+
+        return item === true && originalItem && originalItem.is_significant;
+      });
+
       const verificationReasons = [];
       anyReqAccsTrue && verificationReasons.push(reasons.ACCOUNTABILITIES);
       anyEducationTrue && verificationReasons.push(reasons.EDUCATION);
@@ -255,6 +263,7 @@ const WizardEditProfile = forwardRef(
       resetComplete,
       editedProfessionalRegistrationFields,
       originalProfessionalRegistrationFields,
+      originalSecurityScreeningsFields,
     ]);
 
     useEffect(() => {
@@ -364,7 +373,12 @@ const WizardEditProfile = forwardRef(
                   isCustom: item.isCustom,
                   disabled: item.disabled,
                   is_readonly: item.is_readonly,
-                  is_significant: item.is_significant,
+                  is_significant:
+                    field == 'security_screenings'
+                      ? item.is_significant === undefined
+                        ? true
+                        : item.is_significant
+                      : item.is_significant,
                 };
               }
             })
@@ -442,6 +456,18 @@ const WizardEditProfile = forwardRef(
 
         validateVerification();
 
+        const security_screenings = getInitialFieldValue(effectiveData.security_screenings);
+
+        // previously all security screenings were significant, then a flag was added to control it explicitly
+        // if the flag is missing, treat it as significant
+
+        // iterate over security settings and set the significant flag
+        security_screenings.forEach((item) => {
+          if (item && item.is_significant === undefined) {
+            item.is_significant = true;
+          }
+        });
+
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
@@ -455,7 +481,7 @@ const WizardEditProfile = forwardRef(
           optional_accountabilities: getInitialFieldValue(effectiveData.accountabilities, false),
           education: getInitialFieldValue(effectiveData.education),
           job_experience: getInitialFieldValue(effectiveData.job_experience),
-          security_screenings: getInitialFieldValue(effectiveData.security_screenings),
+          security_screenings: security_screenings,
           behavioural_competencies: effectiveData?.behavioural_competencies || [],
           professional_registration_requirements: getInitialFieldValue(
             effectiveData.professional_registration_requirements,

@@ -155,6 +155,7 @@ export interface JobProfileModel {
     markAllNonEditableJob_experience: boolean;
     markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;
+    markAllSignificantSecurityScreenings: boolean;
   };
   role_type: { id: number; name?: string };
   reports_to: ClassificationModelWrapped[];
@@ -225,6 +226,7 @@ export interface AccountabilitiesModel {
 export interface SecuritiyScreeningModel {
   text: string | TrackedFieldArrayItem;
   is_readonly?: boolean;
+  is_significant?: boolean;
 
   // HM view
   isCustom?: boolean;

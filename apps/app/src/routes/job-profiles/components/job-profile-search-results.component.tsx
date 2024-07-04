@@ -85,7 +85,7 @@ export const JobProfileSearchResults = ({
 
       {isLoading ? (
         <div data-testid="skeleton-loading">
-          <Skeleton loading={isLoading} />
+          <Skeleton loading={isLoading} active></Skeleton>
         </div>
       ) : data?.jobProfiles.length === 0 ? (
         <Empty data-testid="empty-state" style={{ margin: '1rem' }} />
