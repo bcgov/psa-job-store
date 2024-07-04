@@ -73,6 +73,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   }
 
   function transformFormData(originalData: any): JobProfileModel {
+    console.log('originalData.preferences: ', originalData.preferences);
     return {
       id: originalData.id,
       type: 'USER',
@@ -112,9 +113,10 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       optional_requirements: originalData.optional_requirements.filter(
         (req: { text: string }) => req.text.trim() !== '',
       ),
-      preferences: originalData.preferences
-        ? originalData.preferences.filter((reg: { text: string }) => reg.text.trim() !== '')
-        : [], // for some reason in build environment this is undefined, while locally it's []
+      preferences:
+        //  originalData.preferences ?
+        originalData.preferences.filter((reg: { text: string }) => reg.text.trim() !== ''),
+      // : [], // for some reason in build environment this is undefined, while locally it's []
       knowledge_skills_abilities: originalData.knowledge_skills_abilities
         ? originalData.knowledge_skills_abilities.filter((reg: { text: string }) => reg.text.trim() !== '')
         : [], // for some reason in build environment this is undefined, while locally it's []
