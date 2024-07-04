@@ -6,6 +6,7 @@ import WizardEditProfileArrayField from './wizard-edit-profile-array-field';
 import Education from './wizard-edit-profile-min-req-education';
 import ProfessionalRegistrationRequirements from './wizard-edit-profile-professional-reg-req';
 import RelatedExperience from './wizard-edit-profile-related-experience';
+import SecurityScreenings from './wizard-edit-profile-security-screenings';
 
 interface MinimumRequirementsSectionProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -160,6 +161,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
                 setEditedFields={setEditedProfessionalRegistrationFields}
                 editedFields={editedProfessionalRegistrationFields}
                 formErrors={formErrors}
+                trigger={trigger}
               />
             </div>
 
@@ -225,7 +227,16 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
             {/* security screenings */}
 
             <div ref={securityScreeningsSectionRef}>
-              <WizardEditProfileArrayField
+              <SecurityScreenings
+                useFormReturn={useFormReturn}
+                originalFields={originalSecurityScreeningsFields}
+                validateVerification={validateVerification}
+                setEditedFields={setEditedSecurityScreeningsFields}
+                editedFields={editedSecurityScreeningsFields}
+                formErrors={formErrors}
+                trigger={trigger}
+              />
+              {/* <WizardEditProfileArrayField
                 useFormReturn={useFormReturn}
                 originalFields={originalSecurityScreeningsFields}
                 validateVerification={validateVerification}
@@ -236,9 +247,8 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
                 addButtonText="Add a security screening requirement"
                 setEditedFields={setEditedSecurityScreeningsFields}
                 editedFields={editedSecurityScreeningsFields}
-                forceSignificant={true} // force significant because security screenings are required, but not marked as significant
                 formErrors={formErrors}
-              />
+              /> */}
             </div>
 
             <Divider className="hr-reduced-margin" />

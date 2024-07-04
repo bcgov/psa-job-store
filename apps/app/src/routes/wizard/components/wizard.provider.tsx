@@ -31,6 +31,12 @@ interface WizardContextProps {
   relWorkAlertShown: boolean;
   setRelWorkAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 
+  secAlertShown: boolean;
+  setSecAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
+  profRegAlertShown: boolean;
+  setProfRegAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
   originalValuesSet: boolean;
   originalAccReqFields: any[];
   originalOptReqFields: any[];
@@ -107,6 +113,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [classificationsData, setClassificationsData] = useState<GetClassificationsResponse | null>(null);
   const [minReqAlertShown, setMinReqAlertShown] = useState<boolean>(false);
   const [reqAlertShown, setReqAlertShown] = useState<boolean>(false);
+  const [secAlertShown, setSecAlertShown] = useState<boolean>(false);
+  const [profRegAlertShown, setProfRegAlertShown] = useState<boolean>(false);
   const [optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown] = useState<boolean>(false);
   const [originalValuesSet, setOriginalValuesSet] = useState<boolean>(false);
   const [originalAccReqFields, setOriginalAccReqFields] = useState<any[]>([]);
@@ -140,6 +148,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setWizardData(null);
     // setClassificationsData(null); // do not reset this - it just stores the cache of all classifications, otherwise can't find proper classification later
     setMinReqAlertShown(false);
+    setSecAlertShown(false);
+    setProfRegAlertShown(false);
     setReqAlertShown(false);
     setOptionalAccountabilitiesAlertShown(false);
     setOriginalValuesSet(false);
@@ -189,6 +199,12 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
 
     reqAlertShown,
     setReqAlertShown,
+    secAlertShown,
+    setSecAlertShown,
+
+    profRegAlertShown,
+    setProfRegAlertShown,
+
     optionalAccountabilitiesAlertShown,
     setOptionalAccountabilitiesAlertShown,
 

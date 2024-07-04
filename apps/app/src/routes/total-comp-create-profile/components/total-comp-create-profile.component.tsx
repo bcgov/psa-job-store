@@ -120,6 +120,7 @@ export interface SecurityScreeningItem {
   text: string;
   id?: string;
   nonEditable: boolean;
+  is_significant: boolean;
 }
 
 interface TotalCompCreateProfileComponentProps {
@@ -564,6 +565,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           ({
             text: s.text,
             nonEditable: s.is_readonly,
+            is_significant: s.is_significant,
           }) as SecurityScreeningItem,
       ),
       behavioural_competencies: jobProfileData?.jobProfile.behavioural_competencies.map((bc) => ({
@@ -1337,7 +1339,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         security_screenings: formData.security_screenings
           .map((a: any) => ({
             text: a.text,
-            is_readonly: a.nonEditable,
+            is_readonly: a.nonEditable ?? false,
+            is_significant: a.is_significant ?? false,
           }))
           .filter((acc: { text: string }) => acc.text.trim() !== ''),
         all_reports_to: formData.all_reports_to,
@@ -3696,6 +3699,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   appendSecurityScreening({
                                     text: '',
                                     nonEditable: markAllNonEditableSec,
+                                    is_significant: markAllSignificantSecurityScreenings,
                                   })
                                 }
                                 icon={<PlusOutlined />}
