@@ -10,7 +10,7 @@ export class User {
       contact_id: number | null;
     };
     org_chart: {
-      department_ids: string;
+      department_ids: string[];
     };
     peoplesoft: {
       employee_id: string | null;
