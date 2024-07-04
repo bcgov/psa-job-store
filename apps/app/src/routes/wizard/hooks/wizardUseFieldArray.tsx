@@ -14,7 +14,7 @@ interface UseFormFieldsProps {
   originalFields?: any[];
   fieldName: string;
   significant?: true | undefined;
-  forceSignificant?: boolean;
+  significant_add?: boolean | undefined;
 }
 
 const useFormFields = ({
@@ -23,7 +23,7 @@ const useFormFields = ({
   setEditedFields,
   originalFields,
   significant,
-  forceSignificant,
+  significant_add = true,
 }: UseFormFieldsProps) => {
   const { fields, append, remove, update } = useFieldArray({
     control: useFormReturn.control,
@@ -39,14 +39,14 @@ const useFormFields = ({
         onOk: () => {
           // If confirmed, remove the item
           remove(index);
-          if ((significant && currentValues[index].is_significant) || forceSignificant)
+          if (significant && currentValues[index].is_significant)
             setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: false }));
         },
       });
     } else {
       // If it's an original field, mark as disabled
       update(index, { ...currentValues[index], disabled: true });
-      if ((significant && currentValues[index].is_significant) || forceSignificant)
+      if (significant && currentValues[index].is_significant)
         setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: true }));
     }
   };
@@ -55,7 +55,7 @@ const useFormFields = ({
     const currentValues = useFormReturn.getValues(fieldName);
     update(index, { ...currentValues[index], disabled: false });
 
-    if (currentValues[index].is_significant || forceSignificant)
+    if (currentValues[index].is_significant)
       setEditedFields &&
         setEditedFields((prev) => ({
           ...prev,
@@ -64,16 +64,19 @@ const useFormFields = ({
   };
 
   const handleAddNew = () => {
-    if (significant || forceSignificant)
+    if (significant && significant_add)
       setEditedFields && setEditedFields((prev) => ({ ...prev, [fields.length]: true }));
-    append({ text: '', isCustom: true, disabled: false, ...(significant ? { is_significant: true } : {}) });
+    append({
+      text: '',
+      isCustom: true,
+      disabled: false,
+      ...(significant && significant_add ? { is_significant: true } : {}),
+    });
     useFormReturn.trigger();
   };
 
   const handleReset = (index: number) => {
-    // if (significant || forceSignificant)
     setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: false }));
-
     const currentValues: TrackedFieldArrayItem[] = useFormReturn.getValues(fieldName) as TrackedFieldArrayItem[];
     currentValues[index].text = originalFields?.[index]?.text;
     update(index, {

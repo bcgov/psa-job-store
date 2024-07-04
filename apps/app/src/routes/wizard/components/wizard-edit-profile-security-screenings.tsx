@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Form } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Form, Tooltip } from 'antd';
 import React from 'react';
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
@@ -12,62 +13,57 @@ import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
 import { useWizardContext } from './wizard.provider';
 
-interface ProfessionalRegistrationRequirementsProps {
+interface SecurityScreeningsProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
   originalFields: any[];
   validateVerification: () => void;
   editedFields: { [key: number]: boolean };
   setEditedFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
-  // isAdmin: boolean;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
 }
 
-const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationRequirementsProps> = ({
+const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
   useFormReturn,
   originalFields,
   validateVerification,
   editedFields,
   setEditedFields,
-  // isAdmin,
   formErrors,
   trigger,
 }) => {
-  const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
+  const { secAlertShown, setSecAlertShown } = useWizardContext();
 
   const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
     useFormReturn,
-    fieldName: 'professional_registration_requirements',
+    fieldName: 'security_screenings',
     setEditedFields: setEditedFields,
     originalFields: originalFields,
-    // professional registrations are not significant when user adds a new item
-    // but should still handle removal of significant items
     significant: true,
-    significant_add: false,
   });
 
-  const handleProfRegRemoveModal = (index: number) => {
+  const handleRemoveModal = (index: number) => {
     WizardModal(
-      'Do you want to make changes to professional registration and certification requirements?',
-      profRegAlertShown,
-      setProfRegAlertShown,
+      'Do you want to make changes to security screenings?',
+      secAlertShown,
+      setSecAlertShown,
       () => handleRemove(index),
       true,
       undefined,
-      'prof-reg-warning',
+      'security-warning',
       trigger,
     );
   };
 
-  const handleProfRegFocusModal = (field: any) => {
+  const handleFocusModal = (field: any) => {
     WizardModal(
-      'Do you want to make changes to professional registration and certification requirements?',
-      profRegAlertShown,
-      setProfRegAlertShown,
+      'Do you want to make changes to security screenings?',
+      secAlertShown,
+      setSecAlertShown,
       () => {},
       true,
       field.is_significant,
-      'prof-reg-warning',
+      'security-warning',
     );
   };
 
@@ -88,12 +84,10 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
     return (
       <WizardEditProfileListItem
         {...commonProps}
-        label="professional registration and certification requirements"
-        fieldName="professional_registration_requirements"
-        testId="professional_registration_requirements"
-        confirmRemoveModal={() => handleProfRegRemoveModal(index)}
-        onFocus={() => handleProfRegFocusModal(field)}
-        // isAdmin={isAdmin}
+        fieldName="security_screenings"
+        testId="security_screenings"
+        confirmRemoveModal={() => handleRemoveModal(index)}
+        onFocus={() => handleFocusModal(field)}
       />
     );
   };
@@ -101,41 +95,47 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
   return (
     <>
       <Form.Item
-        label="Professional registration and certification requirements"
+        label={
+          <span>
+            {'Security screenings'}{' '}
+            <Tooltip
+              title={
+                "Use this section to add any security screenings required for the position. This could include a criminal record check, a security clearance, or a driver's abstract."
+              }
+            >
+              <InfoCircleOutlined style={{ cursor: 'pointer', fontSize: '0.9rem' }} />
+            </Tooltip>
+          </span>
+        }
         labelCol={{ className: 'card-label' }}
         className="label-only"
         colon={false}
       ></Form.Item>
-
       {fields.length > 0 && (
-        <AccessibleList
-          dataSource={fields}
-          renderItem={renderFields}
-          ariaLabel="Add a professional registration or certification requirement"
-        />
+        <AccessibleList dataSource={fields} ariaLabel="Security screenings" renderItem={renderFields} />
       )}
-      <WizardValidationError formErrors={formErrors} fieldName="professional_registration_requirements" />
+      <WizardValidationError formErrors={formErrors} fieldName="security_screenings" />
 
       <WizardEditAddButton
-        testId="add-prof-reg-button"
+        testId="add-job-experience-button"
         onClick={() => {
-          // WizardModal(
-          //   'Do you want to make changes to education and work experiences?',
-          //   minReqAlertShown,
-          //   setMinReqAlertShown,
-          //   () => {
-          handleAddNew();
-          //   },
-          //   true,
-          //   undefined,
-          //   'education-warning',
-          // );
+          WizardModal(
+            'Do you want to make changes to security screenings?',
+            secAlertShown,
+            setSecAlertShown,
+            () => {
+              handleAddNew();
+            },
+            true,
+            undefined,
+            'experience-warning',
+          );
         }}
       >
-        Add a professional registration or certification requirement
+        Add a security screening requirement
       </WizardEditAddButton>
     </>
   );
 };
 
-export default ProfessionalRegistrationRequirements;
+export default SecurityScreenings;

@@ -1279,8 +1279,14 @@ export class PositionRequestApiService {
             obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
         )
         .map((obj) => obj.text),
-      security_screenings: prJobProfile.security_screenings // all security screenings are significant - there is no is_significant flag
-        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+      security_screenings: prJobProfile.security_screenings
+        // check for undefined and treat it as significant, since significant flag was added later
+        // initially all security screenings were treated as significant
+        .filter(
+          (obj) =>
+            (obj.is_significant === true || obj.is_significant === undefined) &&
+            (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
     };
 
@@ -1311,8 +1317,14 @@ export class PositionRequestApiService {
               obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
           )
           ?.map((obj) => obj.text) ?? [],
-      security_screenings: (jobProfile.security_screenings as Record<string, any>) // all security screenings are significant - there is no is_significant flag
-        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+      security_screenings: (jobProfile.security_screenings as Record<string, any>)
+        // check for undefined and treat it as significant, since significant flag was added later
+        // initially all security screenings were treated as significant
+        .filter(
+          (obj) =>
+            (obj.is_significant === true || obj.is_significant === undefined) &&
+            (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
     };
 

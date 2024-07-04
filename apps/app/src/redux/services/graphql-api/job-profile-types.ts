@@ -226,6 +226,7 @@ export interface AccountabilitiesModel {
 export interface SecuritiyScreeningModel {
   text: string | TrackedFieldArrayItem;
   is_readonly?: boolean;
+  is_significant?: boolean;
 
   // HM view
   isCustom?: boolean;
