@@ -328,9 +328,9 @@ export class JobProfileValidationModel {
   @BehaviouralCompetencyValidator({ message: 'The profile should have between 3 and 10 behavioural competencies' })
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 
-  @CustomItemCountValidator(1, 10, 'professional registration and certification requirements', {
-    message: 'There should be between $constraint1 and $constraint2 $constraint3.',
-  })
+  // @CustomItemCountValidator(1, 10, 'professional registration and certification requirements', {
+  //   message: 'There should be between $constraint1 and $constraint2 $constraint3.',
+  // })
   // @ItemCountValidatorWithInnerProperty(
   //   1,
   //   10,
