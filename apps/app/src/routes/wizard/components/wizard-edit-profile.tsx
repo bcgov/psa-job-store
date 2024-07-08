@@ -16,7 +16,11 @@ import {
   JobProfileModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
-import { useGetJobProfileQuery, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import {
+  useGetJobProfileQuery,
+  useGetRequirementsWithoutReadOnlyQuery,
+  useLazyGetJobProfileQuery,
+} from '../../../redux/services/graphql-api/job-profile.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import AccountabilitiesSection from './wizard-edit-profile-accountabilities-section';
@@ -193,6 +197,35 @@ const WizardEditProfile = forwardRef(
     }, [data, isLoading, profileData, trigger]);
 
     const [form] = Form.useForm();
+
+    // parameters for picklist query
+    const useProfile = effectiveData?.original_profile_json ?? effectiveData;
+    const allOrganizations = useProfile?.organizations?.length === 0;
+    const selectedMinistry = useProfile?.organizations?.map((org) => org.organization.id);
+    const jobFamilyIds = useProfile?.jobFamilies?.map((fam) => fam.jobFamily.id) ?? [];
+    const selectedClassificationId = useProfile?.classifications?.[0]?.classification?.id;
+    const employeeGroup = useProfile?.classifications?.[0]?.classification?.employee_group_id;
+    const jobFamilyStreamIds = useProfile?.streams?.map((stream) => stream.stream.id) ?? [];
+    const streamFamilies = useProfile?.streams?.map((stream) => stream.stream.job_family_id);
+    const jobFamilyWithNoStream = useProfile?.jobFamilies
+      ?.filter((fam) => streamFamilies?.indexOf(fam.jobFamily.id) === -1)
+      .map((fam) => fam.jobFamily.id);
+
+    // todo - check profile with a specific ministries
+    const { data: pickerData } = useGetRequirementsWithoutReadOnlyQuery(
+      {
+        jobFamilyIds: jobFamilyIds,
+        jobFamilyStreamIds: jobFamilyStreamIds,
+        classificationId: selectedClassificationId && selectedClassificationId.split('.')[0],
+        classificationEmployeeGroupId: employeeGroup,
+        ministryIds: !allOrganizations ? selectedMinistry : undefined,
+        jobFamilyWithNoStream: jobFamilyWithNoStream,
+        excludeProfileId: useProfile?.id,
+      },
+      {
+        skip: !selectedClassificationId || !employeeGroup,
+      },
+    );
 
     const validateVerification = useCallback(() => {
       if (!resetComplete) return;
@@ -573,6 +606,7 @@ const WizardEditProfile = forwardRef(
               // for optional accountabilities, disable by default (isSignificant is false)
               disabled: item.disabled === undefined ? (isSignificant === false ? true : false) : item.disabled,
               is_readonly: item.is_readonly,
+              tc_is_readonly: item.tc_is_readonly,
               is_significant: item.is_significant,
             };
           }
@@ -822,6 +856,7 @@ const WizardEditProfile = forwardRef(
                 isAdmin={isAdmin}
                 formErrors={formErrors}
                 trigger={trigger}
+                pickerData={pickerData}
               />
 
               <WizardBehaviouralCompetencies

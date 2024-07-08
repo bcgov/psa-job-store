@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Form, Tooltip } from 'antd';
+import { Col, Form, Row, Tooltip } from 'antd';
 import React from 'react';
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
@@ -11,6 +11,7 @@ import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
+import WizardPicker from './wizard-picker';
 import { useWizardContext } from './wizard.provider';
 
 interface SecurityScreeningsProps {
@@ -21,6 +22,7 @@ interface SecurityScreeningsProps {
   setEditedFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
+  pickerData: any;
 }
 
 const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
@@ -31,10 +33,11 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
   setEditedFields,
   formErrors,
   trigger,
+  pickerData,
 }) => {
   const { secAlertShown, setSecAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, append, remove } = useFormFields({
     useFormReturn,
     fieldName: 'security_screenings',
     setEditedFields: setEditedFields,
@@ -116,7 +119,32 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
       )}
       <WizardValidationError formErrors={formErrors} fieldName="security_screenings" />
 
-      <WizardEditAddButton
+      <Form.Item style={{ marginBottom: 0 }}>
+        <Row>
+          <Col>
+            <WizardPicker
+              data={pickerData?.requirementsWithoutReadOnly?.securityScreenings}
+              fields={fields}
+              addAction={append}
+              removeAction={remove}
+              triggerValidation={trigger}
+              title="Security screenings"
+              buttonText="Browse and add security screenings"
+            />
+          </Col>
+          <Col>
+            <WizardEditAddButton
+              testId="add-job-experience-button"
+              onClick={() => {
+                handleAddNew();
+              }}
+            >
+              Add a custom requirement
+            </WizardEditAddButton>
+          </Col>
+        </Row>
+      </Form.Item>
+      {/* <WizardEditAddButton
         testId="add-job-experience-button"
         onClick={() => {
           WizardModal(
@@ -133,7 +161,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
         }}
       >
         Add a security screening requirement
-      </WizardEditAddButton>
+      </WizardEditAddButton> */}
     </>
   );
 };

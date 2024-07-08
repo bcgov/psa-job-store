@@ -2,9 +2,10 @@
 import { Input, List, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import debounce from 'lodash.debounce';
-import { Controller, UseFormReturn } from 'react-hook-form';
+import { Controller, UseFieldArrayRemove, UseFieldArrayUpdate, UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
+import { ContextOptionsReadonly } from './context-options-readonly.component';
 import { ContextOptions } from './context-options.component';
 
 export type AllowedFieldNames =
@@ -24,7 +25,7 @@ interface FieldItemProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
   editedFields?: { [key: number]: boolean };
   setEditedFields?: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
-  validateVerification: () => void;
+  validateVerification?: () => void;
   fieldName: AllowedFieldNames;
   testId: string;
   label?: string;
@@ -33,8 +34,12 @@ interface FieldItemProps {
   handleRemove: (index: number) => void;
   confirmRemoveModal?: () => void;
   onFocus?: () => void;
-  originalFields: any[];
+  originalFields?: any[];
   isAdmin?: boolean | undefined;
+  update?: UseFieldArrayUpdate<any, string>;
+  remove?: UseFieldArrayRemove;
+  fields?: Record<'id', string>[];
+  trigger?: UseFormTrigger<JobProfileValidationModel>;
 }
 
 const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
@@ -54,6 +59,10 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
   onFocus,
   originalFields,
   isAdmin = undefined,
+  update,
+  remove,
+  fields,
+  trigger,
 }) => {
   const ariaLabel = field.disabled
     ? `Undo remove ${label ?? fieldName} ${index + 1}`
@@ -92,8 +101,11 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
       <FormItem name={`${fieldName}.${index}.is_readonly`} control={useFormReturn.control} hidden>
         <Input />
       </FormItem>
+      <FormItem name={`${fieldName}.${index}.tc_is_readonly`} control={useFormReturn.control} hidden>
+        <Input />
+      </FormItem>
 
-      {field.is_readonly && (
+      {(field.is_readonly || field.tc_is_readonly) && (
         <Typography.Text data-testid={`readonly-${testId}-${index}`} style={{ flex: 1, marginRight: '10px' }}>
           {field['text']}
         </Typography.Text>
@@ -109,7 +121,7 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
             </label>
             <div
               className={`${isEdited && field.is_significant ? 'edited-field-container' : ''} input-container`}
-              style={{ display: field.is_readonly ? 'none' : 'block' }}
+              style={{ display: field.is_readonly || field.tc_is_readonly ? 'none' : 'block' }}
             >
               <TextArea
                 id={field.id}
@@ -125,8 +137,8 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                   handleFieldChange(index, updatedValue);
                 }}
                 onBlur={() => {
-                  if (isAdmin === undefined) validateVerification();
-                  else if (!isAdmin) validateVerification();
+                  if (isAdmin === undefined) validateVerification?.();
+                  else if (!isAdmin) validateVerification?.();
                   onBlur();
                 }}
                 onFocus={() => {
@@ -140,24 +152,38 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
         )}
       />
 
-      <ContextOptions
-        index={index}
-        isReadonly={field.is_readonly}
-        isDisabled={field.disabled}
-        isCustom={field.isCustom}
-        isEdited={(() => {
-          return editedFields?.[index] ?? false;
-          // if (isAdmin === undefined) return editedFields?.[index] ?? false;
-          // else if (!isAdmin) return editedFields?.[index] ?? false;
-          // else return false;
-        })()}
-        ariaLabel={ariaLabel}
-        testId={testId}
-        handleReset={handleReset}
-        handleAddBack={handleAddBack}
-        handleRemove={handleRemove}
-        confirmRemoveModal={confirmRemoveModal}
-      />
+      {field.tc_is_readonly ? (
+        <ContextOptionsReadonly
+          isReadonly={field.tc_is_readonly ?? false}
+          onEdit={() => {
+            update?.(index, {
+              ...fields?.[index],
+              tc_is_readonly: false,
+              isCustom: true,
+            });
+          }}
+          onRemove={() => {
+            remove?.(index);
+            trigger?.();
+          }}
+        />
+      ) : (
+        <ContextOptions
+          index={index}
+          isReadonly={field.is_readonly}
+          isDisabled={field.disabled}
+          isCustom={field.isCustom}
+          isEdited={(() => {
+            return editedFields?.[index] ?? false;
+          })()}
+          ariaLabel={ariaLabel}
+          testId={testId}
+          handleReset={handleReset}
+          handleAddBack={handleAddBack}
+          handleRemove={handleRemove}
+          confirmRemoveModal={confirmRemoveModal}
+        />
+      )}
     </List.Item>
   );
 };

@@ -93,6 +93,9 @@ const useFormFields = ({
     handleAddBack,
     handleAddNew,
     handleReset,
+    remove,
+    append,
+    update,
   };
 };
 

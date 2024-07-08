@@ -1340,11 +1340,11 @@ export class JobProfileService {
     });
 
     // this will be the return value
-    const securityScreeningMap = new Map<string, RequirementEntry>();
-    const professionalRegistrationMap = new Map<string, RequirementEntry>();
-    const preferencesMap = new Map<string, RequirementEntry>();
-    const ksaMap = new Map<string, RequirementEntry>();
-    const willingnessStatementsMap = new Map<string, RequirementEntry>();
+    let securityScreeningMap = new Map<string, RequirementEntry>();
+    let professionalRegistrationMap = new Map<string, RequirementEntry>();
+    let preferencesMap = new Map<string, RequirementEntry>();
+    let ksaMap = new Map<string, RequirementEntry>();
+    let willingnessStatementsMap = new Map<string, RequirementEntry>();
 
     interface RequirementEntry {
       text: string;
@@ -1521,21 +1521,75 @@ export class JobProfileService {
       }
     });
 
+    // filter out data that's identical to excluded profile
+
+    let excludedProfile;
+    if (excludeProfileId) {
+      excludedProfile = await this.prisma.jobProfile.findUnique({
+        where: { id: excludeProfileId },
+        select: {
+          professional_registration_requirements: true,
+          preferences: true,
+          knowledge_skills_abilities: true,
+          willingness_statements: true,
+          security_screenings: true, // Add this line
+        },
+      });
+
+      const filterMap = (map: Map<string, RequirementEntry>, excludedFields: any[] | undefined) => {
+        if (!excludedFields) return map;
+        excludedFields.forEach((field) => {
+          map.delete(field.text);
+        });
+        return map;
+      };
+
+      professionalRegistrationMap = filterMap(
+        professionalRegistrationMap,
+        excludedProfile.professional_registration_requirements,
+      );
+      securityScreeningMap = filterMap(securityScreeningMap, excludedProfile.security_screenings); // Update this line
+      preferencesMap = filterMap(preferencesMap, excludedProfile.preferences);
+      ksaMap = filterMap(ksaMap, excludedProfile.knowledge_skills_abilities);
+      willingnessStatementsMap = filterMap(willingnessStatementsMap, excludedProfile.willingness_statements);
+    }
+
     // build return for pick list requirements from job family and stream
     jobProfiles.forEach((profile) => {
       processRequirements(
         (profile.professional_registration_requirements as any[]) || [],
         professionalRegistrationMap,
         profile,
+        excludedProfile?.professional_registration_requirements,
       );
-      processRequirements((profile.preferences as any[]) || [], preferencesMap, profile);
-      processRequirements((profile.knowledge_skills_abilities as any[]) || [], ksaMap, profile);
-      processRequirements((profile.willingness_statements as any[]) || [], willingnessStatementsMap, profile);
+      processRequirements((profile.preferences as any[]) || [], preferencesMap, profile, excludedProfile?.preferences);
+      processRequirements(
+        (profile.knowledge_skills_abilities as any[]) || [],
+        ksaMap,
+        profile,
+        excludedProfile?.knowledge_skills_abilities,
+      );
+      processRequirements(
+        (profile.willingness_statements as any[]) || [],
+        willingnessStatementsMap,
+        profile,
+        excludedProfile?.willingness_statements,
+      );
     });
 
-    function processRequirements(requirements: any[], map: Map<string, RequirementEntry>, profile: any) {
+    function filterExcludedFields(requirements: any[], excludedFields: any[] | undefined) {
+      if (!excludedFields) return requirements;
+      return requirements.filter((req) => !excludedFields.some((excluded) => excluded.text === req.text));
+    }
+
+    function processRequirements(
+      requirements: any[],
+      map: Map<string, RequirementEntry>,
+      profile: any,
+      excludedFields: any[] | undefined,
+    ) {
       if (requirements) {
-        requirements
+        filterExcludedFields(requirements, excludedFields)
           .filter((requirement) => !requirement.is_readonly)
           .forEach((requirement) => {
             const text = requirement.text;
