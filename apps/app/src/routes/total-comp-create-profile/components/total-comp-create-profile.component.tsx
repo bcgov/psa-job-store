@@ -2431,7 +2431,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 <Card title="Accountabilities" style={{ marginTop: 16 }} bordered={false}>
                   {/* Required accountabilities */}
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2634,7 +2634,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   {/* Eduction */}
 
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2811,7 +2811,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Related experience */}
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -2989,7 +2989,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Professional registration requirement */}
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -3208,7 +3208,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Preferences */}
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -3306,7 +3306,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Knowledge skills and abilities */}
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -3409,7 +3409,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   {/* Provisios */}
 
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -3509,7 +3509,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* Security screenings */}
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -3715,7 +3715,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                   {/* optional requirements */}
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
@@ -3780,7 +3780,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 <Card title="Behavioural competencies" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
-                    <Col xs={24} sm={16} md={16} lg={16} xl={16}>
+                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <>
                         {behavioural_competencies_fields.length > 0 && (
                           <List
