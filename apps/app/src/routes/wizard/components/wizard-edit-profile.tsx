@@ -468,6 +468,8 @@ const WizardEditProfile = forwardRef(
           }
         });
 
+        const preferences = getInitialFieldValue(effectiveData.preferences);
+
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
@@ -489,7 +491,7 @@ const WizardEditProfile = forwardRef(
           // professional_registration_requirements: getInitialFieldValue(
           //   effectiveData.professional_registration_requirements,
           // ).map((item) => ({professional_registration_requirement:item})),
-          preferences: getInitialFieldValue(effectiveData.preferences),
+          preferences: preferences,
           knowledge_skills_abilities: getInitialFieldValue(effectiveData.knowledge_skills_abilities),
           willingness_statements: getInitialFieldValue(effectiveData.willingness_statements),
           optional_requirements: getInitialFieldValue(effectiveData.optional_requirements),
@@ -546,7 +548,13 @@ const WizardEditProfile = forwardRef(
     const getInitialFieldValue = (
       field: AccountabilitiesModel[] | TrackedFieldArrayItem[],
       isSignificant?: boolean | undefined,
-    ) => {
+    ): Array<{
+      text: string | TrackedFieldArrayItem;
+      isCustom: boolean | undefined;
+      disabled: boolean;
+      is_readonly?: boolean;
+      is_significant?: boolean;
+    }> => {
       // console.log('getInitialFieldValue: ', field, isSignificant);
       const ret = field
         ?.map((item) => {
@@ -557,7 +565,7 @@ const WizardEditProfile = forwardRef(
               (isSignificant === true && item.is_significant === false) ||
               (isSignificant === false && item.is_significant === true)
             )
-              return;
+              return null;
 
             return {
               text: item.text,
@@ -569,9 +577,10 @@ const WizardEditProfile = forwardRef(
             };
           }
         })
-        .filter((item) => item !== undefined);
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
       // console.log('getInitialFieldValue: ', field, ret);
-      return ret;
+      return ret ?? [];
     };
 
     const { fields: classifications_fields } = useFieldArray({

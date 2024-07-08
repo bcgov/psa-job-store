@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { VITE_BACKEND_URL, VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../../../envConfig';
-import { oidcConfig } from '../../main';
+import { VITE_BACKEND_URL, VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../../envConfig';
+import { oidcConfig } from '../main';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function checkForExpiredSessionError(response: any) {

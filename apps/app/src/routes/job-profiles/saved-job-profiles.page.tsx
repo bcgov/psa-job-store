@@ -22,7 +22,11 @@ export const SavedJobProfilesPage = () => {
     <>
       <PageHeader title="Saved profiles" />
       <ContentWrapper>
-        <JobProfiles searchParams={searchParams} loadProfileIds={savedJobProfileIds?.getSavedJobProfileIds} />
+        <JobProfiles
+          key={'SavedProfiles'}
+          searchParams={searchParams}
+          loadProfileIds={savedJobProfileIds?.getSavedJobProfileIds}
+        />
       </ContentWrapper>
     </>
   );
