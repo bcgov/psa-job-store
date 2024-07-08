@@ -17,6 +17,9 @@ import { MyPositionsRoute } from '../routes/my-position-requests';
 import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
 import { OrgChartRoute as OrgChartOldRoute, OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage as OrgChartOldPage, OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { SettingsRoute } from '../routes/settings';
+import { UserDetailPage } from '../routes/settings/user/user-detail.page';
+import { UserListPage } from '../routes/settings/user/user-list.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
@@ -84,7 +87,32 @@ export const router = createBrowserRouter([
               },
             ],
           },
-
+          {
+            path: 'settings',
+            element: (
+              <RoleGuard roles={['super-admin']}>
+                <SettingsRoute />
+              </RoleGuard>
+            ),
+            children: [
+              {
+                path: 'users',
+                handle: {
+                  breadcrumb: () => 'Users',
+                },
+                children: [
+                  {
+                    index: true,
+                    element: <UserListPage />,
+                  },
+                  {
+                    path: ':id',
+                    element: <UserDetailPage />,
+                  },
+                ],
+              },
+            ],
+          },
           {
             path: '/my-position-requests',
             element: <MyPositionsRoute />,
@@ -203,7 +231,7 @@ export const router = createBrowserRouter([
           {
             path: '/draft-job-profiles',
             element: (
-              <RoleGuard requiredRole="total-compensation">
+              <RoleGuard roles={['total-compensation']}>
                 <TotalCompDraftProfilesRoute />
               </RoleGuard>
             ),
@@ -214,7 +242,7 @@ export const router = createBrowserRouter([
               {
                 path: 'create',
                 element: (
-                  <RoleGuard requiredRole="total-compensation">
+                  <RoleGuard roles={['total-compensation']}>
                     <TotalCompDraftProfilesRoute />
                   </RoleGuard>
                 ),
@@ -245,7 +273,7 @@ export const router = createBrowserRouter([
           {
             path: '/published-job-profiles',
             element: (
-              <RoleGuard requiredRole="total-compensation">
+              <RoleGuard roles={['total-compensation']}>
                 <TotalCompPublishedProfilesRoute />
               </RoleGuard>
             ),
@@ -266,7 +294,7 @@ export const router = createBrowserRouter([
           {
             path: '/archived-job-profiles',
             element: (
-              <RoleGuard requiredRole="total-compensation">
+              <RoleGuard roles={['total-compensation']}>
                 <TotalCompPublishedProfilesRoute />
               </RoleGuard>
             ),
@@ -287,7 +315,7 @@ export const router = createBrowserRouter([
           {
             path: '/approved-requests',
             element: (
-              <RoleGuard requiredRole="total-compensation">
+              <RoleGuard roles={['total-compensation']}>
                 <TotalCompApprovedRequestsRoute />
               </RoleGuard>
             ),
@@ -309,7 +337,7 @@ export const router = createBrowserRouter([
           {
             path: '/classification-tasks',
             element: (
-              <RoleGuard requiredRole="classification">
+              <RoleGuard roles={['classification']}>
                 <ClassificationTasksRoute />
               </RoleGuard>
             ),

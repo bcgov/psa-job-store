@@ -8,10 +8,19 @@ import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from './user.service';
+import { UserResolver } from './user.resolver';
 
 @Module({
   imports: [ExternalModule, HttpModule, PrismaModule],
-  providers: [CrmService, KeycloakService, PeoplesoftService, PeoplesoftV2Service, PrismaService, UserService],
+  providers: [
+    CrmService,
+    KeycloakService,
+    PeoplesoftService,
+    PeoplesoftV2Service,
+    PrismaService,
+    UserService,
+    UserResolver,
+  ],
   exports: [KeycloakService, PeoplesoftV2Service],
 })
 export class UserModule {}

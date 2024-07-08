@@ -1,19 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { User, UserUpdateInput } from '../../@generated/prisma-nestjs-graphql';
+import { Cache } from 'cache-manager';
+import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../../@generated/prisma-nestjs-graphql';
+import { AlexandriaError } from '../../utils/alexandria-error';
+import { CACHE_USER_PREFIX } from '../auth/auth.constants';
 import { CrmService } from '../external/crm.service';
 import { KeycloakService } from '../external/keycloak.service';
 import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.input';
 
 @Injectable()
 export class UserService {
   constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly crmService: CrmService,
     private readonly keycloakService: KeycloakService,
     private readonly peoplesoftService: PeoplesoftV2Service,
     private readonly prisma: PrismaService,
   ) {}
+
+  async getUser(args: FindUniqueUserArgs) {
+    const user = await this.prisma.user.findUnique(args);
+    if (!user) {
+      throw AlexandriaError(`Could not find user: ${args}`);
+    }
+
+    return user;
+  }
+
+  async getUsers({ where, orderBy = [{ name: { sort: 'asc' } }], take = 1000, skip = 0, distinct }: FindManyUserArgs) {
+    const users = await this.prisma.user.findMany({
+      where,
+      orderBy,
+      take,
+      skip,
+      distinct,
+    });
+
+    return users;
+  }
+
+  async setUserOrgChartAccess({ id, department_ids }: SetUserOrgChartAccessInput) {
+    await this.prisma.$queryRaw(Prisma.sql`
+      UPDATE
+        "user"
+      SET
+        metadata = jsonb_set(metadata, '{org_chart,department_ids}'::text[], ${JSON.stringify(department_ids)}::jsonb)
+      WHERE
+        id = ${id}::uuid`);
+
+    await this.cacheManager.del(`${CACHE_USER_PREFIX}${id}`);
+    return await this.getUser({ where: { id } });
+  }
 
   async syncUsers() {
     const users = await this.keycloakService.getUsers();
@@ -75,11 +115,6 @@ export class UserService {
         roles: [],
       },
     });
-  }
-
-  async getUser(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    return user;
   }
 
   async upsertUser(user: UserUpdateInput) {
