@@ -5,10 +5,10 @@ import LoadingSpinnerWithMessage from '../app/common/components/loading.componen
 
 interface RoleGuardProps {
   children: React.ReactNode;
-  requiredRole: string;
+  roles: string[];
 }
 
-const RoleGuard: React.FC<RoleGuardProps> = ({ children, requiredRole }) => {
+const RoleGuard: React.FC<RoleGuardProps> = ({ children, roles }) => {
   const auth = useAuth();
 
   if (auth.isLoading) {
@@ -21,9 +21,9 @@ const RoleGuard: React.FC<RoleGuardProps> = ({ children, requiredRole }) => {
     return <Navigate to="/login" />;
   }
 
-  const roles = auth.user?.profile['client_roles'] || [];
+  const userRoles = (auth.user?.profile['client_roles'] as string[]) || [];
 
-  if (!(roles as string[]).includes(requiredRole)) {
+  if (!roles.some((role) => userRoles.includes(role))) {
     // Redirect to unauthorized if the user does not have the required role
     return <Navigate to="/unauthorized" />;
   }

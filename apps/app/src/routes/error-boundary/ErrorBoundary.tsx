@@ -1,6 +1,6 @@
 import { Card, Col, Divider, Row, Typography } from 'antd';
 import { Component, ReactNode } from 'react';
-import { sendLogToServer } from '../../redux/services/loggerService';
+import { sendLogToServer } from '../../utils/logger-service.util';
 import ContentWrapper from '../home/components/content-wrapper.component';
 const { Title, Text } = Typography;
 

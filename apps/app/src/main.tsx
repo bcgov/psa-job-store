@@ -11,10 +11,10 @@ import 'reflect-metadata';
 import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL, VITE_KEYCLOAK_REDIRECT_URL } from '../envConfig';
 import './global.css';
 import { store } from './redux/redux.store';
-import { sendLogToServer } from './redux/services/loggerService';
 import { router } from './router/index';
 import ErrorBoundary from './routes/error-boundary/ErrorBoundary';
 import { WizardProvider } from './routes/wizard/components/wizard.provider';
+import { sendLogToServer } from './utils/logger-service.util';
 
 export const oidcConfig: AuthProviderProps = {
   userStore: new WebStorageStateStore({
