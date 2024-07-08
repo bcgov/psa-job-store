@@ -41,11 +41,6 @@ export const OrgChartAccessCard = ({ user }: OrgChartAccessCardProps) => {
               };
             }),
         })) as PicklistOption[]),
-      {
-        type: 'item',
-        text: 'Hello, world!',
-        value: '112-0072',
-      },
     ];
   }, [organizations]);
 
