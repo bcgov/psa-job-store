@@ -1,5 +1,11 @@
 # api
 
+## 0.4.0
+
+### Minor Changes
+
+- [#595](https://github.com/bcgov/psa-job-store/pull/595) [`820e39d2d6cf2a1b2be44323488a1202597860af`](https://github.com/bcgov/psa-job-store/commit/820e39d2d6cf2a1b2be44323488a1202597860af) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Add admin site with ability to assign org chart access.
+
 ## 0.3.0
 
 ### Minor Changes
