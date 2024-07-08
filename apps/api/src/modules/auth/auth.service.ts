@@ -75,7 +75,7 @@ export class AuthService {
 
     if (!match) {
       const user = await this.userService.getUser({ where: { id: uuid } });
-      await this.cacheManager.set(CACHE_KEY, user, (exp ?? 0) * 1000);
+      await this.cacheManager.set(CACHE_KEY, user, (exp ?? 0) * 1000 - Date.now());
       match = await this.cacheManager.get<Express.User>(CACHE_KEY);
     }
 
