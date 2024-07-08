@@ -30,7 +30,7 @@ export class UserService {
     return user;
   }
 
-  async getUsers({ where, orderBy = [{ name: { sort: 'asc' } }], take = 50, skip = 0, distinct }: FindManyUserArgs) {
+  async getUsers({ where, orderBy = [{ name: { sort: 'asc' } }], take = 1000, skip = 0, distinct }: FindManyUserArgs) {
     const users = await this.prisma.user.findMany({
       where,
       orderBy,
