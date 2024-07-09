@@ -5,15 +5,13 @@ import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import useFormFields from '../hooks/wizardUseFieldArray';
-import { WizardModal } from './modal.component';
 import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
-import WizardProfessionalRegistrationPicker from './wizard-professional-registration-picker';
-import { useWizardContext } from './wizard.provider';
+import WizardPicker from './wizard-picker';
 
-interface ProfessionalRegistrationRequirementsProps {
+interface ProvisosProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
   originalFields: any[];
   validateVerification: () => void;
@@ -25,7 +23,7 @@ interface ProfessionalRegistrationRequirementsProps {
   pickerData: any;
 }
 
-const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationRequirementsProps> = ({
+const Provisos: React.FC<ProvisosProps> = ({
   useFormReturn,
   originalFields,
   validateVerification,
@@ -36,11 +34,11 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
   trigger,
   pickerData,
 }) => {
-  const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
+  // const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
   const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, append, update } = useFormFields({
     useFormReturn,
-    fieldName: 'professional_registration_requirements',
+    fieldName: 'willingness_statements',
     setEditedFields: setEditedFields,
     originalFields: originalFields,
     // professional registrations are not significant when user adds a new item
@@ -50,29 +48,30 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
   });
 
   const handleProfRegRemoveModal = (index: number) => {
-    WizardModal(
-      'Do you want to make changes to professional registration and certification requirements?',
-      profRegAlertShown,
-      setProfRegAlertShown,
-      () => handleRemove(index),
-      true,
-      undefined,
-      'prof-reg-warning',
-      trigger,
-    );
+    // WizardModal(
+    //   'Do you want to make changes to professional registration and certification requirements?',
+    //   profRegAlertShown,
+    //   setProfRegAlertShown,
+    // () =>
+    handleRemove(index);
+    //   true,
+    //   undefined,
+    //   'prof-reg-warning',
+    //   trigger,
+    // );
   };
 
-  const handleProfRegFocusModal = (field: any) => {
-    WizardModal(
-      'Do you want to make changes to professional registration and certification requirements?',
-      profRegAlertShown,
-      setProfRegAlertShown,
-      () => {},
-      true,
-      field.is_significant,
-      'prof-reg-warning',
-    );
-  };
+  // const handleProfRegFocusModal = (field: any) => {
+  //   WizardModal(
+  //     'Do you want to make changes to professional registration and certification requirements?',
+  //     profRegAlertShown,
+  //     setProfRegAlertShown,
+  //     () => {},
+  //     true,
+  //     field.is_significant,
+  //     'prof-reg-warning',
+  //   );
+  // };
 
   const renderFields = (field: any, index: number) => {
     const commonProps = {
@@ -91,11 +90,11 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
     return (
       <WizardEditProfileListItem
         {...commonProps}
-        label="professional registration and certification requirements"
-        fieldName="professional_registration_requirements"
-        testId="professional_registration_requirements"
+        label="provisos"
+        fieldName="willingness_statements"
+        testId="provisos"
         confirmRemoveModal={() => handleProfRegRemoveModal(index)}
-        onFocus={() => handleProfRegFocusModal(field)}
+        // onFocus={() => handleProfRegFocusModal(field)}
         update={update}
         remove={remove}
         fields={fields}
@@ -108,30 +107,26 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
   return (
     <>
       <Form.Item
-        label="Professional registration and certification requirements"
+        label="Provisos"
         labelCol={{ className: 'card-label' }}
         className="label-only"
         colon={false}
       ></Form.Item>
 
-      {fields.length > 0 && (
-        <AccessibleList
-          dataSource={fields}
-          renderItem={renderFields}
-          ariaLabel="Add a professional registration or certification requirement"
-        />
-      )}
-      <WizardValidationError formErrors={formErrors} fieldName="professional_registration_requirements" />
+      {fields.length > 0 && <AccessibleList dataSource={fields} renderItem={renderFields} ariaLabel="Add a proviso" />}
+      <WizardValidationError formErrors={formErrors} fieldName="provisos" />
 
       <Form.Item style={{ marginBottom: 0 }}>
         <Row>
           <Col>
-            <WizardProfessionalRegistrationPicker
-              data={pickerData?.requirementsWithoutReadOnly?.professionalRegistrationRequirements}
+            <WizardPicker
+              data={pickerData?.requirementsWithoutReadOnly?.willingnessStatements}
               fields={fields}
               addAction={append}
               removeAction={remove}
               triggerValidation={trigger}
+              title="Provisos"
+              buttonText="Browse and add provisos"
             />
           </Col>
           <Col>
@@ -141,7 +136,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
                 handleAddNew();
               }}
             >
-              Add a custom requirement
+              Add a custom proviso
             </WizardEditAddButton>
           </Col>
         </Row>
@@ -150,4 +145,4 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
   );
 };
 
-export default ProfessionalRegistrationRequirements;
+export default Provisos;

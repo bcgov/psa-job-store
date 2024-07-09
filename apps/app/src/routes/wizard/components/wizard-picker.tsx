@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { UseFieldArrayRemove } from 'react-hook-form';
-import { AccountabilitiesModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
-import { ValueString } from '../../job-profiles/components/job-profile.component';
 import './wizard-behavioural-comptency-picker.css';
 import EditFormOptionsPicker, { SelectableOption } from './wizard-edit-profile-options-picker';
 
 interface WizardPickerProps {
   // style?: CSSProperties;
-  fields: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+  fields: any[];
   addAction: (obj: any) => void;
   removeAction: UseFieldArrayRemove;
   data: any;

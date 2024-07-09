@@ -13,8 +13,8 @@ import './wizard-edit-profile.css';
 
 interface WizardEditProfileArrayFieldProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
-  originalFields: any[];
-  validateVerification: () => void;
+  originalFields?: any[];
+  validateVerification?: () => void;
   label: string;
   description?: string;
   tooltip?: string;
