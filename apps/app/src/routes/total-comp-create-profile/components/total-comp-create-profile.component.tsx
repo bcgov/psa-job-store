@@ -82,7 +82,6 @@ import ContentWrapper from '../../home/components/content-wrapper.component';
 import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
 import { ContextOptionsReadonly } from '../../wizard/components/context-options-readonly.component';
 import BehaviouralComptencyPicker from '../../wizard/components/wizard-behavioural-comptency-picker';
-import WizardEditProfileArrayField from '../../wizard/components/wizard-edit-profile-array-field';
 import WizardOverview from '../../wizard/components/wizard-edit-profile-overview';
 import WizardProgramOverview from '../../wizard/components/wizard-edit-profile-program-overview';
 import WizardTitle from '../../wizard/components/wizard-edit-profile-title';
@@ -3715,13 +3714,72 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   {/* optional requirements */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
-                      <WizardEditProfileArrayField
+                      <Form.Item
+                        style={{ marginBottom: '0' }}
+                        labelCol={{ className: 'full-width-label card-label' }}
+                        label={
+                          <Row justify="space-between" align="middle">
+                            <Col>Optional requirements</Col>
+                          </Row>
+                        }
+                      >
+                        {optionalRequirementsFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                            {/* up/down controls */}
+                            <Col flex="none" className="reorder-controls">
+                              <ReorderButtons
+                                index={index}
+                                moveItem={handleOptionalRequirementsMove}
+                                upperDisabled={index === 0}
+                                lowerDisabled={index === optionalRequirementsFields.length - 1}
+                              />
+                            </Col>
+                            <Col flex="auto">
+                              <Row>{/* Non-editable checkbox */}</Row>
+                              <Row gutter={10}>
+                                <Col flex="auto">
+                                  <Form.Item>
+                                    <Controller
+                                      control={profileControl}
+                                      name={`optional_requirements.${index}.text`}
+                                      render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextArea
+                                          autoSize
+                                          placeholder="Add an optional requirement"
+                                          onChange={onChange}
+                                          onBlur={onBlur}
+                                          value={value?.toString()}
+                                        />
+                                      )}
+                                    />
+                                  </Form.Item>
+                                </Col>
+
+                                <Col flex="none">
+                                  <Button icon={<DeleteOutlined />} onClick={() => removeOptionalRequirement(index)} />
+                                </Col>
+                              </Row>
+                            </Col>
+                          </Row>
+                        ))}
+                        <Form.Item>
+                          <Button
+                            type="link"
+                            onClick={() => appendOptionalRequirement({ text: '' })}
+                            icon={<PlusOutlined />}
+                          >
+                            Add an optional requirement
+                          </Button>
+                        </Form.Item>
+                      </Form.Item>
+                      {/* Todo: if refactoring, need to also add the re-arrange buttons */}
+                      {/* <WizardEditProfileArrayField
                         useFormReturn={jobProfileUseFormReturn}
                         label="Optional requirements"
                         fieldName="optional_requirements"
                         testId="optional-requirement"
                         addButtonText="Add an optional requirement"
-                      />
+                      /> */}
                     </Col>
                   </Row>
                 </Card>
