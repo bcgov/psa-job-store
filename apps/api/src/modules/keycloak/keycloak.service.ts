@@ -8,6 +8,8 @@ import { Cache } from 'cache-manager';
 import { EMPTY, catchError, expand, firstValueFrom, lastValueFrom, map, reduce, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { guidToUuid } from '../../utils/guid-to-uuid.util';
+import { FindManyKeycloakUserArgs } from './args/find-many-keycloak-user.args';
+import { KeycloakUser } from './models/keycloak-user.model';
 
 interface ClientCredentials {
   access_token: string;
@@ -18,19 +20,7 @@ interface ClientCredentials {
   scope: string;
 }
 
-export interface RawKeycloakUser {
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  attributes: {
-    idir_user_guid: string[];
-    idir_username: string[];
-    display_name: string[];
-  };
-}
-
-export interface KeycloakUser {
+export interface User {
   id: string;
   name: string;
   username: string;
@@ -38,7 +28,7 @@ export interface KeycloakUser {
   roles: string[];
 }
 
-export type KeycloakUserWithoutRoles = Omit<KeycloakUser, 'roles'>;
+export type UserWithoutRoles = Omit<User, 'roles'>;
 
 @Injectable()
 export class KeycloakService {
@@ -85,7 +75,7 @@ export class KeycloakService {
     }
   }
 
-  private async getUsersForRole(role: string): Promise<KeycloakUserWithoutRoles[]> {
+  private async getUsersForRole(role: string): Promise<UserWithoutRoles[]> {
     await this.preflight();
 
     const request = (page: number = 1) =>
@@ -111,7 +101,7 @@ export class KeycloakService {
         reduce((acc, response) => {
           return [
             ...acc,
-            ...response.data.data.map((user: RawKeycloakUser): KeycloakUserWithoutRoles => {
+            ...response.data.data.map((user: KeycloakUser): UserWithoutRoles => {
               const { email, attributes } = user;
               const { id, display_name, username } = {
                 id: attributes.idir_user_guid[0],
@@ -127,6 +117,33 @@ export class KeycloakService {
             }),
           ];
         }, []),
+      ),
+    );
+
+    return users;
+  }
+
+  async findUsers(args: FindManyKeycloakUserArgs) {
+    await this.preflight();
+
+    const { field, value } = args;
+
+    const request = () =>
+      this.httpService.get(
+        [
+          this.configService.get('KEYCLOAK_API_URL'),
+          this.configService.get('KEYCLOAK_API_ENVIRONMENT'),
+          `idir/users?${field}=${value}`,
+        ].join('/'),
+        { headers: this.headers },
+      );
+
+    const users = await firstValueFrom(
+      request().pipe(
+        map((r) => r.data.data),
+        catchError((err) => {
+          throw new Error(err);
+        }),
       ),
     );
 
@@ -161,7 +178,7 @@ export class KeycloakService {
   }
 
   async getUsersForRoles(roles: string[]) {
-    const roleUsers: Map<string, KeycloakUserWithoutRoles[]> = new Map();
+    const roleUsers: Map<string, UserWithoutRoles[]> = new Map();
 
     for await (const role of roles) {
       const usersForRole = await this.getUsersForRole(role);
@@ -173,14 +190,14 @@ export class KeycloakService {
     return merged;
   }
 
-  async mergeUsers(roleUsers: Map<string, KeycloakUserWithoutRoles[]>): Promise<KeycloakUser[]> {
-    const mergedUsers: Map<string, KeycloakUser> = new Map();
+  async mergeUsers(roleUsers: Map<string, UserWithoutRoles[]>): Promise<User[]> {
+    const mergedUsers: Map<string, User> = new Map();
 
     for (const [role, users] of Array.from(roleUsers.entries())) {
       users.forEach((user) => {
         const { id, name, email, username } = user;
 
-        let match: KeycloakUser | undefined = mergedUsers.get(user.id);
+        let match: User | undefined = mergedUsers.get(user.id);
         if (match == null) {
           // Create new entry
           match = {
@@ -206,7 +223,7 @@ export class KeycloakService {
     return Array.from([...mergedUsers.values()]);
   }
 
-  async getUsers(): Promise<KeycloakUser[]> {
+  async getUsers(): Promise<User[]> {
     const roles = await this.getRoles();
     const users = await this.getUsersForRoles(roles);
 
