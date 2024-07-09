@@ -6,8 +6,8 @@ import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { CACHE_USER_PREFIX } from '../auth/auth.constants';
 import { CrmService } from '../external/crm.service';
-import { KeycloakService } from '../external/keycloak.service';
 import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
+import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.input';
 

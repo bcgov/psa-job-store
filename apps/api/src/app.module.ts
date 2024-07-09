@@ -32,6 +32,7 @@ import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerOptions } from './utils/logging/logger.factory';
 import { validateAppConfig } from './utils/validate-app-config.util';
 import { UserModule } from './modules/user/user.module';
+import { KeycloakModule } from './modules/keycloak/keycloak.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { UserModule } from './modules/user/user.module';
     ScheduledTaskModule,
     SavedJobProfileModule,
     UserModule,
+    KeycloakModule,
   ],
   controllers: [],
   providers: [
