@@ -13,4 +13,10 @@ export class KeycloakResolver {
   findIdpUsers(@Args() args: FindManyKeycloakUserArgs) {
     return this.keycloakService.findUsers(args);
   }
+
+  @Query(() => [String], { name: 'getRoles' })
+  @Roles('super-admin')
+  getRoles() {
+    return this.keycloakService.getRoles();
+  }
 }
