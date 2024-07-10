@@ -21,6 +21,37 @@ export class UserService {
     private readonly prisma: PrismaService,
   ) {}
 
+  private async getCrmMetadata(username: string) {
+    return {
+      account_id: await this.crmService.getAccountId(username),
+      contact_id: await this.crmService.getContactId(username),
+    };
+  }
+
+  private async getPeoplesoftMetadata(username: string) {
+    const profile = await this.peoplesoftService.getProfile(username);
+    const employee = profile ? await this.peoplesoftService.getEmployee(profile.EMPLID) : undefined;
+
+    return {
+      profile,
+      employee,
+      metadata: {
+        department_id: employee ? employee.DEPTID : null,
+        employee_id: profile ? profile.EMPLID : null,
+        organization_id: employee ? employee.BUSINESS_UNIT : null,
+        position_id: employee ? employee.POSITION_NBR : null,
+      },
+    };
+  }
+
+  async assignUserRoles(id: string, roles: string[]) {
+    await this.keycloakService.assignUserRoles(id, roles);
+    await this.syncUser(id);
+
+    const user = await this.getUser({ where: { id } });
+    return user;
+  }
+
   async getUser(args: FindUniqueUserArgs) {
     const user = await this.prisma.user.findUnique(args);
     if (!user) {
@@ -55,26 +86,48 @@ export class UserService {
     return await this.getUser({ where: { id } });
   }
 
+  async syncUser(id: string) {
+    const user = await this.keycloakService.getUser(id);
+
+    // Get CRM Metadata
+    const crmMetadata = await this.getCrmMetadata(user.username);
+
+    // Get Peoplesoft Metadata
+    const { employee, metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
+
+    const existingUser: User | undefined = await this.getUser({ where: { id: user.id } });
+
+    const orgChartMetadata = {
+      department_ids: existingUser?.metadata?.org_chart?.department_ids
+        ? existingUser?.metadata?.org_chart?.department_ids
+        : employee
+          ? [employee.DEPTID]
+          : [],
+    };
+
+    const metadata = {
+      crm: crmMetadata,
+      org_chart: orgChartMetadata,
+      peoplesoft: peoplesoftMetadata,
+    };
+
+    await this.upsertUser({
+      ...user,
+      deleted_at: null, // Undelete user if it is returned from Keycloak
+      metadata,
+    });
+  }
+
   async syncUsers() {
     const users = await this.keycloakService.getUsers();
     const matches = await this.prisma.user.findMany({ where: { id: { in: users.map((u) => u.id) } } });
 
     for await (const user of users) {
       // Get CRM Metadata
-      const crmMetadata = {
-        account_id: await this.crmService.getAccountId(user.username),
-        contact_id: await this.crmService.getContactId(user.username),
-      };
+      const crmMetadata = await this.getCrmMetadata(user.username);
 
       // Get PeopleSoft Metadata
-      const profile = await this.peoplesoftService.getProfile(user.username);
-      const employee = profile ? await this.peoplesoftService.getEmployee(profile.EMPLID) : undefined;
-      const peoplesoftMetadata = {
-        department_id: employee ? employee.DEPTID : null,
-        employee_id: profile ? profile.EMPLID : null,
-        organization_id: employee ? employee.BUSINESS_UNIT : null,
-        position_id: employee ? employee.POSITION_NBR : null,
-      };
+      const { employee, metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
 
       const match: User | undefined = matches.find((m) => m.id === user.id);
       const orgChartMetadata = {
@@ -126,4 +179,20 @@ export class UserService {
       update: { ...rest },
     } as any as Prisma.UserUpsertArgs);
   }
+
+  async unassignUserRole(id: string, role: string) {
+    await this.keycloakService.unassignUserRole(id, role);
+    await this.syncUser(id);
+
+    const user = await this.getUser({ where: { id } });
+    return user;
+  }
+
+  // async assignUserRoles(id: string, roles: string[]) {
+  //   await this.keycloakService.assignUserRoles(id, roles);
+  //   await this.syncUser(id);
+
+  //   const user = await this.getUser({ where: { id } });
+  //   return user;
+  // }
 }
