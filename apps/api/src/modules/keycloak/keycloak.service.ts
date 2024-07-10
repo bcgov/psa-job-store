@@ -1,24 +1,7 @@
-import { HttpService } from '@nestjs/axios';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { AxiosHeaders } from 'axios';
-import { clientCredentials } from 'axios-oauth-client';
-import { Cache } from 'cache-manager';
-import { EMPTY, catchError, expand, firstValueFrom, lastValueFrom, map, reduce, retry } from 'rxjs';
-import { AppConfigDto } from '../../dtos/app-config.dto';
+import { IDIRUserQuery, UserResponse, getIDIRUsers, getRoles, getUsersWithRole } from '@bcgov/citz-imb-sso-css-api';
+import { Injectable } from '@nestjs/common';
 import { guidToUuid } from '../../utils/guid-to-uuid.util';
-import { FindManyKeycloakUserArgs } from './args/find-many-keycloak-user.args';
-import { KeycloakUser } from './models/keycloak-user.model';
-
-interface ClientCredentials {
-  access_token: string;
-  expires_in: number;
-  refres_expires_in: number;
-  token_type: string;
-  'not-before-policy': number;
-  scope: string;
-}
+import { KeycloakUserAttributes } from './models/keycloak-user.model';
 
 export interface User {
   id: string;
@@ -32,172 +15,87 @@ export type UserWithoutRoles = Omit<User, 'roles'>;
 
 @Injectable()
 export class KeycloakService {
-  private readonly headers: AxiosHeaders = new AxiosHeaders();
-  private readonly KEYCLOAK_API_CREDENTIALS_KEY: string = 'KEYCLOAK_API_CREDENTIALS_KEY';
+  async findUsers(field: keyof IDIRUserQuery, value: string) {
+    const users = await getIDIRUsers({ [field]: value });
+    return users.data;
+  }
 
-  constructor(
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-    private readonly configService: ConfigService<AppConfigDto, true>,
-    private readonly httpService: HttpService,
-  ) {}
+  async getAllUsersForRole(role: string) {
+    // Loop through getUsersForRole to fetch all pages from API
 
-  private async getAuth() {
-    let auth = await this.cacheManager.get<ClientCredentials>(this.KEYCLOAK_API_CREDENTIALS_KEY);
+    let fetchNextPage: boolean = true;
+    let page: number = 1;
+    let usersForRole: UserWithoutRoles[] = [];
 
-    if (auth == null) {
-      try {
-        const credentials = await clientCredentials(
-          this.httpService.axiosRef,
-          this.configService.get('KEYCLOAK_API_TOKEN_URL'),
-          this.configService.get('KEYCLOAK_API_SERVICE_ACCOUNT_CLIENT_ID'),
-          this.configService.get('KEYCLOAK_API_SERVICE_ACCOUNT_CLIENT_SECRET'),
-        )('');
+    while (fetchNextPage) {
+      const response = await this.getUsersForRole(role, page);
+      if (response.data.length === 0) {
+        fetchNextPage = false;
+      } else {
+        usersForRole = [
+          ...usersForRole,
+          ...response.data.map((user: UserResponse) => {
+            const { email, attributes } = user;
+            const { id, display_name, username } = {
+              id: (attributes as KeycloakUserAttributes).idir_user_guid[0],
+              display_name: (attributes as KeycloakUserAttributes).display_name[0],
+              username: (attributes as KeycloakUserAttributes).idir_username[0],
+            };
+            return {
+              id: guidToUuid(id),
+              name: display_name,
+              email,
+              username,
+            };
+          }),
+        ];
 
-        await this.cacheManager.set(this.KEYCLOAK_API_CREDENTIALS_KEY, credentials, credentials.expires_in * 1000);
-        auth = await this.cacheManager.get<ClientCredentials>(this.KEYCLOAK_API_CREDENTIALS_KEY);
-      } catch (error) {
-        console.error('Could not get Keycloak API access_token');
+        // Increment page
+        page = response.page + 1;
       }
     }
 
-    return auth;
+    return usersForRole;
   }
 
-  private async preflight() {
-    const auth = await this.getAuth();
-
-    // Update the Authorization header if needed
-    if (auth != null) {
-      const str = `${auth.token_type} ${auth.access_token}`;
-      if (this.headers.get('Authorization') !== str) this.headers.set('Authorization', str);
-    } else {
-      this.headers.delete('Authorization');
-    }
-  }
-
-  private async getUsersForRole(role: string): Promise<UserWithoutRoles[]> {
-    await this.preflight();
-
-    const request = (page: number = 1) =>
-      this.httpService.get(
-        [
-          this.configService.get('KEYCLOAK_API_URL'),
-          'integrations',
-          this.configService.get('KEYCLOAK_API_INTEGRATION_ID'),
-          this.configService.get('KEYCLOAK_API_ENVIRONMENT'),
-          'roles',
-          role,
-          `users?page=${page}&max=50`,
-        ].join('/'),
-        { headers: this.headers },
-      );
-
-    // The following is inspired by https://stackoverflow.com/a/68690997
-    const users = await lastValueFrom(
-      request().pipe(
-        // Repeat the request if response.data is not an empty array.
-        expand((r) => (Array.isArray(r.data.data) && r.data.data.length > 0 ? request(r.data.page + 1) : EMPTY)),
-        // Stitch results from all pages together
-        reduce((acc, response) => {
-          return [
-            ...acc,
-            ...response.data.data.map((user: KeycloakUser): UserWithoutRoles => {
-              const { email, attributes } = user;
-              const { id, display_name, username } = {
-                id: attributes.idir_user_guid[0],
-                display_name: attributes.display_name[0],
-                username: attributes.idir_username[0],
-              };
-              return {
-                id: guidToUuid(id),
-                name: display_name,
-                email,
-                username,
-              };
-            }),
-          ];
-        }, []),
-      ),
-    );
-
-    return users;
-  }
-
-  async findUsers(args: FindManyKeycloakUserArgs) {
-    await this.preflight();
-
-    const { field, value } = args;
-
-    const request = () =>
-      this.httpService.get(
-        [
-          this.configService.get('KEYCLOAK_API_URL'),
-          this.configService.get('KEYCLOAK_API_ENVIRONMENT'),
-          `idir/users?${field}=${value}`,
-        ].join('/'),
-        { headers: this.headers },
-      );
-
-    const users = await firstValueFrom(
-      request().pipe(
-        map((r) => r.data.data),
-        catchError((err) => {
-          throw new Error(err);
-        }),
-      ),
-    );
-
-    return users;
-  }
-
-  async getRoles(): Promise<string[]> {
-    await this.preflight();
-
-    const roles = await firstValueFrom(
-      this.httpService
-        .get(
-          [
-            this.configService.get('KEYCLOAK_API_URL'),
-            'integrations',
-            this.configService.get('KEYCLOAK_API_INTEGRATION_ID'),
-            this.configService.get('KEYCLOAK_API_ENVIRONMENT'),
-            'roles',
-          ].join('/'),
-          { headers: this.headers },
-        )
-        .pipe(
-          map((r) => r.data.data.map((d) => d.name)),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
-
-    return roles;
+  async getUsersForRole(role: string, page: number = 1, maxCount: number = 50) {
+    const response = await getUsersWithRole(role, page, maxCount);
+    return response;
   }
 
   async getUsersForRoles(roles: string[]) {
-    const roleUsers: Map<string, UserWithoutRoles[]> = new Map();
+    const usersByRole: Map<string, UserWithoutRoles[]> = new Map();
 
     for await (const role of roles) {
-      const usersForRole = await this.getUsersForRole(role);
-      roleUsers.set(role, usersForRole);
+      const users = await this.getAllUsersForRole(role);
+      usersByRole.set(role, users);
     }
 
-    const merged = this.mergeUsers(roleUsers);
+    const merged = this.mergeUsers(usersByRole);
 
     return merged;
   }
 
+  async getRoles(): Promise<string[]> {
+    const response = await getRoles();
+    return response.data.map((role) => role.name);
+  }
+
+  async getUsers(): Promise<User[]> {
+    const roles = await this.getRoles();
+    const users = await this.getUsersForRoles(roles);
+
+    return users;
+  }
+
   async mergeUsers(roleUsers: Map<string, UserWithoutRoles[]>): Promise<User[]> {
-    const mergedUsers: Map<string, User> = new Map();
+    const merged: Map<string, User> = new Map();
 
     for (const [role, users] of Array.from(roleUsers.entries())) {
       users.forEach((user) => {
         const { id, name, email, username } = user;
+        let match: User | undefined = merged.get(user.id);
 
-        let match: User | undefined = mergedUsers.get(user.id);
         if (match == null) {
           // Create new entry
           match = {
@@ -216,17 +114,10 @@ export class KeycloakService {
           };
         }
 
-        mergedUsers.set(id, match);
+        merged.set(id, match);
       });
     }
 
-    return Array.from([...mergedUsers.values()]);
-  }
-
-  async getUsers(): Promise<User[]> {
-    const roles = await this.getRoles();
-    const users = await this.getUsersForRoles(roles);
-
-    return users;
+    return Array.from([...merged.values()]);
   }
 }
