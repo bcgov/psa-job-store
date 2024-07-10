@@ -12,12 +12,12 @@ export class KeycloakResolver {
   @Roles('super-admin')
   findIdpUsers(@Args() args: FindManyKeycloakUserArgs) {
     console.log('args: ', args);
-    // return this.keycloakService.findUsers(args);
+    return this.keycloakService.findUsers(args.field, args.value);
   }
 
   @Query(() => [String], { name: 'getRoles' })
   @Roles('super-admin')
   getRoles() {
-    // return this.keycloakService.getRoles();
+    return this.keycloakService.getRoles();
   }
 }

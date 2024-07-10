@@ -1,8 +1,10 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum FindManyKeycloakUserSearchField {
-  GUID = 'guid',
-  EMAIL = 'email',
+  email = 'email',
+  firstName = 'firstName',
+  guid = 'guid',
+  lastName = 'lastName',
 }
 
 registerEnumType(FindManyKeycloakUserSearchField, { name: 'FindManyKeycloakUserSearchField', description: undefined });
