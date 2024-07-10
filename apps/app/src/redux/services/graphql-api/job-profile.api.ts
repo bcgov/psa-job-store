@@ -491,6 +491,12 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               jobProfile(id: "${args.id}") {
                 id
                 updated_at
+                updated_by {
+                  name
+                }
+                published_by {
+                  name
+                }
                 streams {
                   stream {
                       id
