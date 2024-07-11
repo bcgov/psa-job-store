@@ -3986,7 +3986,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 {
                   key: 'First published by',
                   label: <h3 tabIndex={0}>First published by</h3>,
-                  children: <span tabIndex={0}>{profileJson?.jobProfile?.published_by.name}</span>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.published_by?.name}</span>,
                   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
                 },
                 {
