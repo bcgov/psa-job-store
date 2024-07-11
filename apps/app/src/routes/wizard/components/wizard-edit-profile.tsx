@@ -658,7 +658,8 @@ const WizardEditProfile = forwardRef(
               text: item.text,
               isCustom: item.isCustom,
               // for optional accountabilities, disable by default (isSignificant is false)
-              disabled: item.disabled === undefined ? (isSignificant === false ? true : false) : item.disabled,
+              // disabled: item.disabled === undefined ? (isSignificant === false ? true : false) : item.disabled,
+              disabled: item.disabled === undefined ? false : item.disabled,
               is_readonly: item.is_readonly,
               tc_is_readonly: item.tc_is_readonly,
               is_significant: item.is_significant,
