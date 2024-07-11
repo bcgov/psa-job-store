@@ -1393,7 +1393,7 @@ export class JobProfileService {
       },
     });
 
-    // if ministries were provided, select profiles with those ministries (with and without job family)
+    // if ministries were provided, select professional registrations from profiles with those ministries (with and without job family)
     if (ministryIds) {
       const professionalRegistrationRequirements2 = await this.prisma.professionalRegistrationRequirement.findMany({
         where: {
@@ -1527,7 +1527,7 @@ export class JobProfileService {
     });
 
     // log securityScreeningMap
-    console.log('securityScreeningMap: ', JSON.stringify(Array.from(securityScreeningMap.entries()), null, 2));
+    // console.log('securityScreeningMap: ', JSON.stringify(Array.from(securityScreeningMap.entries()), null, 2));
 
     // filter out data that's identical to excluded profile
 
@@ -1611,7 +1611,7 @@ export class JobProfileService {
     ) {
       if (requirements) {
         filterExcludedFields(requirements, excludedFields)
-          .filter((requirement) => !requirement.is_readonly)
+          // .filter((requirement) => !requirement.is_readonly)
           .forEach((requirement) => {
             const text = requirement.text;
             if (!map.has(text)) {
