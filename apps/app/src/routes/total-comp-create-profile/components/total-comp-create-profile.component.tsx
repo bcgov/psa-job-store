@@ -3974,7 +3974,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 {
                   key: 'Last updated by',
                   label: <h3 tabIndex={0}>Last updated by</h3>,
-                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by.name}</span>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
                   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
                 },
                 {
