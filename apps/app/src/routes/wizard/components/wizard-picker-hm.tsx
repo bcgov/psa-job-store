@@ -4,7 +4,7 @@ import { UseFieldArrayRemove } from 'react-hook-form';
 import './wizard-behavioural-comptency-picker.css';
 import EditFormOptionsPicker, { SelectableOption } from './wizard-edit-profile-options-picker';
 
-interface WizardPickerProps {
+interface WizardPickerHMProps {
   // style?: CSSProperties;
   fields: any[];
   addAction: (obj: any) => void;
@@ -13,9 +13,10 @@ interface WizardPickerProps {
   triggerValidation?: () => void;
   title: string;
   buttonText: string;
+  // log?: boolean;
 }
 
-const WizardPicker: React.FC<WizardPickerProps> = ({
+const WizardPickerHM: React.FC<WizardPickerHMProps> = ({
   fields,
   addAction,
   removeAction,
@@ -23,6 +24,7 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   triggerValidation,
   title,
   buttonText,
+  // log = false,
 }) => {
   // Fetching data from the API
   // console.log('data: ', data);
@@ -35,12 +37,10 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   useEffect(() => {
     // if (log) console.log('fields for selectedOptions: ', fields);
 
-    const selectedOptions = fields
-      .filter((field) => field.tc_is_readonly)
-      .map((field) => {
-        // if (log) console.log('field: ', field);
-        return field.text;
-      });
+    const selectedOptions = fields.map((field) => {
+      // if (log) console.log('field: ', field);
+      return field.text;
+    });
 
     const uniqueSelectedOptions = [...new Set(selectedOptions)];
 
@@ -76,69 +76,32 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   // if (error) return <p>An error occurred</p>;
 
   const onAdd = (selectedItems: string[]) => {
-    // console.log('onAdd selectedItems: ', selectedItems);
-    // console.log('selectableOptions: ', selectableOptions);
+    // Sort selectedItems based on the order in selectableOptions
+    const sortedSelectedItems = selectableOptions
+      .filter((option) => selectedItems.includes(option.value))
+      .map((option) => option.value);
 
-    const selectedProfRegs = selectedItems
+    // Remove all existing items
+    const allIndexes = fields.map((_, index) => index);
+    removeAction(allIndexes);
+
+    // Create a new list of items based on the sorted selected items
+    const newItems = sortedSelectedItems
       .map((text) => {
         const selectedOption = selectableOptions.find((option) => option.value === text);
         if (selectedOption) {
           const { text } = selectedOption.object;
-          return {
-            tc_is_readonly: true,
-            text,
-          };
+          return { text };
         }
         return null;
       })
-      .filter((item) => item !== null);
+      .filter((item): item is { text: any } => item !== null);
 
-    // console.log('selectedProfRegs: ', selectedProfRegs);
-    // .filter((item): item is AccountabilitiesModel => item !== null);
-
-    // Filter out items that already exist in the fields array
-    const newItems = selectedProfRegs
-      .filter(
-        (item) =>
-          !fields.some((field) => {
-            // console.log('building newItems, field, item: ', field, item);
-            return item && field.text === item.text && field.tc_is_readonly === true;
-          }),
-      )
-      .filter(
-        (
-          item,
-        ): item is {
-          text: any;
-          tc_is_readonly: boolean;
-        } => item !== null,
-      );
-
-    // console.log('newItems: ', newItems);
-
-    // Remove items that are no longer in the selectedItems array
-    const idsToRemove = fields
-      .filter((field) => {
-        // console.log('building idsToRemove, field, selectedItems: ', field, selectedItems);
-        const res = field.tc_is_readonly == true && !selectedItems.includes(field.text?.toString() ?? '');
-        return res;
-      })
-      .map((field) => field.text);
-
-    // console.log('idsToRemove: ', idsToRemove);
-
-    // Convert idsToRemove to an array of indexes
-    const indexesToRemove = idsToRemove.map((text) =>
-      fields.findIndex((field) => field.tc_is_readonly == true && field.text === text),
-    );
-    // console.log('indexesToremove: ', indexesToRemove);
-    indexesToRemove.length > 0 && removeAction(indexesToRemove);
-
-    // Add the new items
+    // Add all new items in the correct order
     newItems.forEach((item) => {
-      // console.log('addAction: ', item);
       addAction(item);
     });
+
     triggerValidation?.();
   };
 
@@ -153,4 +116,4 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   );
 };
 
-export default WizardPicker;
+export default WizardPickerHM;
