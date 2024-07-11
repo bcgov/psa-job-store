@@ -192,7 +192,7 @@ export const ClassificationTaskPage = () => {
                                         display: 'inline-flex',
                                       }}
                                     >
-                                      If you need any additional information:
+                                      If you need any additional information from the client:
                                     </div>
                                     <div></div>
                                   </div>
@@ -226,7 +226,7 @@ export const ClassificationTaskPage = () => {
                                     message={
                                       <div className="alert-with-link">
                                         If a formal Classification Review is required and a client wishes to proceed
-                                        with it, proceed to ‘Formal review’.
+                                        with it, proceed to ‘Classification review’.
                                         {/* <Link to="#" className="alert-extra-link">
           Learn More
         </Link> */}
@@ -267,6 +267,9 @@ export const ClassificationTaskPage = () => {
                                     >
                                       <span>Needs the attention of an :</span>
                                       <Select
+                                        style={{
+                                          width: '120px',
+                                        }}
                                         defaultValue={'CA'}
                                         value={needsAttentionFrom}
                                         onChange={(value) => setNeedsAttentionFrom(value)}
@@ -313,7 +316,7 @@ export const ClassificationTaskPage = () => {
                                         message={
                                           <div className="alert-with-link">
                                             If Analyst reassigns the ticket, and requests preparation for a review,
-                                            proceed to ‘Formal review’.
+                                            proceed to Classification review’.
                                             {/* <Link to="#" className="alert-extra-link">
 Learn More
 </Link> */}
@@ -477,23 +480,13 @@ Learn More
                                         <List.Item>
                                           <List.Item.Meta
                                             avatar={<Avatar shape="square" src={PeopleSoftGraphic} />}
-                                            title={
-                                              <>
-                                                PeopleSoft: Add CRM ticket # to “Detailed Position Description” Proposed
-                                                position
-                                              </>
-                                            }
-                                            description={'# is in the original service request (in private note)'}
-                                          />
-                                        </List.Item>
-                                        <List.Item>
-                                          <List.Item.Meta
-                                            avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
-                                            title={
-                                              'CRM: Contact client to ask if they want to proceed with a formal Classification Review. '
+                                            title={<>PeopleSoft: Add CRM ticket # to “Detailed Position Description”</>}
+                                            description={
+                                              'Proposed position # is in the original service request (in private note)'
                                             }
                                           />
                                         </List.Item>
+
                                         <List.Item>
                                           <List.Item.Meta
                                             avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
@@ -598,10 +591,10 @@ Learn More
                                     <List.Item>
                                       <List.Item.Meta
                                         avatar={<Avatar shape="square" src={PeopleSoftGraphic} />}
-                                        title={
-                                          'PeopleSoft: Add CRM ticket # to “Detailed Position Description” Proposed position '
+                                        title={'PeopleSoft: Add CRM ticket # to “Detailed Position Description”'}
+                                        description={
+                                          'Proposed position # is in the original service request (in private note)'
                                         }
-                                        description={'# is in the original service request (in private note)'}
                                       />
                                     </List.Item>
                                     <List.Item>
