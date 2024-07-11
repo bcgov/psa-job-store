@@ -8,6 +8,7 @@ import {
   DuplicateJobProfileResponse,
   GetJobProfileArgs,
   GetJobProfileByNumberResponse,
+  GetJobProfileMetaResponse,
   GetJobProfileResponse,
   GetJobProfilesArchivedResponse,
   GetJobProfilesArgs,
@@ -129,6 +130,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 published_by {
                   name
                 }
+                valid_from
+                valid_to
+                version
               }
               jobProfilesCount(search: $search, where: $where)
               pageNumberForSelectProfile(
@@ -254,6 +258,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 published_by {
                   name
                 }
+                valid_from
+                valid_to
+                version
               }
               jobProfilesDraftsCount(search: $search, where: $where)
             }
@@ -368,6 +375,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   name
                 }
                 is_archived
+                valid_from
+                valid_to
+                version
               }
               jobProfilesArchivedCount(search: $search, where: $where)
             }
@@ -392,7 +402,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         return {
           document: gql`
             query JobProfileByNumber {
-              jobProfileByNumber(number: "${args.number}") {
+              jobProfileByNumber(number: "${args.number}" version: ${args.version ?? null}) {
                 id
                 updated_at
                 streams {
@@ -476,6 +486,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   }
                 }
                 is_archived
+                valid_from
+                valid_to
+                version
               }
             }
           `,
@@ -492,11 +505,19 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 id
                 updated_at
                 updated_by {
+                  id
                   name
                 }
                 published_by {
+                  id
                   name
                 }
+                created_at
+                owner {
+                  id
+                  name
+                }
+                published_at
                 streams {
                   stream {
                       id
@@ -577,6 +598,10 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     code
                   }
                 }
+                valid_from
+                valid_to
+                version
+                currentVersion
               }
             }
           `,
@@ -595,6 +620,35 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             data: input.data,
             id: input.id,
           },
+        };
+      },
+    }),
+    getJobProfileMeta: build.query<GetJobProfileMetaResponse, number>({
+      query: (number: number) => {
+        return {
+          document: gql`
+            query jobProfileMeta {
+              jobProfileMeta(number: ${number}) {
+                id
+                version
+                updated_at
+                updated_by {
+                  id
+                  name
+                }
+                published_by {
+                  id
+                  name
+                }
+                created_at
+                owner {
+                  id
+                  name
+                }
+                published_at
+              }
+            }
+          `,
         };
       },
     }),
@@ -918,6 +972,7 @@ export const {
 
   useGetJobProfileByNumberQuery,
   useLazyGetJobProfileByNumberQuery,
+  useLazyGetJobProfileMetaQuery,
 
   useGetRequirementsWithoutReadOnlyQuery,
 } = jobProfileApi;

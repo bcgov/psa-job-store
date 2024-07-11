@@ -31,9 +31,9 @@ spec:
                   env:
                   - name: DISCOVERY
                     valueFrom:
-                      configMapKeyRef:
-                        name: nginx-config
-                        key: DISCOVERY
+                      secretKeyRef:
+                        name: secrets
+                        key: KEYCLOAK_REALM_URL
                   - name: CLIENT_ID
                     valueFrom:
                       secretKeyRef:

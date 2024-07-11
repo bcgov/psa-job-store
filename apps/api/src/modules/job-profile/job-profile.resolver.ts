@@ -82,6 +82,11 @@ export class JobProfileResolver {
     return await this.jobProfileService.getJobProfileCount(args);
   }
 
+  @Query(() => [JobProfile], { name: 'jobProfileMeta' })
+  async jobProfileMeta(@Args('number') number: number) {
+    return await this.jobProfileService.getJobProfileMeta(number);
+  }
+
   @Query(() => [JobProfile], { name: 'jobProfilesDrafts' })
   @Roles('total-compensation')
   @UseGuards(RoleGuard)
@@ -135,8 +140,12 @@ export class JobProfileResolver {
 
   @Query(() => JobProfile, { name: 'jobProfileByNumber' })
   @AllowNoRoles() // so that share position request feature can fetch relevant data
-  async getJobProfileByNumber(@Args('number') number: string, @CurrentUser() user: Express.User) {
-    const res = await this.jobProfileService.getJobProfileByNumber(+number, user.roles);
+  async getJobProfileByNumber(
+    @CurrentUser() user: Express.User,
+    @Args('number') number: string,
+    @Args('version', { type: () => Int, nullable: true }) version?: number,
+  ) {
+    const res = await this.jobProfileService.getJobProfileByNumber(+number, version, user.roles);
     return res;
   }
 
