@@ -35,11 +35,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
   pickerData,
 }) => {
   const { reqAlertShown, setReqAlertShown } = useWizardContext();
-  const {
-    fields: optionalFields,
-    append: optionalAppend,
-    remove: optionalRemove,
-  } = useFormFields({
+  const { fields: optionalFields, update: optionalUpdate } = useFormFields({
     useFormReturn,
     fieldName: 'optional_accountabilities',
   });
@@ -92,8 +88,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
                   <WizardPickerHM
                     data={pickerData?.requirementsWithoutReadOnly?.accountabilities}
                     fields={optionalFields}
-                    addAction={optionalAppend}
-                    removeAction={optionalRemove}
+                    update={optionalUpdate}
                     title="Optional accountabilities"
                     buttonText="Browse and add optional accountabilities"
                     // log={true}

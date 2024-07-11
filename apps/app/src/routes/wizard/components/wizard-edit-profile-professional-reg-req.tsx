@@ -47,11 +47,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
     significant: true,
   });
 
-  const {
-    fields: optional_fields,
-    remove: optional_remove,
-    append: optional_append,
-  } = useFormFields({
+  const { fields: optional_fields, update: optional_update } = useFormFields({
     useFormReturn,
     fieldName: 'optional_professional_registration_requirements',
     // setEditedFields: setEditedFields,
@@ -153,10 +149,9 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
             <WizardPickerHM
               data={pickerData?.requirementsWithoutReadOnly?.professionalRegistrationRequirements}
               fields={optional_fields}
-              addAction={optional_append}
-              removeAction={optional_remove}
+              update={optional_update}
               title="Optional professional registration and certification requirements"
-              buttonText="Browse and add professional registration and certification requirements"
+              buttonText="Browse and add optional professional registration requirements"
               // log={true}
             />
           </Col>

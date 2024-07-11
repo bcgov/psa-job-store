@@ -912,7 +912,56 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                   0)) && (
               <>
                 <h4>Professional registration and certification requirements</h4>
-                <ul data-testid="professional-registration">
+
+                <>
+                  <ul data-testid="professional-registration">
+                    {showDiff && originalData
+                      ? compareLists(
+                          originalData.professional_registration_requirements.filter((acc) => acc.is_significant),
+                          effectiveData?.professional_registration_requirements.filter((acc) => acc.is_significant),
+                        )
+                      : effectiveData?.professional_registration_requirements
+                          .filter((acc) => acc.is_significant)
+                          .map((professional_registration_requirement, index) => {
+                            if (
+                              typeof professional_registration_requirement === 'string' ||
+                              professional_registration_requirement.disabled
+                            ) {
+                              return null;
+                            }
+                            if (typeof professional_registration_requirement.text === 'string') {
+                              return <li key={index}>{professional_registration_requirement.text}</li>;
+                            }
+                          })}
+                  </ul>
+                  {/* Optional  - is_significant == false */}
+                  {(effectiveData?.professional_registration_requirements.filter(
+                    (acc) => !acc.is_significant && !acc.disabled,
+                  )?.length ?? 0) > 0 && <h4>Optional professional registration and certification requirements</h4>}
+                  <ul data-testid="optional-prof-regs">
+                    {showDiff && originalData
+                      ? compareLists(
+                          originalData.professional_registration_requirements.filter((acc) => !acc.is_significant),
+                          effectiveData?.professional_registration_requirements.filter((acc) => !acc.is_significant),
+                          true,
+                        )
+                      : effectiveData?.professional_registration_requirements
+                          .filter((acc) => !acc.is_significant)
+                          .map((professional_registration_requirement, index) => {
+                            if (
+                              typeof professional_registration_requirement === 'string' ||
+                              professional_registration_requirement.disabled
+                            ) {
+                              return null;
+                            }
+                            if (typeof professional_registration_requirement.text === 'string') {
+                              return <li key={index}>{professional_registration_requirement.text}</li>;
+                            }
+                          })}
+                  </ul>
+                </>
+
+                {/* <ul data-testid="professional-registration">
                   {showDiff && originalData
                     ? compareLists(
                         originalData.professional_registration_requirements,
@@ -927,7 +976,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                         }
                         return <li key={index}>{requirement.text}</li>;
                       })}
-                </ul>
+                </ul> */}
               </>
             )}
 
@@ -996,8 +1045,51 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             {((showDiff && (effectiveData?.security_screenings?.length ?? 0) > 0) ||
               (!showDiff && (effectiveData?.security_screenings.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
-                <h4>Security screening</h4>
-                <ul data-testid="security-screenings">
+                <h4>Security screenings</h4>
+
+                <>
+                  {/* Main - is_significant == true */}
+                  <ul data-testid="security-screenings">
+                    {showDiff && originalData
+                      ? compareLists(
+                          originalData.security_screenings.filter((acc) => acc.is_significant),
+                          effectiveData?.security_screenings.filter((acc) => acc.is_significant),
+                        )
+                      : effectiveData?.security_screenings
+                          .filter((acc) => acc.is_significant)
+                          .map((security_screening, index) => {
+                            if (typeof security_screening === 'string' || security_screening.disabled) {
+                              return null;
+                            }
+                            if (typeof security_screening.text === 'string') {
+                              return <li key={index}>{security_screening.text}</li>;
+                            }
+                          })}
+                  </ul>
+                  {/* Optional - is_significant == false */}
+                  {(effectiveData?.security_screenings.filter((acc) => !acc.is_significant && !acc.disabled)?.length ??
+                    0) > 0 && <h4>Optional security screenings</h4>}
+                  <ul data-testid="optional-security-screenings">
+                    {showDiff && originalData
+                      ? compareLists(
+                          originalData.security_screenings.filter((acc) => !acc.is_significant),
+                          effectiveData?.security_screenings.filter((acc) => !acc.is_significant),
+                          true,
+                        )
+                      : effectiveData?.security_screenings
+                          .filter((acc) => !acc.is_significant)
+                          .map((security_screening, index) => {
+                            if (typeof security_screening === 'string' || security_screening.disabled) {
+                              return null;
+                            }
+                            if (typeof security_screening.text === 'string') {
+                              return <li key={index}>{security_screening.text}</li>;
+                            }
+                          })}
+                  </ul>
+                </>
+
+                {/* <ul data-testid="security-screenings">
                   {showDiff && originalData
                     ? compareLists(originalData.security_screenings, effectiveData?.security_screenings)
                     : effectiveData?.security_screenings?.map((requirement, index) => {
@@ -1013,7 +1105,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                           return <li key={index}>{requirement.text}</li>;
                         }
                       })}
-                </ul>
+                </ul> */}
               </>
             )}
 

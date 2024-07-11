@@ -1,29 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { UseFieldArrayRemove } from 'react-hook-form';
+import { UseFieldArrayUpdate } from 'react-hook-form';
 import './wizard-behavioural-comptency-picker.css';
 import EditFormOptionsPicker, { SelectableOption } from './wizard-edit-profile-options-picker';
 
 interface WizardPickerHMProps {
   // style?: CSSProperties;
   fields: any[];
-  addAction: (obj: any) => void;
-  removeAction: UseFieldArrayRemove;
   data: any;
   triggerValidation?: () => void;
   title: string;
   buttonText: string;
+  update: UseFieldArrayUpdate<any, string>;
   // log?: boolean;
 }
 
 const WizardPickerHM: React.FC<WizardPickerHMProps> = ({
   fields,
-  addAction,
-  removeAction,
   data,
   triggerValidation,
   title,
   buttonText,
+  update,
   // log = false,
 }) => {
   // Fetching data from the API
@@ -32,15 +30,17 @@ const WizardPickerHM: React.FC<WizardPickerHMProps> = ({
   const [selectableOptions, setSelectableOptions] = useState<SelectableOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
-  // if (log) console.log('fields: ', fields);
+  // console.log('fields: ', fields);
 
   useEffect(() => {
-    // if (log) console.log('fields for selectedOptions: ', fields);
+    // console.log('fields for selectedOptions: ', fields);
 
-    const selectedOptions = fields.map((field) => {
-      // if (log) console.log('field: ', field);
-      return field.text;
-    });
+    const selectedOptions = fields
+      .filter((field) => !field.disabled)
+      .map((field) => {
+        // console.log('field: ', field);
+        return field.text;
+      });
 
     const uniqueSelectedOptions = [...new Set(selectedOptions)];
 
@@ -76,30 +76,36 @@ const WizardPickerHM: React.FC<WizardPickerHMProps> = ({
   // if (error) return <p>An error occurred</p>;
 
   const onAdd = (selectedItems: string[]) => {
-    // Sort selectedItems based on the order in selectableOptions
-    const sortedSelectedItems = selectableOptions
-      .filter((option) => selectedItems.includes(option.value))
-      .map((option) => option.value);
+    // // Sort selectedItems based on the order in selectableOptions
+    // const sortedSelectedItems = selectableOptions
+    //   .filter((option) => selectedItems.includes(option.value))
+    //   .map((option) => option.value);
 
-    // Remove all existing items
-    const allIndexes = fields.map((_, index) => index);
-    removeAction(allIndexes);
+    // // Remove all existing items
+    // const allIndexes = fields.map((_, index) => index);
+    // removeAction(allIndexes);
 
-    // Create a new list of items based on the sorted selected items
-    const newItems = sortedSelectedItems
-      .map((text) => {
-        const selectedOption = selectableOptions.find((option) => option.value === text);
-        if (selectedOption) {
-          const { text } = selectedOption.object;
-          return { text };
-        }
-        return null;
-      })
-      .filter((item): item is { text: any } => item !== null);
+    // // Create a new list of items based on the sorted selected items
+    // const newItems = sortedSelectedItems
+    //   .map((text) => {
+    //     const selectedOption = selectableOptions.find((option) => option.value === text);
+    //     if (selectedOption) {
+    //       const { text } = selectedOption.object;
+    //       return { text };
+    //     }
+    //     return null;
+    //   })
+    //   .filter((item): item is { text: any } => item !== null);
 
-    // Add all new items in the correct order
-    newItems.forEach((item) => {
-      addAction(item);
+    // // Add all new items in the correct order
+    // newItems.forEach((item) => {
+    //   addAction(item);
+    // });
+
+    // Update existing fields
+    fields.forEach((field, index) => {
+      const isSelected = selectedItems.includes(field.text);
+      update(index, { ...field, disabled: !isSelected });
     });
 
     triggerValidation?.();
