@@ -1,5 +1,11 @@
 # app
 
+## 0.6.0
+
+### Minor Changes
+
+- [#610](https://github.com/bcgov/psa-job-store/pull/610) [`20b688cd6c4da91d70248e926f781ffd90397cd0`](https://github.com/bcgov/psa-job-store/commit/20b688cd6c4da91d70248e926f781ffd90397cd0) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-758 🔴 HM - 'Browse and add' fields
+
 ## 0.5.0
 
 ### Minor Changes
