@@ -22,13 +22,15 @@ const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, field
     fieldName: fieldName,
   });
 
+  const anyEnabled = fields.some((field: any) => !field.disabled);
+
   const renderOptReqFields = (field: any, index: number) => {
     return (
       <>
         <List.Item
           key={field.id}
           style={{
-            display: 'flex',
+            display: field.disabled ? 'none' : 'flex',
             alignItems: 'flex-start',
             marginBottom: '0px',
             borderBottom: 'none',
@@ -55,7 +57,7 @@ const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, field
 
   return (
     <>
-      {fields.length > 0 && (
+      {anyEnabled && (
         <>
           <Divider className="hr-reduced-margin" />
           <Form.Item

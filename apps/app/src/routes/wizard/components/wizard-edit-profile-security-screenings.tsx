@@ -46,11 +46,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
     significant: true,
   });
 
-  const {
-    fields: optional_fields,
-    append: optional_append,
-    remove: optional_remove,
-  } = useFormFields({
+  const { fields: optional_fields, update: optional_update } = useFormFields({
     useFormReturn,
     fieldName: 'optional_security_screenings',
 
@@ -145,10 +141,9 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
             <WizardPickerHM
               data={pickerData?.requirementsWithoutReadOnly?.securityScreenings}
               fields={optional_fields}
-              addAction={optional_append}
-              removeAction={optional_remove}
               title="Optional security screenings"
-              buttonText="Browse and add security screenings"
+              buttonText="Browse and add optional security screenings"
+              update={optional_update}
               // log={true}
             />
           </Col>
