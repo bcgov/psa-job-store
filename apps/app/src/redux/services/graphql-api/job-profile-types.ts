@@ -228,6 +228,7 @@ export interface SecuritiyScreeningModel {
   text: string | TrackedFieldArrayItem;
   is_readonly?: boolean;
   is_significant?: boolean;
+  tc_is_readonly?: boolean;
 
   // HM view
   isCustom?: boolean;

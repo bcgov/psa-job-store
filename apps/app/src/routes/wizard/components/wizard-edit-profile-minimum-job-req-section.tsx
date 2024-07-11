@@ -181,7 +181,6 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               editedFields={editedPreferencesFields}
               formErrors={formErrors}
               trigger={trigger}
-              pickerData={pickerData}
             />
 
             <Divider className="hr-reduced-margin" />
@@ -194,7 +193,6 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               editedFields={editedKnowledgeSkillsAbilitiesFields}
               formErrors={formErrors}
               trigger={trigger}
-              pickerData={pickerData}
             />
 
             <Divider className="hr-reduced-margin" />
@@ -207,7 +205,6 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               editedFields={editedProvisosFields}
               formErrors={formErrors}
               trigger={trigger}
-              pickerData={pickerData}
             />
 
             {/* <WizardEditProfileArrayField

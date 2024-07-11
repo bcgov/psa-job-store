@@ -9,7 +9,6 @@ import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
-import WizardPicker from './wizard-picker';
 
 interface ProvisosProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
@@ -20,7 +19,6 @@ interface ProvisosProps {
   // isAdmin: boolean;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
-  pickerData: any;
 }
 
 const Provisos: React.FC<ProvisosProps> = ({
@@ -32,11 +30,10 @@ const Provisos: React.FC<ProvisosProps> = ({
   // isAdmin,
   formErrors,
   trigger,
-  pickerData,
 }) => {
   // const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, append, update } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, update } = useFormFields({
     useFormReturn,
     fieldName: 'willingness_statements',
     setEditedFields: setEditedFields,
@@ -118,17 +115,6 @@ const Provisos: React.FC<ProvisosProps> = ({
 
       <Form.Item style={{ marginBottom: 0 }}>
         <Row>
-          <Col>
-            <WizardPicker
-              data={pickerData?.requirementsWithoutReadOnly?.willingnessStatements}
-              fields={fields}
-              addAction={append}
-              removeAction={remove}
-              triggerValidation={trigger}
-              title="Provisos"
-              buttonText="Browse and add provisos"
-            />
-          </Col>
           <Col>
             <WizardEditAddButton
               testId="add-prof-reg-button"

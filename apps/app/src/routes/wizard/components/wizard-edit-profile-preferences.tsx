@@ -9,7 +9,6 @@ import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
-import WizardPicker from './wizard-picker';
 
 interface PreferencesProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
@@ -20,7 +19,6 @@ interface PreferencesProps {
   // isAdmin: boolean;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
-  pickerData: any;
 }
 
 const Preferences: React.FC<PreferencesProps> = ({
@@ -32,11 +30,10 @@ const Preferences: React.FC<PreferencesProps> = ({
   // isAdmin,
   formErrors,
   trigger,
-  pickerData,
 }) => {
   // const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, append, update } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, update } = useFormFields({
     useFormReturn,
     fieldName: 'preferences',
     setEditedFields: setEditedFields,
@@ -121,17 +118,6 @@ const Preferences: React.FC<PreferencesProps> = ({
       <Form.Item style={{ marginBottom: 0 }}>
         <Row>
           <Col>
-            <WizardPicker
-              data={pickerData?.requirementsWithoutReadOnly?.preferences}
-              fields={fields}
-              addAction={append}
-              removeAction={remove}
-              triggerValidation={trigger}
-              title="Preferences"
-              buttonText="Browse and add preferences"
-            />
-          </Col>
-          <Col>
             <WizardEditAddButton
               testId="add-prof-reg-button"
               onClick={() => {
@@ -142,27 +128,6 @@ const Preferences: React.FC<PreferencesProps> = ({
             </WizardEditAddButton>
           </Col>
         </Row>
-        {/* <Row>
-          <Col>
-            <WizardProfessionalRegistrationPicker
-              data={pickerData?.requirementsWithoutReadOnly?.preferences}
-              fields={fields}
-              addAction={append}
-              removeAction={remove}
-              triggerValidation={trigger}
-            />
-          </Col>
-          <Col>
-            <WizardEditAddButton
-              testId="add-prof-reg-button"
-              onClick={() => {
-                handleAddNew();
-              }}
-            >
-              Add a custom requirement
-            </WizardEditAddButton>
-          </Col>
-        </Row> */}
       </Form.Item>
     </>
   );

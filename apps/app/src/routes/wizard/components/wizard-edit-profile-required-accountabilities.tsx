@@ -5,7 +5,6 @@ import AccessibleList from '../../../components/app/common/components/accessible
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import useFormFields from '../hooks/wizardUseFieldArray';
 import { WizardModal } from './modal.component';
-import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
@@ -32,7 +31,7 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
 }) => {
   const { reqAlertShown, setReqAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleReset, update } = useFormFields({
     useFormReturn,
     fieldName: 'accountabilities',
     setEditedFields: setEditedFields,
@@ -77,6 +76,7 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
       handleAddBack,
       handleRemove,
       originalFields,
+      update,
     };
 
     return (
@@ -97,7 +97,7 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
       )}
       <WizardValidationError formErrors={formErrors} fieldName="accountabilities" />
 
-      <WizardEditAddButton
+      {/* <WizardEditAddButton
         testId="add-accountability-button"
         onClick={() => {
           WizardModal(
@@ -114,7 +114,7 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
         }}
       >
         Add another accountability
-      </WizardEditAddButton>
+      </WizardEditAddButton> */}
     </>
   );
 };

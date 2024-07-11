@@ -1340,11 +1340,11 @@ export class JobProfileService {
     });
 
     // this will be the return value
-    let securityScreeningMap = new Map<string, RequirementEntry>();
-    let professionalRegistrationMap = new Map<string, RequirementEntry>();
-    let preferencesMap = new Map<string, RequirementEntry>();
-    let ksaMap = new Map<string, RequirementEntry>();
-    let willingnessStatementsMap = new Map<string, RequirementEntry>();
+    const securityScreeningMap = new Map<string, RequirementEntry>();
+    const professionalRegistrationMap = new Map<string, RequirementEntry>();
+    const preferencesMap = new Map<string, RequirementEntry>();
+    const ksaMap = new Map<string, RequirementEntry>();
+    const willingnessStatementsMap = new Map<string, RequirementEntry>();
 
     interface RequirementEntry {
       text: string;
@@ -1352,6 +1352,7 @@ export class JobProfileService {
       streams: { id: number }[];
       classification: { id: string; employee_group_id: string } | null;
       organization: { id: string } | null;
+      tc_is_readonly: boolean;
     }
 
     // get professional registration requirements for auto-population based on classification and job family
@@ -1493,6 +1494,7 @@ export class JobProfileService {
               }
             : null,
           organization: registration.organization_id ? { id: registration.organization_id } : null,
+          tc_is_readonly: false,
         });
       } else {
         const entry = professionalRegistrationMap.get(text);
@@ -1512,6 +1514,7 @@ export class JobProfileService {
           streams: [],
           classification: null,
           organization: screening.organization_id ? { id: screening.organization_id } : null,
+          tc_is_readonly: false,
         });
       } else {
         const entry = securityScreeningMap.get(text);
@@ -1520,6 +1523,9 @@ export class JobProfileService {
         }
       }
     });
+
+    // log securityScreeningMap
+    console.log('securityScreeningMap: ', JSON.stringify(Array.from(securityScreeningMap.entries()), null, 2));
 
     // filter out data that's identical to excluded profile
 
@@ -1532,26 +1538,34 @@ export class JobProfileService {
           preferences: true,
           knowledge_skills_abilities: true,
           willingness_statements: true,
-          security_screenings: true, // Add this line
+          security_screenings: true,
         },
       });
 
-      const filterMap = (map: Map<string, RequirementEntry>, excludedFields: any[] | undefined) => {
-        if (!excludedFields) return map;
-        excludedFields.forEach((field) => {
-          map.delete(field.text);
-        });
-        return map;
-      };
+      // const filterMap = (map: Map<string, RequirementEntry>, excludedFields: any[] | undefined) => {
+      //   if (!excludedFields) return map;
+      //   excludedFields.forEach((excludedField) => {
+      //     const entry = map.get(excludedField.text);
+      //     console.log('checking: ', excludedField, entry);
+      //     // if the field is present in the excluded profile and is not custom, delete it
+      //     if (entry && !excludedField.tc_is_readonly) {
+      //       console.log('deleting: ', excludedField.text);
+      //       map.delete(excludedField.text);
+      //     }
+      //   });
+      //   return map;
+      // };
 
-      professionalRegistrationMap = filterMap(
-        professionalRegistrationMap,
-        excludedProfile.professional_registration_requirements,
-      );
-      securityScreeningMap = filterMap(securityScreeningMap, excludedProfile.security_screenings); // Update this line
-      preferencesMap = filterMap(preferencesMap, excludedProfile.preferences);
-      ksaMap = filterMap(ksaMap, excludedProfile.knowledge_skills_abilities);
-      willingnessStatementsMap = filterMap(willingnessStatementsMap, excludedProfile.willingness_statements);
+      // professionalRegistrationMap = filterMap(
+      //   professionalRegistrationMap,
+      //   excludedProfile.professional_registration_requirements,
+      // );
+      // console.log('filtering security screenings: ', excludedProfile.security_screenings);
+      // securityScreeningMap = filterMap(securityScreeningMap, excludedProfile.security_screenings);
+      // console.log('after filter: ', JSON.stringify(Array.from(securityScreeningMap.entries()), null, 2));
+      // preferencesMap = filterMap(preferencesMap, excludedProfile.preferences);
+      // ksaMap = filterMap(ksaMap, excludedProfile.knowledge_skills_abilities);
+      // willingnessStatementsMap = filterMap(willingnessStatementsMap, excludedProfile.willingness_statements);
     }
 
     // build return for pick list requirements from job family and stream
@@ -1579,7 +1593,12 @@ export class JobProfileService {
 
     function filterExcludedFields(requirements: any[], excludedFields: any[] | undefined) {
       if (!excludedFields) return requirements;
-      return requirements.filter((req) => !excludedFields.some((excluded) => excluded.text === req.text));
+      // filter out fields that are present in the current profile:
+      // item needs to have the same text and be custom
+      const ret = requirements.filter(
+        (req) => !excludedFields.some((excluded) => excluded.text === req.text && !excluded.tc_is_readonly),
+      );
+      return ret;
     }
 
     function processRequirements(
@@ -1600,6 +1619,7 @@ export class JobProfileService {
                 streams: [],
                 classification: null,
                 organization: null,
+                tc_is_readonly: requirement.tc_is_readonly,
               });
             }
             const entry = map.get(text)!;
@@ -1610,8 +1630,6 @@ export class JobProfileService {
     }
 
     // log requirementsMap, which is a Map
-    // console.log('requirementsMap: ', JSON.stringify(Array.from(requirementsMap.entries()), null, 2));
-
     const result = {
       professionalRegistrationRequirements: processMapToResult(professionalRegistrationMap),
       preferences: processMapToResult(preferencesMap),

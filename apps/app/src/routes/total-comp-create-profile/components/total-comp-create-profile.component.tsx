@@ -554,7 +554,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       //     professional_registration_requirement: bc,
       //   }),
       // ),
-      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements,
+      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements.map(
+        (s) =>
+          ({
+            text: s.text,
+            nonEditable: s.is_readonly,
+            is_significant: s.is_significant,
+            tc_is_readonly: s.tc_is_readonly,
+          }) as AccountabilityItem,
+      ),
       optional_requirements: jobProfileData?.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
       preferences: jobProfileData?.jobProfile.preferences,
       knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities,
@@ -565,6 +573,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             text: s.text,
             nonEditable: s.is_readonly,
             is_significant: s.is_significant,
+            tc_is_readonly: s.tc_is_readonly,
           }) as SecurityScreeningItem,
       ),
       behavioural_competencies: jobProfileData?.jobProfile.behavioural_competencies.map((bc) => ({
@@ -1340,6 +1349,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             text: a.text,
             is_readonly: a.nonEditable ?? false,
             is_significant: a.is_significant ?? false,
+            tc_is_readonly: a.tc_is_readonly,
           }))
           .filter((acc: { text: string }) => acc.text.trim() !== ''),
         all_reports_to: formData.all_reports_to,
@@ -3079,7 +3089,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           // set this item as significant as well
                                           if (args.target.checked) {
                                             profileSetValue(
-                                              `professional_registration_requirements.${index}.nonEditable`,
+                                              `professional_registration_requirements.${index}.is_significant`,
                                               true,
                                             );
                                           }
@@ -3588,6 +3598,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     render={({ field: { onChange, value } }) => (
                                       <Checkbox
                                         onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(`security_screenings.${index}.is_significant`, true);
+                                          }
                                           if (!args.target.checked) {
                                             profileSetValue('markAllNonEditableSec', false);
                                           }

@@ -325,6 +325,8 @@ export class JobProfileValidationModel {
   })
   security_screenings: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
+  optional_security_screenings: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+
   @BehaviouralCompetencyValidator({ message: 'The profile should have between 3 and 10 behavioural competencies' })
   behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
 
@@ -344,6 +346,8 @@ export class JobProfileValidationModel {
   //   professional_registration_requirement: TrackedFieldArrayItem | ValueString | AccountabilitiesModel;
   // }[];
   professional_registration_requirements: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+
+  optional_professional_registration_requirements: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   preferences: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 

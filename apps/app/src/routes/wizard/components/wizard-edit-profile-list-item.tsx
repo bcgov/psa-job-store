@@ -5,15 +5,17 @@ import debounce from 'lodash.debounce';
 import { Controller, UseFieldArrayRemove, UseFieldArrayUpdate, UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
-import { ContextOptionsReadonly } from './context-options-readonly.component';
 import { ContextOptions } from './context-options.component';
 
 export type AllowedFieldNames =
   | 'security_screenings'
+  | 'optional_security_screenings'
   | 'accountabilities'
+  | 'optional_accountabilities'
   | 'education'
   | 'job_experience'
   | 'professional_registration_requirements'
+  | 'optional_professional_registration_requirements'
   | 'preferences'
   | 'knowledge_skills_abilities'
   | 'willingness_statements'
@@ -60,9 +62,6 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
   originalFields,
   isAdmin = undefined,
   update,
-  remove,
-  fields,
-  trigger,
 }) => {
   const ariaLabel = field.disabled
     ? `Undo remove ${label ?? fieldName} ${index + 1}`
@@ -101,11 +100,12 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
       <FormItem name={`${fieldName}.${index}.is_readonly`} control={useFormReturn.control} hidden>
         <Input />
       </FormItem>
-      <FormItem name={`${fieldName}.${index}.tc_is_readonly`} control={useFormReturn.control} hidden>
+      {/* <FormItem name={`${fieldName}.${index}.tc_is_readonly`} control={useFormReturn.control} hidden>
         <Input />
-      </FormItem>
+      </FormItem> */}
 
-      {(field.is_readonly || field.tc_is_readonly) && (
+      {/* || field.tc_is_readonly */}
+      {field.is_readonly && (
         <Typography.Text data-testid={`readonly-${testId}-${index}`} style={{ flex: 1, marginRight: '10px' }}>
           {field['text']}
         </Typography.Text>
@@ -114,52 +114,76 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
       <Controller
         control={useFormReturn.control}
         name={`${fieldName}.${index}.text`}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <>
-            <label className="sr-only" htmlFor={field.id}>
-              {ariaLabel} {index + 1}
-            </label>
-            <div
-              className={`${isEdited && field.is_significant ? 'edited-field-container' : ''} input-container`}
-              style={{ display: field.is_readonly || field.tc_is_readonly ? 'none' : 'block' }}
-            >
-              <TextArea
-                id={field.id}
-                data-testid={`${testId}-input-${index}`}
-                autoSize
-                disabled={field.disabled || useFormReturn.getValues(`${fieldName}.${index}.is_readonly`)}
-                className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
-                  isEdited && field.is_significant ? 'edited-textarea' : ''
-                }`}
-                onChange={(event) => {
-                  onChange(event);
-                  const updatedValue = event.target.value;
-                  handleFieldChange(index, updatedValue);
-                }}
-                onBlur={() => {
-                  if (isAdmin === undefined) validateVerification?.();
-                  else if (!isAdmin) validateVerification?.();
-                  onBlur();
-                }}
-                onFocus={() => {
-                  if (isAdmin === undefined) onFocus?.();
-                  else if (!isAdmin) onFocus?.();
-                }}
-                value={value ? (typeof value === 'string' ? value : value.text) : ''}
-              />
-            </div>
-          </>
-        )}
+        render={({ field: { onChange, onBlur, value } }) => {
+          // if (fieldName === 'accountabilities') console.log('field: ', field);
+
+          return (
+            <>
+              <label className="sr-only" htmlFor={field.id}>
+                {ariaLabel} {index + 1}
+              </label>
+              <div
+                className={`${isEdited && field.is_significant ? 'edited-field-container' : ''} input-container`}
+                style={{ display: field.is_readonly ? 'none' : 'block' }}
+                // || field.tc_is_readonly
+              >
+                <TextArea
+                  id={field.id}
+                  data-testid={`${testId}-input-${index}`}
+                  autoSize
+                  disabled={field.disabled || useFormReturn.getValues(`${fieldName}.${index}.is_readonly`)}
+                  className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
+                    isEdited && field.is_significant ? 'edited-textarea' : ''
+                  }`}
+                  onChange={(event) => {
+                    onChange(event);
+                    const updatedValue = event.target.value;
+                    handleFieldChange(index, updatedValue);
+                  }}
+                  onBlur={() => {
+                    // If this is not a custom field and it's now empty,
+                    // when user leaves the field, restore the text to original
+                    // and mark as disabled. This prevents the issue where
+                    // transformFormData automatically removes empty fields and
+                    // shifts the order of items, causing diff view corruption.
+
+                    if (!field.isCustom && !value) {
+                      // set the value from originalFields?.[index]?.['text']
+                      // onChange(originalFields?.[index]?.['text']);
+                      setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: true }));
+                      // set disabled to true
+                      update?.(index, {
+                        ...field,
+                        text: originalFields?.[index]?.['text'],
+                        disabled: true,
+                      });
+                      useFormReturn.trigger();
+                    }
+
+                    if (isAdmin === undefined) validateVerification?.();
+                    else if (!isAdmin) validateVerification?.();
+                    onBlur();
+                  }}
+                  onFocus={() => {
+                    if (isAdmin === undefined) onFocus?.();
+                    else if (!isAdmin) onFocus?.();
+                  }}
+                  value={value ? (typeof value === 'string' ? value : value.text) : ''}
+                />
+              </div>
+            </>
+          );
+        }}
       />
 
-      {field.tc_is_readonly ? (
+      {/* {field.tc_is_readonly ? (
         <ContextOptionsReadonly
           isReadonly={field.tc_is_readonly ?? false}
           onEdit={() => {
             update?.(index, {
               ...fields?.[index],
               tc_is_readonly: false,
-              isCustom: true,
+              // isCustom: true,
             });
           }}
           onRemove={() => {
@@ -167,23 +191,23 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
             trigger?.();
           }}
         />
-      ) : (
-        <ContextOptions
-          index={index}
-          isReadonly={field.is_readonly}
-          isDisabled={field.disabled}
-          isCustom={field.isCustom}
-          isEdited={(() => {
-            return editedFields?.[index] ?? false;
-          })()}
-          ariaLabel={ariaLabel}
-          testId={testId}
-          handleReset={handleReset}
-          handleAddBack={handleAddBack}
-          handleRemove={handleRemove}
-          confirmRemoveModal={confirmRemoveModal}
-        />
-      )}
+      ) : ( */}
+      <ContextOptions
+        index={index}
+        isReadonly={field.is_readonly}
+        isDisabled={field.disabled}
+        isCustom={field.isCustom}
+        isEdited={(() => {
+          return editedFields?.[index] ?? false;
+        })()}
+        ariaLabel={ariaLabel}
+        testId={testId}
+        handleReset={handleReset}
+        handleAddBack={handleAddBack}
+        handleRemove={handleRemove}
+        confirmRemoveModal={confirmRemoveModal}
+      />
+      {/* )} */}
     </List.Item>
   );
 };

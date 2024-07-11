@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Alert, Card, Col, Divider, Row } from 'antd';
+import { Alert, Card, Col, Form, Row } from 'antd';
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
-import OptionalAccountabilities from './wizard-edit-profile-optional-accountabilities';
+import useFormFields from '../hooks/wizardUseFieldArray';
+import { WizardModal } from './modal.component';
+import WizardEditAddButton from './wizard-edit-profile-add-button';
+import OptionalList from './wizard-edit-profile-optional-list';
 import RequiredAccountabilities from './wizard-edit-profile-required-accountabilities';
+import WizardPickerHM from './wizard-picker-hm';
+import { useWizardContext } from './wizard.provider';
 
 interface AccountabilitiesSectionProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,6 +20,7 @@ interface AccountabilitiesSectionProps {
   setEditedAccReqFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
+  pickerData: any;
 }
 
 const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
@@ -26,7 +32,26 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
   setEditedAccReqFields,
   formErrors,
   trigger,
+  pickerData,
 }) => {
+  const { reqAlertShown, setReqAlertShown } = useWizardContext();
+  const {
+    fields: optionalFields,
+    append: optionalAppend,
+    remove: optionalRemove,
+  } = useFormFields({
+    useFormReturn,
+    fieldName: 'optional_accountabilities',
+  });
+
+  const { handleAddNew } = useFormFields({
+    useFormReturn,
+    fieldName: 'accountabilities',
+    setEditedFields: setEditedAccReqFields,
+    originalFields: originalAccReqFields,
+    significant: true,
+  });
+
   return (
     <Card ref={sectionRef} title="Accountabilities" className="custom-card" style={{ marginTop: 16 }}>
       <section id="accountabilties" aria-label="Accountabilities" role="region">
@@ -55,9 +80,47 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
               trigger={trigger}
             />
 
-            <Divider className="hr-reduced-margin" />
+            <OptionalList
+              useFormReturn={useFormReturn}
+              fieldName="optional_accountabilities"
+              label="Optional accountabilities"
+            />
 
-            <OptionalAccountabilities useFormReturn={useFormReturn} validateVerification={validateVerification} />
+            <Form.Item style={{ marginBottom: 0 }}>
+              <Row>
+                <Col>
+                  <WizardPickerHM
+                    data={pickerData?.requirementsWithoutReadOnly?.accountabilities}
+                    fields={optionalFields}
+                    addAction={optionalAppend}
+                    removeAction={optionalRemove}
+                    title="Optional accountabilities"
+                    buttonText="Browse and add optional accountabilities"
+                    // log={true}
+                  />
+                </Col>
+                <Col>
+                  <WizardEditAddButton
+                    testId="add-accountability-button"
+                    onClick={() => {
+                      WizardModal(
+                        'Do you want to make changes to accountabilities?',
+                        reqAlertShown,
+                        setReqAlertShown,
+                        () => {
+                          handleAddNew();
+                        },
+                        true,
+                        undefined,
+                        'accountabilities-warning',
+                      );
+                    }}
+                  >
+                    Add a custom accountability
+                  </WizardEditAddButton>
+                </Col>
+              </Row>
+            </Form.Item>
           </Col>
         </Row>
       </section>
