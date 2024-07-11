@@ -526,7 +526,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       state: '',
       overview: { text: '' } as TrackedFieldArrayItem,
       program_overview: { text: '' } as TrackedFieldArrayItem,
-      accountabilities: jobProfileData?.jobProfile.accountabilities.map(
+      accountabilities: jobProfileData?.jobProfile.accountabilities?.map(
         (a) =>
           ({
             text: a.text,
@@ -555,7 +555,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       //     professional_registration_requirement: bc,
       //   }),
       // ),
-      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements.map(
+      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements?.map(
         (s) =>
           ({
             text: s.text,
@@ -564,11 +564,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             tc_is_readonly: s.tc_is_readonly,
           }) as AccountabilityItem,
       ),
-      optional_requirements: jobProfileData?.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
+      optional_requirements: jobProfileData?.jobProfile.optional_requirements?.map((r: any) => ({ text: r })),
       preferences: jobProfileData?.jobProfile.preferences,
       knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities,
       willingness_statements: jobProfileData?.jobProfile.willingness_statements,
-      security_screenings: jobProfileData?.jobProfile.security_screenings.map(
+      security_screenings: jobProfileData?.jobProfile.security_screenings?.map(
         (s) =>
           ({
             text: s.text,
