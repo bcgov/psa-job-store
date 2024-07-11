@@ -144,6 +144,9 @@ export interface JobProfileModel {
   type: string;
   role: { id: number; name?: string };
   updated_at?: string;
+  updated_by?: string;
+  published_at?: string;
+  published_by?: string;
   total_comp_create_form_misc?: {
     employeeGroup: string;
     markAllNonEditable: boolean;

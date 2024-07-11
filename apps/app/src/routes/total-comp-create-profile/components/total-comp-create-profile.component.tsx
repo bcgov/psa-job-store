@@ -17,6 +17,7 @@ import {
   Card,
   Checkbox,
   Col,
+  Descriptions,
   Divider,
   Form,
   Input,
@@ -3934,6 +3935,90 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               </Card>
             </Col>
           </Row>
+        </>
+      ),
+    },
+    {
+      key: '5',
+      label: 'Info',
+      children: (
+        <>
+          {/* <Card title="">
+            <Typography.Text>Total Views</Typography.Text>
+            <br></br>
+          </Card>
+           */}
+          <Card
+            style={{
+              marginTop: '24px',
+              marginBottom: '24px',
+              marginLeft: '48px',
+              marginRight: '48px',
+              paddingLeft: '0',
+            }}
+            bodyStyle={{ padding: '0' }}
+          >
+            <Card.Meta
+              title="Additional details"
+              style={{
+                marginTop: '16px',
+                marginBottom: '16px',
+                paddingLeft: '24px',
+              }}
+            ></Card.Meta>
+            <Descriptions
+              className="customDescriptions"
+              bordered
+              column={24}
+              items={[
+                {
+                  key: 'Last updated by',
+                  label: <h3 tabIndex={0}>Last updated by</h3>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by.name}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'Last updated at',
+                  label: <h3 tabIndex={0}>Last updated at</h3>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_at}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'First published by',
+                  label: <h3 tabIndex={0}>First published by</h3>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.published_by.name}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'First published at',
+                  label: <h3 tabIndex={0}>First published at</h3>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.published_at}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                // {
+                //   key: 'Created by',
+                //   label: <h3 tabIndex={0}>Created by</h3>,
+                //   children: <span tabIndex={0}>{profileJson?.updated_at}</span>,
+                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                // },
+                // {
+                //   key: 'Created at',
+                //   label: <h3 tabIndex={0}>Created at</h3>,
+                //   children: <span tabIndex={0}>{profileJson?.updated_at}</span>,
+                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                // },
+              ]}
+              labelStyle={{
+                fontWeight: 700,
+                verticalAlign: 'top',
+                background: '#FAFAFA',
+              }}
+              contentStyle={{
+                background: 'white',
+                verticalAlign: 'top',
+              }}
+            />
+          </Card>
         </>
       ),
     },

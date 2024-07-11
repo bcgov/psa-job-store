@@ -1,5 +1,15 @@
 # app
 
+## 0.5.0
+
+### Minor Changes
+
+- [#595](https://github.com/bcgov/psa-job-store/pull/595) [`820e39d2d6cf2a1b2be44323488a1202597860af`](https://github.com/bcgov/psa-job-store/commit/820e39d2d6cf2a1b2be44323488a1202597860af) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Add admin site with ability to assign org chart access.
+
+### Patch Changes
+
+- [#596](https://github.com/bcgov/psa-job-store/pull/596) [`9c9cd87f909c02958fea9e4041120b7130cce4f2`](https://github.com/bcgov/psa-job-store/commit/9c9cd87f909c02958fea9e4041120b7130cce4f2) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-759 Add classification next steps
+
 ## 0.4.0
 
 ### Minor Changes

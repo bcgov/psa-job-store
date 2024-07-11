@@ -174,7 +174,9 @@ model JobProfile {
   scopes          JobProfileScopeLink[]
   state           JobProfileState       @default(DRAFT)
   type            JobProfileType
+  created_at      DateTime?             @default(now())
   updated_at      DateTime?             @default(now()) @updatedAt
+  published_at    DateTime?
   owner_id        String?               @db.Uuid
   owner           User?                 @relation(fields: [owner_id], references: [id]) //  @relation(name: "OwnerRelation", fields: [owner_id], references: [id])
   updated_by_id   String?               @db.Uuid
@@ -407,20 +409,6 @@ model JobProfileStream {
   // job_profiles  JobProfile[]
 
   @@map("job_profile_stream")
-}
-
-model JobProfileHistory {
-  id             Int       @id @default(autoincrement())
-  job_profile_id Int
-  json           Json      @db.JsonB
-  created_at     DateTime  @default(now())
-  created_by     Int
-  updated_at     DateTime  @default(now())
-  updated_by     Int
-  deleted_at     DateTime?
-  deleted_by     Int
-
-  @@map("job_profile_history")
 }
 
 model Comment {

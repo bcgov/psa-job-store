@@ -439,6 +439,8 @@ export class JobProfileService {
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
+        updated_by: true,
+        published_by: true,
         classifications: {
           include: {
             classification: true,
