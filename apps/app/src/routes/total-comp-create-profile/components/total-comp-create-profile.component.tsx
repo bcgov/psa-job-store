@@ -508,6 +508,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       skip: !selectedClassificationId || !employeeGroup,
     },
   );
+
+  const itemInPickerData = (text: string, category: string) => {
+    return pickerData?.requirementsWithoutReadOnly[category].some((r: any) => r.text === text);
+  };
+
   // console.log('render, selectedClassificationId: ', selectedClassificationId);
   // console.log('professionalRequirementsPickerData:', professionalRequirementsPickerData);
 
@@ -3128,14 +3133,30 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               </Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
+                                  {/* Needs to be tc_is_readonly AND exist in the picklist to appear as read only */}
+                                  {field.tc_is_readonly &&
+                                    itemInPickerData(
+                                      field.text?.toString() ?? '',
+                                      'professionalRegistrationRequirements',
+                                    ) && (
+                                      <div style={{ display: 'flex' }}>
+                                        <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                          {field.text?.toString()}
+                                        </Typography.Text>
+                                      </div>
+                                    )}
+                                  <Form.Item
+                                    style={{
+                                      display:
+                                        field.tc_is_readonly &&
+                                        itemInPickerData(
+                                          field.text?.toString() ?? '',
+                                          'professionalRegistrationRequirements',
+                                        )
+                                          ? 'none'
+                                          : 'block',
+                                    }}
+                                  >
                                     <Controller
                                       control={profileControl}
                                       name={`professional_registration_requirements.${index}.text`}
@@ -3241,14 +3262,23 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             <Col flex="auto">
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
+                                  {field.tc_is_readonly &&
+                                    itemInPickerData(field.text?.toString() ?? '', 'preferences') && (
+                                      <div style={{ display: 'flex' }}>
+                                        <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                          {field.text?.toString()}
+                                        </Typography.Text>
+                                      </div>
+                                    )}
+                                  <Form.Item
+                                    style={{
+                                      display:
+                                        field.tc_is_readonly &&
+                                        itemInPickerData(field.text?.toString() ?? '', 'preferences')
+                                          ? 'none'
+                                          : 'block',
+                                    }}
+                                  >
                                     <Controller
                                       control={profileControl}
                                       name={`preferences.${index}.text`}
@@ -3339,14 +3369,23 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             <Col flex="auto">
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
+                                  {field.tc_is_readonly &&
+                                    itemInPickerData(field.text?.toString() ?? '', 'knowledgeSkillsAbilities') && (
+                                      <div style={{ display: 'flex' }}>
+                                        <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                          {field.text?.toString()}
+                                        </Typography.Text>
+                                      </div>
+                                    )}
+                                  <Form.Item
+                                    style={{
+                                      display:
+                                        field.tc_is_readonly &&
+                                        itemInPickerData(field.text?.toString() ?? '', 'knowledgeSkillsAbilities')
+                                          ? 'none'
+                                          : 'block',
+                                    }}
+                                  >
                                     <Controller
                                       control={profileControl}
                                       name={`knowledge_skills_abilities.${index}.text`}
@@ -3443,14 +3482,23 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               <Row>{/* Non-editable checkbox */}</Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
+                                  {field.tc_is_readonly &&
+                                    itemInPickerData(field.text?.toString() ?? '', 'willingnessStatements') && (
+                                      <div style={{ display: 'flex' }}>
+                                        <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                          {field.text?.toString()}
+                                        </Typography.Text>
+                                      </div>
+                                    )}
+                                  <Form.Item
+                                    style={{
+                                      display:
+                                        field.tc_is_readonly &&
+                                        itemInPickerData(field.text?.toString() ?? '', 'willingnessStatements')
+                                          ? 'none'
+                                          : 'block',
+                                    }}
+                                  >
                                     <Controller
                                       control={profileControl}
                                       name={`willingness_statements.${index}.text`}
@@ -3637,14 +3685,23 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               </Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
+                                  {field.tc_is_readonly &&
+                                    itemInPickerData(field.text?.toString() ?? '', 'securityScreenings') && (
+                                      <div style={{ display: 'flex' }}>
+                                        <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                          {field.text?.toString()}
+                                        </Typography.Text>
+                                      </div>
+                                    )}
+                                  <Form.Item
+                                    style={{
+                                      display:
+                                        field.tc_is_readonly &&
+                                        itemInPickerData(field.text?.toString() ?? '', 'securityScreenings')
+                                          ? 'none'
+                                          : 'block',
+                                    }}
+                                  >
                                     <Controller
                                       control={profileControl}
                                       name={`security_screenings.${index}.text`}
