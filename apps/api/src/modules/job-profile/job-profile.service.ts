@@ -439,6 +439,8 @@ export class JobProfileService {
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
+        updated_by: true,
+        published_by: true,
         classifications: {
           include: {
             classification: true,
@@ -1352,6 +1354,7 @@ export class JobProfileService {
       streams: { id: number }[];
       classification: { id: string; employee_group_id: string } | null;
       organization: { id: string } | null;
+      tc_is_readonly: boolean;
     }
 
     // get professional registration requirements for auto-population based on classification and job family
@@ -1493,6 +1496,7 @@ export class JobProfileService {
               }
             : null,
           organization: registration.organization_id ? { id: registration.organization_id } : null,
+          tc_is_readonly: false,
         });
       } else {
         const entry = professionalRegistrationMap.get(text);
@@ -1512,6 +1516,7 @@ export class JobProfileService {
           streams: [],
           classification: null,
           organization: screening.organization_id ? { id: screening.organization_id } : null,
+          tc_is_readonly: false,
         });
       } else {
         const entry = securityScreeningMap.get(text);
@@ -1521,21 +1526,91 @@ export class JobProfileService {
       }
     });
 
+    // log securityScreeningMap
+    console.log('securityScreeningMap: ', JSON.stringify(Array.from(securityScreeningMap.entries()), null, 2));
+
+    // filter out data that's identical to excluded profile
+
+    let excludedProfile;
+    if (excludeProfileId) {
+      excludedProfile = await this.prisma.jobProfile.findUnique({
+        where: { id: excludeProfileId },
+        select: {
+          professional_registration_requirements: true,
+          preferences: true,
+          knowledge_skills_abilities: true,
+          willingness_statements: true,
+          security_screenings: true,
+        },
+      });
+
+      // const filterMap = (map: Map<string, RequirementEntry>, excludedFields: any[] | undefined) => {
+      //   if (!excludedFields) return map;
+      //   excludedFields.forEach((excludedField) => {
+      //     const entry = map.get(excludedField.text);
+      //     console.log('checking: ', excludedField, entry);
+      //     // if the field is present in the excluded profile and is not custom, delete it
+      //     if (entry && !excludedField.tc_is_readonly) {
+      //       console.log('deleting: ', excludedField.text);
+      //       map.delete(excludedField.text);
+      //     }
+      //   });
+      //   return map;
+      // };
+
+      // professionalRegistrationMap = filterMap(
+      //   professionalRegistrationMap,
+      //   excludedProfile.professional_registration_requirements,
+      // );
+      // console.log('filtering security screenings: ', excludedProfile.security_screenings);
+      // securityScreeningMap = filterMap(securityScreeningMap, excludedProfile.security_screenings);
+      // console.log('after filter: ', JSON.stringify(Array.from(securityScreeningMap.entries()), null, 2));
+      // preferencesMap = filterMap(preferencesMap, excludedProfile.preferences);
+      // ksaMap = filterMap(ksaMap, excludedProfile.knowledge_skills_abilities);
+      // willingnessStatementsMap = filterMap(willingnessStatementsMap, excludedProfile.willingness_statements);
+    }
+
     // build return for pick list requirements from job family and stream
     jobProfiles.forEach((profile) => {
       processRequirements(
         (profile.professional_registration_requirements as any[]) || [],
         professionalRegistrationMap,
         profile,
+        excludedProfile?.professional_registration_requirements,
       );
-      processRequirements((profile.preferences as any[]) || [], preferencesMap, profile);
-      processRequirements((profile.knowledge_skills_abilities as any[]) || [], ksaMap, profile);
-      processRequirements((profile.willingness_statements as any[]) || [], willingnessStatementsMap, profile);
+      processRequirements((profile.preferences as any[]) || [], preferencesMap, profile, excludedProfile?.preferences);
+      processRequirements(
+        (profile.knowledge_skills_abilities as any[]) || [],
+        ksaMap,
+        profile,
+        excludedProfile?.knowledge_skills_abilities,
+      );
+      processRequirements(
+        (profile.willingness_statements as any[]) || [],
+        willingnessStatementsMap,
+        profile,
+        excludedProfile?.willingness_statements,
+      );
     });
 
-    function processRequirements(requirements: any[], map: Map<string, RequirementEntry>, profile: any) {
+    function filterExcludedFields(requirements: any[], excludedFields: any[] | undefined) {
+      if (!excludedFields) return requirements;
+      // filter out fields that are present in the current profile:
+      // item needs to have the same text and be custom
+      const ret = requirements.filter(
+        (req) => !excludedFields.some((excluded) => excluded.text === req.text && !excluded.tc_is_readonly),
+      );
+      return ret;
+    }
+
+    function processRequirements(
+      requirements: any[],
+      map: Map<string, RequirementEntry>,
+      profile: any,
+      excludedFields: any[] | undefined,
+    ) {
       if (requirements) {
-        requirements
+        filterExcludedFields(requirements, excludedFields)
           .filter((requirement) => !requirement.is_readonly)
           .forEach((requirement) => {
             const text = requirement.text;
@@ -1546,6 +1621,7 @@ export class JobProfileService {
                 streams: [],
                 classification: null,
                 organization: null,
+                tc_is_readonly: requirement.tc_is_readonly,
               });
             }
             const entry = map.get(text)!;
@@ -1556,8 +1632,6 @@ export class JobProfileService {
     }
 
     // log requirementsMap, which is a Map
-    // console.log('requirementsMap: ', JSON.stringify(Array.from(requirementsMap.entries()), null, 2));
-
     const result = {
       professionalRegistrationRequirements: processMapToResult(professionalRegistrationMap),
       preferences: processMapToResult(preferencesMap),

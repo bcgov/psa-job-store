@@ -144,6 +144,9 @@ export interface JobProfileModel {
   type: string;
   role: { id: number; name?: string };
   updated_at?: string;
+  updated_by?: string;
+  published_at?: string;
+  published_by?: string;
   total_comp_create_form_misc?: {
     employeeGroup: string;
     markAllNonEditable: boolean;
@@ -175,6 +178,7 @@ export interface JobProfileModel {
   all_reports_to: boolean;
   state?: string;
   is_archived?: boolean;
+  original_profile_json?: JobProfileModel;
 }
 
 export interface ProfessionsModel {
@@ -227,6 +231,7 @@ export interface SecuritiyScreeningModel {
   text: string | TrackedFieldArrayItem;
   is_readonly?: boolean;
   is_significant?: boolean;
+  tc_is_readonly?: boolean;
 
   // HM view
   isCustom?: boolean;

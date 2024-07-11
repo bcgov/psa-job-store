@@ -1,19 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { UseFieldArrayAppend, UseFieldArrayRemove } from 'react-hook-form';
-import { AccountabilitiesModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
-import { JobProfileValidationModel, ValueString } from '../../job-profiles/components/job-profile.component';
+import { UseFieldArrayRemove } from 'react-hook-form';
 import './wizard-behavioural-comptency-picker.css';
 import EditFormOptionsPicker, { SelectableOption } from './wizard-edit-profile-options-picker';
 
 interface WizardProfessionalRegistrationPickerProps {
   // style?: CSSProperties;
-  fields: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
-  addAction: UseFieldArrayAppend<JobProfileValidationModel, 'professional_registration_requirements'>;
+  fields: any[];
+  addAction: (appnd: any) => void;
   removeAction: UseFieldArrayRemove;
   data: any;
   triggerValidation: () => void;
-  markAllSignificantProReg: boolean;
+  markAllSignificantProReg?: boolean;
 }
 
 const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrationPickerProps> = ({
@@ -22,7 +20,7 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
   removeAction,
   data,
   triggerValidation,
-  markAllSignificantProReg,
+  markAllSignificantProReg = false,
 }) => {
   // Fetching data from the API
   // console.log('data: ', data);

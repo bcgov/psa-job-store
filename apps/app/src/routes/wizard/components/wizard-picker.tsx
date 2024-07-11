@@ -1,18 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { UseFieldArrayRemove } from 'react-hook-form';
-import { AccountabilitiesModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
-import { ValueString } from '../../job-profiles/components/job-profile.component';
 import './wizard-behavioural-comptency-picker.css';
 import EditFormOptionsPicker, { SelectableOption } from './wizard-edit-profile-options-picker';
 
 interface WizardPickerProps {
   // style?: CSSProperties;
-  fields: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
+  fields: any[];
   addAction: (obj: any) => void;
   removeAction: UseFieldArrayRemove;
   data: any;
-  triggerValidation: () => void;
+  triggerValidation?: () => void;
   title: string;
   buttonText: string;
 }
@@ -32,13 +30,15 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   const [selectableOptions, setSelectableOptions] = useState<SelectableOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
-  // console.log('fields: ', fields);
+  // if (log) console.log('fields: ', fields);
+
   useEffect(() => {
-    // console.log('fields for selectedOptions: ', fields);
+    // if (log) console.log('fields for selectedOptions: ', fields);
+
     const selectedOptions = fields
       .filter((field) => field.tc_is_readonly)
       .map((field) => {
-        // console.log('field: ', field);
+        // if (log) console.log('field: ', field);
         return field.text;
       });
 
@@ -139,7 +139,7 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
       // console.log('addAction: ', item);
       addAction(item);
     });
-    triggerValidation();
+    triggerValidation?.();
   };
 
   return (

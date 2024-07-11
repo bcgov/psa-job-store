@@ -17,6 +17,7 @@ import {
   Card,
   Checkbox,
   Col,
+  Descriptions,
   Divider,
   Form,
   Input,
@@ -81,7 +82,6 @@ import { FormItem } from '../../../utils/FormItem';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
 import { ContextOptionsReadonly } from '../../wizard/components/context-options-readonly.component';
-import { IsIndigenousCompetency } from '../../wizard/components/is-indigenous-competency.component';
 import BehaviouralComptencyPicker from '../../wizard/components/wizard-behavioural-comptency-picker';
 import WizardOverview from '../../wizard/components/wizard-edit-profile-overview';
 import WizardProgramOverview from '../../wizard/components/wizard-edit-profile-program-overview';
@@ -526,7 +526,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       state: '',
       overview: { text: '' } as TrackedFieldArrayItem,
       program_overview: { text: '' } as TrackedFieldArrayItem,
-      accountabilities: jobProfileData?.jobProfile.accountabilities.map(
+      accountabilities: jobProfileData?.jobProfile.accountabilities?.map(
         (a) =>
           ({
             text: a.text,
@@ -555,17 +555,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       //     professional_registration_requirement: bc,
       //   }),
       // ),
-      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements,
-      optional_requirements: jobProfileData?.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
-      preferences: jobProfileData?.jobProfile.preferences,
-      knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities,
-      willingness_statements: jobProfileData?.jobProfile.willingness_statements,
-      security_screenings: jobProfileData?.jobProfile.security_screenings.map(
+      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements?.map(
         (s) =>
           ({
             text: s.text,
             nonEditable: s.is_readonly,
             is_significant: s.is_significant,
+            tc_is_readonly: s.tc_is_readonly,
+          }) as AccountabilityItem,
+      ),
+      optional_requirements: jobProfileData?.jobProfile.optional_requirements?.map((r: any) => ({ text: r })),
+      preferences: jobProfileData?.jobProfile.preferences,
+      knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities,
+      willingness_statements: jobProfileData?.jobProfile.willingness_statements,
+      security_screenings: jobProfileData?.jobProfile.security_screenings?.map(
+        (s) =>
+          ({
+            text: s.text,
+            nonEditable: s.is_readonly,
+            is_significant: s.is_significant,
+            tc_is_readonly: s.tc_is_readonly,
           }) as SecurityScreeningItem,
       ),
       behavioural_competencies: jobProfileData?.jobProfile.behavioural_competencies.map((bc) => ({
@@ -1341,6 +1350,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             text: a.text,
             is_readonly: a.nonEditable ?? false,
             is_significant: a.is_significant ?? false,
+            tc_is_readonly: a.tc_is_readonly,
           }))
           .filter((acc: { text: string }) => acc.text.trim() !== ''),
         all_reports_to: formData.all_reports_to,
@@ -3080,7 +3090,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           // set this item as significant as well
                                           if (args.target.checked) {
                                             profileSetValue(
-                                              `professional_registration_requirements.${index}.nonEditable`,
+                                              `professional_registration_requirements.${index}.is_significant`,
                                               true,
                                             );
                                           }
@@ -3157,7 +3167,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         ...professionalRegistrationRequirementsFields[index],
                                         tc_is_readonly: false,
                                       });
-                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
                                     }}
                                     onRemove={() => {
                                       removeProfessionalRegistrationRequirement(index);
@@ -3388,7 +3397,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 removeAction={removeKnowledgeSkillAbility}
                                 triggerValidation={triggerProfileValidation}
                                 title="Knowledge, skill and ability requirements"
-                                buttonText="Browse and add knowledge, skill and ability requirements"
+                                buttonText="Browse and add knowledge, skill and abilities"
                               />
                             </Col>
                             <Col>
@@ -3590,6 +3599,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     render={({ field: { onChange, value } }) => (
                                       <Checkbox
                                         onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(`security_screenings.${index}.is_significant`, true);
+                                          }
                                           if (!args.target.checked) {
                                             profileSetValue('markAllNonEditableSec', false);
                                           }
@@ -3774,95 +3787,27 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Button>
                         </Form.Item>
                       </Form.Item>
+                      {/* Todo: if refactoring, need to also add the re-arrange buttons */}
+                      {/* <WizardEditProfileArrayField
+                        useFormReturn={jobProfileUseFormReturn}
+                        label="Optional requirements"
+                        fieldName="optional_requirements"
+                        testId="optional-requirement"
+                        addButtonText="Add an optional requirement"
+                      /> */}
                     </Col>
                   </Row>
                 </Card>
 
                 <Card title="Behavioural competencies" style={{ marginTop: 16 }} bordered={false}>
-                  <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
-                      <>
-                        {behavioural_competencies_fields.length > 0 && (
-                          <List
-                            style={{ marginTop: '7px' }}
-                            locale={{ emptyText: ' ' }}
-                            dataSource={behavioural_competencies_fields}
-                            renderItem={(field, index) => (
-                              <List.Item
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'flex-start', // Align items to the top
-                                  marginBottom: '0px',
-                                  borderBottom: 'none',
-
-                                  padding: '5px 0',
-                                }}
-                                key={field.id} // Ensure this is a unique value
-                              >
-                                <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
-                                  <strong>
-                                    {field.behavioural_competency.name}
-                                    <IsIndigenousCompetency competency={field.behavioural_competency} />
-                                  </strong>
-                                  : {field.behavioural_competency.description}
-                                </p>
-
-                                <Button
-                                  type="text" // No button styling, just the icon
-                                  icon={<DeleteOutlined />}
-                                  onClick={() => {
-                                    behavioural_competencies_remove(index);
-                                    triggerProfileValidation();
-                                  }}
-                                  style={{
-                                    marginLeft: '10px',
-                                    border: '1px solid',
-                                    borderColor: '#d9d9d9',
-                                  }}
-                                />
-
-                                <FormItem
-                                  name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                                  control={profileControl}
-                                  hidden
-                                >
-                                  <Input />
-                                </FormItem>
-                                <FormItem
-                                  hidden
-                                  name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                                  control={profileControl}
-                                  style={{ flex: 1, marginRight: '10px' }}
-                                >
-                                  <Input placeholder="Name" style={{ width: '100%' }} />
-                                </FormItem>
-                                <FormItem
-                                  hidden
-                                  name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                                  control={profileControl}
-                                  style={{ flex: 2, marginRight: '10px' }}
-                                >
-                                  <TextArea placeholder="Description" style={{ width: '100%' }} />
-                                </FormItem>
-                              </List.Item>
-                            )}
-                          />
-                        )}
-                        <Typography.Text type="secondary">
-                          <div style={{ margin: '0.5rem 0' }}>
-                            * denotes an Indigenous Relations Behavioural Competency
-                          </div>
-                        </Typography.Text>
-                        <BehaviouralComptencyPicker
-                          behavioural_competencies_fields={behavioural_competencies_fields}
-                          addAction={behavioural_competencies_append}
-                          removeAction={behavioural_competencies_remove}
-                          validateFunction={triggerProfileValidation}
-                        ></BehaviouralComptencyPicker>
-                      </>
-                      <WizardValidationError formErrors={profileFormErrors} fieldName="behavioural_competencies" />
-                    </Col>
-                  </Row>
+                  <BehaviouralComptencyPicker
+                    behavioural_competencies_fields={behavioural_competencies_fields}
+                    addAction={behavioural_competencies_append}
+                    removeAction={behavioural_competencies_remove}
+                    validateFunction={triggerProfileValidation}
+                    formErrors={profileFormErrors}
+                    useFormReturn={jobProfileUseFormReturn}
+                  ></BehaviouralComptencyPicker>
                 </Card>
               </Form>
             </Col>
@@ -3990,6 +3935,90 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               </Card>
             </Col>
           </Row>
+        </>
+      ),
+    },
+    {
+      key: '5',
+      label: 'Info',
+      children: (
+        <>
+          {/* <Card title="">
+            <Typography.Text>Total Views</Typography.Text>
+            <br></br>
+          </Card>
+           */}
+          <Card
+            style={{
+              marginTop: '24px',
+              marginBottom: '24px',
+              marginLeft: '48px',
+              marginRight: '48px',
+              paddingLeft: '0',
+            }}
+            bodyStyle={{ padding: '0' }}
+          >
+            <Card.Meta
+              title="Additional details"
+              style={{
+                marginTop: '16px',
+                marginBottom: '16px',
+                paddingLeft: '24px',
+              }}
+            ></Card.Meta>
+            <Descriptions
+              className="customDescriptions"
+              bordered
+              column={24}
+              items={[
+                {
+                  key: 'Last updated by',
+                  label: <h3 tabIndex={0}>Last updated by</h3>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'Last updated at',
+                  label: <h3 tabIndex={0}>Last updated at</h3>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_at}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'First published by',
+                  label: <h3 tabIndex={0}>First published by</h3>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.published_by?.name}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'First published at',
+                  label: <h3 tabIndex={0}>First published at</h3>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.published_at}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                // {
+                //   key: 'Created by',
+                //   label: <h3 tabIndex={0}>Created by</h3>,
+                //   children: <span tabIndex={0}>{profileJson?.updated_at}</span>,
+                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                // },
+                // {
+                //   key: 'Created at',
+                //   label: <h3 tabIndex={0}>Created at</h3>,
+                //   children: <span tabIndex={0}>{profileJson?.updated_at}</span>,
+                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                // },
+              ]}
+              labelStyle={{
+                fontWeight: 700,
+                verticalAlign: 'top',
+                background: '#FAFAFA',
+              }}
+              contentStyle={{
+                background: 'white',
+                verticalAlign: 'top',
+              }}
+            />
+          </Card>
         </>
       ),
     },

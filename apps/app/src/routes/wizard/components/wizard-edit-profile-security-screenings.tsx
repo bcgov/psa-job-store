@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Form, Tooltip } from 'antd';
+import { Col, Form, Row, Tooltip } from 'antd';
 import React from 'react';
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
@@ -9,8 +9,10 @@ import useFormFields from '../hooks/wizardUseFieldArray';
 import { WizardModal } from './modal.component';
 import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
+import OptionalList from './wizard-edit-profile-optional-list';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
+import WizardPickerHM from './wizard-picker-hm';
 import { useWizardContext } from './wizard.provider';
 
 interface SecurityScreeningsProps {
@@ -21,6 +23,7 @@ interface SecurityScreeningsProps {
   setEditedFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
+  pickerData: any;
 }
 
 const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
@@ -31,14 +34,22 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
   setEditedFields,
   formErrors,
   trigger,
+  pickerData,
 }) => {
   const { secAlertShown, setSecAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, update } = useFormFields({
     useFormReturn,
     fieldName: 'security_screenings',
     setEditedFields: setEditedFields,
     originalFields: originalFields,
+    significant: true,
+  });
+
+  const { fields: optional_fields, update: optional_update } = useFormFields({
+    useFormReturn,
+    fieldName: 'optional_security_screenings',
+
     significant: true,
   });
 
@@ -79,6 +90,8 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
       handleAddBack,
       handleRemove,
       originalFields,
+      update,
+      fields,
     };
 
     return (
@@ -116,24 +129,36 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
       )}
       <WizardValidationError formErrors={formErrors} fieldName="security_screenings" />
 
-      <WizardEditAddButton
-        testId="add-job-experience-button"
-        onClick={() => {
-          WizardModal(
-            'Do you want to make changes to security screenings?',
-            secAlertShown,
-            setSecAlertShown,
-            () => {
-              handleAddNew();
-            },
-            true,
-            undefined,
-            'experience-warning',
-          );
-        }}
-      >
-        Add a security screening requirement
-      </WizardEditAddButton>
+      <OptionalList
+        useFormReturn={useFormReturn}
+        fieldName="optional_security_screenings"
+        label="Optional security screenings"
+      />
+
+      <Form.Item style={{ marginBottom: 0 }}>
+        <Row>
+          <Col>
+            <WizardPickerHM
+              data={pickerData?.requirementsWithoutReadOnly?.securityScreenings}
+              fields={optional_fields}
+              title="Optional security screenings"
+              buttonText="Browse and add optional security screenings"
+              update={optional_update}
+              // log={true}
+            />
+          </Col>
+          <Col>
+            <WizardEditAddButton
+              testId="add-job-experience-button"
+              onClick={() => {
+                handleAddNew();
+              }}
+            >
+              Add a custom requirement
+            </WizardEditAddButton>
+          </Col>
+        </Row>
+      </Form.Item>
     </>
   );
 };
