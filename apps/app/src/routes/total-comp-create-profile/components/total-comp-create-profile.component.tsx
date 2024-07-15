@@ -504,9 +504,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       jobFamilyWithNoStream: selectedProfession.filter((p) => p.jobStreams.length === 0).map((p) => p.jobFamily),
       excludeProfileId: jobProfileData?.jobProfile.id,
     },
-    {
-      skip: !selectedClassificationId || !employeeGroup,
-    },
+    // {
+    //   skip: !selectedClassificationId || !employeeGroup,
+    // },
   );
 
   const itemInPickerData = (text: string, category: string) => {
@@ -615,6 +615,32 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       triggerProfileValidation();
     }
   }, [jobProfileData, triggerBasicDetailsValidation, triggerProfileValidation]);
+
+  // use ref to hold the flag for auto security settings setup
+  const autoSecuritySettingsSetup = useRef(false);
+  // automatically add security screenings that don't have family or stream associated with them from the pickdata
+  useEffect(() => {
+    if (
+      pickerData?.requirementsWithoutReadOnly?.securityScreenings &&
+      !autoSecuritySettingsSetup.current &&
+      location.pathname === '/draft-job-profiles/create'
+    ) {
+      const securityScreenings = pickerData.requirementsWithoutReadOnly.securityScreenings;
+      const securityScreeningsWithoutFamilyStream = securityScreenings.filter(
+        (s: any) => s.jobFamilies.length == 0 && !s.classification,
+      );
+      autoSecuritySettingsSetup.current = true;
+
+      const updated = securityScreeningsWithoutFamilyStream?.map((field: any) => ({
+        text: field.text,
+        nonEditable: true,
+        is_significant: true,
+        tc_is_readonly: true,
+      }));
+      profileSetValue('security_screenings', updated as AccountabilityItem[]);
+      triggerProfileValidation();
+    }
+  }, [pickerData, profileSetValue, triggerProfileValidation]);
 
   // bug fix for case when user re-navigates to previously opened profile and some of the fields would appear blank
   useEffect(() => {
