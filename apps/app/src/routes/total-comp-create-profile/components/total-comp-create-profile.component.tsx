@@ -1044,7 +1044,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     append: appendJob_experience,
     remove: removeJob_experience,
     move: moveJob_experience,
-    update: updateJob_experience,
   } = useFieldArray({
     control: profileControl,
     name: 'job_experience',
