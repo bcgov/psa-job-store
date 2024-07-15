@@ -114,8 +114,6 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
         } => item !== null,
       );
 
-    // console.log('newItems: ', newItems);
-
     // Remove items that are no longer in the selectedItems array
     const idsToRemove = fields
       .filter((field) => {
@@ -124,8 +122,6 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
         return res;
       })
       .map((field) => field.text);
-
-    // console.log('idsToRemove: ', idsToRemove);
 
     // Convert idsToRemove to an array of indexes
     const indexesToRemove = idsToRemove.map((text) =>
