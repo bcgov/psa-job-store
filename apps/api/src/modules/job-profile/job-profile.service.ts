@@ -1246,6 +1246,7 @@ export class JobProfileService {
     ministryIds?: string[],
     jobFamilyWithNoStream?: number[],
     excludeProfileId?: number,
+    classificationPeoplesoftId?: string,
   ) {
     // get job profiles from which to draw the requirements from based on job family and stream
     let jobProfiles = await this.prisma.jobProfile.findMany({
@@ -1631,6 +1632,48 @@ export class JobProfileService {
       }
     }
 
+    // fetch minimum requirements based on classification
+    // New code to fetch classification grade
+    let classificationGrade: string | null = null;
+    if (classificationId && classificationEmployeeGroupId) {
+      const classification = await this.prisma.classification.findUnique({
+        where: {
+          id_employee_group_id_peoplesoft_id: {
+            id: classificationId,
+            employee_group_id: classificationEmployeeGroupId,
+            peoplesoft_id: classificationPeoplesoftId,
+          },
+        },
+        select: {
+          grade: true,
+        },
+      });
+      classificationGrade = classification?.grade ?? null;
+    }
+
+    // Fetch job profile minimum requirements
+    let jobProfileMinimumRequirements = [];
+
+    if (classificationGrade) {
+      const minimumRequirements = await this.prisma.jobProfileMinimumRequirements.findMany({
+        where: {
+          grade: classificationGrade,
+        },
+      });
+
+      jobProfileMinimumRequirements = minimumRequirements.map((req) => ({
+        text: req.requirement,
+        jobFamilies: [],
+        streams: [],
+        classification:
+          classificationId && classificationEmployeeGroupId
+            ? { id: classificationId, employee_group_id: classificationEmployeeGroupId }
+            : null,
+        organization: null,
+        tc_is_readonly: true, // Assuming these are read-only
+      }));
+    }
+
     // log requirementsMap, which is a Map
     const result = {
       professionalRegistrationRequirements: processMapToResult(professionalRegistrationMap),
@@ -1638,6 +1681,7 @@ export class JobProfileService {
       knowledgeSkillsAbilities: processMapToResult(ksaMap),
       willingnessStatements: processMapToResult(willingnessStatementsMap),
       securityScreenings: processMapToResult(securityScreeningMap),
+      jobProfileMinimumRequirements: jobProfileMinimumRequirements,
     };
 
     function processMapToResult(map: Map<string, RequirementEntry>) {

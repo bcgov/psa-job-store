@@ -76,69 +76,51 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   // if (error) return <p>An error occurred</p>;
 
   const onAdd = (selectedItems: string[]) => {
-    // console.log('onAdd selectedItems: ', selectedItems);
-    // console.log('selectableOptions: ', selectableOptions);
+    // Create a map of existing fields for quick lookup
+    const existingFields = new Map(fields.map((field) => [field.text, field]));
 
-    const selectedProfRegs = selectedItems
+    // Determine which items to keep, add, and their order
+    const updatedFields = selectedItems
       .map((text) => {
         const selectedOption = selectableOptions.find((option) => option.value === text);
         if (selectedOption) {
-          const { text } = selectedOption.object;
-          return {
-            tc_is_readonly: true,
-            text,
-          };
+          const existingField = existingFields.get(selectedOption.text);
+          if (existingField && existingField.tc_is_readonly) {
+            existingFields.delete(selectedOption.text);
+            return existingField;
+          } else {
+            return {
+              tc_is_readonly: true,
+              text: selectedOption.text,
+            };
+          }
         }
         return null;
       })
-      .filter((item) => item !== null);
+      .filter((item): item is { text: string; tc_is_readonly: boolean } => item !== null);
 
-    // console.log('selectedProfRegs: ', selectedProfRegs);
-    // .filter((item): item is AccountabilitiesModel => item !== null);
+    // Add non-readonly fields that weren't in selectedItems
+    const remainingNonReadonlyFields = Array.from(existingFields.values()).filter((field) => !field.tc_is_readonly);
 
-    // Filter out items that already exist in the fields array
-    const newItems = selectedProfRegs
-      .filter(
-        (item) =>
-          !fields.some((field) => {
-            // console.log('building newItems, field, item: ', field, item);
-            return item && field.text === item.text && field.tc_is_readonly === true;
-          }),
-      )
-      .filter(
-        (
-          item,
-        ): item is {
-          text: any;
-          tc_is_readonly: boolean;
-        } => item !== null,
-      );
+    // Combine readonly and non-readonly fields
+    const finalFields = [...updatedFields, ...remainingNonReadonlyFields];
 
-    // console.log('newItems: ', newItems);
-
-    // Remove items that are no longer in the selectedItems array
-    const idsToRemove = fields
-      .filter((field) => {
-        // console.log('building idsToRemove, field, selectedItems: ', field, selectedItems);
-        const res = field.tc_is_readonly == true && !selectedItems.includes(field.text?.toString() ?? '');
-        return res;
-      })
-      .map((field) => field.text);
-
-    // console.log('idsToRemove: ', idsToRemove);
-
-    // Convert idsToRemove to an array of indexes
-    const indexesToRemove = idsToRemove.map((text) =>
-      fields.findIndex((field) => field.tc_is_readonly == true && field.text === text),
-    );
-    // console.log('indexesToremove: ', indexesToRemove);
-    indexesToRemove.length > 0 && removeAction(indexesToRemove);
-
-    // Add the new items
-    newItems.forEach((item) => {
-      // console.log('addAction: ', item);
-      addAction(item);
+    // Sort readonly items based on the order in selectableOptions
+    finalFields.sort((a, b) => {
+      if (a.tc_is_readonly && b.tc_is_readonly) {
+        const indexA = selectableOptions.findIndex((option) => option.text === a.text);
+        const indexB = selectableOptions.findIndex((option) => option.text === b.text);
+        return indexA - indexB;
+      }
+      return a.tc_is_readonly ? -1 : 1;
     });
+
+    // Remove all existing fields
+    removeAction(fields.map((_, index) => index));
+
+    // Add all final fields
+    finalFields.forEach((field) => addAction(field));
+
     triggerValidation?.();
   };
 

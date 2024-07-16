@@ -215,7 +215,7 @@ const WizardEditProfile = forwardRef(
       // professional registrations
       const profRegs = useProfile.professional_registration_requirements;
 
-      profRegs.forEach((profReg) => {
+      profRegs?.forEach((profReg) => {
         const isSignificant = profReg.is_significant;
         const isReadonly = profReg.is_readonly;
 

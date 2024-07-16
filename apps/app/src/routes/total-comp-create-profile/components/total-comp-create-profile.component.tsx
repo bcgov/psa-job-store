@@ -499,14 +499,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       jobFamilyIds: selectedProfession.map((p) => p.jobFamily),
       jobFamilyStreamIds: selectedProfession.map((p) => p.jobStreams).flat(),
       classificationId: selectedClassificationId && selectedClassificationId.split('.')[0],
+      classificationPeoplesoftId: selectedClassificationId && selectedClassificationId.split('.')[2],
       classificationEmployeeGroupId: employeeGroup,
       ministryIds: !allOrganizations ? selectedMinistry : undefined,
       jobFamilyWithNoStream: selectedProfession.filter((p) => p.jobStreams.length === 0).map((p) => p.jobFamily),
       excludeProfileId: jobProfileData?.jobProfile.id,
     },
-    {
-      skip: !selectedClassificationId || !employeeGroup,
-    },
+    // {
+    //   skip: !selectedClassificationId || !employeeGroup,
+    // },
   );
 
   const itemInPickerData = (text: string, category: string) => {
@@ -545,6 +546,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             text: r.text,
             nonEditable: r.is_readonly,
             is_significant: r.is_significant,
+            tc_is_readonly: r.tc_is_readonly,
           }) as AccountabilityItem,
       ),
       job_experience: jobProfileData?.jobProfile.job_experience?.map(
@@ -615,6 +617,32 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       triggerProfileValidation();
     }
   }, [jobProfileData, triggerBasicDetailsValidation, triggerProfileValidation]);
+
+  // use ref to hold the flag for auto security settings setup
+  const autoSecuritySettingsSetup = useRef(false);
+  // automatically add security screenings that don't have family or stream associated with them from the pickdata
+  useEffect(() => {
+    if (
+      pickerData?.requirementsWithoutReadOnly?.securityScreenings &&
+      !autoSecuritySettingsSetup.current &&
+      location.pathname === '/draft-job-profiles/create'
+    ) {
+      const securityScreenings = pickerData.requirementsWithoutReadOnly.securityScreenings;
+      const securityScreeningsWithoutFamilyStream = securityScreenings.filter(
+        (s: any) => s.jobFamilies.length == 0 && !s.classification,
+      );
+      autoSecuritySettingsSetup.current = true;
+
+      const updated = securityScreeningsWithoutFamilyStream?.map((field: any) => ({
+        text: field.text,
+        nonEditable: true,
+        is_significant: true,
+        tc_is_readonly: true,
+      }));
+      profileSetValue('security_screenings', updated as AccountabilityItem[]);
+      triggerProfileValidation();
+    }
+  }, [pickerData, profileSetValue, triggerProfileValidation]);
 
   // bug fix for case when user re-navigates to previously opened profile and some of the fields would appear blank
   useEffect(() => {
@@ -996,6 +1024,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     append: appendEducationAndWorkExperience,
     remove: removeEducationAndWorkExperience,
     move: moveEducationAndWorkExperience,
+    update: updateEducationAndWorkExperience,
   } = useFieldArray({
     control: profileControl,
     name: 'education',
@@ -1277,7 +1306,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       if (jobProfileMinimumRequirements && selectedClassification) {
         const filteredRequirements = jobProfileMinimumRequirements.jobProfileMinimumRequirements
           .filter((req) => req.grade === selectedClassification.grade)
-          .map((req) => ({ text: req.requirement, nonEditable: false, is_significant: true }));
+          .map((req) => ({ text: req.requirement, nonEditable: false, is_significant: true, tc_is_readonly: true }));
 
         // console.log('filteredRequirements: ', filteredRequirements);
         // Update the educationAndWorkExperiences field array
@@ -1312,6 +1341,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             text: a.text,
             is_readonly: a.nonEditable,
             is_significant: a.is_significant,
+            tc_is_readonly: a.tc_is_readonly,
           }))
           .filter((acc: { text: string }) => acc.text.trim() !== ''),
         job_experience: formData.job_experience
@@ -2769,7 +2799,24 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               </Row>
                               <Row gutter={10}>
                                 <Col flex="auto">
-                                  <Form.Item>
+                                  {field.tc_is_readonly &&
+                                    itemInPickerData(field.text?.toString() ?? '', 'jobProfileMinimumRequirements') && (
+                                      <div style={{ display: 'flex' }}>
+                                        <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                          {field.text?.toString()}
+                                        </Typography.Text>
+                                      </div>
+                                    )}
+
+                                  <Form.Item
+                                    style={{
+                                      display:
+                                        field.tc_is_readonly &&
+                                        itemInPickerData(field.text?.toString() ?? '', 'jobProfileMinimumRequirements')
+                                          ? 'none'
+                                          : 'block',
+                                    }}
+                                  >
                                     <Controller
                                       control={profileControl}
                                       name={`education.${index}.text`}
@@ -2790,9 +2837,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 </Col>
 
                                 <Col flex="none">
-                                  <Button
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => {
+                                  <ContextOptionsReadonly
+                                    isReadonly={field.tc_is_readonly ?? false}
+                                    onEdit={() => {
+                                      updateEducationAndWorkExperience(index, {
+                                        ...educationAndWorkExperienceFields[index],
+                                        tc_is_readonly: false,
+                                      });
+                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                    }}
+                                    onRemove={() => {
                                       removeEducationAndWorkExperience(index);
                                       triggerProfileValidation();
                                     }}
@@ -2806,6 +2860,37 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         <WizardValidationError formErrors={profileFormErrors} fieldName="education" />
 
                         <Form.Item>
+                          <Row>
+                            <Col>
+                              <WizardPicker
+                                data={pickerData?.requirementsWithoutReadOnly?.jobProfileMinimumRequirements}
+                                fields={educations}
+                                addAction={appendEducationAndWorkExperience}
+                                removeAction={removeEducationAndWorkExperience}
+                                triggerValidation={triggerProfileValidation}
+                                title="Education and work experiences"
+                                buttonText="Browse and add education"
+                              />
+                            </Col>
+                            <Col>
+                              <Button
+                                type="link"
+                                onClick={() =>
+                                  appendEducationAndWorkExperience({
+                                    text: '',
+                                    nonEditable: markAllNonEditableEdu,
+                                    is_significant: markAllSignificantEdu,
+                                  })
+                                }
+                                icon={<PlusOutlined />}
+                              >
+                                Add custom education
+                              </Button>
+                            </Col>
+                          </Row>
+                        </Form.Item>
+
+                        {/* <Form.Item>
                           <Button
                             type="link"
                             onClick={() =>
@@ -2819,10 +2904,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           >
                             Add education
                           </Button>
-                        </Form.Item>
+                        </Form.Item> */}
                       </Form.Item>
                     </Col>
                   </Row>
+
+                  <Divider className="hr-reduced-margin" />
 
                   {/* Related experience */}
                   <Row justify="start">
@@ -3236,6 +3323,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
+
                   {/* Preferences */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
@@ -3342,6 +3431,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                       </Form.Item>
                     </Col>
                   </Row>
+
+                  <Divider className="hr-reduced-margin" />
 
                   {/* Knowledge skills and abilities */}
                   <Row justify="start">
@@ -3454,6 +3545,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
                   {/* Provisios */}
 
                   <Row justify="start">
@@ -3564,6 +3656,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
                   {/* Security screenings */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
@@ -3783,6 +3876,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
                   {/* optional requirements */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
