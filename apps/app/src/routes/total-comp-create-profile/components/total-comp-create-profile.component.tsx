@@ -2909,6 +2909,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
+
                   {/* Related experience */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
@@ -3321,6 +3323,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
+
                   {/* Preferences */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
@@ -3427,6 +3431,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                       </Form.Item>
                     </Col>
                   </Row>
+
+                  <Divider className="hr-reduced-margin" />
 
                   {/* Knowledge skills and abilities */}
                   <Row justify="start">
@@ -3539,6 +3545,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
                   {/* Provisios */}
 
                   <Row justify="start">
@@ -3649,6 +3656,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
                   {/* Security screenings */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
@@ -3868,6 +3876,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
                   {/* optional requirements */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
