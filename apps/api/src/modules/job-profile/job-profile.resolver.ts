@@ -35,6 +35,9 @@ class RequirementsWithoutReadOnlyResult {
 
   @Field(() => [RequirementWithoutReadOnly], { nullable: true })
   securityScreenings?: RequirementWithoutReadOnly[];
+
+  @Field(() => [RequirementWithoutReadOnly], { nullable: true })
+  jobProfileMinimumRequirements?: RequirementWithoutReadOnly[];
 }
 
 @ObjectType()
@@ -263,6 +266,8 @@ export class JobProfileResolver {
     @Args('classificationId', { type: () => String, nullable: true }) classificationId?: string,
     @Args('classificationEmployeeGroupId', { type: () => String, nullable: true })
     classificationEmployeeGroupId?: string,
+    @Args('classificationPeoplesoftId', { type: () => String, nullable: true })
+    classificationPeoplesoftId?: string,
     @Args('ministryIds', { type: () => [String], nullable: true }) ministryIds?: string[],
     @Args('jobFamilyWithNoStream', { type: () => [Int], nullable: true }) jobFamilyWithNoStream?: number[],
     @Args('excludeProfileId', { type: () => Int, nullable: true }) excludeProfileId?: number,
@@ -275,6 +280,7 @@ export class JobProfileResolver {
       ministryIds,
       jobFamilyWithNoStream ?? [],
       excludeProfileId,
+      classificationPeoplesoftId,
     );
   }
 }
