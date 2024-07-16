@@ -1,5 +1,11 @@
 # app
 
+## 0.6.1
+
+### Patch Changes
+
+- [#619](https://github.com/bcgov/psa-job-store/pull/619) [`4e093a1b2a75bc45ab50fece5fb13ca1d8753a8c`](https://github.com/bcgov/psa-job-store/commit/4e093a1b2a75bc45ab50fece5fb13ca1d8753a8c) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-825 Bugs on job profile creation page
+
 ## 0.6.0
 
 ### Minor Changes
