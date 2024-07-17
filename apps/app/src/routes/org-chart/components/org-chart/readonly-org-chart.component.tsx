@@ -6,6 +6,7 @@ import { OrgChartType } from '../../enums/org-chart-type.enum';
 import { Elements } from '../../interfaces/elements.interface';
 import { Controls } from '../controls';
 import { OrgChartNode } from '../org-chart-node.component';
+import DownloadButton from './download-button.component';
 
 const { Text } = Typography;
 
@@ -91,6 +92,7 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
           style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
           zoomable
         />
+        <DownloadButton />
       </ReactFlow>
     </div>
   );
