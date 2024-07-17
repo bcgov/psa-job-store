@@ -1130,7 +1130,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    currentVersion: true,
+    current_version: true,
   };
 
   const profile194: JobProfile = {
@@ -1240,7 +1240,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    currentVersion: true,
+    current_version: true,
   };
 
   const profile200: JobProfile = {
@@ -1380,7 +1380,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    currentVersion: true,
+    current_version: true,
   };
 
   const profile208: JobProfile = {
@@ -1506,7 +1506,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    currentVersion: true,
+    current_version: true,
   };
 
   const profile210: JobProfile = {
@@ -1647,7 +1647,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    currentVersion: true,
+    current_version: true,
   };
 
   const profile212: JobProfile = {
@@ -1792,7 +1792,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    currentVersion: true,
+    current_version: true,
   };
 
   const profile247: JobProfile = {
@@ -1964,7 +1964,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    currentVersion: true,
+    current_version: true,
   };
 
   const jobProfiles = [profile189, profile194, profile200, profile208, profile210, profile212, profile247];

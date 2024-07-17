@@ -752,7 +752,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
-      setIsCurrentVersion(jobProfileData?.jobProfile.currentVersion);
+      setIsCurrentVersion(jobProfileData?.jobProfile.current_version);
       // console.log('setting values..');
       // Basic Details Form
       setValue('title.text', jobProfileData.jobProfile.title as string);

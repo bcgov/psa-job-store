@@ -601,7 +601,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 valid_from
                 valid_to
                 version
-                currentVersion
+                current_version
               }
             }
           `,
