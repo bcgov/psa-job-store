@@ -23,6 +23,38 @@ function downloadImage(dataUrl: string, fileName: string) {
   a.click();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function generateSVG(getNodes: () => any[]): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const nodesBounds = getRectOfNodes(getNodes());
+    const width = nodesBounds.width + 80;
+    const height = nodesBounds.height + 80;
+    const transform = getTransformForBounds(nodesBounds, width, height, 0.5, 2);
+
+    const el = document.querySelector('.react-flow__viewport') as HTMLElement;
+    if (!el) {
+      console.error('No react-flow__viewport found');
+      reject(new Error('Flow element not found'));
+    }
+
+    toSvg(el, {
+      width: width,
+      height: height,
+      style: {
+        transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
+      },
+    }).then(function (dataUrl) {
+      const encodedSvgString = dataUrl.split(',')[1];
+      const svgString = decodeURIComponent(encodedSvgString);
+
+      const step1 = implementGroupings(removeStyleTags(svgString), analyzeRemainingStyles(svgString));
+      const step2 = step1;
+
+      resolve(step2);
+    });
+  });
+}
+
 // function downloadPDF(svgString) {
 //   const doc = new jsPDF();
 
@@ -520,42 +552,8 @@ function DownloadButton() {
 
   // SVG GENERATION
   const onClick_svg = () => {
-    const nodesBounds = getRectOfNodes(getNodes());
-    const width = nodesBounds.width + 80;
-    const height = nodesBounds.height + 80;
-    const transform = getTransformForBounds(nodesBounds, width, height, 0.5, 2);
-
-    //   toSvg(document.querySelector('.react-flow__viewport'), {
-    //     width: width,
-    //     height: height,
-    //     style: {
-    //       transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
-    //     },
-
-    const el = document.querySelector('.react-flow__viewport') as HTMLElement;
-    if (!el) {
-      console.error('No react-flow__viewport found');
-      return;
-    }
-
-    toSvg(el, {
-      width: width,
-      height: height,
-      style: {
-        transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
-      },
-    }).then(function (dataUrl) {
-      const encodedSvgString = dataUrl.split(',')[1];
-      const svgString = decodeURIComponent(encodedSvgString);
-
-      // 1. remove all style tags - these don't seem to affect rendering
-      // 2. optimize styles - move inline styles to classes
-      const step1 = implementGroupings(removeStyleTags(svgString), analyzeRemainingStyles(svgString));
-      // 3. analyze remaining styles and group them
-      const step2 = step1; //implementGroupings(step1, analyzeRemainingStyles(step1));
-
-      // downloadPDF(appendRedCircle(step2));
-      downloadImage('data:image/svg+xml;base64,' + btoa(step2), 'chart.svg');
+    generateSVG(getNodes).then((svgString: string) => {
+      downloadImage('data:image/svg+xml;base64,' + btoa(svgString), 'chart.svg');
     });
   };
 

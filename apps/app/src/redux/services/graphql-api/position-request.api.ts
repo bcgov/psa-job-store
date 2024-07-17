@@ -28,6 +28,7 @@ export interface CreatePositionRequestInput {
       id: string;
     };
   };
+  orgchart_svg?: string;
 }
 
 export interface GetPositionRequestResponseContent {

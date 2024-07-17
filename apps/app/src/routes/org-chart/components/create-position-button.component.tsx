@@ -1,7 +1,9 @@
 import { UserAddOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
+import { useReactFlow } from 'reactflow';
 import { PositionProvider, usePosition } from '../../../components/app/common/contexts/position.context';
 import { Elements } from '../interfaces/elements.interface';
+import { generateSVG } from './org-chart/download-button.component';
 
 const NaiveCreatePositionButton = ({
   departmentId,
@@ -10,6 +12,7 @@ const NaiveCreatePositionButton = ({
   supervisorId,
 }: CreatePositionButtonProps) => {
   const { createNewPosition } = usePosition();
+  const { getNodes } = useReactFlow();
 
   return (
     <Tooltip
@@ -17,7 +20,16 @@ const NaiveCreatePositionButton = ({
     >
       <Button
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onClick={async () => await createNewPosition(supervisorId as any, departmentId, elements)}
+        onClick={async () => {
+          const svg = await generateSVG(getNodes);
+          await createNewPosition({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            reportingPositionId: supervisorId as any,
+            selectedDepartment: departmentId,
+            orgChartData: elements,
+            svg: btoa(svg),
+          });
+        }}
         disabled={positionIsVacant}
         icon={<UserAddOutlined />}
         data-testid="create-direct-report-button"

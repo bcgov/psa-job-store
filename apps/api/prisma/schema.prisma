@@ -59,6 +59,7 @@ model PositionRequest {
   crm_json                         Json?                  @db.JsonB
   profile_json                     Json?                  @db.JsonB
   orgchart_json                    Json?                  @db.JsonB
+  orgchart_svg                     String?
   user_id                          String?                @db.Uuid
   title                            String?
   position_number                  Int?

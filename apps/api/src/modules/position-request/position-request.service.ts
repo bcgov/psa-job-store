@@ -138,6 +138,7 @@ export class PositionRequestApiService {
         reports_to_position_id: data.reports_to_position_id,
         profile_json: data.profile_json === null ? Prisma.DbNull : data.profile_json,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
+        orgchart_svg: data.orgchart_svg === null ? Prisma.DbNull : data.orgchart_svg,
         // TODO: AL-146
         // user: data.user,
         user_id: userId,
@@ -1544,6 +1545,12 @@ export class PositionRequestApiService {
             fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
             contentType: 'application/json',
             data: orgChartBase64,
+          },
+          {
+            name: 'Org chart',
+            fileName: 'org-chart.svg',
+            contentType: 'image/svg+xml',
+            data: positionRequest.orgchart_svg, // Convert SVG string to base64
           },
         ],
       };
