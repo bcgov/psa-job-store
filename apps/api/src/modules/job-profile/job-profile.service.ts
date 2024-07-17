@@ -664,7 +664,7 @@ export class JobProfileService {
         : !id || (jobProfileState === 'PUBLISHED' && profileIsUsed)
           ? userId
           : data.published_by.connect.id;
-
+    //for net new profile creation - we increment in the create statement
     if (data.version == null) data.version = 0;
     const result = await this.prisma.jobProfile.upsert({
       // if the profile has been used, that means it has been published at some point and linked to a PR.
