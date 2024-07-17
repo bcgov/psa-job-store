@@ -34,7 +34,7 @@ const Education: React.FC<EducationProps> = ({
 }) => {
   const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, update } = useFormFields({
     useFormReturn,
     fieldName: 'education',
     setEditedFields: setEditedFields,
@@ -83,6 +83,7 @@ const Education: React.FC<EducationProps> = ({
       handleAddBack,
       handleRemove,
       originalFields,
+      update,
     };
 
     return (

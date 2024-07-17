@@ -829,6 +829,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         jobFamilyStreamIds: number[];
         classificationId?: string | null;
         classificationEmployeeGroupId?: string | null;
+        classificationPeoplesoftId?: string | null;
         ministryIds?: string[];
         jobFamilyWithNoStream?: number[];
         excludeProfileId?: number;
@@ -839,6 +840,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               $jobFamilyIds: [Int!]!
               $jobFamilyStreamIds: [Int!]!
               $classificationId: String
+              $classificationPeoplesoftId: String
               $classificationEmployeeGroupId: String
               $ministryIds: [String!]
               $jobFamilyWithNoStream: [Int!]
@@ -848,6 +850,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 jobFamilyIds: $jobFamilyIds
                 jobFamilyStreamIds: $jobFamilyStreamIds
                 classificationId: $classificationId
+                classificationPeoplesoftId: $classificationPeoplesoftId
                 classificationEmployeeGroupId: $classificationEmployeeGroupId
                 ministryIds: $ministryIds
                 jobFamilyWithNoStream: $jobFamilyWithNoStream
@@ -918,6 +921,22 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   }
                 }
                 securityScreenings {
+                  text
+                  jobFamilies {
+                    id
+                  }
+                  streams {
+                    id
+                  }
+                  classification {
+                    id
+                    employee_group_id
+                  }
+                  organization {
+                    id
+                  }
+                }
+                jobProfileMinimumRequirements {
                   text
                   jobFamilies {
                     id

@@ -9,7 +9,6 @@ import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
-import WizardPicker from './wizard-picker';
 
 interface KnowledgeSkillsAbilitiesProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
@@ -20,7 +19,6 @@ interface KnowledgeSkillsAbilitiesProps {
   // isAdmin: boolean;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
-  pickerData: any;
 }
 
 const KnowledgeSkillsAbilities: React.FC<KnowledgeSkillsAbilitiesProps> = ({
@@ -32,11 +30,10 @@ const KnowledgeSkillsAbilities: React.FC<KnowledgeSkillsAbilitiesProps> = ({
   // isAdmin,
   formErrors,
   trigger,
-  pickerData,
 }) => {
   // const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, append, update } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, update } = useFormFields({
     useFormReturn,
     fieldName: 'knowledge_skills_abilities',
     setEditedFields: setEditedFields,
@@ -124,7 +121,7 @@ const KnowledgeSkillsAbilities: React.FC<KnowledgeSkillsAbilitiesProps> = ({
 
       <Form.Item style={{ marginBottom: 0 }}>
         <Row>
-          <Col>
+          {/* <Col>
             <WizardPicker
               data={pickerData?.requirementsWithoutReadOnly?.knowledgeSkillsAbilities}
               fields={fields}
@@ -134,7 +131,7 @@ const KnowledgeSkillsAbilities: React.FC<KnowledgeSkillsAbilitiesProps> = ({
               title="Knowledge, skills and abilities"
               buttonText="Browse and add knowledge, skill and abilities"
             />
-          </Col>
+          </Col> */}
           <Col>
             <WizardEditAddButton
               testId="add-prof-reg-button"

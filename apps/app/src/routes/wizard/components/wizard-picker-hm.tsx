@@ -1,28 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { UseFieldArrayRemove } from 'react-hook-form';
+import { UseFieldArrayUpdate } from 'react-hook-form';
 import './wizard-behavioural-comptency-picker.css';
 import EditFormOptionsPicker, { SelectableOption } from './wizard-edit-profile-options-picker';
 
-interface WizardPickerProps {
+interface WizardPickerHMProps {
   // style?: CSSProperties;
   fields: any[];
-  addAction: (obj: any) => void;
-  removeAction: UseFieldArrayRemove;
   data: any;
   triggerValidation?: () => void;
   title: string;
   buttonText: string;
+  update: UseFieldArrayUpdate<any, string>;
+  // log?: boolean;
 }
 
-const WizardPicker: React.FC<WizardPickerProps> = ({
+const WizardPickerHM: React.FC<WizardPickerHMProps> = ({
   fields,
-  addAction,
-  removeAction,
   data,
   triggerValidation,
   title,
   buttonText,
+  update,
+  // log = false,
 }) => {
   // Fetching data from the API
   // console.log('data: ', data);
@@ -30,15 +30,15 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   const [selectableOptions, setSelectableOptions] = useState<SelectableOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
-  // if (log) console.log('fields: ', fields);
+  // console.log('fields: ', fields);
 
   useEffect(() => {
-    // if (log) console.log('fields for selectedOptions: ', fields);
+    // console.log('fields for selectedOptions: ', fields);
 
     const selectedOptions = fields
-      .filter((field) => field.tc_is_readonly)
+      .filter((field) => !field.disabled)
       .map((field) => {
-        // if (log) console.log('field: ', field);
+        // console.log('field: ', field);
         return field.text;
       });
 
@@ -76,50 +76,37 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   // if (error) return <p>An error occurred</p>;
 
   const onAdd = (selectedItems: string[]) => {
-    // Create a map of existing fields for quick lookup
-    const existingFields = new Map(fields.map((field) => [field.text, field]));
+    // // Sort selectedItems based on the order in selectableOptions
+    // const sortedSelectedItems = selectableOptions
+    //   .filter((option) => selectedItems.includes(option.value))
+    //   .map((option) => option.value);
 
-    // Determine which items to keep, add, and their order
-    const updatedFields = selectedItems
-      .map((text) => {
-        const selectedOption = selectableOptions.find((option) => option.value === text);
-        if (selectedOption) {
-          const existingField = existingFields.get(selectedOption.text);
-          if (existingField && existingField.tc_is_readonly) {
-            existingFields.delete(selectedOption.text);
-            return existingField;
-          } else {
-            return {
-              tc_is_readonly: true,
-              text: selectedOption.text,
-            };
-          }
-        }
-        return null;
-      })
-      .filter((item): item is { text: string; tc_is_readonly: boolean } => item !== null);
+    // // Remove all existing items
+    // const allIndexes = fields.map((_, index) => index);
+    // removeAction(allIndexes);
 
-    // Add non-readonly fields that weren't in selectedItems
-    const remainingNonReadonlyFields = Array.from(existingFields.values()).filter((field) => !field.tc_is_readonly);
+    // // Create a new list of items based on the sorted selected items
+    // const newItems = sortedSelectedItems
+    //   .map((text) => {
+    //     const selectedOption = selectableOptions.find((option) => option.value === text);
+    //     if (selectedOption) {
+    //       const { text } = selectedOption.object;
+    //       return { text };
+    //     }
+    //     return null;
+    //   })
+    //   .filter((item): item is { text: any } => item !== null);
 
-    // Combine readonly and non-readonly fields
-    const finalFields = [...updatedFields, ...remainingNonReadonlyFields];
+    // // Add all new items in the correct order
+    // newItems.forEach((item) => {
+    //   addAction(item);
+    // });
 
-    // Sort readonly items based on the order in selectableOptions
-    finalFields.sort((a, b) => {
-      if (a.tc_is_readonly && b.tc_is_readonly) {
-        const indexA = selectableOptions.findIndex((option) => option.text === a.text);
-        const indexB = selectableOptions.findIndex((option) => option.text === b.text);
-        return indexA - indexB;
-      }
-      return a.tc_is_readonly ? -1 : 1;
+    // Update existing fields
+    fields.forEach((field, index) => {
+      const isSelected = selectedItems.includes(field.text);
+      update(index, { ...field, disabled: !isSelected });
     });
-
-    // Remove all existing fields
-    removeAction(fields.map((_, index) => index));
-
-    // Add all final fields
-    finalFields.forEach((field) => addAction(field));
 
     triggerValidation?.();
   };
@@ -135,4 +122,4 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   );
 };
 
-export default WizardPicker;
+export default WizardPickerHM;

@@ -25,10 +25,17 @@ const useFormFields = ({
   significant,
   significant_add = true,
 }: UseFormFieldsProps) => {
-  const { fields, append, remove, update } = useFieldArray({
+  const {
+    // fields: fields_fromUseFieldArray,
+    append,
+    remove,
+    update,
+  } = useFieldArray({
     control: useFormReturn.control,
     name: fieldName,
   });
+
+  const fields = useFormReturn.watch(fieldName);
 
   const handleRemove = (index: number) => {
     const currentValues = useFormReturn.getValues(fieldName);

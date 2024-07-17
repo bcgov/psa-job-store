@@ -33,7 +33,7 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
 }) => {
   const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, update } = useFormFields({
     useFormReturn,
     fieldName: 'job_experience',
     setEditedFields: setEditedFields,
@@ -78,6 +78,7 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
       handleAddBack,
       handleRemove,
       originalFields,
+      update,
     };
 
     return (

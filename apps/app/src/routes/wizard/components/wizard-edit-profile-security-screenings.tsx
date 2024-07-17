@@ -9,9 +9,10 @@ import useFormFields from '../hooks/wizardUseFieldArray';
 import { WizardModal } from './modal.component';
 import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
+import OptionalList from './wizard-edit-profile-optional-list';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
-import WizardPicker from './wizard-picker';
+import WizardPickerHM from './wizard-picker-hm';
 import { useWizardContext } from './wizard.provider';
 
 interface SecurityScreeningsProps {
@@ -37,11 +38,18 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
 }) => {
   const { secAlertShown, setSecAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, append, remove } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, update } = useFormFields({
     useFormReturn,
     fieldName: 'security_screenings',
     setEditedFields: setEditedFields,
     originalFields: originalFields,
+    significant: true,
+  });
+
+  const { fields: optional_fields, update: optional_update } = useFormFields({
+    useFormReturn,
+    fieldName: 'optional_security_screenings',
+
     significant: true,
   });
 
@@ -82,6 +90,8 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
       handleAddBack,
       handleRemove,
       originalFields,
+      update,
+      fields,
     };
 
     return (
@@ -119,17 +129,22 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
       )}
       <WizardValidationError formErrors={formErrors} fieldName="security_screenings" />
 
+      <OptionalList
+        useFormReturn={useFormReturn}
+        fieldName="optional_security_screenings"
+        label="Optional security screenings"
+      />
+
       <Form.Item style={{ marginBottom: 0 }}>
         <Row>
           <Col>
-            <WizardPicker
+            <WizardPickerHM
               data={pickerData?.requirementsWithoutReadOnly?.securityScreenings}
-              fields={fields}
-              addAction={append}
-              removeAction={remove}
-              triggerValidation={trigger}
-              title="Security screenings"
-              buttonText="Browse and add security screenings"
+              fields={optional_fields}
+              title="Optional security screenings"
+              buttonText="Browse and add optional security screenings"
+              update={optional_update}
+              // log={true}
             />
           </Col>
           <Col>
@@ -144,24 +159,6 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
           </Col>
         </Row>
       </Form.Item>
-      {/* <WizardEditAddButton
-        testId="add-job-experience-button"
-        onClick={() => {
-          WizardModal(
-            'Do you want to make changes to security screenings?',
-            secAlertShown,
-            setSecAlertShown,
-            () => {
-              handleAddNew();
-            },
-            true,
-            undefined,
-            'experience-warning',
-          );
-        }}
-      >
-        Add a security screening requirement
-      </WizardEditAddButton> */}
     </>
   );
 };
