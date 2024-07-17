@@ -7,9 +7,10 @@ interface SingleTextFieldProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
   trigger: UseFormTrigger<JobProfileValidationModel>;
   formErrors: any;
+  readOnly?: boolean;
 }
 
-const WizardTitle: React.FC<SingleTextFieldProps> = ({ useFormReturn, formErrors, trigger }) => {
+const WizardTitle: React.FC<SingleTextFieldProps> = ({ useFormReturn, formErrors, trigger, readOnly }) => {
   return (
     <WizardTextField
       name="title"
@@ -20,6 +21,7 @@ const WizardTitle: React.FC<SingleTextFieldProps> = ({ useFormReturn, formErrors
       formErrors={formErrors}
       useFormReturn={useFormReturn}
       jobTitleWarning={true}
+      readOnly={readOnly}
     />
   );
 };

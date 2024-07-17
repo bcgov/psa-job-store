@@ -21,6 +21,7 @@ interface SingleTextFieldProps {
   jobTitleWarning?: boolean;
   showCharacterCount?: boolean;
   maxCharacterCount?: number;
+  readOnly?: boolean;
 }
 
 const WizardTextField: React.FC<SingleTextFieldProps> = ({
@@ -35,6 +36,7 @@ const WizardTextField: React.FC<SingleTextFieldProps> = ({
   jobTitleWarning = false,
   showCharacterCount = false,
   maxCharacterCount = -1,
+  readOnly = false,
 }) => {
   const [currentValue, setCurrentValue] = useState<string>('');
   const [valueOver30, setValueOver30] = useState<boolean>(useFormReturn.getValues(`${name}.text`)?.length > 30);
@@ -74,7 +76,9 @@ const WizardTextField: React.FC<SingleTextFieldProps> = ({
                   control={useFormReturn.control}
                   name={`${name}.text`}
                   render={({ field: { onChange, onBlur, value } }) => {
-                    return isTextArea ? (
+                    return readOnly ? (
+                      <Typography.Text>{value}</Typography.Text>
+                    ) : isTextArea ? (
                       <TextArea
                         data-testid={`${testId}-input`}
                         autoSize
@@ -106,7 +110,7 @@ const WizardTextField: React.FC<SingleTextFieldProps> = ({
               <label className="sr-only" htmlFor={`${name}.text`}>
                 {label}
               </label>
-              {showCharacterCount && (
+              {showCharacterCount && !readOnly && (
                 <Typography.Paragraph type="secondary" style={{ textAlign: 'right', width: '100%', margin: '0' }}>
                   {currentValue.length.toString()} / {maxCharacterCount}
                 </Typography.Paragraph>
