@@ -529,7 +529,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const jobProfileUseFormReturn = useForm<JobProfileValidationModel>({
     resolver: classValidatorResolver(JobProfileValidationModel),
     defaultValues: {
-      state: '',
+      state: 'DRAFT',
       overview: { text: '' } as TrackedFieldArrayItem,
       program_overview: { text: '' } as TrackedFieldArrayItem,
       accountabilities: jobProfileData?.jobProfile.accountabilities.map(
@@ -706,9 +706,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     if (allReportsTo) handleSelectAllReportTo(allReportsTo);
   }, [selectedClassificationId, handleSelectAllReportTo, allReportsTo]);
 
+  const [isCurrentVersion, setIsCurrentVersion] = useState(true);
   useEffect(() => {
     // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
+      setIsCurrentVersion(jobProfileData?.jobProfile.currentVersion);
       // console.log('setting values..');
       // Basic Details Form
       setValue('title.text', jobProfileData.jobProfile.title as string);
@@ -1299,21 +1301,21 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             is_readonly: a.nonEditable,
             is_significant: a.is_significant,
           }))
-          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+          .filter((acc: { text: string }) => acc.text?.trim() !== ''),
         education: formData.education
           .map((a: any) => ({
             text: a.text,
             is_readonly: a.nonEditable,
             is_significant: a.is_significant,
           }))
-          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+          .filter((acc: { text: string }) => acc.text?.trim() !== ''),
         job_experience: formData.job_experience
           .map((a: any) => ({
             text: a.text,
             is_readonly: a.nonEditable,
             is_significant: a.is_significant,
           }))
-          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+          .filter((acc: { text: string }) => acc.text?.trim() !== ''),
         professional_registration_requirements: formData.professional_registration_requirements
           .map((a: any) => ({
             text: a.text,
@@ -1321,7 +1323,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             is_significant: a.is_significant,
             tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: any) => acc.text.trim() !== ''),
+          .filter((acc: any) => acc.text?.trim() !== ''),
         optional_requirements: formData.optional_requirements
           .map((o: any) => o.text)
           .filter((acc: string) => acc.trim() !== ''),
@@ -1330,26 +1332,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             text: a.text,
             tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: any) => acc.text.trim() !== ''),
+          .filter((acc: any) => acc.text?.trim() !== ''),
         knowledge_skills_abilities: formData.knowledge_skills_abilities
           .map((a: any) => ({
             text: a.text,
             tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: any) => acc.text.trim() !== ''),
+          .filter((acc: any) => acc.text?.trim() !== ''),
         willingness_statements: formData.willingness_statements
           .map((a: any) => ({
             text: a.text,
             tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: any) => acc.text.trim() !== ''),
+          .filter((acc: any) => acc.text?.trim() !== ''),
         security_screenings: formData.security_screenings
           .map((a: any) => ({
             text: a.text,
             is_readonly: a.nonEditable ?? false,
             is_significant: a.is_significant ?? false,
           }))
-          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+          .filter((acc: { text: string }) => acc.text?.trim() !== ''),
         all_reports_to: formData.all_reports_to,
         all_organizations: formData.all_organizations,
         total_comp_create_form_misc: {
@@ -1956,7 +1958,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   trigger={triggerBasicDetailsValidation}
                   formErrors={basicFormErrors}
                   useFormReturn={basicUseFormReturn}
-                  readOnly={!jobProfileData?.jobProfile.currentVersion}
+                  readOnly={!isCurrentVersion}
                 />
                 {/*
                 <Card title="Job Title" bordered={false} className="custom-card">
@@ -1976,7 +1978,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 <Card title="JobStore Number" style={{ marginTop: 16 }} bordered={false} className="custom-card">
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                      {jobProfileData?.jobProfile.currentVersion ? (
+                      {isCurrentVersion ? (
                         <FormItem control={control} name="jobStoreNumber">
                           <label style={srOnlyStyle} htmlFor="jobStoreNumber">
                             JobStore Number
@@ -2020,7 +2022,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Employee group" labelCol={{ className: 'card-label' }}>
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Controller
                             name="employeeGroup"
                             control={control}
@@ -2070,7 +2072,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Classification" labelCol={{ className: 'card-label' }}>
                         {/* Form.Item for cosmetic purposes */}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Controller
                             name="classification"
                             control={control}
@@ -2137,7 +2139,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Job role" labelCol={{ className: 'card-label' }}>
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Controller
                             name="jobRole"
                             control={control}
@@ -2173,7 +2175,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         className="label-only"
                       ></Form.Item>
                       {professionsFields.map((field, index: number) =>
-                        jobProfileData?.jobProfile.currentVersion ? (
+                        isCurrentVersion ? (
                           <div key={field.id}>
                             <Form.Item style={{ marginBottom: '0.5rem' }}>
                               {/* First level of selection for job family /profession */}
@@ -2263,7 +2265,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </>
                         ),
                       )}
-                      {jobProfileData?.jobProfile.currentVersion && (
+                      {isCurrentVersion && (
                         <Form.Item>
                           <Button
                             type="dashed"
@@ -2288,7 +2290,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                       {/* Role Radio Buttons */}
 
                       <Form.Item label="Role" labelCol={{ className: 'card-label' }}>
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Controller
                             name="role"
                             control={control}
@@ -2312,7 +2314,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                       {/* Report-to relationship Select */}
 
                       <Form.Item label="Report-to relationship" labelCol={{ className: 'card-label' }}>
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Controller
                             name="reportToRelationship"
                             control={control}
@@ -2364,7 +2366,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {/* Scopes of Responsibility Select */}
                       <Form.Item label="Scope of Responsibility" labelCol={{ className: 'card-label' }}>
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <>
                             <Controller
                               name="scopeOfResponsibility"
@@ -2410,7 +2412,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                         labelCol={{ className: 'card-label' }}
                       >
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Controller
                             name="ministries"
                             control={control}
@@ -2461,7 +2463,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                         labelCol={{ className: 'card-label' }}
                       >
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Controller
                             name="classificationReviewRequired"
                             control={control}
@@ -2487,7 +2489,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 <Card title="Job Context" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                      {jobProfileData?.jobProfile.currentVersion ? (
+                      {isCurrentVersion ? (
                         <Controller
                           control={control}
                           name="jobContext"
@@ -2536,13 +2538,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   trigger={triggerProfileValidation}
                   formErrors={profileFormErrors}
                   useFormReturn={jobProfileUseFormReturn}
-                  readOnly={!jobProfileData?.jobProfile.currentVersion}
+                  readOnly={!isCurrentVersion}
                 />
                 <WizardProgramOverview
                   trigger={triggerProfileValidation}
                   formErrors={profileFormErrors}
                   useFormReturn={jobProfileUseFormReturn}
-                  readOnly={!jobProfileData?.jobProfile.currentVersion}
+                  readOnly={!isCurrentVersion}
                 />
 
                 <Card title="Accountabilities" style={{ marginTop: 16 }} bordered={false}>
@@ -2555,7 +2557,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         label={
                           <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                             <Col>
-                              {jobProfileData?.jobProfile.currentVersion ? (
+                              {isCurrentVersion ? (
                                 <Form.Item style={{ margin: 0 }}>
                                   <Row>
                                     <Col>
@@ -2616,7 +2618,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                       >
                         {accountabilitiesFields.map((field, index) =>
-                          jobProfileData?.jobProfile.currentVersion ? (
+                          isCurrentVersion ? (
                             <Row align="top" key={field.id} gutter={16}>
                               {/* up/down controls */}
                               <Col flex="none" className="reorder-controls">
@@ -2723,7 +2725,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ),
                         )}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Form.Item>
                             <WizardValidationError formErrors={profileFormErrors} fieldName="accountabilities" />
                             <Button
@@ -2754,7 +2756,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   bordered={false}
                   bodyStyle={{ paddingTop: 0 }}
                 >
-                  {jobProfileData?.jobProfile.currentVersion ? (
+                  {isCurrentVersion ? (
                     <Alert
                       className="custom-alert"
                       role="note"
@@ -2780,7 +2782,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             <Col>Education and work experience</Col>
                             <Col>
                               <Form.Item style={{ margin: 0 }}>
-                                {jobProfileData?.jobProfile.currentVersion ? (
+                                {isCurrentVersion ? (
                                   <Row>
                                     <Col>
                                       <Controller
@@ -2838,7 +2840,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                       >
                         {educationAndWorkExperienceFields.map((field, index) =>
-                          jobProfileData?.jobProfile.currentVersion ? (
+                          isCurrentVersion ? (
                             <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                               {/* up/down controls */}
                               <Col flex="none" className="reorder-controls">
@@ -2936,7 +2938,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ),
                         )}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <>
                             <WizardValidationError formErrors={profileFormErrors} fieldName="education" />
 
@@ -2973,7 +2975,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                             <Col>Related experience</Col>
                             <Col>
-                              {jobProfileData?.jobProfile.currentVersion ? (
+                              {isCurrentVersion ? (
                                 <Form.Item style={{ margin: 0 }}>
                                   <Row>
                                     <Col>
@@ -3034,7 +3036,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                       >
                         {job_experienceFields.map((field, index) =>
-                          jobProfileData?.jobProfile.currentVersion ? (
+                          isCurrentVersion ? (
                             <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                               {/* up/down controls */}
                               <Col flex="none" className="reorder-controls">
@@ -3132,7 +3134,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ),
                         )}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <>
                             <WizardValidationError formErrors={profileFormErrors} fieldName="job_experience" />
                             <Form.Item>
@@ -3172,7 +3174,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             {/* NEW */}
 
                             <Col>
-                              {jobProfileData?.jobProfile.currentVersion ? (
+                              {isCurrentVersion ? (
                                 <Form.Item style={{ margin: 0 }}>
                                   <Row>
                                     <Col>
@@ -3234,7 +3236,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                       >
                         {professionalRegistrationRequirementsFields.map((field, index) =>
-                          jobProfileData?.jobProfile.currentVersion ? (
+                          isCurrentVersion ? (
                             <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                               {/* up/down controls */}
                               <Col flex="none" className="reorder-controls">
@@ -3355,7 +3357,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ),
                         )}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <>
                             <WizardValidationError
                               formErrors={profileFormErrors}
@@ -3411,7 +3413,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                       >
                         {preferencesFields.map((field, index) =>
-                          jobProfileData?.jobProfile.currentVersion ? (
+                          isCurrentVersion ? (
                             <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                               {/* up/down controls */}
                               <Col flex="none" className="reorder-controls">
@@ -3476,7 +3478,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ),
                         )}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Form.Item>
                             <Row>
                               <Col>
@@ -3521,7 +3523,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                       >
                         {knowledgeSkillsAbilitiesFields.map((field, index) =>
-                          jobProfileData?.jobProfile.currentVersion ? (
+                          isCurrentVersion ? (
                             <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                               {/* up/down controls */}
                               <Col flex="none" className="reorder-controls">
@@ -3589,7 +3591,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ),
                         )}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <>
                             <WizardValidationError
                               formErrors={profileFormErrors}
@@ -3641,7 +3643,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                       >
                         {willingnessStatementsFields.map((field, index) =>
-                          jobProfileData?.jobProfile.currentVersion ? (
+                          isCurrentVersion ? (
                             <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                               {/* up/down controls */}
                               <Col flex="none" className="reorder-controls">
@@ -3708,7 +3710,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ),
                         )}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Form.Item>
                             <Row>
                               <Col>
@@ -3749,7 +3751,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         label={
                           <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                             <Col>Security Screenings</Col>
-                            {jobProfileData?.jobProfile.currentVersion ? (
+                            {isCurrentVersion ? (
                               <Col>
                                 <Form.Item style={{ margin: 0 }}>
                                   <Row>
@@ -3807,7 +3809,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                       >
                         {securityScreeningsFields.map((field, index) =>
-                          jobProfileData?.jobProfile.currentVersion ? (
+                          isCurrentVersion ? (
                             <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                               {/* up/down controls */}
                               <Col flex="none" className="reorder-controls">
@@ -3923,7 +3925,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ),
                         )}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <>
                             <WizardValidationError formErrors={profileFormErrors} fieldName="security_screenings" />
                             <Form.Item>
@@ -3977,7 +3979,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                       >
                         {optionalRequirementsFields.map((field, index) =>
-                          jobProfileData?.jobProfile.currentVersion ? (
+                          isCurrentVersion ? (
                             <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                               {/* up/down controls */}
                               <Col flex="none" className="reorder-controls">
@@ -4026,7 +4028,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ),
                         )}
-                        {jobProfileData?.jobProfile.currentVersion ? (
+                        {isCurrentVersion ? (
                           <Form.Item>
                             <Button
                               type="link"
@@ -4060,7 +4062,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     validateFunction={triggerProfileValidation}
                     formErrors={profileFormErrors}
                     useFormReturn={jobProfileUseFormReturn}
-                    readOnly={!jobProfileData?.jobProfile.currentVersion}
+                    readOnly={!isCurrentVersion}
                   ></BehaviouralComptencyPicker>
                 </Card>
               </Form>
@@ -4094,7 +4096,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 </Card>
               )}
 
-              {state == 'PUBLISHED' && jobProfileData?.jobProfile.currentVersion && (
+              {state == 'PUBLISHED' && isCurrentVersion && (
                 <Card title="Save and publish">
                   <Typography.Text>Save your progress and publish changes.</Typography.Text>
                   <br></br>
@@ -4142,7 +4144,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 <Divider></Divider>
 
-                {state == 'PUBLISHED' && jobProfileData?.jobProfile.currentVersion && (
+                {state == 'PUBLISHED' && isCurrentVersion && (
                   <>
                     <Typography.Title level={5}>Unpublish</Typography.Title>
                     <Typography.Text>
@@ -4157,7 +4159,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   </>
                 )}
 
-                {jobProfileData?.jobProfile.currentVersion && (
+                {isCurrentVersion && (
                   <>
                     <Typography.Title level={5}>Allow others to edit</Typography.Title>
                     <Typography.Paragraph>
@@ -4234,7 +4236,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 {
                   key: 'Last updated by',
                   label: <h3 tabIndex={0}>Last updated by</h3>,
-                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by.name}</span>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
                   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
                 },
                 {
@@ -4246,7 +4248,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 {
                   key: 'First published by',
                   label: <h3 tabIndex={0}>First published by</h3>,
-                  children: <span tabIndex={0}>{profileJson?.jobProfile?.published_by.name}</span>,
+                  children: <span tabIndex={0}>{profileJson?.jobProfile?.published_by?.name}</span>,
                   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
                 },
                 {
@@ -4258,11 +4260,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         jobProfileMeta?.jobProfileMeta
                           .map((jp) => jp.published_at)
                           .reduce(function (p, v) {
-                            console.log('p ', p);
-                            console.log('v ', v);
-                            console.log('p < v', p < v);
                             return v == null ? p : p < v ? p : v;
-                          })}
+                          }, '')}
                     </span>
                   ),
                   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
@@ -4310,8 +4309,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     !classificationsData ||
     !jobRolesData ||
     !jobProfileScopes ||
-    !jobProfileMinimumRequirements ||
-    !jobProfileMeta
+    !jobProfileMinimumRequirements
   )
     return <LoadingSpinnerWithMessage />;
 

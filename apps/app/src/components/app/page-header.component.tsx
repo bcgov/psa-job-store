@@ -45,11 +45,14 @@ export const PageHeader = ({
   const segments = currentPage.split('/').filter(Boolean); // Filter out empty segments
   const [isCurrentVersion, setIsCurrentVersion] = useState(true);
 
-  const currentVersion = versions?.jobProfileMeta
-    ?.map((jp: { version: any }) => jp.version)
-    .reduce(function (p: number, v: number) {
-      return p > v ? p : v;
-    });
+  const currentVersion =
+    versions?.jobProfileMeta.length > 0
+      ? versions?.jobProfileMeta
+          ?.map((jp: { version: any }) => jp.version)
+          .reduce(function (p: number, v: number) {
+            return p > v ? p : v;
+          }, '')
+      : undefined;
   useEffect(() => {
     const selectedVersion = versions?.jobProfileMeta?.find((v: { id: string | undefined }) => v.id == params.id)
       ?.version;
@@ -153,14 +156,14 @@ export const PageHeader = ({
 
   const renderButtons = () => (
     <div style={{ display: 'flex', gap: '10px' }}>
-      {versions && (
+      {versions?.jobProfileMeta.length > 0 && (
         <Select
           filterSort={(optionA: { label: any }, optionB: { label: any }) =>
             (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
           }
           options={jobProfileVersions}
           onChange={onChange}
-          defaultValue={
+          value={
             'Version ' + versions?.jobProfileMeta?.find((v: { id: string | undefined }) => v.id == params.id)?.version
           }
         >

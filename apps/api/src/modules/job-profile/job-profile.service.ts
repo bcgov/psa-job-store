@@ -659,7 +659,13 @@ export class JobProfileService {
     const owner = !id ? userId : data.owner.connect.id;
     // only set publishedBy if we are publishing a draft or new version of a published profile, ie. a new published record
     const publishedBy =
-      !id || (jobProfileState === 'PUBLISHED' && profileIsUsed) ? userId : data.published_by.connect.id;
+      jobProfileState === 'DRAFT' && data.version == 1
+        ? undefined
+        : !id || (jobProfileState === 'PUBLISHED' && profileIsUsed)
+          ? userId
+          : data.published_by.connect.id;
+
+    if (data.version == null) data.version = 0;
     const result = await this.prisma.jobProfile.upsert({
       // if the profile has been used, that means it has been published at some point and linked to a PR.
       // We must create a new profile version in this case.
