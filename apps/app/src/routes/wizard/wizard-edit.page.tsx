@@ -153,6 +153,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       // ),
       all_organizations: false,
       all_reports_to: false,
+      owner: originalData.owner,
+      created_at: originalData.created_at,
+      currentVersion: originalData.current_version,
     };
   }
 

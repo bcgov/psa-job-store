@@ -847,7 +847,12 @@ const WizardEditProfile = forwardRef(
 
               <WizardTitle trigger={trigger} formErrors={formErrors} useFormReturn={useFormReturn} />
 
-              <WizardProgramOverview trigger={trigger} formErrors={formErrors} useFormReturn={useFormReturn} />
+              <WizardProgramOverview
+                trigger={trigger}
+                formErrors={formErrors}
+                useFormReturn={useFormReturn}
+                readOnly={false}
+              />
 
               {config?.contextEditable ? (
                 <FormItem
