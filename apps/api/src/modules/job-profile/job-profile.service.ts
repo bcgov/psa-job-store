@@ -33,7 +33,7 @@ export class JobProfileService {
         // ...(owner_id != null && { owner_id }),
         ...(searchConditions != null && searchConditions),
         state,
-        currentVersion: true,
+        current_version: true,
         ...where,
       },
       ...args,
@@ -355,7 +355,7 @@ export class JobProfileService {
 
     return this.prisma.jobProfile.count({
       where: {
-        currentVersion: true,
+        current_version: true,
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         ...where,
       },
@@ -488,7 +488,7 @@ export class JobProfileService {
   }
 
   async getJobProfileByNumber(number: number, version: number, userRoles: string[] = []) {
-    const where = version ? { number: number, version: version } : { number, currentVersion: true };
+    const where = version ? { number: number, version: version } : { number, current_version: true };
     const jobProfiles = await this.prisma.jobProfile.findMany({
       where: where,
       include: {
@@ -543,7 +543,7 @@ export class JobProfileService {
 
     return await this.prisma.jobProfile.count({
       where: {
-        currentVersion: true,
+        current_version: true,
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
@@ -583,7 +583,7 @@ export class JobProfileService {
         // stream: { notIn: ['USER'] },
         // owner_id: userId,
         state: 'DRAFT',
-        currentVersion: true,
+        current_version: true,
         ...where,
       },
     });
@@ -601,7 +601,7 @@ export class JobProfileService {
         // stream: { notIn: ['USER'] },
         // owner_id: userId,
         state: 'DRAFT',
-        currentVersion: true,
+        current_version: true,
         ...where,
       },
     });
@@ -612,7 +612,7 @@ export class JobProfileService {
       where: {
         is_archived: false,
         state: 'DRAFT',
-        currentVersion: true,
+        current_version: true,
         // owner_id: userId
       },
       select: {
@@ -733,7 +733,7 @@ export class JobProfileService {
         updated_by: updatedBy ? { connect: { id: updatedBy } } : undefined,
         valid_from: new Date(Date.now()),
         version: data.version + 1,
-        currentVersion: true,
+        current_version: true,
         jobFamilies: {
           create: data.jobFamilies.create.map((item) => ({
             jobFamily: {
@@ -890,7 +890,7 @@ export class JobProfileService {
         where: { id: id || -1 },
         data: {
           valid_to: new Date(Date.now()),
-          currentVersion: false,
+          current_version: false,
         },
       });
     }
@@ -1248,7 +1248,7 @@ export class JobProfileService {
       where: {
         is_archived: false,
         state: 'DRAFT',
-        currentVersion: true,
+        current_version: true,
       },
       include: {
         classifications: {
@@ -1275,7 +1275,7 @@ export class JobProfileService {
 
   async getJobProfilesClassifications() {
     const jobProfiles = await this.prisma.jobProfile.findMany({
-      where: { state: 'PUBLISHED', currentVersion: true },
+      where: { state: 'PUBLISHED', current_version: true },
       include: {
         classifications: {
           include: {

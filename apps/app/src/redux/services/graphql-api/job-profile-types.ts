@@ -182,7 +182,7 @@ export interface JobProfileModel {
   is_archived?: boolean;
   original_profile_json?: JobProfileModel;
   version?: number;
-  currentVersion: boolean;
+  current_version: boolean;
 }
 export interface JobProfileMetaModel {
   id: string;
