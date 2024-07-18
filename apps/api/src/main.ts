@@ -11,7 +11,7 @@ async function bootstrap() {
   app.enableCors();
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe({ skipMissingProperties: false, transform: true }));
-  app.use(json({ limit: '500kb' })); // to allow large org charts to be submitted
+  app.use(json({ limit: '7000kb' })); // to allow large org charts to be submitted
   // app.useGlobalInterceptors(new ErrorLoggingInterceptor());
 
   await app.listen(4000);

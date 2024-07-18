@@ -28,6 +28,7 @@ export interface CreatePositionRequestInput {
       id: string;
     };
   };
+  orgchart_png?: string;
 }
 
 export interface GetPositionRequestResponseContent {
@@ -145,6 +146,7 @@ export interface UpdatePositionRequestInput {
     };
   };
   returnFullObject?: boolean;
+  orgchart_png?: string;
 }
 
 export interface SubmitPositionRequestInput {

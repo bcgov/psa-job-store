@@ -138,6 +138,7 @@ export class PositionRequestApiService {
         reports_to_position_id: data.reports_to_position_id,
         profile_json: data.profile_json === null ? Prisma.DbNull : data.profile_json,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
+        orgchart_png: data.orgchart_png === null ? Prisma.DbNull : data.orgchart_png,
         // TODO: AL-146
         // user: data.user,
         user_id: userId,
@@ -981,6 +982,10 @@ export class PositionRequestApiService {
       updatePayload.reports_to_position_id = updateData.reports_to_position_id;
     }
 
+    if (updateData.orgchart_png !== undefined) {
+      updatePayload.orgchart_png = updateData.orgchart_png;
+    }
+
     if (updateData.profile_json !== undefined) {
       updatePayload.profile_json = updateData.profile_json === null ? Prisma.DbNull : updateData.profile_json;
       // attach original profile json
@@ -1544,6 +1549,12 @@ export class PositionRequestApiService {
             fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
             contentType: 'application/json',
             data: orgChartBase64,
+          },
+          {
+            name: 'Org chart',
+            fileName: 'org-chart.png',
+            contentType: 'image/png',
+            data: positionRequest.orgchart_png,
           },
         ],
       };

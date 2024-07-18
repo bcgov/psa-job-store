@@ -3,6 +3,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useReactFlow } from 'reactflow';
 import 'reactflow/dist/style.css';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import { usePosition } from '../../components/app/common/contexts/position.context';
@@ -12,6 +13,7 @@ import {
 } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { OrgChart } from '../org-chart/components/org-chart';
+import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -102,29 +104,44 @@ export const WizardOrgChartPage = ({
   }, [nextButtonIsDisabled, orgChartData.nodes, selectedPositionId]);
 
   const { createNewPosition } = usePosition();
+  const { getNodes } = useReactFlow();
+
   const next = async ({ switchStep = true }: { switchStep?: boolean } = {}) => {
     if (selectedDepartment == null || selectedPositionId == null) return;
 
     setIsLoading(true);
-    try {
-      const result = await createNewPosition(
-        selectedPositionId as any,
-        selectedDepartment,
-        orgChartData,
-        positionRequestData?.reports_to_position_id,
-        reSelectSupervisor,
-        switchStep,
-      );
 
-      if (result != 'CANCELLED' && switchStep)
+    try {
+      // 1-second delay
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const png = await generatePNGBase64(getNodes);
+
+      // downloadImage('data:image/png;base64,' + png, 'org-chart.png');
+
+      const result = await createNewPosition({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        reportingPositionId: selectedPositionId as any,
+        selectedDepartment: selectedDepartment,
+        orgChartData: orgChartData,
+        current_reports_to_position_id: positionRequestData?.reports_to_position_id,
+        reSelectSupervisor: reSelectSupervisor,
+        changeStep: switchStep,
+        svg: png,
+      });
+
+      if (result != 'CANCELLED' && switchStep) {
         onCreateNewPosition?.(); // this will increment the step in parent, switching the tab to the next step
-      else {
+      } else {
         setIsResetting(true);
-        setTimeout(() => {
-          setIsResetting(false);
-        }, 1000);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setIsResetting(false);
       }
+
       return result;
+    } catch (error) {
+      console.error('An error occurred:', error);
+      return undefined;
     } finally {
       setIsLoading(false);
     }
@@ -222,6 +239,7 @@ export const WizardOrgChartPage = ({
             departmentId={selectedDepartment}
             departmentIdIsLoading={isFetchingUserProfile}
             targetId={selectedPositionId ?? profileData?.profile.position_id}
+            wrapProvider={false}
           />
         )}
       </div>
