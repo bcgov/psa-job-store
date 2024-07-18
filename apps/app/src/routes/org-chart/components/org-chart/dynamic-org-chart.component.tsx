@@ -32,6 +32,7 @@ interface BaseDynamicOrgChartProps {
   departmentId: string | null | undefined;
   departmentIdIsLoading?: boolean;
   targetId?: string | undefined;
+  wrapProvider?: boolean;
 }
 
 export interface DefaultContextDynamicOrgChartProps {

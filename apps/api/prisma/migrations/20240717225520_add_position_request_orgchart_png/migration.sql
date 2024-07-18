@@ -5,4 +5,4 @@
 
 */
 -- AlterTable
-ALTER TABLE "position_request" ADD COLUMN     "orgchart_svg" TEXT;
+ALTER TABLE "position_request" ADD COLUMN     "orgchart_png" TEXT;

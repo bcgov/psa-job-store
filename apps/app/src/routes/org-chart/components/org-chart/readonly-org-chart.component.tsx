@@ -14,6 +14,7 @@ export interface ReadonlyOrgChartProps {
   type: OrgChartType.READONLY;
   departmentId: string;
   elements: Elements;
+  wrapProvider?: boolean;
 }
 
 export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgChartProps) => {

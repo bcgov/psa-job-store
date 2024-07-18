@@ -31,10 +31,10 @@ interface CreateNewPositionParams {
   reportingPositionId: number;
   selectedDepartment: string;
   orgChartData: any;
-  svg: string;
   current_reports_to_position_id?: number;
   reSelectSupervisor?: () => void;
   changeStep?: boolean;
+  svg: string;
 }
 
 export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) => {
@@ -49,10 +49,10 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
       reportingPositionId,
       selectedDepartment,
       orgChartData,
-      svg,
       current_reports_to_position_id,
       reSelectSupervisor,
       changeStep = true,
+      svg,
     } = params;
 
     // we are not editing a draft position request (creatign position from dashboard or from org chart page)
@@ -74,7 +74,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         reports_to_position_id: reportingPositionId,
         department: { connect: { id: selectedDepartment ?? '' } },
         orgchart_json: orgChartData,
-        orgchart_svg: svg,
+        orgchart_png: svg,
       };
       // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
       const resp = await createPositionRequest(positionRequestInput).unwrap();
@@ -121,6 +121,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   additional_info: null,
                   title: null,
                   returnFullObject: true,
+                  orgchart_png: svg,
                 }).unwrap();
 
                 setPositionRequestData(resp.updatePositionRequest ?? null);

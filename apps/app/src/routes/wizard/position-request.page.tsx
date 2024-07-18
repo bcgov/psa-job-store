@@ -253,6 +253,8 @@ export const PositionRequestPage = () => {
   };
 
   const renderStepComponent = () => {
+    if (!wizardContextPositionRequestData) return <LoadingSpinnerWithMessage />;
+
     switch (currentStep) {
       case 0:
         return (
