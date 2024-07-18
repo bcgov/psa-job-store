@@ -1607,7 +1607,8 @@ export class PositionRequestApiService {
     switch (classification.employee_group_id) {
       case 'GEU':
       case 'OEX':
-      case 'PEA': {
+      case 'PEA':
+      case 'LGL': {
         const employees = (
           await this.peoplesoftService.getEmployeesForPositions([additionalInfo.excluded_mgr_position_number])
         ).get(additionalInfo.excluded_mgr_position_number);
