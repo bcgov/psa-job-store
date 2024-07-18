@@ -1012,6 +1012,7 @@ async function seed() {
         name: 'Zone/Office',
         description: 'Geographic area of responsibility under a RD/DM and/or Provincial Dir',
       },
+      { id: 7, name: 'Public Service', description: 'Government-wide responsibility' },
     ],
   });
 

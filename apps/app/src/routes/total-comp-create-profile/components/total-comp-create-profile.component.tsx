@@ -98,7 +98,7 @@ import ReorderButtons from './reorder-buttons';
 const { Option } = Select;
 const { Text } = Typography;
 
-const employeeGroupIds: string[] = ['MGT', 'GEU', 'OEX', 'NUR', 'PEA'];
+const employeeGroupIds: string[] = ['MGT', 'GEU', 'OEX', 'NUR', 'PEA', 'LGL'];
 
 // Define a custom clipboard to handle paste events
 class PlainTextClipboard extends Quill.import('modules/clipboard') {
