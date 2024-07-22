@@ -75,7 +75,7 @@ export const UserListPage = () => {
                   .map((organization) => ({
                     organization_name: organization.name,
                     department_count: [...organization.departments]
-                      .filter((d) => d.effective_status === 'Active' && value.includes(d.id))
+                      .filter((d) => d.effective_status === 'Active' && value?.includes(d.id))
                       .sort((a, b) => (a.name > b.name ? 1 : -1))
                       .map((d) => d.id).length,
                   }))
