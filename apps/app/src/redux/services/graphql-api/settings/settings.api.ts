@@ -8,7 +8,10 @@
 
 import { gql } from 'graphql-request';
 import { graphqlApi } from '..';
+import { AssignUserRolesInput } from './dtos/assign-user-roles-input.dto';
+import { AssignUserRolesResponse } from './dtos/assign-user-roles-response.dto';
 import { GetOrganizationsResponse } from './dtos/get-organizations-response.dto';
+import { GetRolesResponse } from './dtos/get-roles-response.dto';
 import { GetUserPositionResponse } from './dtos/get-user-position-response.dto';
 import { GetUserResponse } from './dtos/get-user-response.dto';
 import { GetUsersResponse } from './dtos/get-users-response.dto';
@@ -35,6 +38,16 @@ export const settingsApi = graphqlApi.injectEndpoints({
         `,
       }),
     }),
+    getRolesForSettings: build.query<string[], void>({
+      query: () => ({
+        document: gql`
+          query GetRoles {
+            getRoles
+          }
+        `,
+      }),
+      transformResponse: (response: GetRolesResponse) => response.getRoles,
+    }),
     getUsersForSettings: build.query<GetUsersResponse, void>({
       query: () => ({
         document: gql`
@@ -52,7 +65,10 @@ export const settingsApi = graphqlApi.injectEndpoints({
       }),
     }),
     getUserForSettings: build.query<GetUserResponse, string>({
-      providesTags: ['settingsUser'],
+      providesTags: (result, err, arg) => {
+        console.log('getUserForSettingsArgs: ', arg);
+        return [{ type: 'settingsUser', id: arg as string }];
+      },
       query: (id: string) => ({
         document: gql`
           query User($id: String) {
@@ -105,6 +121,23 @@ export const settingsApi = graphqlApi.injectEndpoints({
         },
       }),
     }),
+    assignUserRoles: build.mutation<AssignUserRolesResponse, AssignUserRolesInput>({
+      query: (input: AssignUserRolesInput) => ({
+        document: gql`
+          query AssignUserRoles($data: AssignUserRolesInput!) {
+            assignUserRoles(data: $data) {
+              roles
+            }
+          }
+        `,
+        variables: {
+          data: input,
+        },
+      }),
+      invalidatesTags: (result, err, arg) => {
+        return [{ type: 'settingsUser', id: arg.id }];
+      },
+    }),
     setUserOrgChartAccess: build.mutation<SetUserOrgChartAccessResponse, SetUserOrgChartAccessInput>({
       invalidatesTags: ['settingsUser'],
       query: (input: SetUserOrgChartAccessInput) => ({
@@ -133,11 +166,14 @@ export const settingsApi = graphqlApi.injectEndpoints({
 
 export const {
   useLazyGetOrganizationsForSettingsQuery,
+  useLazyGetRolesForSettingsQuery,
   useLazyGetUserForSettingsQuery,
+  useLazyGetUserPositionForSettingsQuery,
   useLazyGetUsersForSettingsQuery,
   useGetOrganizationsForSettingsQuery,
+  useGetRolesForSettingsQuery,
   useGetUserForSettingsQuery,
-  useLazyGetUserPositionForSettingsQuery,
   useGetUsersForSettingsQuery,
+  useAssignUserRolesMutation,
   useSetUserOrgChartAccessMutation,
 } = settingsApi;
