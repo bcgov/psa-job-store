@@ -2,6 +2,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
+import { diff } from 'fast-array-diff';
 import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../../@generated/prisma-nestjs-graphql';
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { CACHE_USER_PREFIX } from '../auth/auth.constants';
@@ -45,8 +46,18 @@ export class UserService {
   }
 
   async assignUserRoles(id: string, roles: string[]) {
+    const existing = await this.getUser({ where: { id } });
+    if (!existing) await this.syncUser(id);
+
+    const { removed } = diff(existing.roles, roles);
+
+    for await (const role of removed) {
+      await this.keycloakService.unassignUserRole(id, role);
+    }
+
+    // Assign submitted roles
     await this.keycloakService.assignUserRoles(id, roles);
-    await this.syncUser(id);
+    await this.prisma.user.update({ where: { id }, data: { roles: roles } });
 
     const user = await this.getUser({ where: { id } });
     return user;

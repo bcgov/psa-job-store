@@ -10,6 +10,7 @@ import {
 } from '@bcgov/citz-imb-sso-css-api';
 import { Injectable } from '@nestjs/common';
 import { guidToUuid } from '../../utils/guid-to-uuid.util';
+import { uuidToGuid } from '../../utils/uuid-to-guid.util';
 import { KeycloakUserAttributes } from './models/keycloak-user.model';
 
 export interface User {
@@ -25,7 +26,8 @@ export type UserWithoutRoles = Omit<User, 'roles'>;
 @Injectable()
 export class KeycloakService {
   async assignUserRoles(id: string, roles: string[]) {
-    await assignUserRoles(`${id}@idir`, roles);
+    const guid = uuidToGuid(id);
+    await assignUserRoles(`${guid}@idir`, roles);
   }
 
   async findUsers(field: keyof IDIRUserQuery, value: string) {
@@ -102,21 +104,27 @@ export class KeycloakService {
   }
 
   async getUser(id: string): Promise<User> {
-    const matches = await this.findUsers('guid', id);
+    console.log('getUser id: ', id);
+
+    const guid = uuidToGuid(id);
+    console.log('getUser guid: ', guid);
+
+    const matches = await this.findUsers('guid', uuidToGuid(id));
     const user = matches.length > 0 ? matches[0] : null;
+
     if (user == null) {
       throw new Error('Could not find user in keycloak');
     }
 
     const { email, attributes } = user;
-    const roles = await getUserRoles(`${id}@idir`);
+    const roles = await getUserRoles(`${guid}@idir`);
     const { display_name, username } = {
       display_name: (attributes as KeycloakUserAttributes).display_name[0],
       username: (attributes as KeycloakUserAttributes).idir_username[0],
     };
 
     return {
-      id: guidToUuid(id),
+      id: guid,
       name: display_name,
       email,
       username,
@@ -158,6 +166,8 @@ export class KeycloakService {
   }
 
   async unassignUserRole(id: string, role: string) {
-    await unassignUserRole(`${id}@idir`, role);
+    const guid = uuidToGuid(id);
+
+    await unassignUserRole(`${guid}@idir`, role);
   }
 }

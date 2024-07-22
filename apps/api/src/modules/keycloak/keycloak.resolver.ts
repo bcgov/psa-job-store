@@ -16,7 +16,6 @@ export class KeycloakResolver {
   }
 
   @Query(() => [String], { name: 'getRoles' })
-  @Roles('super-admin')
   getRoles() {
     return this.keycloakService.getRoles();
   }

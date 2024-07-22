@@ -10,12 +10,14 @@ import { UserService } from './user.service';
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => [User], { name: 'assignUserRoles' })
+  @Query(() => User, { name: 'assignUserRoles' })
   @Roles('super-admin')
-  assignUserRoles(@Args('data') data: AssignUserRolesInput) {
+  async assignUserRoles(@Args('data') data: AssignUserRolesInput) {
     const { id, roles } = data;
 
-    return this.userService.assignUserRoles(id, roles);
+    const result = await this.userService.assignUserRoles(id, roles);
+
+    return result;
   }
 
   @Query(() => [User], { name: 'users' })
