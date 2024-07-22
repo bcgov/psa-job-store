@@ -65,7 +65,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
       }),
     }),
     getUserForSettings: build.query<GetUserResponse, string>({
-      providesTags: (result, err, arg) => {
+      providesTags: (_result, _err, arg) => {
         console.log('getUserForSettingsArgs: ', arg);
         return [{ type: 'settingsUser', id: arg as string }];
       },
@@ -134,7 +134,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
           data: input,
         },
       }),
-      invalidatesTags: (result, err, arg) => {
+      invalidatesTags: (_result, _err, arg) => {
         return [{ type: 'settingsUser', id: arg.id }];
       },
     }),
