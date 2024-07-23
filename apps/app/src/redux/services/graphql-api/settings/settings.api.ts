@@ -15,6 +15,8 @@ import { GetRolesResponse } from './dtos/get-roles-response.dto';
 import { GetUserPositionResponse } from './dtos/get-user-position-response.dto';
 import { GetUserResponse } from './dtos/get-user-response.dto';
 import { GetUsersResponse } from './dtos/get-users-response.dto';
+import { ImportUserSearchInput } from './dtos/import-user-search-input.dto';
+import { ImportUserSearchResponse } from './dtos/import-user-search-response.dto';
 import { SetUserOrgChartAccessInput } from './dtos/set-user-org-chart-access-input.dto';
 import { SetUserOrgChartAccessResponse } from './dtos/set-user-org-chart-access-resposne.dto';
 
@@ -121,6 +123,23 @@ export const settingsApi = graphqlApi.injectEndpoints({
         },
       }),
     }),
+    importUserSearch: build.query<ImportUserSearchResponse, ImportUserSearchInput>({
+      query: (input: ImportUserSearchInput) => ({
+        document: gql`
+          query ImportUserSearch($data: ImportUserSearchInput!) {
+            importUserSearch(data: $data) {
+              id
+              name
+              email
+              source
+            }
+          }
+        `,
+        variables: {
+          data: input,
+        },
+      }),
+    }),
     assignUserRoles: build.mutation<AssignUserRolesResponse, AssignUserRolesInput>({
       query: (input: AssignUserRolesInput) => ({
         document: gql`
@@ -170,6 +189,7 @@ export const {
   useLazyGetUserForSettingsQuery,
   useLazyGetUserPositionForSettingsQuery,
   useLazyGetUsersForSettingsQuery,
+  useLazyImportUserSearchQuery,
   useGetOrganizationsForSettingsQuery,
   useGetRolesForSettingsQuery,
   useGetUserForSettingsQuery,
