@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DownOutlined, RightOutlined, UserOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, DownOutlined, RightOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Tooltip } from 'antd';
 import React, { useState } from 'react';
 import { useReactFlow } from 'reactflow';
@@ -19,6 +19,9 @@ interface TreeNodeProps {
   level: number;
   onKeyDown: (event: React.KeyboardEvent) => void;
   highlighted?: boolean;
+  onSelect?: (nodeId: string) => void;
+  isSelected?: boolean;
+  onCollapse?: (nodeId: string) => void;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
@@ -32,11 +35,24 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   level,
   onKeyDown,
   highlighted,
+  onSelect,
+  isSelected,
+  onCollapse,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { createNewPosition } = usePosition();
   const { getNodes } = useReactFlow();
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSelect) {
+      onSelect(data.id);
+    }
+    if (onCollapse) {
+      onCollapse(data.id);
+    }
+  };
 
   const handleCreateNewReport = async () => {
     if (data.data.employees[0]?.name) {
@@ -71,11 +87,13 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         // apply padding only if hasChildren is true
         bodyStyle={{ padding: hasChildren ? '0 32px 0 0' : '0', position: 'relative' }}
         role="treeitem"
+        aria-selected={isSelected}
         aria-expanded={expanded}
         aria-level={level}
         aria-label={`${data.data.title}, ${data.data.employees[0]?.name || 'Vacant'}`}
         onKeyDown={onKeyDown}
         tabIndex={0}
+        onClick={handleClick}
       >
         <div
           style={{
@@ -111,38 +129,60 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             <span>Reports:</span>
             <span>{data.children.length}</span>
           </div>
-          <Tooltip
-            title={
-              !data.data.employees[0]?.name
-                ? "You can't create a new position which reports to a vacant position."
-                : undefined
-            }
-          >
-            <Button
-              type="link"
-              icon={<UserOutlined />}
-              onClick={handleCreateNewReport}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  handleCreateNewReport();
-                }
-              }}
-              style={{ borderRadius: 0, border: 'none', paddingLeft: '0' }}
-              disabled={!data.data.employees[0]?.name}
-              loading={isLoading}
+          {!onSelect ? (
+            <Tooltip
+              title={
+                !data.data.employees[0]?.name
+                  ? "You can't create a new position which reports to a vacant position."
+                  : undefined
+              }
             >
-              Create new direct report
-            </Button>
-          </Tooltip>
+              <Button
+                type="link"
+                icon={<UserOutlined />}
+                onClick={handleCreateNewReport}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleCreateNewReport();
+                  }
+                }}
+                style={{ borderRadius: 0, border: 'none', paddingLeft: '0' }}
+                disabled={!data.data.employees[0]?.name}
+                loading={isLoading}
+              >
+                Create new direct report
+              </Button>
+            </Tooltip>
+          ) : (
+            isSelected && (
+              <div
+                style={{
+                  background: '#F3F3F3',
+                  border: '1px solid #52C41A',
+                  borderRadius: '0.25rem',
+                  margin: '0.25rem 0 0 0',
+                  padding: '0.25rem',
+                  textAlign: 'center',
+                  width: '100%',
+                }}
+              >
+                <CheckCircleFilled style={{ color: '#52C41A' }} /> Selected
+              </div>
+            )
+          )}
         </div>
 
         {hasChildren && (
           <Button
+            tabIndex={-1}
             type="text"
             icon={expanded ? <RightOutlined /> : <DownOutlined />}
-            onClick={onExpand}
+            onClick={(e) => {
+              e.stopPropagation();
+              onExpand();
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation();

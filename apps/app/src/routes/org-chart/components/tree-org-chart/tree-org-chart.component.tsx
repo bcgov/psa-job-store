@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import debounce from 'lodash.debounce';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { autolayout } from 'common-kit';
 import LoadingComponent from '../../../../components/app/common/components/loading.component';
@@ -16,6 +16,8 @@ interface OrgChartProps {
   isHorizontal?: boolean;
   departmentIdIsLoading?: boolean;
   searchTerm?: string;
+  source?: string;
+  onSelectedPositionIdChange?: (positionId: string | null) => void;
 }
 
 interface HierarchicalNode {
@@ -26,13 +28,44 @@ interface HierarchicalNode {
   children: HierarchicalNode[];
 }
 
-const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal, departmentIdIsLoading, searchTerm }) => {
+const TreeOrgChart: React.FC<OrgChartProps> = ({
+  departmentId,
+  isHorizontal,
+  departmentIdIsLoading,
+  searchTerm,
+  source,
+  onSelectedPositionIdChange,
+}) => {
   const [getOrgChart, { currentData: orgChartData, isFetching: orgChartDataIsFetching }] = useLazyGetOrgChartQuery();
   const debounceSetElements = useMemo(() => debounce((elements: Elements) => setElements(elements), 500), []);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [elements, setElements] = useState<Elements>(initialElements);
   const [hierarchicalData, setHierarchicalData] = useState<HierarchicalNode[]>([]);
   const { setSearchResults } = useSearchContext();
+  const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
+  const [liveRegionMessage, setLiveRegionMessage] = useState('');
+
+  const handleNodeSelect = useCallback(
+    (nodeId: string) => {
+      if (onSelectedPositionIdChange) {
+        if (selectedPositionId === nodeId) {
+          setSelectedPositionId(null);
+          onSelectedPositionIdChange(null);
+          setLiveRegionMessage('Selection cleared');
+        } else {
+          setSelectedPositionId(nodeId);
+          onSelectedPositionIdChange?.(nodeId);
+          const selectedNode = findNodeById(hierarchicalData, nodeId);
+          if (selectedNode) {
+            setLiveRegionMessage(
+              `Selected ${selectedNode.data.title}, ${selectedNode.data.employees[0]?.name || 'Vacant'}`,
+            );
+          }
+        }
+      }
+    },
+    [onSelectedPositionIdChange, selectedPositionId, hierarchicalData],
+  );
 
   // const [isDirty, setIsDirty] = useState<boolean>(false);
   // const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
@@ -165,10 +198,43 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal, dep
   const handleKeyDown = (event: React.KeyboardEvent, nodeId: string) => {
     switch (event.key) {
       case 'Enter':
-      case ' ':
         handleExpand(nodeId, getNodeLevel(hierarchicalData, findNodeById(hierarchicalData, nodeId)));
         break;
+      case ' ':
+        event.preventDefault(); // Prevent page scroll
+        handleNodeSelect(nodeId);
+        break;
     }
+  };
+
+  const handleCollapse = (nodeId: string) => {
+    setExpandedKeys((prevKeys) => {
+      const nodeToCollapse = findNodeById(hierarchicalData, nodeId);
+      if (nodeToCollapse) {
+        const parentNode = findParentNode(hierarchicalData, nodeId);
+        if (parentNode) {
+          // Get all sibling IDs and their descendants
+          const siblingIds = parentNode.children.flatMap((child) => [child.id, ...getAllDescendantIds(child)]);
+          // Filter out the clicked node, its siblings, and all of their descendants
+          return prevKeys.filter((key) => !siblingIds.includes(key));
+        } else {
+          // If it's a root node, collapse all nodes
+          return [];
+        }
+      }
+      return prevKeys;
+    });
+  };
+
+  const findParentNode = (nodes: HierarchicalNode[], targetId: string): HierarchicalNode | null => {
+    for (const node of nodes) {
+      if (node.children.some((child) => child.id === targetId)) {
+        return node;
+      }
+      const found = findParentNode(node.children, targetId);
+      if (found) return found;
+    }
+    return null;
   };
 
   const renderTreeNodes = (nodes: HierarchicalNode[], level: number = 0): React.ReactNode => {
@@ -184,6 +250,22 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal, dep
             flexDirection: !isHorizontal ? 'column' : 'row',
           }}
         >
+          <div
+            aria-live="polite"
+            style={{
+              position: 'absolute',
+              width: '1px',
+              height: '1px',
+              margin: '-1px',
+              padding: '0',
+              overflow: 'hidden',
+              clip: 'rect(0, 0, 0, 0)',
+              whiteSpace: 'nowrap',
+              border: '0',
+            }}
+          >
+            {liveRegionMessage}
+          </div>
           {nodes.map((node) => (
             <div
               className="B"
@@ -211,6 +293,9 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal, dep
                     (node.data.employees[0]?.name &&
                       node.data.employees[0].name.toLowerCase().includes(searchTerm.toLowerCase())))
                 }
+                onSelect={onSelectedPositionIdChange ? handleNodeSelect : undefined}
+                isSelected={selectedPositionId === node.id}
+                onCollapse={handleCollapse}
               />
               {expandedKeys.includes(node.id) && node.children.length > 0 && (
                 <div
@@ -266,6 +351,9 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal, dep
                   elements={elements}
                   level={level}
                   onKeyDown={(e) => handleKeyDown(e, node.id)}
+                  onSelect={onSelectedPositionIdChange ? handleNodeSelect : undefined}
+                  isSelected={selectedPositionId === node.id}
+                  onCollapse={handleCollapse}
                 />
               </div>
             ))}
@@ -347,7 +435,7 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal, dep
   return (
     <PositionProvider>
       {departmentIdIsLoading || orgChartDataIsFetching ? (
-        <LoadingComponent></LoadingComponent>
+        <LoadingComponent height="100%"></LoadingComponent>
       ) : (
         <div
           style={{
@@ -357,7 +445,7 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal, dep
             display: isHorizontal ? 'block' : 'flex',
             flexDirection: 'column',
             alignItems: isHorizontal ? 'center' : 'flex-start',
-            height: 0,
+            height: source == 'wizard' ? undefined : 0,
             flexGrow: 1,
           }}
         >
