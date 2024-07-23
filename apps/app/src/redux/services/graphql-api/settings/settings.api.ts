@@ -139,6 +139,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
           data: input,
         },
       }),
+      providesTags: ['importUserSearch'],
     }),
     assignUserRoles: build.mutation<AssignUserRolesResponse, AssignUserRolesInput>({
       query: (input: AssignUserRolesInput) => ({

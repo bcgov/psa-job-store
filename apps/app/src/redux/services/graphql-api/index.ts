@@ -132,8 +132,9 @@ export const graphqlApi = createApi({
   tagTypes: [
     'positionRequest',
     'positionRequestsCount',
-    'jobProfiles',
     'getOrgChart',
+    'jobProfiles',
+    'importUserSearch',
     'settingsUser',
     'settingsUserRoles',
   ],

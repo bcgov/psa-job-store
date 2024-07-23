@@ -5,6 +5,7 @@ import { PageHeader } from '../../../components/app/page-header.component';
 import { useGetUsersForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 import { useSettingsContext } from '../hooks/use-settings-context.hook';
+import { ImportUserModal } from './components/import-user-modal.component';
 
 const { Text } = Typography;
 
@@ -15,7 +16,7 @@ export const UserListPage = () => {
 
   return (
     <>
-      <PageHeader title="Users" subTitle={'Manage user details'} />
+      <PageHeader title="Users" subTitle={'Manage user details'} extra={[<ImportUserModal />]} />
       <ContentWrapper>
         <Space direction="vertical" style={{ marginTop: '1rem', width: '100%' }}>
           <Table

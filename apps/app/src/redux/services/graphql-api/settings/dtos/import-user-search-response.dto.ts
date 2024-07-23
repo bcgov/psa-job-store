@@ -1,3 +1,5 @@
+import { ImportUserSearchResult } from './import-user-search-result.dto';
+
 export class ImportUserSearchResponse {
-  data: ImportUserSearchResponse[];
+  importUserSearch: ImportUserSearchResult[];
 }
