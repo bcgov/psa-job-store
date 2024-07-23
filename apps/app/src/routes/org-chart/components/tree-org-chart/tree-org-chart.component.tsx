@@ -3,15 +3,19 @@ import debounce from 'lodash.debounce';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { autolayout } from 'common-kit';
+import LoadingComponent from '../../../../components/app/common/components/loading.component';
 import { PositionProvider } from '../../../../components/app/common/contexts/position.context';
 import { useLazyGetOrgChartQuery } from '../../../../redux/services/graphql-api/org-chart.api';
 import { initialElements } from '../../constants/initial-elements.constant';
 import { Elements } from '../../interfaces/elements.interface';
 import TreeNode from './tree-node.component';
+import { useSearchContext } from './tree-org-chart-search-context';
 
 interface OrgChartProps {
   departmentId: string;
   isHorizontal?: boolean;
+  departmentIdIsLoading?: boolean;
+  searchTerm?: string;
 }
 
 interface HierarchicalNode {
@@ -22,14 +26,82 @@ interface HierarchicalNode {
   children: HierarchicalNode[];
 }
 
-const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal }) => {
+const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal, departmentIdIsLoading, searchTerm }) => {
   const [getOrgChart, { currentData: orgChartData, isFetching: orgChartDataIsFetching }] = useLazyGetOrgChartQuery();
   const debounceSetElements = useMemo(() => debounce((elements: Elements) => setElements(elements), 500), []);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [elements, setElements] = useState<Elements>(initialElements);
   const [hierarchicalData, setHierarchicalData] = useState<HierarchicalNode[]>([]);
+  const { setSearchResults } = useSearchContext();
+
   // const [isDirty, setIsDirty] = useState<boolean>(false);
   // const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+
+  // SEARCH CODE
+  useEffect(() => {
+    if (searchTerm) {
+      const results = searchNodes(hierarchicalData, searchTerm.toLowerCase());
+      setSearchResults(results);
+      highlightSearchResults(results);
+    } else {
+      setSearchResults([]);
+      clearHighlights();
+    }
+  }, [searchTerm, hierarchicalData, setSearchResults]);
+
+  const searchNodes = (nodes: HierarchicalNode[], term: string): HierarchicalNode[] => {
+    let results: HierarchicalNode[] = [];
+    for (const node of nodes) {
+      if (
+        node.id.toLowerCase().includes(term) ||
+        node.data.title.toLowerCase().includes(term) ||
+        (node.data.employees[0]?.name && node.data.employees[0].name.toLowerCase().includes(term))
+      ) {
+        results.push(node);
+      }
+      results = results.concat(searchNodes(node.children, term));
+    }
+    return results;
+  };
+
+  const highlightSearchResults = (results: HierarchicalNode[]) => {
+    const pathsToExpand = results.flatMap((node) => getNodePath(hierarchicalData, node.id));
+    const uniquePaths = [...new Set(pathsToExpand)];
+
+    // Filter out nodes that are in the results but don't have matching descendants
+    const newExpandedKeys = uniquePaths.filter((nodeId) => {
+      const node = results.find((result) => result.id === nodeId);
+
+      return !node || hasMatchingDescendant(node, results);
+    });
+
+    setExpandedKeys([...new Set(newExpandedKeys)]);
+  };
+
+  const getNodePath = (nodes: HierarchicalNode[], targetId: string): string[] => {
+    for (const node of nodes) {
+      if (node.id === targetId) {
+        return [node.id];
+      }
+      const childPath = getNodePath(node.children, targetId);
+      if (childPath.length > 0) {
+        return [node.id, ...childPath];
+      }
+    }
+    return [];
+  };
+
+  // New helper function to check if a node has any descendants in the search results
+  const hasMatchingDescendant = (node: HierarchicalNode, results: HierarchicalNode[]): boolean => {
+    return node.children.some(
+      (child) => results.some((result) => result.id === child.id) || hasMatchingDescendant(child, results),
+    );
+  };
+
+  const clearHighlights = () => {
+    setExpandedKeys([]);
+  };
+  // END SEARCH CODE
 
   useEffect(() => {
     if (orgChartData?.orgChart != null) {
@@ -100,32 +172,26 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal }) =
   };
 
   const renderTreeNodes = (nodes: HierarchicalNode[], level: number = 0): React.ReactNode => {
-    const expandedNodeAtThisLevel = nodes.find((node) => expandedKeys.includes(node.id));
+    const isSearchMode = !!searchTerm;
+    const expandedNodeAtThisLevel = isSearchMode ? null : nodes.find((node) => expandedKeys.includes(node.id));
 
-    return (
-      <div
-        role="group"
-        style={{
-          display: 'flex',
-          flexDirection: isHorizontal ? 'column' : 'row',
-          alignItems: isHorizontal ? 'center' : 'flex-start', // Center nodes horizontally
-        }}
-      >
+    if (isSearchMode)
+      return (
         <div
+          className="A"
           style={{
             display: 'flex',
-            flexDirection: isHorizontal ? 'row' : 'column',
-            marginRight: isHorizontal ? '0' : '20px',
-            marginBottom: isHorizontal ? '20px' : '0',
-            justifyContent: isHorizontal ? 'center' : 'flex-start', // Center nodes horizontally
+            flexDirection: !isHorizontal ? 'column' : 'row',
           }}
         >
           {nodes.map((node) => (
             <div
+              className="B"
               key={node.id}
               style={{
-                marginBottom: isHorizontal ? '0' : '10px',
-                marginRight: isHorizontal ? '10px' : '0',
+                display: 'flex',
+                flexDirection: !isHorizontal ? 'row' : 'column',
+                marginRight: isHorizontal ? '20px' : '0',
               }}
             >
               <TreeNode
@@ -133,69 +199,126 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal }) =
                 expanded={expandedKeys.includes(node.id)}
                 onExpand={() => handleExpand(node.id, level)}
                 hasChildren={node.children.length > 0}
-                faded={!!expandedNodeAtThisLevel && !expandedKeys.includes(node.id)}
+                faded={!isSearchMode && !!expandedNodeAtThisLevel && !expandedKeys.includes(node.id)}
                 departmentId={departmentId}
                 elements={elements}
                 level={level}
                 onKeyDown={(e) => handleKeyDown(e, node.id)}
+                highlighted={
+                  searchTerm &&
+                  (node.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    node.data.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (node.data.employees[0]?.name &&
+                      node.data.employees[0].name.toLowerCase().includes(searchTerm.toLowerCase())))
+                }
               />
+              {expandedKeys.includes(node.id) && node.children.length > 0 && (
+                <div
+                  className="C"
+                  style={{
+                    display: 'flex',
+                    flexDirection: !isHorizontal ? 'column' : 'row',
+                    marginLeft: !isHorizontal ? '20px' : '0',
+                    marginTop: !isHorizontal ? '0' : '20px',
+                  }}
+                >
+                  {renderTreeNodes(node.children, level + 1)}
+                </div>
+              )}
             </div>
           ))}
         </div>
-        {nodes.map(
-          (node) =>
-            expandedKeys.includes(node.id) &&
-            node.children.length > 0 && (
-              <div key={`${node.id}-children`} role="group" aria-label={`Children of ${node.data.title}`}>
-                {renderTreeNodes(node.children, level + 1)}
+      );
+    else
+      return (
+        <div
+          role="group"
+          style={{
+            display: 'flex',
+            flexDirection: isHorizontal ? 'column' : 'row',
+            alignItems: isHorizontal ? 'center' : 'flex-start', // Center nodes horizontally
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: isHorizontal ? 'row' : 'column',
+              marginRight: isHorizontal ? '0' : '20px',
+              marginBottom: isHorizontal ? '20px' : '0',
+              justifyContent: isHorizontal ? 'center' : 'flex-start', // Center nodes horizontally
+            }}
+          >
+            {nodes.map((node) => (
+              <div
+                key={node.id}
+                style={{
+                  marginBottom: isHorizontal ? '0' : '10px',
+                  marginRight: isHorizontal ? '10px' : '0',
+                }}
+              >
+                <TreeNode
+                  data={node}
+                  expanded={expandedKeys.includes(node.id)}
+                  onExpand={() => handleExpand(node.id, level)}
+                  hasChildren={node.children.length > 0}
+                  faded={!!expandedNodeAtThisLevel && !expandedKeys.includes(node.id)}
+                  departmentId={departmentId}
+                  elements={elements}
+                  level={level}
+                  onKeyDown={(e) => handleKeyDown(e, node.id)}
+                />
               </div>
-            ),
-        )}
-      </div>
-    );
+            ))}
+          </div>
+          {nodes.map(
+            (node) =>
+              expandedKeys.includes(node.id) &&
+              node.children.length > 0 && (
+                <div key={`${node.id}-children`} role="group" aria-label={`Children of ${node.data.title}`}>
+                  {renderTreeNodes(node.children, level + 1)}
+                </div>
+              ),
+          )}
+        </div>
+      );
   };
 
   const handleExpand = (nodeId: string, level: number) => {
     setExpandedKeys((prevKeys) => {
-      // Collapsing. If the node is already expanded, remove it and all its descendants to collapse
-      if (prevKeys.includes(nodeId)) {
-        const nodeToCollapse = findNodeById(hierarchicalData, nodeId);
-        if (nodeToCollapse) {
-          const descendantIds = getAllDescendantIds(nodeToCollapse);
-          return prevKeys.filter((key) => !descendantIds.includes(key) && key !== nodeId);
+      if (searchTerm) {
+        // In search mode, simply toggle the expanded state of the clicked node
+        return prevKeys.includes(nodeId) ? prevKeys.filter((key) => key !== nodeId) : [...prevKeys, nodeId];
+      } else {
+        // In normal mode, use the original logic
+        // Collapsing. If the node is already expanded, remove it and all its descendants to collapse
+        if (prevKeys.includes(nodeId)) {
+          const nodeToCollapse = findNodeById(hierarchicalData, nodeId);
+          if (nodeToCollapse) {
+            const descendantIds = getAllDescendantIds(nodeToCollapse);
+            return prevKeys.filter((key) => !descendantIds.includes(key) && key !== nodeId);
+          }
+          return prevKeys.filter((key) => key !== nodeId);
         }
-        return prevKeys.filter((key) => key !== nodeId);
+
+        // If expanding, remove any other expanded nodes at the same level and their descendants
+        const newKeys = prevKeys.filter((key) => {
+          const keyNode = findNodeById(hierarchicalData, key);
+          if (!keyNode) return false;
+
+          const nodeLevel = getNodeLevel(hierarchicalData, keyNode);
+          if (keyNode && nodeLevel === level) {
+            // This node is at the same level, remove it and its descendants
+            const descendantIds = getAllDescendantIds(keyNode);
+            return !descendantIds.includes(key) && key !== keyNode.id;
+          }
+
+          // Keep nodes at levels above the current level
+          return nodeLevel < level;
+        });
+
+        // Add the new node to expanded keys
+        return [...newKeys, nodeId];
       }
-
-      // If expanding, remove any other expanded nodes at the same level and their descendants
-      const newKeys = prevKeys.filter((key) => {
-        // console.log('prev key: ', key);
-        const keyNode = findNodeById(hierarchicalData, key);
-        if (!keyNode) return false;
-
-        const nodeLevel = getNodeLevel(hierarchicalData, keyNode);
-        if (keyNode && nodeLevel === level) {
-          // This node is at the same level, remove it and its descendants
-          const descendantIds = getAllDescendantIds(keyNode);
-          // console.log('descendantIds: ', descendantIds, key, keyNode);
-          return !descendantIds.includes(key) && key !== keyNode.id;
-        }
-
-        // This node is not at the same level, keep it
-        // console.log('not same level, true? level/nodeLevel: ', level, nodeLevel);
-
-        if (nodeLevel < level) {
-          // console.log('true');
-          return true;
-        } else {
-          // console.log('false');
-          return false;
-        }
-      });
-
-      // Add the new node to expanded keys
-      console.log('final: ', [...newKeys, nodeId]);
-      return [...newKeys, nodeId];
     });
   };
 
@@ -220,31 +343,36 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({ departmentId, isHorizontal }) =
     return -1;
   };
 
+  console.log('expandedKeys: ', expandedKeys);
   return (
     <PositionProvider>
-      <div
-        style={{
-          overflowX: 'auto',
-          overflowY: isHorizontal ? 'auto' : 'hidden',
-          padding: '20px',
-          display: isHorizontal ? 'block' : 'flex',
-          flexDirection: 'column',
-          alignItems: isHorizontal ? 'center' : 'flex-start',
-          height: 0,
-          flexGrow: 1,
-        }}
-      >
+      {departmentIdIsLoading || orgChartDataIsFetching ? (
+        <LoadingComponent></LoadingComponent>
+      ) : (
         <div
           style={{
-            display: 'inline-block', // Allow the content to shrink-wrap
-            minWidth: '100%',
+            overflowX: 'auto',
+            overflowY: 'auto',
+            padding: '20px',
+            display: isHorizontal ? 'block' : 'flex',
+            flexDirection: 'column',
+            alignItems: isHorizontal ? 'center' : 'flex-start',
+            height: 0,
+            flexGrow: 1,
           }}
-          role="tree"
-          aria-label="Organization Chart"
         >
-          {renderTreeNodes(hierarchicalData)}
+          <div
+            style={{
+              display: 'inline-block', // Allow the content to shrink-wrap
+              minWidth: '100%',
+            }}
+            role="tree"
+            aria-label="Organization Chart"
+          >
+            {renderTreeNodes(hierarchicalData)}
+          </div>
         </div>
-      </div>
+      )}
     </PositionProvider>
   );
 };

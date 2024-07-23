@@ -18,6 +18,7 @@ interface TreeNodeProps {
   elements: Elements;
   level: number;
   onKeyDown: (event: React.KeyboardEvent) => void;
+  highlighted?: boolean;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
@@ -30,6 +31,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   elements,
   level,
   onKeyDown,
+  highlighted,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,110 +57,114 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   };
 
   return (
-    <Card
-      className="tree-node-card"
-      style={{
-        width: 300,
-        marginBottom: '10px',
-        opacity: faded ? 0.5 : 1,
-        transition: 'opacity 0.3s',
-      }}
-      // apply padding only if hasChildren is true
-      bodyStyle={{ padding: hasChildren ? '0 32px 0 0' : '0', position: 'relative' }}
-      role="treeitem"
-      aria-expanded={expanded}
-      aria-level={level}
-      aria-label={`${data.data.title}, ${data.data.employees[0]?.name || 'Vacant'}`}
-      onKeyDown={onKeyDown}
-      tabIndex={0}
-    >
-      <div
+    <div className="card-wrapper">
+      <Card
+        className="tree-node-card"
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '8px',
-          background: '#FAF9F8',
-          padding: '10px',
+          width: 300,
+          marginBottom: '10px',
+          opacity: faded ? 0.5 : 1,
+          transition: 'opacity 0.3s',
+          border: highlighted ? '2px solid #1890ff' : undefined,
+          boxShadow: highlighted ? '0 0 10px rgba(24, 144, 255, 0.5)' : undefined,
         }}
+        // apply padding only if hasChildren is true
+        bodyStyle={{ padding: hasChildren ? '0 32px 0 0' : '0', position: 'relative' }}
+        role="treeitem"
+        aria-expanded={expanded}
+        aria-level={level}
+        aria-label={`${data.data.title}, ${data.data.employees[0]?.name || 'Vacant'}`}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
       >
-        <span
+        <div
           style={{
-            fontWeight: 'bold',
-            display: 'inlineBlock',
-            flex: 1,
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '8px',
+            background: '#FAF9F8',
+            padding: '10px',
           }}
         >
-          <Tooltip title={data.data.title}>{data.data.title}</Tooltip>
-        </span>
-        <span style={{ color: '#474543' }}>{data.data.classification.code}</span>
-      </div>
-      <div style={{ padding: '0 10px 10px 10px' }}>
-        <div style={{ fontWeight: 'bold' }}>{data.data.employees[0]?.name || 'Vacant'}</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span>Position number:</span>
-          <span>{data.id}</span>
+          <span
+            style={{
+              fontWeight: 'bold',
+              display: 'inlineBlock',
+              flex: 1,
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            <Tooltip title={data.data.title}>{data.data.title}</Tooltip>
+          </span>
+          <span style={{ color: '#474543' }}>{data.data.classification.code}</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <span>Reports:</span>
-          <span>{data.children.length}</span>
+        <div style={{ padding: '0 10px 10px 10px' }}>
+          <div style={{ fontWeight: 'bold' }}>{data.data.employees[0]?.name || 'Vacant'}</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>Position number:</span>
+            <span>{data.id}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span>Reports:</span>
+            <span>{data.children.length}</span>
+          </div>
+          <Tooltip
+            title={
+              !data.data.employees[0]?.name
+                ? "You can't create a new position which reports to a vacant position."
+                : undefined
+            }
+          >
+            <Button
+              type="link"
+              icon={<UserOutlined />}
+              onClick={handleCreateNewReport}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleCreateNewReport();
+                }
+              }}
+              style={{ borderRadius: 0, border: 'none', paddingLeft: '0' }}
+              disabled={!data.data.employees[0]?.name}
+              loading={isLoading}
+            >
+              Create new direct report
+            </Button>
+          </Tooltip>
         </div>
-        <Tooltip
-          title={
-            !data.data.employees[0]?.name
-              ? "You can't create a new position which reports to a vacant position."
-              : undefined
-          }
-        >
+
+        {hasChildren && (
           <Button
-            type="link"
-            icon={<UserOutlined />}
-            onClick={handleCreateNewReport}
+            type="text"
+            icon={expanded ? <RightOutlined /> : <DownOutlined />}
+            onClick={onExpand}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation();
                 e.preventDefault();
-                handleCreateNewReport();
+                onExpand();
               }
             }}
-            style={{ borderRadius: 0, border: 'none', paddingLeft: '0' }}
-            disabled={!data.data.employees[0]?.name}
-            loading={isLoading}
-          >
-            Create new direct report
-          </Button>
-        </Tooltip>
-      </div>
-
-      {hasChildren && (
-        <Button
-          type="text"
-          icon={expanded ? <RightOutlined /> : <DownOutlined />}
-          onClick={onExpand}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation();
-              e.preventDefault();
-              onExpand();
-            }
-          }}
-          style={{
-            position: 'absolute',
-            top: '0px',
-            right: '0px',
-            height: '100%',
-            padding: 0,
-            borderLeft: '1px solid #D8D8D8',
-            borderTopLeftRadius: 0,
-            borderBottomLeftRadius: 0,
-          }}
-          aria-label={expanded ? 'Collapse' : 'Expand'}
-        />
-      )}
-    </Card>
+            style={{
+              position: 'absolute',
+              top: '0px',
+              right: '0px',
+              height: '100%',
+              padding: 0,
+              borderLeft: '1px solid #D8D8D8',
+              borderTopLeftRadius: 0,
+              borderBottomLeftRadius: 0,
+            }}
+            aria-label={expanded ? 'Collapse' : 'Expand'}
+          />
+        )}
+      </Card>
+    </div>
   );
 };
 

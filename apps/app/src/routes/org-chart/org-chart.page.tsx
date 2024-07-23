@@ -1,10 +1,12 @@
-import { Col, Layout, Radio, Row } from 'antd';
-import { useEffect, useState } from 'react';
-import { ReactFlowProvider } from 'reactflow';
+import { Col, Layout, Radio, Row, Space } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
+import { DepartmentFilter } from './components/department-filter.component';
 import { OrgChart } from './components/org-chart';
 import { OrgChartHelpButton } from './components/org-chart-help-button.component';
+import { TreeChartSearchProvider } from './components/tree-org-chart/tree-org-chart-search-context';
+import { TreeOrgChartSearch } from './components/tree-org-chart/tree-org-chart-search.component';
 import TreeOrgChart from './components/tree-org-chart/tree-org-chart.component';
 import ViewToggle from './components/view-toggle';
 import { OrgChartContext } from './enums/org-chart-context.enum';
@@ -16,6 +18,7 @@ export const OrgChartPage = () => {
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
   const [currentView, setCurrentView] = useState<'chart' | 'tree'>('tree');
   const [horizontal, setHorizontal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
 
   useEffect(() => {
@@ -26,34 +29,60 @@ export const OrgChartPage = () => {
     setDepartmentId(profileData?.profile.department_id);
   }, [profileData?.profile.department_id]);
 
+  //  SEARCH
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+  }, []);
+
   return (
     <Content style={{ backgroundColor: '#FFF', display: 'flex', flex: '1 0 auto', flexDirection: 'column' }}>
-      <PageHeader
-        title="My organizations"
-        subTitle="You are viewing the current organization structure for your base work area. To begin,  click the supervisor of the new position you would like to create."
-        extra={<OrgChartHelpButton />}
-        subHeader={
-          <>
-            <ViewToggle
-              view={currentView}
-              onToggle={(view) => {
-                setCurrentView(view);
-              }}
-            />
-            {currentView == 'tree' && (
-              <div style={{ marginLeft: '10px', display: 'inline' }}>
-                <Radio.Group value={horizontal} onChange={(e) => setHorizontal(e.target.value)}>
-                  <Radio.Button value={true}>Horizontal</Radio.Button>
-                  <Radio.Button value={false}>Vertical</Radio.Button>
-                </Radio.Group>
-              </div>
-            )}
-          </>
-        }
-      />
-      <Row justify="center" style={{ backgroundColor: '#F0F2F5', flex: 'auto' }}>
-        <Col style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
-          <ReactFlowProvider>
+      <TreeChartSearchProvider>
+        <PageHeader
+          title="My organizations"
+          subTitle="You are viewing the current organization structure for your base work area. To begin,  click the supervisor of the new position you would like to create."
+          extra={<OrgChartHelpButton />}
+          subHeader={
+            <Row gutter={16} align="middle" justify="space-between">
+              <Col flex="500px">
+                {' '}
+                {/* Adjust this width as needed */}
+                <TreeOrgChartSearch
+                  setSearchTerm={setSearchTerm}
+                  onSearch={handleSearch}
+                  disabled={departmentId == null || profileDataIsFetching}
+                  searchTerm={searchTerm}
+                />
+              </Col>
+              <Col>
+                <Space>
+                  <ViewToggle
+                    view={currentView}
+                    onToggle={(view) => {
+                      setCurrentView(view);
+                    }}
+                  />
+                  {currentView === 'tree' && (
+                    <Radio.Group value={horizontal} onChange={(e) => setHorizontal(e.target.value)}>
+                      <Radio.Button value={true}>Horizontal</Radio.Button>
+                      <Radio.Button value={false}>Vertical</Radio.Button>
+                    </Radio.Group>
+                  )}
+                </Space>
+              </Col>
+              <Col flex="auto"> {/* This empty column will create the gap */}</Col>
+              <Col flex="500px">
+                <DepartmentFilter
+                  setDepartmentId={setDepartmentId}
+                  departmentId={departmentId}
+                  loading={profileDataIsFetching}
+                />
+              </Col>
+            </Row>
+          }
+        />
+        <Row justify="center" style={{ backgroundColor: '#F0F2F5', flex: 'auto' }}>
+          <Col style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
             <div style={{ display: currentView !== 'chart' ? 'none' : 'block' }}>
               <OrgChart
                 type={OrgChartType.DYNAMIC}
@@ -66,12 +95,19 @@ export const OrgChartPage = () => {
               />
             </div>
             {
-              currentView !== 'chart' && <TreeOrgChart departmentId="022-2825" isHorizontal={horizontal} />
+              currentView !== 'chart' && (
+                <TreeOrgChart
+                  departmentIdIsLoading={profileDataIsFetching}
+                  departmentId={departmentId ?? ''}
+                  isHorizontal={horizontal}
+                  searchTerm={searchTerm}
+                />
+              )
               // 022-2801
             }
-          </ReactFlowProvider>
-        </Col>
-      </Row>
+          </Col>
+        </Row>
+      </TreeChartSearchProvider>
     </Content>
   );
 };

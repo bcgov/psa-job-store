@@ -1,5 +1,10 @@
 import { Outlet } from 'react-router-dom';
+import { ReactFlowProvider } from 'reactflow';
 
 export const OrgChartRoute = () => {
-  return <Outlet />;
+  return (
+    <ReactFlowProvider>
+      <Outlet />
+    </ReactFlowProvider>
+  );
 };
