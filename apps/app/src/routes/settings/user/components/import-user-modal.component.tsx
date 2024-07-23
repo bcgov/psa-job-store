@@ -1,12 +1,17 @@
-import { SearchOutlined, UserAddOutlined } from '@ant-design/icons';
+import { ReloadOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons';
 import { Button, Input, List, Modal, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import { ImportUserSearchResult } from '../../../../redux/services/graphql-api/settings/dtos/import-user-search-result.dto';
-import { useLazyImportUserSearchQuery } from '../../../../redux/services/graphql-api/settings/settings.api';
+import {
+  useImportUserMutation,
+  useLazyImportUserSearchQuery,
+} from '../../../../redux/services/graphql-api/settings/settings.api';
 
 export const ImportUserModal = () => {
   const [importUserSearchTrigger, { currentData: importUserSearchData, isFetching: importUserSearchDataIsFetching }] =
     useLazyImportUserSearchQuery();
+  const [importUserTrigger, { isLoading: importUserIsLoading }] = useImportUserMutation();
+
   const [visible, setVisible] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<ImportUserSearchResult[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -70,20 +75,13 @@ export const ImportUserModal = () => {
       >
         <List
           dataSource={searchResults}
-          loading={importUserSearchDataIsFetching}
+          loading={importUserSearchDataIsFetching || importUserIsLoading}
           renderItem={(item) => (
             <List.Item
               actions={[
-                <Tooltip
-                  title={item.source.includes('job-store') && 'This user has already been added to the Job Store'}
-                >
-                  <Button
-                    disabled={item.source.includes('job-store')}
-                    shape="circle"
-                    type="primary"
-                    style={{ backgroundColor: !item.source.includes('job-store') ? 'green' : 'clear' }}
-                  >
-                    <UserAddOutlined />
+                <Tooltip title={item.source.includes('job-store') ? 'Force refresh' : 'Add user'}>
+                  <Button onClick={() => importUserTrigger({ id: item.id })} shape="circle" type="primary">
+                    {item.source.includes('job-store') ? <ReloadOutlined /> : <UserAddOutlined />}
                   </Button>
                 </Tooltip>,
               ]}

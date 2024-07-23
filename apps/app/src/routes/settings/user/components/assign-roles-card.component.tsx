@@ -26,12 +26,8 @@ export const AssignRolesCard = ({ user }: AssignRolesCardProps) => {
   }, [user]);
 
   const handleChange = (values: string[]) => {
-    console.log('value: ', value);
-    console.log('values: ', values);
-
     if (user != null) {
-      const result = assignUserRolesTrigger({ id: user.id, roles: values });
-      console.log('result: ', result);
+      assignUserRolesTrigger({ id: user.id, roles: values });
     }
   };
 

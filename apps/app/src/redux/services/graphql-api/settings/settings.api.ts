@@ -15,6 +15,8 @@ import { GetRolesResponse } from './dtos/get-roles-response.dto';
 import { GetUserPositionResponse } from './dtos/get-user-position-response.dto';
 import { GetUserResponse } from './dtos/get-user-response.dto';
 import { GetUsersResponse } from './dtos/get-users-response.dto';
+import { ImportUserInput } from './dtos/import-user-input.dto';
+import { ImportUserResponse } from './dtos/import-user-response.dto';
 import { ImportUserSearchInput } from './dtos/import-user-search-input.dto';
 import { ImportUserSearchResponse } from './dtos/import-user-search-response.dto';
 import { SetUserOrgChartAccessInput } from './dtos/set-user-org-chart-access-input.dto';
@@ -68,7 +70,6 @@ export const settingsApi = graphqlApi.injectEndpoints({
     }),
     getUserForSettings: build.query<GetUserResponse, string>({
       providesTags: (_result, _err, arg) => {
-        console.log('getUserForSettingsArgs: ', arg);
         return [{ type: 'settingsUser', id: arg as string }];
       },
       query: (id: string) => ({
@@ -158,6 +159,31 @@ export const settingsApi = graphqlApi.injectEndpoints({
         return [{ type: 'settingsUser', id: arg.id }];
       },
     }),
+    importUser: build.mutation<ImportUserResponse, ImportUserInput>({
+      query: (input: ImportUserInput) => ({
+        document: gql`
+          query ImportUser($data: ImportUserInput!) {
+            importUser(data: $data) {
+              id
+              name
+              email
+              username
+              roles
+              metadata
+              created_at
+              updated_at
+              deleted_at
+            }
+          }
+        `,
+        variables: {
+          data: input,
+        },
+      }),
+      invalidatesTags: () => {
+        return [{ type: 'importUserSearch' }, { type: '' }];
+      },
+    }),
     setUserOrgChartAccess: build.mutation<SetUserOrgChartAccessResponse, SetUserOrgChartAccessInput>({
       invalidatesTags: ['settingsUser'],
       query: (input: SetUserOrgChartAccessInput) => ({
@@ -196,5 +222,6 @@ export const {
   useGetUserForSettingsQuery,
   useGetUsersForSettingsQuery,
   useAssignUserRolesMutation,
+  useImportUserMutation,
   useSetUserOrgChartAccessMutation,
 } = settingsApi;

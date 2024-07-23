@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { User } from '../../../@generated/prisma-nestjs-graphql';
 import { guidToUuid } from '../../../utils/guid-to-uuid.util';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -51,5 +52,12 @@ export class ImportUserService {
     }
 
     return Array.from(searchResultMap.values());
+  }
+
+  async importUser(id: string): Promise<User> {
+    await this.userService.syncUser(id);
+    const user = await this.userService.getUser({ where: { id } });
+
+    return user;
   }
 }
