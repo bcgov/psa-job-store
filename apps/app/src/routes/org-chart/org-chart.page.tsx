@@ -1,4 +1,4 @@
-import { Col, Layout, Radio, Row, Space } from 'antd';
+import { Col, Layout, Radio, Row } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
@@ -16,14 +16,12 @@ const { Content } = Layout;
 
 export const OrgChartPage = () => {
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
-  const [currentView, setCurrentView] = useState<'chart' | 'tree'>('tree');
+  const [currentView, setCurrentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal, setHorizontal] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
 
-  useEffect(() => {
-    console.log('profileDataIsFetching: ', profileDataIsFetching);
-  }, [profileDataIsFetching]);
+  useEffect(() => {}, [profileDataIsFetching]);
 
   useEffect(() => {
     setDepartmentId(profileData?.profile.department_id);
@@ -44,46 +42,48 @@ export const OrgChartPage = () => {
           extra={<OrgChartHelpButton />}
           subHeader={
             <Row gutter={16} align="middle" justify="space-between">
-              <Col flex="500px">
-                {' '}
-                {/* Adjust this width as needed */}
-                <TreeOrgChartSearch
-                  setSearchTerm={setSearchTerm}
-                  onSearch={handleSearch}
-                  disabled={departmentId == null || profileDataIsFetching}
-                  searchTerm={searchTerm}
+              <Col>
+                <ViewToggle
+                  view={currentView}
+                  onToggle={(view) => {
+                    setCurrentView(view);
+                  }}
                 />
               </Col>
-              <Col>
-                <Space>
-                  <ViewToggle
-                    view={currentView}
-                    onToggle={(view) => {
-                      setCurrentView(view);
-                    }}
+              <Col flex="500px">
+                {currentView === 'tree' && (
+                  <TreeOrgChartSearch
+                    setSearchTerm={setSearchTerm}
+                    onSearch={handleSearch}
+                    disabled={departmentId == null || profileDataIsFetching}
+                    searchTerm={searchTerm}
                   />
-                  {currentView === 'tree' && (
-                    <Radio.Group value={horizontal} onChange={(e) => setHorizontal(e.target.value)}>
-                      <Radio.Button value={true}>Horizontal</Radio.Button>
-                      <Radio.Button value={false}>Vertical</Radio.Button>
-                    </Radio.Group>
-                  )}
-                </Space>
+                )}
+              </Col>
+              <Col>
+                {currentView === 'tree' && (
+                  <Radio.Group value={horizontal} onChange={(e) => setHorizontal(e.target.value)}>
+                    <Radio.Button value={true}>Horizontal</Radio.Button>
+                    <Radio.Button value={false}>Vertical</Radio.Button>
+                  </Radio.Group>
+                )}
               </Col>
               <Col flex="auto"> {/* This empty column will create the gap */}</Col>
               <Col flex="500px">
-                <DepartmentFilter
-                  setDepartmentId={setDepartmentId}
-                  departmentId={departmentId}
-                  loading={profileDataIsFetching}
-                />
+                {currentView === 'tree' && (
+                  <DepartmentFilter
+                    setDepartmentId={setDepartmentId}
+                    departmentId={departmentId}
+                    loading={profileDataIsFetching}
+                  />
+                )}
               </Col>
             </Row>
           }
         />
         <Row justify="center" style={{ backgroundColor: '#F0F2F5', flex: 'auto' }}>
           <Col style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
-            <div style={{ display: currentView !== 'chart' ? 'none' : 'block' }}>
+            <div style={{ display: currentView !== 'chart' ? 'none' : 'block', height: '100%' }}>
               <OrgChart
                 type={OrgChartType.DYNAMIC}
                 context={OrgChartContext.DEFAULT}
