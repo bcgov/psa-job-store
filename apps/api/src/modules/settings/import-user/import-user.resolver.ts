@@ -1,5 +1,6 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { User } from '../../../@generated/prisma-nestjs-graphql';
+import { Roles } from '../../auth/decorators/roles.decorator';
 import { ImportUserService } from './import-user.service';
 import { ImportUserSearchInput } from './inputs/import-user-search.input';
 import { ImportUserInput } from './inputs/import-user.input';
@@ -10,6 +11,7 @@ export class ImportUserResolver {
   constructor(private readonly importUserService: ImportUserService) {}
 
   @Query(() => [ImportUserSearchResult], { name: 'importUserSearch' })
+  @Roles('super-admin')
   importUserSearch(@Args('data') data: ImportUserSearchInput) {
     const { email } = data;
 
@@ -17,6 +19,7 @@ export class ImportUserResolver {
   }
 
   @Query(() => User, { name: 'importUser' })
+  @Roles('super-admin')
   importUser(@Args('data') data: ImportUserInput) {
     const { id } = data;
 
