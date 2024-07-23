@@ -23,6 +23,7 @@ interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
   showButton2?: boolean;
   versions?: any;
   selectVersionCallback?: (selectedId: string) => void;
+  subHeader?: ReactNode;
 }
 
 export const PageHeader = ({
@@ -37,6 +38,7 @@ export const PageHeader = ({
   title,
   versions,
   selectVersionCallback,
+  subHeader,
   ...props
 }: ExtendedPageHeaderProps) => {
   const matches = useMatches();
@@ -195,6 +197,8 @@ export const PageHeader = ({
       title={<h1 style={{ fontWeight: 600, fontSize: '20px', lineHeight: '32px' }}>{title}</h1>}
       {...props}
       style={{ backgroundColor: '#FFF' }}
-    />
+    >
+      {subHeader}
+    </AntdProPageHeader>
   );
 };
