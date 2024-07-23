@@ -4,7 +4,6 @@ import { Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { diff } from 'fast-array-diff';
 import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../../@generated/prisma-nestjs-graphql';
-import { AlexandriaError } from '../../utils/alexandria-error';
 import { CACHE_USER_PREFIX } from '../auth/auth.constants';
 import { CrmService } from '../external/crm.service';
 import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
@@ -65,9 +64,6 @@ export class UserService {
 
   async getUser(args: FindUniqueUserArgs) {
     const user = await this.prisma.user.findUnique(args);
-    if (!user) {
-      throw AlexandriaError(`Could not find user: ${args}`);
-    }
 
     return user;
   }
@@ -106,7 +102,7 @@ export class UserService {
     // Get Peoplesoft Metadata
     const { employee, metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
 
-    const existingUser: User | undefined = await this.getUser({ where: { id: user.id } });
+    const existingUser: User | undefined = await this.getUser({ where: { id } });
 
     const orgChartMetadata = {
       department_ids: existingUser?.metadata?.org_chart?.department_ids

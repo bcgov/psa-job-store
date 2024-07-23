@@ -8,9 +8,9 @@ import { KeycloakUser } from './models/keycloak-user.model';
 export class KeycloakResolver {
   constructor(private readonly keycloakService: KeycloakService) {}
 
-  @Query(() => [KeycloakUser], { name: 'findIdpUsers' })
+  @Query(() => [KeycloakUser], { name: 'findKeycloakUsers' })
   @Roles('super-admin')
-  findIdpUsers(@Args() args: FindManyKeycloakUserArgs) {
+  findKeycloakUsers(@Args() args: FindManyKeycloakUserArgs) {
     console.log('args: ', args);
     return this.keycloakService.findUsers(args.field, args.value);
   }
