@@ -181,7 +181,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
         },
       }),
       invalidatesTags: () => {
-        return [{ type: 'importUserSearch' }, { type: '' }];
+        return [{ type: 'importUserSearch' }];
       },
     }),
     setUserOrgChartAccess: build.mutation<SetUserOrgChartAccessResponse, SetUserOrgChartAccessInput>({
