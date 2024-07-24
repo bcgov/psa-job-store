@@ -96,6 +96,8 @@ const WizardEditProfile = forwardRef(
       setCurrentSection,
     } = useWizardContext();
 
+    // console.log('originalRelWorkFields: ', originalRelWorkFields);
+
     const acctSection = useRef<null | HTMLDivElement>(null);
     const educationSection = useRef<null | HTMLDivElement>(null);
     const workExperienceSection = useRef<null | HTMLDivElement>(null);
@@ -452,6 +454,10 @@ const WizardEditProfile = forwardRef(
 
         fieldMappings.forEach(({ field, originalField, setOriginal, setEdited, isSignificant }) => {
           // console.log('KEY: ', field, originalField, isSignificant);
+          // console.log(
+          //   'originalProfileData.jobProfile[originalField as keyof JobProfileModel] as Array<any>: ',
+          //   originalProfileData.jobProfile[originalField as keyof JobProfileModel] as Array<any>,
+          // );
 
           // for accountabilities, make sure we only look at those with significant == true,
           // since false means it's an optional accountability
@@ -473,9 +479,15 @@ const WizardEditProfile = forwardRef(
             })
             .filter((item) => {
               // console.log('filter item: ', item);
-              // if (field != 'accountabilities') return true;
-              // else
-              return item.is_significant === isSignificant;
+              // this should be a list with picklists
+              if (
+                field == 'accountabilities' ||
+                field == 'professional_registration_requirements' ||
+                field == 'security_screenings'
+              )
+                return item.is_significant === isSignificant;
+              else return true;
+              // return item.is_significant === isSignificant;
             });
 
           // console.log('originalFieldValue: ', originalFieldValue);
@@ -495,10 +507,16 @@ const WizardEditProfile = forwardRef(
               }
             })
             .filter((item) => {
-              // if (field != 'accountabilities') return true;
-              // else
+              // this should be a list with picklists
+              if (
+                field == 'accountabilities' ||
+                field == 'professional_registration_requirements' ||
+                field == 'security_screenings'
+              )
+                return item.is_significant === isSignificant;
+              else return true;
 
-              return item.is_significant === isSignificant;
+              // return item.is_significant === isSignificant;
             });
 
           if (!originalValuesSet) setOriginal(originalFieldValue);
