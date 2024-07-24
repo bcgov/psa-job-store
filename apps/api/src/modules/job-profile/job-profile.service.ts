@@ -1331,6 +1331,7 @@ export class JobProfileService {
     let jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
         AND: [
+          { current_version: true },
           { id: { not: excludeProfileId ?? -1 } },
           {
             OR: [

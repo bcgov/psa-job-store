@@ -3496,7 +3496,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     addAction={appendProfessionalRegistrationRequirement}
                                     removeAction={removeProfessionalRegistrationRequirement}
                                     triggerValidation={triggerProfileValidation}
-                                    markAllSignificantProReg={markAllSignificantProReg}
                                   />
                                 </Col>
                                 <Col>
@@ -4100,6 +4099,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     triggerValidation={triggerProfileValidation}
                                     title="Security screenings"
                                     buttonText="Browse and add security screenings"
+                                    addAsSignificantAndReadonly={true}
                                   />
                                 </Col>
                                 <Col>

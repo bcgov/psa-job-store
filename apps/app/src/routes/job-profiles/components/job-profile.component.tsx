@@ -911,7 +911,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 (effectiveData?.professional_registration_requirements?.filter((ed) => !ed.disabled)?.length ?? 0) >
                   0)) && (
               <>
-                <h4>Professional registration and certification requirements</h4>
+                {(effectiveData?.professional_registration_requirements?.filter(
+                  (ed) => !ed.disabled && ed.is_significant,
+                )?.length ?? 0) > 0 && <h4>Professional registration and certification requirements</h4>}
 
                 <>
                   <ul data-testid="professional-registration">
@@ -1045,8 +1047,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             {((showDiff && (effectiveData?.security_screenings?.length ?? 0) > 0) ||
               (!showDiff && (effectiveData?.security_screenings.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
-                <h4>Security screenings</h4>
-
+                {(effectiveData?.security_screenings.filter((ed) => !ed.disabled && ed.is_significant)?.length ?? 0) >
+                  0 && <h4>Security screenings</h4>}
                 <>
                   {/* Main - is_significant == true */}
                   <ul data-testid="security-screenings">
