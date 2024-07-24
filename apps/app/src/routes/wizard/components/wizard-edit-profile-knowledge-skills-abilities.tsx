@@ -33,7 +33,7 @@ const KnowledgeSkillsAbilities: React.FC<KnowledgeSkillsAbilitiesProps> = ({
 }) => {
   // const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, update } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove } = useFormFields({
     useFormReturn,
     fieldName: 'knowledge_skills_abilities',
     setEditedFields: setEditedFields,
@@ -92,7 +92,6 @@ const KnowledgeSkillsAbilities: React.FC<KnowledgeSkillsAbilitiesProps> = ({
         testId="knowledge_skills_abilities"
         confirmRemoveModal={() => handleProfRegRemoveModal(index)}
         // onFocus={() => handleProfRegFocusModal(field)}
-        update={update}
         remove={remove}
         fields={fields}
         trigger={trigger}
