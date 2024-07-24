@@ -1,6 +1,7 @@
 import { DownloadOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
 import { toPng, toSvg } from 'html-to-image';
+import { useState } from 'react';
 import { Panel, Rect, getRectOfNodes, getTransformForBounds, useReactFlow } from 'reactflow';
 
 interface NodesBounds {
@@ -88,7 +89,7 @@ export async function generateSVG(getNodes: () => any[]): Promise<string> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function generatePNGBase64(getNodes: () => any[]): Promise<string> {
-  const resolution = 200;
+  const resolution = 100;
   const tileSize = 16382;
   const padding = 40;
   const maxDimension = 16382 * 3;
@@ -399,19 +400,32 @@ function parseStyle(styleString: string): StyleObject {
 }
 
 function DownloadButton() {
+  const [isLoading, setIsLoading] = useState(false);
   const { getNodes } = useReactFlow();
 
   // SVG GENERATION
-  const onClick_svg = () => {
-    generateSVG(getNodes).then((svgString: string) => {
-      downloadImage('data:image/svg+xml;base64,' + btoa(svgString), 'chart.svg');
-    });
+  const onClick_svg = async () => {
+    setIsLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      generateSVG(getNodes).then((svgString: string) => {
+        downloadImage('data:image/svg+xml;base64,' + btoa(svgString), 'chart.svg');
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // // TILE PNG
   const onClick_png = async () => {
-    const pngBase64 = await generatePNGBase64(getNodes);
-    downloadImage('data:image/png;base64,' + pngBase64, 'org-chart.png');
+    setIsLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      const pngBase64 = await generatePNGBase64(getNodes);
+      downloadImage('data:image/png;base64,' + pngBase64, 'org-chart.png');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const items = [
@@ -430,7 +444,9 @@ function DownloadButton() {
   return (
     <Panel position="top-right">
       <Dropdown menu={{ items }} placement="bottomRight">
-        <Button icon={<DownloadOutlined />}>Download</Button>
+        <Button loading={isLoading} icon={<DownloadOutlined />}>
+          Download
+        </Button>
       </Dropdown>
     </Panel>
   );
