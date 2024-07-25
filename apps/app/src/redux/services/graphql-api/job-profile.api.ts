@@ -24,6 +24,7 @@ import {
   NextAvailableJobProfileNumberResponse,
   UnarchiveJobProfileResponse,
   UpdateJobProfileResponse,
+  updateJobProfileViewCountInput,
 } from './job-profile-types';
 
 export const jobProfileApi = graphqlApi.injectEndpoints({
@@ -602,6 +603,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 valid_to
                 version
                 current_version
+                views
               }
             }
           `,
@@ -629,30 +631,39 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
           document: gql`
             query jobProfileMeta {
               jobProfileMeta(number: ${number}) {
-                id
-                version
-                updated_at
-                updated_by {
-                  id
-                  name
+                totalViews
+                firstPublishedBy {
+                  date
+                  user
                 }
-                published_by {
-                  id
-                  name
+                firstCreatedBy {
+                  date
+                  owner
                 }
-                created_at
-                owner {
+                versions {
                   id
-                  name
+                  version
                 }
-                published_at
-              }
             }
+        }
           `,
         };
       },
     }),
-
+    updateJobProfileViewCount: build.mutation<GetJobProfileMetaResponse, updateJobProfileViewCountInput>({
+      query: (input: updateJobProfileViewCountInput) => {
+        return {
+          document: gql`
+            mutation updateJobProfileViewCount($jobProfiles: [Int!]) {
+              updateJobProfileViewCount(jobProfiles: $jobProfiles)
+            }
+          `,
+          variables: {
+            jobProfiles: input.jobProfiles,
+          },
+        };
+      },
+    }),
     duplicateJobProfile: build.mutation<DuplicateJobProfileResponse, { jobProfileId: number }>({
       query: (args) => {
         return {
@@ -992,6 +1003,7 @@ export const {
   useGetJobProfileByNumberQuery,
   useLazyGetJobProfileByNumberQuery,
   useLazyGetJobProfileMetaQuery,
+  useUpdateJobProfileViewCountMutation,
 
   useGetRequirementsWithoutReadOnlyQuery,
 } = jobProfileApi;

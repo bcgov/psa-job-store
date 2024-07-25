@@ -81,6 +81,7 @@ import {
 } from '../../../redux/services/graphql-api/job-profile.api';
 import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-role.api';
 import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
+import { useLazyGetPositionRequestsCountQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { FormItem } from '../../../utils/FormItem';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
@@ -145,6 +146,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
   // const [triggerGetPreviousJobProfile, { data: previousJobProfile }] = useLazyGetJobProfileByNumberQuery();
   const [triggerGetJobProfileMeta, { data: jobProfileMeta }] = useLazyGetJobProfileMetaQuery();
+  const [triggerGetPositionRequestsCount, { data: positionRequestsCount, isFetching }] =
+    useLazyGetPositionRequestsCountQuery();
   let link: string;
   const [selectedKeys, setSelectedKeys] = useState([]);
 
@@ -620,10 +623,45 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     if (jobProfileData) {
       setProfileJson(jobProfileData);
       triggerGetJobProfileMeta(jobProfileData.jobProfile.number);
+      triggerGetPositionRequestsCount({ where: { parent_job_profile_id: { equals: jobProfileData.jobProfile.id } } });
       triggerBasicDetailsValidation();
       triggerProfileValidation();
     }
-  }, [jobProfileData, triggerBasicDetailsValidation, triggerGetJobProfileMeta, triggerProfileValidation]);
+  }, [
+    jobProfileData,
+    triggerBasicDetailsValidation,
+    triggerGetJobProfileMeta,
+    triggerGetPositionRequestsCount,
+    triggerProfileValidation,
+  ]);
+  const [versionInReview, setVersionInReview] = useState<number>(-1); // set to -1 to for triggering second call
+  const [versionCompleted, setVersionCompleted] = useState<number>(0);
+  const [totalInReview, setTotalInReview] = useState<number>(0);
+  const [totalCompleted, setTotalCompleted] = useState<number>(0);
+  useEffect(() => {
+    if (jobProfileData && positionRequestsCount && versionInReview == -1) {
+      setVersionInReview(positionRequestsCount.positionRequestsCount.verification);
+      setVersionCompleted(positionRequestsCount.positionRequestsCount.completed);
+
+      return;
+    }
+    if (jobProfileData && positionRequestsCount && jobProfileMeta) {
+      setTotalInReview(positionRequestsCount.positionRequestsCount.verification);
+      setTotalCompleted(positionRequestsCount.positionRequestsCount.completed);
+      triggerGetPositionRequestsCount({
+        where: {
+          parent_job_profile_id: { in: jobProfileMeta?.jobProfileMeta.versions.map((v: { id: number }) => v.id) },
+        },
+      });
+    }
+  }, [
+    jobProfileData,
+    jobProfileMeta,
+    positionRequestsCount,
+    totalInReview,
+    triggerGetPositionRequestsCount,
+    versionInReview,
+  ]);
 
   // use ref to hold the flag for auto security settings setup
   const autoSecuritySettingsSetup = useRef(false);
@@ -4372,6 +4410,153 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             <br></br>
           </Card>
            */}
+
+          <Row
+            style={{
+              marginTop: '24px',
+              marginBottom: '24px',
+              marginLeft: '48px',
+              marginRight: '48px',
+              paddingLeft: '0',
+            }}
+            gutter={12}
+          >
+            <Col className="gutter-row" span={24}>
+              <Card
+                bodyStyle={{
+                  padding: '0',
+                  backgroundColor: '#F0F2F5',
+                  borderRadius: '8px',
+                  border: '1px solid #D9D9D9',
+                }}
+              >
+                <Card.Meta
+                  title={
+                    <>
+                      Version
+                      {' ' +
+                        jobProfileMeta?.jobProfileMeta?.versions.find(
+                          (v: { id: number | undefined }) => v.id == jobProfileData?.jobProfile.id,
+                        )?.version +
+                        ' '}
+                      <Tag color={'green'}>Latest</Tag>
+                    </>
+                  }
+                  style={{
+                    padding: '16px',
+                    backgroundColor: 'white',
+                  }}
+                ></Card.Meta>
+                <Descriptions
+                  className="customDescriptions"
+                  bordered
+                  column={24}
+                  items={[
+                    {
+                      key: 'updated by',
+                      label: <Typography.Title level={3}>Updated by</Typography.Title>,
+                      children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
+                      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                    },
+                    {
+                      key: 'updated at',
+                      label: <Typography.Title level={3}>Updated at</Typography.Title>,
+                      children: (
+                        <span tabIndex={0}>
+                          {profileJson?.jobProfile?.updated_at &&
+                            new Intl.DateTimeFormat('en-CA', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              hour12: false,
+                              minute: '2-digit',
+                              second: '2-digit',
+                            }).format(new Date(profileJson?.jobProfile?.updated_at))}
+                        </span>
+                      ),
+                      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                    },
+                  ]}
+                  labelStyle={{
+                    fontWeight: 700,
+                    verticalAlign: 'top',
+                    background: '#FAFAFA',
+                  }}
+                  contentStyle={{
+                    background: 'white',
+                    verticalAlign: 'top',
+                  }}
+                  style={{ marginBottom: '-12px', padding: '12px' }}
+                />
+                <Card
+                  style={{
+                    margin: '12px',
+                  }}
+                >
+                  <Row justify="center" align="middle">
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '8px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      Views
+                    </Col>
+
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '8px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      In Review
+                    </Col>
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '8px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      Completed
+                    </Col>
+                  </Row>
+                  <Row justify="center" align="middle">
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '4px',
+                      }}
+                    >
+                      <Typography style={{ fontSize: '24px', textAlign: 'center' }}>
+                        {profileJson?.jobProfile?.views}
+                      </Typography>
+                    </Col>
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '4px',
+                      }}
+                    >
+                      <Typography style={{ fontSize: '24px', textAlign: 'center' }}>{versionInReview}</Typography>
+                    </Col>
+
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '4px',
+                      }}
+                    >
+                      <Typography style={{ fontSize: '24px', textAlign: 'center' }}>{versionCompleted}</Typography>
+                    </Col>
+                  </Row>
+                </Card>
+              </Card>
+            </Col>
+          </Row>
           <Card
             style={{
               marginTop: '24px',
@@ -4380,14 +4565,18 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               marginRight: '48px',
               paddingLeft: '0',
             }}
-            bodyStyle={{ padding: '0' }}
+            bodyStyle={{
+              padding: '0',
+              backgroundColor: '#F0F2F5',
+              borderRadius: '8px',
+              border: '1px solid #D9D9D9',
+            }}
           >
             <Card.Meta
-              title="Additional details"
+              title="All versions"
               style={{
-                marginTop: '16px',
-                marginBottom: '16px',
-                paddingLeft: '24px',
+                padding: '16px',
+                backgroundColor: 'white',
               }}
             ></Card.Meta>
             <Descriptions
@@ -4395,51 +4584,68 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               bordered
               column={24}
               items={[
-                {
-                  key: 'Last updated by',
-                  label: <h3 tabIndex={0}>Last updated by</h3>,
-                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
-                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-                },
-                {
-                  key: 'Last updated at',
-                  label: <h3 tabIndex={0}>Last updated at</h3>,
-                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_at}</span>,
-                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-                },
+                // {
+                //   key: 'Last updated by',
+                //   label: <Typography.Title level={3}>Last updated by</Typography.Title>,
+                //   children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
+                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                // },
+                // {
+                //   key: 'Last updated at',
+                //   label: <Typography.Title level={3}>Last updated at</Typography.Title>,
+                //   children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_at}</span>,
+                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                // },
                 {
                   key: 'First published by',
-                  label: <h3 tabIndex={0}>First published by</h3>,
-                  children: <span tabIndex={0}>{profileJson?.jobProfile?.published_by?.name}</span>,
+                  label: <Typography.Title level={3}>First published by</Typography.Title>,
+                  children: <span tabIndex={0}>{jobProfileMeta?.jobProfileMeta.firstPublishedBy?.user}</span>,
                   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
                 },
                 {
                   key: 'First published at',
-                  label: <h3 tabIndex={0}>First published at</h3>,
+                  label: <Typography.Title level={3}>First published at</Typography.Title>,
                   children: (
                     <span tabIndex={0}>
-                      {jobProfileMeta?.jobProfileMeta &&
-                        jobProfileMeta?.jobProfileMeta
-                          .map((jp) => jp.published_at)
-                          .reduce(function (p, v) {
-                            return v == null ? p : p < v ? p : v;
-                          }, '')}
+                      {jobProfileMeta?.jobProfileMeta.firstPublishedBy?.date &&
+                        new Intl.DateTimeFormat('en-CA', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          hour12: false,
+                          minute: '2-digit',
+                          second: '2-digit',
+                        }).format(new Date(jobProfileMeta.jobProfileMeta.firstPublishedBy.date))}
                     </span>
                   ),
                   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
                 },
-                // {
-                //   key: 'Created by',
-                //   label: <h3 tabIndex={0}>Created by</h3>,
-                //   children: <span tabIndex={0}>{profileJson?.updated_at}</span>,
-                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-                // },
-                // {
-                //   key: 'Created at',
-                //   label: <h3 tabIndex={0}>Created at</h3>,
-                //   children: <span tabIndex={0}>{profileJson?.updated_at}</span>,
-                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-                // },
+                {
+                  key: 'Created by',
+                  label: <Typography.Title level={3}>Created by</Typography.Title>,
+                  children: <span tabIndex={0}>{jobProfileMeta?.jobProfileMeta.firstCreatedBy?.owner ?? ''}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'Created at',
+                  label: <Typography.Title level={3}>Created at</Typography.Title>,
+                  children: (
+                    <span tabIndex={0}>
+                      {jobProfileMeta?.jobProfileMeta.firstCreatedBy?.date &&
+                        new Intl.DateTimeFormat('en-CA', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          hour12: false,
+                          minute: '2-digit',
+                          second: '2-digit',
+                        }).format(new Date(jobProfileMeta.jobProfileMeta.firstCreatedBy.date))}
+                    </span>
+                  ),
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
               ]}
               labelStyle={{
                 fontWeight: 700,
@@ -4450,7 +4656,73 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 background: 'white',
                 verticalAlign: 'top',
               }}
+              style={{ marginBottom: '-12px', padding: '12px' }}
             />
+            <Card
+              style={{
+                margin: '12px',
+              }}
+            >
+              <Row justify="center" align="middle">
+                <Col
+                  span={8}
+                  style={{
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  Total views
+                </Col>
+
+                <Col
+                  span={8}
+                  style={{
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  In Review
+                </Col>
+                <Col
+                  span={8}
+                  style={{
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  Completed
+                </Col>
+              </Row>
+              <Row justify="center" align="middle">
+                <Col
+                  span={8}
+                  style={{
+                    padding: '4px',
+                  }}
+                >
+                  <Typography style={{ fontSize: '24px', textAlign: 'center' }}>
+                    {jobProfileMeta?.jobProfileMeta.totalViews}
+                  </Typography>
+                </Col>
+                <Col
+                  span={8}
+                  style={{
+                    padding: '4px',
+                  }}
+                >
+                  <Typography style={{ fontSize: '24px', textAlign: 'center' }}>{totalInReview}</Typography>
+                </Col>
+
+                <Col
+                  span={8}
+                  style={{
+                    padding: '4px',
+                  }}
+                >
+                  <Typography style={{ fontSize: '24px', textAlign: 'center' }}>{totalCompleted}</Typography>
+                </Col>
+              </Row>
+            </Card>
           </Card>
         </>
       ),
@@ -4492,7 +4764,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         button2Callback={async () => {
           await save();
         }}
-        versions={jobProfileMeta}
+        versions={jobProfileMeta?.jobProfileMeta}
         selectVersionCallback={(selectedId: string) => {
           setId(selectedId);
           navigate('/published-job-profiles/' + selectedId);
