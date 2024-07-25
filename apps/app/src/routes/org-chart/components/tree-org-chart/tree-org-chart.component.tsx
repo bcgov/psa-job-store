@@ -16,7 +16,7 @@ interface OrgChartProps {
   isHorizontal?: boolean;
   departmentIdIsLoading?: boolean;
   searchTerm?: string;
-  source?: string;
+  source?: 'home' | 'wizard';
   onSelectedPositionIdChange?: (positionId: string | null) => void;
 }
 
@@ -33,6 +33,7 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({
   isHorizontal,
   departmentIdIsLoading,
   searchTerm,
+  // source is string with allowed values for source: "home" or "wizard"
   source,
   onSelectedPositionIdChange,
 }) => {
@@ -431,7 +432,6 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({
     return -1;
   };
 
-  console.log('expandedKeys: ', expandedKeys);
   return (
     <PositionProvider>
       {departmentIdIsLoading || orgChartDataIsFetching ? (
@@ -445,7 +445,7 @@ const TreeOrgChart: React.FC<OrgChartProps> = ({
             display: isHorizontal ? 'block' : 'flex',
             flexDirection: 'column',
             alignItems: isHorizontal ? 'center' : 'flex-start',
-            height: source == 'wizard' ? undefined : 0,
+            height: source == 'wizard' ? undefined : source == 'home' ? '100%' : 0,
             flexGrow: 1,
           }}
         >
