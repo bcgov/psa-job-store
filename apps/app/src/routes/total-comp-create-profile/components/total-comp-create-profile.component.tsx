@@ -235,8 +235,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
   // const [triggerGetPreviousJobProfile, { data: previousJobProfile }] = useLazyGetJobProfileByNumberQuery();
   const [triggerGetJobProfileMeta, { data: jobProfileMeta }] = useLazyGetJobProfileMetaQuery();
-  const [triggerGetPositionRequestsCount, { data: positionRequestsCount, isFetching }] =
-    useLazyGetPositionRequestsCountQuery();
+  const [triggerGetPositionRequestsCount, { data: positionRequestsCount }] = useLazyGetPositionRequestsCountQuery();
   let link: string;
   const [selectedKeys, setSelectedKeys] = useState([]);
 
