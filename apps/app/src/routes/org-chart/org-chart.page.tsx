@@ -41,7 +41,7 @@ export const OrgChartPage = () => {
           subTitle="You are viewing the current organization structure for your base work area. To begin,  click the supervisor of the new position you would like to create."
           extra={<OrgChartHelpButton />}
           subHeader={
-            <Row gutter={16} align="middle" justify="space-between">
+            <Row gutter={16} align="middle" justify="space-between" style={{ paddingBottom: '10px' }}>
               <Col>
                 <ViewToggle
                   view={currentView}

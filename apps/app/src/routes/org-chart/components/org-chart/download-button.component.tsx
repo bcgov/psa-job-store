@@ -442,7 +442,7 @@ function DownloadButton() {
   ];
 
   return (
-    <Panel position="top-right">
+    <Panel position="top-right" style={{ marginTop: 0 }}>
       <Dropdown menu={{ items }} placement="bottomRight">
         <Button loading={isLoading} icon={<DownloadOutlined />}>
           Download
