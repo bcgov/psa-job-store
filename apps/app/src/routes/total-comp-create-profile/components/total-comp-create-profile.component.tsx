@@ -37,6 +37,7 @@ import {
   notification,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
+import { ArrayMinSize, IsNotEmpty, NotEquals, ValidationOptions, registerDecorator } from 'class-validator';
 import copy from 'copy-to-clipboard';
 import DOMPurify from 'dompurify';
 import debounce from 'lodash.debounce';
@@ -130,6 +131,94 @@ interface TotalCompCreateProfileComponentProps {
   jobProfileData: GetJobProfileResponse | undefined;
   id: string | undefined;
   setId: React.Dispatch<React.SetStateAction<string | undefined>>;
+}
+
+export function IsNotNull(validationOptions?: ValidationOptions) {
+  return function (object: any, propertyName: string) {
+    registerDecorator({
+      name: 'isNotNull',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any) {
+          return value !== null && value !== undefined && value.toString().length > 0;
+        },
+      },
+    });
+  };
+}
+
+function ValidProfessionsValidator(validationOptions?: ValidationOptions) {
+  return function (object: any, propertyName: string) {
+    registerDecorator({
+      name: 'validProfessionsValidator',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: ProfessionsModel[]) {
+          if (!Array.isArray(value) || value.length === 0) {
+            return false;
+          }
+
+          // If there's only one profession and its jobFamily is -1, fail
+          if (value.length === 1 && value[0].jobFamily === -1) {
+            return false;
+          }
+
+          // Ensure at least one profession has a valid jobFamily
+          return value.some((profession) => profession.jobFamily !== -1);
+        },
+        defaultMessage() {
+          return 'At least one profession must be selected.';
+        },
+      },
+    });
+  };
+}
+
+export class ExtendedJobProfileValidationModel extends JobProfileValidationModel {
+  // // New properties
+  // @IsNotEmpty()
+  // @Length(5, 100)
+  // department: string;
+
+  // @Min(1)
+  // @Max(10)
+  // teamSize: number;
+
+  // @IsArray()
+  // @ArrayMinSize(1)
+  // @ArrayMaxSize(5)
+  // keyResponsibilities: string[];
+
+  // Override properties from parent
+
+  @IsNotNull({ message: 'Employee group must be selected' })
+  declare employeeGroup: string | null;
+
+  @IsNotNull({ message: 'Classification must be selected' })
+  declare classification: string | null;
+
+  @IsNotNull({ message: 'Job role must be selected' })
+  declare jobRole: number | null;
+
+  @ArrayMinSize(1, { message: 'At least one report-to relationship must be selected.' })
+  declare reportToRelationship: string[];
+
+  @ArrayMinSize(1, { message: 'At least one scope of responsibility must be selected.' })
+  declare scopeOfResponsibility: number | number[] | null; // number[] is latest change, used to allow only single selection
+
+  @ArrayMinSize(1, { message: 'At least one ministry must be selected.' })
+  declare ministries: string[];
+
+  @IsNotEmpty({ message: 'Job context must be provided.' })
+  @NotEquals('<p><br></p>', { message: 'Job context must be provided.' })
+  declare jobContext: string;
+
+  @ValidProfessionsValidator()
+  declare professions: ProfessionsModel[];
 }
 
 export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileComponentProps> = ({
@@ -303,8 +392,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   }));
   const prevProfessionsData = useRef(professionsData);
 
-  const basicUseFormReturn = useForm<JobProfileValidationModel>({
-    resolver: classValidatorResolver(JobProfileValidationModel),
+  const basicUseFormReturn = useForm<ExtendedJobProfileValidationModel>({
+    resolver: classValidatorResolver(ExtendedJobProfileValidationModel),
     defaultValues: {
       title: { text: '' } as TitleField,
       jobStoreNumber: '',
@@ -717,7 +806,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     return treeData ? transformToTreeData(treeData.groupedClassifications) : [];
   }, [treeData, transformToTreeData]);
 
-  const [maxReportsTo, setMaxReportsTo] = useState<number>(0);
   const setAllReportToRelationships = useCallback(
     (isChecked: boolean) => {
       // Get all values for 'reportToRelationship' if isChecked is true, else an empty array
@@ -727,8 +815,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       let filteredReportToRelationship = allValues;
       if (selectedClassificationId)
         filteredReportToRelationship = allValues.filter((r: string) => r !== selectedClassificationId);
-      isChecked ? setMaxReportsTo(filteredReportToRelationship.length) : setMaxReportsTo(0);
       // Update the 'reportToRelationship' form variable
+
+      console.log('selectedClassificationId:', selectedClassificationId);
       setValue('reportToRelationship', filteredReportToRelationship);
     },
     [getAllTreeValues, treeDataConverted, selectedClassificationId, setValue],
@@ -761,8 +850,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
       setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup ?? null);
       const rawClassification = jobProfileData.jobProfile?.classifications?.[0]?.classification ?? null;
+      let classificationString = '';
       if (rawClassification != null) {
         const { id, employee_group_id, peoplesoft_id } = rawClassification;
+        classificationString = `${id}.${employee_group_id}.${peoplesoft_id}`;
         setValue('classification', `${id}.${employee_group_id}.${peoplesoft_id}`);
       } else {
         setValue('classification', null);
@@ -796,9 +887,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       setValue('all_reports_to', allReportsToValue);
 
       if (allReportsToValue) {
-        // If 'all_reports_to' is true, set 'reportToRelationship' to all possible values
+        // If 'all_reports_to' is true, set 'reportToRelationship' to all possible values EXCEPT current classification
         const allValues = getAllTreeValues(treeDataConverted);
-        setValue('reportToRelationship', allValues);
+        let filteredReportToRelationship = allValues;
+        if (classificationString)
+          filteredReportToRelationship = allValues.filter((r: string) => r !== classificationString);
+
+        setValue('reportToRelationship', filteredReportToRelationship);
       } else {
         // If 'all_reports_to' is false, set 'reportToRelationship' to specific values
         setValue(
@@ -1611,8 +1706,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         .map((error: any) => {
           // only interested in title validation here
           // todo: tag the error so it's easier to identify
-          if (!error?.text?.message || !error?.text?.message.toString().startsWith('Title must be between'))
-            return null;
+          // if (!error?.text?.message || !error?.text?.message.toString().startsWith('Title must be between'))
+          //   return null;
 
           const message =
             error.message != null
@@ -2068,42 +2163,46 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Employee group" labelCol={{ className: 'card-label' }}>
                         {isCurrentVersion ? (
-                          <Controller
-                            name="employeeGroup"
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => {
-                              return (
-                                <Select
-                                  placeholder="Choose an employee group"
-                                  onChange={(arg) => {
-                                    if (selectedClassificationId) {
-                                      showWarningModal(
-                                        () => {
-                                          // User confirmed the change
-                                          setValue('classification', null);
-                                          onChange(arg);
-                                        },
-                                        () => {
-                                          // User canceled the change
-                                        },
-                                      );
-                                    } else {
-                                      // Call the original onChange to update the form state
-                                      onChange(arg);
-                                    }
-                                  }}
-                                  onBlur={onBlur}
-                                  value={value}
-                                  style={{ width: '100%' }}
-                                  // Transforming data to required format for the Select options prop
-                                  options={employeeGroupData?.employeeGroups.map((group) => ({
-                                    label: group.id,
-                                    value: group.id,
-                                  }))}
-                                />
-                              );
-                            }}
-                          />
+                          <>
+                            <Controller
+                              name="employeeGroup"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => {
+                                return (
+                                  <Select
+                                    placeholder="Choose an employee group"
+                                    onChange={(arg) => {
+                                      if (selectedClassificationId) {
+                                        showWarningModal(
+                                          () => {
+                                            // User confirmed the change
+                                            setValue('classification', null);
+                                            onChange(arg);
+                                          },
+                                          () => {
+                                            // User canceled the change
+                                          },
+                                        );
+                                      } else {
+                                        // Call the original onChange to update the form state
+                                        onChange(arg);
+                                      }
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    onBlur={onBlur}
+                                    value={value}
+                                    style={{ width: '100%' }}
+                                    // Transforming data to required format for the Select options prop
+                                    options={employeeGroupData?.employeeGroups.map((group) => ({
+                                      label: group.id,
+                                      value: group.id,
+                                    }))}
+                                  />
+                                );
+                              }}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="employeeGroup" />
+                          </>
                         ) : (
                           <Typography.Text>{employeeGroup}</Typography.Text>
                         )}
@@ -2118,55 +2217,59 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                       <Form.Item label="Classification" labelCol={{ className: 'card-label' }}>
                         {/* Form.Item for cosmetic purposes */}
                         {isCurrentVersion ? (
-                          <Controller
-                            name="classification"
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => {
-                              return (
-                                <Select
-                                  placeholder="Choose a classification"
-                                  onChange={(newValue) => {
-                                    // onChange(newValue);
-                                    // handleClassificationChange(newValue);
+                          <>
+                            <Controller
+                              name="classification"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => {
+                                return (
+                                  <Select
+                                    placeholder="Choose a classification"
+                                    onChange={(newValue) => {
+                                      // onChange(newValue);
+                                      // handleClassificationChange(newValue);
 
-                                    if (selectedClassificationId) {
-                                      showWarningModal(
-                                        () => {
-                                          onChange(newValue);
-                                          handleClassificationChange(newValue);
-                                        },
-                                        () => {
-                                          // User canceled the change
-                                        },
-                                      );
-                                    } else {
-                                      onChange(newValue);
-                                      handleClassificationChange(newValue);
-                                    }
-                                  }}
-                                  onBlur={onBlur} // notify when input is touched/blur
-                                  value={value}
-                                  style={{ width: '100%' }}
-                                  showSearch={true}
-                                  filterOption={(input, option) => {
-                                    if (!option) return false;
-                                    return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                                  }}
-                                  // Transforming data to required format for the Select options prop
-                                  // options={classificationsData?.classifications.map((classification) => ({
-                                  //   label: classification.name,
-                                  //   value: classification.id,
-                                  // }))}
-                                  options={filteredClassifications.map(
-                                    ({ id, employee_group_id, peoplesoft_id, name }) => ({
-                                      label: name,
-                                      value: `${id}.${employee_group_id}.${peoplesoft_id}`,
-                                    }),
-                                  )}
-                                ></Select>
-                              );
-                            }}
-                          />
+                                      if (selectedClassificationId) {
+                                        showWarningModal(
+                                          () => {
+                                            onChange(newValue);
+                                            handleClassificationChange(newValue);
+                                          },
+                                          () => {
+                                            // User canceled the change
+                                          },
+                                        );
+                                      } else {
+                                        onChange(newValue);
+                                        handleClassificationChange(newValue);
+                                      }
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    onBlur={onBlur} // notify when input is touched/blur
+                                    value={value}
+                                    style={{ width: '100%' }}
+                                    showSearch={true}
+                                    filterOption={(input, option) => {
+                                      if (!option) return false;
+                                      return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                                    }}
+                                    // Transforming data to required format for the Select options prop
+                                    // options={classificationsData?.classifications.map((classification) => ({
+                                    //   label: classification.name,
+                                    //   value: classification.id,
+                                    // }))}
+                                    options={filteredClassifications.map(
+                                      ({ id, employee_group_id, peoplesoft_id, name }) => ({
+                                        label: name,
+                                        value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+                                      }),
+                                    )}
+                                  ></Select>
+                                );
+                              }}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="classification" />
+                          </>
                         ) : (
                           <Typography.Text>
                             {
@@ -2185,22 +2288,28 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Job role" labelCol={{ className: 'card-label' }}>
                         {isCurrentVersion ? (
-                          <Controller
-                            name="jobRole"
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                              <Select
-                                placeholder="Choose a job role"
-                                onChange={onChange}
-                                onBlur={onBlur}
-                                value={value}
-                                options={jobRolesData?.jobRoles.map((jobRole) => ({
-                                  label: jobRole.name,
-                                  value: jobRole.id,
-                                }))}
-                              ></Select>
-                            )}
-                          />
+                          <>
+                            <Controller
+                              name="jobRole"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <Select
+                                  placeholder="Choose a job role"
+                                  onChange={(args) => {
+                                    onChange(args);
+                                    triggerBasicDetailsValidation();
+                                  }}
+                                  onBlur={onBlur}
+                                  value={value}
+                                  options={jobRolesData?.jobRoles.map((jobRole) => ({
+                                    label: jobRole.name,
+                                    value: jobRole.id,
+                                  }))}
+                                ></Select>
+                              )}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="jobRole" />
+                          </>
                         ) : (
                           <Typography.Text style={{ marginBottom: '5px', display: 'block' }}>
                             {jobProfileData?.jobProfile?.role?.name}
@@ -2224,62 +2333,66 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           <div key={field.id}>
                             <Form.Item style={{ marginBottom: '0.5rem' }}>
                               {/* First level of selection for job family /profession */}
-                              <Controller
-                                // ref={register()}
-                                control={control}
-                                name={`professions.${index}.jobFamily`}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                  <Row gutter={8} wrap={false}>
-                                    <Col flex="auto">
-                                      <Select
-                                        value={value == -1 ? null : value}
-                                        onBlur={onBlur}
-                                        placeholder="Choose a profession"
-                                        onChange={(v) => {
-                                          // When profession changes, clear the jobStreams for this profession
-                                          setValue(`professions.${index}.jobStreams`, []);
-                                          onChange(v);
-                                          handleJobFamilyChange();
-                                        }}
-                                      >
-                                        {/* Dynamically render profession options based on your data */}
-                                        {jobFamiliesData?.jobFamilies
-                                          .filter(
-                                            (jf) =>
-                                              !selectedProfession.map((p) => p.jobFamily).includes(jf.id) ||
-                                              jf.id == selectedProfession[index].jobFamily,
-                                          )
-                                          .map((family) => (
-                                            <Option key={family.id} value={family.id}>
-                                              {family.name}
-                                            </Option>
-                                          ))}
-                                      </Select>
-                                    </Col>
-                                    <Col>
-                                      <Button
-                                        disabled={index === 0 && selectedProfession?.[index]?.jobFamily === -1}
-                                        onClick={() => {
-                                          Modal.confirm({
-                                            title: 'Confirmation',
-                                            content:
-                                              'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
-                                            onOk: () => {
-                                              remove(index);
-                                              // removing last one - append blank
-                                              if (selectedProfession?.length === 1) {
-                                                append({ jobFamily: -1, jobStreams: [] });
-                                              }
-                                              handleJobFamilyChange();
-                                            },
-                                          });
-                                        }}
-                                        icon={<DeleteOutlined />}
-                                      ></Button>
-                                    </Col>
-                                  </Row>
-                                )}
-                              />
+                              <>
+                                <Controller
+                                  // ref={register()}
+                                  control={control}
+                                  name={`professions.${index}.jobFamily`}
+                                  render={({ field: { onChange, onBlur, value } }) => (
+                                    <Row gutter={8} wrap={false}>
+                                      <Col flex="auto">
+                                        <Select
+                                          value={value == -1 ? null : value}
+                                          onBlur={onBlur}
+                                          placeholder="Choose a profession"
+                                          onChange={(v) => {
+                                            // When profession changes, clear the jobStreams for this profession
+                                            setValue(`professions.${index}.jobStreams`, []);
+                                            onChange(v);
+                                            handleJobFamilyChange();
+                                            triggerBasicDetailsValidation();
+                                          }}
+                                        >
+                                          {/* Dynamically render profession options based on your data */}
+                                          {jobFamiliesData?.jobFamilies
+                                            .filter(
+                                              (jf) =>
+                                                !selectedProfession.map((p) => p.jobFamily).includes(jf.id) ||
+                                                jf.id == selectedProfession[index].jobFamily,
+                                            )
+                                            .map((family) => (
+                                              <Option key={family.id} value={family.id}>
+                                                {family.name}
+                                              </Option>
+                                            ))}
+                                        </Select>
+                                      </Col>
+                                      <Col>
+                                        <Button
+                                          disabled={index === 0 && selectedProfession?.[index]?.jobFamily === -1}
+                                          onClick={() => {
+                                            Modal.confirm({
+                                              title: 'Confirmation',
+                                              content:
+                                                'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
+                                              onOk: () => {
+                                                remove(index);
+                                                // removing last one - append blank
+                                                if (selectedProfession?.length === 1) {
+                                                  append({ jobFamily: -1, jobStreams: [] });
+                                                }
+                                                handleJobFamilyChange();
+                                                triggerBasicDetailsValidation();
+                                              },
+                                            });
+                                          }}
+                                          icon={<DeleteOutlined />}
+                                        ></Button>
+                                      </Col>
+                                    </Row>
+                                  )}
+                                />
+                              </>
                             </Form.Item>
 
                             {/* Second level for job family/profession selector (select job stream/discipline) */}
@@ -2325,6 +2438,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Button>
                         </Form.Item>
                       )}
+
+                      {isCurrentVersion && (
+                        <WizardValidationError formErrors={basicFormErrors} fieldName="professions" />
+                      )}
                     </Col>
                   </Row>
                 </Card>
@@ -2360,38 +2477,58 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                       <Form.Item label="Report-to relationship" labelCol={{ className: 'card-label' }}>
                         {isCurrentVersion ? (
-                          <Controller
-                            name="reportToRelationship"
-                            control={control}
-                            render={({ field }) => (
-                              <>
-                                <Checkbox
-                                  onChange={(e) => handleSelectAllReportTo(e.target.checked)}
-                                  checked={allReportsTo}
-                                  style={{ marginBottom: '10px' }}
-                                >
-                                  Select all
-                                </Checkbox>
-                                <TreeSelect
-                                  {...field}
-                                  onChange={(selectedItems) => {
-                                    setValue('all_reports_to', maxReportsTo == selectedItems.length);
-                                    field.onChange(selectedItems); // Continue with the original onChange
-                                  }}
-                                  autoClearSearchValue={false}
-                                  // todo: do the filtering externally, wasn't able to do it because of inifinite render loop
-                                  treeData={filterTreeData(treeDataConverted, selectedClassificationId)}
-                                  // treeData={treeDataConverted} // Replace with your data
-                                  // onChange={(value) => setReportToRelationship(value)}
-                                  treeCheckable={true}
-                                  showCheckedStrategy={SHOW_CHILD}
-                                  placeholder="Choose all the positions this role should report to"
-                                  style={{ width: '100%' }}
-                                  maxTagCount={10}
-                                />
-                              </>
-                            )}
-                          />
+                          <>
+                            <Controller
+                              name="reportToRelationship"
+                              control={control}
+                              render={({ field }) => (
+                                <>
+                                  <Checkbox
+                                    onChange={(e) => {
+                                      handleSelectAllReportTo(e.target.checked);
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    checked={allReportsTo}
+                                    style={{ marginBottom: '10px' }}
+                                  >
+                                    Select all
+                                  </Checkbox>
+                                  <TreeSelect
+                                    {...field}
+                                    onChange={(selectedItems) => {
+                                      field.onChange(selectedItems); // Continue with the original onChange
+
+                                      // if user selected all items, check the all selected box
+                                      const allValues = getAllTreeValues(treeDataConverted);
+
+                                      // filter out the selected classification
+                                      let filteredReportToRelationship = allValues;
+                                      if (selectedClassificationId)
+                                        filteredReportToRelationship = allValues.filter(
+                                          (r: string) => r !== selectedClassificationId,
+                                        );
+
+                                      if (filteredReportToRelationship.length === selectedItems.length)
+                                        setValue('all_reports_to', true);
+                                      else setValue('all_reports_to', false);
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    autoClearSearchValue={false}
+                                    // todo: do the filtering externally, wasn't able to do it because of inifinite render loop
+                                    treeData={filterTreeData(treeDataConverted, selectedClassificationId)}
+                                    // treeData={treeDataConverted} // Replace with your data
+                                    // onChange={(value) => setReportToRelationship(value)}
+                                    treeCheckable={true}
+                                    showCheckedStrategy={SHOW_CHILD}
+                                    placeholder="Choose all the positions this role should report to"
+                                    style={{ width: '100%' }}
+                                    maxTagCount={10}
+                                  />
+                                </>
+                              )}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="reportToRelationship" />
+                          </>
                         ) : (
                           <>
                             {allReportsTo ? (
@@ -2420,7 +2557,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 return (
                                   <Select
                                     placeholder="Choose the scopes of responsibility"
-                                    onChange={onChange}
+                                    onChange={(v) => {
+                                      onChange(v);
+                                      triggerBasicDetailsValidation();
+                                    }}
                                     onBlur={onBlur}
                                     value={value}
                                     mode="multiple"
@@ -2433,6 +2573,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               }}
                             />
                             <Typography.Text type="secondary">{selectedScopeDescription}</Typography.Text>
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="scopeOfResponsibility" />
                           </>
                         ) : (
                           <>{jobProfileData?.jobProfile.scopes.map((s) => <Tag>{s.scope.name}</Tag>)}</>
@@ -2458,28 +2599,35 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         labelCol={{ className: 'card-label' }}
                       >
                         {isCurrentVersion ? (
-                          <Controller
-                            name="ministries"
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                              <>
-                                <Text type="secondary" style={{ marginBottom: '5px', display: 'block' }}>
-                                  If selected, this role would be available only for those specific ministries.
-                                </Text>
-                                <MinistriesSelect
-                                  isMultiSelect={true}
-                                  onChange={(args: any) => {
-                                    onChange(args);
-                                    handleMinistriesChange();
-                                  }}
-                                  onBlur={onBlur}
-                                  value={value}
-                                  setValue={setValue}
-                                  allOrganizations={allOrganizations}
-                                />
-                              </>
-                            )}
-                          />
+                          <>
+                            <Controller
+                              name="ministries"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <>
+                                  <Text type="secondary" style={{ marginBottom: '5px', display: 'block' }}>
+                                    If selected, this role would be available only for those specific ministries.
+                                  </Text>
+                                  <MinistriesSelect
+                                    isMultiSelect={true}
+                                    onChange={(args: any) => {
+                                      onChange(args);
+                                      handleMinistriesChange();
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    onBlur={onBlur}
+                                    value={value}
+                                    setValue={(a: any, b: any) => {
+                                      setValue(a, b);
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    allOrganizations={allOrganizations}
+                                  />
+                                </>
+                              )}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="ministries" />
+                          </>
                         ) : (
                           <>
                             {allOrganizations ? (
@@ -2535,13 +2683,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {isCurrentVersion ? (
-                        <Controller
-                          control={control}
-                          name="jobContext"
-                          render={({ field }) => (
-                            <ReactQuill {...field} modules={quill_modules} theme="snow" placeholder="Add job context" />
-                          )}
-                        />
+                        <>
+                          <Controller
+                            control={control}
+                            name="jobContext"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                              <ReactQuill
+                                modules={quill_modules}
+                                theme="snow"
+                                placeholder="Add job context"
+                                value={value}
+                                onBlur={onBlur}
+                                onChange={(v) => {
+                                  onChange(v);
+                                  triggerBasicDetailsValidation();
+                                }}
+                              />
+                            )}
+                          />
+                          <WizardValidationError formErrors={basicFormErrors} fieldName="jobContext" />
+                        </>
                       ) : (
                         <Typography.Text type="secondary">
                           <span

@@ -24,7 +24,7 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, allOrganizat
   };
 
   const handleSelectionChange = (selected: any) => {
-    console.log('seelcted: ', selected);
+    // console.log('seelcted ministries: ', selected);
     // setSelectedMinistries(selected);
     setValue('all_organizations', false);
     onChange(selected);
