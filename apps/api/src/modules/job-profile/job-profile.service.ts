@@ -590,13 +590,13 @@ export class JobProfileService {
       // Check and set the first published by date and user
       if (!firstPublishedByDate || new Date(profile.published_at) < new Date(firstPublishedByDate)) {
         firstPublishedByDate = profile.published_at;
-        firstPublishedByUser = profile.published_by.name;
+        firstPublishedByUser = profile.published_by?.name;
       }
 
       // Check and set the first created by date and owner
       if (!firstCreatedByDate || new Date(profile.created_at) < new Date(firstCreatedByDate)) {
         firstCreatedByDate = profile.created_at;
-        firstCreatedByOwner = profile.owner.name;
+        firstCreatedByOwner = profile.owner?.name;
       }
 
       // Collect all versions with id and version
