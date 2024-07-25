@@ -1,17 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { JobProfile, JobProfileState, JobProfileType, Prisma } from '@prisma/client';
+import { Cache } from 'cache-manager';
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
-
 @Injectable()
 export class JobProfileService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly searchService: SearchService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   private async getJobProfilesWithSearch(
@@ -553,7 +556,7 @@ export class JobProfileService {
   }
 
   async getJobProfileMeta(jobStoreNumber: number) {
-    return await this.prisma.jobProfile.findMany({
+    const jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
         number: jobStoreNumber,
         state: 'PUBLISHED',
@@ -567,8 +570,52 @@ export class JobProfileService {
         owner: true,
         published_at: true,
         published_by: true,
+        views: true,
       },
     });
+
+    // Initialize variables for the aggregates
+    let totalViews = 0;
+    let firstPublishedByDate = null;
+    let firstPublishedByUser = null;
+    let firstCreatedByDate = null;
+    let firstCreatedByOwner = null;
+    const versions = [];
+
+    // Process the job profiles
+    jobProfiles.forEach((profile) => {
+      // Sum of views
+      totalViews += profile.views;
+
+      // Check and set the first published by date and user
+      if (!firstPublishedByDate || new Date(profile.published_at) < new Date(firstPublishedByDate)) {
+        firstPublishedByDate = profile.published_at;
+        firstPublishedByUser = profile.published_by.name;
+      }
+
+      // Check and set the first created by date and owner
+      if (!firstCreatedByDate || new Date(profile.created_at) < new Date(firstCreatedByDate)) {
+        firstCreatedByDate = profile.created_at;
+        firstCreatedByOwner = profile.owner.name;
+      }
+
+      // Collect all versions with id and version
+      versions.push({ id: profile.id, version: profile.version });
+    });
+
+    // Return the aggregated result
+    return {
+      totalViews,
+      firstPublishedBy: {
+        date: firstPublishedByDate,
+        user: firstPublishedByUser,
+      },
+      firstCreatedBy: {
+        date: firstCreatedByDate,
+        owner: firstCreatedByOwner,
+      },
+      versions,
+    };
   }
 
   async getJobProfilesDraftsCount({ search, where }: FindManyJobProfileWithSearch, userId: string) {
@@ -897,6 +944,43 @@ export class JobProfileService {
     await this.searchService.updateJobProfileSearchIndex(result.id);
 
     return result;
+  }
+
+  async updateJobProfileViewCountCache(jobProfiles: number[]) {
+    const jobProfileCounts: Map<number, number> =
+      (await this.cacheManager.get('jobProfileCounts')) ?? new Map<number, number>();
+    for (const id of jobProfiles) {
+      if (jobProfileCounts.has(id)) {
+        jobProfileCounts.set(id, jobProfileCounts.get(id) + 1);
+      } else {
+        jobProfileCounts.set(id, 1);
+      }
+    }
+
+    await this.cacheManager.set('jobProfileCounts', jobProfileCounts, 20000);
+    return jobProfileCounts.size;
+  }
+
+  @Cron('*/10 * * * * *')
+  async updateJobProfileViewCount() {
+    const jobProfileCounts: Map<number, number> = await this.cacheManager.get('jobProfileCounts');
+
+    if (!jobProfileCounts) {
+      return 0; // Handle case where there are no job profile counts
+    }
+
+    const updates = Array.from(jobProfileCounts.entries()).map(([id, count]) =>
+      this.prisma.jobProfile.update({
+        where: { id: id || -1 },
+        data: {
+          views: { increment: count },
+        },
+      }),
+    );
+
+    await this.cacheManager.del('jobProfileCounts');
+
+    return (await this.prisma.$transaction(updates)).length;
   }
 
   async updateJobProfileState(jobProfileId: number, jobProfileState: string, userId: string) {

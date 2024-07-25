@@ -588,6 +588,7 @@ export const {
   useSubmitPositionRequestMutation,
   useDeletePositionRequestMutation,
   useGetPositionRequestsCountQuery,
+  useLazyGetPositionRequestsCountQuery,
   useGetPositionRequestClassificationsQuery,
   useGetPositionRequestJobStoreNumbersQuery,
   useGetPositionRequestStatusesQuery,

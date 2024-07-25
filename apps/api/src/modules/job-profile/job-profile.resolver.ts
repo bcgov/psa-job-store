@@ -62,6 +62,47 @@ class RequirementWithoutReadOnly {
     id: string;
   };
 }
+@ObjectType()
+class PublishedBy {
+  @Field(() => Date, { nullable: true })
+  date: Date | null;
+
+  @Field(() => String, { nullable: true })
+  user: string | null;
+}
+
+@ObjectType()
+class CreatedBy {
+  @Field(() => Date, { nullable: true })
+  date: Date | null;
+
+  @Field(() => String, { nullable: true })
+  owner: string | null;
+}
+
+@ObjectType()
+class Version {
+  @Field(() => Number)
+  id: number;
+
+  @Field(() => String)
+  version: string;
+}
+
+@ObjectType()
+class JobProfileMetaModel {
+  @Field(() => Int)
+  totalViews: number;
+
+  @Field(() => PublishedBy)
+  firstPublishedBy: PublishedBy;
+
+  @Field(() => CreatedBy)
+  firstCreatedBy: CreatedBy;
+
+  @Field(() => [Version])
+  versions: Version[];
+}
 
 @Resolver(() => JobProfile)
 export class JobProfileResolver {
@@ -84,8 +125,11 @@ export class JobProfileResolver {
   async jobProfilesCount(@Args() args?: FindManyJobProfileWithSearch) {
     return await this.jobProfileService.getJobProfileCount(args);
   }
-
-  @Query(() => [JobProfile], { name: 'jobProfileMeta' })
+  @Mutation(() => Int, { name: 'updateJobProfileViewCount' })
+  async updateJobProfileViewCount(@Args('jobProfiles', { type: () => [Int], nullable: true }) jobProfiles: number[]) {
+    return await this.jobProfileService.updateJobProfileViewCountCache(jobProfiles);
+  }
+  @Query(() => JobProfileMetaModel, { name: 'jobProfileMeta' })
   async jobProfileMeta(@Args('number') number: number) {
     return await this.jobProfileService.getJobProfileMeta(number);
   }

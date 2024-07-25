@@ -213,6 +213,7 @@ model JobProfile {
   valid_to        DateTime?
   version         Int               @default(1)
   current_version Boolean           @default(true)
+  views           Int?              @default(0)
 
   @@unique([number, version])
   // @@id([id, version])

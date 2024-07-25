@@ -12,8 +12,8 @@ import { OrganizationModel } from '../../../redux/services/graphql-api/organizat
 import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 import { JobProfileSearch } from './job-profile-search.component';
+import JobProfileViewCounter from './job-profile-view-counter.component';
 import { JobProfile } from './job-profile.component';
-
 const { Text, Title } = Typography;
 const { useBreakpoint } = Grid;
 
@@ -52,6 +52,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const dispatch = useAppDispatch();
     const [useData, setUseData] = useState<GetJobProfilesResponse | null>(null);
     const [trigger, { data, isLoading, isFetching }] = useLazyGetJobProfilesQuery();
+
     const [classificationIdFilter, setClassificationIdFilter] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(page_size); // Default page size, adjust as needed
@@ -445,16 +446,17 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           {screens['xl'] === true ? (
             <>
               <Col span={8}>
-                <JobProfileSearchResults
-                  data={useData}
-                  //  jobProfilesLoading || isLoading
-                  isLoading={useData == null || positionFilteringProcessActive}
-                  onSelectProfile={onSelectProfile}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  totalResults={totalResults}
-                  onPageChange={handlePageChange}
-                />{' '}
+                <JobProfileViewCounter onProfileView={onSelectProfile}>
+                  <JobProfileSearchResults
+                    data={useData}
+                    //  jobProfilesLoading || isLoading
+                    isLoading={useData == null || positionFilteringProcessActive}
+                    currentPage={currentPage}
+                    pageSize={5}
+                    totalResults={totalResults}
+                    onPageChange={handlePageChange}
+                  />
+                </JobProfileViewCounter>
               </Col>
               <Col span={16} role="region" aria-label="Selected job profile contents">
                 {renderJobProfile()}
@@ -465,15 +467,16 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
               {renderJobProfile()}
             </Col>
           ) : (
-            <JobProfileSearchResults
-              data={useData}
-              isLoading={isLoading}
-              onSelectProfile={onSelectProfile}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              totalResults={totalResults}
-              onPageChange={handlePageChange}
-            />
+            <JobProfileViewCounter onProfileView={onSelectProfile}>
+              <JobProfileSearchResults
+                data={useData}
+                isLoading={isLoading}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalResults={totalResults}
+                onPageChange={handlePageChange}
+              />
+            </JobProfileViewCounter>
           )}
         </Row>
       </>

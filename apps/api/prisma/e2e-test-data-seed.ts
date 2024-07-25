@@ -1132,6 +1132,7 @@ async function seed() {
     valid_to: undefined,
     version: 1,
     current_version: true,
+    views: 1,
   };
 
   const profile194: JobProfile = {
@@ -1242,6 +1243,7 @@ async function seed() {
     valid_to: undefined,
     version: 1,
     current_version: true,
+    views: 1,
   };
 
   const profile200: JobProfile = {
@@ -1382,6 +1384,7 @@ async function seed() {
     valid_to: undefined,
     version: 1,
     current_version: true,
+    views: 10,
   };
 
   const profile208: JobProfile = {
@@ -1508,6 +1511,7 @@ async function seed() {
     valid_to: undefined,
     version: 1,
     current_version: true,
+    views: 74,
   };
 
   const profile210: JobProfile = {
@@ -1649,6 +1653,7 @@ async function seed() {
     valid_to: undefined,
     version: 1,
     current_version: true,
+    views: 474,
   };
 
   const profile212: JobProfile = {
@@ -1794,6 +1799,7 @@ async function seed() {
     valid_to: undefined,
     version: 1,
     current_version: true,
+    views: 747,
   };
 
   const profile247: JobProfile = {
@@ -1966,6 +1972,7 @@ async function seed() {
     valid_to: undefined,
     version: 1,
     current_version: true,
+    views: 0,
   };
 
   const jobProfiles = [profile189, profile194, profile200, profile208, profile210, profile212, profile247];

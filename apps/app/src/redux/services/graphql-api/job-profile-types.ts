@@ -185,14 +185,19 @@ export interface JobProfileModel {
   current_version: boolean;
 }
 export interface JobProfileMetaModel {
-  id: string;
-  version: string;
-  updated_at: string;
-  updated_by: string;
-  created_at: string;
-  owner: string;
-  published_at: string;
-  published_by: string;
+  totalViews: number;
+  firstPublishedBy: {
+    date: string | null;
+    user: string | null;
+  };
+  firstCreatedBy: {
+    date: string | null;
+    owner: string | null;
+  };
+  versions: Array<{
+    id: number;
+    version: string;
+  }>;
 }
 
 export interface ProfessionsModel {
@@ -400,6 +405,10 @@ export interface CreateJobProfileInput {
   id?: number;
 }
 
+export interface updateJobProfileViewCountInput {
+  //jobProfileId, addViews
+  jobProfiles: number[];
+}
 export interface CreateJobProfileResponse {
   createOrUpdateJobProfile: {
     id: number;
@@ -442,7 +451,7 @@ export interface GetJobProfilesResponse {
 }
 
 export interface GetJobProfileMetaResponse {
-  jobProfileMeta: JobProfileMetaModel[];
+  jobProfileMeta: JobProfileMetaModel;
 }
 
 export interface GetJobProfilesDraftsResponse {
