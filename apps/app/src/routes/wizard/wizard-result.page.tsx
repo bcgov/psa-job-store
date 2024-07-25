@@ -241,7 +241,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
   const getMenuContent = () => {
     return (
-      <Menu>
+      <Menu className="wizard-menu">
         <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
           <div style={{ padding: '5px 0' }}>
             Save and quit

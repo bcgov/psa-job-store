@@ -312,7 +312,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   const getMenuContent = () => {
     return (
-      <Menu>
+      <Menu className="wizard-menu">
         <Menu.Item key="save" onClick={saveAndQuit} disabled={saveAndQuitLoading}>
           <div style={{ position: 'relative' }}>
             {saveAndQuitLoading && (
