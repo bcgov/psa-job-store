@@ -176,7 +176,7 @@ function ItemCountValidator(min: number, max: number, label: string, validationO
   };
 }
 
-function MinItemsValidator(min: number, validationOptions?: ValidationOptions) {
+export function MinItemsValidator(min: number, validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: 'minItemsValidator',
@@ -280,7 +280,7 @@ function CustomItemCountValidator(min: number, max: number, label: string, valid
 //   };
 // }
 
-class ClassificationField {
+export class ClassificationField {
   classification: string;
 }
 
