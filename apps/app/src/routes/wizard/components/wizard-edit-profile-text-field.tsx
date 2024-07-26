@@ -6,17 +6,20 @@ import { useState } from 'react';
 import { Controller, UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
+import { BasicDetailsValidationModel } from '../../total-comp-create-profile/components/total-comp-create-profile.component';
 
 type AllowedFieldNames = 'overview' | 'program_overview' | 'title';
 
 interface SingleTextFieldProps {
-  useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
+  useFormReturn:
+    | UseFormReturn<JobProfileValidationModel, any, undefined>
+    | UseFormReturn<BasicDetailsValidationModel, any, undefined>;
   name: AllowedFieldNames;
   label: string;
   placeholder?: string;
   isTextArea?: boolean;
   testId: string;
-  trigger: UseFormTrigger<JobProfileValidationModel>;
+  trigger: UseFormTrigger<JobProfileValidationModel> | UseFormTrigger<BasicDetailsValidationModel>;
   formErrors: any;
   jobTitleWarning?: boolean;
   showCharacterCount?: boolean;
@@ -39,7 +42,9 @@ const WizardTextField: React.FC<SingleTextFieldProps> = ({
   readOnly = false,
 }) => {
   const [currentValue, setCurrentValue] = useState<string>('');
-  const [valueOver30, setValueOver30] = useState<boolean>(useFormReturn.getValues(`${name}.text`)?.length > 30);
+  const [valueOver30, setValueOver30] = useState<boolean>(
+    (useFormReturn as UseFormReturn<any, any, undefined>).getValues(`${name}.text`)?.length > 30,
+  );
 
   const handleFieldChange = debounce((event: any) => {
     const updatedValue = event.target.value;
@@ -50,10 +55,18 @@ const WizardTextField: React.FC<SingleTextFieldProps> = ({
 
   return (
     <>
-      <FormItem name={`${name}.disabled`} control={useFormReturn.control} hidden>
+      <FormItem
+        name={`${name}.disabled`}
+        control={(useFormReturn as UseFormReturn<any, any, undefined>).control}
+        hidden
+      >
         <Input />
       </FormItem>
-      <FormItem name={`${name}.isCustom`} control={useFormReturn.control} hidden>
+      <FormItem
+        name={`${name}.isCustom`}
+        control={(useFormReturn as UseFormReturn<any, any, undefined>).control}
+        hidden
+      >
         <Input />
       </FormItem>
 
@@ -73,7 +86,7 @@ const WizardTextField: React.FC<SingleTextFieldProps> = ({
                 }
               >
                 <Controller
-                  control={useFormReturn.control}
+                  control={(useFormReturn as UseFormReturn<any, any, undefined>).control}
                   name={`${name}.text`}
                   render={({ field: { onChange, onBlur, value } }) => {
                     return readOnly ? (
