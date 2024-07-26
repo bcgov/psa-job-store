@@ -37,7 +37,15 @@ import {
   notification,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { ArrayMinSize, IsNotEmpty, NotEquals, ValidationOptions, registerDecorator } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayMinSize,
+  IsNotEmpty,
+  NotEquals,
+  ValidateNested,
+  ValidationOptions,
+  registerDecorator,
+} from 'class-validator';
 import copy from 'copy-to-clipboard';
 import DOMPurify from 'dompurify';
 import debounce from 'lodash.debounce';
@@ -85,7 +93,12 @@ import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/or
 import { useLazyGetPositionRequestsCountQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { FormItem } from '../../../utils/FormItem';
 import ContentWrapper from '../../home/components/content-wrapper.component';
-import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
+import {
+  JobProfileValidationModel,
+  OverviewField,
+  ProgramOverviewField,
+  TitleField,
+} from '../../job-profiles/components/job-profile.component';
 import { ContextOptionsReadonly } from '../../wizard/components/context-options-readonly.component';
 import BehaviouralComptencyPicker from '../../wizard/components/wizard-behavioural-comptency-picker';
 import WizardOverview from '../../wizard/components/wizard-edit-profile-overview';
@@ -179,7 +192,7 @@ function ValidProfessionsValidator(validationOptions?: ValidationOptions) {
   };
 }
 
-export class ExtendedJobProfileValidationModel extends JobProfileValidationModel {
+export class BasicDetailsValidationModel {
   // // New properties
   // @IsNotEmpty()
   // @Length(5, 100)
@@ -196,30 +209,44 @@ export class ExtendedJobProfileValidationModel extends JobProfileValidationModel
 
   // Override properties from parent
 
+  @ValidateNested()
+  @Type(() => TitleField)
+  title: TitleField | string;
+
+  jobStoreNumber: string;
+
   @IsNotNull({ message: 'Employee group must be selected' })
-  declare employeeGroup: string | null;
+  employeeGroup: string | null;
 
   @IsNotNull({ message: 'Classification must be selected' })
-  declare classification: string | null;
+  classification: string | null;
 
   @IsNotNull({ message: 'Job role must be selected' })
-  declare jobRole: number | null;
+  jobRole: number | null;
 
   @ArrayMinSize(1, { message: 'At least one report-to relationship must be selected.' })
-  declare reportToRelationship: string[];
+  reportToRelationship: string[];
 
   @ArrayMinSize(1, { message: 'At least one scope of responsibility must be selected.' })
-  declare scopeOfResponsibility: number | number[] | null; // number[] is latest change, used to allow only single selection
+  scopeOfResponsibility: number | number[] | null; // number[] is latest change, used to allow only single selection
 
   @ArrayMinSize(1, { message: 'At least one ministry must be selected.' })
-  declare ministries: string[];
+  ministries: string[];
 
   @IsNotEmpty({ message: 'Job context must be provided.' })
   @NotEquals('<p><br></p>', { message: 'Job context must be provided.' })
-  declare jobContext: string;
+  jobContext: string;
 
   @ValidProfessionsValidator()
-  declare professions: ProfessionsModel[];
+  professions: ProfessionsModel[];
+
+  originalJobStoreNumber: string;
+  role: number;
+  classificationReviewRequired: boolean;
+  all_reports_to: boolean;
+  all_organizations: boolean;
+  overview: OverviewField | string;
+  program_overview: ProgramOverviewField | string;
 }
 
 export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileComponentProps> = ({
@@ -394,8 +421,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   }));
   const prevProfessionsData = useRef(professionsData);
 
-  const basicUseFormReturn = useForm<ExtendedJobProfileValidationModel>({
-    resolver: classValidatorResolver(ExtendedJobProfileValidationModel),
+  const basicUseFormReturn = useForm<BasicDetailsValidationModel>({
+    resolver: classValidatorResolver(BasicDetailsValidationModel),
     defaultValues: {
       title: { text: '' } as TitleField,
       jobStoreNumber: '',
