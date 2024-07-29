@@ -477,8 +477,18 @@ model Department {
   effective_date   DateTime     @db.Date // EFFDT
 
   PositionRequest PositionRequest[]
+  metadata        DepartmentMetadata?
 
   @@map("department")
+}
+
+model DepartmentMetadata {
+  department_id           String  @id
+  is_statutorily_excluded Boolean @default(false)
+
+  department Department @relation(fields: [department_id], references: [id])
+
+  @@map("department_metadata")
 }
 
 model Location {

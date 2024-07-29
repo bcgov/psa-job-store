@@ -294,6 +294,15 @@ export class PeoplesoftService {
           },
         });
       } catch (error) {}
+
+      // Try to create a metadata entry if it doesn't already exist.  Ignore the FK error
+      try {
+        await this.prisma.departmentMetadata.create({
+          data: {
+            department_id: row.DEPTID,
+          },
+        });
+      } catch (error) {}
     }
 
     this.logger.log(`End syncDepartments @ ${new Date()}`);
