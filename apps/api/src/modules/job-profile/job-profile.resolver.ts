@@ -62,6 +62,47 @@ class RequirementWithoutReadOnly {
     id: string;
   };
 }
+@ObjectType()
+class PublishedBy {
+  @Field(() => Date, { nullable: true })
+  date: Date | null;
+
+  @Field(() => String, { nullable: true })
+  user: string | null;
+}
+
+@ObjectType()
+class CreatedBy {
+  @Field(() => Date, { nullable: true })
+  date: Date | null;
+
+  @Field(() => String, { nullable: true })
+  owner: string | null;
+}
+
+@ObjectType()
+class Version {
+  @Field(() => Number)
+  id: number;
+
+  @Field(() => String)
+  version: string;
+}
+
+@ObjectType()
+class JobProfileMetaModel {
+  @Field(() => Int)
+  totalViews: number;
+
+  @Field(() => PublishedBy)
+  firstPublishedBy: PublishedBy;
+
+  @Field(() => CreatedBy)
+  firstCreatedBy: CreatedBy;
+
+  @Field(() => [Version])
+  versions: Version[];
+}
 
 @Resolver(() => JobProfile)
 export class JobProfileResolver {
@@ -83,6 +124,14 @@ export class JobProfileResolver {
   @Query(() => Int, { name: 'jobProfilesCount' })
   async jobProfilesCount(@Args() args?: FindManyJobProfileWithSearch) {
     return await this.jobProfileService.getJobProfileCount(args);
+  }
+  @Mutation(() => Int, { name: 'updateJobProfileViewCount' })
+  async updateJobProfileViewCount(@Args('jobProfiles', { type: () => [Int], nullable: true }) jobProfiles: number[]) {
+    return await this.jobProfileService.updateJobProfileViewCountCache(jobProfiles);
+  }
+  @Query(() => JobProfileMetaModel, { name: 'jobProfileMeta' })
+  async jobProfileMeta(@Args('number') number: number) {
+    return await this.jobProfileService.getJobProfileMeta(number);
   }
 
   @Query(() => [JobProfile], { name: 'jobProfilesDrafts' })
@@ -138,8 +187,12 @@ export class JobProfileResolver {
 
   @Query(() => JobProfile, { name: 'jobProfileByNumber' })
   @AllowNoRoles() // so that share position request feature can fetch relevant data
-  async getJobProfileByNumber(@Args('number') number: string, @CurrentUser() user: Express.User) {
-    const res = await this.jobProfileService.getJobProfileByNumber(+number, user.roles);
+  async getJobProfileByNumber(
+    @CurrentUser() user: Express.User,
+    @Args('number') number: string,
+    @Args('version', { type: () => Int, nullable: true }) version?: number,
+  ) {
+    const res = await this.jobProfileService.getJobProfileByNumber(+number, version, user.roles);
     return res;
   }
 

@@ -9,14 +9,7 @@ import {
 import { useWizardContext } from '../../../../routes/wizard/components/wizard.provider';
 
 interface PositionContextProps {
-  createNewPosition: (
-    reportingPositionId: number,
-    selectedDepartment: string,
-    orgChartData: any,
-    current_reports_to_position_id?: number | undefined,
-    reSelectSupervisor?: () => void,
-    changeStep?: boolean,
-  ) => Promise<string>;
+  createNewPosition: (params: CreateNewPositionParams) => Promise<string>;
 }
 
 const PositionContext = React.createContext<PositionContextProps | null>(null);
@@ -34,6 +27,16 @@ interface PositionProviderProps {
   children: ReactNode;
 }
 
+interface CreateNewPositionParams {
+  reportingPositionId: number;
+  selectedDepartment: string;
+  orgChartData: any;
+  current_reports_to_position_id?: number;
+  reSelectSupervisor?: () => void;
+  changeStep?: boolean;
+  svg: string;
+}
+
 export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) => {
   const { positionRequestId, resetWizardContext, setPositionRequestData } = useWizardContext();
   const [createPositionRequest] = useCreatePositionRequestMutation();
@@ -41,14 +44,17 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
   const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
   const navigate = useNavigate();
 
-  const createNewPosition = async (
-    reportingPositionId: number,
-    selectedDepartment: string,
-    orgChartData: any,
-    current_reports_to_position_id?: number | undefined,
-    reSelectSupervisor?: () => void,
-    changeStep: boolean = true,
-  ): Promise<string> => {
+  const createNewPosition = async (params: CreateNewPositionParams): Promise<string> => {
+    const {
+      reportingPositionId,
+      selectedDepartment,
+      orgChartData,
+      current_reports_to_position_id,
+      reSelectSupervisor,
+      changeStep = true,
+      svg,
+    } = params;
+
     // we are not editing a draft position request (creatign position from dashboard or from org chart page)
     // we can create a new position from the my-position-requests org chart view, or directly from the org chart, or from home page
     if (
@@ -57,6 +63,10 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
       location.pathname == '/' || // home page
       location.pathname == '' // home page
     ) {
+      // orgChartData.svg = btoa(svg);
+      // console.log('svg: ', svg);
+
+      // console.log('orgChartData: ', orgChartData);
       const positionRequestInput = {
         step: 1,
         max_step_completed: 1,
@@ -64,6 +74,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         reports_to_position_id: reportingPositionId,
         department: { connect: { id: selectedDepartment ?? '' } },
         orgchart_json: orgChartData,
+        orgchart_png: svg,
       };
       // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
       const resp = await createPositionRequest(positionRequestInput).unwrap();
@@ -110,6 +121,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   additional_info: null,
                   title: null,
                   returnFullObject: true,
+                  orgchart_png: svg,
                 }).unwrap();
 
                 setPositionRequestData(resp.updatePositionRequest ?? null);

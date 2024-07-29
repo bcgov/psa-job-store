@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EllipsisOutlined } from '@ant-design/icons';
+import { DownOutlined, EllipsisOutlined, TagOutlined } from '@ant-design/icons';
 import { PageHeader as AntdProPageHeader, PageHeaderProps } from '@ant-design/pro-layout';
-import { Button, Popover } from 'antd';
-import { ReactNode } from 'react';
+import { Button, Popover, Select } from 'antd';
+import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation, useMatches, useParams } from 'react-router-dom';
+import { JobProfileMetaModel } from '../../redux/services/graphql-api/job-profile-types';
 import './page-header.component.css';
 
 // Define the type for your breadcrumb item
@@ -21,6 +22,9 @@ interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
   button2Text?: string;
   button2Callback?: () => void;
   showButton2?: boolean;
+  versions?: JobProfileMetaModel;
+  selectVersionCallback?: (selectedId: string) => void;
+  subHeader?: ReactNode;
 }
 
 export const PageHeader = ({
@@ -33,13 +37,29 @@ export const PageHeader = ({
   button2Callback,
   showButton2,
   title,
+  versions,
+  selectVersionCallback,
+  subHeader,
   ...props
 }: ExtendedPageHeaderProps) => {
   const matches = useMatches();
   const params = useParams<Record<string, string>>();
   const currentPage = useLocation().pathname;
   const segments = currentPage.split('/').filter(Boolean); // Filter out empty segments
+  const [isCurrentVersion, setIsCurrentVersion] = useState(true);
 
+  const currentVersion =
+    versions?.versions?.length ?? 0 > 0
+      ? versions?.versions
+          ?.map((jp: { version: any }) => jp.version)
+          .reduce(function (p: number, v: number) {
+            return p > v ? p : v;
+          }, '')
+      : undefined;
+  useEffect(() => {
+    const selectedVersion = versions?.versions?.find((v: { id: number | undefined }) => v.id == params.id)?.version;
+    setIsCurrentVersion(selectedVersion === currentVersion);
+  }, [currentVersion, params.id, versions?.versions]);
   // Check if it's a level 1 subpage (e.g., 'my-position-requests')
   const hideBreadcrumb = segments.length === 1;
   const breadcrumbs: BreadcrumbItem[] = matches
@@ -124,9 +144,37 @@ export const PageHeader = ({
           })),
         },
       };
+  const jobProfileVersions: { label: string; value: any; icon: any }[] = versions
+    ? versions?.versions?.map((version: { version: any; id: any }) => ({
+        label: 'Version ' + version.version,
+        value: version.id,
+        icon: <TagOutlined />,
+      }))
+    : [];
+
+  const onChange = (value: string) => {
+    console.log(`Click on item ${value}`);
+    setIsCurrentVersion(value === currentVersion);
+    value && selectVersionCallback && selectVersionCallback(value);
+  };
 
   const renderButtons = () => (
     <div style={{ display: 'flex', gap: '10px' }}>
+      {(versions?.versions?.length ?? 0 > 0) && (
+        <Select
+          filterSort={(optionA: { label: any }, optionB: { label: any }) =>
+            (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+          }
+          options={jobProfileVersions}
+          onChange={onChange}
+          value={'Version ' + versions?.versions?.find((v: { id: number | undefined }) => v.id == params.id)?.version}
+        >
+          <Button>
+            Select Version
+            <DownOutlined />
+          </Button>
+        </Select>
+      )}
       {showButton1 && (
         <Popover content={button1Content} trigger="click" placement="bottomRight">
           <Button icon={<EllipsisOutlined />} onClick={button1Callback}>
@@ -135,7 +183,7 @@ export const PageHeader = ({
         </Popover>
       )}
       {showButton2 && (
-        <Button type="primary" onClick={button2Callback}>
+        <Button disabled={!isCurrentVersion} type="primary" onClick={button2Callback}>
           {button2Text}
         </Button>
       )}
@@ -149,6 +197,8 @@ export const PageHeader = ({
       title={<h1 style={{ fontWeight: 600, fontSize: '20px', lineHeight: '32px' }}>{title}</h1>}
       {...props}
       style={{ backgroundColor: '#FFF' }}
-    />
+    >
+      {subHeader}
+    </AntdProPageHeader>
   );
 };

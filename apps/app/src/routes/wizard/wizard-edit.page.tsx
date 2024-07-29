@@ -153,6 +153,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       // ),
       all_organizations: false,
       all_reports_to: false,
+      owner: originalData.owner,
+      created_at: originalData.created_at,
+      current_version: originalData.current_version,
     };
   }
 
@@ -309,7 +312,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   const getMenuContent = () => {
     return (
-      <Menu>
+      <Menu className="wizard-menu">
         <Menu.Item key="save" onClick={saveAndQuit} disabled={saveAndQuitLoading}>
           <div style={{ position: 'relative' }}>
             {saveAndQuitLoading && (

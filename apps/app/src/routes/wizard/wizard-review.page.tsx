@@ -112,7 +112,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   };
   const getMenuContent = () => {
     return (
-      <Menu>
+      <Menu className="wizard-menu">
         <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
           <div style={{ padding: '5px 0' }}>
             Save and quit

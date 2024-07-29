@@ -24,6 +24,7 @@ import { Controls } from '../controls';
 import { DepartmentFilter } from '../department-filter.component';
 import { OrgChartNode } from '../org-chart-node.component';
 import { PositionSearch } from '../position-search.component';
+import DownloadButton from './download-button.component';
 
 interface BaseDynamicOrgChartProps {
   type: OrgChartType.DYNAMIC;
@@ -31,6 +32,7 @@ interface BaseDynamicOrgChartProps {
   departmentId: string | null | undefined;
   departmentIdIsLoading?: boolean;
   targetId?: string | undefined;
+  wrapProvider?: boolean;
 }
 
 export interface DefaultContextDynamicOrgChartProps {
@@ -331,6 +333,7 @@ export const DynamicOrgChart = ({
             style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
             zoomable
           />
+          <DownloadButton />
         </ReactFlow>
       )}
     </div>

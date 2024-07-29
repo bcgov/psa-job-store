@@ -27,6 +27,7 @@ interface BehaviouralComptencyPickerProps {
   validateFunction: () => void;
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
   formErrors: any;
+  readOnly?: boolean;
 }
 
 const formatEnumString = (str: string): string => {
@@ -43,6 +44,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   validateFunction,
   useFormReturn,
   formErrors,
+  readOnly,
 }) => {
   // Fetching data from the API
   const { data, error, isLoading } = useGetBehaviouralCompetenciesQuery();
@@ -161,20 +163,22 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
                   </p>
 
                   {/* Trash icon/button for deletion */}
-                  <Button
-                    data-testid={`remove-behavioral-competency-${index}`}
-                    type="text" // No button styling, just the icon
-                    aria-label={`Remove ${field.behavioural_competency.name} behavioural competency`}
-                    icon={<DeleteOutlined aria-hidden />}
-                    onClick={() => {
-                      removeAction(index);
-                    }}
-                    style={{
-                      marginLeft: '10px',
-                      border: '1px solid',
-                      borderColor: '#d9d9d9',
-                    }}
-                  />
+                  {!readOnly && (
+                    <Button
+                      data-testid={`remove-behavioral-competency-${index}`}
+                      type="text" // No button styling, just the icon
+                      aria-label={`Remove ${field.behavioural_competency.name} behavioural competency`}
+                      icon={<DeleteOutlined aria-hidden />}
+                      onClick={() => {
+                        removeAction(index);
+                      }}
+                      style={{
+                        marginLeft: '10px',
+                        border: '1px solid',
+                        borderColor: '#d9d9d9',
+                      }}
+                    />
+                  )}
 
                   {/* Hidden fields to submit actual data */}
                   <FormItem
@@ -208,22 +212,24 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
           <Typography.Text type="secondary">
             <div style={{ margin: '0.5rem 0' }}>* denotes an Indigenous Relations Behavioural Competency</div>
           </Typography.Text>
-          <EditFormOptionsPicker
-            renderOption={renderOption}
-            renderOptionExtra={renderOptionExtra}
-            filterOptions={options}
-            buttonText="Browse and add behavioural competencies"
-            selectableOptions={selectableOptions}
-            title="Behavioural competencies"
-            selectedOptions={selectedOptions}
-            onAdd={onAdd}
-            infoContent={
-              'It is highly recommended that there be at least one Indigenous Relations Behavioural Competency in a job profile.'
-            }
-          ></EditFormOptionsPicker>
+          {!readOnly && (
+            <EditFormOptionsPicker
+              renderOption={renderOption}
+              renderOptionExtra={renderOptionExtra}
+              filterOptions={options}
+              buttonText="Browse and add behavioural competencies"
+              selectableOptions={selectableOptions}
+              title="Behavioural competencies"
+              selectedOptions={selectedOptions}
+              onAdd={onAdd}
+              infoContent={
+                'It is highly recommended that there be at least one Indigenous Relations Behavioural Competency in a job profile.'
+              }
+            ></EditFormOptionsPicker>
+          )}
         </>
 
-        <WizardValidationError formErrors={formErrors} fieldName="behavioural_competencies" />
+        {!readOnly && <WizardValidationError formErrors={formErrors} fieldName="behavioural_competencies" />}
       </Col>
     </Row>
   );

@@ -424,7 +424,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
   const getMenuContent = () => {
     return (
-      <Menu>
+      <Menu className="wizard-menu">
         <Menu.Item key="save" onClick={saveAndQuit} data-testid="save-and-quit">
           <div style={{ padding: '5px 0' }}>
             Save and quit

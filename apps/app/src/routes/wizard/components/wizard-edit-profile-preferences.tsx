@@ -33,7 +33,7 @@ const Preferences: React.FC<PreferencesProps> = ({
 }) => {
   // const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, update } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove } = useFormFields({
     useFormReturn,
     fieldName: 'preferences',
     setEditedFields: setEditedFields,
@@ -92,7 +92,6 @@ const Preferences: React.FC<PreferencesProps> = ({
         testId="preferences"
         confirmRemoveModal={() => handleProfRegRemoveModal(index)}
         // onFocus={() => handleProfRegFocusModal(field)}
-        update={update}
         remove={remove}
         fields={fields}
         trigger={trigger}

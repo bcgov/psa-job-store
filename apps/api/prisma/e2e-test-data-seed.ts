@@ -1012,6 +1012,7 @@ async function seed() {
         name: 'Zone/Office',
         description: 'Geographic area of responsibility under a RD/DM and/or Provincial Dir',
       },
+      { id: 7, name: 'Public Service', description: 'Government-wide responsibility' },
     ],
   });
 
@@ -1124,9 +1125,14 @@ async function seed() {
     created_at: new Date(2024, 6, 1),
     updated_at: new Date(2024, 7, 1),
     published_at: new Date(2024, 6, 15),
-    owner_id: undefined,
-    updated_by_id: undefined,
-    published_by_id: undefined,
+    owner_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    updated_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    published_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    valid_from: undefined,
+    valid_to: undefined,
+    version: 1,
+    current_version: true,
+    views: 1,
   };
 
   const profile194: JobProfile = {
@@ -1230,9 +1236,14 @@ async function seed() {
     created_at: new Date(2024, 6, 1),
     updated_at: new Date(2024, 7, 1),
     published_at: new Date(2024, 6, 15),
-    owner_id: undefined,
-    updated_by_id: undefined,
-    published_by_id: undefined,
+    owner_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    updated_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    published_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    valid_from: undefined,
+    valid_to: undefined,
+    version: 1,
+    current_version: true,
+    views: 1,
   };
 
   const profile200: JobProfile = {
@@ -1366,9 +1377,14 @@ async function seed() {
     created_at: new Date(2024, 6, 1),
     updated_at: new Date(2024, 7, 1),
     published_at: new Date(2024, 6, 15),
-    owner_id: undefined,
-    updated_by_id: undefined,
-    published_by_id: undefined,
+    owner_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    updated_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    published_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    valid_from: undefined,
+    valid_to: undefined,
+    version: 1,
+    current_version: true,
+    views: 10,
   };
 
   const profile208: JobProfile = {
@@ -1488,9 +1504,14 @@ async function seed() {
     created_at: new Date(2024, 6, 1),
     updated_at: new Date(2024, 7, 1),
     published_at: new Date(2024, 6, 15),
-    owner_id: undefined,
-    updated_by_id: undefined,
-    published_by_id: undefined,
+    owner_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    updated_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    published_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    valid_from: undefined,
+    valid_to: undefined,
+    version: 1,
+    current_version: true,
+    views: 74,
   };
 
   const profile210: JobProfile = {
@@ -1625,9 +1646,14 @@ async function seed() {
     created_at: new Date(2024, 6, 1),
     updated_at: new Date(2024, 7, 1),
     published_at: new Date(2024, 6, 15),
-    owner_id: undefined,
-    updated_by_id: undefined,
-    published_by_id: undefined,
+    owner_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    updated_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    published_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    valid_from: undefined,
+    valid_to: undefined,
+    version: 1,
+    current_version: true,
+    views: 474,
   };
 
   const profile212: JobProfile = {
@@ -1766,9 +1792,14 @@ async function seed() {
     created_at: new Date(2024, 6, 1),
     updated_at: new Date(2024, 7, 1),
     published_at: new Date(2024, 6, 15),
-    owner_id: undefined,
-    updated_by_id: undefined,
-    published_by_id: undefined,
+    owner_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    updated_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    published_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    valid_from: undefined,
+    valid_to: undefined,
+    version: 1,
+    current_version: true,
+    views: 747,
   };
 
   const profile247: JobProfile = {
@@ -1895,7 +1926,7 @@ async function seed() {
     created_at: new Date(2024, 6, 1),
     updated_at: new Date(2024, 7, 1),
     published_at: new Date(2024, 6, 15),
-    owner_id: undefined,
+    owner_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
     job_experience: [
       {
         text: 'Related experience',
@@ -1935,8 +1966,13 @@ async function seed() {
       { text: 'Professional registration requirement 1' },
       { text: 'Professional registration requirement 2' },
     ],
-    updated_by_id: undefined,
-    published_by_id: undefined,
+    updated_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    published_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
+    valid_from: undefined,
+    valid_to: undefined,
+    version: 1,
+    current_version: true,
+    views: 0,
   };
 
   const jobProfiles = [profile189, profile194, profile200, profile208, profile210, profile212, profile247];
@@ -1977,43 +2013,43 @@ async function seed() {
 
   const jobProfileClassifications = [
     {
-      classification_id: '551052',
+      classification_id: '508011',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
     },
     {
-      classification_id: '551103',
+      classification_id: '508010',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
     },
     {
-      classification_id: '551104',
+      classification_id: '508013',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
     },
     {
-      classification_id: '551105',
+      classification_id: '752203',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
     },
     {
-      classification_id: '551401',
+      classification_id: '501537',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
     },
     {
-      classification_id: '551402',
+      classification_id: '621252',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'STTSS',
       job_profile_id: profile212.id,
     },
     {
-      classification_id: '551404',
+      classification_id: '551409',
       classification_employee_group_id: '805G',
       classification_peoplesoft_id: 'ST805',
       job_profile_id: profile247.id,
@@ -2897,7 +2933,7 @@ async function seed() {
         user_id: TEST_USER_ID,
         title: 'Senior Analyst',
         position_number: null,
-        classification_id: 'CLS01',
+        classification_id: '508011',
         user_name: 'John Doe',
         email: 'john.doe@example.com',
         submission_id: 'SUB001',
@@ -3314,7 +3350,7 @@ async function seed() {
         user_id: TEST_USER_ID,
         title: 'Project Manager - Additional info step',
         position_number: null,
-        classification_id: 'CLS02',
+        classification_id: '752203',
         user_name: 'Jane Smith',
         email: 'jane.smith@example.com',
         submission_id: 'SUB002',
@@ -3717,7 +3753,7 @@ async function seed() {
         user_id: TEST_USER_ID,
         title: 'Project Manager',
         position_number: 20002,
-        classification_id: 'CLS02',
+        classification_id: '508013',
         user_name: 'Jane Smith',
         email: 'jane.smith@example.com',
         submission_id: 'SUB002',
@@ -4120,7 +4156,7 @@ async function seed() {
         user_id: TEST_USER_ID,
         title: 'Data Scientist',
         position_number: 30003,
-        classification_id: 'CLS03',
+        classification_id: '752203',
         user_name: 'Alex Johnson',
         email: 'alex.johnson@example.com',
         submission_id: 'SUB003',

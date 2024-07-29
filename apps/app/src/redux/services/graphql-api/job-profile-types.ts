@@ -143,10 +143,12 @@ export interface JobProfileModel {
   overview: string | TrackedFieldArrayItem;
   type: string;
   role: { id: number; name?: string };
+  owner: { id: string; name?: string };
+  created_at: string;
   updated_at?: string;
-  updated_by?: string;
+  updated_by?: { id: string; name?: string };
   published_at?: string;
-  published_by?: string;
+  published_by?: { id: string; name?: string };
   total_comp_create_form_misc?: {
     employeeGroup: string;
     markAllNonEditable: boolean;
@@ -179,6 +181,23 @@ export interface JobProfileModel {
   state?: string;
   is_archived?: boolean;
   original_profile_json?: JobProfileModel;
+  version?: number;
+  current_version: boolean;
+}
+export interface JobProfileMetaModel {
+  totalViews: number;
+  firstPublishedBy: {
+    date: string | null;
+    user: string | null;
+  };
+  firstCreatedBy: {
+    date: string | null;
+    owner: string | null;
+  };
+  versions: Array<{
+    id: number;
+    version: string;
+  }>;
 }
 
 export interface ProfessionsModel {
@@ -376,10 +395,20 @@ export interface CreateJobProfileInput {
     reports_to: {
       create: ClassificationConnectInput[];
     };
+    owner_id: string;
+    created_at: string;
+    updated_at?: string;
+    updated_by_id?: string;
+    published_at?: string;
+    published_by_id?: string;
   };
   id?: number;
 }
 
+export interface updateJobProfileViewCountInput {
+  //jobProfileId, addViews
+  jobProfiles: number[];
+}
 export interface CreateJobProfileResponse {
   createOrUpdateJobProfile: {
     id: number;
@@ -421,6 +450,10 @@ export interface GetJobProfilesResponse {
   pageNumberForSelectProfile: number;
 }
 
+export interface GetJobProfileMetaResponse {
+  jobProfileMeta: JobProfileMetaModel;
+}
+
 export interface GetJobProfilesDraftsResponse {
   jobProfilesDrafts: JobProfileModel[];
   jobProfilesDraftsCount: number;
@@ -434,10 +467,15 @@ export interface GetJobProfilesArchivedResponse {
 export interface GetJobProfileArgs {
   id?: number;
   number?: number;
+  version?: number;
 }
 
 export interface GetJobProfileResponse {
   jobProfile: JobProfileModel;
+}
+
+export interface GetJobProfileMetaResponse {
+  jobProfile: JobProfileMetaModel;
 }
 
 export interface GetJobProfileByNumberResponse {
