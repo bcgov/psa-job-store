@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 export enum SearchIndex {
   JobProfile = 'job-profile',
+  SettingsDocument = '93eb5277-f780-43c7-94e3-d857bc75a27a',
 }
 
 @Injectable()
@@ -15,21 +16,44 @@ export class SearchService {
     private readonly prisma: PrismaService,
   ) {}
 
-  private query(index: SearchIndex, value: string): QueryDslQueryContainer {
-    switch (index) {
-      case SearchIndex.JobProfile: {
-        return {
-          multi_match: {
-            query: value,
-            fields: ['title', 'context', 'overview'],
-            fuzziness: 1,
-          },
-        };
-      }
-      default:
-        return {};
-    }
+  async indexDocument(index: SearchIndex, id: string, document: Record<string, any>) {
+    await this.elasticService.index({ index, id, document });
   }
+
+  async search(index: SearchIndex, query?: QueryDslQueryContainer) {
+    const results = await this.elasticService.search({ index, query });
+
+    return results;
+  }
+
+  async deleteDocument(index: SearchIndex, id: string) {
+    try {
+      await this.elasticService.delete({ index, id });
+    } catch (error) {}
+  }
+
+  async resetIndex(index: SearchIndex) {
+    try {
+      await this.elasticService.indices.delete({ index });
+      await this.elasticService.indices.create({ index });
+    } catch (error) {}
+  }
+
+  // private query(index: SearchIndex, value: string): QueryDslQueryContainer {
+  //   switch (index) {
+  //     case SearchIndex.JobProfile: {
+  //       return {
+  //         multi_match: {
+  //           query: value,
+  //           fields: ['title', 'context', 'overview'],
+  //           fuzziness: 1,
+  //         },
+  //       };
+  //     }
+  //     default:
+  //       return {};
+  //   }
+  // }
 
   async searchJobProfiles(value: string) {
     const results = await this.elasticService.search({

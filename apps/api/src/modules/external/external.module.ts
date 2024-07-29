@@ -5,6 +5,8 @@ import { KeycloakModule } from '../keycloak/keycloak.module';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
+import { SearchModule } from '../search/search.module';
+import { SearchService } from '../search/search.service';
 import { ClassificationResolver } from './classification.resolver';
 import { ClassificationService } from './classification.service';
 import { CrmService } from './crm.service';
@@ -28,6 +30,7 @@ import { PositionService } from './position.service';
     }),
     KeycloakModule,
     PrismaModule,
+    SearchModule,
   ],
   providers: [
     ClassificationResolver,
@@ -47,6 +50,8 @@ import { PositionService } from './position.service';
     PositionService,
     KeycloakService,
     PeoplesoftV2Service,
+    SearchService,
   ],
+  exports: [SearchService],
 })
 export class ExternalModule {}

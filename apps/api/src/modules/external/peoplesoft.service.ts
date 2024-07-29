@@ -5,6 +5,7 @@ import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { SearchIndex, SearchService } from '../search/search.service';
 import { Employee } from './models/employee.model';
 import { PositionCreateInput } from './models/position-create.input';
 
@@ -58,6 +59,7 @@ export class PeoplesoftService {
     private readonly configService: ConfigService<AppConfigDto, true>,
     private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
+    private readonly searchService: SearchService,
   ) {
     this.headers = new AxiosHeaders();
     this.headers.set(
@@ -237,6 +239,8 @@ export class PeoplesoftService {
       ),
     );
 
+    await this.searchService.resetIndex(SearchIndex.JobProfile);
+
     for await (const row of response?.data?.query?.rows ?? []) {
       try {
         await this.prisma.department.upsert({
@@ -292,6 +296,11 @@ export class PeoplesoftService {
               },
             },
           },
+        });
+
+        await this.searchService.indexDocument(SearchIndex.SettingsDocument, row.DEPTID, {
+          id: row.DEPTID,
+          name: row.DESCR,
         });
       } catch (error) {}
 
