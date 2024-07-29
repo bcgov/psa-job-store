@@ -1,5 +1,31 @@
 # app
 
+## 0.7.0
+
+### Minor Changes
+
+- [#632](https://github.com/bcgov/psa-job-store/pull/632) [`90762b8acc8900aa2109b238cfc56f38a2ee727c`](https://github.com/bcgov/psa-job-store/commit/90762b8acc8900aa2109b238cfc56f38a2ee727c) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Add import user feature.
+
+- [#644](https://github.com/bcgov/psa-job-store/pull/644) [`33434ede162eb98b46506253bf99ea13f41467ba`](https://github.com/bcgov/psa-job-store/commit/33434ede162eb98b46506253bf99ea13f41467ba) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-863 Add tree chart view to the home page
+
+- [#644](https://github.com/bcgov/psa-job-store/pull/644) [`33434ede162eb98b46506253bf99ea13f41467ba`](https://github.com/bcgov/psa-job-store/commit/33434ede162eb98b46506253bf99ea13f41467ba) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-659 Add additional validation restrictions for total comp form
+
+- [#628](https://github.com/bcgov/psa-job-store/pull/628) [`b02fc8b695cb3d3b35e76ab85b7f847fc755ccef`](https://github.com/bcgov/psa-job-store/commit/b02fc8b695cb3d3b35e76ab85b7f847fc755ccef) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-634 Attach org chart to CRM service request
+
+- [#634](https://github.com/bcgov/psa-job-store/pull/634) [`d6989a99f8338d374d76eeea474ef1de4de6a85f`](https://github.com/bcgov/psa-job-store/commit/d6989a99f8338d374d76eeea474ef1de4de6a85f) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-72 Implement accessibility on org chart view
+
+- [#624](https://github.com/bcgov/psa-job-store/pull/624) [`ae1ef262edbef467ef852cdfeda1dd33b2d39ffa`](https://github.com/bcgov/psa-job-store/commit/ae1ef262edbef467ef852cdfeda1dd33b2d39ffa) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-635 Allow downloading a snapshot of the org chart
+
+- [#629](https://github.com/bcgov/psa-job-store/pull/629) [`4fcaf7b4d71eb10a0a63fc423fb9fa8f21f0700f`](https://github.com/bcgov/psa-job-store/commit/4fcaf7b4d71eb10a0a63fc423fb9fa8f21f0700f) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Add role switcher to admin site.
+
+- [#640](https://github.com/bcgov/psa-job-store/pull/640) [`95bd5d0a51d5e3aae58fcfc0d303d8d3ce8ad779`](https://github.com/bcgov/psa-job-store/commit/95bd5d0a51d5e3aae58fcfc0d303d8d3ce8ad779) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-795 Add viewcounts for job profiles
+
+- [#622](https://github.com/bcgov/psa-job-store/pull/622) [`1fa9b5df0b8c6b75a463584216aa70f04eea5740`](https://github.com/bcgov/psa-job-store/commit/1fa9b5df0b8c6b75a463584216aa70f04eea5740) Thanks [@kmandryk](https://github.com/kmandryk)! - Add job profile versioning
+
+### Patch Changes
+
+- [#627](https://github.com/bcgov/psa-job-store/pull/627) [`2c5c16d4392a73632c26d0d0a103a5baec8e65e6`](https://github.com/bcgov/psa-job-store/commit/2c5c16d4392a73632c26d0d0a103a5baec8e65e6) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-842 add next steps for analyst, specialist
+
 ## 0.6.1
 
 ### Patch Changes
