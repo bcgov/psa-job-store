@@ -25,6 +25,7 @@ import { DepartmentFilter } from '../department-filter.component';
 import { OrgChartNode } from '../org-chart-node.component';
 import { PositionSearch } from '../position-search.component';
 import DownloadButton from './download-button.component';
+import './dynamic-org-chart.component.css';
 
 interface BaseDynamicOrgChartProps {
   type: OrgChartType.DYNAMIC;
@@ -296,12 +297,14 @@ export const DynamicOrgChart = ({
               setDepartmentId={setDepartmentId}
               departmentId={departmentId}
               loading={departmentIdIsLoading}
+              focusable={false}
             />
             <PositionSearch
               setSearchTerm={setSearchTerm}
               disabled={departmentId == null || departmentIdIsLoading}
               searchResults={getSearchResults()}
               searchTerm={searchTerm}
+              focusable={false}
             />
           </Space>
         </Col>
@@ -312,6 +315,7 @@ export const DynamicOrgChart = ({
         </div>
       ) : (
         <ReactFlow
+          aria-hidden="true"
           onPaneClick={() => {
             setIsDirty(true);
             setSearchTerm(undefined);
@@ -324,16 +328,19 @@ export const DynamicOrgChart = ({
           nodes={nodes}
           nodesConnectable={false}
           nodesDraggable={false}
+          nodesFocusable={false}
+          edgesFocusable={false}
+          disableKeyboardA11y={true}
         >
           <Background />
-          <Controls position="top-right" />
+          <Controls position="top-right" focusable={false} />
           <MiniMap
             nodeStrokeWidth={3}
             pannable
             style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
             zoomable
           />
-          <DownloadButton />
+          <DownloadButton focusable={false} />
         </ReactFlow>
       )}
     </div>

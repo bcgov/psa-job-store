@@ -399,7 +399,7 @@ function parseStyle(styleString: string): StyleObject {
   return styleObj;
 }
 
-function DownloadButton() {
+function DownloadButton({ focusable = true }: { focusable?: boolean }) {
   const [isLoading, setIsLoading] = useState(false);
   const { getNodes } = useReactFlow();
 
@@ -444,7 +444,7 @@ function DownloadButton() {
   return (
     <Panel position="top-right" style={{ marginTop: 0 }}>
       <Dropdown menu={{ items }} placement="bottomRight">
-        <Button loading={isLoading} icon={<DownloadOutlined />}>
+        <Button tabIndex={focusable ? 0 : -1} loading={isLoading} icon={<DownloadOutlined />}>
           Download
         </Button>
       </Dropdown>

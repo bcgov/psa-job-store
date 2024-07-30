@@ -32,6 +32,7 @@ const ControlsComponent = ({
   showInteractive = true,
   showZoom = true,
   style,
+  focusable = true,
 }: ControlsProps) => {
   const store = useStoreApi();
   const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -81,6 +82,7 @@ const ControlsComponent = ({
             title="Zoom in"
             aria-label="Zoom in"
             disabled={maxZoomReached}
+            tabIndex={focusable ? 0 : -1}
           >
             <PlusOutlined />
           </ControlsButton>
@@ -90,6 +92,7 @@ const ControlsComponent = ({
             title="Zoom out"
             aria-label="Zoom out"
             disabled={minZoomReached}
+            tabIndex={focusable ? 0 : -1}
           >
             <MinusOutlined />
           </ControlsButton>
@@ -101,6 +104,7 @@ const ControlsComponent = ({
           onClick={onFitViewHandler}
           title="Fit view"
           aria-label="Fit View"
+          tabIndex={focusable ? 0 : -1}
         >
           <ExpandOutlined />
         </ControlsButton>
@@ -111,6 +115,7 @@ const ControlsComponent = ({
           onClick={onToggleInteractivity}
           title="Toggle interactivity"
           aria-label="Toggle interactivity"
+          tabIndex={focusable ? 0 : -1}
         >
           {isInteractive ? <UnlockOutlined /> : <LockOutlined />}
         </ControlsButton>

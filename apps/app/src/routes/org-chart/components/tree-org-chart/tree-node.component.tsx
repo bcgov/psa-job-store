@@ -83,6 +83,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           transition: 'opacity 0.3s',
           border: highlighted ? '2px solid #1890ff' : undefined,
           boxShadow: highlighted ? '0 0 10px rgba(24, 144, 255, 0.5)' : undefined,
+          cursor: 'pointer',
         }}
         // apply padding only if hasChildren is true
         bodyStyle={{ padding: hasChildren ? '0 32px 0 0' : '0', position: 'relative' }}

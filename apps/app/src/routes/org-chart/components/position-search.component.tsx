@@ -1,4 +1,5 @@
-import { Input, Tag } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import { Button, Input, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { Node } from 'reactflow';
 
@@ -7,6 +8,7 @@ export interface PositionSearchProps {
   disabled?: boolean;
   searchTerm?: string | undefined;
   searchResults: (() => Node[]) | Node[] | undefined;
+  focusable?: boolean;
 }
 
 export const PositionSearch = ({
@@ -14,6 +16,7 @@ export const PositionSearch = ({
   disabled = false,
   searchTerm: searchTermFromProps,
   searchResults,
+  focusable = true,
 }: PositionSearchProps) => {
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
@@ -44,6 +47,8 @@ export const PositionSearch = ({
       loading={disabled}
       placeholder="Search by Position Number, Title, or Employee Name"
       value={searchTerm}
+      tabIndex={focusable ? 0 : -1}
+      enterButton={<Button tabIndex={focusable ? 0 : -1} icon={<SearchOutlined />}></Button>}
     />
   );
 };
