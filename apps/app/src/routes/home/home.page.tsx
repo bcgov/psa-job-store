@@ -13,7 +13,6 @@ import { OrgChartHelpButton } from '../org-chart/components/org-chart-help-butto
 import { TreeChartSearchProvider } from '../org-chart/components/tree-org-chart/tree-org-chart-search-context';
 import { TreeOrgChartSearch } from '../org-chart/components/tree-org-chart/tree-org-chart-search.component';
 import TreeOrgChart from '../org-chart/components/tree-org-chart/tree-org-chart.component';
-import ViewToggle from '../org-chart/components/view-toggle';
 import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import ContentWrapper from './components/content-wrapper.component';
@@ -28,7 +27,7 @@ export const HomePage = () => {
   const { data: positionsCountData } = useGetPositionRequestsCountQuery();
   const { total = 0, completed = 0, verification = 0 } = positionsCountData?.positionRequestsCount || {};
   const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
-  const [currentView, setCurrentView] = useState<'chart' | 'tree'>('chart');
+  const [currentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal, setHorizontal] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
@@ -147,7 +146,7 @@ export const HomePage = () => {
                 <Col>
                   <h2 style={{ marginBottom: 0 }}>My organization</h2>{' '}
                 </Col>
-                <Col style={{ paddingLeft: '20px', paddingBottom: '4px' }}>
+                {/* <Col style={{ paddingLeft: '20px', paddingBottom: '4px' }}>
                   <ViewToggle
                     size={'small'}
                     view={currentView}
@@ -155,7 +154,7 @@ export const HomePage = () => {
                       setCurrentView(view);
                     }}
                   />
-                </Col>
+                </Col> */}
               </Row>
             }
             extra={
