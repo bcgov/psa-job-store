@@ -558,6 +558,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                 </Col>
                 <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
                   <AccessibleTreeSelect
+                    width={'300px'}
                     placeholderText={'Profession and Discipline'}
                     treeData={JSON.parse(JSON.stringify(treeData))}
                     value={treeSelectValues}

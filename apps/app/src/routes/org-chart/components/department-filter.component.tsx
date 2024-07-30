@@ -1,5 +1,6 @@
 import { TreeSelect, Typography } from 'antd';
 import { useEffect, useState } from 'react';
+import AccessibleTreeSelect from '../../../components/app/common/components/accessible-tree-select';
 import { useGetOrgChartDepartmentFilterQuery } from '../../../redux/services/graphql-api/org-chart.api';
 
 const { Text } = Typography;
@@ -15,6 +16,7 @@ export const DepartmentFilter = ({
   setDepartmentId,
   departmentId,
   loading,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   focusable = true,
 }: DepartmentFilterProps) => {
   const { data: filterData, isFetching: filterDataIsFetching } = useGetOrgChartDepartmentFilterQuery();
@@ -47,7 +49,6 @@ export const DepartmentFilter = ({
         },
       })),
       metadata: {
-        filterString: ministry.filterString,
         label: ministry.label,
         value: ministry.value,
         selectable: ministry.selectable,
@@ -58,8 +59,8 @@ export const DepartmentFilter = ({
     setTreeData(treeData);
   }, [filterData]);
 
-  console.log('treeData', treeData);
-  console.log('departmentId', departmentId);
+  // console.log('original treeData', treeData);
+  // console.log('departmentId', departmentId);
   return (
     <>
       <div id="department-filter-description" style={{ display: 'none' }}>
@@ -69,7 +70,7 @@ export const DepartmentFilter = ({
         Use arrow keys to navigate options. Press Enter to select or deselect an option.
       </div>
 
-      <TreeSelect
+      {/* <TreeSelect
         onClear={() => setDepartmentId(undefined)}
         onSelect={(value) => setDepartmentId(value)}
         allowClear
@@ -86,9 +87,10 @@ export const DepartmentFilter = ({
         tabIndex={focusable ? 0 : -1}
         aria-label="Department selector"
         aria-describedby="department-filter-description usage-instructions"
-      />
+        // open={true}
+      /> */}
 
-      {/* <AccessibleTreeSelect
+      <AccessibleTreeSelect
         placeholderText={'Select a Department'}
         treeData={JSON.parse(JSON.stringify(treeData))}
         value={departmentId ?? ''}
@@ -96,12 +98,12 @@ export const DepartmentFilter = ({
         allowClear
         width={'100%'}
         onSelect={(value) => {
-          console.log('onSelect:', value);
-          setDepartmentId(value.metadata.value);
+          // console.log('onSelect:', value);
+          if (value?.metadata?.value) setDepartmentId(value.metadata.value.toString());
         }}
         renderNode={(node) => {
           // console.log('renderNode:', node.metadata.ministry, node);
-          if (!node?.metadata) return null;
+          if (!node?.metadata) return <></>;
 
           if (node.metadata.ministry) return <span>{node.metadata.label}</span>;
           else
@@ -115,10 +117,9 @@ export const DepartmentFilter = ({
             );
         }}
         disabled={loading || filterDataIsFetching}
-        style={{ width: '100%' }}
-        tabIndex={focusable ? 0 : -1}
+        // tabIndex={focusable ? 0 : -1}
         treeNodeFilterProp="filterString"
-      /> */}
+      />
     </>
   );
 };

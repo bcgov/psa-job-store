@@ -44,6 +44,7 @@ const TreeViewDropdown = ({
   data,
   onSelect,
   renderNode,
+  isSearching,
 }: {
   value: string[] | string;
   onChange?: (inp: string[]) => void;
@@ -51,10 +52,11 @@ const TreeViewDropdown = ({
   onClose: () => void;
   data: INode<IFlatMetadata>[];
   renderNode?: (node: INode<IFlatMetadata>) => JSX.Element;
+  isSearching: boolean;
 }) => {
   const multiSelectMode = onSelect == undefined;
 
-  // console.log('data: ', data);
+  console.log('TreeViewDropdown data: ', data);
   const treeViewRef = useRef(null);
 
   // console.log('TreeViewDropdown render');
@@ -75,13 +77,15 @@ const TreeViewDropdown = ({
         typeof d.metadata?.value === 'string' && value.includes(d.metadata.value),
     )
     .map((d) => d.id);
-  // console.log('selectedIds: ', selectedIds);
+
+  console.log('selectedIds: ', selectedIds);
+
+  // if isSearching, expand all nodes by generating a list of ids to expand
+  const expandedIds = isSearching ? data.filter((d) => d.children.length > 0).map((d) => d.id) : undefined;
+  console.log('expandedIds: ', expandedIds);
 
   return (
-    <div
-      onKeyDown={handleKeyDown}
-      style={{ maxHeight: '300px', overflowY: 'auto', overflowX: 'hidden', wordBreak: 'break-word' }}
-    >
+    <div onKeyDown={handleKeyDown} style={{ maxHeight: '300px', overflowY: 'auto', overflowX: 'hidden' }}>
       <div className="checkbox" ref={treeViewRef}>
         <TreeView
           data={data}
@@ -91,6 +95,7 @@ const TreeViewDropdown = ({
           propagateSelectUpwards
           togglableSelect={multiSelectMode}
           defaultSelectedIds={selectedIds}
+          expandedIds={expandedIds}
           nodeRenderer={({
             element,
             isBranch,
@@ -102,18 +107,34 @@ const TreeViewDropdown = ({
             handleSelect,
             handleExpand,
           }) => {
-            if (renderNode)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const handleClick = (e: any) => {
+              if (!isBranch) {
+                onSelect?.(element);
+                handleSelect(e);
+              }
+
+              handleExpand(e);
+            };
+
+            // console.log('rendering element: ', element);
+
+            if (renderNode) {
+              // if (element.id == 149) {
+              //   console.log('element: ', element, isHalfSelected, isBranch, isExpanded, isSelected);
+              // }
+
               return (
                 <div
-                  // {...getNodeProps({ onClick: handleExpand })}
+                  {...getNodeProps({ onClick: handleClick })}
                   style={{ marginLeft: 40 * (level - 1) }}
-                  className="antd-container-copy"
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onClick={(e: any) => {
-                    if (!isBranch) onSelect?.(element);
-
-                    handleSelect(e);
-                    handleExpand(e);
+                  className={`antd-container-copy ${isSelected && !isBranch ? 'antd-copy-selected-item' : ''}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      if (!isBranch) {
+                        onSelect?.(element);
+                      }
+                    }
                     // e.stopPropagation();
                   }}
                 >
@@ -122,41 +143,47 @@ const TreeViewDropdown = ({
                       <ArrowIcon isOpen={isExpanded} />
                     </div>
                   )}
-                  {renderNode(element)}
+                  {!element.metadata?.isPartOfSearch ? (
+                    <span className="antd-text-copy">{renderNode(element)}</span>
+                  ) : (
+                    <b className="antd-text-copy">{renderNode(element)}</b>
+                  )}
+                  {/* {isSelected ? 'selected' : 'N'} */}
                 </div>
               );
-
-            return (
-              <div
-                {...getNodeProps({ onClick: handleExpand })}
-                style={{ marginLeft: 40 * (level - 1) }}
-                className="antd-container-copy"
-              >
-                {isBranch && (
-                  <div className="antd-icon-container-copy">
-                    <ArrowIcon isOpen={isExpanded} />
-                  </div>
-                )}
-                <CheckBoxIcon
-                  tabIndex={0}
-                  className="checkbox-icon"
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onClick={(e: any) => {
-                    handleSelect(e);
-                    e.stopPropagation();
-                  }}
-                  variant={isHalfSelected ? 'some' : isSelected ? 'all' : 'none'}
-                />
-                {!element.metadata?.isPartOfSearch ? (
-                  <span className="antd-text-copy">{element.name}</span>
-                ) : (
-                  <b className="antd-text-copy">{element.name}</b>
-                )}
-              </div>
-            );
+            } else {
+              return (
+                <div
+                  {...getNodeProps({ onClick: handleExpand })}
+                  style={{ marginLeft: 40 * (level - 1) }}
+                  className="antd-container-copy"
+                >
+                  {isBranch && (
+                    <div className="antd-icon-container-copy">
+                      <ArrowIcon isOpen={isExpanded} />
+                    </div>
+                  )}
+                  <CheckBoxIcon
+                    tabIndex={0}
+                    className="checkbox-icon"
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    onClick={(e: any) => {
+                      handleSelect(e);
+                      e.stopPropagation();
+                    }}
+                    variant={isHalfSelected ? 'some' : isSelected ? 'all' : 'none'}
+                  />
+                  {/* {isSelected ? 'selected' : 'N'} */}
+                  {!element.metadata?.isPartOfSearch ? (
+                    <span className="antd-text-copy">{element.name}</span>
+                  ) : (
+                    <b className="antd-text-copy">{element.name}</b>
+                  )}
+                </div>
+              );
+            }
           }}
           onSelect={(selected) => {
-            // console.log('selected: ', selected);
             const selectedIds = selected.treeState.selectedIds;
             const selectedValues: string[] = data
               .filter((d) => selectedIds.has(d.id))
@@ -229,17 +256,23 @@ const AccessibleTreeSelect = ({
   onSelect,
   renderNode,
   width,
+  disabled,
+  tabIndex,
+  treeNodeFilterProp,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   treeData: any;
   value: string[] | string;
-  onChange: (inp: string[]) => void;
+  onChange?: (inp: string[]) => void;
   placeholderText?: string;
   onClear?: () => void;
   allowClear?: boolean;
   onSelect?: (inp: INode<IFlatMetadata>) => void;
   renderNode?: (node: INode<IFlatMetadata>) => JSX.Element;
   width?: string;
+  disabled?: boolean;
+  tabIndex?: number;
+  treeNodeFilterProp?: string;
 }) => {
   // console.log('treeData: ', treeData);
   // console.log('value: ', value);
@@ -299,37 +332,58 @@ const AccessibleTreeSelect = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flattenedData]);
 
-  const filter = (value: string) => {
-    // console.log('filtering for value: ', value, flattenedData);
+  const filter = (searchText: string) => {
+    // console.log('=== filtering for value: ', searchText, flattenedData);
 
     const filtered = [] as INode<IFlatMetadata>[];
+    const matchedIds = new Set<NodeId>();
+
     const includeChildren = (id: NodeId) => {
+      // console.log('= includeChildren: ', id);
       flattenedData.forEach((item) => {
         if (item.parent === id) {
-          const itemMatches = item.name.toUpperCase().includes(value.toUpperCase());
-          const newItem = {
-            ...item,
-            metadata: {
-              ...item.metadata,
-              isPartOfSearch: itemMatches,
-            },
-          };
-          if (!filtered.find((x) => x.id === item.id)) {
-            filtered.push(newItem);
+          let searchProp = item.name;
+          if (treeNodeFilterProp) {
+            if (item.metadata) searchProp = item.metadata[treeNodeFilterProp]?.toString() ?? '';
           }
-          if (item.children.length) {
-            includeChildren(item.id);
+          const itemMatches = searchProp.toUpperCase().includes(searchText.toUpperCase());
+          if (itemMatches) {
+            const newItem = {
+              ...item,
+              metadata: {
+                ...item.metadata,
+                isPartOfSearch: itemMatches,
+              },
+            };
+            if (!filtered.find((x) => x.id === item.id)) {
+              // console.log('pushing child item: ', newItem);
+              filtered.push(newItem);
+              if (itemMatches) {
+                matchedIds.add(item.id);
+              }
+            }
+            if (item.children.length) {
+              includeChildren(item.id);
+            }
           }
         }
       });
     };
 
     flattenedData.forEach((item) => {
-      if (item.id === 'ROOT') {
+      if (item.id === 0) {
         return;
       }
-      const itemMatches = item.name.toUpperCase().includes(value.toUpperCase());
+      let searchProp = item.name;
+      if (treeNodeFilterProp) {
+        if (item.metadata) searchProp = item.metadata[treeNodeFilterProp]?.toString() ?? '';
+      }
+
+      // console.log('searchProp:', searchProp, item.id);
+      const itemMatches = searchProp.toUpperCase().includes(searchText.toUpperCase());
       if (itemMatches) {
+        // console.log('itemMatches: ', item);
+        matchedIds.add(item.id);
         const newItem = {
           ...item,
           metadata: {
@@ -338,15 +392,51 @@ const AccessibleTreeSelect = ({
           },
         };
         if (!filtered.find((x) => x.id === item.id)) {
+          // console.log('pushing item: ', newItem);
           filtered.push(newItem);
         }
 
         if (item.children.length) {
+          // console.log('item has children');
           includeChildren(item.id);
         }
       }
     });
 
+    // Include parents of matched items
+
+    flattenedData.forEach((item) => {
+      if (!filtered.find((x) => x.id === item.id) && item.children.some((childId) => matchedIds.has(childId))) {
+        if (!filtered.find((x) => x.id === item.id)) {
+          // ensure that the only children of this parent are ones that are actually part of the search results
+          const filteredChildren = item.children.filter((childId) => matchedIds.has(childId));
+          filtered.push({
+            ...item,
+            children: filteredChildren,
+            metadata: {
+              ...item.metadata,
+              isPartOfSearch: false,
+            },
+          });
+        }
+      }
+    });
+
+    // const duplicateIds = filtered.map((item) => item.id).filter((id, index, array) => array.indexOf(id) !== index);
+
+    // if (duplicateIds.length > 0) {
+    //   console.warn('Duplicate IDs found:', duplicateIds);
+    // } else {
+    //   console.log('No duplicate IDs found');
+    // }
+
+    // remove root node that may have been added
+    const rootIndex = filtered.findIndex((item) => item.id === 0);
+    if (rootIndex > -1) {
+      filtered.splice(rootIndex, 1);
+    }
+
+    // add root node
     const rootChildren = flattenedData[0].children.filter((id) => filtered.find((fitem) => fitem.id === id));
     filtered.unshift(
       Object.assign({
@@ -359,7 +449,17 @@ const AccessibleTreeSelect = ({
       }),
     );
 
-    setFinalTreeData(filtered);
+    // Remove duplicates
+    const uniqueFiltered = Array.from(new Map(filtered.map((item) => [item.id, item])).values());
+
+    // remove any items in children that are not in the filtered list
+    uniqueFiltered.forEach((item) => {
+      item.children = item.children.filter((childId) => uniqueFiltered.find((fitem) => fitem.id === childId));
+    });
+
+    // console.log('uniqueFiltered:', filtered);
+    setDropdownKey((prevKey) => prevKey + 1);
+    setFinalTreeData(uniqueFiltered);
   };
 
   useEffect(() => {
@@ -374,11 +474,22 @@ const AccessibleTreeSelect = ({
   }, [filterText]);
 
   const onSelectInternal = (selected: INode<IFlatMetadata>) => {
-    console.log('onSelectInternal: ', selected);
+    // console.log('onSelectInternal: ', selected);
     setSelectedNode(selected);
     onSelect?.(selected);
     handleClose();
   };
+
+  useEffect(() => {
+    // in mode where we select a single item at a time, initialize selectedNode to the "value"
+    if (onSelect && treeData.length !== 0) {
+      // if value is a string
+      if (typeof value === 'string') {
+        const node = finalTreeData.find((node) => node.metadata?.value === value);
+        if (node) setSelectedNode(node);
+      }
+    }
+  }, [value, onSelect, finalTreeData, treeData]);
 
   // console.log('finalTreeData: ', finalTreeData);
   if (treeData.length === 0) return <></>;
@@ -396,8 +507,9 @@ const AccessibleTreeSelect = ({
       aria-label={placeholderText}
       allowClear={allowClear}
       onClear={onClear}
+      disabled={disabled}
+      tabIndex={tabIndex}
       value={(() => {
-        // return 'hello';
         // console.log('rendering value node: ', selectedNode);
         if (!selectedNode) return;
 
@@ -414,6 +526,7 @@ const AccessibleTreeSelect = ({
               data={finalTreeData}
               onSelect={onSelect ? onSelectInternal : undefined}
               renderNode={renderNode}
+              isSearching={filterText.length > 0}
             />
           </div>
         );
