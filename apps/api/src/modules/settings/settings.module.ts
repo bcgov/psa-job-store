@@ -10,20 +10,9 @@ import { UserModule } from '../user/user.module';
 import { UserService } from '../user/user.service';
 import { ImportUserResolver } from './import-user/import-user.resolver';
 import { ImportUserService } from './import-user/import-user.service';
-import { DepartmentService } from './department/department.service';
-import { DepartmentResolver } from './department/department.resolver';
 
 @Module({
   imports: [ExternalModule, HttpModule, KeycloakModule, PrismaModule, UserModule],
-  providers: [
-    CrmService,
-    ImportUserResolver,
-    ImportUserService,
-    KeycloakService,
-    PrismaService,
-    UserService,
-    DepartmentService,
-    DepartmentResolver,
-  ],
+  providers: [CrmService, ImportUserResolver, ImportUserService, KeycloakService, PrismaService, UserService],
 })
 export class SettingsModule {}

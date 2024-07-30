@@ -3,7 +3,7 @@ import { Field, InputType } from '@nestjs/graphql';
 @InputType()
 export class UpdateDepartmentMetadataInput {
   @Field(() => String, { nullable: false })
-  id!: string;
+  department_id!: string;
 
   @Field(() => Boolean, { nullable: false })
   is_statutorily_excluded!: boolean;
