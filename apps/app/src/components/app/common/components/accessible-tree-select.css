@@ -118,6 +118,13 @@
     padding: 0 4px;
     cursor: pointer;
     /* outline: none; */
+
+    transition: all 0.2s, border 0s, line-height 0s, box-shadow 0s;
+    border-radius: 6px;
+  }
+
+  .antd-container-copy:hover{
+    background-color: rgba(0, 0, 0, 0.04);
   }
 
   .antd-icon-container-copy{
@@ -192,6 +199,6 @@
   }
 
   .antd-copy-selected-item{
-    background-color: #d5e5ed;
-    border-radius: 6px;
+    background-color: #d5e5ed !important;
+    
   }

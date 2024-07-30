@@ -125,30 +125,32 @@ const TreeViewDropdown = ({
               // }
 
               return (
-                <div
-                  {...getNodeProps({ onClick: handleClick })}
-                  style={{ marginLeft: 40 * (level - 1) }}
-                  className={`antd-container-copy ${isSelected && !isBranch ? 'antd-copy-selected-item' : ''}`}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      if (!isBranch) {
-                        onSelect?.(element);
+                <div style={{ padding: '0 0 4px 0' }}>
+                  <div
+                    {...getNodeProps({ onClick: handleClick })}
+                    style={{ marginLeft: 40 * (level - 1) }}
+                    className={`antd-container-copy ${isSelected && !isBranch ? 'antd-copy-selected-item' : ''}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        if (!isBranch) {
+                          onSelect?.(element);
+                        }
                       }
-                    }
-                    // e.stopPropagation();
-                  }}
-                >
-                  {isBranch && (
-                    <div className="antd-icon-container-copy">
-                      <ArrowIcon isOpen={isExpanded} />
-                    </div>
-                  )}
-                  {!element.metadata?.isPartOfSearch ? (
-                    <span className="antd-text-copy">{renderNode(element)}</span>
-                  ) : (
-                    <b className="antd-text-copy">{renderNode(element)}</b>
-                  )}
-                  {/* {isSelected ? 'selected' : 'N'} */}
+                      // e.stopPropagation();
+                    }}
+                  >
+                    {isBranch && (
+                      <div className="antd-icon-container-copy">
+                        <ArrowIcon isOpen={isExpanded} />
+                      </div>
+                    )}
+                    {!element.metadata?.isPartOfSearch ? (
+                      <span className="antd-text-copy">{renderNode(element)}</span>
+                    ) : (
+                      <b className="antd-text-copy">{renderNode(element)}</b>
+                    )}
+                    {/* {isSelected ? 'selected' : 'N'} */}
+                  </div>
                 </div>
               );
             } else {
