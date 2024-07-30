@@ -9,16 +9,15 @@ interface DepartmentFilterProps {
   setDepartmentId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
   departmentId: string | null | undefined;
   loading?: boolean;
-  focusable?: boolean;
+  // focusable?: boolean;
 }
 
 export const DepartmentFilter = ({
   setDepartmentId,
   departmentId,
-  loading,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  focusable = true,
-}: DepartmentFilterProps) => {
+  loading, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+} // focusable = true,
+: DepartmentFilterProps) => {
   const { data: filterData, isFetching: filterDataIsFetching } = useGetOrgChartDepartmentFilterQuery();
   const [treeData, setTreeData] = useState<React.ComponentProps<typeof TreeSelect>['treeData']>([]);
 
@@ -31,14 +30,14 @@ export const DepartmentFilter = ({
       selectable: ministry.selectable,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       children: ministry.children.map(({ label, value, filterString }: Record<string, any>) => ({
-        label: (
-          <span title={`${label} (${value})`}>
-            {label}{' '}
-            <Text style={{ whiteSpace: 'nowrap' }} type="secondary">
-              ({value})
-            </Text>
-          </span>
-        ),
+        // label: (
+        //   <span title={`${label} (${value})`}>
+        //     {label}{' '}
+        //     <Text style={{ whiteSpace: 'nowrap' }} type="secondary">
+        //       ({value})
+        //     </Text>
+        //   </span>
+        // ),
         value: value,
         filterString: filterString,
         metadata: {

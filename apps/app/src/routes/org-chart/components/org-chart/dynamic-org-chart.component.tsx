@@ -297,7 +297,7 @@ export const DynamicOrgChart = ({
               setDepartmentId={setDepartmentId}
               departmentId={departmentId}
               loading={departmentIdIsLoading}
-              focusable={false}
+              // focusable={false}
             />
             <PositionSearch
               setSearchTerm={setSearchTerm}
