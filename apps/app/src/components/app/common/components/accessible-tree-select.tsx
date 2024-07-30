@@ -78,11 +78,11 @@ const TreeViewDropdown = ({
     )
     .map((d) => d.id);
 
-  console.log('selectedIds: ', selectedIds);
+  // console.log('selectedIds: ', selectedIds);
 
   // if isSearching, expand all nodes by generating a list of ids to expand
   const expandedIds = isSearching ? data.filter((d) => d.children.length > 0).map((d) => d.id) : undefined;
-  console.log('expandedIds: ', expandedIds);
+  // console.log('expandedIds: ', expandedIds);
 
   return (
     <div onKeyDown={handleKeyDown} style={{ maxHeight: '300px', overflowY: 'auto', overflowX: 'hidden' }}>
