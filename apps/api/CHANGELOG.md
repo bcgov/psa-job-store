@@ -1,5 +1,19 @@
 # api
 
+## 0.6.0
+
+### Minor Changes
+
+- [#632](https://github.com/bcgov/psa-job-store/pull/632) [`90762b8acc8900aa2109b238cfc56f38a2ee727c`](https://github.com/bcgov/psa-job-store/commit/90762b8acc8900aa2109b238cfc56f38a2ee727c) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Add import user feature.
+
+- [#628](https://github.com/bcgov/psa-job-store/pull/628) [`b02fc8b695cb3d3b35e76ab85b7f847fc755ccef`](https://github.com/bcgov/psa-job-store/commit/b02fc8b695cb3d3b35e76ab85b7f847fc755ccef) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-634 Attach org chart to CRM service request
+
+- [#629](https://github.com/bcgov/psa-job-store/pull/629) [`4fcaf7b4d71eb10a0a63fc423fb9fa8f21f0700f`](https://github.com/bcgov/psa-job-store/commit/4fcaf7b4d71eb10a0a63fc423fb9fa8f21f0700f) Thanks [@sidmclaughlin](https://github.com/sidmclaughlin)! - Add role switcher to admin site.
+
+- [#640](https://github.com/bcgov/psa-job-store/pull/640) [`95bd5d0a51d5e3aae58fcfc0d303d8d3ce8ad779`](https://github.com/bcgov/psa-job-store/commit/95bd5d0a51d5e3aae58fcfc0d303d8d3ce8ad779) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-795 Add viewcounts for job profiles
+
+- [#622](https://github.com/bcgov/psa-job-store/pull/622) [`1fa9b5df0b8c6b75a463584216aa70f04eea5740`](https://github.com/bcgov/psa-job-store/commit/1fa9b5df0b8c6b75a463584216aa70f04eea5740) Thanks [@kmandryk](https://github.com/kmandryk)! - Add job profile versioning
+
 ## 0.5.0
 
 ### Minor Changes

@@ -18,7 +18,6 @@ import { generatePNGBase64 } from '../org-chart/components/org-chart/download-bu
 import { TreeChartSearchProvider } from '../org-chart/components/tree-org-chart/tree-org-chart-search-context';
 import { TreeOrgChartSearch } from '../org-chart/components/tree-org-chart/tree-org-chart-search.component';
 import TreeOrgChart from '../org-chart/components/tree-org-chart/tree-org-chart.component';
-import ViewToggle from '../org-chart/components/view-toggle';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -63,7 +62,7 @@ export const WizardOrgChartPage = ({
   const [positionVacant, setPositionVacant] = useState<boolean>(false);
   const positionVacantTooltipText = "You can't create a new position which reports to a vacant position.";
 
-  const [currentView, setCurrentView] = useState<'chart' | 'tree'>('chart');
+  const [currentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal, setHorizontal] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
@@ -248,14 +247,14 @@ export const WizardOrgChartPage = ({
               justify="space-between"
               style={{ padding: '10px', position: currentView === 'chart' ? 'absolute' : undefined }}
             >
-              <Col>
+              {/* <Col>
                 <ViewToggle
                   view={currentView}
                   onToggle={(view) => {
                     setCurrentView(view);
                   }}
                 />
-              </Col>
+              </Col> */}
               <Col flex="500px">
                 {currentView === 'tree' && (
                   <TreeOrgChartSearch
