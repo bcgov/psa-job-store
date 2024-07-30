@@ -158,9 +158,11 @@ export const PageHeader = ({
     value && selectVersionCallback && selectVersionCallback(value);
   };
 
+  const showVersions = (versions?.versions?.length ?? 0) > 0;
+
   const renderButtons = () => (
     <div style={{ display: 'flex', gap: '10px' }}>
-      {(versions?.versions?.length ?? 0 > 0) && (
+      {showVersions && (
         <Select
           filterSort={(optionA: { label: any }, optionB: { label: any }) =>
             (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())

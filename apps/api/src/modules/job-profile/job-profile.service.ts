@@ -776,7 +776,7 @@ export class JobProfileService {
         type: data.organizations.create.length > 0 ? JobProfileType.MINISTRY : JobProfileType.CORPORATE, // should be MINISTRY if ministries provided, otherwise corporate
         owner: { connect: { id: owner } },
         published_by: publishedBy ? { connect: { id: publishedBy } } : undefined,
-        published_at: jobProfileState === 'PUBLISHED' && profileIsUsed ? new Date(Date.now()) : undefined,
+        published_at: !id || (jobProfileState === 'PUBLISHED' && profileIsUsed) ? new Date(Date.now()) : undefined,
         updated_by: updatedBy ? { connect: { id: updatedBy } } : undefined,
         valid_from: new Date(Date.now()),
         version: data.version + 1,
