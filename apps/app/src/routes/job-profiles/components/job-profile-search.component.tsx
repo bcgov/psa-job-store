@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CloseCircleFilled } from '@ant-design/icons';
-import { Button, Card, Col, Input, Row, Tag, Tooltip, TreeSelect } from 'antd';
+import { Button, Card, Col, Input, Row, Tag, Tooltip } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
+import AccessibleTreeSelect from '../../../components/app/common/components/accessible-tree-select';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
 import {
   JobProfileStreamModel,
@@ -99,9 +100,9 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   const { data: jobFamiliesData } = useGetJobFamiliesQuery();
   const { data: jobProfileStreamsData } = useGetJobProfileStreamsQuery();
 
-  const [searchValue, setSearchValue] = useState('');
+  // const [searchValue, setSearchValue] = useState('');
   const [treeData, setTreeData] = useState<any>([]);
-  const { SHOW_CHILD } = TreeSelect;
+  // const { SHOW_CHILD } = TreeSelect;
 
   useEffect(() => {
     if (jobFamiliesData && jobProfileStreamsData) {
@@ -556,15 +557,73 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                   ></Select>
                 </Col>
                 <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
-                  <TreeSelect
+                  <AccessibleTreeSelect
+                    width={'300px'}
+                    placeholderText={'Profession and Discipline'}
+                    treeData={JSON.parse(JSON.stringify(treeData))}
+                    value={treeSelectValues}
+                    onChange={(selectedItems) => {
+                      console.log('ONCHANGE');
+                      console.log('selectedItems: ', selectedItems);
+
+                      // separate selectedItems into jobFamily and jobStream
+                      const selectedJobFamilies: any[] = [];
+                      const selectedJobStreams: any[] = [];
+
+                      selectedItems.forEach((item: any) => {
+                        if (item.startsWith('job_family-')) {
+                          // Extract the job family ID and store it
+                          selectedJobFamilies.push(item.replace('job_family-', ''));
+                        } else if (item.startsWith('stream-')) {
+                          // Extract the job stream ID and store it
+                          selectedJobStreams.push(item.replace('stream-', ''));
+                        }
+                      });
+
+                      // console.log('tree on change: ', selectedJobFamilies, selectedJobStreams);
+
+                      const selections: { value: any; type: string }[] = [];
+                      const newValues = selectedJobFamilies;
+                      if (newValues != null) {
+                        newValues.forEach((val: any) => {
+                          selections.push({ value: val, type: 'jobFamily' });
+                        });
+                      }
+
+                      // console.log('selectedJobStream: ', selectedJobStream);
+                      const newValues2 = selectedJobStreams;
+                      if (newValues2 != null) {
+                        newValues2.forEach((val: any) => {
+                          selections.push({ value: val, type: 'jobStream' });
+                        });
+                      }
+
+                      // console.log('selections: ', selections);
+
+                      // remove previous settings and set new ones
+                      // get all the unique types from the selections, removing duplicates
+                      const types = ['jobStream', 'jobFamily'];
+
+                      // remove these types from the current selections
+                      const cleanedSelections = allSelections.filter((selection) => !types.includes(selection.type));
+
+                      // selections has value and type
+                      const newSelections = selections.map((item: any) => ({ value: item.value, type: item.type }));
+
+                      // console.log('cleaned, new: ', cleanedSelections, newSelections);
+                      setAllSelections([...cleanedSelections, ...newSelections]);
+                    }}
+                  />
+
+                  {/* <TreeSelect
                     className={`jobFamilyStreamFilter ${searchValue ? 'search-active' : 'no-search'}`}
                     value={treeSelectValues}
                     onSearch={(value) => {
                       setSearchValue(value);
                     }}
                     onChange={(selectedItems) => {
-                      // console.log('ONCHANGE');
-                      // console.log('selectedItems: ', selectedItems);
+                      console.log('ONCHANGE');
+                      console.log('selectedItems: ', selectedItems);
 
                       // separate selectedItems into jobFamily and jobStream
                       const selectedJobFamilies: any[] = [];
@@ -615,6 +674,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     }}
                     style={{ width: '200px' }}
                     treeData={treeData}
+                    treeNodeLabelProp="title"
+                    treeNodeFilterProp="title"
                     treeCheckable={true}
                     showCheckedStrategy={SHOW_CHILD}
                     placeholder="Profession and Discipline"
@@ -624,7 +685,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     tagRender={() => {
                       return <></>;
                     }}
-                  />
+                  /> */}
                 </Col>
                 <Col data-testid="Classification-filter" data-cy="Classification-filter">
                   <Select

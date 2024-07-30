@@ -168,7 +168,15 @@ export const HomePage = () => {
               </Space>
             }
           >
-            <div style={{ display: currentView !== 'chart' ? 'none' : 'block', height: '100%' }}>
+            <div className="sr-only" style={{ display: currentView !== 'chart' ? 'none' : 'block' }} tabIndex={0}>
+              This chart view is not keyboard accessible. Please switch to the tree view for a keyboard-navigable
+              version.
+            </div>
+            <div
+              style={{ display: currentView !== 'chart' ? 'none' : 'block', height: '100%' }}
+              aria-hidden={true}
+              tabIndex={-1}
+            >
               <OrgChart
                 data-testid="org-chart"
                 type={OrgChartType.DYNAMIC}

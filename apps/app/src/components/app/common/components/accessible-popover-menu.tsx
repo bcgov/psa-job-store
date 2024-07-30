@@ -6,12 +6,14 @@ interface AcessiblePopoverMenuProps {
   triggerButton: ReactNode;
   content: ReactNode;
   ariaLabel?: string;
+  padding?: string;
 }
 
 const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
   triggerButton,
   content,
   ariaLabel = 'Open menu',
+  padding,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -90,6 +92,7 @@ const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
       content={<ContentWrapper ref={contentRef}>{content}</ContentWrapper>}
       trigger="click"
       placement="bottom"
+      overlayInnerStyle={{ padding: padding }}
     >
       {/* add ref to triggerButton, e.g. ref={(el) => (ellipsisRef.current = el)} */}
       <TriggerButtonWrapper ref={ellipsisRef}>{triggerButton}</TriggerButtonWrapper>
