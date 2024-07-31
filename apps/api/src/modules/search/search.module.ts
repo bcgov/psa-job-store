@@ -17,6 +17,9 @@ import { SearchIndex, SearchService } from './search.service';
           username: configService.get('ELASTIC_USERNAME'),
           password: configService.get('ELASTIC_PASSWORD'),
         },
+        tls: {
+          rejectUnauthorized: false,
+        },
       }),
       inject: [ConfigService],
     }),

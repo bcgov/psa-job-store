@@ -4,8 +4,8 @@ import {
   FindManyOrganizationArgs,
   FindUniqueOrganizationArgs,
   Organization,
-} from '../../@generated/prisma-nestjs-graphql';
-import { DepartmentService } from './department.service';
+} from '../../../@generated/prisma-nestjs-graphql';
+import { DepartmentService } from '../department/department.service';
 import { OrganizationService } from './organization.service';
 
 @Resolver(() => Organization)
@@ -25,8 +25,8 @@ export class OrganizationResolver {
     return this.organizationService.getOrganization(args);
   }
 
-  @ResolveField(() => [Department])
-  async departments(@Parent() { id }: Organization) {
-    return this.departmentService.getDepartments({ where: { organization_id: { equals: id } } });
+  @ResolveField(() => Department)
+  department(@Parent() parent: Organization) {
+    return this.departmentService.getDepartment({ where: { id: parent.id } });
   }
 }
