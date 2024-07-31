@@ -319,11 +319,11 @@ export class SearchService {
         professional_registration_requirements: (
           profile.professional_registration_requirements as Prisma.JsonObject[]
         )?.map((pr) => pr.text),
-        preferences: profile.preferences,
-        knowledge_skills_abilities: profile.knowledge_skills_abilities,
-        willingness_statements: profile.willingness_statements,
+        preferences: (profile.preferences as Prisma.JsonObject[])?.map((pr) => pr.text),
+        knowledge_skills_abilities: (profile.knowledge_skills_abilities as Prisma.JsonObject[])?.map((pr) => pr.text),
+        willingness_statements: (profile.willingness_statements as Prisma.JsonObject[])?.map((pr) => pr.text),
         optional_requirements: profile.optional_requirements,
-        security_screenings: profile.security_screenings,
+        security_screenings: (profile.security_screenings as Prisma.JsonObject[])?.map((pr) => pr.text),
         classifications: (
           await this.prisma.jobProfileClassification.findMany({
             where: {

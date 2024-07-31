@@ -3,8 +3,11 @@ import { Alert, Card, Col, Divider, Form, Row, Typography } from 'antd';
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import WizardEditProfileArrayField from './wizard-edit-profile-array-field';
+import KnowledgeSkillsAbilities from './wizard-edit-profile-knowledge-skills-abilities';
 import Education from './wizard-edit-profile-min-req-education';
+import Preferences from './wizard-edit-profile-preferences';
 import ProfessionalRegistrationRequirements from './wizard-edit-profile-professional-reg-req';
+import Provisos from './wizard-edit-profile-provisos';
 import RelatedExperience from './wizard-edit-profile-related-experience';
 import SecurityScreenings from './wizard-edit-profile-security-screenings';
 
@@ -48,6 +51,7 @@ interface MinimumRequirementsSectionProps {
   isAdmin: boolean;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
+  pickerData: any;
 }
 
 const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
@@ -94,6 +98,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
   isAdmin,
   formErrors,
   trigger,
+  pickerData,
 }) => {
   return (
     <Card title="Minimum job requirements" className="custom-card" style={{ marginTop: 16 }}>
@@ -162,43 +167,47 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
                 editedFields={editedProfessionalRegistrationFields}
                 formErrors={formErrors}
                 trigger={trigger}
+                pickerData={pickerData}
               />
             </div>
 
             <Divider className="hr-reduced-margin" />
 
-            <WizardEditProfileArrayField
+            <Preferences
               useFormReturn={useFormReturn}
               originalFields={originalPreferencesFields}
               validateVerification={validateVerification}
-              label="Preferences"
-              tooltip="Use this section to add any preferred education or experience  for the position.  This can be helfpul when screening your pool of candidates. It could be an educational certification, or an experience in a certain type of work."
-              fieldName="preferences"
-              testId="preferences"
-              addButtonText="Add a job preference"
               setEditedFields={setEditedPreferencesFields}
               editedFields={editedPreferencesFields}
+              formErrors={formErrors}
+              trigger={trigger}
             />
 
             <Divider className="hr-reduced-margin" />
 
-            <WizardEditProfileArrayField
+            <KnowledgeSkillsAbilities
               useFormReturn={useFormReturn}
               originalFields={originalKnowledgeSkillsAbilitiesFields}
               validateVerification={validateVerification}
-              label="Knowledge, skills and abilities"
-              tooltip="Use this section to add knowledge, skills and abilities required to perform the work successfully."
-              fieldName="knowledge_skills_abilities"
-              testId="knowledge-skills-abilities"
-              addButtonText="Add a knowledge, skill or ability requirement"
-              formErrors={formErrors}
               setEditedFields={setEditedKnowledgeSkillsAbilitiesFields}
               editedFields={editedKnowledgeSkillsAbilitiesFields}
+              formErrors={formErrors}
+              trigger={trigger}
             />
 
             <Divider className="hr-reduced-margin" />
 
-            <WizardEditProfileArrayField
+            <Provisos
+              useFormReturn={useFormReturn}
+              originalFields={originalProvisosFields}
+              validateVerification={validateVerification}
+              setEditedFields={setEditedProvisosFields}
+              editedFields={editedProvisosFields}
+              formErrors={formErrors}
+              trigger={trigger}
+            />
+
+            {/* <WizardEditProfileArrayField
               useFormReturn={useFormReturn}
               originalFields={originalProvisosFields}
               validateVerification={validateVerification}
@@ -209,20 +218,9 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               addButtonText="Add a proviso"
               setEditedFields={setEditedProvisosFields}
               editedFields={editedProvisosFields}
-            />
+            /> */}
 
             <Divider className="hr-reduced-margin" />
-
-            {/* <WizardEditProfileArrayField
-              useFormReturn={useFormReturn}
-              originalFields={originalProvisosFields}
-              validateVerification={validateVerification}
-              label=""
-              tooltip=""
-              fieldName=""
-              testId=""
-              textField=""
-              addButtonText="" */}
 
             {/* security screenings */}
 
@@ -235,20 +233,8 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
                 editedFields={editedSecurityScreeningsFields}
                 formErrors={formErrors}
                 trigger={trigger}
+                pickerData={pickerData}
               />
-              {/* <WizardEditProfileArrayField
-                useFormReturn={useFormReturn}
-                originalFields={originalSecurityScreeningsFields}
-                validateVerification={validateVerification}
-                label="Security screenings"
-                tooltip="Use this section to add any security screenings required for the position. This could include a criminal record check, a security clearance, or a driver's abstract."
-                fieldName="security_screenings"
-                testId="security-screening"
-                addButtonText="Add a security screening requirement"
-                setEditedFields={setEditedSecurityScreeningsFields}
-                editedFields={editedSecurityScreeningsFields}
-                formErrors={formErrors}
-              /> */}
             </div>
 
             <Divider className="hr-reduced-margin" />

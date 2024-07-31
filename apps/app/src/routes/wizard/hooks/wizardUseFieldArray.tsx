@@ -25,10 +25,17 @@ const useFormFields = ({
   significant,
   significant_add = true,
 }: UseFormFieldsProps) => {
-  const { fields, append, remove, update } = useFieldArray({
+  const {
+    // fields: fields_fromUseFieldArray,
+    append,
+    remove,
+    update,
+  } = useFieldArray({
     control: useFormReturn.control,
     name: fieldName,
   });
+
+  const fields = useFormReturn.watch(fieldName);
 
   const handleRemove = (index: number) => {
     const currentValues = useFormReturn.getValues(fieldName);
@@ -79,12 +86,18 @@ const useFormFields = ({
     setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: false }));
     const currentValues: TrackedFieldArrayItem[] = useFormReturn.getValues(fieldName) as TrackedFieldArrayItem[];
     currentValues[index].text = originalFields?.[index]?.text;
-    update(index, {
-      text: originalFields?.[index]?.text,
-      disabled: false,
-      is_readonly: originalFields?.[index]?.is_readonly,
-      is_significant: originalFields?.[index]?.is_significant,
-    });
+    // console.log('handle reset: ', index, originalFields?.[index]?.text);
+    // update for some reason doesn't update the value in the text box
+    // update(index, {
+    //   text: originalFields?.[index]?.text,
+    //   disabled: false,
+    //   is_readonly: originalFields?.[index]?.is_readonly,
+    //   is_significant: originalFields?.[index]?.is_significant,
+    // });
+    useFormReturn.setValue(`${fieldName}.${index}.text`, originalFields?.[index]?.text);
+    useFormReturn.setValue(`${fieldName}.${index}.disabled`, false);
+    useFormReturn.setValue(`${fieldName}.${index}.is_readonly`, originalFields?.[index]?.is_readonly);
+    useFormReturn.setValue(`${fieldName}.${index}.is_significant`, originalFields?.[index]?.is_significant);
   };
 
   return {
@@ -93,6 +106,9 @@ const useFormFields = ({
     handleAddBack,
     handleAddNew,
     handleReset,
+    remove,
+    append,
+    update,
   };
 };
 

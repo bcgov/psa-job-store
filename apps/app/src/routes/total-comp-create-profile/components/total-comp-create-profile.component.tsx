@@ -17,6 +17,7 @@ import {
   Card,
   Checkbox,
   Col,
+  Descriptions,
   Divider,
   Form,
   Input,
@@ -28,6 +29,7 @@ import {
   Select,
   Switch,
   Tabs,
+  Tag,
   Tooltip,
   TreeSelect,
   Typography,
@@ -35,7 +37,17 @@ import {
   notification,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
+import { Type } from 'class-transformer';
+import {
+  ArrayMinSize,
+  IsNotEmpty,
+  NotEquals,
+  ValidateNested,
+  ValidationOptions,
+  registerDecorator,
+} from 'class-validator';
 import copy from 'copy-to-clipboard';
+import DOMPurify from 'dompurify';
 import debounce from 'lodash.debounce';
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
@@ -71,17 +83,23 @@ import {
   useDuplicateJobProfileMutation,
   useGetJobProfilesDraftsMinistriesQuery,
   useGetRequirementsWithoutReadOnlyQuery,
+  useLazyGetJobProfileMetaQuery,
   useLazyGetJobProfileQuery,
   useLazyGetNextAvailableJobProfileNumberQuery,
   useLazyIsJobProfileNumberAvailableQuery,
 } from '../../../redux/services/graphql-api/job-profile.api';
 import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-role.api';
 import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
+import { useLazyGetPositionRequestsCountQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { FormItem } from '../../../utils/FormItem';
 import ContentWrapper from '../../home/components/content-wrapper.component';
-import { JobProfileValidationModel, TitleField } from '../../job-profiles/components/job-profile.component';
+import {
+  JobProfileValidationModel,
+  OverviewField,
+  ProgramOverviewField,
+  TitleField,
+} from '../../job-profiles/components/job-profile.component';
 import { ContextOptionsReadonly } from '../../wizard/components/context-options-readonly.component';
-import { IsIndigenousCompetency } from '../../wizard/components/is-indigenous-competency.component';
 import BehaviouralComptencyPicker from '../../wizard/components/wizard-behavioural-comptency-picker';
 import WizardOverview from '../../wizard/components/wizard-edit-profile-overview';
 import WizardProgramOverview from '../../wizard/components/wizard-edit-profile-program-overview';
@@ -95,7 +113,7 @@ import ReorderButtons from './reorder-buttons';
 const { Option } = Select;
 const { Text } = Typography;
 
-const employeeGroupIds: string[] = ['MGT', 'GEU', 'OEX', 'NUR', 'PEA'];
+const employeeGroupIds: string[] = ['MGT', 'GEU', 'OEX', 'NUR', 'PEA', 'LGL'];
 
 // Define a custom clipboard to handle paste events
 class PlainTextClipboard extends Quill.import('modules/clipboard') {
@@ -129,6 +147,108 @@ interface TotalCompCreateProfileComponentProps {
   setId: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
+export function IsNotNull(validationOptions?: ValidationOptions) {
+  return function (object: any, propertyName: string) {
+    registerDecorator({
+      name: 'isNotNull',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any) {
+          return value !== null && value !== undefined && value.toString().length > 0;
+        },
+      },
+    });
+  };
+}
+
+function ValidProfessionsValidator(validationOptions?: ValidationOptions) {
+  return function (object: any, propertyName: string) {
+    registerDecorator({
+      name: 'validProfessionsValidator',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: ProfessionsModel[]) {
+          if (!Array.isArray(value) || value.length === 0) {
+            return false;
+          }
+
+          // If there's only one profession and its jobFamily is -1, fail
+          if (value.length === 1 && value[0].jobFamily === -1) {
+            return false;
+          }
+
+          // Ensure at least one profession has a valid jobFamily
+          return value.some((profession) => profession.jobFamily !== -1);
+        },
+        defaultMessage() {
+          return 'At least one profession must be selected.';
+        },
+      },
+    });
+  };
+}
+
+export class BasicDetailsValidationModel {
+  // // New properties
+  // @IsNotEmpty()
+  // @Length(5, 100)
+  // department: string;
+
+  // @Min(1)
+  // @Max(10)
+  // teamSize: number;
+
+  // @IsArray()
+  // @ArrayMinSize(1)
+  // @ArrayMaxSize(5)
+  // keyResponsibilities: string[];
+
+  // Override properties from parent
+
+  @ValidateNested()
+  @Type(() => TitleField)
+  title: TitleField | string;
+
+  jobStoreNumber: string;
+
+  @IsNotNull({ message: 'Employee group must be selected' })
+  employeeGroup: string | null;
+
+  @IsNotNull({ message: 'Classification must be selected' })
+  classification: string | null;
+
+  @IsNotNull({ message: 'Job role must be selected' })
+  jobRole: number | null;
+
+  @ArrayMinSize(1, { message: 'At least one report-to relationship must be selected.' })
+  reportToRelationship: string[];
+
+  @ArrayMinSize(1, { message: 'At least one scope of responsibility must be selected.' })
+  scopeOfResponsibility: number | number[] | null; // number[] is latest change, used to allow only single selection
+
+  @ArrayMinSize(1, { message: 'At least one ministry must be selected.' })
+  ministries: string[];
+
+  @IsNotEmpty({ message: 'Job context must be provided.' })
+  @NotEquals('<p><br></p>', { message: 'Job context must be provided.' })
+  jobContext: string;
+
+  @ValidProfessionsValidator()
+  professions: ProfessionsModel[];
+
+  originalJobStoreNumber: string;
+  role: number;
+  classificationReviewRequired: boolean;
+  all_reports_to: boolean;
+  all_organizations: boolean;
+  overview: OverviewField | string;
+  program_overview: ProgramOverviewField | string;
+}
+
 export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileComponentProps> = ({
   jobProfileData,
   id,
@@ -140,6 +260,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [profileJson, setProfileJson] = useState<any>(null);
 
   const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
+  // const [triggerGetPreviousJobProfile, { data: previousJobProfile }] = useLazyGetJobProfileByNumberQuery();
+  const [triggerGetJobProfileMeta, { data: jobProfileMeta }] = useLazyGetJobProfileMetaQuery();
+  const [triggerGetPositionRequestsCount, { data: positionRequestsCount }] = useLazyGetPositionRequestsCountQuery();
   let link: string;
   const [selectedKeys, setSelectedKeys] = useState([]);
 
@@ -267,8 +390,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     if (lazyJobProfile) {
       setProfileJson(lazyJobProfile);
+      triggerGetJobProfileMeta(lazyJobProfile.jobProfile.number);
     }
-  }, [lazyJobProfile]);
+  }, [lazyJobProfile, triggerGetJobProfileMeta]);
 
   // console.log('=== TotalCompCreateProfilePage, id: ', id, jobProfileData);
 
@@ -297,8 +421,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   }));
   const prevProfessionsData = useRef(professionsData);
 
-  const basicUseFormReturn = useForm<JobProfileValidationModel>({
-    resolver: classValidatorResolver(JobProfileValidationModel),
+  const basicUseFormReturn = useForm<BasicDetailsValidationModel>({
+    resolver: classValidatorResolver(BasicDetailsValidationModel),
     defaultValues: {
       title: { text: '' } as TitleField,
       jobStoreNumber: '',
@@ -499,15 +623,21 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       jobFamilyIds: selectedProfession.map((p) => p.jobFamily),
       jobFamilyStreamIds: selectedProfession.map((p) => p.jobStreams).flat(),
       classificationId: selectedClassificationId && selectedClassificationId.split('.')[0],
+      classificationPeoplesoftId: selectedClassificationId && selectedClassificationId.split('.')[2],
       classificationEmployeeGroupId: employeeGroup,
       ministryIds: !allOrganizations ? selectedMinistry : undefined,
       jobFamilyWithNoStream: selectedProfession.filter((p) => p.jobStreams.length === 0).map((p) => p.jobFamily),
       excludeProfileId: jobProfileData?.jobProfile.id,
     },
-    {
-      skip: !selectedClassificationId || !employeeGroup,
-    },
+    // {
+    //   skip: !selectedClassificationId || !employeeGroup,
+    // },
   );
+
+  const itemInPickerData = (text: string, category: string) => {
+    return pickerData?.requirementsWithoutReadOnly[category].some((r: any) => r.text === text);
+  };
+
   // console.log('render, selectedClassificationId: ', selectedClassificationId);
   // console.log('professionalRequirementsPickerData:', professionalRequirementsPickerData);
 
@@ -523,10 +653,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const jobProfileUseFormReturn = useForm<JobProfileValidationModel>({
     resolver: classValidatorResolver(JobProfileValidationModel),
     defaultValues: {
-      state: '',
+      state: 'DRAFT',
       overview: { text: '' } as TrackedFieldArrayItem,
       program_overview: { text: '' } as TrackedFieldArrayItem,
-      accountabilities: jobProfileData?.jobProfile.accountabilities.map(
+      accountabilities: jobProfileData?.jobProfile.accountabilities?.map(
         (a) =>
           ({
             text: a.text,
@@ -540,6 +670,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             text: r.text,
             nonEditable: r.is_readonly,
             is_significant: r.is_significant,
+            tc_is_readonly: r.tc_is_readonly,
           }) as AccountabilityItem,
       ),
       job_experience: jobProfileData?.jobProfile.job_experience?.map(
@@ -555,17 +686,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       //     professional_registration_requirement: bc,
       //   }),
       // ),
-      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements,
-      optional_requirements: jobProfileData?.jobProfile.optional_requirements.map((r: any) => ({ text: r })),
-      preferences: jobProfileData?.jobProfile.preferences,
-      knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities,
-      willingness_statements: jobProfileData?.jobProfile.willingness_statements,
-      security_screenings: jobProfileData?.jobProfile.security_screenings.map(
+      professional_registration_requirements: jobProfileData?.jobProfile.professional_registration_requirements?.map(
         (s) =>
           ({
             text: s.text,
             nonEditable: s.is_readonly,
             is_significant: s.is_significant,
+            tc_is_readonly: s.tc_is_readonly,
+          }) as AccountabilityItem,
+      ),
+      optional_requirements: jobProfileData?.jobProfile.optional_requirements?.map((r: any) => ({ text: r })),
+      preferences: jobProfileData?.jobProfile.preferences,
+      knowledge_skills_abilities: jobProfileData?.jobProfile.knowledge_skills_abilities,
+      willingness_statements: jobProfileData?.jobProfile.willingness_statements,
+      security_screenings: jobProfileData?.jobProfile.security_screenings?.map(
+        (s) =>
+          ({
+            text: s.text,
+            nonEditable: s.is_readonly,
+            is_significant: s.is_significant,
+            tc_is_readonly: s.tc_is_readonly,
           }) as SecurityScreeningItem,
       ),
       behavioural_competencies: jobProfileData?.jobProfile.behavioural_competencies.map((bc) => ({
@@ -597,10 +737,72 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     if (jobProfileData) {
       setProfileJson(jobProfileData);
+      triggerGetJobProfileMeta(jobProfileData.jobProfile.number);
+      triggerGetPositionRequestsCount({ where: { parent_job_profile_id: { equals: jobProfileData.jobProfile.id } } });
       triggerBasicDetailsValidation();
       triggerProfileValidation();
     }
-  }, [jobProfileData, triggerBasicDetailsValidation, triggerProfileValidation]);
+  }, [
+    jobProfileData,
+    triggerBasicDetailsValidation,
+    triggerGetJobProfileMeta,
+    triggerGetPositionRequestsCount,
+    triggerProfileValidation,
+  ]);
+  const [versionInReview, setVersionInReview] = useState<number>(-1); // set to -1 to for triggering second call
+  const [versionCompleted, setVersionCompleted] = useState<number>(0);
+  const [totalInReview, setTotalInReview] = useState<number>(0);
+  const [totalCompleted, setTotalCompleted] = useState<number>(0);
+  useEffect(() => {
+    if (jobProfileData && positionRequestsCount && versionInReview == -1) {
+      setVersionInReview(positionRequestsCount.positionRequestsCount.verification);
+      setVersionCompleted(positionRequestsCount.positionRequestsCount.completed);
+
+      return;
+    }
+    if (jobProfileData && positionRequestsCount && jobProfileMeta) {
+      setTotalInReview(positionRequestsCount.positionRequestsCount.verification);
+      setTotalCompleted(positionRequestsCount.positionRequestsCount.completed);
+      triggerGetPositionRequestsCount({
+        where: {
+          parent_job_profile_id: { in: jobProfileMeta?.jobProfileMeta.versions.map((v: { id: number }) => v.id) },
+        },
+      });
+    }
+  }, [
+    jobProfileData,
+    jobProfileMeta,
+    positionRequestsCount,
+    totalInReview,
+    triggerGetPositionRequestsCount,
+    versionInReview,
+  ]);
+
+  // use ref to hold the flag for auto security settings setup
+  const autoSecuritySettingsSetup = useRef(false);
+  // automatically add security screenings that don't have family or stream associated with them from the pickdata
+  useEffect(() => {
+    if (
+      pickerData?.requirementsWithoutReadOnly?.securityScreenings &&
+      !autoSecuritySettingsSetup.current &&
+      location.pathname === '/draft-job-profiles/create'
+    ) {
+      const securityScreenings = pickerData.requirementsWithoutReadOnly.securityScreenings;
+      const securityScreeningsWithoutFamilyStream = securityScreenings.filter(
+        (s: any) => s.jobFamilies.length == 0 && !s.classification,
+      );
+      autoSecuritySettingsSetup.current = true;
+
+      const updated = securityScreeningsWithoutFamilyStream?.map((field: any) => ({
+        text: field.text,
+        nonEditable: true,
+        is_significant: true,
+        tc_is_readonly: true,
+      }));
+      profileSetValue('security_screenings', updated as AccountabilityItem[]);
+      triggerProfileValidation();
+    }
+  }, [pickerData, profileSetValue, triggerProfileValidation]);
 
   // bug fix for case when user re-navigates to previously opened profile and some of the fields would appear blank
   useEffect(() => {
@@ -668,7 +870,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     return treeData ? transformToTreeData(treeData.groupedClassifications) : [];
   }, [treeData, transformToTreeData]);
 
-  const [maxReportsTo, setMaxReportsTo] = useState<number>(0);
   const setAllReportToRelationships = useCallback(
     (isChecked: boolean) => {
       // Get all values for 'reportToRelationship' if isChecked is true, else an empty array
@@ -678,8 +879,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       let filteredReportToRelationship = allValues;
       if (selectedClassificationId)
         filteredReportToRelationship = allValues.filter((r: string) => r !== selectedClassificationId);
-      isChecked ? setMaxReportsTo(filteredReportToRelationship.length) : setMaxReportsTo(0);
       // Update the 'reportToRelationship' form variable
+
+      console.log('selectedClassificationId:', selectedClassificationId);
       setValue('reportToRelationship', filteredReportToRelationship);
     },
     [getAllTreeValues, treeDataConverted, selectedClassificationId, setValue],
@@ -699,9 +901,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     if (allReportsTo) handleSelectAllReportTo(allReportsTo);
   }, [selectedClassificationId, handleSelectAllReportTo, allReportsTo]);
 
+  const [isCurrentVersion, setIsCurrentVersion] = useState(true);
   useEffect(() => {
     // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
+      setIsCurrentVersion(jobProfileData?.jobProfile.current_version);
       // console.log('setting values..');
       // Basic Details Form
       setValue('title.text', jobProfileData.jobProfile.title as string);
@@ -710,8 +914,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
       setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup ?? null);
       const rawClassification = jobProfileData.jobProfile?.classifications?.[0]?.classification ?? null;
+      let classificationString = '';
       if (rawClassification != null) {
         const { id, employee_group_id, peoplesoft_id } = rawClassification;
+        classificationString = `${id}.${employee_group_id}.${peoplesoft_id}`;
         setValue('classification', `${id}.${employee_group_id}.${peoplesoft_id}`);
       } else {
         setValue('classification', null);
@@ -745,9 +951,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       setValue('all_reports_to', allReportsToValue);
 
       if (allReportsToValue) {
-        // If 'all_reports_to' is true, set 'reportToRelationship' to all possible values
+        // If 'all_reports_to' is true, set 'reportToRelationship' to all possible values EXCEPT current classification
         const allValues = getAllTreeValues(treeDataConverted);
-        setValue('reportToRelationship', allValues);
+        let filteredReportToRelationship = allValues;
+        if (classificationString)
+          filteredReportToRelationship = allValues.filter((r: string) => r !== classificationString);
+
+        setValue('reportToRelationship', filteredReportToRelationship);
       } else {
         // If 'all_reports_to' is false, set 'reportToRelationship' to specific values
         setValue(
@@ -982,6 +1192,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     append: appendEducationAndWorkExperience,
     remove: removeEducationAndWorkExperience,
     move: moveEducationAndWorkExperience,
+    update: updateEducationAndWorkExperience,
   } = useFieldArray({
     control: profileControl,
     name: 'education',
@@ -1263,7 +1474,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       if (jobProfileMinimumRequirements && selectedClassification) {
         const filteredRequirements = jobProfileMinimumRequirements.jobProfileMinimumRequirements
           .filter((req) => req.grade === selectedClassification.grade)
-          .map((req) => ({ text: req.requirement, nonEditable: false, is_significant: true }));
+          .map((req) => ({ text: req.requirement, nonEditable: false, is_significant: true, tc_is_readonly: true }));
 
         // console.log('filteredRequirements: ', filteredRequirements);
         // Update the educationAndWorkExperiences field array
@@ -1292,21 +1503,22 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             is_readonly: a.nonEditable,
             is_significant: a.is_significant,
           }))
-          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+          .filter((acc: { text: string }) => acc.text?.trim() !== ''),
         education: formData.education
           .map((a: any) => ({
             text: a.text,
             is_readonly: a.nonEditable,
             is_significant: a.is_significant,
+            tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+          .filter((acc: { text: string }) => acc.text?.trim() !== ''),
         job_experience: formData.job_experience
           .map((a: any) => ({
             text: a.text,
             is_readonly: a.nonEditable,
             is_significant: a.is_significant,
           }))
-          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+          .filter((acc: { text: string }) => acc.text?.trim() !== ''),
         professional_registration_requirements: formData.professional_registration_requirements
           .map((a: any) => ({
             text: a.text,
@@ -1314,7 +1526,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             is_significant: a.is_significant,
             tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: any) => acc.text.trim() !== ''),
+          .filter((acc: any) => acc.text?.trim() !== ''),
         optional_requirements: formData.optional_requirements
           .map((o: any) => o.text)
           .filter((acc: string) => acc.trim() !== ''),
@@ -1323,26 +1535,27 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             text: a.text,
             tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: any) => acc.text.trim() !== ''),
+          .filter((acc: any) => acc.text?.trim() !== ''),
         knowledge_skills_abilities: formData.knowledge_skills_abilities
           .map((a: any) => ({
             text: a.text,
             tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: any) => acc.text.trim() !== ''),
+          .filter((acc: any) => acc.text?.trim() !== ''),
         willingness_statements: formData.willingness_statements
           .map((a: any) => ({
             text: a.text,
             tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: any) => acc.text.trim() !== ''),
+          .filter((acc: any) => acc.text?.trim() !== ''),
         security_screenings: formData.security_screenings
           .map((a: any) => ({
             text: a.text,
             is_readonly: a.nonEditable ?? false,
             is_significant: a.is_significant ?? false,
+            tc_is_readonly: a.tc_is_readonly,
           }))
-          .filter((acc: { text: string }) => acc.text.trim() !== ''),
+          .filter((acc: { text: string }) => acc.text?.trim() !== ''),
         all_reports_to: formData.all_reports_to,
         all_organizations: formData.all_organizations,
         total_comp_create_form_misc: {
@@ -1435,6 +1648,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 };
               }),
             },
+        version: formData.version,
+        owner: {
+          connect: { id: jobProfileData?.jobProfile.owner.id },
+        },
+        created_at: jobProfileData?.jobProfile.created_at,
+        published_by: {
+          connect: { id: jobProfileData?.jobProfile.published_by?.id },
+        },
+        published_at: jobProfileData?.jobProfile.published_at,
       },
       id: parseInt(id ?? ''),
     };
@@ -1504,17 +1726,18 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const profileDetails = getProfileValues();
 
     if (isUnpublishing) isPublishing = false;
-
+    const newState = isPublishing ? 'PUBLISHED' : isUnpublishing ? 'DRAFT' : state;
     const combinedData = {
       ...basicDetails,
       ...profileDetails,
       // Set the state based on whether the job profile is being published
-      state: isPublishing ? 'PUBLISHED' : null,
+      state: newState,
+      version: jobProfileData?.jobProfile.version,
     };
 
-    if (isPublishing) profileSetValue('state', 'PUBLISHED');
-    if (isUnpublishing) {
-      combinedData.state = 'DRAFT';
+    if (isPublishing) {
+      profileSetValue('state', 'PUBLISHED');
+    } else if (isUnpublishing) {
       profileSetValue('state', 'DRAFT');
     }
 
@@ -1547,8 +1770,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         .map((error: any) => {
           // only interested in title validation here
           // todo: tag the error so it's easier to identify
-          if (!error?.text?.message || !error?.text?.message.toString().startsWith('Title must be between'))
-            return null;
+          // if (!error?.text?.message || !error?.text?.message.toString().startsWith('Title must be between'))
+          //   return null;
 
           const message =
             error.message != null
@@ -1939,6 +2162,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   trigger={triggerBasicDetailsValidation}
                   formErrors={basicFormErrors}
                   useFormReturn={basicUseFormReturn}
+                  readOnly={!isCurrentVersion}
                 />
                 {/*
                 <Card title="Job Title" bordered={false} className="custom-card">
@@ -1958,34 +2182,42 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 <Card title="JobStore Number" style={{ marginTop: 16 }} bordered={false} className="custom-card">
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                      <FormItem control={control} name="jobStoreNumber">
-                        <label style={srOnlyStyle} htmlFor="jobStoreNumber">
-                          JobStore Number
-                        </label>
-                        <Input
-                          placeholder="Ex.: 1001"
-                          aria-label="JobStore Number"
-                          addonBefore={
-                            <Tooltip title="Fetch Next Available Number">
-                              {fetchingNextNumber ? <LoadingOutlined /> : <ReloadOutlined onClick={fetchNextNumber} />}
-                            </Tooltip>
-                          }
-                          addonAfter={
-                            <>
-                              {validationStatus === 'valid' && (
-                                <Tooltip title="Number is Valid">
-                                  <CheckCircleOutlined style={{ color: 'green' }} />
-                                </Tooltip>
-                              )}
-                              {validationStatus === 'invalid' && (
-                                <Tooltip title="Number is Invalid">
-                                  <CloseCircleOutlined style={{ color: 'red' }} />
-                                </Tooltip>
-                              )}
-                            </>
-                          }
-                        />
-                      </FormItem>
+                      {isCurrentVersion ? (
+                        <FormItem control={control} name="jobStoreNumber">
+                          <label style={srOnlyStyle} htmlFor="jobStoreNumber">
+                            JobStore Number
+                          </label>
+                          <Input
+                            placeholder="Ex.: 1001"
+                            aria-label="JobStore Number"
+                            addonBefore={
+                              <Tooltip title="Fetch Next Available Number">
+                                {fetchingNextNumber ? (
+                                  <LoadingOutlined />
+                                ) : (
+                                  <ReloadOutlined onClick={fetchNextNumber} />
+                                )}
+                              </Tooltip>
+                            }
+                            addonAfter={
+                              <>
+                                {validationStatus === 'valid' && (
+                                  <Tooltip title="Number is Valid">
+                                    <CheckCircleOutlined style={{ color: 'green' }} />
+                                  </Tooltip>
+                                )}
+                                {validationStatus === 'invalid' && (
+                                  <Tooltip title="Number is Invalid">
+                                    <CloseCircleOutlined style={{ color: 'red' }} />
+                                  </Tooltip>
+                                )}
+                              </>
+                            }
+                          />
+                        </FormItem>
+                      ) : (
+                        <span>{jobStoreNumber}</span>
+                      )}
                     </Col>
                   </Row>
                 </Card>
@@ -1994,42 +2226,50 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Employee group" labelCol={{ className: 'card-label' }}>
-                        <Controller
-                          name="employeeGroup"
-                          control={control}
-                          render={({ field: { onChange, onBlur, value } }) => {
-                            return (
-                              <Select
-                                placeholder="Choose an employee group"
-                                onChange={(arg) => {
-                                  if (selectedClassificationId) {
-                                    showWarningModal(
-                                      () => {
-                                        // User confirmed the change
-                                        setValue('classification', null);
+                        {isCurrentVersion ? (
+                          <>
+                            <Controller
+                              name="employeeGroup"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => {
+                                return (
+                                  <Select
+                                    placeholder="Choose an employee group"
+                                    onChange={(arg) => {
+                                      if (selectedClassificationId) {
+                                        showWarningModal(
+                                          () => {
+                                            // User confirmed the change
+                                            setValue('classification', null);
+                                            onChange(arg);
+                                          },
+                                          () => {
+                                            // User canceled the change
+                                          },
+                                        );
+                                      } else {
+                                        // Call the original onChange to update the form state
                                         onChange(arg);
-                                      },
-                                      () => {
-                                        // User canceled the change
-                                      },
-                                    );
-                                  } else {
-                                    // Call the original onChange to update the form state
-                                    onChange(arg);
-                                  }
-                                }}
-                                onBlur={onBlur}
-                                value={value}
-                                style={{ width: '100%' }}
-                                // Transforming data to required format for the Select options prop
-                                options={employeeGroupData?.employeeGroups.map((group) => ({
-                                  label: group.id,
-                                  value: group.id,
-                                }))}
-                              />
-                            );
-                          }}
-                        />
+                                      }
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    onBlur={onBlur}
+                                    value={value}
+                                    style={{ width: '100%' }}
+                                    // Transforming data to required format for the Select options prop
+                                    options={employeeGroupData?.employeeGroups.map((group) => ({
+                                      label: group.id,
+                                      value: group.id,
+                                    }))}
+                                  />
+                                );
+                              }}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="employeeGroup" />
+                          </>
+                        ) : (
+                          <Typography.Text>{employeeGroup}</Typography.Text>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2040,55 +2280,68 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Classification" labelCol={{ className: 'card-label' }}>
                         {/* Form.Item for cosmetic purposes */}
-                        <Controller
-                          name="classification"
-                          control={control}
-                          render={({ field: { onChange, onBlur, value } }) => {
-                            return (
-                              <Select
-                                placeholder="Choose a classification"
-                                onChange={(newValue) => {
-                                  // onChange(newValue);
-                                  // handleClassificationChange(newValue);
+                        {isCurrentVersion ? (
+                          <>
+                            <Controller
+                              name="classification"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => {
+                                return (
+                                  <Select
+                                    placeholder="Choose a classification"
+                                    onChange={(newValue) => {
+                                      // onChange(newValue);
+                                      // handleClassificationChange(newValue);
 
-                                  if (selectedClassificationId) {
-                                    showWarningModal(
-                                      () => {
+                                      if (selectedClassificationId) {
+                                        showWarningModal(
+                                          () => {
+                                            onChange(newValue);
+                                            handleClassificationChange(newValue);
+                                          },
+                                          () => {
+                                            // User canceled the change
+                                          },
+                                        );
+                                      } else {
                                         onChange(newValue);
                                         handleClassificationChange(newValue);
-                                      },
-                                      () => {
-                                        // User canceled the change
-                                      },
-                                    );
-                                  } else {
-                                    onChange(newValue);
-                                    handleClassificationChange(newValue);
-                                  }
-                                }}
-                                onBlur={onBlur} // notify when input is touched/blur
-                                value={value}
-                                style={{ width: '100%' }}
-                                showSearch={true}
-                                filterOption={(input, option) => {
-                                  if (!option) return false;
-                                  return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                                }}
-                                // Transforming data to required format for the Select options prop
-                                // options={classificationsData?.classifications.map((classification) => ({
-                                //   label: classification.name,
-                                //   value: classification.id,
-                                // }))}
-                                options={filteredClassifications.map(
-                                  ({ id, employee_group_id, peoplesoft_id, name }) => ({
-                                    label: name,
-                                    value: `${id}.${employee_group_id}.${peoplesoft_id}`,
-                                  }),
-                                )}
-                              ></Select>
-                            );
-                          }}
-                        />
+                                      }
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    onBlur={onBlur} // notify when input is touched/blur
+                                    value={value}
+                                    style={{ width: '100%' }}
+                                    showSearch={true}
+                                    filterOption={(input, option) => {
+                                      if (!option) return false;
+                                      return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                                    }}
+                                    // Transforming data to required format for the Select options prop
+                                    // options={classificationsData?.classifications.map((classification) => ({
+                                    //   label: classification.name,
+                                    //   value: classification.id,
+                                    // }))}
+                                    options={filteredClassifications.map(
+                                      ({ id, employee_group_id, peoplesoft_id, name }) => ({
+                                        label: name,
+                                        value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+                                      }),
+                                    )}
+                                  ></Select>
+                                );
+                              }}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="classification" />
+                          </>
+                        ) : (
+                          <Typography.Text>
+                            {
+                              filteredClassifications.find((c) => c.id === selectedClassificationId?.split('.')[0])
+                                ?.code
+                            }
+                          </Typography.Text>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2098,22 +2351,34 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       <Form.Item label="Job role" labelCol={{ className: 'card-label' }}>
-                        <Controller
-                          name="jobRole"
-                          control={control}
-                          render={({ field: { onChange, onBlur, value } }) => (
-                            <Select
-                              placeholder="Choose a job role"
-                              onChange={onChange}
-                              onBlur={onBlur}
-                              value={value}
-                              options={jobRolesData?.jobRoles.map((jobRole) => ({
-                                label: jobRole.name,
-                                value: jobRole.id,
-                              }))}
-                            ></Select>
-                          )}
-                        />
+                        {isCurrentVersion ? (
+                          <>
+                            <Controller
+                              name="jobRole"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <Select
+                                  placeholder="Choose a job role"
+                                  onChange={(args) => {
+                                    onChange(args);
+                                    triggerBasicDetailsValidation();
+                                  }}
+                                  onBlur={onBlur}
+                                  value={value}
+                                  options={jobRolesData?.jobRoles.map((jobRole) => ({
+                                    label: jobRole.name,
+                                    value: jobRole.id,
+                                  }))}
+                                ></Select>
+                              )}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="jobRole" />
+                          </>
+                        ) : (
+                          <Typography.Text style={{ marginBottom: '5px', display: 'block' }}>
+                            {jobProfileData?.jobProfile?.role?.name}
+                          </Typography.Text>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2127,92 +2392,120 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         labelCol={{ className: 'card-label' }}
                         className="label-only"
                       ></Form.Item>
-                      {professionsFields.map((field, index: number) => (
-                        <div key={field.id}>
-                          <Form.Item style={{ marginBottom: '0.5rem' }}>
-                            {/* First level of selection for job family /profession */}
-                            <Controller
-                              // ref={register()}
-                              control={control}
-                              name={`professions.${index}.jobFamily`}
-                              render={({ field: { onChange, onBlur, value } }) => (
-                                <Row gutter={8} wrap={false}>
-                                  <Col flex="auto">
-                                    <Select
-                                      value={value == -1 ? null : value}
-                                      onBlur={onBlur}
-                                      placeholder="Choose a profession"
-                                      onChange={(v) => {
-                                        // When profession changes, clear the jobStreams for this profession
-                                        setValue(`professions.${index}.jobStreams`, []);
-                                        onChange(v);
-                                        handleJobFamilyChange();
-                                      }}
-                                    >
-                                      {/* Dynamically render profession options based on your data */}
-                                      {jobFamiliesData?.jobFamilies
-                                        .filter(
-                                          (jf) =>
-                                            !selectedProfession.map((p) => p.jobFamily).includes(jf.id) ||
-                                            jf.id == selectedProfession[index].jobFamily,
-                                        )
-                                        .map((family) => (
-                                          <Option key={family.id} value={family.id}>
-                                            {family.name}
-                                          </Option>
-                                        ))}
-                                    </Select>
-                                  </Col>
-                                  <Col>
-                                    <Button
-                                      disabled={index === 0 && selectedProfession?.[index]?.jobFamily === -1}
-                                      onClick={() => {
-                                        Modal.confirm({
-                                          title: 'Confirmation',
-                                          content:
-                                            'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
-                                          onOk: () => {
-                                            remove(index);
-                                            // removing last one - append blank
-                                            if (selectedProfession?.length === 1) {
-                                              append({ jobFamily: -1, jobStreams: [] });
-                                            }
+                      {professionsFields.map((field, index: number) =>
+                        isCurrentVersion ? (
+                          <div key={field.id}>
+                            <Form.Item style={{ marginBottom: '0.5rem' }}>
+                              {/* First level of selection for job family /profession */}
+                              <>
+                                <Controller
+                                  // ref={register()}
+                                  control={control}
+                                  name={`professions.${index}.jobFamily`}
+                                  render={({ field: { onChange, onBlur, value } }) => (
+                                    <Row gutter={8} wrap={false}>
+                                      <Col flex="auto">
+                                        <Select
+                                          value={value == -1 ? null : value}
+                                          onBlur={onBlur}
+                                          placeholder="Choose a profession"
+                                          onChange={(v) => {
+                                            // When profession changes, clear the jobStreams for this profession
+                                            setValue(`professions.${index}.jobStreams`, []);
+                                            onChange(v);
                                             handleJobFamilyChange();
-                                          },
-                                        });
-                                      }}
-                                      icon={<DeleteOutlined />}
-                                    ></Button>
-                                  </Col>
-                                </Row>
-                              )}
-                            />
-                          </Form.Item>
+                                            triggerBasicDetailsValidation();
+                                          }}
+                                        >
+                                          {/* Dynamically render profession options based on your data */}
+                                          {jobFamiliesData?.jobFamilies
+                                            .filter(
+                                              (jf) =>
+                                                !selectedProfession.map((p) => p.jobFamily).includes(jf.id) ||
+                                                jf.id == selectedProfession[index].jobFamily,
+                                            )
+                                            .map((family) => (
+                                              <Option key={family.id} value={family.id}>
+                                                {family.name}
+                                              </Option>
+                                            ))}
+                                        </Select>
+                                      </Col>
+                                      <Col>
+                                        <Button
+                                          disabled={index === 0 && selectedProfession?.[index]?.jobFamily === -1}
+                                          onClick={() => {
+                                            Modal.confirm({
+                                              title: 'Confirmation',
+                                              content:
+                                                'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
+                                              onOk: () => {
+                                                remove(index);
+                                                // removing last one - append blank
+                                                if (selectedProfession?.length === 1) {
+                                                  append({ jobFamily: -1, jobStreams: [] });
+                                                }
+                                                handleJobFamilyChange();
+                                                triggerBasicDetailsValidation();
+                                              },
+                                            });
+                                          }}
+                                          icon={<DeleteOutlined />}
+                                        ></Button>
+                                      </Col>
+                                    </Row>
+                                  )}
+                                />
+                              </>
+                            </Form.Item>
 
-                          {/* Second level for job family/profession selector (select job stream/discipline) */}
-                          {selectedProfession?.[index]?.jobFamily != -1 && (
-                            <JobStreamDiscipline
-                              index={index}
-                              control={control}
-                              getJobStreamsForFamily={getJobStreamsForFamily}
-                              selectedProfession={selectedProfession}
-                            ></JobStreamDiscipline>
-                          )}
-                        </div>
-                      ))}
-                      <Form.Item>
-                        <Button
-                          type="dashed"
-                          onClick={() => {
-                            append({ jobFamily: -1, jobStreams: [] });
-                          }}
-                          block
-                          icon={<PlusOutlined />}
-                          disabled={selectedProfession?.[0]?.jobFamily == -1}
-                        >
-                          Add another job family
-                        </Button>
-                      </Form.Item>
+                            {/* Second level for job family/profession selector (select job stream/discipline) */}
+                            {selectedProfession?.[index]?.jobFamily != -1 && (
+                              <JobStreamDiscipline
+                                index={index}
+                                control={control}
+                                getJobStreamsForFamily={getJobStreamsForFamily}
+                                selectedProfession={selectedProfession}
+                              ></JobStreamDiscipline>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <Typography.Text style={{ marginBottom: '5px', display: 'block' }}>
+                              {jobProfileData?.jobProfile.jobFamilies[index].jobFamily.name}
+                            </Typography.Text>
+
+                            {/*
+                            
+                            fix this to display all
+                            
+                            
+                            */}
+                            <Typography.Text style={{ marginBottom: '5px', display: 'block' }}>
+                              {jobProfileData?.jobProfile.streams[index].stream.name}
+                            </Typography.Text>
+                          </>
+                        ),
+                      )}
+                      {isCurrentVersion && (
+                        <Form.Item>
+                          <Button
+                            type="dashed"
+                            onClick={() => {
+                              append({ jobFamily: -1, jobStreams: [] });
+                            }}
+                            block
+                            icon={<PlusOutlined />}
+                            disabled={selectedProfession?.[0]?.jobFamily == -1}
+                          >
+                            Add another job family
+                          </Button>
+                        </Form.Item>
+                      )}
+
+                      {isCurrentVersion && (
+                        <WizardValidationError formErrors={basicFormErrors} fieldName="professions" />
+                      )}
                     </Col>
                   </Row>
                 </Card>
@@ -2221,17 +2514,22 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {/* Role Radio Buttons */}
+
                       <Form.Item label="Role" labelCol={{ className: 'card-label' }}>
-                        <Controller
-                          name="role"
-                          control={control}
-                          render={({ field }) => (
-                            <Radio.Group {...field}>
-                              <Radio value={1}>Individual Contributor</Radio>
-                              <Radio value={2}>People Leader</Radio>
-                            </Radio.Group>
-                          )}
-                        />
+                        {isCurrentVersion ? (
+                          <Controller
+                            name="role"
+                            control={control}
+                            render={({ field }) => (
+                              <Radio.Group {...field}>
+                                <Radio value={1}>Individual Contributor</Radio>
+                                <Radio value={2}>People Leader</Radio>
+                              </Radio.Group>
+                            )}
+                          />
+                        ) : (
+                          <Typography title="Role">{jobProfileData?.jobProfile.role_type?.name}</Typography>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2242,38 +2540,68 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                       {/* Report-to relationship Select */}
 
                       <Form.Item label="Report-to relationship" labelCol={{ className: 'card-label' }}>
-                        <Controller
-                          name="reportToRelationship"
-                          control={control}
-                          render={({ field }) => (
-                            <>
-                              <Checkbox
-                                onChange={(e) => handleSelectAllReportTo(e.target.checked)}
-                                checked={allReportsTo}
-                                style={{ marginBottom: '10px' }}
-                              >
-                                Select all
-                              </Checkbox>
-                              <TreeSelect
-                                {...field}
-                                onChange={(selectedItems) => {
-                                  setValue('all_reports_to', maxReportsTo == selectedItems.length);
-                                  field.onChange(selectedItems); // Continue with the original onChange
-                                }}
-                                autoClearSearchValue={false}
-                                // todo: do the filtering externally, wasn't able to do it because of inifinite render loop
-                                treeData={filterTreeData(treeDataConverted, selectedClassificationId)}
-                                // treeData={treeDataConverted} // Replace with your data
-                                // onChange={(value) => setReportToRelationship(value)}
-                                treeCheckable={true}
-                                showCheckedStrategy={SHOW_CHILD}
-                                placeholder="Choose all the positions this role should report to"
-                                style={{ width: '100%' }}
-                                maxTagCount={10}
-                              />
-                            </>
-                          )}
-                        />
+                        {isCurrentVersion ? (
+                          <>
+                            <Controller
+                              name="reportToRelationship"
+                              control={control}
+                              render={({ field }) => (
+                                <>
+                                  <Checkbox
+                                    onChange={(e) => {
+                                      handleSelectAllReportTo(e.target.checked);
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    checked={allReportsTo}
+                                    style={{ marginBottom: '10px' }}
+                                  >
+                                    Select all
+                                  </Checkbox>
+                                  <TreeSelect
+                                    {...field}
+                                    onChange={(selectedItems) => {
+                                      field.onChange(selectedItems); // Continue with the original onChange
+
+                                      // if user selected all items, check the all selected box
+                                      const allValues = getAllTreeValues(treeDataConverted);
+
+                                      // filter out the selected classification
+                                      let filteredReportToRelationship = allValues;
+                                      if (selectedClassificationId)
+                                        filteredReportToRelationship = allValues.filter(
+                                          (r: string) => r !== selectedClassificationId,
+                                        );
+
+                                      if (filteredReportToRelationship.length === selectedItems.length)
+                                        setValue('all_reports_to', true);
+                                      else setValue('all_reports_to', false);
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    autoClearSearchValue={false}
+                                    // todo: do the filtering externally, wasn't able to do it because of inifinite render loop
+                                    treeData={filterTreeData(treeDataConverted, selectedClassificationId)}
+                                    // treeData={treeDataConverted} // Replace with your data
+                                    // onChange={(value) => setReportToRelationship(value)}
+                                    treeCheckable={true}
+                                    showCheckedStrategy={SHOW_CHILD}
+                                    placeholder="Choose all the positions this role should report to"
+                                    style={{ width: '100%' }}
+                                    maxTagCount={10}
+                                  />
+                                </>
+                              )}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="reportToRelationship" />
+                          </>
+                        ) : (
+                          <>
+                            {allReportsTo ? (
+                              <Tag>Reports to All</Tag>
+                            ) : (
+                              jobProfileData?.jobProfile.reports_to.map((r) => <Tag>{r.classification.code}</Tag>)
+                            )}
+                          </>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2284,26 +2612,36 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {/* Scopes of Responsibility Select */}
                       <Form.Item label="Scope of Responsibility" labelCol={{ className: 'card-label' }}>
-                        <Controller
-                          name="scopeOfResponsibility"
-                          control={control}
-                          render={({ field: { onChange, onBlur, value } }) => {
-                            return (
-                              <Select
-                                placeholder="Choose the scopes of responsibility"
-                                onChange={onChange}
-                                onBlur={onBlur}
-                                value={value}
-                                mode="multiple"
-                                options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
-                                  label: scope.name,
-                                  value: scope.id,
-                                }))}
-                              ></Select>
-                            );
-                          }}
-                        />
-                        <Typography.Text type="secondary">{selectedScopeDescription}</Typography.Text>
+                        {isCurrentVersion ? (
+                          <>
+                            <Controller
+                              name="scopeOfResponsibility"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => {
+                                return (
+                                  <Select
+                                    placeholder="Choose the scopes of responsibility"
+                                    onChange={(v) => {
+                                      onChange(v);
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    onBlur={onBlur}
+                                    value={value}
+                                    mode="multiple"
+                                    options={jobProfileScopes?.jobProfileScopes.map((scope) => ({
+                                      label: scope.name,
+                                      value: scope.id,
+                                    }))}
+                                  ></Select>
+                                );
+                              }}
+                            />
+                            <Typography.Text type="secondary">{selectedScopeDescription}</Typography.Text>
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="scopeOfResponsibility" />
+                          </>
+                        ) : (
+                          <>{jobProfileData?.jobProfile.scopes.map((s) => <Tag>{s.scope.name}</Tag>)}</>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2324,28 +2662,45 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                         labelCol={{ className: 'card-label' }}
                       >
-                        <Controller
-                          name="ministries"
-                          control={control}
-                          render={({ field: { onChange, onBlur, value } }) => (
-                            <>
-                              <Text type="secondary" style={{ marginBottom: '5px', display: 'block' }}>
-                                If selected, this role would be available only for those specific ministries.
-                              </Text>
-                              <MinistriesSelect
-                                isMultiSelect={true}
-                                onChange={(args: any) => {
-                                  onChange(args);
-                                  handleMinistriesChange();
-                                }}
-                                onBlur={onBlur}
-                                value={value}
-                                setValue={setValue}
-                                allOrganizations={allOrganizations}
-                              />
-                            </>
-                          )}
-                        />
+                        {isCurrentVersion ? (
+                          <>
+                            <Controller
+                              name="ministries"
+                              control={control}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <>
+                                  <Text type="secondary" style={{ marginBottom: '5px', display: 'block' }}>
+                                    If selected, this role would be available only for those specific ministries.
+                                  </Text>
+                                  <MinistriesSelect
+                                    isMultiSelect={true}
+                                    onChange={(args: any) => {
+                                      onChange(args);
+                                      handleMinistriesChange();
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    onBlur={onBlur}
+                                    value={value}
+                                    setValue={(a: any, b: any) => {
+                                      setValue(a, b);
+                                      triggerBasicDetailsValidation();
+                                    }}
+                                    allOrganizations={allOrganizations}
+                                  />
+                                </>
+                              )}
+                            />
+                            <WizardValidationError formErrors={basicFormErrors} fieldName="ministries" />
+                          </>
+                        ) : (
+                          <>
+                            {allOrganizations ? (
+                              <Tag>All Organizations</Tag>
+                            ) : (
+                              jobProfileData?.jobProfile.organizations.map((o) => <Tag>{o.organization.name}</Tag>)
+                            )}
+                          </>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2365,18 +2720,24 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                         labelCol={{ className: 'card-label' }}
                       >
-                        <Controller
-                          name="classificationReviewRequired"
-                          control={control}
-                          render={({ field: { onChange, value, ref } }) => (
-                            <>
-                              <Switch checked={value} onChange={onChange} ref={ref} />
-                              <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
-                                Verification or Classification Review required
-                              </span>
-                            </>
-                          )}
-                        />
+                        {isCurrentVersion ? (
+                          <Controller
+                            name="classificationReviewRequired"
+                            control={control}
+                            render={({ field: { onChange, value, ref } }) => (
+                              <>
+                                <Switch checked={value} onChange={onChange} ref={ref} />
+                                <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
+                                  Verification or Classification Review required
+                                </span>
+                              </>
+                            )}
+                          />
+                        ) : jobProfileData?.jobProfile.review_required ? (
+                          'Review Required'
+                        ) : (
+                          'No Review Required'
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2385,13 +2746,40 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 <Card title="Job Context" style={{ marginTop: 16 }} bordered={false}>
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                      <Controller
-                        control={control}
-                        name="jobContext"
-                        render={({ field }) => (
-                          <ReactQuill {...field} modules={quill_modules} theme="snow" placeholder="Add job context" />
-                        )}
-                      />
+                      {isCurrentVersion ? (
+                        <>
+                          <Controller
+                            control={control}
+                            name="jobContext"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                              <ReactQuill
+                                modules={quill_modules}
+                                theme="snow"
+                                placeholder="Add job context"
+                                value={value}
+                                onBlur={onBlur}
+                                onChange={(v) => {
+                                  onChange(v);
+                                  triggerBasicDetailsValidation();
+                                }}
+                              />
+                            )}
+                          />
+                          <WizardValidationError formErrors={basicFormErrors} fieldName="jobContext" />
+                        </>
+                      ) : (
+                        <Typography.Text type="secondary">
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: DOMPurify.sanitize(
+                                typeof jobProfileData?.jobProfile?.context === 'string'
+                                  ? jobProfileData?.jobProfile.context
+                                  : jobProfileData?.jobProfile.context.description ?? '',
+                              ),
+                            }}
+                          ></span>
+                        </Typography.Text>
+                      )}
                     </Col>
                   </Row>
                 </Card>
@@ -2420,12 +2808,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   trigger={triggerProfileValidation}
                   formErrors={profileFormErrors}
                   useFormReturn={jobProfileUseFormReturn}
+                  readOnly={!isCurrentVersion}
                 />
-
                 <WizardProgramOverview
                   trigger={triggerProfileValidation}
                   formErrors={profileFormErrors}
                   useFormReturn={jobProfileUseFormReturn}
+                  readOnly={!isCurrentVersion}
                 />
 
                 <Card title="Accountabilities" style={{ marginTop: 16 }} bordered={false}>
@@ -2438,178 +2827,194 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         label={
                           <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                             <Col>
-                              <Form.Item style={{ margin: 0 }}>
-                                <Row>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllNonEditable"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllNonEditable}
-                                          disabled={accountabilitiesFields.length === 0}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateNonEditable(e.target.checked);
-                                            triggerProfileValidation();
-                                          }}
-                                        >
-                                          Mark all as non-editable
-                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllSignificant"
-                                      // disable if markAllNonEditable checkbox is on
+                              {isCurrentVersion ? (
+                                <Form.Item style={{ margin: 0 }}>
+                                  <Row>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllNonEditable"
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={markAllNonEditable}
+                                            disabled={accountabilitiesFields.length === 0}
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateNonEditable(e.target.checked);
+                                              triggerProfileValidation();
+                                            }}
+                                          >
+                                            Mark all as non-editable
+                                            <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllSignificant"
+                                        // disable if markAllNonEditable checkbox is on
 
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllSignificant || markAllNonEditable}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateSignificant(e.target.checked);
-                                            triggerProfileValidation();
-                                          }}
-                                          disabled={markAllNonEditable || accountabilitiesFields.length === 0}
-                                        >
-                                          Mark all as significant
-                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                </Row>
-                              </Form.Item>
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={markAllSignificant || markAllNonEditable}
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateSignificant(e.target.checked);
+                                              triggerProfileValidation();
+                                            }}
+                                            disabled={markAllNonEditable || accountabilitiesFields.length === 0}
+                                          >
+                                            Mark all as significant
+                                            <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                              ) : (
+                                <></>
+                              )}
                             </Col>
                           </Row>
                         }
                       >
-                        {accountabilitiesFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === accountabilitiesFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row>
-                                {/* Non-editable checkbox */}
-                                <div style={{ marginBottom: '5px' }}>
-                                  <Controller
-                                    name={`accountabilities.${index}.nonEditable`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => {
-                                      return (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            // set this item as significant as well
-                                            // console.log('non-editable toggle: ', args);
-                                            if (args.target.checked) {
-                                              profileSetValue(`accountabilities.${index}.is_significant`, true);
-                                            }
-                                            if (!args.target.checked) {
-                                              // console.log('setting markAllNonEditable to false');
-                                              profileSetValue('markAllNonEditable', false);
-                                            }
-                                            onChange(args);
-                                            triggerProfileValidation();
-                                          }}
-                                          checked={value}
-                                        >
-                                          Non-editable
-                                        </Checkbox>
-                                      );
-                                    }}
-                                  />
-                                  <Controller
-                                    name={`accountabilities.${index}.is_significant`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => {
-                                      return (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            if (!args.target.checked) {
-                                              profileSetValue('markAllSignificant', false);
-                                            }
-                                            onChange(args);
-                                            triggerProfileValidation();
-                                          }} // send value to hook form
-                                          // disable if this item is non-editable
-                                          disabled={accountabilities?.[index].nonEditable}
-                                          checked={value || accountabilities?.[index].nonEditable}
-                                        >
-                                          Significant
-                                        </Checkbox>
-                                      );
-                                    }}
-                                  />
-                                </div>
-                              </Row>
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  <Form.Item>
+                        {accountabilitiesFields.map((field, index) =>
+                          isCurrentVersion ? (
+                            <Row align="top" key={field.id} gutter={16}>
+                              {/* up/down controls */}
+                              <Col flex="none" className="reorder-controls">
+                                <ReorderButtons
+                                  index={index}
+                                  moveItem={handleMove}
+                                  upperDisabled={index === 0}
+                                  lowerDisabled={index === accountabilitiesFields.length - 1}
+                                />
+                              </Col>
+                              <Col flex="auto">
+                                <Row>
+                                  {/* Non-editable checkbox */}
+                                  <div style={{ marginBottom: '5px' }}>
                                     <Controller
+                                      name={`accountabilities.${index}.nonEditable`}
                                       control={profileControl}
-                                      name={`accountabilities.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add an accountability"
-                                          onChange={(event) => {
-                                            onChange(event);
-                                            debounce(triggerProfileValidation, 300)();
-                                          }}
-                                          onBlur={onBlur}
-                                          value={value?.toString()}
-                                        />
-                                      )}
+                                      render={({ field: { onChange, value } }) => {
+                                        return (
+                                          <Checkbox
+                                            onChange={(args) => {
+                                              // set this item as significant as well
+                                              // console.log('non-editable toggle: ', args);
+                                              if (args.target.checked) {
+                                                profileSetValue(`accountabilities.${index}.is_significant`, true);
+                                              }
+                                              if (!args.target.checked) {
+                                                // console.log('setting markAllNonEditable to false');
+                                                profileSetValue('markAllNonEditable', false);
+                                              }
+                                              onChange(args);
+                                              triggerProfileValidation();
+                                            }}
+                                            checked={value}
+                                          >
+                                            Non-editable
+                                          </Checkbox>
+                                        );
+                                      }}
                                     />
-                                  </Form.Item>
-                                </Col>
+                                    <Controller
+                                      name={`accountabilities.${index}.is_significant`}
+                                      control={profileControl}
+                                      render={({ field: { onChange, value } }) => {
+                                        return (
+                                          <Checkbox
+                                            onChange={(args) => {
+                                              if (!args.target.checked) {
+                                                profileSetValue('markAllSignificant', false);
+                                              }
+                                              onChange(args);
+                                              triggerProfileValidation();
+                                            }} // send value to hook form
+                                            // disable if this item is non-editable
+                                            disabled={accountabilities?.[index].nonEditable}
+                                            checked={value || accountabilities?.[index].nonEditable}
+                                          >
+                                            Significant
+                                          </Checkbox>
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                </Row>
+                                <Row gutter={10}>
+                                  <Col flex="auto">
+                                    <Form.Item>
+                                      <Controller
+                                        control={profileControl}
+                                        name={`accountabilities.${index}.text`}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                          <TextArea
+                                            autoSize
+                                            placeholder="Add an accountability"
+                                            onChange={(event) => {
+                                              onChange(event);
+                                              debounce(triggerProfileValidation, 300)();
+                                            }}
+                                            onBlur={onBlur}
+                                            value={value?.toString()}
+                                          />
+                                        )}
+                                      />
+                                    </Form.Item>
+                                  </Col>
 
-                                <Col flex="none">
-                                  <Button
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => {
-                                      removeAccountability(index);
-                                      triggerProfileValidation();
-                                    }}
-                                  />
-                                </Col>
-                              </Row>
-                            </Col>
-                          </Row>
-                        ))}
-                        <Form.Item>
-                          <WizardValidationError formErrors={profileFormErrors} fieldName="accountabilities" />
-                          <Button
-                            type="link"
-                            onClick={() =>
-                              appendAccountability({
-                                text: '',
-                                nonEditable: markAllNonEditable,
-                                is_significant: markAllSignificant,
-                              })
-                            }
-                            icon={<PlusOutlined />}
-                          >
-                            Add an accountability
-                          </Button>
-                        </Form.Item>
+                                  <Col flex="none">
+                                    <Button
+                                      icon={<DeleteOutlined />}
+                                      onClick={() => {
+                                        removeAccountability(index);
+                                        triggerProfileValidation();
+                                      }}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <Row gutter={10}>
+                              <Card style={{ width: '100%', margin: '5px' }}>
+                                <Typography>{accountabilities?.[index].text?.toString()}</Typography>
+                              </Card>
+                            </Row>
+                          ),
+                        )}
+                        {isCurrentVersion ? (
+                          <Form.Item>
+                            <WizardValidationError formErrors={profileFormErrors} fieldName="accountabilities" />
+                            <Button
+                              type="link"
+                              onClick={() =>
+                                appendAccountability({
+                                  text: '',
+                                  nonEditable: markAllNonEditable,
+                                  is_significant: markAllSignificant,
+                                })
+                              }
+                              icon={<PlusOutlined />}
+                            >
+                              Add an accountability
+                            </Button>
+                          </Form.Item>
+                        ) : (
+                          <></>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2621,15 +3026,19 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   bordered={false}
                   bodyStyle={{ paddingTop: 0 }}
                 >
-                  <Alert
-                    className="custom-alert"
-                    role="note"
-                    style={{ margin: '0 -24px 24px', borderRadius: '0', paddingBottom: '10px', paddingTop: '10px' }}
-                    message=""
-                    description="Some information may have been added based on the details you have already provided."
-                    type="info"
-                    showIcon
-                  />
+                  {isCurrentVersion ? (
+                    <Alert
+                      className="custom-alert"
+                      role="note"
+                      style={{ margin: '0 -24px 24px', borderRadius: '0', paddingBottom: '10px', paddingTop: '10px' }}
+                      message=""
+                      description="Some information may have been added based on the details you have already provided."
+                      type="info"
+                      showIcon
+                    />
+                  ) : (
+                    <></>
+                  )}
 
                   {/* Eduction */}
 
@@ -2643,171 +3052,252 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             <Col>Education and work experience</Col>
                             <Col>
                               <Form.Item style={{ margin: 0 }}>
-                                <Row>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllNonEditableEdu"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllNonEditableEdu}
-                                          disabled={educationAndWorkExperienceFields.length === 0}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateNonEditableEdu(e.target.checked);
-                                          }}
-                                        >
-                                          Mark all as non-editable
-                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllSignificantEdu"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllSignificantEdu || markAllNonEditableEdu}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateSignificantEdu(e.target.checked);
-                                          }}
-                                          disabled={
-                                            markAllNonEditableEdu || educationAndWorkExperienceFields.length === 0
-                                          }
-                                        >
-                                          Mark all as significant
-                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                </Row>
+                                {isCurrentVersion ? (
+                                  <Row>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllNonEditableEdu"
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={markAllNonEditableEdu}
+                                            disabled={educationAndWorkExperienceFields.length === 0}
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateNonEditableEdu(e.target.checked);
+                                            }}
+                                          >
+                                            Mark all as non-editable
+                                            <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllSignificantEdu"
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={markAllSignificantEdu || markAllNonEditableEdu}
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateSignificantEdu(e.target.checked);
+                                            }}
+                                            disabled={
+                                              markAllNonEditableEdu || educationAndWorkExperienceFields.length === 0
+                                            }
+                                          >
+                                            Mark all as significant
+                                            <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                  </Row>
+                                ) : (
+                                  <></>
+                                )}
                               </Form.Item>
                             </Col>
                           </Row>
                         }
                       >
-                        {educationAndWorkExperienceFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleEducationAndWorkExperienceMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === educationAndWorkExperienceFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row>
-                                {/* Non-editable checkbox */}
-                                <div style={{ marginBottom: '5px' }}>
-                                  <Controller
-                                    name={`education.${index}.nonEditable`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          // set this item as significant as well
-                                          if (args.target.checked) {
-                                            profileSetValue(`education.${index}.is_significant`, true);
-                                          }
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllNonEditableEdu', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        checked={value}
-                                      >
-                                        Non-editable
-                                      </Checkbox>
-                                    )}
-                                  />
-                                  <Controller
-                                    name={`education.${index}.is_significant`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllSignificantEdu', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        disabled={educations?.[index].nonEditable}
-                                        checked={value || educations?.[index].nonEditable}
-                                      >
-                                        Significant
-                                      </Checkbox>
-                                    )}
-                                  />
-                                </div>
-                              </Row>
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  <Form.Item>
+                        {educationAndWorkExperienceFields.map((field, index) =>
+                          isCurrentVersion ? (
+                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                              {/* up/down controls */}
+                              <Col flex="none" className="reorder-controls">
+                                <ReorderButtons
+                                  index={index}
+                                  moveItem={handleEducationAndWorkExperienceMove}
+                                  upperDisabled={index === 0}
+                                  lowerDisabled={index === educationAndWorkExperienceFields.length - 1}
+                                />
+                              </Col>
+                              <Col flex="auto">
+                                <Row>
+                                  {/* Non-editable checkbox */}
+                                  <div style={{ marginBottom: '5px' }}>
                                     <Controller
+                                      name={`education.${index}.nonEditable`}
                                       control={profileControl}
-                                      name={`education.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add education"
-                                          onChange={(event) => {
-                                            onChange(event);
-                                            debounce(triggerProfileValidation, 300)();
+                                      render={({ field: { onChange, value } }) => (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            // set this item as significant as well
+                                            if (args.target.checked) {
+                                              profileSetValue(`education.${index}.is_significant`, true);
+                                            }
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllNonEditableEdu', false);
+                                            }
+                                            onChange(args);
                                           }}
-                                          onBlur={onBlur}
-                                          value={value?.toString()}
-                                        />
+                                          checked={value}
+                                        >
+                                          Non-editable
+                                        </Checkbox>
                                       )}
                                     />
-                                  </Form.Item>
-                                </Col>
+                                    <Controller
+                                      name={`education.${index}.is_significant`}
+                                      control={profileControl}
+                                      render={({ field: { onChange, value } }) => (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllSignificantEdu', false);
+                                            }
+                                            onChange(args);
+                                          }}
+                                          disabled={educations?.[index].nonEditable}
+                                          checked={value || educations?.[index].nonEditable}
+                                        >
+                                          Significant
+                                        </Checkbox>
+                                      )}
+                                    />
+                                  </div>
+                                </Row>
+                                <Row gutter={10}>
+                                  <Col flex="auto">
+                                    {field.tc_is_readonly &&
+                                      itemInPickerData(
+                                        field.text?.toString() ?? '',
+                                        'jobProfileMinimumRequirements',
+                                      ) && (
+                                        <div style={{ display: 'flex' }}>
+                                          <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                            {field.text?.toString()}
+                                          </Typography.Text>
+                                        </div>
+                                      )}
 
-                                <Col flex="none">
-                                  <Button
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => {
-                                      removeEducationAndWorkExperience(index);
-                                      triggerProfileValidation();
-                                    }}
+                                    <Form.Item
+                                      style={{
+                                        display:
+                                          field.tc_is_readonly &&
+                                          itemInPickerData(
+                                            field.text?.toString() ?? '',
+                                            'jobProfileMinimumRequirements',
+                                          )
+                                            ? 'none'
+                                            : 'block',
+                                      }}
+                                    >
+                                      <Controller
+                                        control={profileControl}
+                                        name={`education.${index}.text`}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                          <TextArea
+                                            autoSize
+                                            placeholder="Add education"
+                                            onChange={(event) => {
+                                              onChange(event);
+                                              debounce(triggerProfileValidation, 300)();
+                                            }}
+                                            onBlur={onBlur}
+                                            value={value?.toString()}
+                                          />
+                                        )}
+                                      />
+                                    </Form.Item>
+                                  </Col>
+
+                                  <Col flex="none">
+                                    <ContextOptionsReadonly
+                                      isReadonly={field.tc_is_readonly ?? false}
+                                      onEdit={() => {
+                                        updateEducationAndWorkExperience(index, {
+                                          ...educationAndWorkExperienceFields[index],
+                                          tc_is_readonly: false,
+                                        });
+                                        // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                      }}
+                                      onRemove={() => {
+                                        removeEducationAndWorkExperience(index);
+                                        triggerProfileValidation();
+                                      }}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <Row gutter={10}>
+                              <Card style={{ width: '100%', margin: '5px' }}>
+                                <Typography>{educationAndWorkExperienceFields?.[index].text?.toString()}</Typography>
+                              </Card>
+                            </Row>
+                          ),
+                        )}
+                        {isCurrentVersion ? (
+                          <>
+                            <WizardValidationError formErrors={profileFormErrors} fieldName="education" />
+
+                            <Form.Item>
+                              <Row>
+                                <Col>
+                                  <WizardPicker
+                                    data={pickerData?.requirementsWithoutReadOnly?.jobProfileMinimumRequirements}
+                                    fields={educations}
+                                    addAction={appendEducationAndWorkExperience}
+                                    removeAction={removeEducationAndWorkExperience}
+                                    triggerValidation={triggerProfileValidation}
+                                    title="Education and work experiences"
+                                    buttonText="Browse and add education"
+                                    tc_is_readonly={true}
                                   />
                                 </Col>
+                                <Col>
+                                  <Button
+                                    type="link"
+                                    onClick={() =>
+                                      appendEducationAndWorkExperience({
+                                        text: '',
+                                        nonEditable: markAllNonEditableEdu,
+                                        is_significant: markAllSignificantEdu,
+                                      })
+                                    }
+                                    icon={<PlusOutlined />}
+                                  >
+                                    Add custom education
+                                  </Button>
+                                </Col>
                               </Row>
-                            </Col>
-                          </Row>
-                        ))}
+                            </Form.Item>
 
-                        <WizardValidationError formErrors={profileFormErrors} fieldName="education" />
-
-                        <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() =>
-                              appendEducationAndWorkExperience({
-                                text: '',
-                                nonEditable: markAllNonEditableEdu,
-                                is_significant: markAllSignificantEdu,
-                              })
-                            }
-                            icon={<PlusOutlined />}
-                          >
-                            Add education
-                          </Button>
-                        </Form.Item>
+                            {/* <Form.Item>
+                              <Button
+                                type="link"
+                                onClick={() =>
+                                  appendEducationAndWorkExperience({
+                                    text: '',
+                                    nonEditable: markAllNonEditableEdu,
+                                    is_significant: markAllSignificantEdu,
+                                  })
+                                }
+                                icon={<PlusOutlined />}
+                              >
+                                Add education
+                              </Button>
+                            </Form.Item> */}
+                          </>
+                        ) : (
+                          <></>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
+
+                  <Divider className="hr-reduced-margin" />
 
                   {/* Related experience */}
                   <Row justify="start">
@@ -2819,168 +3309,187 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                             <Col>Related experience</Col>
                             <Col>
-                              <Form.Item style={{ margin: 0 }}>
-                                <Row>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllNonEditableJob_experience"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllNonEditableJob_experience}
-                                          disabled={job_experienceFields.length === 0}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateNonEditableJob_experience(e.target.checked);
-                                          }}
-                                        >
-                                          Mark all as non-editable
-                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllSignificantJob_experience"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllSignificantJob_experience || markAllNonEditableJob_experience}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateSignificantJob_experience(e.target.checked);
-                                          }}
-                                          disabled={
-                                            markAllNonEditableJob_experience || job_experienceFields.length === 0
-                                          }
-                                        >
-                                          Mark all as significant
-                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                </Row>
-                              </Form.Item>
+                              {isCurrentVersion ? (
+                                <Form.Item style={{ margin: 0 }}>
+                                  <Row>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllNonEditableJob_experience"
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={markAllNonEditableJob_experience}
+                                            disabled={job_experienceFields.length === 0}
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateNonEditableJob_experience(e.target.checked);
+                                            }}
+                                          >
+                                            Mark all as non-editable
+                                            <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllSignificantJob_experience"
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={
+                                              markAllSignificantJob_experience || markAllNonEditableJob_experience
+                                            }
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateSignificantJob_experience(e.target.checked);
+                                            }}
+                                            disabled={
+                                              markAllNonEditableJob_experience || job_experienceFields.length === 0
+                                            }
+                                          >
+                                            Mark all as significant
+                                            <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                              ) : (
+                                <></>
+                              )}
                             </Col>
                           </Row>
                         }
                       >
-                        {job_experienceFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleJob_experienceMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === job_experienceFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row>
-                                {/* Non-editable checkbox */}
-                                <div style={{ marginBottom: '5px' }}>
-                                  <Controller
-                                    name={`job_experience.${index}.nonEditable`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          // set this item as significant as well
-                                          if (args.target.checked) {
-                                            profileSetValue(`job_experience.${index}.is_significant`, true);
-                                          }
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllNonEditableJob_experience', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        checked={value}
-                                      >
-                                        Non-editable
-                                      </Checkbox>
-                                    )}
-                                  />
-                                  <Controller
-                                    name={`job_experience.${index}.is_significant`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllSignificantJob_experience', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        disabled={job_experiences?.[index].nonEditable}
-                                        checked={value || job_experiences?.[index].nonEditable}
-                                      >
-                                        Significant
-                                      </Checkbox>
-                                    )}
-                                  />
-                                </div>
-                              </Row>
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  <Form.Item>
+                        {job_experienceFields.map((field, index) =>
+                          isCurrentVersion ? (
+                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                              {/* up/down controls */}
+                              <Col flex="none" className="reorder-controls">
+                                <ReorderButtons
+                                  index={index}
+                                  moveItem={handleJob_experienceMove}
+                                  upperDisabled={index === 0}
+                                  lowerDisabled={index === job_experienceFields.length - 1}
+                                />
+                              </Col>
+                              <Col flex="auto">
+                                <Row>
+                                  {/* Non-editable checkbox */}
+                                  <div style={{ marginBottom: '5px' }}>
                                     <Controller
+                                      name={`job_experience.${index}.nonEditable`}
                                       control={profileControl}
-                                      name={`job_experience.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add related experience"
-                                          onChange={(event) => {
-                                            onChange(event);
-                                            debounce(triggerProfileValidation, 300)();
+                                      render={({ field: { onChange, value } }) => (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            // set this item as significant as well
+                                            if (args.target.checked) {
+                                              profileSetValue(`job_experience.${index}.is_significant`, true);
+                                            }
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllNonEditableJob_experience', false);
+                                            }
+                                            onChange(args);
                                           }}
-                                          onBlur={onBlur}
-                                          value={value?.toString()}
-                                        />
+                                          checked={value}
+                                        >
+                                          Non-editable
+                                        </Checkbox>
                                       )}
                                     />
-                                  </Form.Item>
-                                </Col>
+                                    <Controller
+                                      name={`job_experience.${index}.is_significant`}
+                                      control={profileControl}
+                                      render={({ field: { onChange, value } }) => (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllSignificantJob_experience', false);
+                                            }
+                                            onChange(args);
+                                          }}
+                                          disabled={job_experiences?.[index].nonEditable}
+                                          checked={value || job_experiences?.[index].nonEditable}
+                                        >
+                                          Significant
+                                        </Checkbox>
+                                      )}
+                                    />
+                                  </div>
+                                </Row>
+                                <Row gutter={10}>
+                                  <Col flex="auto">
+                                    <Form.Item>
+                                      <Controller
+                                        control={profileControl}
+                                        name={`job_experience.${index}.text`}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                          <TextArea
+                                            autoSize
+                                            placeholder="Add related experience"
+                                            onChange={(event) => {
+                                              onChange(event);
+                                              debounce(triggerProfileValidation, 300)();
+                                            }}
+                                            onBlur={onBlur}
+                                            value={value?.toString()}
+                                          />
+                                        )}
+                                      />
+                                    </Form.Item>
+                                  </Col>
 
-                                <Col flex="none">
-                                  <Button
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => {
-                                      removeJob_experience(index);
-                                      triggerProfileValidation();
-                                    }}
-                                  />
-                                </Col>
-                              </Row>
-                            </Col>
-                          </Row>
-                        ))}
-
-                        <WizardValidationError formErrors={profileFormErrors} fieldName="job_experience" />
-                        <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() =>
-                              appendJob_experience({
-                                text: '',
-                                nonEditable: markAllNonEditableJob_experience,
-                                is_significant: markAllSignificantJob_experience,
-                              })
-                            }
-                            icon={<PlusOutlined />}
-                          >
-                            Add an experience requirement
-                          </Button>
-                        </Form.Item>
+                                  <Col flex="none">
+                                    <Button
+                                      icon={<DeleteOutlined />}
+                                      onClick={() => {
+                                        removeJob_experience(index);
+                                        triggerProfileValidation();
+                                      }}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <Row gutter={10}>
+                              <Card style={{ width: '100%', margin: '5px' }}>
+                                <Typography>{job_experiences?.[index].text?.toString()}</Typography>
+                              </Card>
+                            </Row>
+                          ),
+                        )}
+                        {isCurrentVersion ? (
+                          <>
+                            <WizardValidationError formErrors={profileFormErrors} fieldName="job_experience" />
+                            <Form.Item>
+                              <Button
+                                type="link"
+                                onClick={() =>
+                                  appendJob_experience({
+                                    text: '',
+                                    nonEditable: markAllNonEditableJob_experience,
+                                    is_significant: markAllSignificantJob_experience,
+                                  })
+                                }
+                                icon={<PlusOutlined />}
+                              >
+                                Add an experience requirement
+                              </Button>
+                            </Form.Item>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2999,212 +3508,248 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             {/* NEW */}
 
                             <Col>
-                              <Form.Item style={{ margin: 0 }}>
-                                <Row>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllNonEditableProReg"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllNonEditableProReg}
-                                          disabled={professionalRegistrationRequirementsFields.length === 0}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateNonEditableProReg(e.target.checked);
-                                          }}
-                                        >
-                                          Mark all as non-editable
-                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllSignificantProReg"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllSignificantProReg || markAllNonEditableProReg}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateSignificantProReg(e.target.checked);
-                                          }}
-                                          disabled={
-                                            markAllNonEditableProReg ||
-                                            professionalRegistrationRequirementsFields.length === 0
-                                          }
-                                        >
-                                          Mark all as significant
-                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                </Row>
-                              </Form.Item>
+                              {isCurrentVersion ? (
+                                <Form.Item style={{ margin: 0 }}>
+                                  <Row>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllNonEditableProReg"
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={markAllNonEditableProReg}
+                                            disabled={professionalRegistrationRequirementsFields.length === 0}
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateNonEditableProReg(e.target.checked);
+                                            }}
+                                          >
+                                            Mark all as non-editable
+                                            <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllSignificantProReg"
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={markAllSignificantProReg || markAllNonEditableProReg}
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateSignificantProReg(e.target.checked);
+                                            }}
+                                            disabled={
+                                              markAllNonEditableProReg ||
+                                              professionalRegistrationRequirementsFields.length === 0
+                                            }
+                                          >
+                                            Mark all as significant
+                                            <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                              ) : (
+                                <></>
+                              )}
                             </Col>
 
                             {/* END NEW */}
                           </Row>
                         }
                       >
-                        {professionalRegistrationRequirementsFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleProfessionalRegistrationRequirementsMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === professionalRegistrationRequirementsFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row>
-                                {/* NEW Non-editable checkbox */}
-                                <div style={{ marginBottom: '5px' }}>
-                                  <Controller
-                                    name={`professional_registration_requirements.${index}.nonEditable`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          // set this item as significant as well
-                                          if (args.target.checked) {
-                                            profileSetValue(
-                                              `professional_registration_requirements.${index}.nonEditable`,
-                                              true,
-                                            );
-                                          }
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllNonEditableProReg', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        checked={value}
-                                      >
-                                        Non-editable
-                                      </Checkbox>
-                                    )}
-                                  />
-                                  <Controller
-                                    name={`professional_registration_requirements.${index}.is_significant`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllSignificantProReg', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        disabled={professionalRegistrations?.[index].nonEditable}
-                                        checked={value || professionalRegistrations?.[index].nonEditable}
-                                      >
-                                        Significant
-                                      </Checkbox>
-                                    )}
-                                  />
-                                </div>
-                                {/* END NEW Non-editable checkbox */}
-                              </Row>
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
+                        {professionalRegistrationRequirementsFields.map((field, index) =>
+                          isCurrentVersion ? (
+                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                              {/* up/down controls */}
+                              <Col flex="none" className="reorder-controls">
+                                <ReorderButtons
+                                  index={index}
+                                  moveItem={handleProfessionalRegistrationRequirementsMove}
+                                  upperDisabled={index === 0}
+                                  lowerDisabled={index === professionalRegistrationRequirementsFields.length - 1}
+                                />
+                              </Col>
+                              <Col flex="auto">
+                                <Row>
+                                  {/* NEW Non-editable checkbox */}
+                                  <div style={{ marginBottom: '5px' }}>
                                     <Controller
+                                      name={`professional_registration_requirements.${index}.nonEditable`}
                                       control={profileControl}
-                                      name={`professional_registration_requirements.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => {
-                                        return (
-                                          <>
-                                            <TextArea
-                                              autoSize
-                                              placeholder="Add a professional registration or certification requirement"
-                                              onChange={(event) => {
-                                                onChange(event);
-                                                debounce(triggerProfileValidation, 300)();
-                                              }}
-                                              onBlur={onBlur}
-                                              value={value?.toString()}
-                                            />
-                                          </>
-                                        );
+                                      render={({ field: { onChange, value } }) => (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            // set this item as significant as well
+                                            if (args.target.checked) {
+                                              profileSetValue(
+                                                `professional_registration_requirements.${index}.is_significant`,
+                                                true,
+                                              );
+                                            }
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllNonEditableProReg', false);
+                                            }
+                                            onChange(args);
+                                          }}
+                                          checked={value}
+                                        >
+                                          Non-editable
+                                        </Checkbox>
+                                      )}
+                                    />
+                                    <Controller
+                                      name={`professional_registration_requirements.${index}.is_significant`}
+                                      control={profileControl}
+                                      render={({ field: { onChange, value } }) => (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllSignificantProReg', false);
+                                            }
+                                            onChange(args);
+                                          }}
+                                          disabled={professionalRegistrations?.[index].nonEditable}
+                                          checked={value || professionalRegistrations?.[index].nonEditable}
+                                        >
+                                          Significant
+                                        </Checkbox>
+                                      )}
+                                    />
+                                  </div>
+                                  {/* END NEW Non-editable checkbox */}
+                                </Row>
+                                <Row gutter={10}>
+                                  <Col flex="auto">
+                                    {/* Needs to be tc_is_readonly AND exist in the picklist to appear as read only */}
+                                    {field.tc_is_readonly &&
+                                      itemInPickerData(
+                                        field.text?.toString() ?? '',
+                                        'professionalRegistrationRequirements',
+                                      ) && (
+                                        <div style={{ display: 'flex' }}>
+                                          <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                            {field.text?.toString()}
+                                          </Typography.Text>
+                                        </div>
+                                      )}
+                                    <Form.Item
+                                      style={{
+                                        display:
+                                          field.tc_is_readonly &&
+                                          itemInPickerData(
+                                            field.text?.toString() ?? '',
+                                            'professionalRegistrationRequirements',
+                                          )
+                                            ? 'none'
+                                            : 'block',
+                                      }}
+                                    >
+                                      <Controller
+                                        control={profileControl}
+                                        name={`professional_registration_requirements.${index}.text`}
+                                        render={({ field: { onChange, onBlur, value } }) => {
+                                          return (
+                                            <>
+                                              <TextArea
+                                                autoSize
+                                                placeholder="Add a professional registration or certification requirement"
+                                                onChange={(event) => {
+                                                  onChange(event);
+                                                  debounce(triggerProfileValidation, 300)();
+                                                }}
+                                                onBlur={onBlur}
+                                                value={value?.toString()}
+                                              />
+                                            </>
+                                          );
+                                        }}
+                                      />
+                                    </Form.Item>
+                                  </Col>
+
+                                  <Col flex="none">
+                                    <ContextOptionsReadonly
+                                      isReadonly={field.tc_is_readonly ?? false}
+                                      onEdit={() => {
+                                        updateProfessionalRegistrationRequirement(index, {
+                                          ...professionalRegistrationRequirementsFields[index],
+                                          tc_is_readonly: false,
+                                        });
+                                      }}
+                                      onRemove={() => {
+                                        removeProfessionalRegistrationRequirement(index);
+                                        triggerProfileValidation();
                                       }}
                                     />
-                                  </Form.Item>
-                                </Col>
-
-                                <Col flex="none">
-                                  <ContextOptionsReadonly
-                                    isReadonly={field.tc_is_readonly ?? false}
-                                    onEdit={() => {
-                                      updateProfessionalRegistrationRequirement(index, {
-                                        ...professionalRegistrationRequirementsFields[index],
-                                        tc_is_readonly: false,
-                                      });
-                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
-                                    }}
-                                    onRemove={() => {
-                                      removeProfessionalRegistrationRequirement(index);
-                                      triggerProfileValidation();
-                                    }}
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <Row gutter={10}>
+                              <Card style={{ width: '100%', margin: '5px' }}>
+                                <Typography>
+                                  {professionalRegistrationRequirementsFields?.[index].text?.toString()}
+                                </Typography>
+                              </Card>
+                            </Row>
+                          ),
+                        )}
+                        {isCurrentVersion ? (
+                          <>
+                            <WizardValidationError
+                              formErrors={profileFormErrors}
+                              fieldName="professional_registration_requirements"
+                            />
+                            <Form.Item>
+                              <Row>
+                                <Col>
+                                  <WizardProfessionalRegistrationPicker
+                                    data={pickerData?.requirementsWithoutReadOnly?.professionalRegistrationRequirements}
+                                    fields={professionalRegistrations}
+                                    addAction={appendProfessionalRegistrationRequirement}
+                                    removeAction={removeProfessionalRegistrationRequirement}
+                                    triggerValidation={triggerProfileValidation}
                                   />
                                 </Col>
+                                <Col>
+                                  <Button
+                                    type="link"
+                                    onClick={() =>
+                                      appendProfessionalRegistrationRequirement({
+                                        text: '',
+                                        nonEditable: markAllNonEditableProReg,
+                                        is_significant: markAllSignificantProReg,
+                                      })
+                                    }
+                                    icon={<PlusOutlined />}
+                                  >
+                                    Add a custom requirement
+                                  </Button>
+                                </Col>
                               </Row>
-                            </Col>
-                          </Row>
-                        ))}
-                        <WizardValidationError
-                          formErrors={profileFormErrors}
-                          fieldName="professional_registration_requirements"
-                        />
-                        <Form.Item>
-                          <Row>
-                            <Col>
-                              <WizardProfessionalRegistrationPicker
-                                data={pickerData?.requirementsWithoutReadOnly?.professionalRegistrationRequirements}
-                                fields={professionalRegistrations}
-                                addAction={appendProfessionalRegistrationRequirement}
-                                removeAction={removeProfessionalRegistrationRequirement}
-                                triggerValidation={triggerProfileValidation}
-                                markAllSignificantProReg={markAllSignificantProReg}
-                              />
-                            </Col>
-                            <Col>
-                              <Button
-                                type="link"
-                                onClick={() =>
-                                  appendProfessionalRegistrationRequirement({
-                                    text: '',
-                                    nonEditable: markAllNonEditableProReg,
-                                    is_significant: markAllSignificantProReg,
-                                  })
-                                }
-                                icon={<PlusOutlined />}
-                              >
-                                Add a custom requirement
-                              </Button>
-                            </Col>
-                          </Row>
-                        </Form.Item>
+                            </Form.Item>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
+
+                  <Divider className="hr-reduced-margin" />
 
                   {/* Preferences */}
                   <Row justify="start">
@@ -3218,91 +3763,115 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Row>
                         }
                       >
-                        {preferencesFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handlePreferencesMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === preferencesFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
-                                    <Controller
-                                      control={profileControl}
-                                      name={`preferences.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add a preference"
-                                          onChange={onChange}
-                                          onBlur={onBlur}
-                                          value={value?.toString()}
-                                        />
+                        {preferencesFields.map((field, index) =>
+                          isCurrentVersion ? (
+                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                              {/* up/down controls */}
+                              <Col flex="none" className="reorder-controls">
+                                <ReorderButtons
+                                  index={index}
+                                  moveItem={handlePreferencesMove}
+                                  upperDisabled={index === 0}
+                                  lowerDisabled={index === preferencesFields.length - 1}
+                                />
+                              </Col>
+                              <Col flex="auto">
+                                <Row gutter={10}>
+                                  <Col flex="auto">
+                                    {field.tc_is_readonly &&
+                                      itemInPickerData(field.text?.toString() ?? '', 'preferences') && (
+                                        <div style={{ display: 'flex' }}>
+                                          <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                            {field.text?.toString()}
+                                          </Typography.Text>
+                                        </div>
                                       )}
-                                    />
-                                  </Form.Item>
-                                </Col>
+                                    <Form.Item
+                                      style={{
+                                        display:
+                                          field.tc_is_readonly &&
+                                          itemInPickerData(field.text?.toString() ?? '', 'preferences')
+                                            ? 'none'
+                                            : 'block',
+                                      }}
+                                    >
+                                      <Controller
+                                        control={profileControl}
+                                        name={`preferences.${index}.text`}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                          <TextArea
+                                            autoSize
+                                            placeholder="Add a preference"
+                                            onChange={onChange}
+                                            onBlur={onBlur}
+                                            value={value?.toString()}
+                                          />
+                                        )}
+                                      />
+                                    </Form.Item>
+                                  </Col>
 
-                                <Col flex="none">
-                                  <ContextOptionsReadonly
-                                    isReadonly={field.tc_is_readonly ?? false}
-                                    onEdit={() => {
-                                      updatePreference(index, {
-                                        ...preferencesFields[index],
-                                        tc_is_readonly: false,
-                                      });
-                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
-                                    }}
-                                    onRemove={() => {
-                                      removePreference(index);
-                                      triggerProfileValidation();
-                                    }}
-                                  />
-                                </Col>
-                              </Row>
-                            </Col>
-                          </Row>
-                        ))}
-                        <Form.Item>
-                          <Row>
-                            <Col>
-                              <WizardPicker
-                                data={pickerData?.requirementsWithoutReadOnly?.preferences}
-                                fields={preferences}
-                                addAction={appendPreference}
-                                removeAction={removePreference}
-                                triggerValidation={triggerProfileValidation}
-                                title="Preferences"
-                                buttonText="Browse and add preferences"
-                              />
-                            </Col>
-                            <Col>
-                              <Button
-                                type="link"
-                                onClick={() => appendPreference({ text: '' })}
-                                icon={<PlusOutlined />}
-                              >
-                                Add a custom job preference
-                              </Button>
-                            </Col>
-                          </Row>
-                        </Form.Item>
+                                  <Col flex="none">
+                                    <ContextOptionsReadonly
+                                      isReadonly={field.tc_is_readonly ?? false}
+                                      onEdit={() => {
+                                        updatePreference(index, {
+                                          ...preferencesFields[index],
+                                          tc_is_readonly: false,
+                                        });
+                                        // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                      }}
+                                      onRemove={() => {
+                                        removePreference(index);
+                                        triggerProfileValidation();
+                                      }}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <Row gutter={10}>
+                              <Card style={{ width: '100%', margin: '5px' }}>
+                                <Typography>{preferencesFields?.[index].text?.toString()}</Typography>
+                              </Card>
+                            </Row>
+                          ),
+                        )}
+                        {isCurrentVersion ? (
+                          <Form.Item>
+                            <Row>
+                              <Col>
+                                <WizardPicker
+                                  data={pickerData?.requirementsWithoutReadOnly?.preferences}
+                                  fields={preferences}
+                                  addAction={appendPreference}
+                                  removeAction={removePreference}
+                                  triggerValidation={triggerProfileValidation}
+                                  title="Preferences"
+                                  buttonText="Browse and add preferences"
+                                  tc_is_readonly={true}
+                                />
+                              </Col>
+                              <Col>
+                                <Button
+                                  type="link"
+                                  onClick={() => appendPreference({ text: '' })}
+                                  icon={<PlusOutlined />}
+                                >
+                                  Add a custom job preference
+                                </Button>
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        ) : (
+                          <></>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
+
+                  <Divider className="hr-reduced-margin" />
 
                   {/* Knowledge skills and abilities */}
                   <Row justify="start">
@@ -3316,96 +3885,124 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Row>
                         }
                       >
-                        {knowledgeSkillsAbilitiesFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleKnowledgeSkillsAbilitiesMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === knowledgeSkillsAbilitiesFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
-                                    <Controller
-                                      control={profileControl}
-                                      name={`knowledge_skills_abilities.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add a knowledge, skill, or ability"
-                                          onChange={(event) => {
-                                            onChange(event);
-                                            debounce(triggerProfileValidation, 300)();
-                                          }}
-                                          onBlur={onBlur}
-                                          value={value?.toString()}
-                                        />
+                        {knowledgeSkillsAbilitiesFields.map((field, index) =>
+                          isCurrentVersion ? (
+                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                              {/* up/down controls */}
+                              <Col flex="none" className="reorder-controls">
+                                <ReorderButtons
+                                  index={index}
+                                  moveItem={handleKnowledgeSkillsAbilitiesMove}
+                                  upperDisabled={index === 0}
+                                  lowerDisabled={index === knowledgeSkillsAbilitiesFields.length - 1}
+                                />
+                              </Col>
+                              <Col flex="auto">
+                                <Row gutter={10}>
+                                  <Col flex="auto">
+                                    {field.tc_is_readonly &&
+                                      itemInPickerData(field.text?.toString() ?? '', 'knowledgeSkillsAbilities') && (
+                                        <div style={{ display: 'flex' }}>
+                                          <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                            {field.text?.toString()}
+                                          </Typography.Text>
+                                        </div>
                                       )}
-                                    />
-                                  </Form.Item>
-                                </Col>
+                                    <Form.Item
+                                      style={{
+                                        display:
+                                          field.tc_is_readonly &&
+                                          itemInPickerData(field.text?.toString() ?? '', 'knowledgeSkillsAbilities')
+                                            ? 'none'
+                                            : 'block',
+                                      }}
+                                    >
+                                      <Controller
+                                        control={profileControl}
+                                        name={`knowledge_skills_abilities.${index}.text`}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                          <TextArea
+                                            autoSize
+                                            placeholder="Add a knowledge, skill, or ability"
+                                            onChange={(event) => {
+                                              onChange(event);
+                                              debounce(triggerProfileValidation, 300)();
+                                            }}
+                                            onBlur={onBlur}
+                                            value={value?.toString()}
+                                          />
+                                        )}
+                                      />
+                                    </Form.Item>
+                                  </Col>
 
-                                <Col flex="none">
-                                  <ContextOptionsReadonly
-                                    isReadonly={field.tc_is_readonly ?? false}
-                                    onEdit={() => {
-                                      updateKnowledgeSkillAbility(index, {
-                                        ...knowledgeSkillsAbilitiesFields[index],
-                                        tc_is_readonly: false,
-                                      });
-                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
-                                    }}
-                                    onRemove={() => {
-                                      removeKnowledgeSkillAbility(index);
-                                      triggerProfileValidation();
-                                    }}
+                                  <Col flex="none">
+                                    <ContextOptionsReadonly
+                                      isReadonly={field.tc_is_readonly ?? false}
+                                      onEdit={() => {
+                                        updateKnowledgeSkillAbility(index, {
+                                          ...knowledgeSkillsAbilitiesFields[index],
+                                          tc_is_readonly: false,
+                                        });
+                                        // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                      }}
+                                      onRemove={() => {
+                                        removeKnowledgeSkillAbility(index);
+                                        triggerProfileValidation();
+                                      }}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <Row gutter={10}>
+                              <Card style={{ width: '100%', margin: '5px' }}>
+                                <Typography>{knowledgeSkillsAbilitiesFields?.[index].text?.toString()}</Typography>
+                              </Card>
+                            </Row>
+                          ),
+                        )}
+                        {isCurrentVersion ? (
+                          <>
+                            <WizardValidationError
+                              formErrors={profileFormErrors}
+                              fieldName="knowledge_skills_abilities"
+                            />
+                            <Form.Item>
+                              <Row>
+                                <Col>
+                                  <WizardPicker
+                                    data={pickerData?.requirementsWithoutReadOnly?.knowledgeSkillsAbilities}
+                                    fields={knowledgeSkillsAbilities}
+                                    addAction={appendKnowledgeSkillAbility}
+                                    removeAction={removeKnowledgeSkillAbility}
+                                    triggerValidation={triggerProfileValidation}
+                                    title="Knowledge, skill and ability requirements"
+                                    buttonText="Browse and add knowledge, skill and abilities"
+                                    tc_is_readonly={true}
                                   />
                                 </Col>
+                                <Col>
+                                  <Button
+                                    type="link"
+                                    onClick={() => appendKnowledgeSkillAbility({ text: '' })}
+                                    icon={<PlusOutlined />}
+                                  >
+                                    Add a custom requirement
+                                  </Button>
+                                </Col>
                               </Row>
-                            </Col>
-                          </Row>
-                        ))}
-                        <WizardValidationError formErrors={profileFormErrors} fieldName="knowledge_skills_abilities" />
-                        <Form.Item>
-                          <Row>
-                            <Col>
-                              <WizardPicker
-                                data={pickerData?.requirementsWithoutReadOnly?.knowledgeSkillsAbilities}
-                                fields={knowledgeSkillsAbilities}
-                                addAction={appendKnowledgeSkillAbility}
-                                removeAction={removeKnowledgeSkillAbility}
-                                triggerValidation={triggerProfileValidation}
-                                title="Knowledge, skill and ability requirements"
-                                buttonText="Browse and add knowledge, skill and ability requirements"
-                              />
-                            </Col>
-                            <Col>
-                              <Button
-                                type="link"
-                                onClick={() => appendKnowledgeSkillAbility({ text: '' })}
-                                icon={<PlusOutlined />}
-                              >
-                                Add a custom requirement
-                              </Button>
-                            </Col>
-                          </Row>
-                        </Form.Item>
+                            </Form.Item>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
                   {/* Provisios */}
 
                   <Row justify="start">
@@ -3419,94 +4016,108 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Row>
                         }
                       >
-                        {willingnessStatementsFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleWillingnessStatementsMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === willingnessStatementsFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row>{/* Non-editable checkbox */}</Row>
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
-                                    <Controller
-                                      control={profileControl}
-                                      name={`willingness_statements.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add a willingness statement or proviso"
-                                          onChange={onChange}
-                                          onBlur={onBlur}
-                                          value={value?.toString()}
-                                        />
-                                      )}
-                                    />
-                                  </Form.Item>
-                                </Col>
+                        {willingnessStatementsFields.map((field, index) =>
+                          isCurrentVersion ? (
+                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                              {/* up/down controls */}
+                              <Col flex="none" className="reorder-controls">
+                                <ReorderButtons
+                                  index={index}
+                                  moveItem={handleWillingnessStatementsMove}
+                                  upperDisabled={index === 0}
+                                  lowerDisabled={index === willingnessStatementsFields.length - 1}
+                                />
+                              </Col>
+                              <Col flex="auto">
+                                <Row>{/* Non-editable checkbox */}</Row>
+                                <Row gutter={10}>
+                                  <Col flex="auto">
+                                    {field.tc_is_readonly && (
+                                      <div style={{ display: 'flex' }}>
+                                        <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                          {field.text?.toString()}
+                                        </Typography.Text>
+                                      </div>
+                                    )}
+                                    <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
+                                      <Controller
+                                        control={profileControl}
+                                        name={`willingness_statements.${index}.text`}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                          <TextArea
+                                            autoSize
+                                            placeholder="Add a willingness statement or proviso"
+                                            onChange={onChange}
+                                            onBlur={onBlur}
+                                            value={value?.toString()}
+                                          />
+                                        )}
+                                      />
+                                    </Form.Item>
+                                  </Col>
 
-                                <Col flex="none">
-                                  {/* <Button icon={<DeleteOutlined />} onClick={() => removeWillingnessStatement(index)} /> */}
-                                  <ContextOptionsReadonly
-                                    isReadonly={field.tc_is_readonly ?? false}
-                                    onEdit={() => {
-                                      updateWillingnessStatement(index, {
-                                        ...willingnessStatementsFields[index],
-                                        tc_is_readonly: false,
-                                      });
-                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
-                                    }}
-                                    onRemove={() => {
-                                      removeWillingnessStatement(index);
-                                      triggerProfileValidation();
-                                    }}
-                                  />
-                                </Col>
-                              </Row>
-                            </Col>
-                          </Row>
-                        ))}
-                        <Form.Item>
-                          <Row>
-                            <Col>
-                              <WizardPicker
-                                data={pickerData?.requirementsWithoutReadOnly?.willingnessStatements}
-                                fields={willingnessStatements}
-                                addAction={appendWillingnessStatement}
-                                removeAction={removeWillingnessStatement}
-                                triggerValidation={triggerProfileValidation}
-                                title="Willingness statements or provisos"
-                                buttonText="Browse and add provisos"
-                              />
-                            </Col>
-                            <Col>
-                              <Button
-                                type="link"
-                                onClick={() => appendWillingnessStatement({ text: '' })}
-                                icon={<PlusOutlined />}
-                              >
-                                Add a custom proviso
-                              </Button>
-                            </Col>
-                          </Row>
-                        </Form.Item>
+                                  <Col flex="none">
+                                    {/* <Button icon={<DeleteOutlined />} onClick={() => removeWillingnessStatement(index)} /> */}
+                                    <ContextOptionsReadonly
+                                      isReadonly={field.tc_is_readonly ?? false}
+                                      onEdit={() => {
+                                        updateWillingnessStatement(index, {
+                                          ...willingnessStatementsFields[index],
+                                          tc_is_readonly: false,
+                                        });
+                                        // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                      }}
+                                      onRemove={() => {
+                                        removeWillingnessStatement(index);
+                                        triggerProfileValidation();
+                                      }}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <Row gutter={10}>
+                              <Card style={{ width: '100%', margin: '5px' }}>
+                                <Typography>{willingnessStatementsFields?.[index].text?.toString()}</Typography>
+                              </Card>
+                            </Row>
+                          ),
+                        )}
+                        {isCurrentVersion ? (
+                          <Form.Item>
+                            <Row>
+                              <Col>
+                                <WizardPicker
+                                  data={pickerData?.requirementsWithoutReadOnly?.willingnessStatements}
+                                  fields={willingnessStatements}
+                                  addAction={appendWillingnessStatement}
+                                  removeAction={removeWillingnessStatement}
+                                  triggerValidation={triggerProfileValidation}
+                                  title="Willingness statements or provisos"
+                                  buttonText="Browse and add provisos"
+                                  tc_is_readonly={true}
+                                />
+                              </Col>
+                              <Col>
+                                <Button
+                                  type="link"
+                                  onClick={() => appendWillingnessStatement({ text: '' })}
+                                  icon={<PlusOutlined />}
+                                >
+                                  Add a custom proviso
+                                </Button>
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        ) : (
+                          <></>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
                   {/* Security screenings */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
@@ -3516,203 +4127,237 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         label={
                           <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                             <Col>Security Screenings</Col>
-                            <Col>
-                              <Form.Item style={{ margin: 0 }}>
-                                <Row>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllNonEditableSec"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllNonEditableSec}
-                                          disabled={professionalRegistrationRequirementsFields.length === 0}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateNonEditableSec(e.target.checked);
-                                          }}
-                                        >
-                                          Mark all as non-editable
-                                          <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                  <Col>
-                                    <Controller
-                                      control={profileControl}
-                                      name="markAllSignificantSecurityScreenings"
-                                      render={({ field }) => (
-                                        <Checkbox
-                                          {...field}
-                                          checked={markAllSignificantSecurityScreenings || markAllNonEditableSec}
-                                          onChange={(e) => {
-                                            field.onChange(e.target.checked);
-                                            updateSignificantSecurityScreenings(e.target.checked);
-                                          }}
-                                          disabled={markAllNonEditableSec || securityScreeningsFields.length === 0}
-                                        >
-                                          Mark all as significant
-                                          <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
-                                            <InfoCircleOutlined style={{ marginLeft: 8 }} />
-                                          </Tooltip>
-                                        </Checkbox>
-                                      )}
-                                    ></Controller>
-                                  </Col>
-                                </Row>
-                              </Form.Item>
-                            </Col>
+                            {isCurrentVersion ? (
+                              <Col>
+                                <Form.Item style={{ margin: 0 }}>
+                                  <Row>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllNonEditableSec"
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={markAllNonEditableSec}
+                                            disabled={professionalRegistrationRequirementsFields.length === 0}
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateNonEditableSec(e.target.checked);
+                                            }}
+                                          >
+                                            Mark all as non-editable
+                                            <Tooltip title="Points marked as non-editable will not be changable by the hiring manager.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                    <Col>
+                                      <Controller
+                                        control={profileControl}
+                                        name="markAllSignificantSecurityScreenings"
+                                        render={({ field }) => (
+                                          <Checkbox
+                                            {...field}
+                                            checked={markAllSignificantSecurityScreenings || markAllNonEditableSec}
+                                            onChange={(e) => {
+                                              field.onChange(e.target.checked);
+                                              updateSignificantSecurityScreenings(e.target.checked);
+                                            }}
+                                            disabled={markAllNonEditableSec || securityScreeningsFields.length === 0}
+                                          >
+                                            Mark all as significant
+                                            <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
+                                              <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                            </Tooltip>
+                                          </Checkbox>
+                                        )}
+                                      ></Controller>
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                              </Col>
+                            ) : (
+                              <></>
+                            )}
                           </Row>
                         }
                       >
-                        {securityScreeningsFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleSecurityScreeningsMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === securityScreeningsFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row>
-                                {/* Non-editable checkbox */}
-                                <div style={{ marginBottom: '5px' }}>
-                                  <Controller
-                                    name={`security_screenings.${index}.nonEditable`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllNonEditableSec', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        checked={value}
-                                      >
-                                        Non-editable
-                                      </Checkbox>
-                                    )}
-                                  />
-
-                                  <Controller
-                                    name={`security_screenings.${index}.is_significant`}
-                                    control={profileControl}
-                                    render={({ field: { onChange, value } }) => (
-                                      <Checkbox
-                                        onChange={(args) => {
-                                          if (!args.target.checked) {
-                                            profileSetValue('markAllSignificantSecurityScreenings', false);
-                                          }
-                                          onChange(args);
-                                        }}
-                                        disabled={securityScreenings?.[index].nonEditable}
-                                        checked={value || securityScreenings?.[index].nonEditable}
-                                      >
-                                        Significant
-                                      </Checkbox>
-                                    )}
-                                  />
-                                </div>
-                              </Row>
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  {field.tc_is_readonly && (
-                                    <div style={{ display: 'flex' }}>
-                                      <Typography.Text style={{ flexGrow: 1, width: 0 }}>
-                                        {field.text?.toString()}
-                                      </Typography.Text>
-                                    </div>
-                                  )}
-                                  <Form.Item style={{ display: field.tc_is_readonly ? 'none' : 'block' }}>
+                        {securityScreeningsFields.map((field, index) =>
+                          isCurrentVersion ? (
+                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                              {/* up/down controls */}
+                              <Col flex="none" className="reorder-controls">
+                                <ReorderButtons
+                                  index={index}
+                                  moveItem={handleSecurityScreeningsMove}
+                                  upperDisabled={index === 0}
+                                  lowerDisabled={index === securityScreeningsFields.length - 1}
+                                />
+                              </Col>
+                              <Col flex="auto">
+                                <Row>
+                                  {/* Non-editable checkbox */}
+                                  <div style={{ marginBottom: '5px' }}>
                                     <Controller
+                                      name={`security_screenings.${index}.nonEditable`}
                                       control={profileControl}
-                                      name={`security_screenings.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add a security screenings requirement"
-                                          onChange={(event) => {
-                                            onChange(event);
-                                            debounce(triggerProfileValidation, 300)();
+                                      render={({ field: { onChange, value } }) => (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            // set this item as significant as well
+                                            if (args.target.checked) {
+                                              profileSetValue(`security_screenings.${index}.is_significant`, true);
+                                            }
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllNonEditableSec', false);
+                                            }
+                                            onChange(args);
                                           }}
-                                          onBlur={onBlur}
-                                          value={value?.toString()}
-                                        />
+                                          checked={value}
+                                        >
+                                          Non-editable
+                                        </Checkbox>
                                       )}
                                     />
-                                  </Form.Item>
-                                </Col>
 
-                                <Col flex="none">
-                                  <ContextOptionsReadonly
-                                    isReadonly={field.tc_is_readonly ?? false}
-                                    onEdit={() => {
-                                      updateSecurityScreeining(index, {
-                                        ...securityScreeningsFields[index],
-                                        tc_is_readonly: false,
-                                      });
-                                      // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
-                                    }}
-                                    onRemove={() => {
-                                      removeSecurityScreening(index);
-                                      triggerProfileValidation();
-                                    }}
-                                  />
-                                  {/* <Button
+                                    <Controller
+                                      name={`security_screenings.${index}.is_significant`}
+                                      control={profileControl}
+                                      render={({ field: { onChange, value } }) => (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllSignificantSecurityScreenings', false);
+                                            }
+                                            onChange(args);
+                                          }}
+                                          disabled={securityScreenings?.[index].nonEditable}
+                                          checked={value || securityScreenings?.[index].nonEditable}
+                                        >
+                                          Significant
+                                        </Checkbox>
+                                      )}
+                                    />
+                                  </div>
+                                </Row>
+                                <Row gutter={10}>
+                                  <Col flex="auto">
+                                    {field.tc_is_readonly &&
+                                      itemInPickerData(field.text?.toString() ?? '', 'securityScreenings') && (
+                                        <div style={{ display: 'flex' }}>
+                                          <Typography.Text style={{ flexGrow: 1, width: 0 }}>
+                                            {field.text?.toString()}
+                                          </Typography.Text>
+                                        </div>
+                                      )}
+                                    <Form.Item
+                                      style={{
+                                        display:
+                                          field.tc_is_readonly &&
+                                          itemInPickerData(field.text?.toString() ?? '', 'securityScreenings')
+                                            ? 'none'
+                                            : 'block',
+                                      }}
+                                    >
+                                      <Controller
+                                        control={profileControl}
+                                        name={`security_screenings.${index}.text`}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                          <TextArea
+                                            autoSize
+                                            placeholder="Add a security screenings requirement"
+                                            onChange={(event) => {
+                                              onChange(event);
+                                              debounce(triggerProfileValidation, 300)();
+                                            }}
+                                            onBlur={onBlur}
+                                            value={value?.toString()}
+                                          />
+                                        )}
+                                      />
+                                    </Form.Item>
+                                  </Col>
+
+                                  <Col flex="none">
+                                    <ContextOptionsReadonly
+                                      isReadonly={field.tc_is_readonly ?? false}
+                                      onEdit={() => {
+                                        updateSecurityScreeining(index, {
+                                          ...securityScreeningsFields[index],
+                                          tc_is_readonly: false,
+                                        });
+                                        // setValue(`professional_registration_requirements.${index}.is_readonly`, false);
+                                      }}
+                                      onRemove={() => {
+                                        removeSecurityScreening(index);
+                                        triggerProfileValidation();
+                                      }}
+                                    />
+                                    {/* <Button
                                     icon={<DeleteOutlined />}
                                     onClick={() => {
                                       removeSecurityScreening(index);
                                       triggerProfileValidation();
                                     }}
                                   /> */}
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <Row gutter={10}>
+                              <Card style={{ width: '100%', margin: '5px' }}>
+                                <Typography>{securityScreeningsFields?.[index].text?.toString()}</Typography>
+                              </Card>
+                            </Row>
+                          ),
+                        )}
+                        {isCurrentVersion ? (
+                          <>
+                            <WizardValidationError formErrors={profileFormErrors} fieldName="security_screenings" />
+                            <Form.Item>
+                              <Row>
+                                <Col>
+                                  <WizardPicker
+                                    data={pickerData?.requirementsWithoutReadOnly?.securityScreenings}
+                                    fields={securityScreenings}
+                                    addAction={appendSecurityScreening}
+                                    removeAction={removeSecurityScreening}
+                                    triggerValidation={triggerProfileValidation}
+                                    title="Security screenings"
+                                    buttonText="Browse and add security screenings"
+                                    addAsSignificantAndReadonly={true}
+                                    tc_is_readonly={true}
+                                  />
+                                </Col>
+                                <Col>
+                                  <Button
+                                    type="link"
+                                    onClick={() =>
+                                      appendSecurityScreening({
+                                        text: '',
+                                        nonEditable: markAllNonEditableSec,
+                                        is_significant: markAllSignificantSecurityScreenings,
+                                      })
+                                    }
+                                    icon={<PlusOutlined />}
+                                  >
+                                    Add a custom requirement
+                                  </Button>
                                 </Col>
                               </Row>
-                            </Col>
-                          </Row>
-                        ))}
-                        <WizardValidationError formErrors={profileFormErrors} fieldName="security_screenings" />
-                        <Form.Item>
-                          <Row>
-                            <Col>
-                              <WizardPicker
-                                data={pickerData?.requirementsWithoutReadOnly?.securityScreenings}
-                                fields={securityScreenings}
-                                addAction={appendSecurityScreening}
-                                removeAction={removeSecurityScreening}
-                                triggerValidation={triggerProfileValidation}
-                                title="Security screenings"
-                                buttonText="Browse and add security screenings"
-                              />
-                            </Col>
-                            <Col>
-                              <Button
-                                type="link"
-                                onClick={() =>
-                                  appendSecurityScreening({
-                                    text: '',
-                                    nonEditable: markAllNonEditableSec,
-                                    is_significant: markAllSignificantSecurityScreenings,
-                                  })
-                                }
-                                icon={<PlusOutlined />}
-                              >
-                                Add a custom requirement
-                              </Button>
-                            </Col>
-                          </Row>
-                        </Form.Item>
+                            </Form.Item>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                       </Form.Item>
                     </Col>
                   </Row>
 
+                  <Divider className="hr-reduced-margin" />
                   {/* optional requirements */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
@@ -3725,144 +4370,92 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Row>
                         }
                       >
-                        {optionalRequirementsFields.map((field, index) => (
-                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                            {/* up/down controls */}
-                            <Col flex="none" className="reorder-controls">
-                              <ReorderButtons
-                                index={index}
-                                moveItem={handleOptionalRequirementsMove}
-                                upperDisabled={index === 0}
-                                lowerDisabled={index === optionalRequirementsFields.length - 1}
-                              />
-                            </Col>
-                            <Col flex="auto">
-                              <Row>{/* Non-editable checkbox */}</Row>
-                              <Row gutter={10}>
-                                <Col flex="auto">
-                                  <Form.Item>
-                                    <Controller
-                                      control={profileControl}
-                                      name={`optional_requirements.${index}.text`}
-                                      render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextArea
-                                          autoSize
-                                          placeholder="Add an optional requirement"
-                                          onChange={onChange}
-                                          onBlur={onBlur}
-                                          value={value?.toString()}
-                                        />
-                                      )}
-                                    />
-                                  </Form.Item>
-                                </Col>
+                        {optionalRequirementsFields.map((field, index) =>
+                          isCurrentVersion ? (
+                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                              {/* up/down controls */}
+                              <Col flex="none" className="reorder-controls">
+                                <ReorderButtons
+                                  index={index}
+                                  moveItem={handleOptionalRequirementsMove}
+                                  upperDisabled={index === 0}
+                                  lowerDisabled={index === optionalRequirementsFields.length - 1}
+                                />
+                              </Col>
+                              <Col flex="auto">
+                                <Row>{/* Non-editable checkbox */}</Row>
+                                <Row gutter={10}>
+                                  <Col flex="auto">
+                                    <Form.Item>
+                                      <Controller
+                                        control={profileControl}
+                                        name={`optional_requirements.${index}.text`}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                          <TextArea
+                                            autoSize
+                                            placeholder="Add an optional requirement"
+                                            onChange={onChange}
+                                            onBlur={onBlur}
+                                            value={value?.toString()}
+                                          />
+                                        )}
+                                      />
+                                    </Form.Item>
+                                  </Col>
 
-                                <Col flex="none">
-                                  <Button icon={<DeleteOutlined />} onClick={() => removeOptionalRequirement(index)} />
-                                </Col>
-                              </Row>
-                            </Col>
-                          </Row>
-                        ))}
-                        <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() => appendOptionalRequirement({ text: '' })}
-                            icon={<PlusOutlined />}
-                          >
-                            Add an optional requirement
-                          </Button>
-                        </Form.Item>
+                                  <Col flex="none">
+                                    <Button
+                                      icon={<DeleteOutlined />}
+                                      onClick={() => removeOptionalRequirement(index)}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <Row gutter={10}>
+                              <Card style={{ width: '100%', margin: '5px' }}>
+                                <Typography>{optionalRequirementsFields?.[index].text?.toString()}</Typography>
+                              </Card>
+                            </Row>
+                          ),
+                        )}
+                        {isCurrentVersion ? (
+                          <Form.Item>
+                            <Button
+                              type="link"
+                              onClick={() => appendOptionalRequirement({ text: '' })}
+                              icon={<PlusOutlined />}
+                            >
+                              Add an optional requirement
+                            </Button>
+                          </Form.Item>
+                        ) : (
+                          <></>
+                        )}
                       </Form.Item>
+                      {/* Todo: if refactoring, need to also add the re-arrange buttons */}
+                      {/* <WizardEditProfileArrayField
+                        useFormReturn={jobProfileUseFormReturn}
+                        label="Optional requirements"
+                        fieldName="optional_requirements"
+                        testId="optional-requirement"
+                        addButtonText="Add an optional requirement"
+                      /> */}
                     </Col>
                   </Row>
                 </Card>
 
                 <Card title="Behavioural competencies" style={{ marginTop: 16 }} bordered={false}>
-                  <Row justify="start">
-                    <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
-                      <>
-                        {behavioural_competencies_fields.length > 0 && (
-                          <List
-                            style={{ marginTop: '7px' }}
-                            locale={{ emptyText: ' ' }}
-                            dataSource={behavioural_competencies_fields}
-                            renderItem={(field, index) => (
-                              <List.Item
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'flex-start', // Align items to the top
-                                  marginBottom: '0px',
-                                  borderBottom: 'none',
-
-                                  padding: '5px 0',
-                                }}
-                                key={field.id} // Ensure this is a unique value
-                              >
-                                <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
-                                  <strong>
-                                    {field.behavioural_competency.name}
-                                    <IsIndigenousCompetency competency={field.behavioural_competency} />
-                                  </strong>
-                                  : {field.behavioural_competency.description}
-                                </p>
-
-                                <Button
-                                  type="text" // No button styling, just the icon
-                                  icon={<DeleteOutlined />}
-                                  onClick={() => {
-                                    behavioural_competencies_remove(index);
-                                    triggerProfileValidation();
-                                  }}
-                                  style={{
-                                    marginLeft: '10px',
-                                    border: '1px solid',
-                                    borderColor: '#d9d9d9',
-                                  }}
-                                />
-
-                                <FormItem
-                                  name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                                  control={profileControl}
-                                  hidden
-                                >
-                                  <Input />
-                                </FormItem>
-                                <FormItem
-                                  hidden
-                                  name={`behavioural_competencies.${index}.behavioural_competency.name`}
-                                  control={profileControl}
-                                  style={{ flex: 1, marginRight: '10px' }}
-                                >
-                                  <Input placeholder="Name" style={{ width: '100%' }} />
-                                </FormItem>
-                                <FormItem
-                                  hidden
-                                  name={`behavioural_competencies.${index}.behavioural_competency.description`}
-                                  control={profileControl}
-                                  style={{ flex: 2, marginRight: '10px' }}
-                                >
-                                  <TextArea placeholder="Description" style={{ width: '100%' }} />
-                                </FormItem>
-                              </List.Item>
-                            )}
-                          />
-                        )}
-                        <Typography.Text type="secondary">
-                          <div style={{ margin: '0.5rem 0' }}>
-                            * denotes an Indigenous Relations Behavioural Competency
-                          </div>
-                        </Typography.Text>
-                        <BehaviouralComptencyPicker
-                          behavioural_competencies_fields={behavioural_competencies_fields}
-                          addAction={behavioural_competencies_append}
-                          removeAction={behavioural_competencies_remove}
-                          validateFunction={triggerProfileValidation}
-                        ></BehaviouralComptencyPicker>
-                      </>
-                      <WizardValidationError formErrors={profileFormErrors} fieldName="behavioural_competencies" />
-                    </Col>
-                  </Row>
+                  <BehaviouralComptencyPicker
+                    behavioural_competencies_fields={behavioural_competencies_fields}
+                    addAction={behavioural_competencies_append}
+                    removeAction={behavioural_competencies_remove}
+                    validateFunction={triggerProfileValidation}
+                    formErrors={profileFormErrors}
+                    useFormReturn={jobProfileUseFormReturn}
+                    readOnly={!isCurrentVersion}
+                  ></BehaviouralComptencyPicker>
                 </Card>
               </Form>
             </Col>
@@ -3895,7 +4488,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 </Card>
               )}
 
-              {state == 'PUBLISHED' && (
+              {state == 'PUBLISHED' && isCurrentVersion && (
                 <Card title="Save and publish">
                   <Typography.Text>Save your progress and publish changes.</Typography.Text>
                   <br></br>
@@ -3943,7 +4536,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 <Divider></Divider>
 
-                {state == 'PUBLISHED' && (
+                {state == 'PUBLISHED' && isCurrentVersion && (
                   <>
                     <Typography.Title level={5}>Unpublish</Typography.Title>
                     <Typography.Text>
@@ -3958,13 +4551,19 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   </>
                 )}
 
-                <Typography.Title level={5}>Allow others to edit</Typography.Title>
-                <Typography.Paragraph>
-                  Share the URL with people who you would like to collaborate with (IDIR restricted).
-                </Typography.Paragraph>
-                <Typography.Text copyable>http://pjs-dev.apps.silver.devops.gov.bc.ca/wizard/edit/1</Typography.Text>
+                {isCurrentVersion && (
+                  <>
+                    <Typography.Title level={5}>Allow others to edit</Typography.Title>
+                    <Typography.Paragraph>
+                      Share the URL with people who you would like to collaborate with (IDIR restricted).
+                    </Typography.Paragraph>
+                    <Typography.Text copyable>
+                      http://pjs-dev.apps.silver.devops.gov.bc.ca/wizard/edit/1
+                    </Typography.Text>
 
-                <Divider></Divider>
+                    <Divider></Divider>
+                  </>
+                )}
 
                 {state == 'PUBLISHED' && (
                   <>
@@ -3990,6 +4589,333 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               </Card>
             </Col>
           </Row>
+        </>
+      ),
+    },
+    {
+      key: '5',
+      label: 'Info',
+      children: (
+        <>
+          {/* <Card title="">
+            <Typography.Text>Total Views</Typography.Text>
+            <br></br>
+          </Card>
+           */}
+
+          <Row
+            style={{
+              marginTop: '24px',
+              marginBottom: '24px',
+              marginLeft: '48px',
+              marginRight: '48px',
+              paddingLeft: '0',
+            }}
+            gutter={12}
+          >
+            <Col className="gutter-row" span={24}>
+              <Card
+                bodyStyle={{
+                  padding: '0',
+                  backgroundColor: '#F0F2F5',
+                  borderRadius: '8px',
+                  border: '1px solid #D9D9D9',
+                }}
+              >
+                <Card.Meta
+                  title={
+                    <>
+                      Version
+                      {' ' +
+                        jobProfileMeta?.jobProfileMeta?.versions.find(
+                          (v: { id: number | undefined }) => v.id == jobProfileData?.jobProfile.id,
+                        )?.version +
+                        ' '}
+                      <Tag color={'green'}>Latest</Tag>
+                    </>
+                  }
+                  style={{
+                    padding: '16px',
+                    backgroundColor: 'white',
+                  }}
+                ></Card.Meta>
+                <Descriptions
+                  className="customDescriptions"
+                  bordered
+                  column={24}
+                  items={[
+                    {
+                      key: 'updated by',
+                      label: <Typography.Title level={3}>Updated by</Typography.Title>,
+                      children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
+                      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                    },
+                    {
+                      key: 'updated at',
+                      label: <Typography.Title level={3}>Updated at</Typography.Title>,
+                      children: (
+                        <span tabIndex={0}>
+                          {profileJson?.jobProfile?.updated_at &&
+                            new Intl.DateTimeFormat('en-CA', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              hour12: false,
+                              minute: '2-digit',
+                              second: '2-digit',
+                            }).format(new Date(profileJson?.jobProfile?.updated_at))}
+                        </span>
+                      ),
+                      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                    },
+                  ]}
+                  labelStyle={{
+                    fontWeight: 700,
+                    verticalAlign: 'top',
+                    background: '#FAFAFA',
+                  }}
+                  contentStyle={{
+                    background: 'white',
+                    verticalAlign: 'top',
+                  }}
+                  style={{ marginBottom: '-12px', padding: '12px' }}
+                />
+                <Card
+                  style={{
+                    margin: '12px',
+                  }}
+                >
+                  <Row justify="center" align="middle">
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '8px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      Views
+                    </Col>
+
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '8px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      In Review
+                    </Col>
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '8px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      Completed
+                    </Col>
+                  </Row>
+                  <Row justify="center" align="middle">
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '4px',
+                      }}
+                    >
+                      <Typography style={{ fontSize: '24px', textAlign: 'center' }}>
+                        {profileJson?.jobProfile?.views}
+                      </Typography>
+                    </Col>
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '4px',
+                      }}
+                    >
+                      <Typography style={{ fontSize: '24px', textAlign: 'center' }}>{versionInReview}</Typography>
+                    </Col>
+
+                    <Col
+                      span={8}
+                      style={{
+                        padding: '4px',
+                      }}
+                    >
+                      <Typography style={{ fontSize: '24px', textAlign: 'center' }}>{versionCompleted}</Typography>
+                    </Col>
+                  </Row>
+                </Card>
+              </Card>
+            </Col>
+          </Row>
+          <Card
+            style={{
+              marginTop: '24px',
+              marginBottom: '24px',
+              marginLeft: '48px',
+              marginRight: '48px',
+              paddingLeft: '0',
+            }}
+            bodyStyle={{
+              padding: '0',
+              backgroundColor: '#F0F2F5',
+              borderRadius: '8px',
+              border: '1px solid #D9D9D9',
+            }}
+          >
+            <Card.Meta
+              title="All versions"
+              style={{
+                padding: '16px',
+                backgroundColor: 'white',
+              }}
+            ></Card.Meta>
+            <Descriptions
+              className="customDescriptions"
+              bordered
+              column={24}
+              items={[
+                // {
+                //   key: 'Last updated by',
+                //   label: <Typography.Title level={3}>Last updated by</Typography.Title>,
+                //   children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
+                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                // },
+                // {
+                //   key: 'Last updated at',
+                //   label: <Typography.Title level={3}>Last updated at</Typography.Title>,
+                //   children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_at}</span>,
+                //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                // },
+                {
+                  key: 'First published by',
+                  label: <Typography.Title level={3}>First published by</Typography.Title>,
+                  children: <span tabIndex={0}>{jobProfileMeta?.jobProfileMeta.firstPublishedBy?.user}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'First published at',
+                  label: <Typography.Title level={3}>First published at</Typography.Title>,
+                  children: (
+                    <span tabIndex={0}>
+                      {jobProfileMeta?.jobProfileMeta.firstPublishedBy?.date &&
+                        new Intl.DateTimeFormat('en-CA', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          hour12: false,
+                          minute: '2-digit',
+                          second: '2-digit',
+                        }).format(new Date(jobProfileMeta.jobProfileMeta.firstPublishedBy.date))}
+                    </span>
+                  ),
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'Created by',
+                  label: <Typography.Title level={3}>Created by</Typography.Title>,
+                  children: <span tabIndex={0}>{jobProfileMeta?.jobProfileMeta.firstCreatedBy?.owner ?? ''}</span>,
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+                {
+                  key: 'Created at',
+                  label: <Typography.Title level={3}>Created at</Typography.Title>,
+                  children: (
+                    <span tabIndex={0}>
+                      {jobProfileMeta?.jobProfileMeta.firstCreatedBy?.date &&
+                        new Intl.DateTimeFormat('en-CA', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          hour12: false,
+                          minute: '2-digit',
+                          second: '2-digit',
+                        }).format(new Date(jobProfileMeta.jobProfileMeta.firstCreatedBy.date))}
+                    </span>
+                  ),
+                  span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+                },
+              ]}
+              labelStyle={{
+                fontWeight: 700,
+                verticalAlign: 'top',
+                background: '#FAFAFA',
+              }}
+              contentStyle={{
+                background: 'white',
+                verticalAlign: 'top',
+              }}
+              style={{ marginBottom: '-12px', padding: '12px' }}
+            />
+            <Card
+              style={{
+                margin: '12px',
+              }}
+            >
+              <Row justify="center" align="middle">
+                <Col
+                  span={8}
+                  style={{
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  Total views
+                </Col>
+
+                <Col
+                  span={8}
+                  style={{
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  In Review
+                </Col>
+                <Col
+                  span={8}
+                  style={{
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  Completed
+                </Col>
+              </Row>
+              <Row justify="center" align="middle">
+                <Col
+                  span={8}
+                  style={{
+                    padding: '4px',
+                  }}
+                >
+                  <Typography style={{ fontSize: '24px', textAlign: 'center' }}>
+                    {jobProfileMeta?.jobProfileMeta.totalViews}
+                  </Typography>
+                </Col>
+                <Col
+                  span={8}
+                  style={{
+                    padding: '4px',
+                  }}
+                >
+                  <Typography style={{ fontSize: '24px', textAlign: 'center' }}>{totalInReview}</Typography>
+                </Col>
+
+                <Col
+                  span={8}
+                  style={{
+                    padding: '4px',
+                  }}
+                >
+                  <Typography style={{ fontSize: '24px', textAlign: 'center' }}>{totalCompleted}</Typography>
+                </Col>
+              </Row>
+            </Card>
+          </Card>
         </>
       ),
     },
@@ -4029,6 +4955,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         button2Text={state == 'PUBLISHED' ? 'Save and publish' : 'Save as draft'}
         button2Callback={async () => {
           await save();
+        }}
+        versions={jobProfileMeta?.jobProfileMeta}
+        selectVersionCallback={(selectedId: string) => {
+          setId(selectedId);
+          navigate('/published-job-profiles/' + selectedId);
         }}
       />
 

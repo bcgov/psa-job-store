@@ -92,9 +92,13 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
           isCustom: acc.isCustom,
           disabled: acc.disabled,
         }))
-        .filter((acc) => acc.text.trim() !== ''),
-      education: originalData.education.filter((edu: { text: string }) => edu.text.trim() !== ''),
-      job_experience: originalData.job_experience.filter((exp: { text: string }) => exp.text.trim() !== ''),
+        .filter((acc) => !acc.isCustom || acc.text.trim() !== ''), // remove items only if they are custom and empty
+      education: originalData.education.filter(
+        (edu: { text: string; isCustom?: boolean }) => !edu.isCustom || edu.text.trim() !== '',
+      ),
+      job_experience: originalData.job_experience.filter(
+        (exp: { text: string; isCustom?: boolean }) => !exp.isCustom || exp.text.trim() !== '',
+      ),
       behavioural_competencies: originalData.behavioural_competencies,
       classifications: originalData.classifications.map((classification: any) => ({
         classification: getClassificationById(classification.classification),
@@ -106,29 +110,52 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       organizations: [],
       review_required: false,
       professions: [],
-      professional_registration_requirements: originalData.professional_registration_requirements.filter(
-        (reg: { text: string }) => reg.text.trim() !== '',
-      ),
+      professional_registration_requirements: [
+        ...originalData.professional_registration_requirements,
+        ...originalData.optional_professional_registration_requirements,
+      ]
+        .map((acc) => ({
+          text: acc.text,
+          is_significant: acc.is_significant,
+          is_readonly: acc.is_readonly,
+          isCustom: acc.isCustom,
+          disabled: acc.disabled,
+        }))
+        .filter((acc) => !acc.isCustom || acc.text.trim() !== ''), // remove items only if they are custom and empty
       optional_requirements: originalData.optional_requirements.filter(
-        (req: { text: string }) => req.text.trim() !== '',
+        (req: { text: string; isCustom?: boolean }) => !req.isCustom || req.text.trim() !== '',
       ),
-      preferences: originalData.preferences.filter((reg: { text: string }) => reg.text.trim() !== ''),
+      preferences: originalData.preferences.filter(
+        (pref: { text: string; isCustom?: boolean }) => !pref.isCustom || pref.text.trim() !== '',
+      ),
       knowledge_skills_abilities: originalData.knowledge_skills_abilities.filter(
-        (reg: { text: string }) => reg.text.trim() !== '',
+        (ksa: { text: string; isCustom?: boolean }) => !ksa.isCustom || ksa.text.trim() !== '',
       ),
-
       willingness_statements: originalData.willingness_statements
         .map((proviso: any) => ({
           text: proviso.text,
           isCustom: proviso.isCustom,
           disabled: proviso.disabled,
         }))
-        .filter((stmt: { text: string }) => stmt.text.trim() !== ''),
-      security_screenings: originalData.security_screenings.filter(
-        (screening: { text: string }) => screening.text.trim() !== '',
-      ),
+        .filter((stmt: { text: string; isCustom?: boolean }) => !stmt.isCustom || stmt.text.trim() !== ''),
+      security_screenings: [...originalData.security_screenings, ...originalData.optional_security_screenings]
+        .map((acc) => ({
+          text: acc.text,
+          is_significant: acc.is_significant,
+          is_readonly: acc.is_readonly,
+          isCustom: acc.isCustom,
+          disabled: acc.disabled,
+        }))
+        .filter((acc) => !acc.isCustom || acc.text.trim() !== ''), // remove items only if they are custom and empty
+
+      // originalData.security_screenings.filter(
+      //   (screening: { text: string; isCustom?: boolean }) => !screening.isCustom || screening.text.trim() !== '',
+      // ),
       all_organizations: false,
       all_reports_to: false,
+      owner: originalData.owner,
+      created_at: originalData.created_at,
+      current_version: originalData.current_version,
     };
   }
 
@@ -285,7 +312,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   const getMenuContent = () => {
     return (
-      <Menu>
+      <Menu className="wizard-menu">
         <Menu.Item key="save" onClick={saveAndQuit} disabled={saveAndQuitLoading}>
           <div style={{ position: 'relative' }}>
             {saveAndQuitLoading && (

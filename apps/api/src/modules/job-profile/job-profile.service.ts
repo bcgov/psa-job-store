@@ -1,17 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { JobProfile, JobProfileState, JobProfileType, Prisma } from '@prisma/client';
+import { Cache } from 'cache-manager';
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
-
 @Injectable()
 export class JobProfileService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly searchService: SearchService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   private async getJobProfilesWithSearch(
@@ -33,6 +36,7 @@ export class JobProfileService {
         // ...(owner_id != null && { owner_id }),
         ...(searchConditions != null && searchConditions),
         state,
+        current_version: true,
         ...where,
       },
       ...args,
@@ -354,6 +358,7 @@ export class JobProfileService {
 
     return this.prisma.jobProfile.count({
       where: {
+        current_version: true,
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         ...where,
       },
@@ -439,6 +444,9 @@ export class JobProfileService {
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id },
       include: {
+        owner: true,
+        updated_by: true,
+        published_by: true,
         classifications: {
           include: {
             classification: true,
@@ -482,9 +490,10 @@ export class JobProfileService {
     return jobProfile;
   }
 
-  async getJobProfileByNumber(number: number, userRoles: string[] = []) {
-    const jobProfile = await this.prisma.jobProfile.findUnique({
-      where: { number },
+  async getJobProfileByNumber(number: number, version: number, userRoles: string[] = []) {
+    const where = version ? { number: number, version: version } : { number, current_version: true };
+    const jobProfiles = await this.prisma.jobProfile.findMany({
+      where: where,
       include: {
         classifications: {
           include: {
@@ -521,6 +530,10 @@ export class JobProfileService {
         },
       },
     });
+    if (jobProfiles.length > 1) {
+      throw AlexandriaError('More than one job profile found for job number ' + number + '. Please contact support.');
+    }
+    const jobProfile = jobProfiles[0];
     // if profile is not published and user is not total compensation, deny access
     if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
       throw AlexandriaError('You do not have permission to view this job profile');
@@ -533,12 +546,76 @@ export class JobProfileService {
 
     return await this.prisma.jobProfile.count({
       where: {
+        current_version: true,
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
         ...this.transofrmWhereForAllOrgs(where),
       },
     });
+  }
+
+  async getJobProfileMeta(jobStoreNumber: number) {
+    const jobProfiles = await this.prisma.jobProfile.findMany({
+      where: {
+        number: jobStoreNumber,
+        state: 'PUBLISHED',
+      },
+      select: {
+        id: true,
+        version: true,
+        updated_at: true,
+        updated_by: true,
+        created_at: true,
+        owner: true,
+        published_at: true,
+        published_by: true,
+        views: true,
+      },
+    });
+
+    // Initialize variables for the aggregates
+    let totalViews = 0;
+    let firstPublishedByDate = null;
+    let firstPublishedByUser = null;
+    let firstCreatedByDate = null;
+    let firstCreatedByOwner = null;
+    const versions = [];
+
+    // Process the job profiles
+    jobProfiles.forEach((profile) => {
+      // Sum of views
+      totalViews += profile.views;
+
+      // Check and set the first published by date and user
+      if (!firstPublishedByDate || new Date(profile.published_at) < new Date(firstPublishedByDate)) {
+        firstPublishedByDate = profile.published_at;
+        firstPublishedByUser = profile.published_by?.name;
+      }
+
+      // Check and set the first created by date and owner
+      if (!firstCreatedByDate || new Date(profile.created_at) < new Date(firstCreatedByDate)) {
+        firstCreatedByDate = profile.created_at;
+        firstCreatedByOwner = profile.owner?.name;
+      }
+
+      // Collect all versions with id and version
+      versions.push({ id: profile.id, version: profile.version });
+    });
+
+    // Return the aggregated result
+    return {
+      totalViews,
+      firstPublishedBy: {
+        date: firstPublishedByDate,
+        user: firstPublishedByUser,
+      },
+      firstCreatedBy: {
+        date: firstCreatedByDate,
+        owner: firstCreatedByOwner,
+      },
+      versions,
+    };
   }
 
   async getJobProfilesDraftsCount({ search, where }: FindManyJobProfileWithSearch, userId: string) {
@@ -553,6 +630,7 @@ export class JobProfileService {
         // stream: { notIn: ['USER'] },
         // owner_id: userId,
         state: 'DRAFT',
+        current_version: true,
         ...where,
       },
     });
@@ -570,6 +648,7 @@ export class JobProfileService {
         // stream: { notIn: ['USER'] },
         // owner_id: userId,
         state: 'DRAFT',
+        current_version: true,
         ...where,
       },
     });
@@ -580,6 +659,7 @@ export class JobProfileService {
       where: {
         is_archived: false,
         state: 'DRAFT',
+        current_version: true,
         // owner_id: userId
       },
       select: {
@@ -610,10 +690,34 @@ export class JobProfileService {
   async createOrUpdateJobProfile(data: JobProfileCreateInput, userId: string, id?: number) {
     // todo: catch the "number" constraint failure and process the error on the client appropriately
     const jobProfileState = data.state ? data.state : JobProfileState.DRAFT;
-    const updatedBy = jobProfileState === 'DRAFT' ? userId : null;
-    const publishedBy = jobProfileState === 'PUBLISHED' ? userId : null;
+
+    const profileIsUsed = await this.prisma.positionRequest.findFirst({
+      where: {
+        profile_json: {
+          path: ['id'],
+          equals: id,
+        },
+      },
+    });
+
+    // always set updatedBy to current user
+    const updatedBy = userId;
+    // only set owner (created_by) if this is a new record, ie. new draft or new version of a published profile
+    const owner = !id ? userId : data.owner.connect.id;
+    // only set publishedBy if we are publishing a draft or new version of a published profile, ie. a new published record
+    const publishedBy =
+      jobProfileState === 'DRAFT' && data.version == 1
+        ? undefined
+        : !id || (jobProfileState === 'PUBLISHED' && profileIsUsed)
+          ? userId
+          : data.published_by.connect.id;
+    //for net new profile creation - we increment in the create statement
+    if (data.version == null) data.version = 0;
     const result = await this.prisma.jobProfile.upsert({
-      where: { id: id || -1 },
+      // if the profile has been used, that means it has been published at some point and linked to a PR.
+      // We must create a new profile version in this case.
+      // if it has an id but it has not been used, regardless of state, we can simply update the existing record.
+      where: { id: id && !profileIsUsed ? id : -1 },
       create: {
         behavioural_competencies: {
           create: data.behavioural_competencies.create.map((item) => ({
@@ -652,6 +756,12 @@ export class JobProfileService {
         role_type: {
           connect: { id: data.role_type.connect.id },
         },
+        // ...(data.role && {
+        //   role_id: data.role.connect.id,
+        // }),
+        // ...(data.role_type && {
+        //   role_type_id: data.role_type.connect.id,
+        // }),
 
         ...(data.scopes && {
           scopes: {
@@ -664,8 +774,13 @@ export class JobProfileService {
         }),
         state: jobProfileState,
         type: data.organizations.create.length > 0 ? JobProfileType.MINISTRY : JobProfileType.CORPORATE, // should be MINISTRY if ministries provided, otherwise corporate
+        owner: { connect: { id: owner } },
         published_by: publishedBy ? { connect: { id: publishedBy } } : undefined,
+        published_at: jobProfileState === 'PUBLISHED' && profileIsUsed ? new Date(Date.now()) : undefined,
         updated_by: updatedBy ? { connect: { id: updatedBy } } : undefined,
+        valid_from: new Date(Date.now()),
+        version: data.version + 1,
+        current_version: true,
         jobFamilies: {
           create: data.jobFamilies.create.map((item) => ({
             jobFamily: {
@@ -766,7 +881,9 @@ export class JobProfileService {
             })),
           },
         }),
+        owner: { connect: { id: owner } },
         published_by: publishedBy ? { connect: { id: publishedBy } } : undefined,
+        published_at: data.published_at,
         updated_by: updatedBy ? { connect: { id: updatedBy } } : undefined,
         // Update jobFamilies
         jobFamilies: {
@@ -814,9 +931,56 @@ export class JobProfileService {
       },
     });
 
+    if (profileIsUsed) {
+      //set old version to no longer be current
+      await this.prisma.jobProfile.update({
+        where: { id: id || -1 },
+        data: {
+          valid_to: new Date(Date.now()),
+          current_version: false,
+        },
+      });
+    }
     await this.searchService.updateJobProfileSearchIndex(result.id);
 
     return result;
+  }
+
+  async updateJobProfileViewCountCache(jobProfiles: number[]) {
+    const jobProfileCounts: Map<number, number> =
+      (await this.cacheManager.get('jobProfileCounts')) ?? new Map<number, number>();
+    for (const id of jobProfiles) {
+      if (jobProfileCounts.has(id)) {
+        jobProfileCounts.set(id, jobProfileCounts.get(id) + 1);
+      } else {
+        jobProfileCounts.set(id, 1);
+      }
+    }
+
+    await this.cacheManager.set('jobProfileCounts', jobProfileCounts, 20000);
+    return jobProfileCounts.size;
+  }
+
+  @Cron('*/10 * * * * *')
+  async updateJobProfileViewCount() {
+    const jobProfileCounts: Map<number, number> = await this.cacheManager.get('jobProfileCounts');
+
+    if (!jobProfileCounts) {
+      return 0; // Handle case where there are no job profile counts
+    }
+
+    const updates = Array.from(jobProfileCounts.entries()).map(([id, count]) =>
+      this.prisma.jobProfile.update({
+        where: { id: id || -1 },
+        data: {
+          views: { increment: count },
+        },
+      }),
+    );
+
+    await this.cacheManager.del('jobProfileCounts');
+
+    return (await this.prisma.$transaction(updates)).length;
   }
 
   async updateJobProfileState(jobProfileId: number, jobProfileState: string, userId: string) {
@@ -1168,6 +1332,7 @@ export class JobProfileService {
       where: {
         is_archived: false,
         state: 'DRAFT',
+        current_version: true,
       },
       include: {
         classifications: {
@@ -1194,7 +1359,7 @@ export class JobProfileService {
 
   async getJobProfilesClassifications() {
     const jobProfiles = await this.prisma.jobProfile.findMany({
-      where: { state: 'PUBLISHED' },
+      where: { state: 'PUBLISHED', current_version: true },
       include: {
         classifications: {
           include: {
@@ -1244,11 +1409,13 @@ export class JobProfileService {
     ministryIds?: string[],
     jobFamilyWithNoStream?: number[],
     excludeProfileId?: number,
+    classificationPeoplesoftId?: string,
   ) {
     // get job profiles from which to draw the requirements from based on job family and stream
     let jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
         AND: [
+          { current_version: true },
           { id: { not: excludeProfileId ?? -1 } },
           {
             OR: [
@@ -1352,6 +1519,7 @@ export class JobProfileService {
       streams: { id: number }[];
       classification: { id: string; employee_group_id: string } | null;
       organization: { id: string } | null;
+      tc_is_readonly: boolean;
     }
 
     // get professional registration requirements for auto-population based on classification and job family
@@ -1390,7 +1558,7 @@ export class JobProfileService {
       },
     });
 
-    // if ministries were provided, select profiles with those ministries (with and without job family)
+    // if ministries were provided, select professional registrations from profiles with those ministries (with and without job family)
     if (ministryIds) {
       const professionalRegistrationRequirements2 = await this.prisma.professionalRegistrationRequirement.findMany({
         where: {
@@ -1493,6 +1661,7 @@ export class JobProfileService {
               }
             : null,
           organization: registration.organization_id ? { id: registration.organization_id } : null,
+          tc_is_readonly: false,
         });
       } else {
         const entry = professionalRegistrationMap.get(text);
@@ -1512,6 +1681,7 @@ export class JobProfileService {
           streams: [],
           classification: null,
           organization: screening.organization_id ? { id: screening.organization_id } : null,
+          tc_is_readonly: false,
         });
       } else {
         const entry = securityScreeningMap.get(text);
@@ -1521,22 +1691,92 @@ export class JobProfileService {
       }
     });
 
+    // log securityScreeningMap
+    // console.log('securityScreeningMap: ', JSON.stringify(Array.from(securityScreeningMap.entries()), null, 2));
+
+    // filter out data that's identical to excluded profile
+
+    let excludedProfile;
+    if (excludeProfileId) {
+      excludedProfile = await this.prisma.jobProfile.findUnique({
+        where: { id: excludeProfileId },
+        select: {
+          professional_registration_requirements: true,
+          preferences: true,
+          knowledge_skills_abilities: true,
+          willingness_statements: true,
+          security_screenings: true,
+        },
+      });
+
+      // const filterMap = (map: Map<string, RequirementEntry>, excludedFields: any[] | undefined) => {
+      //   if (!excludedFields) return map;
+      //   excludedFields.forEach((excludedField) => {
+      //     const entry = map.get(excludedField.text);
+      //     console.log('checking: ', excludedField, entry);
+      //     // if the field is present in the excluded profile and is not custom, delete it
+      //     if (entry && !excludedField.tc_is_readonly) {
+      //       console.log('deleting: ', excludedField.text);
+      //       map.delete(excludedField.text);
+      //     }
+      //   });
+      //   return map;
+      // };
+
+      // professionalRegistrationMap = filterMap(
+      //   professionalRegistrationMap,
+      //   excludedProfile.professional_registration_requirements,
+      // );
+      // console.log('filtering security screenings: ', excludedProfile.security_screenings);
+      // securityScreeningMap = filterMap(securityScreeningMap, excludedProfile.security_screenings);
+      // console.log('after filter: ', JSON.stringify(Array.from(securityScreeningMap.entries()), null, 2));
+      // preferencesMap = filterMap(preferencesMap, excludedProfile.preferences);
+      // ksaMap = filterMap(ksaMap, excludedProfile.knowledge_skills_abilities);
+      // willingnessStatementsMap = filterMap(willingnessStatementsMap, excludedProfile.willingness_statements);
+    }
+
     // build return for pick list requirements from job family and stream
     jobProfiles.forEach((profile) => {
       processRequirements(
         (profile.professional_registration_requirements as any[]) || [],
         professionalRegistrationMap,
         profile,
+        excludedProfile?.professional_registration_requirements,
       );
-      processRequirements((profile.preferences as any[]) || [], preferencesMap, profile);
-      processRequirements((profile.knowledge_skills_abilities as any[]) || [], ksaMap, profile);
-      processRequirements((profile.willingness_statements as any[]) || [], willingnessStatementsMap, profile);
+      processRequirements((profile.preferences as any[]) || [], preferencesMap, profile, excludedProfile?.preferences);
+      processRequirements(
+        (profile.knowledge_skills_abilities as any[]) || [],
+        ksaMap,
+        profile,
+        excludedProfile?.knowledge_skills_abilities,
+      );
+      processRequirements(
+        (profile.willingness_statements as any[]) || [],
+        willingnessStatementsMap,
+        profile,
+        excludedProfile?.willingness_statements,
+      );
     });
 
-    function processRequirements(requirements: any[], map: Map<string, RequirementEntry>, profile: any) {
+    function filterExcludedFields(requirements: any[], excludedFields: any[] | undefined) {
+      if (!excludedFields) return requirements;
+      // filter out fields that are present in the current profile:
+      // item needs to have the same text and be custom
+      const ret = requirements.filter(
+        (req) => !excludedFields.some((excluded) => excluded.text === req.text && !excluded.tc_is_readonly),
+      );
+      return ret;
+    }
+
+    function processRequirements(
+      requirements: any[],
+      map: Map<string, RequirementEntry>,
+      profile: any,
+      excludedFields: any[] | undefined,
+    ) {
       if (requirements) {
-        requirements
-          .filter((requirement) => !requirement.is_readonly)
+        filterExcludedFields(requirements, excludedFields)
+          // .filter((requirement) => !requirement.is_readonly)
           .forEach((requirement) => {
             const text = requirement.text;
             if (!map.has(text)) {
@@ -1546,6 +1786,7 @@ export class JobProfileService {
                 streams: [],
                 classification: null,
                 organization: null,
+                tc_is_readonly: requirement.tc_is_readonly,
               });
             }
             const entry = map.get(text)!;
@@ -1555,15 +1796,56 @@ export class JobProfileService {
       }
     }
 
-    // log requirementsMap, which is a Map
-    // console.log('requirementsMap: ', JSON.stringify(Array.from(requirementsMap.entries()), null, 2));
+    // fetch minimum requirements based on classification
+    // New code to fetch classification grade
+    let classificationGrade: string | null = null;
+    if (classificationId && classificationEmployeeGroupId) {
+      const classification = await this.prisma.classification.findUnique({
+        where: {
+          id_employee_group_id_peoplesoft_id: {
+            id: classificationId,
+            employee_group_id: classificationEmployeeGroupId,
+            peoplesoft_id: classificationPeoplesoftId,
+          },
+        },
+        select: {
+          grade: true,
+        },
+      });
+      classificationGrade = classification?.grade ?? null;
+    }
 
+    // Fetch job profile minimum requirements
+    let jobProfileMinimumRequirements = [];
+
+    if (classificationGrade) {
+      const minimumRequirements = await this.prisma.jobProfileMinimumRequirements.findMany({
+        where: {
+          grade: classificationGrade,
+        },
+      });
+
+      jobProfileMinimumRequirements = minimumRequirements.map((req) => ({
+        text: req.requirement,
+        jobFamilies: [],
+        streams: [],
+        classification:
+          classificationId && classificationEmployeeGroupId
+            ? { id: classificationId, employee_group_id: classificationEmployeeGroupId }
+            : null,
+        organization: null,
+        tc_is_readonly: true, // Assuming these are read-only
+      }));
+    }
+
+    // log requirementsMap, which is a Map
     const result = {
       professionalRegistrationRequirements: processMapToResult(professionalRegistrationMap),
       preferences: processMapToResult(preferencesMap),
       knowledgeSkillsAbilities: processMapToResult(ksaMap),
       willingnessStatements: processMapToResult(willingnessStatementsMap),
       securityScreenings: processMapToResult(securityScreeningMap),
+      jobProfileMinimumRequirements: jobProfileMinimumRequirements,
     };
 
     function processMapToResult(map: Map<string, RequirementEntry>) {

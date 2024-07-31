@@ -151,7 +151,7 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
 
   return (
     <div>
-      <Form.Item>
+      <Form.Item style={{ marginBottom: 0 }}>
         <Tooltip title={filteredOptions.length == 0 ? 'No items available' : ''}>
           <Button
             style={{ paddingLeft: 0 }}

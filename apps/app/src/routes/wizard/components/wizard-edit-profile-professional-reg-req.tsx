@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Form } from 'antd';
+import { Col, Form, Row } from 'antd';
 import React from 'react';
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
@@ -8,8 +8,10 @@ import useFormFields from '../hooks/wizardUseFieldArray';
 import { WizardModal } from './modal.component';
 import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
+import OptionalList from './wizard-edit-profile-optional-list';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
+import WizardPickerHM from './wizard-picker-hm';
 import { useWizardContext } from './wizard.provider';
 
 interface ProfessionalRegistrationRequirementsProps {
@@ -21,6 +23,7 @@ interface ProfessionalRegistrationRequirementsProps {
   // isAdmin: boolean;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
+  pickerData: any;
 }
 
 const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationRequirementsProps> = ({
@@ -32,18 +35,24 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
   // isAdmin,
   formErrors,
   trigger,
+  pickerData,
 }) => {
   const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove } = useFormFields({
     useFormReturn,
     fieldName: 'professional_registration_requirements',
     setEditedFields: setEditedFields,
     originalFields: originalFields,
-    // professional registrations are not significant when user adds a new item
-    // but should still handle removal of significant items
     significant: true,
-    significant_add: false,
+  });
+
+  const { fields: optional_fields, update: optional_update } = useFormFields({
+    useFormReturn,
+    fieldName: 'optional_professional_registration_requirements',
+    // setEditedFields: setEditedFields,
+    // originalFields: originalFields,
+    significant: true,
   });
 
   const handleProfRegRemoveModal = (index: number) => {
@@ -93,6 +102,9 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
         testId="professional_registration_requirements"
         confirmRemoveModal={() => handleProfRegRemoveModal(index)}
         onFocus={() => handleProfRegFocusModal(field)}
+        remove={remove}
+        fields={fields}
+        trigger={trigger}
         // isAdmin={isAdmin}
       />
     );
@@ -116,24 +128,44 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
       )}
       <WizardValidationError formErrors={formErrors} fieldName="professional_registration_requirements" />
 
-      <WizardEditAddButton
-        testId="add-prof-reg-button"
-        onClick={() => {
-          // WizardModal(
-          //   'Do you want to make changes to education and work experiences?',
-          //   minReqAlertShown,
-          //   setMinReqAlertShown,
-          //   () => {
-          handleAddNew();
-          //   },
-          //   true,
-          //   undefined,
-          //   'education-warning',
-          // );
-        }}
-      >
-        Add a professional registration or certification requirement
-      </WizardEditAddButton>
+      <OptionalList
+        useFormReturn={useFormReturn}
+        fieldName="optional_professional_registration_requirements"
+        label="Optional professional registration and certification requirements"
+      />
+
+      <Form.Item style={{ marginBottom: 0 }}>
+        <Row>
+          <Col>
+            {/* <WizardProfessionalRegistrationPicker
+              data={pickerData?.requirementsWithoutReadOnly?.professionalRegistrationRequirements}
+              fields={optional_fields}
+              addAction={optional_append}
+              removeAction={optional_remove}
+              triggerValidation={trigger}
+              filterForTC={false}
+            /> */}
+            <WizardPickerHM
+              data={pickerData?.requirementsWithoutReadOnly?.professionalRegistrationRequirements}
+              fields={optional_fields}
+              update={optional_update}
+              title="Optional professional registration and certification requirements"
+              buttonText="Browse and add optional professional registration requirements"
+              // log={true}
+            />
+          </Col>
+          <Col>
+            <WizardEditAddButton
+              testId="add-prof-reg-button"
+              onClick={() => {
+                handleAddNew();
+              }}
+            >
+              Add a custom requirement
+            </WizardEditAddButton>
+          </Col>
+        </Row>
+      </Form.Item>
     </>
   );
 };

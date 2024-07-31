@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Environment } from '../enums/environment.enum';
-import { KeycloakEnvironment } from '../enums/keycloak-environment.enum';
+import { SSOEnvironment } from '../enums/sso-environment.enum';
 
 export class AppConfigDto {
   @IsEnum(Environment)
@@ -52,26 +52,18 @@ export class AppConfigDto {
 
   @IsNotEmpty()
   @IsString()
-  KEYCLOAK_API_URL: string;
+  CSS_API_CLIENT_ID: string;
 
   @IsNotEmpty()
   @IsString()
-  KEYCLOAK_API_TOKEN_URL: string;
-
-  @IsEnum(KeycloakEnvironment)
-  KEYCLOAK_API_ENVIRONMENT: KeycloakEnvironment;
+  CSS_API_CLIENT_SECRET: string;
 
   @IsNotEmpty()
   @IsString()
-  KEYCLOAK_API_INTEGRATION_ID: string;
+  SSO_INTEGRATION_ID: string;
 
-  @IsNotEmpty()
-  @IsString()
-  KEYCLOAK_API_SERVICE_ACCOUNT_CLIENT_ID: string;
-
-  @IsNotEmpty()
-  @IsString()
-  KEYCLOAK_API_SERVICE_ACCOUNT_CLIENT_SECRET: string;
+  @IsEnum(SSOEnvironment)
+  SSO_ENVIRONMENT: SSOEnvironment;
 
   @IsNotEmpty()
   @IsString()

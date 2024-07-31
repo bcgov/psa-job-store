@@ -8,6 +8,7 @@ import {
   DuplicateJobProfileResponse,
   GetJobProfileArgs,
   GetJobProfileByNumberResponse,
+  GetJobProfileMetaResponse,
   GetJobProfileResponse,
   GetJobProfilesArchivedResponse,
   GetJobProfilesArgs,
@@ -23,6 +24,7 @@ import {
   NextAvailableJobProfileNumberResponse,
   UnarchiveJobProfileResponse,
   UpdateJobProfileResponse,
+  updateJobProfileViewCountInput,
 } from './job-profile-types';
 
 export const jobProfileApi = graphqlApi.injectEndpoints({
@@ -129,6 +131,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 published_by {
                   name
                 }
+                valid_from
+                valid_to
+                version
               }
               jobProfilesCount(search: $search, where: $where)
               pageNumberForSelectProfile(
@@ -254,6 +259,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 published_by {
                   name
                 }
+                valid_from
+                valid_to
+                version
               }
               jobProfilesDraftsCount(search: $search, where: $where)
             }
@@ -368,6 +376,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   name
                 }
                 is_archived
+                valid_from
+                valid_to
+                version
               }
               jobProfilesArchivedCount(search: $search, where: $where)
             }
@@ -392,7 +403,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         return {
           document: gql`
             query JobProfileByNumber {
-              jobProfileByNumber(number: "${args.number}") {
+              jobProfileByNumber(number: "${args.number}" version: ${args.version ?? null}) {
                 id
                 updated_at
                 streams {
@@ -476,6 +487,9 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   }
                 }
                 is_archived
+                valid_from
+                valid_to
+                version
               }
             }
           `,
@@ -491,6 +505,20 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               jobProfile(id: "${args.id}") {
                 id
                 updated_at
+                updated_by {
+                  id
+                  name
+                }
+                published_by {
+                  id
+                  name
+                }
+                created_at
+                owner {
+                  id
+                  name
+                }
+                published_at
                 streams {
                   stream {
                       id
@@ -571,6 +599,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     code
                   }
                 }
+                valid_from
+                valid_to
+                version
+                current_version
+                views
               }
             }
           `,
@@ -592,7 +625,45 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-
+    getJobProfileMeta: build.query<GetJobProfileMetaResponse, number>({
+      query: (number: number) => {
+        return {
+          document: gql`
+            query jobProfileMeta {
+              jobProfileMeta(number: ${number}) {
+                totalViews
+                firstPublishedBy {
+                  date
+                  user
+                }
+                firstCreatedBy {
+                  date
+                  owner
+                }
+                versions {
+                  id
+                  version
+                }
+            }
+        }
+          `,
+        };
+      },
+    }),
+    updateJobProfileViewCount: build.mutation<GetJobProfileMetaResponse, updateJobProfileViewCountInput>({
+      query: (input: updateJobProfileViewCountInput) => {
+        return {
+          document: gql`
+            mutation updateJobProfileViewCount($jobProfiles: [Int!]) {
+              updateJobProfileViewCount(jobProfiles: $jobProfiles)
+            }
+          `,
+          variables: {
+            jobProfiles: input.jobProfiles,
+          },
+        };
+      },
+    }),
     duplicateJobProfile: build.mutation<DuplicateJobProfileResponse, { jobProfileId: number }>({
       query: (args) => {
         return {
@@ -769,6 +840,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         jobFamilyStreamIds: number[];
         classificationId?: string | null;
         classificationEmployeeGroupId?: string | null;
+        classificationPeoplesoftId?: string | null;
         ministryIds?: string[];
         jobFamilyWithNoStream?: number[];
         excludeProfileId?: number;
@@ -779,6 +851,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               $jobFamilyIds: [Int!]!
               $jobFamilyStreamIds: [Int!]!
               $classificationId: String
+              $classificationPeoplesoftId: String
               $classificationEmployeeGroupId: String
               $ministryIds: [String!]
               $jobFamilyWithNoStream: [Int!]
@@ -788,6 +861,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 jobFamilyIds: $jobFamilyIds
                 jobFamilyStreamIds: $jobFamilyStreamIds
                 classificationId: $classificationId
+                classificationPeoplesoftId: $classificationPeoplesoftId
                 classificationEmployeeGroupId: $classificationEmployeeGroupId
                 ministryIds: $ministryIds
                 jobFamilyWithNoStream: $jobFamilyWithNoStream
@@ -873,6 +947,22 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     id
                   }
                 }
+                jobProfileMinimumRequirements {
+                  text
+                  jobFamilies {
+                    id
+                  }
+                  streams {
+                    id
+                  }
+                  classification {
+                    id
+                    employee_group_id
+                  }
+                  organization {
+                    id
+                  }
+                }
               }
             }
           `,
@@ -912,6 +1002,8 @@ export const {
 
   useGetJobProfileByNumberQuery,
   useLazyGetJobProfileByNumberQuery,
+  useLazyGetJobProfileMetaQuery,
+  useUpdateJobProfileViewCountMutation,
 
   useGetRequirementsWithoutReadOnlyQuery,
 } = jobProfileApi;

@@ -55,9 +55,11 @@ model PositionRequest {
   reports_to_position_id           String
   department_id                    String // this is department id that user selected in org chart
   parent_job_profile_id            Int?
+  parent_job_profile_version       Int?
   crm_json                         Json?                  @db.JsonB
   profile_json                     Json?                  @db.JsonB
   orgchart_json                    Json?                  @db.JsonB
+  orgchart_png                     String?
   user_id                          String?                @db.Uuid
   title                            String?
   position_number                  Int?
@@ -174,7 +176,9 @@ model JobProfile {
   scopes          JobProfileScopeLink[]
   state           JobProfileState       @default(DRAFT)
   type            JobProfileType
+  created_at      DateTime?             @default(now())
   updated_at      DateTime?             @default(now()) @updatedAt
+  published_at    DateTime?
   owner_id        String?               @db.Uuid
   owner           User?                 @relation(fields: [owner_id], references: [id]) //  @relation(name: "OwnerRelation", fields: [owner_id], references: [id])
   updated_by_id   String?               @db.Uuid
@@ -188,7 +192,7 @@ model JobProfile {
   review_required  Boolean?                  @default(false)
 
   title                                  String
-  number                                 Int                   @unique
+  number                                 Int
   overview                               String
   accountabilities                       Json?                 @db.JsonB
   education                              Json?                 @db.JsonB
@@ -205,7 +209,14 @@ model JobProfile {
 
   is_archived     Boolean           @default(false) // When total comp puts profile to draft, then deletes it AND it's linked to PositionRequests
   SavedJobProfile SavedJobProfile[]
+  valid_from      DateTime?         @default(now())
+  valid_to        DateTime?
+  version         Int               @default(1)
+  current_version Boolean           @default(true)
+  views           Int?              @default(0)
 
+  @@unique([number, version])
+  // @@id([id, version])
   @@map("job_profile")
 }
 
@@ -407,20 +418,6 @@ model JobProfileStream {
   // job_profiles  JobProfile[]
 
   @@map("job_profile_stream")
-}
-
-model JobProfileHistory {
-  id             Int       @id @default(autoincrement())
-  job_profile_id Int
-  json           Json      @db.JsonB
-  created_at     DateTime  @default(now())
-  created_by     Int
-  updated_at     DateTime  @default(now())
-  updated_by     Int
-  deleted_at     DateTime?
-  deleted_by     Int
-
-  @@map("job_profile_history")
 }
 
 model Comment {

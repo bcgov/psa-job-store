@@ -1,6 +1,8 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import qs from 'qs';
+import { KeycloakModule } from '../keycloak/keycloak.module';
+import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClassificationResolver } from './classification.resolver';
@@ -8,7 +10,6 @@ import { ClassificationService } from './classification.service';
 import { CrmService } from './crm.service';
 import { DepartmentResolver } from './department.resolver';
 import { DepartmentService } from './department.service';
-import { KeycloakService } from './keycloak.service';
 import { LocationResolver } from './location.resolver';
 import { LocationService } from './location.service';
 import { OrgChartResolver } from './org-chart.resolver';
@@ -25,6 +26,7 @@ import { PositionService } from './position.service';
     HttpModule.register({
       paramsSerializer: (params) => qs.stringify(params, { encode: false }),
     }),
+    KeycloakModule,
     PrismaModule,
   ],
   providers: [
