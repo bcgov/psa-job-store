@@ -3253,6 +3253,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     triggerValidation={triggerProfileValidation}
                                     title="Education and work experiences"
                                     buttonText="Browse and add education"
+                                    tc_is_readonly={true}
                                   />
                                 </Col>
                                 <Col>
@@ -3849,6 +3850,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   triggerValidation={triggerProfileValidation}
                                   title="Preferences"
                                   buttonText="Browse and add preferences"
+                                  tc_is_readonly={true}
                                 />
                               </Col>
                               <Col>
@@ -3978,6 +3980,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     triggerValidation={triggerProfileValidation}
                                     title="Knowledge, skill and ability requirements"
                                     buttonText="Browse and add knowledge, skill and abilities"
+                                    tc_is_readonly={true}
                                   />
                                 </Col>
                                 <Col>
@@ -4093,6 +4096,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   triggerValidation={triggerProfileValidation}
                                   title="Willingness statements or provisos"
                                   buttonText="Browse and add provisos"
+                                  tc_is_readonly={true}
                                 />
                               </Col>
                               <Col>
@@ -4325,6 +4329,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     title="Security screenings"
                                     buttonText="Browse and add security screenings"
                                     addAsSignificantAndReadonly={true}
+                                    tc_is_readonly={true}
                                   />
                                 </Col>
                                 <Col>

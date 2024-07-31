@@ -14,6 +14,7 @@ interface WizardPickerProps {
   title: string;
   buttonText: string;
   addAsSignificantAndReadonly?: boolean;
+  tc_is_readonly?: boolean;
 }
 
 const WizardPicker: React.FC<WizardPickerProps> = ({
@@ -25,6 +26,7 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   title,
   buttonText,
   addAsSignificantAndReadonly,
+  tc_is_readonly,
 }) => {
   // Fetching data from the API
   // console.log('data: ', data);
@@ -93,13 +95,14 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
           } else {
             if (addAsSignificantAndReadonly)
               return {
-                tc_is_readonly: true,
+                tc_is_readonly: tc_is_readonly,
                 nonEditable: true,
                 is_significant: true,
                 text,
               };
             else
               return {
+                tc_is_readonly: tc_is_readonly,
                 is_significant: true,
                 text,
               };
