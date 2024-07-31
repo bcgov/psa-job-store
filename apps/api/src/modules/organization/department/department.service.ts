@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { FindManyDepartmentArgs, FindUniqueDepartmentArgs } from '../../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateDepartmentMetadataInput } from './inputs/update-department-metadata.input';
+import { PaginatedDepartmentsResponse } from './models/paginated-departments-response.model';
 
 @Injectable()
 export class DepartmentService {
@@ -12,8 +13,31 @@ export class DepartmentService {
       ...args,
       include: {
         metadata: true,
+        organization: true,
       },
     });
+  }
+
+  async getDepartmentsWithCount({
+    take = 10,
+    skip = 0,
+    ...args
+  }: FindManyDepartmentArgs): Promise<PaginatedDepartmentsResponse> {
+    console.log('ARRRRRGS: ', args);
+
+    const result = await this.prisma.department.findManyAndCount({
+      ...args,
+      take,
+      skip,
+      include: {
+        metadata: true,
+        organization: true,
+      },
+    });
+
+    const [data, page, pageCount, pageSize, totalCount] = result;
+
+    return new PaginatedDepartmentsResponse(data, { page, pageCount, pageSize, totalCount });
   }
 
   async getDepartment(args: FindUniqueDepartmentArgs) {

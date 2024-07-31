@@ -10,6 +10,8 @@ import { gql } from 'graphql-request';
 import { graphqlApi } from '..';
 import { AssignUserRolesInput } from './dtos/assign-user-roles-input.dto';
 import { AssignUserRolesResponse } from './dtos/assign-user-roles-response.dto';
+import { GetDepartmentsForSettingsArgs } from './dtos/get-departments-for-settings-args.dto';
+import { GetDepartmentsForSettingsResponse } from './dtos/get-departments-for-settings-response.dto';
 import { GetOrganizationsResponse } from './dtos/get-organizations-response.dto';
 import { GetRolesResponse } from './dtos/get-roles-response.dto';
 import { GetUserPositionResponse } from './dtos/get-user-position-response.dto';
@@ -24,6 +26,44 @@ import { SetUserOrgChartAccessResponse } from './dtos/set-user-org-chart-access-
 
 export const settingsApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
+    getDepartmentsForSettings: build.query<
+      GetDepartmentsForSettingsResponse,
+      GetDepartmentsForSettingsArgs | undefined
+    >({
+      query: (args: GetDepartmentsForSettingsArgs) => ({
+        document: gql`
+          query GetDepartmentsForSettings(
+            $where: DepartmentWhereInput
+            $orderBy: [DepartmentOrderByWithRelationAndSearchRelevanceInput!]
+            $take: Int
+            $skip: Int
+          ) {
+            departmentsWithCount(where: $where, orderBy: $orderBy, take: $take, skip: $skip) {
+              data {
+                id
+                name
+                organization {
+                  name
+                }
+                effective_status
+              }
+              pageInfo {
+                page
+                pageCount
+                pageSize
+                totalCount
+              }
+            }
+          }
+        `,
+        variables: {
+          where: args.where,
+          orderBy: args.orderBy,
+          take: args.take,
+          skip: args.skip,
+        },
+      }),
+    }),
     getOrganizationsForSettings: build.query<GetOrganizationsResponse, void>({
       query: () => ({
         document: gql`
@@ -211,6 +251,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
 });
 
 export const {
+  useLazyGetDepartmentsForSettingsQuery,
   useLazyGetOrganizationsForSettingsQuery,
   useLazyGetRolesForSettingsQuery,
   useLazyGetUserForSettingsQuery,
@@ -218,6 +259,7 @@ export const {
   useLazyGetUsersForSettingsQuery,
   useLazyImportUserSearchQuery,
   useGetOrganizationsForSettingsQuery,
+  useGetDepartmentsForSettingsQuery,
   useGetRolesForSettingsQuery,
   useGetUserForSettingsQuery,
   useGetUsersForSettingsQuery,

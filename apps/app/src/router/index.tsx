@@ -18,6 +18,8 @@ import { MyPositionsPage } from '../routes/my-position-requests/my-position-requ
 import { OrgChartRoute as OrgChartOldRoute, OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage as OrgChartOldPage, OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { SettingsRoute } from '../routes/settings';
+import { DepartmentDetailPage } from '../routes/settings/department/department-detail.page';
+import { DepartmentListPage } from '../routes/settings/department/department-list.page';
 import { UserDetailPage } from '../routes/settings/user/user-detail.page';
 import { UserListPage } from '../routes/settings/user/user-list.page';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
@@ -95,6 +97,22 @@ export const router = createBrowserRouter([
               </RoleGuard>
             ),
             children: [
+              {
+                path: 'departments',
+                handle: {
+                  breadcrumb: () => 'Departments',
+                },
+                children: [
+                  {
+                    index: true,
+                    element: <DepartmentListPage />,
+                  },
+                  {
+                    path: ':id',
+                    element: <DepartmentDetailPage />,
+                  },
+                ],
+              },
               {
                 path: 'users',
                 handle: {
