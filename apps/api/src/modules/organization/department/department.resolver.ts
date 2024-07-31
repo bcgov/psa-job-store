@@ -26,8 +26,6 @@ export class DepartmentResolver {
 
   @Query(() => PaginatedDepartmentsResponse, { name: 'departmentsWithCount' })
   async getDepartmentsWithCount(@Args() args?: FindManyDepartmentArgs) {
-    console.log('GG: ', args);
-
     return this.departmentService.getDepartmentsWithCount(args);
   }
 

@@ -23,8 +23,6 @@ export class DepartmentService {
     skip = 0,
     ...args
   }: FindManyDepartmentArgs): Promise<PaginatedDepartmentsResponse> {
-    console.log('ARRRRRGS: ', args);
-
     const result = await this.prisma.department.findManyAndCount({
       ...args,
       take,

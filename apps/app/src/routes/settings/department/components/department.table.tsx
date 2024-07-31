@@ -36,13 +36,8 @@ export const DepartmentTable = () => {
 
   return (
     <Table
-      onChange={(pagination, filters, sorter, extra) => {
+      onChange={(pagination, _filters, sorter) => {
         const { current, pageSize } = pagination;
-
-        console.log('pagination: ', pagination);
-        console.log('filters: ', filters);
-        console.log('sorter: ', sorter);
-        console.log('extra: ', extra);
 
         setSearchParams((params) => {
           params.set('page', current != null ? current.toString() : DEFAULT_PAGE.toString());
