@@ -1,47 +1,34 @@
 import { SettingOutlined } from '@ant-design/icons';
-import { Button, Table, TableProps, Tooltip } from 'antd';
+import { Button, Table, Tooltip } from 'antd';
 import { isArray } from 'class-validator';
-import { useCallback, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { useLazyGetDepartmentsForSettingsQuery } from '../../../../redux/services/graphql-api/settings/settings.api';
-import { deserializeOrderBy } from '../../../../redux/services/graphql-api/utils/deserialize-order-by.util';
+import { Link, SetURLSearchParams } from 'react-router-dom';
+import { GetDepartmentsForSettingsResponse } from '../../../../redux/services/graphql-api/settings/dtos/get-departments-for-settings-response.dto';
+import { DEFAULT_SEARCH_PARAMS } from '../department.constants';
 
 export class DepartmentTableProps {
-  tableProps: TableProps<{ name: string }>;
+  setSearchParams: SetURLSearchParams;
+  data: GetDepartmentsForSettingsResponse | undefined;
+  isLoading?: boolean;
+  searchParams: URLSearchParams;
 }
 
-const DEFAULT_PAGE = 1;
-const DEFAULT_PAGE_SIZE = 10;
-
-export const DepartmentTable = () => {
-  const [searchParams, setSearchParams] = useSearchParams({
-    page: DEFAULT_PAGE.toString(),
-    pageSize: DEFAULT_PAGE_SIZE.toString(),
-  });
-  const [trigger, { data, isFetching }] = useLazyGetDepartmentsForSettingsQuery();
-
-  const fetchData = useCallback(() => {
-    const page = parseInt(searchParams.get('page') ?? DEFAULT_PAGE.toString(), 10);
-    const pageSize = parseInt(searchParams.get('pageSize') ?? DEFAULT_PAGE_SIZE.toString(), 10);
-    const orderBy = searchParams.get('orderBy');
-
-    trigger({
-      take: pageSize,
-      skip: (page - 1) * pageSize,
-      orderBy: deserializeOrderBy(orderBy),
-    });
-  }, [searchParams]);
-
-  useEffect(() => fetchData(), [fetchData]);
-
+export const DepartmentTable = ({ setSearchParams, data, isLoading, searchParams }: DepartmentTableProps) => {
   return (
     <Table
       onChange={(pagination, _filters, sorter) => {
         const { current, pageSize } = pagination;
 
         setSearchParams((params) => {
-          params.set('page', current != null ? current.toString() : DEFAULT_PAGE.toString());
-          params.set('pageSize', pageSize != null ? pageSize.toString() : DEFAULT_PAGE_SIZE.toString());
+          params.set(
+            'page',
+            current != null ? current.toString() : (DEFAULT_SEARCH_PARAMS as Record<string, string>).page.toString(),
+          );
+          params.set(
+            'pageSize',
+            pageSize != null
+              ? pageSize.toString()
+              : (DEFAULT_SEARCH_PARAMS as Record<string, string>).pageSize.toString(),
+          );
 
           if (!isArray(sorter) && sorter.field != null && sorter.order != null) {
             const { order, field } = sorter;
@@ -93,7 +80,7 @@ export const DepartmentTable = () => {
         },
       ]}
       dataSource={data?.departmentsWithCount.data ?? []}
-      loading={isFetching}
+      loading={isLoading}
       pagination={{
         current: Number(searchParams.get('page')),
         pageSize: Number(searchParams.get('pageSize')),
