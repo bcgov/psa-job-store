@@ -14,6 +14,7 @@ import { GetDepartmentForSettingsArgs } from './dtos/get-department-for-settings
 import { GetDepartmentForSettingsResponse } from './dtos/get-department-for-settings-response.dto';
 import { GetDepartmentsForSettingsArgs } from './dtos/get-departments-for-settings-args.dto';
 import { GetDepartmentsForSettingsResponse } from './dtos/get-departments-for-settings-response.dto';
+import { GetOrganizationsPicklistResponse } from './dtos/get-organizations-picklist-response.dto';
 import { GetOrganizationsResponse } from './dtos/get-organizations-response.dto';
 import { GetRolesResponse } from './dtos/get-roles-response.dto';
 import { GetUserPositionResponse } from './dtos/get-user-position-response.dto';
@@ -107,6 +108,18 @@ export const settingsApi = graphqlApi.injectEndpoints({
                 name
                 effective_status
               }
+            }
+          }
+        `,
+      }),
+    }),
+    getOrganizationsPicklistForSettings: build.query<GetOrganizationsPicklistResponse, void>({
+      query: () => ({
+        document: gql`
+          query OrganizationsPicklist {
+            organizations(orderBy: [{ name: asc }]) {
+              id
+              name
             }
           }
         `,
@@ -304,12 +317,14 @@ export const {
   useLazyGetDepartmentForSettingsQuery,
   useLazyGetDepartmentsForSettingsQuery,
   useLazyGetOrganizationsForSettingsQuery,
+  useLazyGetOrganizationsPicklistForSettingsQuery,
   useLazyGetRolesForSettingsQuery,
   useLazyGetUserForSettingsQuery,
   useLazyGetUserPositionForSettingsQuery,
   useLazyGetUsersForSettingsQuery,
   useLazyImportUserSearchQuery,
   useGetOrganizationsForSettingsQuery,
+  useGetOrganizationsPicklistForSettingsQuery,
   useGetDepartmentForSettingsQuery,
   useGetDepartmentsForSettingsQuery,
   useGetRolesForSettingsQuery,
