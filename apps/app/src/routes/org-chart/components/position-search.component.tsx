@@ -1,22 +1,27 @@
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Input, Tag } from 'antd';
 import { useEffect, useState } from 'react';
-import { Node } from 'reactflow';
 
 export interface PositionSearchProps {
-  setSearchTerm: React.Dispatch<React.SetStateAction<string | undefined>>;
   disabled?: boolean;
   searchTerm?: string | undefined;
-  searchResults: (() => Node[]) | Node[] | undefined;
-  focusable?: boolean;
+  searchResultsCount: number | null;
+  onSearch: (
+    value: string,
+    source:
+      | {
+          source?: 'input' | 'clear' | undefined;
+        }
+      | undefined,
+  ) => void;
+  // focusable?: boolean;
 }
 
 export const PositionSearch = ({
-  setSearchTerm: setSearchTermFromProps,
   disabled = false,
   searchTerm: searchTermFromProps,
-  searchResults,
-  focusable = true,
+  searchResultsCount, // focusable = true,
+  onSearch,
 }: PositionSearchProps) => {
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
@@ -27,17 +32,15 @@ export const PositionSearch = ({
   return (
     <Input.Search
       onChange={(event) => setSearchTerm(event.currentTarget.value)}
-      onSearch={(value, _, source) =>
-        setSearchTermFromProps(source?.source === 'clear' ? undefined : (value ?? '').length > 0 ? value : undefined)
-      }
+      onSearch={(value, _, source) => onSearch(value, source)}
       addonAfter={
         searchTermFromProps != null &&
-        searchResults != null && (
+        searchResultsCount != null && (
           <Tag
-            color={searchTermFromProps != null && searchResults.length === 0 ? 'red' : 'green'}
+            color={searchTermFromProps != null && searchResultsCount === 0 ? 'red' : 'green'}
             style={{ marginLeft: '0.5rem', marginRight: 0 }}
           >
-            {searchResults.length === 1 ? '1 result' : `${searchResults.length} results`}
+            {searchResultsCount === 1 ? '1 result' : `${searchResultsCount} results`}
           </Tag>
         )
       }
@@ -47,8 +50,10 @@ export const PositionSearch = ({
       loading={disabled}
       placeholder="Search by Position Number, Title, or Employee Name"
       value={searchTerm}
-      tabIndex={focusable ? 0 : -1}
-      enterButton={<Button tabIndex={focusable ? 0 : -1} icon={<SearchOutlined />}></Button>}
+      // tabIndex={focusable ? 0 : -1}
+      enterButton={
+        <Button id="org-chart-search-button" icon={<SearchOutlined aria-hidden />} aria-label="Search"></Button>
+      } // tabIndex={focusable ? 0 : -1}
     />
   );
 };

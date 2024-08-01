@@ -286,10 +286,10 @@ export const WizardOrgChartPage = ({
             </Row>
 
             <>
-              <div className="sr-only" style={{ display: currentView !== 'chart' ? 'none' : 'block' }} tabIndex={0}>
+              {/* <div className="sr-only" style={{ display: currentView !== 'chart' ? 'none' : 'block' }} tabIndex={0}>
                 This chart view is not keyboard accessible. Please switch to the tree view for a keyboard-navigable
                 version.
-              </div>
+              </div> */}
               <div
                 style={{ display: currentView !== 'chart' ? 'none' : 'block', height: '100%' }}
                 aria-hidden={true}
@@ -308,6 +308,7 @@ export const WizardOrgChartPage = ({
                   departmentIdIsLoading={isFetchingUserProfile}
                   targetId={selectedPositionId ?? profileData?.profile.position_id}
                   wrapProvider={false}
+                  wizardNextHandler={next}
                 />
               </div>
               {
