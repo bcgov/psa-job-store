@@ -1,13 +1,17 @@
 export class GetDepartmentsForSettingsArgs {
   where?: {
-    effective_status?: {
-      in: string[];
-    };
-    organization?: {
-      id?: {
-        in: string[];
-      };
-    };
+    AND: (
+      | {
+          effective_status?: {
+            in: string[];
+          };
+        }
+      | {
+          organization_id?: {
+            in: string[];
+          };
+        }
+    )[];
   };
   orderBy?:
     | { id: 'asc' | 'desc' }

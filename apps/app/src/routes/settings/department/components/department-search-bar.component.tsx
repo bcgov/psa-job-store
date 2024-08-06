@@ -1,14 +1,15 @@
 import { Button, Card, Col, Input, Row, Tag } from 'antd';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { SetURLSearchParams } from 'react-router-dom';
 import Select from 'react-select';
 import { useGetOrganizationsPicklistForSettingsQuery } from '../../../../redux/services/graphql-api/settings/settings.api';
-import { FilterOption, FilterValues } from '../department-list.page';
+import { FilterOption, FilterOptions } from '../department-list.page';
 
 const { Search } = Input;
 
 interface DepartmentSearchBarProps {
-  setFilterValues: React.Dispatch<React.SetStateAction<FilterValues>>;
-  filterValues: FilterValues;
+  setSearchParams: SetURLSearchParams;
+  searchParams: URLSearchParams;
 }
 
 const statusFilterOptions: FilterOption[] = [
@@ -22,22 +23,42 @@ const statusFilterOptions: FilterOption[] = [
   },
 ];
 
-export const DepartmentSearchBar = ({ setFilterValues, filterValues }: DepartmentSearchBarProps) => {
+export const DepartmentSearchBar = ({ setSearchParams }: DepartmentSearchBarProps) => {
+  const [filterValues, setFilterValues] = useState<FilterOptions>({ organization_id: [], effective_status: [] });
   const { data, isFetching } = useGetOrganizationsPicklistForSettingsQuery();
+
+  useEffect(() => {
+    console.log('zzg: ', JSON.stringify(filterValues, undefined, 2));
+
+    setSearchParams((params) => {
+      const optionKeys = Object.keys(filterValues) as (keyof FilterOptions)[];
+      optionKeys.forEach((key) => {
+        const filterName = `${key}__in`;
+
+        if (filterValues[key].length === 0) {
+          params.delete(filterName);
+        } else {
+          params.set(filterName, filterValues[key].map((value) => value.value).join(','));
+        }
+      });
+
+      return params;
+    });
+  }, [setSearchParams, filterValues]);
 
   const organizations = useMemo(
     () => data?.organizations.map((o) => ({ label: o.name, value: o.id })),
     [data?.organizations],
   );
 
-  const addFilterValue = (type: keyof FilterValues, value: FilterOption) => {
+  const addFilterValue = (type: keyof FilterOptions, value: FilterOption) => {
     setFilterValues({
       ...filterValues,
       [type]: [...filterValues[type], value],
     });
   };
 
-  const removeFilterValue = (type: keyof FilterValues, value: FilterOption) => {
+  const removeFilterValue = (type: keyof FilterOptions, value: FilterOption) => {
     setFilterValues({
       ...filterValues,
       [type]: filterValues[type].filter((fv) => !(fv.label === value.label && fv.value === value.value)),
@@ -45,7 +66,7 @@ export const DepartmentSearchBar = ({ setFilterValues, filterValues }: Departmen
   };
 
   const clearAllFilters = () => {
-    const reset = Object.keys(filterValues).reduce((prev, curr) => ({ ...prev, [curr]: [] }), {} as FilterValues);
+    const reset = Object.keys(filterValues).reduce((prev, curr) => ({ ...prev, [curr]: [] }), {} as FilterOptions);
 
     setFilterValues({ ...reset });
   };
@@ -65,9 +86,9 @@ export const DepartmentSearchBar = ({ setFilterValues, filterValues }: Departmen
                     onChange={(_, { action, option }) => {
                       if (option != null) {
                         if (action === 'select-option') {
-                          addFilterValue('ministry', option);
+                          addFilterValue('organization_id', option);
                         } else if (action === 'deselect-option') {
-                          removeFilterValue('ministry', option);
+                          removeFilterValue('organization_id', option);
                         }
                       }
                     }}
@@ -85,7 +106,7 @@ export const DepartmentSearchBar = ({ setFilterValues, filterValues }: Departmen
                       menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
                     }}
                     value={(organizations ?? []).filter(
-                      (sfo) => filterValues.ministry.filter((fo) => fo.value === sfo.value).length > 0,
+                      (sfo) => filterValues['organization_id'].filter((fo) => fo.value === sfo.value).length > 0,
                     )}
                   />
                 </Col>
@@ -94,9 +115,9 @@ export const DepartmentSearchBar = ({ setFilterValues, filterValues }: Departmen
                     onChange={(_, { action, option }) => {
                       if (option != null) {
                         if (action === 'select-option') {
-                          addFilterValue('status', option);
+                          addFilterValue('effective_status', option);
                         } else if (action === 'deselect-option') {
-                          removeFilterValue('status', option);
+                          removeFilterValue('effective_status', option);
                         }
                       }
                     }}
@@ -113,7 +134,7 @@ export const DepartmentSearchBar = ({ setFilterValues, filterValues }: Departmen
                       menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
                     }}
                     value={statusFilterOptions.filter(
-                      (sfo) => filterValues.status.filter((fo) => fo.value === sfo.value).length > 0,
+                      (sfo) => filterValues['effective_status'].filter((fo) => fo.value === sfo.value).length > 0,
                     )}
                   />
                 </Col>
@@ -175,7 +196,7 @@ export const DepartmentSearchBar = ({ setFilterValues, filterValues }: Departmen
                   .map(([key, values]) =>
                     values.map((filterOption) => (
                       <Tag
-                        onClose={() => removeFilterValue(key as keyof FilterValues, filterOption)}
+                        onClose={() => removeFilterValue(key as keyof FilterOptions, filterOption)}
                         key={`${key}-${filterOption.value}`}
                         closable
                         style={{ marginTop: '4px' }}

@@ -1,7 +1,8 @@
 import { Space } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
+import { GetDepartmentsForSettingsArgs } from '../../../redux/services/graphql-api/settings/dtos/get-departments-for-settings-args.dto';
 import { useLazyGetDepartmentsForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
 import { deserializeOrderBy } from '../../../redux/services/graphql-api/utils/deserialize-order-by.util';
 import ContentWrapper from '../../home/components/content-wrapper.component';
@@ -10,10 +11,9 @@ import { DepartmentTable } from './components/department.table';
 import { DEFAULT_SEARCH_PARAMS } from './department.constants';
 
 export type FilterOption = { label: string; value: string };
-export type FilterValues = { [key in 'ministry' | 'status']: FilterOption[] };
+export type FilterOptions = { [key in 'organization_id' | 'effective_status']: FilterOption[] };
 
 export const DepartmentListPage = () => {
-  const [filterValues, setFilterValues] = useState<FilterValues>({ ministry: [], status: [] });
   const [searchParams, setSearchParams] = useSearchParams(DEFAULT_SEARCH_PARAMS);
 
   const [departmentTrigger, { data: departmentData, isFetching: departmentDataIsFetching }] =
@@ -30,7 +30,28 @@ export const DepartmentListPage = () => {
     );
     const orderBy = searchParams.get('orderBy');
 
+    // let where: GetDepartmentsForSettingsArgs['where'] | null = { AND: [] };
+    const where: GetDepartmentsForSettingsArgs['where'] = { AND: [] };
+    const AND: typeof where.AND = [];
+    const filterKeys = ['organization_id__in', 'effective_status__in'];
+
+    filterKeys.forEach((filterKey) => {
+      const rawValue = searchParams.get(filterKey);
+      const [key, operation] = filterKey.split('__');
+
+      const value = ['in'].includes(operation) ? rawValue?.split(',') : rawValue;
+
+      if (rawValue != null) {
+        AND.push({ [key]: { [operation]: value } });
+      }
+    });
+
+    if (AND.length > 0) {
+      where.AND = AND;
+    }
+
     departmentTrigger({
+      where: where.AND.length > 0 ? where : undefined,
       take: pageSize,
       skip: (page - 1) * pageSize,
       orderBy: deserializeOrderBy(orderBy),
@@ -39,20 +60,15 @@ export const DepartmentListPage = () => {
 
   useEffect(() => fetchData(), [fetchData]);
 
-  useEffect(() => {
-    console.log(JSON.stringify(filterValues, undefined, 2));
-  }, [filterValues]);
-
   return (
     <>
       <PageHeader title="Departments" subTitle="Manage departments" />
       <ContentWrapper>
         <Space direction="vertical" style={{ marginTop: '1rem', width: '100%' }}>
-          <DepartmentSearchBar setFilterValues={setFilterValues} filterValues={filterValues} />
+          <DepartmentSearchBar setSearchParams={setSearchParams} searchParams={searchParams} />
           <DepartmentTable
             setSearchParams={setSearchParams}
             data={departmentData}
-            defaultSearchParams={DEFAULT_SEARCH_PARAMS}
             isLoading={departmentDataIsFetching}
             searchParams={searchParams}
           />
