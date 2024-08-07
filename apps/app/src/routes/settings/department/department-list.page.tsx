@@ -2,8 +2,12 @@ import { Space } from 'antd';
 import { useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
+import { FilterBar } from '../../../components/shared/filter-bar/filter-bar.component';
 import { GetDepartmentsForSettingsArgs } from '../../../redux/services/graphql-api/settings/dtos/get-departments-for-settings-args.dto';
-import { useLazyGetDepartmentsForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
+import {
+  useGetOrganizationsPicklistForSettingsQuery,
+  useLazyGetDepartmentsForSettingsQuery,
+} from '../../../redux/services/graphql-api/settings/settings.api';
 import { deserializeOrderBy } from '../../../redux/services/graphql-api/utils/deserialize-order-by.util';
 import ContentWrapper from '../../home/components/content-wrapper.component';
 import { DepartmentSearchBar } from './components/department-search-bar.component';
@@ -18,6 +22,8 @@ export const DepartmentListPage = () => {
 
   const [departmentTrigger, { data: departmentData, isFetching: departmentDataIsFetching }] =
     useLazyGetDepartmentsForSettingsQuery();
+
+  const { data: organizationsData } = useGetOrganizationsPicklistForSettingsQuery();
 
   const fetchData = useCallback(() => {
     const page = parseInt(
@@ -65,6 +71,33 @@ export const DepartmentListPage = () => {
       <PageHeader title="Departments" subTitle="Manage departments" />
       <ContentWrapper>
         <Space direction="vertical" style={{ marginTop: '1rem', width: '100%' }}>
+          <FilterBar
+            filters={[
+              {
+                name: 'organization_id',
+                componentType: 'select',
+                isMulti: true,
+                options: (organizationsData?.organizations ?? []).map((o) => ({ label: o.name, value: o.id })),
+                placeholder: 'Ministries',
+              },
+              {
+                name: 'effective_status',
+                componentType: 'select',
+                isMulti: false,
+                options: [
+                  {
+                    label: 'Active',
+                    value: 'Active',
+                  },
+                  {
+                    label: 'Inactive',
+                    value: 'Inactive',
+                  },
+                ],
+                placeholder: 'Status',
+              },
+            ]}
+          />
           <DepartmentSearchBar setSearchParams={setSearchParams} searchParams={searchParams} />
           <DepartmentTable
             setSearchParams={setSearchParams}
