@@ -592,6 +592,7 @@ function renderTile(
       backgroundColor: '#ffffff',
       width: useTileWidth,
       height: useTileHeight,
+      pixelRatio: 1,
       style: {
         width: `${useTileWidth}px`,
         height: `${useTileHeight}px`,
@@ -835,6 +836,8 @@ function DownloadButton({ focusable = true }: { focusable?: boolean }) {
   );
 }
 
+// html-to-image library extract - modified toCanvas function to re-use the canvas object instead of re-creating it
+// this improves memory usage for the tiling process.
 function px(node: HTMLElement, styleProperty: string) {
   const win = node.ownerDocument.defaultView || window;
   const val = win.getComputedStyle(node).getPropertyValue(styleProperty);
@@ -895,7 +898,14 @@ export function getPixelRatio() {
 
 export function checkCanvasDimensions(canvas: HTMLCanvasElement) {
   if (canvas.width > canvasDimensionLimit || canvas.height > canvasDimensionLimit) {
-    console.log('checkCanvasDimensions TRIGGERED');
+    console.log(
+      'checkCanvasDimensions TRIGGERED, canvas.width: ',
+      canvas.width,
+      'canvas.height: ',
+      canvas.height,
+      'canvasDimensionLimit: ',
+      canvasDimensionLimit,
+    );
     if (canvas.width > canvasDimensionLimit && canvas.height > canvasDimensionLimit) {
       if (canvas.width > canvas.height) {
         canvas.height *= canvasDimensionLimit / canvas.width;
