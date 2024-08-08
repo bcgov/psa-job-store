@@ -88,9 +88,14 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     // isError: positionNeedsRivewError,
     refetch: refetchPositionNeedsRivew,
     isFetching: isFetchingPositionNeedsRivew,
-  } = usePositionNeedsRivewQuery({
-    id: positionRequestId ?? -1,
-  });
+  } = usePositionNeedsRivewQuery(
+    {
+      id: positionRequestId ?? -1,
+    },
+    {
+      skip: !positionRequestId,
+    },
+  );
 
   useEffect(() => {
     // Fetch position request and needs review data when positionRequestId changes
