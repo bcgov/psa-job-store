@@ -9,8 +9,10 @@ import {
 import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
+import { autolayout, updateSupervisorAndAddNewPositionNode } from 'common-kit';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useReactFlow } from 'reactflow';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import {
   GetPositionRequestResponseContent,
@@ -20,6 +22,9 @@ import {
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
+import { OrgChart } from '../org-chart/components/org-chart';
+import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
+import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import CommentsList from './components/comments-list.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -58,7 +63,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   const [mode, setMode] = useState('');
   const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
-  const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData } = useWizardContext();
+  const [orgChartDataForPng, setOrgChartDataForPng] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData, getClassificationById } =
+    useWizardContext();
+  const { getNodes } = useReactFlow();
 
   // const {
   //   data: positionRequestData,
@@ -187,28 +196,40 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       //   step: 6,
       // }).unwrap();
 
-      const result = await submitPositionRequest({
-        id: positionRequestId,
-        comment: comment,
-      }).unwrap();
+      setIsLoading(true);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // console.log('submitPositionRequest result: ', result);
-      // todo - change check for position_number
-      if (!result?.submitPositionRequest.id) throw new Error('API failure');
+        const png = await generatePNGBase64(getNodes);
 
-      // if successfull, switch parent to readonly mode and show success message
-      // switchParentMode, switchParentReadonlyMode
-      if (result?.submitPositionRequest.status === 'COMPLETED') {
-        switchParentMode && switchParentMode('readonly');
-        switchParentReadonlyMode && switchParentReadonlyMode('completed');
-        setReadOnlySelectedTab && setReadOnlySelectedTab('4');
-      } else if (result?.submitPositionRequest.status === 'VERIFICATION') {
-        switchParentMode && switchParentMode('readonly');
-        switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
-        setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+        const result = await submitPositionRequest({
+          id: positionRequestId,
+          comment: comment,
+          orgchart_png: png,
+        }).unwrap();
+
+        // console.log('submitPositionRequest result: ', result);
+        // todo - change check for position_number
+        if (!result?.submitPositionRequest.id) throw new Error('API failure');
+
+        // if successfull, switch parent to readonly mode and show success message
+        // switchParentMode, switchParentReadonlyMode
+        if (result?.submitPositionRequest.status === 'COMPLETED') {
+          switchParentMode && switchParentMode('readonly');
+          switchParentReadonlyMode && switchParentReadonlyMode('completed');
+          setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+        } else if (result?.submitPositionRequest.status === 'VERIFICATION') {
+          switchParentMode && switchParentMode('readonly');
+          switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
+          setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+        }
+
+        setPositionRequestData(result?.submitPositionRequest ?? null);
+      } catch (error) {
+        console.error('Error submitting position request: ', error);
+      } finally {
+        setIsLoading(false);
       }
-
-      setPositionRequestData(result?.submitPositionRequest ?? null);
     } else {
       throw Error('Position request not found');
     }
@@ -285,7 +306,38 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       });
   };
 
-  if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew) return <LoadingSpinnerWithMessage />;
+  useEffect(() => {
+    if (positionRequest) {
+      // console.log(
+      //   'positionRequest?.classification_id for getClassificationById : ',
+      //   positionRequest?.classification_id,
+      //   positionRequest,
+      // );
+      const classification = getClassificationById(positionRequest?.classification_id ?? '');
+      // console.log('classification: ', classification);
+
+      // const { data: departmentData } = useGetDepartmentQuery(positionRequest?.department_id);
+      let orgChartDataForPng = JSON.parse(JSON.stringify(positionRequest?.orgchart_json));
+      orgChartDataForPng = updateSupervisorAndAddNewPositionNode(
+        orgChartDataForPng.edges,
+        orgChartDataForPng.nodes,
+        positionRequest?.additional_info?.excluded_mgr_position_number ?? '',
+        positionRequest?.reports_to_position_id,
+        '000000',
+        positionRequest?.title,
+        classification,
+        { id: positionRequest?.department_id, organization_id: '', name: '' },
+      );
+      setOrgChartDataForPng(autolayout(orgChartDataForPng));
+    }
+  }, [positionRequest, setOrgChartDataForPng, getClassificationById]);
+
+  // augment data the way it's done upon submission for position creation, e.g.
+  // - update supervisor and excluded manager nodes
+  // - add node for new position
+
+  if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew || !orgChartDataForPng)
+    return <LoadingSpinnerWithMessage />;
 
   return (
     <>
@@ -321,12 +373,22 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             </Button>,
             <>
               {mode === 'readyToCreatePositionNumber' && (
-                <Button onClick={showModal} key="back" type="primary" loading={submitPositionRequestIsLoading}>
+                <Button
+                  onClick={showModal}
+                  key="back"
+                  type="primary"
+                  loading={submitPositionRequestIsLoading || isLoading}
+                >
                   Generate position number
                 </Button>
               )}
               {(mode === 'verificationRequired_edits' || mode === 'verificationRequired_retry') && (
-                <Button key="back" type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
+                <Button
+                  key="back"
+                  type="primary"
+                  onClick={handleOk}
+                  loading={submitPositionRequestIsLoading || isLoading}
+                >
                   Submit for verification
                 </Button>
               )}
@@ -338,6 +400,17 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             current={5}
             maxStepCompleted={positionRequest?.max_step_completed}
           ></WizardSteps>
+          {/* Invisible org chart so we can generate a png image to attach with the submission to CRM */}
+          <div style={{ height: '1px', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ height: '400px', width: '100%', position: 'absolute', top: 0, left: 0 }}>
+              <OrgChart
+                type={OrgChartType.READONLY}
+                departmentId={positionRequest?.department_id ?? ''}
+                elements={orgChartDataForPng}
+                wrapProvider={false}
+              />
+            </div>
+          </div>
 
           <div
             style={{
@@ -374,7 +447,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         <Button
                           type="primary"
                           onClick={showModal}
-                          loading={submitPositionRequestIsLoading}
+                          loading={submitPositionRequestIsLoading || isLoading}
                           data-testid="generate-position-button"
                         >
                           Generate position number
@@ -530,7 +603,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       <Button
                         type="primary"
                         onClick={handleOk}
-                        loading={submitPositionRequestIsLoading}
+                        loading={submitPositionRequestIsLoading || isLoading}
                         data-testid="submit-for-verification-button"
                       >
                         Submit for verification
@@ -624,7 +697,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                           <CommentsList positionRequestId={positionRequestId ?? -1} />
                         </>
                       </Form.Item>
-                      <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
+                      <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading || isLoading}>
                         Re-submit for verification
                       </Button>
                     </Card>
@@ -737,7 +810,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   key="submit"
                   type="primary"
                   onClick={handleOk}
-                  loading={submitPositionRequestIsLoading}
+                  loading={submitPositionRequestIsLoading || isLoading}
                   data-testid="confirm-modal-ok"
                 >
                   Generate position number

@@ -2,7 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 import { btoa } from 'buffer';
-import { Elements, autolayout, generateJobProfile, getALStatus } from 'common-kit';
+import {
+  Elements,
+  autolayout,
+  generateJobProfile,
+  getALStatus,
+  updateSupervisorAndAddNewPositionNode,
+} from 'common-kit';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import { Packer } from 'docx';
@@ -157,7 +163,7 @@ export class PositionRequestApiService {
     });
   }
 
-  async submitPositionRequest(id: number, comment: string, userId: string) {
+  async submitPositionRequest(id: number, comment: string, userId: string, orgchart_png: string) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
     if (!positionRequest) throw AlexandriaError('Position request not found');
@@ -165,7 +171,8 @@ export class PositionRequestApiService {
     // ensure comments are saved
     try {
       if (comment != null && comment.length > 0) {
-        const c = await this.prisma.comment.create({
+        //  const c =
+        await this.prisma.comment.create({
           data: {
             author_id: userId,
             record_id: positionRequest.id,
@@ -173,7 +180,7 @@ export class PositionRequestApiService {
             text: comment,
           },
         });
-        console.log('comment ', c);
+        // console.log('comment ', c);
       }
     } catch (error) {
       this.logger.error(error);
@@ -215,6 +222,19 @@ export class PositionRequestApiService {
           throw AlexandriaError('Failed to save position number');
         }
 
+        try {
+          positionRequest = await this.prisma.positionRequest.update({
+            where: { id },
+            data: {
+              orgchart_png: orgchart_png,
+            },
+          });
+        } catch (error) {
+          this.logger.error('Failed to set orgchart_png: ' + position.positionNbr);
+          this.logger.error(error);
+          throw AlexandriaError('Failed to save org chart image');
+        }
+
         if (position.positionNbr.length > 0) {
           positionRequest = await this.submitPositionRequest_afterCreatePosition(
             position.positionNbr,
@@ -227,6 +247,22 @@ export class PositionRequestApiService {
       } else {
         // we already have a position number assigned to this position request
         // check crm status etc
+
+        // update org chart snapshot
+
+        try {
+          positionRequest = await this.prisma.positionRequest.update({
+            where: { id },
+            data: {
+              orgchart_png: orgchart_png,
+            },
+          });
+        } catch (error) {
+          this.logger.error('Failed to set orgchart_png: ' + positionRequest.position_number.toString());
+          this.logger.error(error);
+          throw AlexandriaError('Failed to save org chart image');
+        }
+
         positionRequest = await this.submitPositionRequest_afterCreatePosition(
           `${positionRequest.position_number.toString()}`.padStart(8, '0'),
           id,
@@ -330,67 +366,34 @@ export class PositionRequestApiService {
     const department = await this.departmentService.getDepartment({ where: { id: positionObj['A.DEPTID'] } });
     const { edges, nodes } = positionRequest.orgchart_json as Record<string, any> as Elements;
 
-    // Update supervisor, excluded manager nodes
     const excludedManagerId = (positionRequest.additional_info as AdditionalInfo | null)?.excluded_mgr_position_number;
     const supervisorId = positionObj['A.REPORTS_TO'];
-    nodes.forEach((node) => {
-      node.data = {
-        ...node.data,
-        isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
-        isExcludedManager: node.id === excludedManagerId,
-        isNewPosition: false, // Clear previous positions marked as new
-        isSelected: false,
-        isSupervisor: node.id === supervisorId,
-      };
-    });
+    const positionNumber = positionObj['A.POSITION_NBR'];
+    const positionTitle = positionObj['A.DESCR'];
 
-    // Add edge & node for new position
-    // add edge
-    const edgeId = `${supervisorId}-${positionObj['A.POSITION_NBR']}`;
-    if (edges.find((edge) => edge.id === edgeId) == null) {
-      edges.push({
-        id: edgeId,
-        source: supervisorId,
-        target: positionObj['A.POSITION_NBR'],
-        style: { stroke: 'blue' },
-        type: 'smoothstep',
-        animated: true,
-        selected: true,
-      });
-    }
+    const { edges: newEdges, nodes: newNodes } = updateSupervisorAndAddNewPositionNode(
+      edges,
+      nodes,
+      excludedManagerId,
+      supervisorId,
+      positionNumber,
+      positionTitle,
+      classification,
+      department,
+    );
 
-    // add node
-    const nodeId = positionObj['A.POSITION_NBR'];
-    if (nodes.find((node) => node.id === nodeId) == null) {
-      nodes.push({
-        id: nodeId,
-        type: 'org-chart-card',
-        data: {
-          id: nodeId,
-          isAdjacent: true,
-          isNewPosition: true,
-          title: positionObj['A.DESCR'],
-          classification: {
-            id: classification.id,
-            code: classification.code,
-            name: classification.name,
-          },
-          department: {
-            id: department.id,
-            organization_id: department.organization_id,
-            name: department.name,
-          },
-          employees: [],
-        },
-        position: { x: 0, y: 0 },
-      });
-    }
+    const elementsData: Elements = {
+      edges: newEdges,
+      nodes: newNodes,
+    };
+
+    const orgchart_json = autolayout(elementsData) as any;
 
     //write org chart changes
     const positionRequestNew = await this.prisma.positionRequest.update({
       where: { id },
       data: {
-        orgchart_json: autolayout({ edges, nodes }) as any,
+        orgchart_json: orgchart_json,
       },
     });
     return positionRequestNew;
@@ -1081,6 +1084,7 @@ export class PositionRequestApiService {
 
         if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
           // Remove existing node with isExcludedManager = true
+          // isExcludedManager indicates it's a custom added node
           const updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.isExcludedManager !== true);
 
           const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
@@ -1118,7 +1122,7 @@ export class PositionRequestApiService {
                   data: {
                     id: additionalInfo.excluded_mgr_position_number,
                     title: employeeInfo[0].positionDescription,
-                    isExcludedManager: true,
+                    isExcludedManager: true, // isExcludedManager indicates it's a custom added node
                     employees: employeeInfo.map((employee) => ({
                       id: employee.employeeId,
                       name: employee.employeeName,
@@ -1392,7 +1396,7 @@ export class PositionRequestApiService {
   async createOrUpdateCrmIncidentForPositionRequest(id: number) {
     try {
       const needsReview = (await this.positionRequestNeedsReview(id)).result;
-
+      const formattedDate = dayjs().format('YYYYMMDD');
       const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
       const classification = await this.classificationService.getClassification({
         where: {
@@ -1438,6 +1442,8 @@ export class PositionRequestApiService {
 
       const zeroFilledPositionNumber =
         positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
+
+      const pngFileName = `Organization Chart ${zeroFilledPositionNumber} ${positionRequest.title} ${formattedDate}.png`;
 
       const data: IncidentCreateUpdateInput = {
         subject: `Job Store Beta - Position Number Request - ${classification.code}`,
@@ -1552,7 +1558,7 @@ export class PositionRequestApiService {
           },
           {
             name: 'Org chart',
-            fileName: 'org-chart.png',
+            fileName: pngFileName,
             contentType: 'image/png',
             data: positionRequest.orgchart_png,
           },
