@@ -4,6 +4,7 @@ import {
   CheckCircleOutlined,
   EllipsisOutlined,
   ExclamationCircleFilled,
+  ExclamationCircleOutlined,
   WarningFilled,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
@@ -170,8 +171,18 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   ]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isVerificationModalVisible, setIsVerificationModalVisible] = useState(false);
+
   // const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [submitPositionRequest, { isLoading: submitPositionRequestIsLoading }] = useSubmitPositionRequestMutation();
+
+  const showVerificationModal = async () => {
+    setIsVerificationModalVisible(true);
+  };
+
+  const handleVerificationCancel = () => {
+    setIsVerificationModalVisible(false);
+  };
 
   const showModal = async () => {
     setIsModalVisible(true);
@@ -602,7 +613,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       </Form.Item>
                       <Button
                         type="primary"
-                        onClick={handleOk}
+                        onClick={showVerificationModal}
                         loading={submitPositionRequestIsLoading || isLoading}
                         data-testid="submit-for-verification-button"
                       >
@@ -847,6 +858,42 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       related to this position.
                     </li>
                   </ul>
+                </div>
+              </div>
+            </Modal>
+
+            <Modal
+              title={
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: '8px', fontSize: '22px' }} />
+                  <span>Submit for verification?</span>
+                </div>
+              }
+              open={isVerificationModalVisible}
+              onOk={handleOk}
+              onCancel={handleVerificationCancel}
+              footer={[
+                <Button key="back" onClick={handleVerificationCancel}>
+                  Cancel
+                </Button>,
+                <Button
+                  key="submit"
+                  type="primary"
+                  onClick={() => {
+                    setIsVerificationModalVisible(false);
+                    handleOk();
+                  }}
+                  loading={submitPositionRequestIsLoading || isLoading}
+                  data-testid="confirm-modal-ok"
+                >
+                  Submit for verification
+                </Button>,
+              ]}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                <div>
+                  Once submitted, you won’t be able to cancel the request from the job store. Are you sure you wish to
+                  proceed?
                 </div>
               </div>
             </Modal>

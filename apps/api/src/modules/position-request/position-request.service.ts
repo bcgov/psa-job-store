@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { btoa } from 'buffer';
 import {
   Elements,
   autolayout,
@@ -1437,8 +1436,8 @@ export class PositionRequestApiService {
           : null;
       const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
 
-      const orgChartBase64 =
-        positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
+      // const orgChartBase64 =
+      //   positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
 
       const zeroFilledPositionNumber =
         positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
@@ -1550,12 +1549,12 @@ export class PositionRequestApiService {
             contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             data: jobProfileBase64,
           },
-          {
-            name: `${zeroFilledPositionNumber} - Organization Chart.json`.substring(0, 40),
-            fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
-            contentType: 'application/json',
-            data: orgChartBase64,
-          },
+          // {
+          //   name: `${zeroFilledPositionNumber} - Organization Chart.json`.substring(0, 40),
+          //   fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
+          //   contentType: 'application/json',
+          //   data: orgChartBase64,
+          // },
           {
             name: 'Org chart',
             fileName: pngFileName,
