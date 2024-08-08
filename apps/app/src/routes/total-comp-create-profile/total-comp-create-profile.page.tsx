@@ -15,7 +15,7 @@ export const TotalCompCreateProfilePage = () => {
   const [id, setId] = useState(urlId);
   const [version, setVersion] = useState('');
 
-  const [trigger, { data: jobProfileData, isFetching, error: fetchError }] = useLazyGetJobProfileQuery();
+  const [trigger, { data: jobProfileData, isFetching }] = useLazyGetJobProfileQuery();
 
   // Refetch data when the component mounts or the id changes
   useEffect(() => {

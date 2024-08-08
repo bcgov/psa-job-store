@@ -8,7 +8,7 @@ export interface UserConnect {
 }
 
 export interface JobProfileConnect {
-  id_version: IdVersion;
+  id_version: IdVersion | null;
 }
 
 interface JobProfileConnectItem {
@@ -56,7 +56,9 @@ export interface GetPositionRequestResponseContent {
   submitted_at?: string;
   email?: string;
   shareUUID?: string;
-  parent_job_profile?: JobProfileConnectItem;
+  parent_job_profile?: {
+    number: number;
+  };
 
   additional_info?: AdditionalInfo;
 
@@ -136,12 +138,7 @@ export interface UpdatePositionRequestInput {
   submission_id?: string;
   status?: string;
   additional_info?: AdditionalInfo | null;
-  parent_job_profile?: {
-    connect: {
-      id: number | null;
-      version: number | null;
-    };
-  };
+  parent_job_profile?: JobProfileConnectItem;
   department?: {
     connect: {
       id: string;

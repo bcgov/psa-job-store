@@ -117,7 +117,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   orgchart_json: orgChartData,
                   // clear previous data
                   profile_json: null,
-                  parent_job_profile: { connect: { id_version: { id: null, version: null } } },
+                  parent_job_profile: { connect: { id_version: null } },
                   additional_info: null,
                   title: null,
                   returnFullObject: true,
