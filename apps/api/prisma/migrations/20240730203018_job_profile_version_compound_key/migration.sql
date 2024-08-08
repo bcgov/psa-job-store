@@ -61,56 +61,62 @@ DROP INDEX IF EXISTS "job_profile_number_version_key";
 -- DropIndex
 
 -- Add version column to tables and update with values from referenced records in job_profile table
-ALTER TABLE "job_profile_behavioural_competency" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER,
-ALTER COLUMN "job_profile_version" SET NOT NULL;
+ALTER TABLE "job_profile_behavioural_competency" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER;
 UPDATE "job_profile_behavioural_competency" AS jbc
 SET "job_profile_version" = jp."version"
 FROM "job_profile" AS jp
 WHERE jbc."job_profile_id" = jp."id";
+ALTER TABLE "job_profile_behavioural_competency" ALTER COLUMN "job_profile_version"  SET NOT NULL;
 
-ALTER TABLE "job_profile_classification" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER,
-ALTER COLUMN "job_profile_version" SET NOT NULL;
+
+ALTER TABLE "job_profile_classification" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER;
 UPDATE "job_profile_classification" AS jpc
 SET "job_profile_version" = jp."version"
 FROM "job_profile" AS jp
 WHERE jpc."job_profile_id" = jp."id";
+ALTER TABLE "job_profile_classification" ALTER COLUMN "job_profile_version" SET NOT NULL;
 
 
 
-ALTER TABLE "job_profile_job_family_link" ADD COLUMN IF NOT EXISTS "jobProfileVersion" INTEGER,
-ALTER COLUMN "jobProfileVersion" SET NOT NULL;
+ALTER TABLE "job_profile_job_family_link" ADD COLUMN IF NOT EXISTS "jobProfileVersion" INTEGER;
 UPDATE "job_profile_job_family_link" AS jpfl
 SET "jobProfileVersion" = jp."version"
 FROM "job_profile" AS jp
 WHERE jpfl."jobProfileId" = jp."id";
+ALTER TABLE "job_profile_job_family_link" ALTER COLUMN "jobProfileVersion" SET NOT NULL;
 
-ALTER TABLE "job_profile_organization" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER,
-ALTER COLUMN "job_profile_version" SET NOT NULL;
+
+ALTER TABLE "job_profile_organization" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER;
 UPDATE "job_profile_organization" AS jpo
 SET "job_profile_version" = jp."version"
 FROM "job_profile" AS jp
 WHERE jpo."job_profile_id" = jp."id";
+ALTER TABLE "job_profile_organization" ALTER COLUMN "job_profile_version" SET NOT NULL;
 
-ALTER TABLE "job_profile_reports_to" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER,
-ALTER COLUMN "job_profile_version" SET NOT NULL;
+
+ALTER TABLE "job_profile_reports_to" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER;
 UPDATE "job_profile_reports_to" AS jprt
 SET "job_profile_version" = jp."version"
 FROM "job_profile" AS jp
 WHERE jprt."job_profile_id" = jp."id";
+ALTER TABLE "job_profile_reports_to" ALTER COLUMN "job_profile_version" SET NOT NULL;
 
-ALTER TABLE "job_profile_scope_link" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER,
-ALTER COLUMN "job_profile_version" SET NOT NULL;
+
+ALTER TABLE "job_profile_scope_link" ADD COLUMN IF NOT EXISTS "job_profile_version" INTEGER;
 UPDATE "job_profile_scope_link" AS jpsl
 SET "job_profile_version" = jp."version"
 FROM "job_profile" AS jp
 WHERE jpsl."job_profile_id" = jp."id";
+ALTER TABLE "job_profile_scope_link" ALTER COLUMN "job_profile_version" SET NOT NULL;
 
-ALTER TABLE "job_profile_stream_link" ADD COLUMN IF NOT EXISTS "jobProfileVersion" INTEGER,
-ALTER COLUMN "jobProfileVersion" SET NOT NULL;
+
+ALTER TABLE "job_profile_stream_link" ADD COLUMN IF NOT EXISTS "jobProfileVersion" INTEGER;
 UPDATE "job_profile_stream_link" AS jpsl
 SET "jobProfileVersion" = jp."version"
 FROM "job_profile" AS jp
 WHERE jpsl."jobProfileId" = jp."id";
+ALTER TABLE "job_profile_stream_link" ALTER COLUMN "jobProfileVersion" SET NOT NULL;
+
 
 ALTER TABLE "position_request" ADD COLUMN IF NOT EXISTS "parent_job_profile_version" INTEGER;
 UPDATE "position_request" AS pr
