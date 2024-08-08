@@ -118,6 +118,7 @@ export async function generatePNGBase64(getNodes: () => any[]): Promise<string> 
   const resolution = 1.5;
 
   const nodes = getNodes();
+  console.log('nodes: ', nodes);
   const nodesBounds = getNodesBounds(nodes);
 
   console.log('nodesBounds: ', nodesBounds);

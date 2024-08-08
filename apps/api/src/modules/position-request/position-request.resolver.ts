@@ -88,8 +88,9 @@ export class PositionRequestApiResolver {
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: Express.User,
     @Args('comment', { nullable: true }) comment?: string,
+    @Args('orgchart_png', { nullable: true }) orgchart_png?: string,
   ) {
-    await this.positionRequestService.submitPositionRequest(id, comment, user.id);
+    await this.positionRequestService.submitPositionRequest(id, comment, user.id, orgchart_png);
 
     // this ensures that returned object is the same as the one returned by getPositionRequest
     return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
