@@ -34,6 +34,7 @@ interface ConfigProps {
 
 interface WizardEditProfileProps {
   id?: string;
+  version?: string;
   profileData?: JobProfileModel | null;
   config?: ConfigProps;
   submitText?: string;
@@ -55,7 +56,10 @@ type sectionMap = {
 };
 
 const WizardEditProfile = forwardRef(
-  ({ id, profileData, config, onVerificationRequiredChange, handleFormChange }: WizardEditProfileProps, ref) => {
+  (
+    { id, version, profileData, config, onVerificationRequiredChange, handleFormChange }: WizardEditProfileProps,
+    ref,
+  ) => {
     const {
       originalValuesSet,
       setOriginalValuesSet,
@@ -91,6 +95,7 @@ const WizardEditProfile = forwardRef(
       originalBehaviouralCompetenciesFields,
       setOriginalBehaviouralCompetenciesFields,
       positionRequestProfileId,
+      positionRequestProfileVersion,
       // errors,
       currentSection,
       setCurrentSection,
@@ -146,7 +151,10 @@ const WizardEditProfile = forwardRef(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [acctSection.current]);
     // get original profile data for comparison to the edited state
-    const { data: originalProfileData } = useGetJobProfileQuery({ id: positionRequestProfileId ?? -1 });
+    const { data: originalProfileData } = useGetJobProfileQuery({
+      id: positionRequestProfileId ?? -1,
+      version: positionRequestProfileVersion ?? -1,
+    });
     const initialData = profileData ?? null;
     const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
     const [requiresVerification, setRequiresVerification] = useState(false);
@@ -169,11 +177,11 @@ const WizardEditProfile = forwardRef(
       // If profileData exists, use it to set the form state
       if (profileData) {
         setEffectiveData(profileData);
-      } else if (!profileData && id) {
+      } else if (!profileData && id && version) {
         // If no profileData is provided and an id exists, fetch the data
-        triggerGetJobProfile({ id: +id });
+        triggerGetJobProfile({ id: +id, version: +version });
       }
-    }, [id, profileData, triggerGetJobProfile]);
+    }, [id, profileData, triggerGetJobProfile, version]);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const useFormReturn = useForm<JobProfileValidationModel>({
@@ -573,8 +581,7 @@ const WizardEditProfile = forwardRef(
           id: effectiveData?.id,
           number: effectiveData?.number,
           title: getInitialValue(effectiveData.title),
-          context:
-            typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description,
+          context: typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context,
           overview: getInitialValue(effectiveData.overview),
           program_overview: getInitialValue(effectiveData.program_overview),
           classifications: classificationIds,
@@ -773,11 +780,7 @@ const WizardEditProfile = forwardRef(
               description={
                 <p
                   dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(
-                      typeof effectiveData?.context === 'string'
-                        ? effectiveData?.context
-                        : effectiveData?.context?.description ?? '',
-                    ),
+                    __html: DOMPurify.sanitize(effectiveData?.context ?? ''),
                   }}
                 ></p>
               }

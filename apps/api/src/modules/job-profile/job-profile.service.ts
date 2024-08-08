@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
 import { JobProfile, JobProfileState, JobProfileType, Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { JobProfileCreateInput } from '../../@generated/prisma-nestjs-graphql';
@@ -29,14 +28,13 @@ export class JobProfileService {
     let searchResultIds = null;
     if (!searchConditions) searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
-    return this.prisma.jobProfile.findMany({
+    return this.prisma.currentJobProfile.findMany({
       where: {
         is_archived: include_archived,
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // ...(owner_id != null && { owner_id }),
         ...(searchConditions != null && searchConditions),
         state,
-        current_version: true,
         ...where,
       },
       ...args,
@@ -74,7 +72,6 @@ export class JobProfileService {
           },
         },
         role_type: true,
-        context: true,
       },
     });
   }
@@ -356,9 +353,8 @@ export class JobProfileService {
   private async getJobProfilesCount(search: string, where: any) {
     const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
-    return this.prisma.jobProfile.count({
+    return this.prisma.currentJobProfile.count({
       where: {
-        current_version: true,
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         ...where,
       },
@@ -370,7 +366,7 @@ export class JobProfileService {
 
     for (const profile of jobProfiles) {
       const classifications = await this.prisma.jobProfileClassification.findMany({
-        where: { job_profile_id: profile.id },
+        where: { job_profile_id: profile.id, job_profile_version: profile.version },
         include: { classification: true },
         orderBy: { classification: { name: 'asc' } }, // Sorting classifications for each profile
       });
@@ -395,7 +391,7 @@ export class JobProfileService {
 
     for (const profile of jobProfiles) {
       const classifications = await this.prisma.jobProfileJobFamilyLink.findMany({
-        where: { jobProfileId: profile.id },
+        where: { jobProfileId: profile.id, jobProfileVersion: profile.version },
         include: { jobFamily: true },
         orderBy: { jobFamily: { name: 'asc' } }, // Sorting classifications for each profile
       });
@@ -420,7 +416,7 @@ export class JobProfileService {
 
     for (const profile of jobProfiles) {
       const classifications = await this.prisma.jobProfileOrganization.findMany({
-        where: { job_profile_id: profile.id },
+        where: { job_profile_id: profile.id, job_profile_version: profile.version },
         include: { organization: true },
         orderBy: { organization: { name: 'asc' } }, // Sorting classifications for each profile
       });
@@ -440,9 +436,20 @@ export class JobProfileService {
     });
   }
 
-  async getJobProfile(id: number, userRoles: string[] = []) {
+  async getJobProfile(id: number, version: number, userRoles: string[] = []) {
+    const maxVersion =
+      version ??
+      (
+        await this.prisma.jobProfile.groupBy({
+          where: { id: id },
+          by: ['id'],
+          _max: {
+            version: true,
+          },
+        })
+      )[0]._max.version;
     const jobProfile = await this.prisma.jobProfile.findUnique({
-      where: { id },
+      where: { id_version: { id, version: maxVersion } },
       include: {
         owner: true,
         updated_by: true,
@@ -474,7 +481,7 @@ export class JobProfileService {
             stream: true,
           },
         },
-        context: true,
+
         behavioural_competencies: {
           include: {
             behavioural_competency: true,
@@ -482,6 +489,47 @@ export class JobProfileService {
         },
       },
     });
+    // : await this.prisma.currentJobProfile.findUnique({
+    //     where: { id },
+    //     include: {
+    //       owner: true,
+    //       updated_by: true,
+    //       published_by: true,
+    //       classifications: {
+    //         include: {
+    //           classification: true,
+    //         },
+    //       },
+    //       jobFamilies: {
+    //         include: {
+    //           jobFamily: true,
+    //         },
+    //       },
+    //       organizations: {
+    //         include: {
+    //           organization: true,
+    //         },
+    //       },
+    //       scopes: {
+    //         include: {
+    //           scope: true,
+    //         },
+    //       },
+    //       role: true,
+    //       role_type: true,
+    //       streams: {
+    //         include: {
+    //           stream: true,
+    //         },
+    //       },
+
+    //       behavioural_competencies: {
+    //         include: {
+    //           behavioural_competency: true,
+    //         },
+    //       },
+    //     },
+    //   });
 
     // if profile is not published and user is not total compensation, deny access
     if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
@@ -491,45 +539,84 @@ export class JobProfileService {
   }
 
   async getJobProfileByNumber(number: number, version: number, userRoles: string[] = []) {
-    const where = version ? { number: number, version: version } : { number, current_version: true };
-    const jobProfiles = await this.prisma.jobProfile.findMany({
-      where: where,
-      include: {
-        classifications: {
+    const where = version ? { number: number, version: version } : { number };
+    const jobProfiles = version
+      ? await this.prisma.jobProfile.findMany({
+          where: where,
           include: {
-            classification: true,
+            classifications: {
+              include: {
+                classification: true,
+              },
+            },
+            jobFamilies: {
+              include: {
+                jobFamily: true,
+              },
+            },
+            organizations: {
+              include: {
+                organization: true,
+              },
+            },
+            scopes: {
+              include: {
+                scope: true,
+              },
+            },
+            role: true,
+            role_type: true,
+            streams: {
+              include: {
+                stream: true,
+              },
+            },
+
+            behavioural_competencies: {
+              include: {
+                behavioural_competency: true,
+              },
+            },
           },
-        },
-        jobFamilies: {
+        })
+      : await this.prisma.currentJobProfile.findMany({
+          where: where,
           include: {
-            jobFamily: true,
+            classifications: {
+              include: {
+                classification: true,
+              },
+            },
+            jobFamilies: {
+              include: {
+                jobFamily: true,
+              },
+            },
+            organizations: {
+              include: {
+                organization: true,
+              },
+            },
+            scopes: {
+              include: {
+                scope: true,
+              },
+            },
+            role: true,
+            role_type: true,
+            streams: {
+              include: {
+                stream: true,
+              },
+            },
+
+            behavioural_competencies: {
+              include: {
+                behavioural_competency: true,
+              },
+            },
           },
-        },
-        organizations: {
-          include: {
-            organization: true,
-          },
-        },
-        scopes: {
-          include: {
-            scope: true,
-          },
-        },
-        role: true,
-        role_type: true,
-        streams: {
-          include: {
-            stream: true,
-          },
-        },
-        context: true,
-        behavioural_competencies: {
-          include: {
-            behavioural_competency: true,
-          },
-        },
-      },
-    });
+        });
     if (jobProfiles.length > 1) {
       throw AlexandriaError('More than one job profile found for job number ' + number + '. Please contact support.');
     }
@@ -544,9 +631,8 @@ export class JobProfileService {
   async getJobProfileCount({ search, where }: FindManyJobProfileWithSearch) {
     const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
-    return await this.prisma.jobProfile.count({
+    return await this.prisma.currentJobProfile.count({
       where: {
-        current_version: true,
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
@@ -555,10 +641,10 @@ export class JobProfileService {
     });
   }
 
-  async getJobProfileMeta(jobStoreNumber: number) {
+  async getJobProfileMeta(jobStoreId: number) {
     const jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
-        number: jobStoreNumber,
+        id: jobStoreId,
         state: 'PUBLISHED',
       },
       select: {
@@ -630,7 +716,6 @@ export class JobProfileService {
         // stream: { notIn: ['USER'] },
         // owner_id: userId,
         state: 'DRAFT',
-        current_version: true,
         ...where,
       },
     });
@@ -648,7 +733,6 @@ export class JobProfileService {
         // stream: { notIn: ['USER'] },
         // owner_id: userId,
         state: 'DRAFT',
-        current_version: true,
         ...where,
       },
     });
@@ -659,7 +743,6 @@ export class JobProfileService {
       where: {
         is_archived: false,
         state: 'DRAFT',
-        current_version: true,
         // owner_id: userId
       },
       select: {
@@ -678,47 +761,118 @@ export class JobProfileService {
     return uniqueOrganizations;
   }
 
-  async getBehaviouralCompetencies(job_profile_id: number) {
+  async getBehaviouralCompetencies(job_profile_id: number, job_profile_version: number) {
     return this.prisma.jobProfileBehaviouralCompetency.findMany({
-      where: { job_profile_id },
+      where: { job_profile_id, job_profile_version },
       include: {
         behavioural_competency: true,
       },
     });
   }
 
-  async createOrUpdateJobProfile(data: JobProfileCreateInput, userId: string, id?: number) {
+  async createOrUpdateJobProfile(data: JobProfileCreateInput, userId: string) {
     // todo: catch the "number" constraint failure and process the error on the client appropriately
     const jobProfileState = data.state ? data.state : JobProfileState.DRAFT;
 
-    const profileIsUsed = await this.prisma.positionRequest.findFirst({
-      where: {
-        profile_json: {
-          path: ['id'],
-          equals: id,
+    // if the id is 0, we have set this on the client to indicate a new record. Autoincrement is not set so
+    // find the max id and increment.
+    const sorted = (await this.prisma.jobProfile.findMany({ select: { id: true } })).sort((a, b) => b.id - a.id);
+    const id = data.id == 0 ? sorted[0].id + 1 : data.id;
+
+    const profileIsUsed =
+      data.version > 0 &&
+      (await this.prisma.positionRequest.findFirst({
+        where: {
+          AND: [
+            {
+              profile_json: {
+                path: ['id'],
+                equals: id,
+              },
+            },
+            {
+              profile_json: {
+                path: ['original_profile_json', 'version'],
+                equals: data.version,
+              },
+            },
+          ],
         },
-      },
-    });
+      }));
+
+    // only set owner (created_by) if this is a new record, ie. new draft or new version of a published profile
+    let owner;
+    // only set publishedBy if we are publishing a draft or new version of a published profile, ie. a new published record
+    let publishedBy;
+    let publishedAt;
+    let version;
+    if (data.id == id) {
+      if (profileIsUsed) {
+        //we are publishing a new version.
+        owner = userId;
+        publishedBy = jobProfileState === 'PUBLISHED' ? userId : data.published_by.connect.id;
+        publishedAt = jobProfileState === 'PUBLISHED' ? new Date(Date.now()) : data.published_at;
+        version = data.version + 1;
+      } else {
+        // we are updating a record. - DRAFT or PUBLISHED
+        owner = data.owner.connect.id;
+        const previousState = (
+          await this.prisma.jobProfile.findUnique({
+            where: {
+              id_version: {
+                id: id ?? -1,
+                version: data.version ?? -1,
+              },
+            },
+          })
+        ).state;
+        // if the existing record is not published, the published by should be null. otherwise, set it to previous value.
+        publishedBy =
+          jobProfileState != 'PUBLISHED'
+            ? undefined
+            : previousState === 'DRAFT'
+              ? userId
+              : data.published_by.connect.id;
+        publishedAt =
+          jobProfileState != 'PUBLISHED'
+            ? undefined
+            : previousState === 'DRAFT'
+              ? new Date(Date.now())
+              : data.published_at;
+        version = data.version;
+      }
+    } else {
+      //we are creating a new job profile.
+      owner = userId;
+      publishedBy = jobProfileState === 'PUBLISHED' ? userId : data.published_by.connect.id;
+      publishedAt = jobProfileState === 'PUBLISHED' ? new Date(Date.now()) : data.published_at;
+      version = 1;
+    }
 
     // always set updatedBy to current user
     const updatedBy = userId;
-    // only set owner (created_by) if this is a new record, ie. new draft or new version of a published profile
-    const owner = !id ? userId : data.owner.connect.id;
-    // only set publishedBy if we are publishing a draft or new version of a published profile, ie. a new published record
-    const publishedBy =
-      jobProfileState === 'DRAFT' && data.version == 1
-        ? undefined
-        : !id || (jobProfileState === 'PUBLISHED' && profileIsUsed)
-          ? userId
-          : data.published_by.connect.id;
+
     //for net new profile creation - we increment in the create statement
-    if (data.version == null) data.version = 0;
+    const doesExist = await this.prisma.jobProfile.findUnique({
+      // if the profile has been used, that means it has been published at some point and linked to a PR.
+      // We must create a new profile version in this case.
+      // if it has an id but it has not been used, regardless of state, we can simply update the existing record.
+      where: {
+        id_version: { id: id, version: version },
+      },
+    });
+
+    console.log('doesExist ', doesExist);
     const result = await this.prisma.jobProfile.upsert({
       // if the profile has been used, that means it has been published at some point and linked to a PR.
       // We must create a new profile version in this case.
       // if it has an id but it has not been used, regardless of state, we can simply update the existing record.
-      where: { id: id && !profileIsUsed ? id : -1 },
+      where: {
+        id_version: { id: id, version: version },
+      },
       create: {
+        id: id,
+        version: version,
         behavioural_competencies: {
           create: data.behavioural_competencies.create.map((item) => ({
             behavioural_competency: {
@@ -744,9 +898,7 @@ export class JobProfileService {
             },
           })),
         },
-        context: {
-          create: { description: data.context.create.description },
-        },
+        context: data.context,
 
         ...(data.role && {
           role: {
@@ -776,11 +928,9 @@ export class JobProfileService {
         type: data.organizations.create.length > 0 ? JobProfileType.MINISTRY : JobProfileType.CORPORATE, // should be MINISTRY if ministries provided, otherwise corporate
         owner: { connect: { id: owner } },
         published_by: publishedBy ? { connect: { id: publishedBy } } : undefined,
-        published_at: !id || (jobProfileState === 'PUBLISHED' && profileIsUsed) ? new Date(Date.now()) : undefined,
+        published_at: publishedAt,
         updated_by: updatedBy ? { connect: { id: updatedBy } } : undefined,
         valid_from: new Date(Date.now()),
-        version: data.version + 1,
-        current_version: true,
         jobFamilies: {
           create: data.jobFamilies.create.map((item) => ({
             jobFamily: {
@@ -860,9 +1010,7 @@ export class JobProfileService {
         },
 
         // Update context
-        context: {
-          update: { description: data.context.create.description },
-        },
+        context: data.context,
 
         // Connect role, role_type, and scope
         ...(data.role && {
@@ -883,7 +1031,7 @@ export class JobProfileService {
         }),
         owner: { connect: { id: owner } },
         published_by: publishedBy ? { connect: { id: publishedBy } } : undefined,
-        published_at: data.published_at,
+        published_at: publishedAt,
         updated_by: updatedBy ? { connect: { id: updatedBy } } : undefined,
         // Update jobFamilies
         jobFamilies: {
@@ -931,16 +1079,6 @@ export class JobProfileService {
       },
     });
 
-    if (profileIsUsed) {
-      //set old version to no longer be current
-      await this.prisma.jobProfile.update({
-        where: { id: id || -1 },
-        data: {
-          valid_to: new Date(Date.now()),
-          current_version: false,
-        },
-      });
-    }
     await this.searchService.updateJobProfileSearchIndex(result.id);
 
     return result;
@@ -961,33 +1099,16 @@ export class JobProfileService {
     return jobProfileCounts.size;
   }
 
-  @Cron('*/10 * * * * *')
-  async updateJobProfileViewCount() {
-    const jobProfileCounts: Map<number, number> = await this.cacheManager.get('jobProfileCounts');
-
-    if (!jobProfileCounts) {
-      return 0; // Handle case where there are no job profile counts
-    }
-
-    const updates = Array.from(jobProfileCounts.entries()).map(([id, count]) =>
-      this.prisma.jobProfile.update({
-        where: { id: id || -1 },
-        data: {
-          views: { increment: count },
-        },
-      }),
-    );
-
-    await this.cacheManager.del('jobProfileCounts');
-
-    return (await this.prisma.$transaction(updates)).length;
-  }
-
-  async updateJobProfileState(jobProfileId: number, jobProfileState: string, userId: string) {
+  async updateJobProfileState(
+    jobProfileId: number,
+    jobProfileVersion: number,
+    jobProfileState: string,
+    userId: string,
+  ) {
     const updatedBy = jobProfileState === 'DRAFT' ? userId : null;
     const publishedBy = jobProfileState === 'PUBLISHED' ? userId : null;
     await this.prisma.jobProfile.update({
-      where: { id: jobProfileId || -1 },
+      where: { id_version: { id: jobProfileId || -1, version: jobProfileVersion || -1 } },
       data: {
         state: jobProfileState as JobProfileState,
         published_by: publishedBy ? { connect: { id: publishedBy } } : undefined,
@@ -997,9 +1118,14 @@ export class JobProfileService {
     return true;
   }
 
-  async duplicateJobProfile(jobProfileId: number, userId: string): Promise<number> {
+  async duplicateJobProfile(jobProfileId: number, jobProfileVersion: number, userId: string): Promise<number> {
+    const maxId = await this.prisma.jobProfile.aggregate({
+      _max: {
+        id: true,
+      },
+    });
     const jobProfileToDuplicate = await this.prisma.jobProfile.findUnique({
-      where: { id: jobProfileId },
+      where: { id_version: { id: jobProfileId, version: jobProfileVersion } },
       include: {
         behavioural_competencies: {
           include: {
@@ -1033,7 +1159,7 @@ export class JobProfileService {
             stream: true,
           },
         },
-        context: true,
+
         reports_to: {
           include: {
             classification: true,
@@ -1049,6 +1175,8 @@ export class JobProfileService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {
       id,
+      version,
+      is_archived,
       role_id,
       role_type_id,
       scopes,
@@ -1062,6 +1190,9 @@ export class JobProfileService {
     // Modify fields that should be unique for the new record
     // Create a new JobProfileCreateInput object
     const newJobProfileData: JobProfileCreateInput = {
+      id: maxId._max.id + 1,
+      version: 1,
+      is_archived: false,
       // Spread the original job profile data
       ...jobProfileDataWithoutId,
       title: title + ' (Copy)',
@@ -1135,7 +1266,7 @@ export class JobProfileService {
           },
         })),
       },
-      context: { create: { description: jobProfileToDuplicate.context.description } },
+      context: jobProfileToDuplicate.context,
     };
 
     const newJobProfile = await this.prisma.jobProfile.create({
@@ -1146,20 +1277,28 @@ export class JobProfileService {
   }
 
   async unarchiveJobProfile(jobProfileId: number, userId: string): Promise<number> {
-    const jobProfile = await this.prisma.jobProfile.findUnique({
+    const jobProfiles = await this.prisma.jobProfile.findMany({
       where: { id: jobProfileId },
+      include: {
+        position_request: true,
+      },
     });
 
-    if (!jobProfile) {
+    if (!jobProfiles) {
+      throw AlexandriaError('Job Profile not found');
+    }
+    const currentJobProfile = jobProfiles.sort((a, b) => b.version - a.version)[0];
+
+    if (!currentJobProfile) {
       throw AlexandriaError('Job Profile not found');
     }
 
-    if (!jobProfile.is_archived) {
+    if (!currentJobProfile.is_archived) {
       throw AlexandriaError('Job Profile is not archived');
     }
 
     await this.prisma.jobProfile.update({
-      where: { id: jobProfileId },
+      where: { id_version: { id: jobProfileId, version: currentJobProfile.version } },
       data: {
         is_archived: false,
       },
@@ -1169,68 +1308,66 @@ export class JobProfileService {
   }
 
   async deleteJobProfile(jobProfileId: number, userId: string): Promise<number> {
-    const jobProfile = await this.prisma.jobProfile.findUnique({
+    const jobProfiles = await this.prisma.jobProfile.findMany({
       where: { id: jobProfileId },
       include: {
         position_request: true,
       },
     });
 
-    if (!jobProfile) {
+    if (!jobProfiles) {
       throw AlexandriaError('Job Profile not found');
     }
-
-    if (jobProfile.state !== JobProfileState.DRAFT) {
+    const currentJobProfile = jobProfiles.sort((a, b) => b.version - a.version)[0];
+    if (currentJobProfile.state !== JobProfileState.DRAFT) {
       throw AlexandriaError('Only job profiles in DRAFT state can be deleted');
     }
-
-    if (jobProfile.position_request.length > 0) {
+    const anyPositionRequests = jobProfiles.find((jp) => jp.position_request.length > 0);
+    if (anyPositionRequests) {
       // If the job profile has links to PositionRequests, mark it as archived
       await this.prisma.jobProfile.update({
-        where: { id: jobProfileId },
+        where: { id_version: { id: jobProfileId, version: currentJobProfile.version } },
         data: {
           is_archived: true,
         },
       });
     } else {
-      // If the job profile does not have links to PositionRequests, delete it along with related entities
-      await this.prisma.$transaction([
-        this.prisma.jobProfileBehaviouralCompetency.deleteMany({
-          where: { job_profile_id: jobProfileId },
-        }),
-        this.prisma.jobProfileClassification.deleteMany({
-          where: { job_profile_id: jobProfileId },
-        }),
-        this.prisma.jobProfileOrganization.deleteMany({
-          where: { job_profile_id: jobProfileId },
-        }),
-        this.prisma.jobProfileJobFamilyLink.deleteMany({
-          where: { jobProfileId: jobProfileId },
-        }),
-        this.prisma.jobProfileStreamLink.deleteMany({
-          where: { jobProfileId: jobProfileId },
-        }),
-        this.prisma.jobProfileContext.deleteMany({
-          where: { job_profile_id: jobProfileId },
-        }),
-        this.prisma.jobProfileReportsTo.deleteMany({
-          where: { job_profile_id: jobProfileId },
-        }),
-        this.prisma.jobProfileScopeLink.deleteMany({
-          where: { job_profile_id: jobProfileId },
-        }),
-        this.prisma.jobProfile.delete({
-          where: { id: jobProfileId },
-        }),
-      ]);
+      if (!anyPositionRequests) {
+        // If the job profile does not have links to PositionRequests, delete it along with related entities
+        await this.prisma.$transaction([
+          this.prisma.jobProfileBehaviouralCompetency.deleteMany({
+            where: { job_profile_id: jobProfileId },
+          }),
+          this.prisma.jobProfileClassification.deleteMany({
+            where: { job_profile_id: jobProfileId },
+          }),
+          this.prisma.jobProfileOrganization.deleteMany({
+            where: { job_profile_id: jobProfileId },
+          }),
+          this.prisma.jobProfileJobFamilyLink.deleteMany({
+            where: { jobProfileId: jobProfileId },
+          }),
+          this.prisma.jobProfileStreamLink.deleteMany({
+            where: { jobProfileId: jobProfileId },
+          }),
+          this.prisma.jobProfileReportsTo.deleteMany({
+            where: { job_profile_id: jobProfileId },
+          }),
+          this.prisma.jobProfileScopeLink.deleteMany({
+            where: { job_profile_id: jobProfileId },
+          }),
+          this.prisma.jobProfile.deleteMany({
+            where: { id: jobProfileId },
+          }),
+        ]);
+      }
     }
-
     return jobProfileId;
   }
 
-  async getReportsTo(job_profile_id: number) {
+  async getReportsTo(job_profile_id: number, job_profile_version: number) {
     return this.prisma.jobProfileReportsTo.findMany({
-      where: { job_profile_id },
+      where: { job_profile_id, job_profile_version },
       include: {
         classification: true,
       },
@@ -1306,7 +1443,7 @@ export class JobProfileService {
       // // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"organizations":{"some":{"organization_id":{"in":["BC026","ALL"]}}}}]}
     }
 
-    const jobProfiles = await this.prisma.jobProfile.findMany({
+    const jobProfiles = await this.prisma.currentJobProfile.findMany({
       where: { state: 'PUBLISHED' },
       select: {
         organizations: {
@@ -1332,7 +1469,6 @@ export class JobProfileService {
       where: {
         is_archived: false,
         state: 'DRAFT',
-        current_version: true,
       },
       include: {
         classifications: {
@@ -1358,8 +1494,34 @@ export class JobProfileService {
   }
 
   async getJobProfilesClassifications() {
-    const jobProfiles = await this.prisma.jobProfile.findMany({
-      where: { state: 'PUBLISHED', current_version: true },
+    // Step 1: Get the maximum version for each job profile
+    // const maxVersions = await this.prisma.jobProfile.groupBy({
+    //   by: ['id'],
+    //   _max: {
+    //     version: true,
+    //   },
+    // });
+    // const jobProfiles = await this.prisma.jobProfile.findMany({
+    //   where: {
+    //     state: 'PUBLISHED',
+    //     AND: maxVersions.map((maxVersion) => ({
+    //       id: maxVersion.id,
+    //       version: maxVersion._max.version,
+    //     })),
+    //   },
+    //   include: {
+    //     classifications: {
+    //       include: {
+    //         classification: true,
+    //       },
+    //     },
+    //   },
+    // });
+
+    const jobProfiles = await this.prisma.currentJobProfile.findMany({
+      where: {
+        state: 'PUBLISHED',
+      },
       include: {
         classifications: {
           include: {
@@ -1368,6 +1530,43 @@ export class JobProfileService {
         },
       },
     });
+
+    //doesnt work
+    // const jobProfiles = await this.prisma.jobProfile.groupBy({
+    //   by: ['id'],
+    //   _max: {
+    //     version: true,
+    //   },
+    //   where: {
+    //     state: 'PUBLISHED',
+    //   },
+    //   include: {
+    //     classifications: {
+    //       include: {
+    //         classification: true,
+    //       },
+    //     },
+    //   },
+    // });
+
+    // const jobProfiles2 = await this.prisma.$queryRaw`
+    // SELECT
+    //   jp.id,
+    //   MAX(jp.version) AS max_version,
+    //       c.job_profile_id,
+    //       c.classification_id
+    // FROM
+    //   job_profile jp
+    // LEFT JOIN
+    //   job_profile_classification c ON jp.id = c.job_profile_id
+    // LEFT JOIN
+    //   classification cl ON c.classification_id = cl.id
+    // WHERE
+    //   jp.state = 'PUBLISHED'
+    // GROUP BY
+    //   jp.id,c.job_profile_id,c.classification_id`;
+
+    // console.log(jobProfiles2);
 
     // Flatten the array of organizations and deduplicate
     const allClassifications = jobProfiles.flatMap((profile) => profile.classifications.map((o) => o.classification));
@@ -1409,13 +1608,13 @@ export class JobProfileService {
     ministryIds?: string[],
     jobFamilyWithNoStream?: number[],
     excludeProfileId?: number,
+    excludeProfileVersion?: number,
     classificationPeoplesoftId?: string,
   ) {
     // get job profiles from which to draw the requirements from based on job family and stream
-    let jobProfiles = await this.prisma.jobProfile.findMany({
+    let jobProfiles = await this.prisma.currentJobProfile.findMany({
       where: {
         AND: [
-          { current_version: true },
           { id: { not: excludeProfileId ?? -1 } },
           {
             OR: [
@@ -1699,7 +1898,7 @@ export class JobProfileService {
     let excludedProfile;
     if (excludeProfileId) {
       excludedProfile = await this.prisma.jobProfile.findUnique({
-        where: { id: excludeProfileId },
+        where: { id_version: { id: excludeProfileId, version: excludeProfileVersion } },
         select: {
           professional_registration_requirements: true,
           preferences: true,

@@ -3,6 +3,7 @@
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
+  CopyOutlined,
   DeleteOutlined,
   InfoCircleOutlined,
   LinkOutlined,
@@ -29,6 +30,7 @@ import {
   Select,
   Switch,
   Tabs,
+  TabsProps,
   Tag,
   Tooltip,
   TreeSelect,
@@ -53,7 +55,8 @@ import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import StickyBox from 'react-sticky-box';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import MinistriesSelect from '../../../components/app/common/components/ministries-select.component';
 import '../../../components/app/common/css/custom-form.css';
@@ -74,6 +77,7 @@ import {
   ClassificationModel,
   CreateJobProfileInput,
   GetJobProfileResponse,
+  IdVersion,
   OrganizationConnectInput,
   ProfessionsModel,
   TrackedFieldArrayItem,
@@ -145,6 +149,7 @@ interface TotalCompCreateProfileComponentProps {
   jobProfileData: GetJobProfileResponse | undefined;
   id: string | undefined;
   setId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setVersion: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export function IsNotNull(validationOptions?: ValidationOptions) {
@@ -253,6 +258,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   jobProfileData,
   id,
   setId,
+  setVersion,
 }) => {
   const { id: urlId } = useParams();
   const navigate = useNavigate();
@@ -289,7 +295,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const duplicate = async () => {
     // console.log('duplicate', record);
     if (jobProfileData?.jobProfile.id) {
-      const res = await duplicateJobProfile({ jobProfileId: jobProfileData?.jobProfile.id }).unwrap();
+      const res = await duplicateJobProfile({
+        jobProfileId: jobProfileData?.jobProfile.id,
+        jobProfileVersion: jobProfileData.jobProfile.version,
+      }).unwrap();
       // console.log('res: ', res);
       navigate(`${link}${res.duplicateJobProfile}`);
     }
@@ -390,7 +399,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     if (lazyJobProfile) {
       setProfileJson(lazyJobProfile);
-      triggerGetJobProfileMeta(lazyJobProfile.jobProfile.number);
+      triggerGetJobProfileMeta(lazyJobProfile.jobProfile.id);
     }
   }, [lazyJobProfile, triggerGetJobProfileMeta]);
 
@@ -737,8 +746,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     if (jobProfileData) {
       setProfileJson(jobProfileData);
-      triggerGetJobProfileMeta(jobProfileData.jobProfile.number);
-      triggerGetPositionRequestsCount({ where: { parent_job_profile_id: { equals: jobProfileData.jobProfile.id } } });
+      if (jobProfileData.jobProfile.state == 'PUBLISHED') {
+        triggerGetJobProfileMeta(jobProfileData.jobProfile.id);
+        triggerGetPositionRequestsCount({ where: { parent_job_profile_id: { equals: jobProfileData.jobProfile.id } } });
+      }
       triggerBasicDetailsValidation();
       triggerProfileValidation();
     }
@@ -761,6 +772,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       return;
     }
     if (jobProfileData && positionRequestsCount && jobProfileMeta) {
+      const currentVersion =
+        jobProfileData?.jobProfile.version ==
+        jobProfileMeta.jobProfileMeta.versions.map((v) => v.version).sort((a, b: number) => b - a)[0];
+      setIsCurrentVersion(currentVersion);
       setTotalInReview(positionRequestsCount.positionRequestsCount.verification);
       setTotalCompleted(positionRequestsCount.positionRequestsCount.completed);
       triggerGetPositionRequestsCount({
@@ -905,7 +920,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
-      setIsCurrentVersion(jobProfileData?.jobProfile.current_version);
       // console.log('setting values..');
       // Basic Details Form
       setValue('title.text', jobProfileData.jobProfile.title as string);
@@ -938,7 +952,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       if (typeof jobProfileData.jobProfile.context === 'string') {
         setValue('jobContext', jobProfileData.jobProfile.context);
       } else {
-        setValue('jobContext', jobProfileData.jobProfile.context.description);
+        setValue('jobContext', jobProfileData.jobProfile.context);
       }
 
       // Profile Form
@@ -1602,7 +1616,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 organization: { connect: { id: orgId } },
               })),
             },
-        context: { create: { description: formData.jobContext } },
+        context: formData.jobContext,
         ...(formData.jobRole && {
           role: { connect: { id: formData.jobRole } },
         }),
@@ -1649,6 +1663,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               }),
             },
         version: formData.version,
+        id: parseInt(id ?? '0'),
         owner: {
           connect: { id: jobProfileData?.jobProfile.owner.id },
         },
@@ -1658,7 +1673,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         },
         published_at: jobProfileData?.jobProfile.published_at,
       },
-      id: parseInt(id ?? ''),
     };
   }
 
@@ -1732,6 +1746,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       ...profileDetails,
       // Set the state based on whether the job profile is being published
       state: newState,
+      is_archived: isPublishing ? false : isUnpublishing ? true : undefined,
       version: jobProfileData?.jobProfile.version,
     };
 
@@ -2720,24 +2735,18 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         }
                         labelCol={{ className: 'card-label' }}
                       >
-                        {isCurrentVersion ? (
-                          <Controller
-                            name="classificationReviewRequired"
-                            control={control}
-                            render={({ field: { onChange, value, ref } }) => (
-                              <>
-                                <Switch checked={value} onChange={onChange} ref={ref} />
-                                <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
-                                  Verification or Classification Review required
-                                </span>
-                              </>
-                            )}
-                          />
-                        ) : jobProfileData?.jobProfile.review_required ? (
-                          'Review Required'
-                        ) : (
-                          'No Review Required'
-                        )}
+                        <Controller
+                          name="classificationReviewRequired"
+                          control={control}
+                          render={({ field: { onChange, value, ref } }) => (
+                            <>
+                              <Switch checked={value} onChange={onChange} ref={ref} disabled={!isCurrentVersion} />
+                              <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
+                                Verification or Classification Review required
+                              </span>
+                            </>
+                          )}
+                        />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -2774,7 +2783,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               __html: DOMPurify.sanitize(
                                 typeof jobProfileData?.jobProfile?.context === 'string'
                                   ? jobProfileData?.jobProfile.context
-                                  : jobProfileData?.jobProfile.context.description ?? '',
+                                  : jobProfileData?.jobProfile.context ?? '',
                               ),
                             }}
                           ></span>
@@ -2887,10 +2896,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Row>
                         }
                       >
-                        {accountabilitiesFields.map((field, index) =>
-                          isCurrentVersion ? (
-                            <Row align="top" key={field.id} gutter={16}>
-                              {/* up/down controls */}
+                        {accountabilitiesFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16}>
+                            {/* up/down controls */}
+                            {isCurrentVersion && (
                               <Col flex="none" className="reorder-controls">
                                 <ReorderButtons
                                   index={index}
@@ -2899,60 +2908,63 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   lowerDisabled={index === accountabilitiesFields.length - 1}
                                 />
                               </Col>
-                              <Col flex="auto">
-                                <Row>
-                                  {/* Non-editable checkbox */}
-                                  <div style={{ marginBottom: '5px' }}>
-                                    <Controller
-                                      name={`accountabilities.${index}.nonEditable`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => {
-                                        return (
-                                          <Checkbox
-                                            onChange={(args) => {
-                                              // set this item as significant as well
-                                              // console.log('non-editable toggle: ', args);
-                                              if (args.target.checked) {
-                                                profileSetValue(`accountabilities.${index}.is_significant`, true);
-                                              }
-                                              if (!args.target.checked) {
-                                                // console.log('setting markAllNonEditable to false');
-                                                profileSetValue('markAllNonEditable', false);
-                                              }
-                                              onChange(args);
-                                              triggerProfileValidation();
-                                            }}
-                                            checked={value}
-                                          >
-                                            Non-editable
-                                          </Checkbox>
-                                        );
-                                      }}
-                                    />
-                                    <Controller
-                                      name={`accountabilities.${index}.is_significant`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => {
-                                        return (
-                                          <Checkbox
-                                            onChange={(args) => {
-                                              if (!args.target.checked) {
-                                                profileSetValue('markAllSignificant', false);
-                                              }
-                                              onChange(args);
-                                              triggerProfileValidation();
-                                            }} // send value to hook form
-                                            // disable if this item is non-editable
-                                            disabled={accountabilities?.[index].nonEditable}
-                                            checked={value || accountabilities?.[index].nonEditable}
-                                          >
-                                            Significant
-                                          </Checkbox>
-                                        );
-                                      }}
-                                    />
-                                  </div>
-                                </Row>
+                            )}
+                            <Col flex="auto">
+                              <Row>
+                                {/* Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`accountabilities.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => {
+                                      return (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            // set this item as significant as well
+                                            // console.log('non-editable toggle: ', args);
+                                            if (args.target.checked) {
+                                              profileSetValue(`accountabilities.${index}.is_significant`, true);
+                                            }
+                                            if (!args.target.checked) {
+                                              // console.log('setting markAllNonEditable to false');
+                                              profileSetValue('markAllNonEditable', false);
+                                            }
+                                            onChange(args);
+                                            triggerProfileValidation();
+                                          }}
+                                          checked={value}
+                                          disabled={!isCurrentVersion}
+                                        >
+                                          Non-editable
+                                        </Checkbox>
+                                      );
+                                    }}
+                                  />
+                                  <Controller
+                                    name={`accountabilities.${index}.is_significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => {
+                                      return (
+                                        <Checkbox
+                                          onChange={(args) => {
+                                            if (!args.target.checked) {
+                                              profileSetValue('markAllSignificant', false);
+                                            }
+                                            onChange(args);
+                                            triggerProfileValidation();
+                                          }} // send value to hook form
+                                          // disable if this item is non-editable
+                                          disabled={accountabilities?.[index].nonEditable || !isCurrentVersion}
+                                          checked={value || accountabilities?.[index].nonEditable}
+                                        >
+                                          Significant
+                                        </Checkbox>
+                                      );
+                                    }}
+                                  />
+                                </div>
+                              </Row>
+                              {isCurrentVersion ? (
                                 <Row gutter={10}>
                                   <Col flex="auto">
                                     <Form.Item>
@@ -2985,16 +2997,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     />
                                   </Col>
                                 </Row>
-                              </Col>
-                            </Row>
-                          ) : (
-                            <Row gutter={10}>
-                              <Card style={{ width: '100%', margin: '5px' }}>
-                                <Typography>{accountabilities?.[index].text?.toString()}</Typography>
-                              </Card>
-                            </Row>
-                          ),
-                        )}
+                              ) : (
+                                <Row gutter={10}>
+                                  <Typography.Text style={{ marginBottom: '20px', display: 'block' }}>
+                                    {accountabilities?.[index].text?.toString()}
+                                  </Typography.Text>
+                                </Row>
+                              )}
+                            </Col>
+                          </Row>
+                        ))}
                         {isCurrentVersion ? (
                           <Form.Item>
                             <WizardValidationError formErrors={profileFormErrors} fieldName="accountabilities" />
@@ -3109,10 +3121,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Row>
                         }
                       >
-                        {educationAndWorkExperienceFields.map((field, index) =>
-                          isCurrentVersion ? (
-                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                              {/* up/down controls */}
+                        {educationAndWorkExperienceFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                            {/* up/down controls */}
+                            {isCurrentVersion && (
                               <Col flex="none" className="reorder-controls">
                                 <ReorderButtons
                                   index={index}
@@ -3121,51 +3133,54 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   lowerDisabled={index === educationAndWorkExperienceFields.length - 1}
                                 />
                               </Col>
-                              <Col flex="auto">
-                                <Row>
-                                  {/* Non-editable checkbox */}
-                                  <div style={{ marginBottom: '5px' }}>
-                                    <Controller
-                                      name={`education.${index}.nonEditable`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            // set this item as significant as well
-                                            if (args.target.checked) {
-                                              profileSetValue(`education.${index}.is_significant`, true);
-                                            }
-                                            if (!args.target.checked) {
-                                              profileSetValue('markAllNonEditableEdu', false);
-                                            }
-                                            onChange(args);
-                                          }}
-                                          checked={value}
-                                        >
-                                          Non-editable
-                                        </Checkbox>
-                                      )}
-                                    />
-                                    <Controller
-                                      name={`education.${index}.is_significant`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            if (!args.target.checked) {
-                                              profileSetValue('markAllSignificantEdu', false);
-                                            }
-                                            onChange(args);
-                                          }}
-                                          disabled={educations?.[index].nonEditable}
-                                          checked={value || educations?.[index].nonEditable}
-                                        >
-                                          Significant
-                                        </Checkbox>
-                                      )}
-                                    />
-                                  </div>
-                                </Row>
+                            )}
+                            <Col flex="auto">
+                              <Row>
+                                {/* Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`education.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(`education.${index}.is_significant`, true);
+                                          }
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableEdu', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
+                                  <Controller
+                                    name={`education.${index}.is_significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantEdu', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={educations?.[index].nonEditable || !isCurrentVersion}
+                                        checked={value || educations?.[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                              </Row>
+                              {isCurrentVersion ? (
                                 <Row gutter={10}>
                                   <Col flex="auto">
                                     {field.tc_is_readonly &&
@@ -3228,16 +3243,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     />
                                   </Col>
                                 </Row>
-                              </Col>
-                            </Row>
-                          ) : (
-                            <Row gutter={10}>
-                              <Card style={{ width: '100%', margin: '5px' }}>
-                                <Typography>{educationAndWorkExperienceFields?.[index].text?.toString()}</Typography>
-                              </Card>
-                            </Row>
-                          ),
-                        )}
+                              ) : (
+                                <Row gutter={10}>
+                                  <Typography.Text style={{ marginBottom: '20px', display: 'block' }}>
+                                    {educationAndWorkExperienceFields?.[index].text?.toString()}
+                                  </Typography.Text>
+                                </Row>
+                              )}
+                            </Col>
+                          </Row>
+                        ))}
+
                         {isCurrentVersion ? (
                           <>
                             <WizardValidationError formErrors={profileFormErrors} fieldName="education" />
@@ -3320,7 +3336,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           <Checkbox
                                             {...field}
                                             checked={markAllNonEditableJob_experience}
-                                            disabled={job_experienceFields.length === 0}
+                                            disabled={job_experienceFields.length === 0 || !isCurrentVersion}
                                             onChange={(e) => {
                                               field.onChange(e.target.checked);
                                               updateNonEditableJob_experience(e.target.checked);
@@ -3349,7 +3365,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                               updateSignificantJob_experience(e.target.checked);
                                             }}
                                             disabled={
-                                              markAllNonEditableJob_experience || job_experienceFields.length === 0
+                                              markAllNonEditableJob_experience ||
+                                              job_experienceFields.length === 0 ||
+                                              !isCurrentVersion
                                             }
                                           >
                                             Mark all as significant
@@ -3369,10 +3387,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Row>
                         }
                       >
-                        {job_experienceFields.map((field, index) =>
-                          isCurrentVersion ? (
-                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                              {/* up/down controls */}
+                        {job_experienceFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                            {/* up/down controls */}
+                            {isCurrentVersion && (
                               <Col flex="none" className="reorder-controls">
                                 <ReorderButtons
                                   index={index}
@@ -3381,51 +3399,54 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   lowerDisabled={index === job_experienceFields.length - 1}
                                 />
                               </Col>
-                              <Col flex="auto">
-                                <Row>
-                                  {/* Non-editable checkbox */}
-                                  <div style={{ marginBottom: '5px' }}>
-                                    <Controller
-                                      name={`job_experience.${index}.nonEditable`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            // set this item as significant as well
-                                            if (args.target.checked) {
-                                              profileSetValue(`job_experience.${index}.is_significant`, true);
-                                            }
-                                            if (!args.target.checked) {
-                                              profileSetValue('markAllNonEditableJob_experience', false);
-                                            }
-                                            onChange(args);
-                                          }}
-                                          checked={value}
-                                        >
-                                          Non-editable
-                                        </Checkbox>
-                                      )}
-                                    />
-                                    <Controller
-                                      name={`job_experience.${index}.is_significant`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            if (!args.target.checked) {
-                                              profileSetValue('markAllSignificantJob_experience', false);
-                                            }
-                                            onChange(args);
-                                          }}
-                                          disabled={job_experiences?.[index].nonEditable}
-                                          checked={value || job_experiences?.[index].nonEditable}
-                                        >
-                                          Significant
-                                        </Checkbox>
-                                      )}
-                                    />
-                                  </div>
-                                </Row>
+                            )}
+                            <Col flex="auto">
+                              <Row>
+                                {/* Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`job_experience.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(`job_experience.${index}.is_significant`, true);
+                                          }
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableJob_experience', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
+                                  <Controller
+                                    name={`job_experience.${index}.is_significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantJob_experience', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={job_experiences?.[index].nonEditable || !isCurrentVersion}
+                                        checked={value || job_experiences?.[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                              </Row>
+                              {isCurrentVersion ? (
                                 <Row gutter={10}>
                                   <Col flex="auto">
                                     <Form.Item>
@@ -3458,16 +3479,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     />
                                   </Col>
                                 </Row>
-                              </Col>
-                            </Row>
-                          ) : (
-                            <Row gutter={10}>
-                              <Card style={{ width: '100%', margin: '5px' }}>
-                                <Typography>{job_experiences?.[index].text?.toString()}</Typography>
-                              </Card>
-                            </Row>
-                          ),
-                        )}
+                              ) : (
+                                <Row gutter={10}>
+                                  <Typography.Text style={{ marginBottom: '20px', display: 'block' }}>
+                                    {job_experiences?.[index].text?.toString()}
+                                  </Typography.Text>
+                                </Row>
+                              )}
+                            </Col>
+                          </Row>
+                        ))}
                         {isCurrentVersion ? (
                           <>
                             <WizardValidationError formErrors={profileFormErrors} fieldName="job_experience" />
@@ -3519,7 +3540,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           <Checkbox
                                             {...field}
                                             checked={markAllNonEditableProReg}
-                                            disabled={professionalRegistrationRequirementsFields.length === 0}
+                                            disabled={
+                                              professionalRegistrationRequirementsFields.length === 0 ||
+                                              !isCurrentVersion
+                                            }
                                             onChange={(e) => {
                                               field.onChange(e.target.checked);
                                               updateNonEditableProReg(e.target.checked);
@@ -3547,7 +3571,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             }}
                                             disabled={
                                               markAllNonEditableProReg ||
-                                              professionalRegistrationRequirementsFields.length === 0
+                                              professionalRegistrationRequirementsFields.length === 0 ||
+                                              !isCurrentVersion
                                             }
                                           >
                                             Mark all as significant
@@ -3569,10 +3594,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Row>
                         }
                       >
-                        {professionalRegistrationRequirementsFields.map((field, index) =>
-                          isCurrentVersion ? (
-                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                              {/* up/down controls */}
+                        {professionalRegistrationRequirementsFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                            {/* up/down controls */}
+                            {isCurrentVersion && (
                               <Col flex="none" className="reorder-controls">
                                 <ReorderButtons
                                   index={index}
@@ -3581,55 +3606,58 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   lowerDisabled={index === professionalRegistrationRequirementsFields.length - 1}
                                 />
                               </Col>
-                              <Col flex="auto">
-                                <Row>
-                                  {/* NEW Non-editable checkbox */}
-                                  <div style={{ marginBottom: '5px' }}>
-                                    <Controller
-                                      name={`professional_registration_requirements.${index}.nonEditable`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            // set this item as significant as well
-                                            if (args.target.checked) {
-                                              profileSetValue(
-                                                `professional_registration_requirements.${index}.is_significant`,
-                                                true,
-                                              );
-                                            }
-                                            if (!args.target.checked) {
-                                              profileSetValue('markAllNonEditableProReg', false);
-                                            }
-                                            onChange(args);
-                                          }}
-                                          checked={value}
-                                        >
-                                          Non-editable
-                                        </Checkbox>
-                                      )}
-                                    />
-                                    <Controller
-                                      name={`professional_registration_requirements.${index}.is_significant`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            if (!args.target.checked) {
-                                              profileSetValue('markAllSignificantProReg', false);
-                                            }
-                                            onChange(args);
-                                          }}
-                                          disabled={professionalRegistrations?.[index].nonEditable}
-                                          checked={value || professionalRegistrations?.[index].nonEditable}
-                                        >
-                                          Significant
-                                        </Checkbox>
-                                      )}
-                                    />
-                                  </div>
-                                  {/* END NEW Non-editable checkbox */}
-                                </Row>
+                            )}
+                            <Col flex="auto">
+                              <Row>
+                                {/* NEW Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`professional_registration_requirements.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(
+                                              `professional_registration_requirements.${index}.is_significant`,
+                                              true,
+                                            );
+                                          }
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableProReg', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
+                                  <Controller
+                                    name={`professional_registration_requirements.${index}.is_significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantProReg', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={professionalRegistrations?.[index].nonEditable || !isCurrentVersion}
+                                        checked={value || professionalRegistrations?.[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                                {/* END NEW Non-editable checkbox */}
+                              </Row>
+                              {isCurrentVersion ? (
                                 <Row gutter={10}>
                                   <Col flex="auto">
                                     {/* Needs to be tc_is_readonly AND exist in the picklist to appear as read only */}
@@ -3695,18 +3723,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     />
                                   </Col>
                                 </Row>
-                              </Col>
-                            </Row>
-                          ) : (
-                            <Row gutter={10}>
-                              <Card style={{ width: '100%', margin: '5px' }}>
-                                <Typography>
-                                  {professionalRegistrationRequirementsFields?.[index].text?.toString()}
-                                </Typography>
-                              </Card>
-                            </Row>
-                          ),
-                        )}
+                              ) : (
+                                <Row gutter={10}>
+                                  <Typography.Text style={{ marginBottom: '20px', display: 'block' }}>
+                                    {professionalRegistrationRequirementsFields?.[index].text?.toString()}
+                                  </Typography.Text>
+                                </Row>
+                              )}
+                            </Col>
+                          </Row>
+                        ))}
                         {isCurrentVersion ? (
                           <>
                             <WizardValidationError
@@ -3832,9 +3858,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ) : (
                             <Row gutter={10}>
-                              <Card style={{ width: '100%', margin: '5px' }}>
-                                <Typography>{preferencesFields?.[index].text?.toString()}</Typography>
-                              </Card>
+                              <Typography.Text style={{ marginBottom: '20px', display: 'block' }}>
+                                {preferencesFields?.[index].text?.toString()}
+                              </Typography.Text>
                             </Row>
                           ),
                         )}
@@ -3957,9 +3983,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ) : (
                             <Row gutter={10}>
-                              <Card style={{ width: '100%', margin: '5px' }}>
-                                <Typography>{knowledgeSkillsAbilitiesFields?.[index].text?.toString()}</Typography>
-                              </Card>
+                              <Typography.Text style={{ marginBottom: '20px', display: 'block' }}>
+                                {knowledgeSkillsAbilitiesFields?.[index].text?.toString()}
+                              </Typography.Text>
                             </Row>
                           ),
                         )}
@@ -4078,9 +4104,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ) : (
                             <Row gutter={10}>
-                              <Card style={{ width: '100%', margin: '5px' }}>
-                                <Typography>{willingnessStatementsFields?.[index].text?.toString()}</Typography>
-                              </Card>
+                              <Typography.Text style={{ marginBottom: '20px', display: 'block' }}>
+                                {willingnessStatementsFields?.[index].text?.toString()}
+                              </Typography.Text>
                             </Row>
                           ),
                         )}
@@ -4165,7 +4191,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                               field.onChange(e.target.checked);
                                               updateSignificantSecurityScreenings(e.target.checked);
                                             }}
-                                            disabled={markAllNonEditableSec || securityScreeningsFields.length === 0}
+                                            disabled={
+                                              markAllNonEditableSec ||
+                                              securityScreeningsFields.length === 0 ||
+                                              !isCurrentVersion
+                                            }
                                           >
                                             Mark all as significant
                                             <Tooltip title="Points marked as significant will be highlighted to the hiring manager and say that any changes will require verification.">
@@ -4184,10 +4214,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Row>
                         }
                       >
-                        {securityScreeningsFields.map((field, index) =>
-                          isCurrentVersion ? (
-                            <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
-                              {/* up/down controls */}
+                        {securityScreeningsFields.map((field, index) => (
+                          <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                            {/* up/down controls */}
+                            {isCurrentVersion && (
                               <Col flex="none" className="reorder-controls">
                                 <ReorderButtons
                                   index={index}
@@ -4196,52 +4226,55 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   lowerDisabled={index === securityScreeningsFields.length - 1}
                                 />
                               </Col>
-                              <Col flex="auto">
-                                <Row>
-                                  {/* Non-editable checkbox */}
-                                  <div style={{ marginBottom: '5px' }}>
-                                    <Controller
-                                      name={`security_screenings.${index}.nonEditable`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            // set this item as significant as well
-                                            if (args.target.checked) {
-                                              profileSetValue(`security_screenings.${index}.is_significant`, true);
-                                            }
-                                            if (!args.target.checked) {
-                                              profileSetValue('markAllNonEditableSec', false);
-                                            }
-                                            onChange(args);
-                                          }}
-                                          checked={value}
-                                        >
-                                          Non-editable
-                                        </Checkbox>
-                                      )}
-                                    />
+                            )}
+                            <Col flex="auto">
+                              <Row>
+                                {/* Non-editable checkbox */}
+                                <div style={{ marginBottom: '5px' }}>
+                                  <Controller
+                                    name={`security_screenings.${index}.nonEditable`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          // set this item as significant as well
+                                          if (args.target.checked) {
+                                            profileSetValue(`security_screenings.${index}.is_significant`, true);
+                                          }
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllNonEditableSec', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        checked={value}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Non-editable
+                                      </Checkbox>
+                                    )}
+                                  />
 
-                                    <Controller
-                                      name={`security_screenings.${index}.is_significant`}
-                                      control={profileControl}
-                                      render={({ field: { onChange, value } }) => (
-                                        <Checkbox
-                                          onChange={(args) => {
-                                            if (!args.target.checked) {
-                                              profileSetValue('markAllSignificantSecurityScreenings', false);
-                                            }
-                                            onChange(args);
-                                          }}
-                                          disabled={securityScreenings?.[index].nonEditable}
-                                          checked={value || securityScreenings?.[index].nonEditable}
-                                        >
-                                          Significant
-                                        </Checkbox>
-                                      )}
-                                    />
-                                  </div>
-                                </Row>
+                                  <Controller
+                                    name={`security_screenings.${index}.is_significant`}
+                                    control={profileControl}
+                                    render={({ field: { onChange, value } }) => (
+                                      <Checkbox
+                                        onChange={(args) => {
+                                          if (!args.target.checked) {
+                                            profileSetValue('markAllSignificantSecurityScreenings', false);
+                                          }
+                                          onChange(args);
+                                        }}
+                                        disabled={securityScreenings?.[index].nonEditable || !isCurrentVersion}
+                                        checked={value || securityScreenings?.[index].nonEditable}
+                                      >
+                                        Significant
+                                      </Checkbox>
+                                    )}
+                                  />
+                                </div>
+                              </Row>
+                              {isCurrentVersion ? (
                                 <Row gutter={10}>
                                   <Col flex="auto">
                                     {field.tc_is_readonly &&
@@ -4304,16 +4337,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   /> */}
                                   </Col>
                                 </Row>
-                              </Col>
-                            </Row>
-                          ) : (
-                            <Row gutter={10}>
-                              <Card style={{ width: '100%', margin: '5px' }}>
-                                <Typography>{securityScreeningsFields?.[index].text?.toString()}</Typography>
-                              </Card>
-                            </Row>
-                          ),
-                        )}
+                              ) : (
+                                <Row gutter={10}>
+                                  <Typography.Text style={{ marginBottom: '20px', display: 'block' }}>
+                                    {securityScreeningsFields?.[index].text?.toString()}
+                                  </Typography.Text>
+                                </Row>
+                              )}
+                            </Col>
+                          </Row>
+                        ))}
                         {isCurrentVersion ? (
                           <>
                             <WizardValidationError formErrors={profileFormErrors} fieldName="security_screenings" />
@@ -4414,9 +4447,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             </Row>
                           ) : (
                             <Row gutter={10}>
-                              <Card style={{ width: '100%', margin: '5px' }}>
-                                <Typography>{optionalRequirementsFields?.[index].text?.toString()}</Typography>
-                              </Card>
+                              <Typography.Text style={{ marginBottom: '20px', display: 'block' }}>
+                                {optionalRequirementsFields?.[index].text?.toString()}
+                              </Typography.Text>
                             </Row>
                           ),
                         )}
@@ -4504,6 +4537,25 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 </Card>
               )}
 
+              {state == 'PUBLISHED' && !isCurrentVersion && jobProfileMeta?.jobProfileMeta.versions && (
+                <Card title="Ppublish">
+                  <Typography.Title level={5}>Publish</Typography.Title>
+                  <Typography.Text>
+                    This will replace the existing published version in the job store. If published, it will be Version{' '}
+                    {Number(
+                      jobProfileMeta?.jobProfileMeta.versions
+                        .map((version) => version.version)
+                        .sort((a, b) => b - a)[0],
+                    ) + 1}
+                    .
+                  </Typography.Text>
+                  <br></br>
+                  <Button type="primary" style={{ marginTop: 10 }} onClick={showPublishConfirm}>
+                    Publish as latest version (need to do functionality)
+                  </Button>
+                </Card>
+              )}
+
               {/* Other Actions Card */}
               <Card style={{ marginTop: 24 }} title="Other Actions">
                 {state != 'PUBLISHED' && (
@@ -4551,17 +4603,20 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   </>
                 )}
 
-                {isCurrentVersion && (
+                {!isCurrentVersion && (
                   <>
-                    <Typography.Title level={5}>Allow others to edit</Typography.Title>
-                    <Typography.Paragraph>
-                      Share the URL with people who you would like to collaborate with (IDIR restricted).
-                    </Typography.Paragraph>
-                    <Typography.Text copyable>
-                      http://pjs-dev.apps.silver.devops.gov.bc.ca/wizard/edit/1
-                    </Typography.Text>
-
-                    <Divider></Divider>
+                    <div>
+                      <Typography.Title level={5}>Copy Link</Typography.Title>
+                      <p>
+                        Share the URL with people who you would like to view this version of the job profile (IDIR
+                        restricted).
+                      </p>
+                      <Text>{`${window.location.origin}/published-job-profiles/${profileJson?.jobProfile.id}?version=${profileJson?.jobProfile.version}`}</Text>
+                      <Button icon={<CopyOutlined />} onClick={handleCopyLink}>
+                        Copy URL
+                      </Button>
+                      <Divider></Divider>
+                    </div>
                   </>
                 )}
 
@@ -4592,7 +4647,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         </>
       ),
     },
-    {
+    jobProfileMeta && {
       key: '5',
       label: 'Info',
       children: (
@@ -4939,6 +4994,25 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   )
     return <LoadingSpinnerWithMessage />;
 
+  const renderTabBar: TabsProps['renderTabBar'] = (props, DefaultTabBar) => (
+    <StickyBox style={{ zIndex: 1 }}>
+      <DefaultTabBar {...props} />
+      {jobProfileMeta && !isCurrentVersion && (
+        <Alert
+          banner
+          message={
+            <>
+              You are viewing an older version of this job profile. To go to the latest version, click the link:{' '}
+              <Link to={link + [...jobProfileMeta.jobProfileMeta.versions].sort((a, b) => b.version - a.version)[0].id}>
+                Version 123
+              </Link>
+            </>
+          }
+          style={{ marginLeft: '-1rem', marginRight: '-1rem' }}
+        ></Alert>
+      )}
+    </StickyBox>
+  );
   return (
     <>
       <PageHeader
@@ -4957,9 +5031,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           await save();
         }}
         versions={jobProfileMeta?.jobProfileMeta}
-        selectVersionCallback={(selectedId: string) => {
-          setId(selectedId);
-          navigate('/published-job-profiles/' + selectedId);
+        selectVersionCallback={(selectedVersion: IdVersion) => {
+          setId(selectedVersion.id.toString());
+          setVersion(selectedVersion.version.toString());
+          navigate('/published-job-profiles/' + selectedVersion.id + '?version=' + selectedVersion.version);
         }}
       />
 
@@ -4968,6 +5043,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           defaultActiveKey="1"
           items={tabItems}
           tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
+          renderTabBar={renderTabBar}
         />
       </ContentWrapper>
     </>

@@ -3,8 +3,8 @@ import { DownOutlined, EllipsisOutlined, TagOutlined } from '@ant-design/icons';
 import { PageHeader as AntdProPageHeader, PageHeaderProps } from '@ant-design/pro-layout';
 import { Button, Popover, Select } from 'antd';
 import { ReactNode, useEffect, useState } from 'react';
-import { Link, useLocation, useMatches, useParams } from 'react-router-dom';
-import { JobProfileMetaModel } from '../../redux/services/graphql-api/job-profile-types';
+import { Link, useLocation, useMatches, useParams, useSearchParams } from 'react-router-dom';
+import { IdVersion, JobProfileMetaModel } from '../../redux/services/graphql-api/job-profile-types';
 import './page-header.component.css';
 
 // Define the type for your breadcrumb item
@@ -23,7 +23,7 @@ interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
   button2Callback?: () => void;
   showButton2?: boolean;
   versions?: JobProfileMetaModel;
-  selectVersionCallback?: (selectedId: string) => void;
+  selectVersionCallback?: (selectedVersion: IdVersion) => void;
   subHeader?: ReactNode;
 }
 
@@ -44,9 +44,11 @@ export const PageHeader = ({
 }: ExtendedPageHeaderProps) => {
   const matches = useMatches();
   const params = useParams<Record<string, string>>();
+  const [searchParams] = useSearchParams();
   const currentPage = useLocation().pathname;
   const segments = currentPage.split('/').filter(Boolean); // Filter out empty segments
   const [isCurrentVersion, setIsCurrentVersion] = useState(true);
+  const [selectedVersion, setSelectedVersion] = useState<IdVersion | undefined>({ id: 0, version: 0 });
 
   const currentVersion =
     versions?.versions?.length ?? 0 > 0
@@ -57,9 +59,19 @@ export const PageHeader = ({
           }, '')
       : undefined;
   useEffect(() => {
-    const selectedVersion = versions?.versions?.find((v: { id: number | undefined }) => v.id == params.id)?.version;
-    setIsCurrentVersion(selectedVersion === currentVersion);
-  }, [currentVersion, params.id, versions?.versions]);
+    if (versions?.versions) {
+      const versionParam = searchParams.get('version');
+      const selectedVersion = versionParam
+        ? versions.versions.find(
+            (v: IdVersion) => v.id == parseInt(params.id ?? '') && v.version == parseInt(versionParam ?? '1'),
+          )
+        : [...versions.versions].sort((a, b) => {
+            return b.version - a.version;
+          })[0];
+      setSelectedVersion(selectedVersion);
+      setIsCurrentVersion(selectedVersion?.version === currentVersion);
+    }
+  }, [currentVersion, params.id, params.version, searchParams, versions?.versions]);
   // Check if it's a level 1 subpage (e.g., 'my-position-requests')
   const hideBreadcrumb = segments.length === 1;
   const breadcrumbs: BreadcrumbItem[] = matches
@@ -145,31 +157,33 @@ export const PageHeader = ({
         },
       };
   const jobProfileVersions: { label: string; value: any; icon: any }[] = versions
-    ? versions?.versions?.map((version: { version: any; id: any }) => ({
+    ? versions?.versions?.map((version: IdVersion) => ({
         label: 'Version ' + version.version,
-        value: version.id,
+        value: version?.id + '-' + version?.version,
         icon: <TagOutlined />,
       }))
     : [];
 
   const onChange = (value: string) => {
-    console.log(`Click on item ${value}`);
-    setIsCurrentVersion(value === currentVersion);
-    value && selectVersionCallback && selectVersionCallback(value);
+    const id_version = value.split('-');
+    setIsCurrentVersion(id_version[1] === currentVersion);
+    value &&
+      selectVersionCallback &&
+      selectVersionCallback({ id: parseInt(id_version[0] ?? ''), version: parseInt(id_version[1] ?? '') });
   };
 
   const showVersions = (versions?.versions?.length ?? 0) > 0;
 
   const renderButtons = () => (
     <div style={{ display: 'flex', gap: '10px' }}>
-      {showVersions && (
+      {showVersions && selectedVersion && (
         <Select
           filterSort={(optionA: { label: any }, optionB: { label: any }) =>
             (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
           }
           options={jobProfileVersions}
           onChange={onChange}
-          value={'Version ' + versions?.versions?.find((v: { id: number | undefined }) => v.id == params.id)?.version}
+          value={selectedVersion?.id + '-' + selectedVersion?.version}
         >
           <Button>
             Select Version

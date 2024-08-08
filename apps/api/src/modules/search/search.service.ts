@@ -294,9 +294,8 @@ export class SearchService {
   }
 
   async updateJobProfileSearchIndex(job_profile_id: number) {
-    const profile = await this.prisma.jobProfile.findUnique({
+    const profile = await this.prisma.currentJobProfile.findUnique({
       where: { id: job_profile_id },
-      include: { context: true },
     });
 
     // If profile doesn't exist, or it is in DRAFT or UNPUBLISHED state, delete it from the search index
@@ -316,7 +315,7 @@ export class SearchService {
       document: {
         title: profile.title,
         number: profile.number,
-        context: profile.context?.description,
+        context: profile.context,
         overview: profile.overview,
         // requirements: profile.requirements,
         education: (profile.education as Prisma.JsonObject[]).map((education) => education.text),
