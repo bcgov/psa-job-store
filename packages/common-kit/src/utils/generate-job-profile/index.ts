@@ -341,7 +341,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                                   smallCaps: true,
                                 }),
                                 new TextRun({
-                                  text: supervisorProfile.employeeName,
+                                  text: supervisorProfile.positionDescription ?? '',
                                   bold: true,
                                   font: 'Calibri',
                                   size: '12pt',

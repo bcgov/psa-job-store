@@ -98,6 +98,8 @@ export const DownloadJobProfileComponent = ({
     }
   }, [positionProfileData, profileIsLoading]);
 
+  // console.log('positionProfileData?.positionProfile: ', positionProfileData?.positionProfile);
+
   useEffect(() => {
     if (doDownload) {
       setDoDownload(false);

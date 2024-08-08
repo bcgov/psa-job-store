@@ -755,7 +755,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                         <Col xs={24} sm={24} md={24} lg={18} xl={12}>
                           <Form.Item
                             name="branch"
-                            label="Branch"
+                            label="Branch (please use full name and avoid acronyms)"
                             validateStatus={errors.branch ? 'error' : ''}
                             help={errors.branch?.message}
                           >
