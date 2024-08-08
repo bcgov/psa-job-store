@@ -35,6 +35,7 @@ ALTER TABLE "job_profile_organization" DROP CONSTRAINT IF EXISTS "job_profile_or
 ALTER TABLE "job_profile_reports_to" DROP CONSTRAINT IF EXISTS "job_profile_reports_to_pkey";
 ALTER TABLE "job_profile_stream_link" DROP CONSTRAINT IF EXISTS "job_profile_stream_link_pkey";
 
+
 -- DropForeignKey
 ALTER TABLE "job_profile_behavioural_competency" DROP CONSTRAINT IF EXISTS "job_profile_behavioural_competency_job_profile_id_fkey";
 
@@ -62,7 +63,9 @@ ALTER TABLE "position_request" DROP CONSTRAINT IF EXISTS "position_request_paren
 -- DropForeignKey
 ALTER TABLE "saved_job_profile" DROP CONSTRAINT IF EXISTS "saved_job_profile_jobProfileId_fkey";
 
-
+ALTER TABLE "job_profile" DROP CONSTRAINT IF EXISTS "job_profile_pkey",
+DROP COLUMN "current_version",
+ALTER COLUMN "id" DROP DEFAULT;
 -- DropIndex
 DROP INDEX IF EXISTS "job_profile_number_version_key";
 
@@ -258,10 +261,8 @@ WHERE jp1."number" = jp_low."number";
 
 
 -- -- Continue with your original migration steps
-ALTER TABLE "job_profile" DROP CONSTRAINT IF EXISTS "job_profile_pkey",
-DROP COLUMN "current_version",
-ALTER COLUMN "id" DROP DEFAULT,
-ADD CONSTRAINT "job_profile_pkey" PRIMARY KEY ("id", "version");
+
+ALTER TABLE "job_profile"  ADD CONSTRAINT "job_profile_pkey" PRIMARY KEY ("id", "version");
 DROP SEQUENCE "job_profile_id_seq";
 
 -- -- Add constraints and primary keys back
