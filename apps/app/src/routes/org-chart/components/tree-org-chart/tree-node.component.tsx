@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CheckCircleFilled, DownOutlined, RightOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Tooltip } from 'antd';
-import React, { useState } from 'react';
-import { useReactFlow } from 'reactflow';
+import React from 'react';
 import { usePosition } from '../../../../components/app/common/contexts/position.context';
 import { Elements } from '../../interfaces/elements.interface';
-import { generatePNGBase64 } from '../org-chart/download-button.component';
 import './tree-node.component.css';
 
 interface TreeNodeProps {
@@ -39,10 +37,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   isSelected,
   onCollapse,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const { createNewPosition } = usePosition();
-  const { getNodes } = useReactFlow();
+  // const { getNodes } = useReactFlow();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -56,18 +54,18 @@ const TreeNode: React.FC<TreeNodeProps> = ({
 
   const handleCreateNewReport = async () => {
     if (data.data.employees[0]?.name) {
-      setIsLoading(true);
+      // setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        const png = await generatePNGBase64(getNodes);
+        // await new Promise((resolve) => setTimeout(resolve, 300));
+        // const png = await generatePNGBase64(getNodes);
         await createNewPosition({
           reportingPositionId: data.id as any,
           selectedDepartment: departmentId,
           orgChartData: elements,
-          svg: png,
+          // svg: png,
         });
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     }
   };
@@ -151,7 +149,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 }}
                 style={{ borderRadius: 0, border: 'none', paddingLeft: '0' }}
                 disabled={!data.data.employees[0]?.name}
-                loading={isLoading}
+                // loading={isLoading}
               >
                 Create new direct report
               </Button>

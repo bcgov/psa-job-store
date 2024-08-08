@@ -47,6 +47,7 @@ export interface GetPositionRequestResponseContent {
   position_number?: number;
   classification?: string;
   classification_code?: string;
+  classification_id?: string;
   submission_id?: string;
   status?: string;
   department_id?: string;
@@ -153,6 +154,7 @@ export interface UpdatePositionRequestInput {
 export interface SubmitPositionRequestInput {
   id: number;
   comment?: string;
+  orgchart_png?: string;
 }
 
 export interface DeletePositionRequestInput {
@@ -234,6 +236,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 approved_at
                 position_number
                 classification_code
+                classification_id
                 submission_id
                 status
                 updated_at
@@ -288,6 +291,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   title
                   position_number
                   classification_code
+                  classification_id
                   submission_id
                   status
                   updated_at
@@ -389,6 +393,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 title
                 position_number
                 classification_code
+                classification_id
                 submission_id
                 status
                 updated_at
@@ -422,8 +427,8 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (input: SubmitPositionRequestInput) => {
         return {
           document: gql`
-            mutation SubmitPositionRequest($id: Int!, $comment: String) {
-              submitPositionRequest(id: $id, comment: $comment) {
+            mutation SubmitPositionRequest($id: Int!, $comment: String, $orgchart_png: String) {
+              submitPositionRequest(id: $id, comment: $comment, orgchart_png: $orgchart_png) {
                 id
                 step
                 max_step_completed
@@ -457,6 +462,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
           variables: {
             id: input.id,
             comment: input.comment,
+            orgchart_png: input.orgchart_png,
           },
         };
       },

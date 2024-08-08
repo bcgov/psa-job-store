@@ -205,7 +205,7 @@ const OrgChartTreeView = ({
           reportingPositionId: element.id as any,
           selectedDepartment: departmentId,
           orgChartData: data,
-          svg: '',
+          // svg: '',
         });
       },
       onCancel() {

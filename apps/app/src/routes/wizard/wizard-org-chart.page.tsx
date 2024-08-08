@@ -14,7 +14,6 @@ import {
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { DepartmentFilter } from '../org-chart/components/department-filter.component';
 import { OrgChart } from '../org-chart/components/org-chart';
-import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
 import { TreeChartSearchProvider } from '../org-chart/components/tree-org-chart/tree-org-chart-search-context';
 import { TreeOrgChartSearch } from '../org-chart/components/tree-org-chart/tree-org-chart-search.component';
 import TreeOrgChart from '../org-chart/components/tree-org-chart/tree-org-chart.component';
@@ -56,7 +55,7 @@ export const WizardOrgChartPage = ({
   }, [location.pathname]);
 
   const [selectedDepartment, setSelectedDepartment] = useState<string | null | undefined>(positionRequestDepartmentId);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [nextButtonTooltipTitle, setNextButtonTooltipTitle] = useState<string>('');
   const [positionVacant, setPositionVacant] = useState<boolean>(false);
@@ -117,13 +116,13 @@ export const WizardOrgChartPage = ({
   const next = async ({ switchStep = true }: { switchStep?: boolean } = {}) => {
     if (selectedDepartment == null || selectedPositionId == null) return;
 
-    setIsLoading(true);
+    // setIsLoading(true);
 
     try {
       // 1-second delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const png = await generatePNGBase64(getNodes);
+      // const png = await generatePNGBase64(getNodes);
 
       // downloadImage('data:image/png;base64,' + png, 'org-chart.png');
 
@@ -135,7 +134,7 @@ export const WizardOrgChartPage = ({
         current_reports_to_position_id: positionRequestData?.reports_to_position_id,
         reSelectSupervisor: reSelectSupervisor,
         changeStep: switchStep,
-        svg: png,
+        // svg: png,
       });
 
       if (result != 'CANCELLED' && switchStep) {
@@ -151,7 +150,7 @@ export const WizardOrgChartPage = ({
       console.error('An error occurred:', error);
       return undefined;
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -209,7 +208,7 @@ export const WizardOrgChartPage = ({
             onClick={() => {
               next();
             }}
-            loading={isLoading}
+            // loading={isLoading}
           >
             Save and next
           </Button>

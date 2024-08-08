@@ -4,7 +4,7 @@ import { Button, Col, FormInstance, List, Menu, Modal, Popover, Row, Typography 
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LoadingComponent from '../../components/app/common/components/loading.component';
-import { ClassificationModel, JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
+import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -41,7 +41,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   const {
     wizardData,
     setWizardData,
-    classificationsData,
+    getClassificationById,
     positionRequestProfileId,
     positionRequestProfileVersion,
     positionRequestId,
@@ -59,17 +59,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   };
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
-
-  function getClassificationById(id: string): ClassificationModel | undefined {
-    // If data is loaded, find the classification by ID
-    // console.log('classificationsData: ', classificationsData, id);
-    if (classificationsData) {
-      return classificationsData.classifications.find(
-        (classification: ClassificationModel) => classification.id === id,
-      );
-    }
-    return;
-  }
 
   function transformFormData(originalData: any): JobProfileModel {
     return {

@@ -627,7 +627,7 @@ export const PositionRequestPage = () => {
       : []),
   ];
 
-  if (classificationsDataLoading) return <LoadingSpinnerWithMessage />;
+  if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
 
   return (
     <>
