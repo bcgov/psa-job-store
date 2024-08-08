@@ -5,11 +5,13 @@ import {
   EllipsisOutlined,
   ExclamationCircleFilled,
   ExclamationCircleOutlined,
+  MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
+import { Divider } from 'antd/lib';
 import { autolayout, updateSupervisorAndAddNewPositionNode } from 'common-kit';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -618,6 +620,31 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         data-testid="submit-for-verification-button"
                       >
                         Submit for verification
+                      </Button>
+                      <Divider />
+                      <h3>Get support</h3>
+                      <Typography.Paragraph>
+                        Get advice from the classification services team before sending the request for verification.
+                        The classification services team will contact you via email after they have reviewed the
+                        request.
+                      </Typography.Paragraph>
+                      <Button
+                        type="dashed"
+                        icon={<MailOutlined />}
+                        onClick={() => {
+                          const subject = encodeURIComponent('Support Request');
+                          const body = encodeURIComponent(
+                            `Hello, \n\n` +
+                              `I need assistance with my position request.\n\n` +
+                              `Please review the details at this link (do not share this link):\n` +
+                              `${window.location.origin}/my-position-requests/share/${positionRequest?.shareUUID}`,
+                          );
+                          window.location.href = `mailto:${
+                            import.meta.env.VITE_SUPPORT_EMAIL
+                          }?subject=${subject}&body=${body}`;
+                        }}
+                      >
+                        Get support
                       </Button>
                     </Card>
                     <Card
