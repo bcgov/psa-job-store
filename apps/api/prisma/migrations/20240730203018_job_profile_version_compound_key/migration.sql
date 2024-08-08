@@ -27,6 +27,14 @@ DROP TABLE "job_profile_context";
 
 --make compound key
 
+-- Drop Primary Keys
+ALTER TABLE "job_profile_behavioural_competency" DROP CONSTRAINT "job_profile_behavioural_competency_pkey";
+ALTER TABLE "job_profile_classification" DROP CONSTRAINT IF EXISTS "job_profile_classification_pkey";
+ALTER TABLE "job_profile_job_family_link" DROP CONSTRAINT IF EXISTS "job_profile_job_family_link_pkey";
+ALTER TABLE "job_profile_organization" DROP CONSTRAINT IF EXISTS "job_profile_organization_pkey";
+ALTER TABLE "job_profile_reports_to" DROP CONSTRAINT IF EXISTS "job_profile_reports_to_pkey";
+ALTER TABLE "job_profile_stream_link" DROP CONSTRAINT IF EXISTS "job_profile_stream_link_pkey";
+
 -- DropForeignKey
 ALTER TABLE "job_profile_behavioural_competency" DROP CONSTRAINT IF EXISTS "job_profile_behavioural_competency_job_profile_id_fkey";
 
@@ -257,24 +265,24 @@ ADD CONSTRAINT "job_profile_pkey" PRIMARY KEY ("id", "version");
 DROP SEQUENCE "job_profile_id_seq";
 
 -- -- Add constraints and primary keys back
-ALTER TABLE "job_profile_behavioural_competency" DROP CONSTRAINT "job_profile_behavioural_competency_pkey",
-ADD CONSTRAINT "job_profile_behavioural_competency_pkey" PRIMARY KEY ("behavioural_competency_id", "job_profile_id", "job_profile_version");
+
+ALTER TABLE "job_profile_behavioural_competency"ADD CONSTRAINT "job_profile_behavioural_competency_pkey" PRIMARY KEY ("behavioural_competency_id", "job_profile_id", "job_profile_version");
 
 
-ALTER TABLE "job_profile_classification" DROP CONSTRAINT IF EXISTS "job_profile_classification_pkey",
-ADD CONSTRAINT "job_profile_classification_pkey" PRIMARY KEY ("job_profile_id", "job_profile_version", "classification_id", "classification_employee_group_id", "classification_peoplesoft_id");
 
-ALTER TABLE "job_profile_job_family_link" DROP CONSTRAINT IF EXISTS "job_profile_job_family_link_pkey",
-ADD CONSTRAINT "job_profile_job_family_link_pkey" PRIMARY KEY ("jobProfileId", "jobProfileVersion", "jobFamilyId");
+ALTER TABLE "job_profile_classification" ADD CONSTRAINT "job_profile_classification_pkey" PRIMARY KEY ("job_profile_id", "job_profile_version", "classification_id", "classification_employee_group_id", "classification_peoplesoft_id");
 
-ALTER TABLE "job_profile_organization" DROP CONSTRAINT IF EXISTS "job_profile_organization_pkey",
-ADD CONSTRAINT "job_profile_organization_pkey" PRIMARY KEY ("organization_id", "job_profile_id", "job_profile_version");
 
-ALTER TABLE "job_profile_reports_to" DROP CONSTRAINT IF EXISTS "job_profile_reports_to_pkey",
-ADD CONSTRAINT "job_profile_reports_to_pkey" PRIMARY KEY ("job_profile_id", "job_profile_version", "classification_id", "classification_employee_group_id", "classification_peoplesoft_id");
+ALTER TABLE "job_profile_job_family_link" ADD CONSTRAINT "job_profile_job_family_link_pkey" PRIMARY KEY ("jobProfileId", "jobProfileVersion", "jobFamilyId");
 
-ALTER TABLE "job_profile_stream_link" DROP CONSTRAINT IF EXISTS "job_profile_stream_link_pkey",
-ADD CONSTRAINT "job_profile_stream_link_pkey" PRIMARY KEY ("jobProfileId", "jobProfileVersion", "streamId");
+
+ALTER TABLE "job_profile_organization" ADD CONSTRAINT "job_profile_organization_pkey" PRIMARY KEY ("organization_id", "job_profile_id", "job_profile_version");
+
+
+ALTER TABLE "job_profile_reports_to" ADD CONSTRAINT "job_profile_reports_to_pkey" PRIMARY KEY ("job_profile_id", "job_profile_version", "classification_id", "classification_employee_group_id", "classification_peoplesoft_id");
+
+
+ALTER TABLE "job_profile_stream_link" ADD CONSTRAINT "job_profile_stream_link_pkey" PRIMARY KEY ("jobProfileId", "jobProfileVersion", "streamId");
 
 -- -- Add foreign key constraints back
 ALTER TABLE "position_request" ADD CONSTRAINT "position_request_parent_job_profile_id_parent_job_profile__fkey" FOREIGN KEY ("parent_job_profile_id", "parent_job_profile_version") REFERENCES "job_profile"("id", "version") ON DELETE SET NULL ON UPDATE CASCADE;
