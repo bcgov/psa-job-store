@@ -612,9 +612,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
-      key: 'Lastupdated',
-      label: <h3 tabIndex={0}>Last updated</h3>,
-      children: <span tabIndex={0}>{`${dayjs(effectiveData?.updated_at).format('MMM D, YYYY')}`}</span>,
+      key: 'profileversion',
+      label: <h3 tabIndex={0}>Profile Version</h3>,
+      children: (
+        <div>
+          <div style={{ paddingBottom: '5px' }}>{effectiveData?.version}</div>
+          <Typography.Text type="secondary">
+            {`Updated ${dayjs(effectiveData?.updated_at).format('MMM D, YYYY')}`}
+          </Typography.Text>
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
 
@@ -1209,11 +1216,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         description={
           <span
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(
-                typeof effectiveData?.context === 'string'
-                  ? effectiveData?.context
-                  : effectiveData?.context.description ?? '',
-              ),
+              __html: DOMPurify.sanitize(effectiveData?.context ?? ''),
             }}
           ></span>
         }

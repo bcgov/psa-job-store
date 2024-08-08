@@ -69,10 +69,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 title
                 number
-                context {
-                  id
-                  description
-                }
+                context
                 overview
                 accountabilities
                 education
@@ -201,10 +198,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 title
                 number
-                context {
-                  id
-                  description
-                }
+                context
                 overview
                 accountabilities
                 education
@@ -317,10 +311,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 title
                 number
-                context {
-                  id
-                  description
-                }
+                context
                 overview
                 accountabilities
                 education
@@ -403,7 +394,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         return {
           document: gql`
             query JobProfileByNumber {
-              jobProfileByNumber(number: "${args.number}" version: ${args.version ?? null}) {
+              jobProfileByNumber(number: "${args.number}") {
                 id
                 updated_at
                 streams {
@@ -415,10 +406,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 title
                 number
-                context {
-                  id,
-                  description
-                }
+                context
                 state
                 security_screenings
                 all_reports_to
@@ -501,8 +489,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       query: (args: GetJobProfileArgs) => {
         return {
           document: gql`
-            query JobProfile {
-              jobProfile(id: "${args.id}") {
+            query JobProfile($id: Float!, $version: Float) {
+              jobProfile(id: $id, version: $version) {
                 id
                 updated_at
                 updated_by {
@@ -521,17 +509,14 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 published_at
                 streams {
                   stream {
-                      id
-                      name
-                      job_family_id
+                    id
+                    name
+                    job_family_id
                   }
                 }
                 title
                 number
-                context {
-                  id,
-                  description
-                }
+                context
                 state
                 security_screenings
                 all_reports_to
@@ -577,8 +562,8 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 }
                 jobFamilies {
                   jobFamily {
-                      id
-                      name
+                    id
+                    name
                   }
                 }
                 role {
@@ -586,7 +571,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   name
                 }
                 organizations {
-                  organization{
+                  organization {
                     id
                     name
                   }
@@ -602,11 +587,14 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 valid_from
                 valid_to
                 version
-                current_version
                 views
               }
             }
           `,
+          variables: {
+            id: args.id,
+            version: args.version,
+          },
         };
       },
     }),
@@ -626,11 +614,11 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       },
     }),
     getJobProfileMeta: build.query<GetJobProfileMetaResponse, number>({
-      query: (number: number) => {
+      query: (id: number) => {
         return {
           document: gql`
             query jobProfileMeta {
-              jobProfileMeta(number: ${number}) {
+              jobProfileMeta(id: ${id}) {
                 totalViews
                 firstPublishedBy {
                   date
@@ -664,12 +652,15 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    duplicateJobProfile: build.mutation<DuplicateJobProfileResponse, { jobProfileId: number }>({
+    duplicateJobProfile: build.mutation<
+      DuplicateJobProfileResponse,
+      { jobProfileId: number; jobProfileVersion: number }
+    >({
       query: (args) => {
         return {
           document: gql`
-            mutation DuplicateJobProfile($jobProfileId: Int!) {
-              duplicateJobProfile(jobProfileId: $jobProfileId)
+            mutation DuplicateJobProfile($jobProfileId: Int!, $jobProfileVersion: Int!) {
+              duplicateJobProfile(jobProfileId: $jobProfileId, jobProfileVersion: $jobProfileVersion)
             }
           `,
           variables: args,
@@ -703,12 +694,15 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       },
     }),
 
-    updateJobProfileState: build.mutation<UpdateJobProfileResponse, { jobProfileId: number; state: string }>({
+    updateJobProfileState: build.mutation<
+      UpdateJobProfileResponse,
+      { jobProfileId: number; jobProfileVersion: number; state: string }
+    >({
       query: (args) => {
         return {
           document: gql`
-            mutation UpdateJobProfileState($jobProfileId: Int!, $state: String!) {
-              updateJobProfileState(jobProfileId: $jobProfileId, state: $state)
+            mutation UpdateJobProfileState($jobProfileId: Int!, $jobProfileVersion: Int!, $state: String!) {
+              updateJobProfileState(jobProfileId: $jobProfileId, jobProfileVersion: $jobProfileVersion, state: $state)
             }
           `,
           variables: args,

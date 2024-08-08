@@ -38,6 +38,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   // const { id } = useParams();
   const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileVersion, setSelectedProfileVersion] = useState<string | null>(null);
   const [selectedProfileNumber, setSelectedProfileNumber] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | null>(null);
 
@@ -56,7 +57,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { setPositionRequestProfileId } = useWizardContext();
+  const { setPositionRequestProfileId, setPositionRequestProfileVersion } = useWizardContext();
   const navigate = useNavigate();
 
   // get organization for the department in which the position is being created in
@@ -165,7 +166,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
-      if (selectedProfileNumber && selectedProfileId) {
+      if (selectedProfileNumber && selectedProfileId && selectedProfileVersion) {
         if (positionRequestId) {
           if (state == 'CHANGED_PROFILE' || (state == 'NO_CHANGE' && switchStep)) {
             const resp = await updatePositionRequest({
@@ -183,7 +184,9 @@ export const WizardPage: React.FC<WizardPageProps> = ({
                 title: selectedProfileName ?? undefined,
                 max_step_completed: 2,
               }),
-              parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
+              parent_job_profile: {
+                connect: { id_version: { id: parseInt(selectedProfileId), version: parseInt(selectedProfileVersion) } },
+              },
               classification_id: selectedClassification?.id,
               classification_employee_group_id: selectedClassification?.employee_group_id,
               classification_peoplesoft_id: selectedClassification?.peoplesoft_id,
@@ -194,6 +197,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           }
         }
         setPositionRequestProfileId(parseInt(selectedProfileId));
+        setPositionRequestProfileVersion(parseInt(selectedProfileVersion));
 
         if (action === 'next') {
           if (onNext && switchStep) onNext();
@@ -214,6 +218,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       setSelectedProfileNumber(selectedProfile);
     } else {
       setSelectedProfileId(null);
+      setSelectedProfileVersion(null);
       setSelectedProfileNumber(null);
     }
   }, [searchParams]); // picks up profile id from search params
@@ -240,6 +245,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     // if there is a profile already associated with the position request, show a warning
     setSelectedProfileName(profile.title.toString());
     setSelectedProfileId(profile.id.toString());
+    setSelectedProfileVersion(profile.version.toString());
     setSelectedProfileNumber(profile.number.toString());
 
     if (profile?.classifications != null) {

@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
+import { IdVersion } from './job-profile-types';
 
 export interface UserConnect {
   id: string;
 }
 
 export interface JobProfileConnect {
-  id: number;
+  id_version: IdVersion;
 }
 
 interface JobProfileConnectItem {
@@ -41,6 +42,7 @@ export interface GetPositionRequestResponseContent {
   user_id?: string;
   user_name?: string;
   parent_job_profile_id?: number;
+  parent_job_profile_version?: number;
   title?: string;
   position_number?: number;
   classification?: string;
@@ -53,9 +55,7 @@ export interface GetPositionRequestResponseContent {
   submitted_at?: string;
   email?: string;
   shareUUID?: string;
-  parent_job_profile?: {
-    number: number;
-  };
+  parent_job_profile?: JobProfileConnectItem;
 
   additional_info?: AdditionalInfo;
 
@@ -138,6 +138,7 @@ export interface UpdatePositionRequestInput {
   parent_job_profile?: {
     connect: {
       id: number | null;
+      version: number | null;
     };
   };
   department?: {
@@ -225,6 +226,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 max_step_completed
                 reports_to_position_id
                 parent_job_profile_id
+                parent_job_profile_version
                 user_id
                 user_name
                 email
@@ -277,6 +279,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   max_step_completed
                   reports_to_position_id
                   parent_job_profile_id
+                  parent_job_profile_version
                   profile_json
                   orgchart_json
                   user_id
@@ -319,6 +322,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   max_step_completed
                   reports_to_position_id
                   parent_job_profile_id
+                  parent_job_profile_version
                   profile_json
                   orgchart_json
                   user_id
@@ -376,6 +380,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 max_step_completed
                 reports_to_position_id
                 parent_job_profile_id
+                parent_job_profile_version
                 profile_json
                 orgchart_json
                 user_id
@@ -424,6 +429,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 max_step_completed
                 reports_to_position_id
                 parent_job_profile_id
+                parent_job_profile_version
                 profile_json
                 orgchart_json
                 user_id

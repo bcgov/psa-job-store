@@ -43,6 +43,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     setWizardData,
     classificationsData,
     positionRequestProfileId,
+    positionRequestProfileVersion,
     positionRequestId,
     setRequiresVerification,
     setPositionRequestData,
@@ -59,8 +60,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
-  const profileId = positionRequestProfileId;
-
   function getClassificationById(id: string): ClassificationModel | undefined {
     // If data is loaded, find the classification by ID
     // console.log('classificationsData: ', classificationsData, id);
@@ -75,6 +74,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   function transformFormData(originalData: any): JobProfileModel {
     return {
       id: originalData.id,
+      version: originalData.version,
       type: 'USER',
       title: originalData.title,
       number: originalData.number,
@@ -155,7 +155,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       all_reports_to: false,
       owner: originalData.owner,
       created_at: originalData.created_at,
-      current_version: originalData.current_version,
     };
   }
 
@@ -455,7 +454,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
               onVerificationRequiredChange={setRequiresVerification}
               ref={wizardEditProfileRef}
               profileData={wizardData}
-              id={profileId?.toString()}
+              id={positionRequestProfileId?.toString()}
+              version={positionRequestProfileVersion?.toString()}
               submitText="Review Profile"
               showBackButton={true}
               handleFormChange={handleFormChange}

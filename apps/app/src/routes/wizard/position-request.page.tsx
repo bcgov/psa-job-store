@@ -59,6 +59,7 @@ export const PositionRequestPage = () => {
     setWizardData,
     setPositionRequestId,
     setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
     setPositionRequestData,
     resetWizardContext,
@@ -176,6 +177,7 @@ export const PositionRequestPage = () => {
     setWizardData,
     setPositionRequestId,
     setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
     setPositionRequestData,
 
@@ -183,31 +185,37 @@ export const PositionRequestPage = () => {
   ]);
 
   useEffect(() => {
-    const step = wizardContextPositionRequestData?.step;
+    if (wizardContextPositionRequestData) {
+      const step = wizardContextPositionRequestData?.step;
 
-    if (step != null) {
-      setCurrentStep(step);
-    }
+      if (step != null) {
+        setCurrentStep(step);
+      }
 
-    if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: wizardContextPositionRequestData?.id });
+      if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: wizardContextPositionRequestData?.id });
 
-    if (wizardContextPositionRequestData?.id) {
-      setPositionRequestId(wizardContextPositionRequestData?.id);
-    }
+      if (wizardContextPositionRequestData?.id) {
+        setPositionRequestId(wizardContextPositionRequestData?.id);
+      }
 
-    if (wizardContextPositionRequestData?.profile_json) setWizardData(wizardContextPositionRequestData?.profile_json);
+      if (wizardContextPositionRequestData?.profile_json) setWizardData(wizardContextPositionRequestData?.profile_json);
 
-    if (wizardContextPositionRequestData?.parent_job_profile_id)
-      setPositionRequestProfileId(wizardContextPositionRequestData?.parent_job_profile_id);
+      if (wizardContextPositionRequestData?.parent_job_profile_id)
+        setPositionRequestProfileId(wizardContextPositionRequestData?.parent_job_profile_id);
 
-    if (wizardContextPositionRequestData?.department_id) {
-      setPositionRequestDepartmentId(wizardContextPositionRequestData?.department_id);
+      if (wizardContextPositionRequestData?.parent_job_profile_version)
+        setPositionRequestProfileVersion(wizardContextPositionRequestData?.parent_job_profile_version);
+
+      if (wizardContextPositionRequestData?.department_id) {
+        setPositionRequestDepartmentId(wizardContextPositionRequestData?.department_id);
+      }
     }
   }, [
     wizardContextPositionRequestData,
     setPositionRequestId,
     setWizardData,
     setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
     triggerPositionNeedsReviewQuery,
   ]);
