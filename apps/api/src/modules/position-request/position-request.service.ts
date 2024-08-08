@@ -22,7 +22,6 @@ import {
 import { AlexandriaError, AlexandriaErrorClass } from '../../utils/alexandria-error';
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
-import { DepartmentService } from '../external/department.service';
 import {
   IncidentCreateUpdateInput,
   IncidentStatus,
@@ -39,6 +38,7 @@ import {
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PositionService } from '../external/position.service';
 import { JobProfileService } from '../job-profile/job-profile.service';
+import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 
@@ -992,7 +992,11 @@ export class PositionRequestApiService {
       updatePayload.profile_json = updateData.profile_json === null ? Prisma.DbNull : updateData.profile_json;
       // attach original profile json
       if (updateData.profile_json !== null) {
-        const originalProfile = await this.jobProfileService.getJobProfile(updateData.profile_json.id, userRoles);
+        const originalProfile = await this.jobProfileService.getJobProfile(
+          updateData.profile_json.id,
+          updateData.profile_json.version,
+          userRoles,
+        );
         updateData.profile_json.original_profile_json = originalProfile;
       }
     }
@@ -1006,12 +1010,22 @@ export class PositionRequestApiService {
     }
 
     if (updateData.parent_job_profile !== undefined) {
-      if (updateData.parent_job_profile.connect.id == null) {
+      if (updateData.parent_job_profile.connect.id_version == null) {
         updatePayload.parent_job_profile = { disconnect: true };
       } else {
-        updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
+        updatePayload.parent_job_profile = {
+          connect: {
+            id_version: {
+              id: updateData.parent_job_profile.connect.id_version.id,
+              version: updateData.parent_job_profile.connect.id_version.version,
+            },
+          },
+        };
 
-        const parentJobProfile = await this.jobProfileService.getJobProfile(updateData.parent_job_profile.connect.id);
+        const parentJobProfile = await this.jobProfileService.getJobProfile(
+          updateData.parent_job_profile.connect.id_version.id,
+          updateData.parent_job_profile.connect.id_version.version,
+        );
 
         // Set Classification IDs on positionRequest
         updatePayload.classification_id = parentJobProfile.classifications[0].classification.id;
@@ -1233,7 +1247,9 @@ export class PositionRequestApiService {
       return { result: false, reasons: reasons };
     }
     const jobProfile = await this.prisma.jobProfile.findUnique({
-      where: { id: positionRequest.parent_job_profile_id },
+      where: {
+        id_version: { id: positionRequest.parent_job_profile_id, version: positionRequest.parent_job_profile_version },
+      },
       include: {
         jobFamilies: {
           include: {

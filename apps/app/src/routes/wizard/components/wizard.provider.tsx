@@ -54,6 +54,9 @@ interface WizardContextProps {
   positionRequestProfileId: number | null;
   setPositionRequestProfileId: React.Dispatch<React.SetStateAction<number | null>>;
 
+  positionRequestProfileVersion: number | null;
+  setPositionRequestProfileVersion: React.Dispatch<React.SetStateAction<number | null>>;
+
   positionRequestDepartmentId: string | null;
   setPositionRequestDepartmentId: React.Dispatch<React.SetStateAction<string | null>>;
 
@@ -105,6 +108,7 @@ interface WizardProviderProps {
   children: ReactNode;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useWizardContext = () => {
   const context = useContext(WizardContext);
   if (!context) {
@@ -138,6 +142,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
 
   const [positionRequestId, setPositionRequestId] = useState<number | null>(null);
   const [positionRequestProfileId, setPositionRequestProfileId] = useState<number | null>(null);
+  const [positionRequestProfileVersion, setPositionRequestProfileVersion] = useState<number | null>(null);
   const [positionRequestDepartmentId, setPositionRequestDepartmentId] = useState<string | null>(null);
 
   const [originalProfessionalRegistrationFields, setOriginalProfessionalRegistrationFields] = useState<any[]>([]);
@@ -182,6 +187,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setPositionRequestData(null);
     setPositionRequestId(null);
     setPositionRequestProfileId(null);
+    setPositionRequestProfileVersion(null);
     setPositionRequestDepartmentId(null);
     setOriginalProfessionalRegistrationFields([]);
     setOriginalOptionalRequirementsFields([]);
@@ -240,6 +246,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setPositionRequestId,
     positionRequestProfileId,
     setPositionRequestProfileId,
+    positionRequestProfileVersion,
+    setPositionRequestProfileVersion,
     positionRequestDepartmentId,
     setPositionRequestDepartmentId,
 

@@ -9,7 +9,7 @@ export class SavedJobProfileService {
     await this.prisma.savedJobProfile.create({
       data: {
         user: { connect: { id: userId } },
-        jobProfile: { connect: { id: jobProfileId } },
+        CurrentJobProfile: { connect: { id: jobProfileId } },
       },
     });
     return true;

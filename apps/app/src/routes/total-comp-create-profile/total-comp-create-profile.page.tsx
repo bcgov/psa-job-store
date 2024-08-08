@@ -2,37 +2,36 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
 import '../../components/app/common/css/filtered-table.page.css';
-import { useGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
+import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import { TotalCompCreateProfileComponent } from './components/total-comp-create-profile.component';
 
 export const TotalCompCreateProfilePage = () => {
   const { id: urlId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [id, setId] = useState(urlId);
+  const [version, setVersion] = useState('');
 
-  const {
-    data: jobProfileData,
-    isFetching,
-    refetch,
-    // isLoading: isLoadingJobProfile,
-    // isFetching: isFetchingJobProfile,
-  } = useGetJobProfileQuery(
-    { id: parseInt(id ?? '') },
-    {
-      skip: !id,
-    },
-  );
+  const [trigger, { data: jobProfileData, isFetching }] = useLazyGetJobProfileQuery();
 
   // Refetch data when the component mounts or the id changes
   useEffect(() => {
     setId(urlId);
+    setVersion(searchParams.get('version') ?? '');
+
+    // setSearchParams(version ?? '');
     if (urlId) {
-      refetch();
+      trigger(
+        { id: parseInt(id ?? ''), version: version ? parseInt(version ?? '') : undefined },
+        // {
+        //   skip: !urlId,
+        // },
+      );
     }
-  }, [urlId, refetch]);
+  }, [urlId, version, setSearchParams, searchParams, trigger, id]);
 
   if (isFetching) return <LoadingComponent />;
 
@@ -41,6 +40,7 @@ export const TotalCompCreateProfilePage = () => {
       jobProfileData={jobProfileData}
       id={id}
       setId={setId}
+      setVersion={setVersion}
     ></TotalCompCreateProfileComponent>
   );
 };
