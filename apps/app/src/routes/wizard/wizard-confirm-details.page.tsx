@@ -258,7 +258,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
     if (skipValidation) {
       // console.log('handleOk 2');
-      await handleOk(updateStep, step);
+      await handleOk(updateStep, step, action);
       return false;
     }
 
@@ -316,7 +316,10 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           additional_info: {
             department_id: formData.payListDepartmentId ?? undefined,
             work_location_id: formData.workLocation ?? undefined,
-            excluded_mgr_position_number: formData.excludedManagerPositionNumber,
+            excluded_mgr_position_number:
+              !noPositions && formData.excludedManagerPositionNumber != ''
+                ? formData.excludedManagerPositionNumber
+                : undefined,
             comments: formData.comments,
             branch: formData.branch,
             division: formData.division,
@@ -503,7 +506,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
             <Button data-testid="ellipsis-menu" icon={<EllipsisOutlined />}></Button>
           </Popover>,
-          <Button onClick={() => showModal({ action: 'back' })} key="back" data-testid="back-button">
+          <Button
+            onClick={() => showModal({ skipValidation: true, action: 'back' })}
+            key="back"
+            data-testid="back-button"
+          >
             Back
           </Button>,
           <Button
