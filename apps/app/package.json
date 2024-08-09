@@ -21,7 +21,6 @@
     "@types/diff-match-patch": "^1.0.36",
     "@types/dompurify": "^3.0.5",
     "@types/lodash.debounce": "^4.0.9",
-    "@uidotdev/usehooks": "^2.4.1",
     "antd": "^5.11.2",
     "axios": "^1.6.2",
     "buffer": "^6.0.3",
