@@ -23,11 +23,9 @@ export const ListTable = ({
   pageInfo,
   paginationData,
 }: ListTableProps) => {
-  console.log('datasource length: ', dataSource);
-
   return (
     <Table
-      onChange={(pagination, filters, sorter) => {
+      onChange={(pagination, _filters, sorter) => {
         const { current, pageSize } = pagination;
 
         setSearchParams((params) => {

@@ -82,6 +82,10 @@ export const WidgetListPage = () => {
         },
       ]}
       loading={departmentDataIsLoading}
+      searchConfig={{
+        fields: ['id', 'name'],
+        placeholder: 'Search by name or department ID',
+      }}
     />
   );
 };

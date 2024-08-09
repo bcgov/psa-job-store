@@ -1,18 +1,23 @@
 import { SyncOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Row, Tag } from 'antd';
+import { Button, Card, Col, Input, Row, Tag } from 'antd';
 import { useMemo } from 'react';
 import { SetURLSearchParams } from 'react-router-dom';
 import { FilterData } from '../../interfaces/filter-data.interface';
+import { SearchConfig } from '../../interfaces/search-config.interface';
 import { Filter } from './components/filters';
 import { SelectFilter } from './components/filters/select-filter.component';
+
+const { Search } = Input;
 
 export interface ListFilterProps {
   setSearchParams: SetURLSearchParams;
   filterData: FilterData;
   filters: Filter[];
+  searchConfig?: SearchConfig | undefined;
+  searchTerm?: string | undefined;
 }
 
-export const ListFilter = ({ setSearchParams, filterData, filters }: ListFilterProps) => {
+export const ListFilter = ({ setSearchParams, filterData, filters, searchConfig, searchTerm }: ListFilterProps) => {
   const clearFilters = () => {
     const filterKeys = Object.entries(filterData).map(([key, { operation }]) => `${key}__${operation}`);
     setSearchParams((params) => {
@@ -38,19 +43,42 @@ export const ListFilter = ({ setSearchParams, filterData, filters }: ListFilterP
     [filterData],
   );
 
+  const handleSearch = (value: string) => {
+    const trimmed = value.trim();
+
+    setSearchParams((params) => {
+      if (trimmed.length > 0) {
+        params.set('search', trimmed);
+      } else {
+        params.delete('search');
+      }
+
+      return params;
+    });
+  };
+
   return (
     <Row role="search" style={{ position: 'relative', zIndex: 9001 }}>
       <Col span={24}>
         <Card style={{ marginTop: '1rem', marginBottom: '1rem' }}>
           <Row wrap>
-            <Col span={12}>{/* Search Bar */}</Col>
+            <Col span={12}>
+              {searchConfig != null && (
+                <Search
+                  onPressEnter={(e) => handleSearch(e.currentTarget.value)}
+                  onSearch={handleSearch}
+                  allowClear
+                  defaultValue={searchTerm}
+                  enterButton={searchConfig.enterButton ?? 'Search'}
+                  placeholder={searchConfig.placeholder}
+                />
+              )}
+            </Col>
             <Col span={12}>
               <Row justify="end" gutter={8}>
                 {filters.map((props) => {
-                  console.log('props: ', props);
-
                   return (
-                    <Col>
+                    <Col key={props.name}>
                       {props.type === 'single-value' ? (
                         <SelectFilter
                           {...props}

@@ -15,6 +15,8 @@ import { ListFilter } from './components/list-filter/list-filter.component';
 import { ListTable } from './components/list-table.component';
 import { FilterData } from './interfaces/filter-data.interface';
 import { PaginationData } from './interfaces/pagination-data.interface';
+import { SearchConfig } from './interfaces/search-config.interface';
+import { SearchData } from './interfaces/search-data.interface';
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from './list-page.constants';
 import { OrderByData } from './types/order-by-data.type';
 
@@ -25,9 +27,18 @@ export interface ListPageProps {
   filters: Filter[];
   loading?: boolean;
   pageHeaderProps: ExtendedPageHeaderProps;
+  searchConfig?: SearchConfig | undefined;
 }
 
-export const ListPage = ({ trigger, columns, data, filters, loading, pageHeaderProps }: ListPageProps) => {
+export const ListPage = ({
+  trigger,
+  columns,
+  data,
+  filters,
+  loading,
+  pageHeaderProps,
+  searchConfig,
+}: ListPageProps) => {
   const [filterData, setFilterData] = useState<FilterData>(
     Object.fromEntries(
       filters.map((f) => [
@@ -46,14 +57,18 @@ export const ListPage = ({ trigger, columns, data, filters, loading, pageHeaderP
     pageSize: DEFAULT_PAGE_SIZE,
   });
 
+  const [searchData, setSearchData] = useState<SearchData | undefined>(undefined);
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
+    // Pagination Data
     const current = Number(searchParams.get('page') ?? DEFAULT_PAGE);
     const pageSize = Number(searchParams.get('pageSize') ?? DEFAULT_PAGE_SIZE);
 
     setPaginationData({ current, pageSize });
 
+    // Filter Data
     let tempFilterData: FilterData = {};
 
     Object.keys(filterData).forEach((key) => {
@@ -77,6 +92,31 @@ export const ListPage = ({ trigger, columns, data, filters, loading, pageHeaderP
 
     setFilterData(tempFilterData);
 
+    // Search Data
+    if (searchConfig) {
+      const searchTerm = searchParams.get('search');
+      const newSearchData = searchTerm
+        ? {
+            OR: searchConfig.fields.map((field) => ({
+              [field]: { contains: searchTerm, mode: 'insensitive' as const },
+            })),
+          }
+        : undefined;
+
+      // Compare current and proposed search data
+      // reset page, pageSize, update searchData if valus have changed
+      if (JSON.stringify(searchData) !== JSON.stringify(newSearchData)) {
+        setSearchParams((params) => {
+          params.delete('page');
+          params.delete('pageSize');
+
+          return params;
+        });
+        setSearchData(searchTerm ? newSearchData : undefined);
+      }
+    }
+
+    // Order By Data
     const orderBy = searchParams.get('orderBy');
     setOrderByData(deserializeOrderBy(orderBy));
   }, [searchParams]);
@@ -86,7 +126,7 @@ export const ListPage = ({ trigger, columns, data, filters, loading, pageHeaderP
     const { current, pageSize } = paginationData;
 
     // Generate where clause
-    const where: Record<string, unknown>[] = [];
+    const where: Record<string, any>[] = [];
     filterKeys.forEach((key) => {
       const { operation, value } = filterData[key];
 
@@ -101,20 +141,30 @@ export const ListPage = ({ trigger, columns, data, filters, loading, pageHeaderP
       }
     });
 
+    if (searchData) {
+      where.push(searchData);
+    }
+
     trigger({
       where: where.length > 0 ? { AND: where } : undefined,
       take: pageSize,
       skip: (current - 1) * pageSize,
       ...(orderByData != null && { orderBy: orderByData }),
     });
-  }, [trigger, paginationData, searchParams]);
+  }, [trigger, paginationData, searchData]);
 
   return (
     <>
       <PageHeader {...pageHeaderProps} />
       <ContentWrapper>
         <Space direction="vertical" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-          <ListFilter setSearchParams={setSearchParams} filterData={filterData} filters={filters} />
+          <ListFilter
+            setSearchParams={setSearchParams}
+            filterData={filterData}
+            filters={filters}
+            searchConfig={searchConfig}
+            searchTerm={searchParams.get('search') ?? undefined}
+          />
           <ListTable
             setSearchParams={setSearchParams}
             columns={columns}
