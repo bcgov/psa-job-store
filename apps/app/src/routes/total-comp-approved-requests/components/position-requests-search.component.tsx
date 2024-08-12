@@ -413,12 +413,18 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                     isClearable={false}
                     backspaceRemovesValue={false}
                     hideSelectedOptions={false}
-                    value={classificationFilterData.filter((jf) =>
-                      allSelections
-                        .filter((selection) => selection.type === 'classification')
-                        .map((selection) => selection.value)
-                        .includes(jf.value),
-                    )}
+                    value={() => {
+                      const value = classificationFilterData.filter((jf) =>
+                        allSelections
+                          .filter((selection) => selection.type === 'classification')
+                          .map((selection) => selection.value)
+                          .includes(jf.value),
+                      );
+
+                      console.log('value: ', value);
+
+                      return value;
+                    }}
                     styles={{
                       container: (css) => ({ ...css, width: '200px' }),
                       menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),

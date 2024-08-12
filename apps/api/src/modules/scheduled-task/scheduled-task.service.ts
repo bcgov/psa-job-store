@@ -80,7 +80,7 @@ export class ScheduledTaskService {
         for (const row of rows) {
           const [crm_id, crm_lookup_name, crm_status, crm_category] = row as [string, string, string, string];
           const positionRequest = await this.prisma.positionRequest.findUnique({ where: { crm_id: +crm_id } });
-          const positionNumber = positionRequest.position_number.toString();
+          const positionNumber = positionRequest.position_number?.toString();
 
           if (positionNumber) {
             const result = await this.peoplesoftService.getPosition(positionNumber.padStart(8, '0'));
