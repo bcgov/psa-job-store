@@ -121,10 +121,14 @@ export class ScheduledTaskService {
                   ps status: ${positionObj['A.POSN_STATUS']}, ps effective status: ${positionObj['A.EFF_STATUS']}`,
                 );
 
+                const status = incomingPositionRequestStatus as PositionRequestStatus;
+                // if status is completed, update approved_at date
+                const approved_at = status === 'COMPLETED' ? dayjs().toDate() : null;
                 await this.prisma.positionRequest.update({
                   where: { crm_id: +crm_id },
                   data: {
-                    status: incomingPositionRequestStatus as PositionRequestStatus,
+                    status: status,
+                    ...(approved_at === null ? {} : { approved_at }),
                   },
                 });
               }

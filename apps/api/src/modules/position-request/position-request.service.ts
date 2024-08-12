@@ -208,11 +208,13 @@ export class PositionRequestApiService {
         }
 
         // write position number back to position request immidietely to prevent data loss and duplicate position creation
+        // also set submitted_at date
         try {
           positionRequest = await this.prisma.positionRequest.update({
             where: { id },
             data: {
               position_number: +position.positionNbr,
+              submitted_at: dayjs().toDate(),
             },
           });
         } catch (error) {
@@ -231,7 +233,6 @@ export class PositionRequestApiService {
         } catch (error) {
           this.logger.error('Failed to set orgchart_png: ' + position.positionNbr);
           this.logger.error(error);
-          throw AlexandriaError('Failed to save org chart image');
         }
 
         if (position.positionNbr.length > 0) {
@@ -245,7 +246,24 @@ export class PositionRequestApiService {
         }
       } else {
         // we already have a position number assigned to this position request
+        // this happens if something went wrong previously and we did not get to changing the status of this position request
+        // this should not be a common occurrence
+        this.logger.warn('Position request already has a position number assigned: ' + positionRequest.position_number);
+
         // check crm status etc
+
+        // update submitted_at
+        try {
+          positionRequest = await this.prisma.positionRequest.update({
+            where: { id },
+            data: {
+              submitted_at: dayjs().toDate(),
+            },
+          });
+        } catch (error) {
+          this.logger.error('Failed to update submitted_at: ' + positionRequest.position_number.toString());
+          this.logger.error(error);
+        }
 
         // update org chart snapshot
 
@@ -259,7 +277,6 @@ export class PositionRequestApiService {
         } catch (error) {
           this.logger.error('Failed to set orgchart_png: ' + positionRequest.position_number.toString());
           this.logger.error(error);
-          throw AlexandriaError('Failed to save org chart image');
         }
 
         positionRequest = await this.submitPositionRequest_afterCreatePosition(
@@ -279,6 +296,10 @@ export class PositionRequestApiService {
   }
 
   private async submitPositionRequest_afterCreatePosition(positionNumber: string, id, positionRequest) {
+    // this function runs after a position has been created in peoplesoft
+    // we're going to update org chart (update supervisor and add new position nodes),
+    // create or update CRM incident, and update position request status
+
     // retrieve position we just created from peoplesoft
     let positionObj: Record<string, any> | null;
     try {
@@ -341,10 +362,14 @@ export class PositionRequestApiService {
       }
 
       // we will potentially create PRs with UNKNOWN status if there is an issue with CRM or PS creation
+      // if status is completed, update approved_at date
+      const status = incomingPositionRequestStatus as PositionRequestStatus;
+      const approved_at = status === 'COMPLETED' ? dayjs().toDate() : null;
       return await this.prisma.positionRequest.update({
         where: { id },
         data: {
-          status: incomingPositionRequestStatus as PositionRequestStatus,
+          status: status,
+          ...(approved_at === null ? {} : { approved_at }),
         },
       });
     } catch (error) {
