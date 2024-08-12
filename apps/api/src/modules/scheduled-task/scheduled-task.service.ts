@@ -169,7 +169,7 @@ export class ScheduledTaskService {
     });
     jobProfileVersionCounts;
     const updates = await Promise.all(jobProfileVersionCounts).then((values) => {
-      console.log(values);
+      // console.log(values);
       return values.map((v) =>
         this.prisma.jobProfile.update({
           where: { id_version: { id: v.id || -1, version: v.version || -1 } },

@@ -109,8 +109,8 @@ export class OrgChartService {
       select: { id: true, name: true },
     });
 
-    console.log('departments: ', departments);
-    console.log('ministries: ', ministries);
+    // console.log('departments: ', departments);
+    // console.log('ministries: ', ministries);
 
     return ministries.map((ministry) => {
       return {

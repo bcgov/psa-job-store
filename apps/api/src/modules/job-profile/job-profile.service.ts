@@ -862,7 +862,7 @@ export class JobProfileService {
       },
     });
 
-    console.log('doesExist ', doesExist);
+    // console.log('doesExist ', doesExist);
     const result = await this.prisma.jobProfile.upsert({
       // if the profile has been used, that means it has been published at some point and linked to a PR.
       // We must create a new profile version in this case.
