@@ -13,7 +13,7 @@ interface BreadcrumbItem {
   path?: string;
 }
 
-interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
+export interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
   additionalBreadcrumb?: { title?: string; path?: string; icon?: React.ReactNode };
   button1Text?: string;
   button1Callback?: () => void;

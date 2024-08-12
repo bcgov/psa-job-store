@@ -22,6 +22,7 @@ import { DepartmentDetailPage } from '../routes/settings/department/department-d
 import { DepartmentListPage } from '../routes/settings/department/department-list.page';
 import { UserDetailPage } from '../routes/settings/user/user-detail.page';
 import { UserListPage } from '../routes/settings/user/user-list.page';
+import { WidgetListPage } from '../routes/settings/widget/widget-list-page.component';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
@@ -126,6 +127,18 @@ export const router = createBrowserRouter([
                   {
                     path: ':id',
                     element: <UserDetailPage />,
+                  },
+                ],
+              },
+              {
+                path: 'widgets',
+                handle: {
+                  breadcrumb: () => 'Widgets',
+                },
+                children: [
+                  {
+                    index: true,
+                    element: <WidgetListPage />,
                   },
                 ],
               },

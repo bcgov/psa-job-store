@@ -7,7 +7,7 @@ import {
   useLazyGetDepartmentsForSettingsQuery,
 } from '../../../redux/services/graphql-api/settings/settings.api';
 
-export const DepartmentListPage = () => {
+export const WidgetListPage = () => {
   const { data: organizationsData, isFetching: organizationsDataIsLoading } =
     useGetOrganizationsPicklistForSettingsQuery();
 
@@ -18,8 +18,8 @@ export const DepartmentListPage = () => {
     <ListPage
       trigger={trigger}
       pageHeaderProps={{
-        title: 'Departments',
-        subTitle: 'Manage departments',
+        title: 'Widgets',
+        subTitle: 'Manage widgets',
       }}
       columns={[
         {
