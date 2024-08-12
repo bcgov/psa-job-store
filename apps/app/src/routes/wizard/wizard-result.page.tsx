@@ -4,11 +4,14 @@ import {
   CheckCircleOutlined,
   EllipsisOutlined,
   ExclamationCircleFilled,
+  ExclamationCircleOutlined,
+  MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
+import { Divider } from 'antd/lib';
 import { autolayout, updateSupervisorAndAddNewPositionNode } from 'common-kit';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -85,9 +88,14 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     // isError: positionNeedsRivewError,
     refetch: refetchPositionNeedsRivew,
     isFetching: isFetchingPositionNeedsRivew,
-  } = usePositionNeedsRivewQuery({
-    id: positionRequestId ?? -1,
-  });
+  } = usePositionNeedsRivewQuery(
+    {
+      id: positionRequestId ?? -1,
+    },
+    {
+      skip: !positionRequestId,
+    },
+  );
 
   useEffect(() => {
     // Fetch position request and needs review data when positionRequestId changes
@@ -170,8 +178,18 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   ]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isVerificationModalVisible, setIsVerificationModalVisible] = useState(false);
+
   // const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [submitPositionRequest, { isLoading: submitPositionRequestIsLoading }] = useSubmitPositionRequestMutation();
+
+  const showVerificationModal = async () => {
+    setIsVerificationModalVisible(true);
+  };
+
+  const handleVerificationCancel = () => {
+    setIsVerificationModalVisible(false);
+  };
 
   const showModal = async () => {
     setIsModalVisible(true);
@@ -602,11 +620,36 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       </Form.Item>
                       <Button
                         type="primary"
-                        onClick={handleOk}
+                        onClick={showVerificationModal}
                         loading={submitPositionRequestIsLoading || isLoading}
                         data-testid="submit-for-verification-button"
                       >
                         Submit for verification
+                      </Button>
+                      <Divider />
+                      <h3>Get support</h3>
+                      <Typography.Paragraph>
+                        Get advice from the classification services team before sending the request for verification.
+                        The classification services team will contact you via email after they have reviewed the
+                        request.
+                      </Typography.Paragraph>
+                      <Button
+                        type="dashed"
+                        icon={<MailOutlined />}
+                        onClick={() => {
+                          const subject = encodeURIComponent('Support Request');
+                          const body = encodeURIComponent(
+                            `Hello, \n\n` +
+                              `I need assistance with my position request.\n\n` +
+                              `Please review the details at this link (do not share this link):\n` +
+                              `${window.location.origin}/my-position-requests/share/${positionRequest?.shareUUID}`,
+                          );
+                          window.location.href = `mailto:${
+                            import.meta.env.VITE_SUPPORT_EMAIL
+                          }?subject=${subject}&body=${body}`;
+                        }}
+                      >
+                        Get support
                       </Button>
                     </Card>
                     <Card
@@ -847,6 +890,42 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       related to this position.
                     </li>
                   </ul>
+                </div>
+              </div>
+            </Modal>
+
+            <Modal
+              title={
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: '8px', fontSize: '22px' }} />
+                  <span>Submit for verification?</span>
+                </div>
+              }
+              open={isVerificationModalVisible}
+              onOk={handleOk}
+              onCancel={handleVerificationCancel}
+              footer={[
+                <Button key="back" onClick={handleVerificationCancel}>
+                  Cancel
+                </Button>,
+                <Button
+                  key="submit"
+                  type="primary"
+                  onClick={() => {
+                    setIsVerificationModalVisible(false);
+                    handleOk();
+                  }}
+                  loading={submitPositionRequestIsLoading || isLoading}
+                  data-testid="confirm-modal-ok"
+                >
+                  Submit for verification
+                </Button>,
+              ]}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                <div>
+                  Once submitted, you won’t be able to cancel the request from the job store. Are you sure you wish to
+                  proceed?
                 </div>
               </div>
             </Modal>

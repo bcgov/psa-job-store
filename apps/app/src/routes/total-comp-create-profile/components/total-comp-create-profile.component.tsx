@@ -1173,6 +1173,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const securityScreeningsUpdated = securityScreenings?.map((field) => ({
       ...field,
       nonEditable: nonEditable,
+      is_significant: nonEditable ? true : false,
     }));
     profileSetValue('security_screenings', securityScreeningsUpdated as SecurityScreeningItem[]);
   };
@@ -1199,6 +1200,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const knowledgeSkillsAbilities = profileWatch('knowledge_skills_abilities');
   const willingnessStatements = profileWatch('willingness_statements');
   const job_experiences = profileWatch('job_experience');
+  // console.log('markAllSignificant: ', markAllSignificant);
 
   // education
   const {
@@ -3016,7 +3018,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 appendAccountability({
                                   text: '',
                                   nonEditable: markAllNonEditable,
-                                  is_significant: markAllSignificant,
+                                  is_significant: markAllSignificant || markAllNonEditable,
                                 })
                               }
                               icon={<PlusOutlined />}
@@ -3279,7 +3281,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       appendEducationAndWorkExperience({
                                         text: '',
                                         nonEditable: markAllNonEditableEdu,
-                                        is_significant: markAllSignificantEdu,
+                                        is_significant: markAllSignificantEdu || markAllNonEditableEdu,
                                       })
                                     }
                                     icon={<PlusOutlined />}
@@ -3499,7 +3501,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   appendJob_experience({
                                     text: '',
                                     nonEditable: markAllNonEditableJob_experience,
-                                    is_significant: markAllSignificantJob_experience,
+                                    is_significant:
+                                      markAllSignificantJob_experience || markAllNonEditableJob_experience,
                                   })
                                 }
                                 icon={<PlusOutlined />}
@@ -3757,7 +3760,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       appendProfessionalRegistrationRequirement({
                                         text: '',
                                         nonEditable: markAllNonEditableProReg,
-                                        is_significant: markAllSignificantProReg,
+                                        is_significant: markAllSignificantProReg || markAllNonEditableProReg,
                                       })
                                     }
                                     icon={<PlusOutlined />}
@@ -4372,7 +4375,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       appendSecurityScreening({
                                         text: '',
                                         nonEditable: markAllNonEditableSec,
-                                        is_significant: markAllSignificantSecurityScreenings,
+                                        is_significant: markAllSignificantSecurityScreenings || markAllNonEditableSec,
                                       })
                                     }
                                     icon={<PlusOutlined />}
@@ -4391,7 +4394,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   </Row>
 
                   <Divider className="hr-reduced-margin" />
-                  {/* optional requirements */}
+                  {/* other requirements */}
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={22} xl={22} xxl={20}>
                       <Form.Item
@@ -4399,7 +4402,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
                           <Row justify="space-between" align="middle">
-                            <Col>Optional requirements</Col>
+                            <Col>Other requirements</Col>
                           </Row>
                         }
                       >
