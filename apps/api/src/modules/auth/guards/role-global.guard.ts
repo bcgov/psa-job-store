@@ -8,6 +8,10 @@ export const AllowNoRoles = () => SetMetadata('allowNoRoles', true);
 
 @Injectable()
 export class RolesGlobalGuard extends PassportAuthGuard('keycloak') {
+  // This guard requires that a user has one of the required roles to access any endpoint
+  // If the endpoint allows access with no roles (but still must be authenticated), use the AllowNoRoles decorator
+  // If this guard passes, the RoleGuard will check if the user has the required roles for the specific endpoint
+
   constructor(private reflector: Reflector) {
     super();
   }
