@@ -14,6 +14,8 @@ interface OrgChartFlowProps {
   departmentId: string;
   wizardNextHandler?: (options?: { switchStep?: boolean }) => Promise<string | undefined>;
   searchTerm?: string;
+  loading?: boolean;
+  treeViewInFocusCallback: (inFocus: boolean) => void;
 }
 
 const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
@@ -24,6 +26,8 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
   departmentId,
   wizardNextHandler,
   searchTerm,
+  loading,
+  treeViewInFocusCallback,
 }) => {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const { setCenter } = useReactFlow();
@@ -45,13 +49,15 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
   return (
     <>
       <PositionProvider>
-        <div style={{ height: '300px', overflow: 'auto' }}>
+        <div style={{ height: '0px', overflow: 'auto' }}>
           <OrgChartTreeView
             data={{ nodes: nodes, edges: edges }}
             departmentId={departmentId}
             setSelectedNodeId={setSelectedNodeId}
             wizardNextHandler={wizardNextHandler}
             searchTerm={searchTerm}
+            loading={loading}
+            treeViewInFocusCallback={treeViewInFocusCallback}
           />
         </div>
         <ReactFlow

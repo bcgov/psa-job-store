@@ -1,5 +1,5 @@
 import { Modal } from 'antd';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import TreeView, { INode } from 'react-accessible-treeview';
 import { IFlatMetadata } from 'react-accessible-treeview/dist/TreeView/utils';
 import { Edge, Node, useStoreApi } from 'reactflow';
@@ -14,13 +14,18 @@ const OrgChartTreeView = ({
   setSelectedNodeId,
   wizardNextHandler,
   searchTerm,
+  loading,
+  treeViewInFocusCallback,
 }: {
   data: { nodes: Node[]; edges: Edge[] };
   departmentId: string;
   setSelectedNodeId: (id: string | null) => void;
   wizardNextHandler?: ({ switchStep }?: { switchStep?: boolean }) => Promise<string | undefined>;
   searchTerm?: string;
+  loading?: boolean;
+  treeViewInFocusCallback: (inFocus: boolean) => void;
 }) => {
+  // console.log('departmentId: ', departmentId, data);
   const { createNewPosition } = usePosition();
   const store = useStoreApi();
   const { addSelectedNodes } = store.getState();
@@ -83,21 +88,21 @@ const OrgChartTreeView = ({
     const rootNodes = Array.from(nodeMap.values()).filter((node) => !node.parent);
 
     // Create a root node if there are multiple root nodes or no root nodes
-    if (rootNodes.length !== 1) {
-      const rootNode = {
-        name: 'Organization',
-        id: 'root',
-        children: rootNodes.map((node) => node.id),
-        parent: null,
-        employees: [],
-        departmentId: '',
-        positionNumber: '',
-        classification: { name: '' },
-        metadata: { searchString: '' },
-      };
-      nodeMap.set('root', rootNode);
-      rootNodes.forEach((node) => (node.parent = 'root'));
-    }
+    // if (rootNodes.length !== 1) {
+    const rootNode = {
+      name: 'Organization',
+      id: 'root',
+      children: rootNodes.map((node) => node.id),
+      parent: null,
+      employees: [],
+      departmentId: '',
+      positionNumber: '',
+      classification: { name: '' },
+      metadata: { searchString: '' },
+    };
+    nodeMap.set('root', rootNode);
+    rootNodes.forEach((node) => (node.parent = 'root'));
+    // }
 
     // Sort function
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,6 +139,7 @@ const OrgChartTreeView = ({
   };
 
   const treeData = convertData(data.nodes, data.edges);
+  // console.log('treeData: ', treeData, data);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderNode = ({ element, isBranch, isExpanded, getNodeProps, level }: any) => {
@@ -215,6 +221,20 @@ const OrgChartTreeView = ({
   };
 
   useEffect(() => {
+    // this handles department switching
+    // console.log('updating renderkey from loading');
+    setRenderKey((prevKey) => prevKey + 1);
+    // setRender(false);
+    // setTimeout(() => {
+    //   setRender(true);
+    // }, 1000);
+    if (!loading) {
+      setFinalTreeData(treeData);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    // handle search
     setRenderKey((prevKey) => prevKey + 1);
     if (!searchTerm || searchTerm.trim() == '') {
       setSearchMode(false);
@@ -271,12 +291,79 @@ const OrgChartTreeView = ({
     }
   }, [searchMode]);
 
-  if (finalTreeData.length === 0) return <></>;
+  // console.log('treeview loading: ', loading);
+
+  // HANDLE CONTAINER FOCUS
+  const [containerHasFocus, setContainerHasFocus] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const setupFocusListeners = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // console.log('setting up listener: ', container);
+
+    const handleFocusIn = () => {
+      // console.log('focus in');
+      setContainerHasFocus(true);
+    };
+
+    const handleFocusOut = () => {
+      // console.log('focus out');
+      setContainerHasFocus(false);
+    };
+
+    container.addEventListener('focusin', handleFocusIn);
+    container.addEventListener('focusout', handleFocusOut);
+
+    return () => {
+      container.removeEventListener('focusin', handleFocusIn);
+      container.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+
+    if (containerRef.current) {
+      cleanup = setupFocusListeners();
+    } else {
+      const observer = new MutationObserver((_mutations, obs) => {
+        if (containerRef.current) {
+          cleanup = setupFocusListeners();
+          obs.disconnect();
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      return () => {
+        observer.disconnect();
+        if (cleanup) cleanup();
+      };
+    }
+
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [setupFocusListeners]);
+
+  useEffect(() => {
+    // console.log('containerHasFocus: ', containerHasFocus);
+    treeViewInFocusCallback(containerHasFocus);
+  }, [containerHasFocus, treeViewInFocusCallback]);
+
+  // if (!render) return <>no render</>;
+  if (finalTreeData.length === 0 || loading) return <></>;
 
   // console.log('finalTreeData: ', finalTreeData);
 
   return (
     <div
+      ref={containerRef}
       onBlur={(e) => {
         setSelectedIds([]); // clear selected nodes on change, so user can press enter repeadetly to select
         // Prevent the event from bubbling up to parent elements
@@ -284,17 +371,17 @@ const OrgChartTreeView = ({
 
         // Check if the new focus target is outside of this div
         if (!e.currentTarget.contains(e.relatedTarget)) {
-          console.log('User has exited the div');
+          // console.log('User has exited the div');
           setLastFocusInner(false);
         } else {
-          console.log('Focus is still within the div');
+          // console.log('Focus is still within the div');
         }
       }}
       onFocus={(e) => {
         setSelectedIds([]); // clear selected nodes on change, so user can press enter repeadetly to select
         setLastFocusInner(true);
 
-        console.log('on focus outer', e.target, e);
+        // console.log('on focus outer', e.target, e);
 
         // Function to find the node element or its closest ancestor
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -337,7 +424,7 @@ const OrgChartTreeView = ({
               // e.preventDefault();
               // firstSearchResult.focus();
               announce('You entered org chart, use arrow keys to navigate. Press enter to select position.');
-              return;
+              // return;
             } else {
               // focus on the previous focusable element relative to this div
               // document.getElementById('org-chart-search-button')?.focus();
@@ -347,7 +434,7 @@ const OrgChartTreeView = ({
           // }
 
           if (nodeId) {
-            console.log('Node focused:', nodeId);
+            // console.log('Node focused:', nodeId);
             setSelectedNodeId(nodeId);
             addSelectedNodes([nodeId]);
           }
