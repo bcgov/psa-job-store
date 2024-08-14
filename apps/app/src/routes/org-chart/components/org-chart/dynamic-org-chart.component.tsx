@@ -2,7 +2,7 @@ import { Col, Row, Space, Spin } from 'antd';
 import { autolayout } from 'common-kit';
 import Fuse from 'fuse.js';
 import debounce from 'lodash.debounce';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Edge, Node, NodeProps, useEdgesState, useNodesState, useOnSelectionChange, useReactFlow } from 'reactflow';
 import { useLazyGetOrgChartQuery } from '../../../../redux/services/graphql-api/org-chart.api';
 import { initialElements } from '../../constants/initial-elements.constant';
@@ -57,8 +57,11 @@ export const DynamicOrgChart = ({
   const [searchResultCount, setSearchResultCount] = useState<number>(0);
 
   const { fitView } = useReactFlow();
+  const [dataUpdated, setDataUpdated] = useState<boolean>(true);
   const [edges, setEdges] = useEdgesState([]);
   const [nodes, setNodes] = useNodesState([]);
+  // const [treeviewInFocus, setTreeviewInFocus] = useState<boolean>(false);
+  const treeViewInFocus = useRef(false);
 
   useEffect(() => {
     setIsDirty(false);
@@ -72,6 +75,11 @@ export const DynamicOrgChart = ({
   }, [departmentId]);
 
   useEffect(() => {
+    if (orgChartDataIsFetching) setDataUpdated(false);
+    // setTimeout(() => {
+    else setDataUpdated(true);
+    // }, 2000);
+
     if (orgChartData?.orgChart != null) {
       const elements = autolayout(orgChartData?.orgChart);
 
@@ -169,6 +177,7 @@ export const DynamicOrgChart = ({
             sNodeIds.length > 0 ? (sNodeIds.includes(node.id) || focusedElementIds.includes(node.id) ? 1 : 0.25) : 1,
         };
       });
+      // console.log('setNodes renderSelectedNodes');
       setEdges(edges);
       setNodes(nodes);
     },
@@ -199,6 +208,7 @@ export const DynamicOrgChart = ({
         opacity: 1,
       };
     });
+    // console.log('setNodes renderDefault');
     setEdges(edges);
     setNodes(nodes);
   }, []);
@@ -227,11 +237,14 @@ export const DynamicOrgChart = ({
     const adjacentNodes = selectedNodes.length > 0 ? nodes.filter((node) => node.data.isAdjacent === true) : [];
 
     if (selectedNodes.length > 0) {
+      // console.log('fitView A: ', selectedNodes, adjacentNodes);
       fitView({ duration: 800, nodes: [...selectedNodes, ...adjacentNodes] });
     } else if (searchResultNodes.length > 0) {
+      // console.log('fitView B: ', searchResultNodes);
       fitView({ duration: 800, nodes: searchResultNodes });
     } else {
       if (isDirty === false) {
+        // console.log('fitView C: ', nodes);
         fitView({ duration: 800, nodes });
       }
     }
@@ -256,7 +269,9 @@ export const DynamicOrgChart = ({
           // search will clear the selected nodes, so we want to show search results instead of default
           onSearch(searchTerm, { source: 'input' });
         } else {
-          renderSelectedNodes(nodeIds);
+          // if user is navigating using keyboard throughout the treeview, do not run this
+          // since we want to focus on the individual single node to bring into focus
+          if (!treeViewInFocus.current) renderSelectedNodes(nodeIds);
         }
       }
     },
@@ -313,9 +328,16 @@ export const DynamicOrgChart = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setSearchResultCount(nodes.filter((node: any) => node.data.isSearchResult === true).length);
     }
+    // console.log('setNodes onsearch');
     setEdges(edges);
     setNodes(nodes);
     // console.log('onsearch done');
+  };
+
+  const treeViewInFocusCallback = (inFocus: boolean) => {
+    // console.log('treeViewInFocusCallback: ', inFocus);
+    treeViewInFocus.current = inFocus;
+    // setTreeviewInFocus(inFocus);
   };
 
   return (
@@ -353,6 +375,8 @@ export const DynamicOrgChart = ({
             departmentId={departmentId ?? ''}
             wizardNextHandler={wizardNextHandler}
             searchTerm={searchTerm}
+            loading={!dataUpdated}
+            treeViewInFocusCallback={treeViewInFocusCallback}
             onPaneClick={() => {
               // console.log('onPaneClick, searchTerm: ', searchTerm);
               setIsDirty(true);
