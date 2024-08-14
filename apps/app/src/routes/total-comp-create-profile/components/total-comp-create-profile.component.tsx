@@ -4563,7 +4563,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   </Typography.Text>
                   <br></br>
                   <Button type="primary" style={{ marginTop: 10 }} onClick={showPublishConfirm}>
-                    Publish as latest version (need to do functionality)
+                    Publish as latest version
                   </Button>
                 </Card>
               )}
@@ -4713,12 +4713,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     title={
                       <>
                         Version
-                        {' ' +
-                          jobProfileMeta?.jobProfileMeta?.versions.find(
-                            (v: { id: number | undefined }) => v.id == jobProfileData?.jobProfile.id,
-                          )?.version +
-                          ' '}
-                        <Tag color={'green'}>Latest</Tag>
+                        {' ' + profileJson?.jobProfile.version + ' '}
+                        {isCurrentVersion && <Tag color={'green'}>Latest</Tag>}
                       </>
                     }
                     style={{
