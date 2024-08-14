@@ -27,15 +27,23 @@ export class JobProfileService {
     // if searchConditions were provided, do a "dumb" search instead of elastic search
     let searchResultIds = null;
     if (!searchConditions) searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
-    const currentJobProfiles = await this.prisma.currentJobProfile.findMany({ select: { id: true, version: true } });
+    const currentJobProfiles =
+      state == 'PUBLISHED'
+        ? await this.prisma.currentJobProfile.findMany({
+            select: { id: true, version: true },
+            where: { ...(searchResultIds != null && { id: { in: searchResultIds } }) },
+          })
+        : undefined;
     return this.prisma.jobProfile.findMany({
       where: {
         is_archived: include_archived,
         // ...(searchResultIds != null && { id: { in: searchResultIds } }),
-        OR: currentJobProfiles.map((record) => ({
-          id: record.id,
-          version: record.version,
-        })),
+        ...(currentJobProfiles && {
+          OR: currentJobProfiles.map((record) => ({
+            id: record.id,
+            version: record.version,
+          })),
+        }),
         // ...(owner_id != null && { owner_id }),
         ...(searchConditions != null && searchConditions),
         state,
