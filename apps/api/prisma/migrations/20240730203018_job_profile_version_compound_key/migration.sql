@@ -20,8 +20,12 @@
 ALTER TABLE "job_profile_context" DROP CONSTRAINT IF EXISTS "job_profile_context_job_profile_id_fkey";
 
 -- AlterTable
-ALTER TABLE "job_profile" ADD COLUMN     "context" TEXT;
+ALTER TABLE "job_profile" ADD COLUMN "context" TEXT;
 
+UPDATE "job_profile" AS jp
+SET "context" = jpc.description
+FROM "job_profile_context" AS jpc
+WHERE jpc."job_profile_id" = jp."id";
 -- DropTable
 DROP TABLE "job_profile_context";
 

@@ -366,7 +366,11 @@ export const PositionRequestPage = () => {
             key: '3',
             label: 'Job Profile',
             children: (
-              <JobProfileWithDiff positionRequestData={{ positionRequest: wizardContextPositionRequestData }} />
+              <JobProfileWithDiff
+                positionRequestData={{ positionRequest: wizardContextPositionRequestData }}
+                rowProps={{ justify: 'center' }}
+                colProps={{ xs: 24, sm: 24, md: 24, lg: 20, xl: 16 }}
+              />
             ),
           },
         ]
