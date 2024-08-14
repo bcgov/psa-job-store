@@ -15,13 +15,13 @@ export enum AutolayoutDirection {
 const { Top, Right, Bottom, Left } = Position;
 const { Vertical } = AutolayoutDirection;
 
-const graph = new dagre.graphlib.Graph();
-graph.setDefaultEdgeLabel(() => ({}));
-
 const nodeWidth = 300;
 const nodeHeight = 200;
 
 export const autolayout = (elements: Elements, direction: AutolayoutDirection = AutolayoutDirection.Vertical) => {
+  const graph = new dagre.graphlib.Graph();
+  graph.setDefaultEdgeLabel(() => ({}));
+
   graph.setGraph({});
 
   const clone: Elements = {

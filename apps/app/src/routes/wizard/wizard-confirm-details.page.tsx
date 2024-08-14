@@ -175,7 +175,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const debouncedFetchPositionProfile = useCallback(
     debounce(async (positionNumber: string) => {
       try {
-        getPositionProfile({ positionNumber, suppressGlobalError: true });
+        // console.log('debounce fetch: ', positionNumber);
+        getPositionProfile({ positionNumber, uniqueKey: 'excludedManagerProfile', suppressGlobalError: true });
         trigger('excludedManagerPositionNumber');
       } catch (e) {
         // handled by isError, prevents showing error toast
@@ -202,6 +203,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     async function fetchExcludedManagerProfile() {
       if (positionRequestData?.additional_info?.excluded_mgr_position_number) {
         try {
+          // console.log('fetch2: ', positionRequestData?.additional_info?.excluded_mgr_position_number);
           await getPositionProfile({
             positionNumber: positionRequestData.additional_info.excluded_mgr_position_number,
             uniqueKey: 'excludedManagerProfile',
@@ -390,9 +392,12 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           ? findExcludedManager(`${reports_to_position_id}`, orgchart_json)
           : undefined;
 
-      setValue('excludedManagerPositionNumber', excluded_mgr_position_number || lookup?.id || '');
-      if (lookup?.id) {
-        debouncedFetchPositionProfile(lookup.id);
+      const useExcludedMngr = excluded_mgr_position_number || lookup?.id || '';
+      setValue('excludedManagerPositionNumber', useExcludedMngr);
+      if (!excluded_mgr_position_number && lookup?.id) {
+        // console.log('debouncedFetchPositionProfile A: ', useExcludedMngr);
+        // fetch only if excluded manager wasn't previously set,  otherwise causes a double fetch because of the uniqueKey = true
+        debouncedFetchPositionProfile(useExcludedMngr);
       }
 
       setValue('comments', comments || '');
@@ -709,6 +714,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                   onBlur={onBlur}
                                   value={value}
                                   onChange={(e) => {
+                                    // console.log('debouncedFetchPositionProfile B: ', e.target.value);
                                     debouncedFetchPositionProfile(e.target.value); // Fetch position profile
                                     onChange(e); // Update controller state
                                   }}
