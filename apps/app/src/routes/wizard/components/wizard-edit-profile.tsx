@@ -209,11 +209,8 @@ const WizardEditProfile = forwardRef(
     useEffect(() => {
       if (!effectiveData) return;
 
-      const useProfile = effectiveData?.original_profile_json ?? effectiveData;
-
       // construct picklist data by looking at fields that are marked as editable + non-significant
 
-      console.log('useProfile: ', useProfile);
       const pickListData = {
         requirementsWithoutReadOnly: {
           professionalRegistrationRequirements: [] as { text: string }[],
@@ -223,7 +220,7 @@ const WizardEditProfile = forwardRef(
       };
 
       // professional registrations
-      const profRegs = useProfile.professional_registration_requirements;
+      const profRegs = effectiveData.professional_registration_requirements;
 
       profRegs?.forEach((profReg) => {
         const isSignificant = profReg.is_significant;
@@ -237,7 +234,7 @@ const WizardEditProfile = forwardRef(
       });
 
       // accountabilities
-      const accs = useProfile.accountabilities;
+      const accs = effectiveData.accountabilities;
 
       accs.forEach((acc) => {
         const isSignificant = acc.is_significant;
@@ -251,7 +248,7 @@ const WizardEditProfile = forwardRef(
       });
 
       // security screenings
-      const secs = useProfile.security_screenings;
+      const secs = effectiveData.security_screenings;
 
       secs.forEach((acc) => {
         const isSignificant = acc.is_significant;

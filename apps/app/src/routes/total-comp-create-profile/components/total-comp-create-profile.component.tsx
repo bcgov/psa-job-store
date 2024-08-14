@@ -28,6 +28,7 @@ import {
   Radio,
   Row,
   Select,
+  Space,
   Switch,
   Tabs,
   TabsProps,
@@ -266,7 +267,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [profileJson, setProfileJson] = useState<any>(null);
 
   const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
-  // const [triggerGetPreviousJobProfile, { data: previousJobProfile }] = useLazyGetJobProfileByNumberQuery();
   const [triggerGetJobProfileMeta, { data: jobProfileMeta }] = useLazyGetJobProfileMetaQuery();
   const [triggerGetPositionRequestsCount, { data: positionRequestsCount }] = useLazyGetPositionRequestsCountQuery();
   let link: string;
@@ -322,14 +322,23 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   </DownloadJobProfileComponent>
                 </div>
               </Menu.Item>
-              <Menu.Item key="delete" onClick={showUnPublishConfirm}>
-                <div style={{ padding: '5px 0' }}>
-                  Unpublish
-                  <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                    Remove the job profile from the Job Store.{' '}
+              {isCurrentVersion ? (
+                <Menu.Item key="delete" onClick={showUnPublishConfirm}>
+                  <div style={{ padding: '5px 0' }}>
+                    Unpublish
+                    <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                      Remove the job profile from the Job Store.{' '}
+                    </Typography.Text>
+                  </div>
+                </Menu.Item>
+              ) : (
+                <Menu.Item key="duplicate" onClick={() => duplicate()}>
+                  <div style={{ padding: '5px 0' }}>Duplicate</div>
+                  <Typography.Text type="secondary" style={{ marginTop: '5px' }}>
+                    Create a copy of this job profile.
                   </Typography.Text>
-                </div>
-              </Menu.Item>
+                </Menu.Item>
+              )}
               <Menu.Item key="copy" onClick={() => handleCopyLink()}>
                 <div style={{ padding: '5px 0' }}>
                   <div>
@@ -2497,7 +2506,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                             
                             */}
                             <Typography.Text style={{ marginBottom: '5px', display: 'block' }}>
-                              {jobProfileData?.jobProfile.streams[index].stream.name}
+                              {jobProfileData?.jobProfile.streams[index].stream?.name}
                             </Typography.Text>
                           </>
                         ),
@@ -4538,7 +4547,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               )}
 
               {state == 'PUBLISHED' && !isCurrentVersion && jobProfileMeta?.jobProfileMeta.versions && (
-                <Card title="Ppublish">
+                <Card>
                   <Typography.Title level={5}>Publish</Typography.Title>
                   <Typography.Text>
                     This will replace the existing published version in the job store. If published, it will be Version{' '}
@@ -4568,25 +4577,37 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Button type="primary" style={{ marginTop: 10 }} onClick={showPublishConfirm}>
                       Publish Profile
                     </Button>
+                    <Divider></Divider>
                   </>
                 )}
 
-                <Divider></Divider>
+                {jobProfileMeta?.jobProfileMeta.versions && isCurrentVersion && (
+                  <>
+                    <Typography.Title level={5}>Download job profile</Typography.Title>
+                    <Typography.Text>Download a copy of the job profile.</Typography.Text>
+                    <br></br>
+                    <DownloadJobProfileComponent
+                      jobProfile={profileJson?.jobProfile}
+                      style={{ marginTop: 10 }}
+                      ignoreAbsentParent={true}
+                    ></DownloadJobProfileComponent>
+                    <Divider></Divider>
+                  </>
+                )}
 
-                {/* {state == 'PUBLISHED' && ( */}
-                <>
-                  <Typography.Title level={5}>Download job profile</Typography.Title>
-                  <Typography.Text>Download a copy of the job profile.</Typography.Text>
-                  <br></br>
-                  <DownloadJobProfileComponent
-                    jobProfile={profileJson?.jobProfile}
-                    style={{ marginTop: 10 }}
-                    ignoreAbsentParent={true}
-                  ></DownloadJobProfileComponent>
-                </>
-                {/* )} */}
+                {state == 'PUBLISHED' && !isCurrentVersion && jobProfileMeta?.jobProfileMeta.versions && (
+                  <>
+                    <Typography.Title level={5}>Duplicate</Typography.Title>
 
-                <Divider></Divider>
+                    <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                      This will create a draft copy of this version of the job profile.{' '}
+                    </Typography.Text>
+                    <Button type="primary" style={{ marginTop: 10 }} onClick={duplicate}>
+                      Duplicate job profile
+                    </Button>
+                    <Divider></Divider>
+                  </>
+                )}
 
                 {state == 'PUBLISHED' && isCurrentVersion && (
                   <>
@@ -4611,10 +4632,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         Share the URL with people who you would like to view this version of the job profile (IDIR
                         restricted).
                       </p>
-                      <Text>{`${window.location.origin}/published-job-profiles/${profileJson?.jobProfile.id}?version=${profileJson?.jobProfile.version}`}</Text>
-                      <Button icon={<CopyOutlined />} onClick={handleCopyLink}>
-                        Copy URL
-                      </Button>
+                      <Space.Compact style={{ width: '70%' }}>
+                        <Input
+                          readOnly
+                          value={`${window.location.origin}/published-job-profiles/${profileJson?.jobProfile.id}?version=${profileJson?.jobProfile.version}`}
+                        ></Input>
+                        <Button icon={<CopyOutlined />} onClick={handleCopyLink}>
+                          Copy URL
+                        </Button>
+                      </Space.Compact>
                       <Divider></Divider>
                     </div>
                   </>
@@ -5007,7 +5033,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             <>
               You are viewing an older version of this job profile. To go to the latest version, click the link:{' '}
               <Link to={link + [...jobProfileMeta.jobProfileMeta.versions].sort((a, b) => b.version - a.version)[0].id}>
-                Version 123
+                Version {[...jobProfileMeta.jobProfileMeta.versions].sort((a, b) => b.version - a.version)[0].version}
               </Link>
             </>
           }
