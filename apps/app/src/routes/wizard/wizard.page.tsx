@@ -172,7 +172,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           if (state == 'CHANGED_PROFILE' || (state == 'NO_CHANGE' && switchStep)) {
             const resp = await updatePositionRequest({
               id: positionRequestId,
-              step: step == -1 ? (action === 'next' ? 2 : 1) : step,
+              step: step == -1 ? (action === 'next' ? 3 : 1) : step,
               // increment max step only if it's not incremented
               ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 2 && step == -1
                 ? { max_step_completed: 2 }
@@ -381,7 +381,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       ]}
     >
       <WizardSteps
-        current={1}
+        current={2}
         //  onStepClick={handleStepClick}
         //   hasUnsavedChanges={hasUnsavedChanges}
         maxStepCompleted={positionRequest?.max_step_completed}

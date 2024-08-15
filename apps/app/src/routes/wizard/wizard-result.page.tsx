@@ -8,7 +8,7 @@ import {
   MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Switch, Typography } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { Divider } from 'antd/lib';
@@ -67,6 +67,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   const [mode, setMode] = useState('');
   const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
+  const [confirmation, setConfirmation] = useState<boolean>(false);
   const [orgChartDataForPng, setOrgChartDataForPng] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData, getClassificationById } =
@@ -220,7 +221,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
         await new Promise((resolve) => setTimeout(resolve, 300));
 
         const png = await generatePNGBase64(getNodes);
-
         const result = await submitPositionRequest({
           id: positionRequestId,
           comment: comment,
@@ -261,7 +261,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
 
   const handleVerificationClick = (reason: string) => {
-    setStep && setStep(2, reason);
+    setStep && setStep(3, reason);
     setCurrentSection(reason);
   };
 
@@ -856,6 +856,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   key="submit"
                   type="primary"
                   onClick={handleOk}
+                  disabled={!confirmation}
                   loading={submitPositionRequestIsLoading || isLoading}
                   data-testid="confirm-modal-ok"
                 >
@@ -895,6 +896,31 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   </ul>
                 </div>
               </div>
+              <Card
+                title={<h3 style={{ fontWeight: '600', fontSize: '16px' }}>Confirmation</h3>}
+                bordered={false}
+                className="custom-card"
+              >
+                <Row>
+                  <Col span={4}>
+                    <Switch
+                      aria-labelledby="confirmation-label-id"
+                      checkedChildren="Yes"
+                      data-testid="confirmation-switch"
+                      checked={confirmation}
+                      onChange={(newValue: boolean | ((prevState: boolean) => boolean)) => {
+                        setConfirmation(newValue);
+                      }}
+                    />
+                  </Col>
+                  <Col span={20}>
+                    <span id="confirmation-label-id">
+                      I confirm that I have received executive approval (Deputy Minister or delegate) for this new
+                      position.
+                    </span>
+                  </Col>
+                </Row>
+              </Card>
             </Modal>
 
             <Modal

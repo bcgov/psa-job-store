@@ -114,15 +114,15 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                 <Tooltip title={disabledTooltip && maxStepCompleted >= 1 && current != 1 ? disabledTooltip : ''}>
                   <div>
                     {current == 1 ? (
-                      <h2 className={current == 1 ? 'current' : ''}>Choose profile</h2>
+                      <h2 className={current == 1 ? 'current' : ''}>Basic Details</h2>
                     ) : maxStepCompleted >= 1 && current != 1 && !disabledTooltip ? (
-                      <span aria-label="Go to step 2 of the wizard - choose profile" tabIndex={0} role="button">
-                        Choose profile
+                      <span aria-label="Go to step 2 of the wizard - basic details" tabIndex={0} role="button">
+                        Basic Details
                       </span>
                     ) : (
-                      'Choose profile'
+                      'Basic Details'
                     )}
-                    <div className="ant-steps-item-description">Choose the right job profile</div>
+                    <div className="ant-steps-item-description">Provide basic info</div>
                   </div>
                 </Tooltip>
               ),
@@ -136,7 +136,7 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                 <Tooltip title={disabledTooltip && maxStepCompleted >= 2 && current != 2 ? disabledTooltip : ''}>
                   <div>
                     {current == 2 ? (
-                      <h2 className={current == 2 ? 'current' : ''}>Edit</h2>
+                      <h2 className={current == 2 ? 'current' : ''}>Choose profile</h2>
                     ) : maxStepCompleted >= 2 && current != 2 && !disabledTooltip ? (
                       <span
                         aria-label={`Go to step 3 of the wizard - edit profile - ${
@@ -145,14 +145,12 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                         tabIndex={0}
                         role="button"
                       >
-                        Edit
+                        Choose profile
                       </span>
                     ) : (
-                      'Edit'
+                      'Choose profile'
                     )}
-                    <div className="ant-steps-item-description">
-                      {requiresVerification ? 'Changes will need to be verified' : 'Make changes if needed'}
-                    </div>
+                    <div className="ant-steps-item-description">Choose the right job profile</div>
                   </div>
                 </Tooltip>
               ),
@@ -168,15 +166,23 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                 <Tooltip title={disabledTooltip && maxStepCompleted >= 3 && current != 3 ? disabledTooltip : ''}>
                   <div>
                     {current == 3 ? (
-                      <h2 className={current == 3 ? 'current' : ''}>Review</h2>
+                      <h2 className={current == 3 ? 'current' : ''}>Edit</h2>
                     ) : maxStepCompleted >= 3 && current != 3 && !disabledTooltip ? (
-                      <span aria-label="Go to step 4 of the wizard - review the job profile" tabIndex={0} role="button">
-                        Review
+                      <span
+                        aria-label={`Go to step 3 of the wizard - edit profile - ${
+                          requiresVerification ? 'Changes will need to be verified' : 'Make changes if needed'
+                        }`}
+                        tabIndex={0}
+                        role="button"
+                      >
+                        Edit
                       </span>
                     ) : (
-                      'Review'
+                      'Edit'
                     )}
-                    <div className="ant-steps-item-description">Review the job profile</div>
+                    <div className="ant-steps-item-description">
+                      {requiresVerification ? 'Changes will need to be verified' : 'Make changes if needed'}
+                    </div>{' '}
                   </div>
                 </Tooltip>
               ),
@@ -190,19 +196,15 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                 <Tooltip title={disabledTooltip && maxStepCompleted >= 4 && current != 4 ? disabledTooltip : ''}>
                   <div>
                     {current == 4 ? (
-                      <h2 className={current == 4 ? 'current' : ''}>Additional details</h2>
+                      <h2 className={current == 4 ? 'current' : ''}>Review</h2>
                     ) : maxStepCompleted >= 4 && current != 4 && !disabledTooltip ? (
-                      <span
-                        aria-label="Go to step 5 of the wizard - additional details - provide additional info"
-                        tabIndex={0}
-                        role="button"
-                      >
-                        Additional details
+                      <span aria-label="Go to step 4 of the wizard - review the job profile" tabIndex={0} role="button">
+                        Review
                       </span>
                     ) : (
-                      'Additional details'
+                      'Review'
                     )}
-                    <div className="ant-steps-item-description">Provide additional info</div>
+                    <div className="ant-steps-item-description">Review the job profile</div>
                   </div>
                 </Tooltip>
               ),

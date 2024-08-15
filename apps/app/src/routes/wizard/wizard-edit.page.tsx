@@ -224,10 +224,10 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         if (positionRequestId) {
           const resp = await updatePositionRequest({
             id: positionRequestId,
-            step: !step && step != 0 ? (action === 'next' ? 3 : action === 'back' ? 1 : 2) : step,
+            step: !step && step != 0 ? (action === 'next' ? 4 : action === 'back' ? 2 : 3) : step,
             // increment max step only if it's not incremented
-            ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 3 && !step && step != 0
-              ? { max_step_completed: 3 }
+            ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 4 && !step && step != 0
+              ? { max_step_completed: 4 }
               : {}),
             profile_json: transformedData,
             title: formData.title.text,
@@ -420,7 +420,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       ]}
     >
       <WizardSteps
-        current={2}
+        current={3}
         onStepClick={switchStep}
         maxStepCompleted={positionRequest?.max_step_completed}
       ></WizardSteps>
