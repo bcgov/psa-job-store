@@ -192,6 +192,7 @@ export const PositionRequestPage = () => {
         setCurrentStep(step);
       }
 
+      //TODO
       if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: wizardContextPositionRequestData?.id });
 
       if (wizardContextPositionRequestData?.id) {
@@ -274,7 +275,7 @@ export const PositionRequestPage = () => {
         );
       case 1:
         return (
-          <WizardPage
+          <WizardConfirmDetailsPage
             setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
@@ -283,6 +284,17 @@ export const PositionRequestPage = () => {
           />
         );
       case 2:
+        return (
+          <WizardPage
+            setCurrentStep={setCurrentStep}
+            onNext={onNext}
+            onBack={onBack}
+            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={wizardContextPositionRequestData}
+          />
+        );
+
+      case 3:
         return (
           <WizardEditPage
             setCurrentStep={setCurrentStep}
@@ -293,7 +305,7 @@ export const PositionRequestPage = () => {
           />
         );
 
-      case 3:
+      case 4:
         return (
           <WizardReviewPage
             setCurrentStep={setCurrentStep}
@@ -303,16 +315,7 @@ export const PositionRequestPage = () => {
             positionRequest={wizardContextPositionRequestData}
           />
         );
-      case 4:
-        return (
-          <WizardConfirmDetailsPage
-            setCurrentStep={setCurrentStep}
-            onNext={onNext}
-            onBack={onBack}
-            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
-            positionRequest={wizardContextPositionRequestData}
-          />
-        );
+
       case 5:
         return (
           <WizardResultPage

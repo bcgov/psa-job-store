@@ -39,10 +39,10 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
       if (positionRequestId) {
         const resp = await updatePositionRequest({
           id: positionRequestId,
-          step: 4,
+          step: 5,
 
           // increment max step only if it's not incremented
-          ...(positionRequest?.max_step_completed != 4 ? { max_step_completed: 4 } : {}),
+          ...(positionRequest?.max_step_completed != 5 ? { max_step_completed: 5 } : {}),
           returnFullObject: true,
         }).unwrap();
         setPositionRequestData(resp.updatePositionRequest ?? null);
@@ -56,7 +56,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
 
   const onBackCallback = async () => {
     if (positionRequestId) {
-      await updatePositionRequest({ id: positionRequestId, step: 2 }).unwrap();
+      await updatePositionRequest({ id: positionRequestId, step: 3 }).unwrap();
       if (onBack) onBack();
     }
     // navigate(-1);
@@ -182,7 +182,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
       >
         <WizardSteps
           onStepClick={switchStep}
-          current={3}
+          current={4}
           maxStepCompleted={positionRequest?.max_step_completed}
         ></WizardSteps>
 

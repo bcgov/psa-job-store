@@ -2,22 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import {
-  Button,
-  Card,
-  Col,
-  Divider,
-  Empty,
-  Form,
-  Input,
-  Menu,
-  Modal,
-  Row,
-  Select,
-  Switch,
-  Tooltip,
-  Typography,
-} from 'antd';
+import { Button, Card, Col, Divider, Empty, Form, Input, Menu, Modal, Row, Select, Tooltip, Typography } from 'antd';
 import { IsNotEmpty, ValidationOptions, registerDecorator } from 'class-validator';
 import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
@@ -305,13 +290,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         // console.log('updatePositionRequest');
         const resp = await updatePositionRequest({
           id: positionRequestId,
-          step: step == -1 ? (updateStep ? (action == 'next' ? 5 : 3) : 4) : step,
+          step: step == -1 ? (updateStep ? (action == 'next' ? 2 : 0) : 1) : step,
           // status: 'COMPLETED',
           // position_number: 123456,
 
           // increment max step only if it's not incremented, and we're not moving back
-          ...(updateStep && action == 'next' && (positionRequest?.max_step_completed ?? 0) < 5 && step == -1
-            ? { max_step_completed: 5 }
+          ...(updateStep && action == 'next' && (positionRequest?.max_step_completed ?? 0) < 2 && step == -1
+            ? { max_step_completed: 2 }
             : {}),
 
           // attach additional information
@@ -407,8 +392,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       }
     }
   }, [departmentsData, positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
-
-  const confirmation = watch('confirmation');
 
   const [deletePositionRequest] = useDeletePositionRequestMutation();
   const deleteRequest = async () => {
@@ -534,7 +517,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       >
         <WizardSteps
           onStepClick={switchStep}
-          current={4}
+          current={1}
           maxStepCompleted={positionRequest?.max_step_completed}
           disabledTooltip={isFetchingPositionProfile ? 'Loading, please wait...' : null}
         ></WizardSteps>
@@ -562,44 +545,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     })}
                     onChange={handleFormChange}
                   >
-                    <Card
-                      title={<h3 style={{ fontWeight: '600', fontSize: '16px' }}>Confirmation</h3>}
-                      bordered={false}
-                      className="custom-card"
-                    >
-                      <Row justify="start">
-                        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-                          <Form.Item
-                            name="confirmation"
-                            validateStatus={errors.confirmation ? 'error' : ''}
-                            help={errors.confirmation?.message}
-                          >
-                            <Controller
-                              name="confirmation"
-                              control={control}
-                              render={({ field: { onChange, value } }) => {
-                                return (
-                                  <Switch
-                                    aria-labelledby="confirmation-label-id"
-                                    checkedChildren="Yes"
-                                    data-testid="confirmation-switch"
-                                    checked={value}
-                                    onChange={(newValue) => {
-                                      onChange(newValue);
-                                    }}
-                                  />
-                                );
-                              }}
-                            />
-                            <span style={{ marginLeft: '1rem' }} id="confirmation-label-id">
-                              I confirm that I have received executive approval (Deputy Minister or delegate) for this
-                              new position.
-                            </span>
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                    </Card>
-
                     <Card
                       title={
                         <span id="department-id-label">
@@ -646,7 +591,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                     value: group.id,
                                   }))}
                                   placeholder="Select department"
-                                  disabled={!confirmation}
                                   notFoundContent={
                                     <Empty
                                       image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -721,7 +665,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                     onChange(e); // Update controller state
                                   }}
                                   placeholder="Position number"
-                                  disabled={!confirmation}
                                 />
                               )}
                             />
@@ -774,11 +717,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                             validateStatus={errors.branch ? 'error' : ''}
                             help={errors.branch?.message}
                           >
-                            <Controller
-                              name="branch"
-                              control={control}
-                              render={({ field }) => <Input {...field} disabled={!confirmation} />}
-                            />
+                            <Controller name="branch" control={control} render={({ field }) => <Input {...field} />} />
                           </Form.Item>
 
                           <Form.Item
@@ -790,7 +729,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                             <Controller
                               name="division"
                               control={control}
-                              render={({ field }) => <Input {...field} disabled={!confirmation} />}
+                              render={({ field }) => <Input {...field} />}
                             />
                           </Form.Item>
                         </Col>
