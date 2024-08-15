@@ -149,6 +149,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 }}
                 style={{ borderRadius: 0, border: 'none', paddingLeft: '0' }}
                 disabled={!data.data.employees[0]?.name}
+                tabIndex={-1}
                 // loading={isLoading}
               >
                 Create new direct report
