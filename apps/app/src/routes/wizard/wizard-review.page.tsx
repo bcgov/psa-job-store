@@ -1,5 +1,5 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Modal, Row, Typography } from 'antd';
+import { Button, Menu, Modal, Typography } from 'antd';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
@@ -8,9 +8,8 @@ import {
   useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
-import { JobProfile } from '../job-profiles/components/job-profile.component';
+import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
-import WizardEditControlBar from './components/wizard-edit-control-bar';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
@@ -31,7 +30,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   setCurrentStep,
 }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
-  const { wizardData, positionRequestId, setPositionRequestData } = useWizardContext();
+  const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const onNextCallback = async () => {
@@ -61,12 +60,6 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
       if (onBack) onBack();
     }
     // navigate(-1);
-  };
-
-  const [showDiff, setShowDiff] = useState(true);
-
-  const handleToggleShowDiff = (checked: boolean) => {
-    setShowDiff(checked);
   };
 
   // const [hasScrolledPast, setHasScrolledPast] = useState(false);
@@ -205,39 +198,13 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
             padding: '2rem 1rem',
           }}
         >
-          <Row justify="center" gutter={16}>
-            <Col sm={24} md={24} lg={24} xxl={18}>
-              <Card bodyStyle={{ padding: '0' }}>
-                <WizardEditControlBar
-                  style={{ background: 'white' }}
-                  onToggleShowDiff={handleToggleShowDiff}
-                  showDiffToggle={true}
-                  showDiff={showDiff}
-                  showNext={false}
-                />
-              </Card>
-
-              {/* <Collapse
-        ref={collapseRef}
-        bordered={false}
-        ghost
-        activeKey={showDiff ? ['1'] : []} // Control the active key based on showDiff
-        className={hasScrolledPast ? 'no-animation' : ''}
-      >
-        <Collapse.Panel key="1" showArrow={false} header="">
-          {diffLegendContent}
-        </Collapse.Panel>
-      </Collapse> */}
-              <JobProfile
-                style={{ marginTop: '1rem' }}
-                profileData={wizardData}
-                showBackToResults={false}
-                showDiff={showDiff}
-                id={wizardData?.number.toString()}
-                showBasicInfo={false}
-              />
-            </Col>
-          </Row>
+          <JobProfileWithDiff
+            positionRequestData={{ positionRequest: positionRequestData }}
+            showBasicInfo={false}
+            controlBarStyle={{ background: 'white' }}
+            rowProps={{ justify: 'center' }}
+            colProps={{ sm: 24, md: 24, lg: 24, xxl: 18 }}
+          />
         </div>
       </WizardPageWrapper>
     </div>

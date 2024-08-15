@@ -175,7 +175,6 @@ export interface JobProfileModel {
   all_reports_to: boolean;
   state?: string;
   is_archived?: boolean;
-  original_profile_json?: JobProfileModel;
   version: number;
 }
 

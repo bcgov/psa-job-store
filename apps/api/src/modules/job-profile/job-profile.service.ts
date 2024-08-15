@@ -27,11 +27,23 @@ export class JobProfileService {
     // if searchConditions were provided, do a "dumb" search instead of elastic search
     let searchResultIds = null;
     if (!searchConditions) searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
-
-    return this.prisma.currentJobProfile.findMany({
+    const currentJobProfiles =
+      state == 'PUBLISHED'
+        ? await this.prisma.currentJobProfile.findMany({
+            select: { id: true, version: true },
+            where: { ...(searchResultIds != null && { id: { in: searchResultIds } }) },
+          })
+        : undefined;
+    return this.prisma.jobProfile.findMany({
       where: {
         is_archived: include_archived,
-        ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        // ...(searchResultIds != null && { id: { in: searchResultIds } }),
+        ...(currentJobProfiles && {
+          OR: currentJobProfiles.map((record) => ({
+            id: record.id,
+            version: record.version,
+          })),
+        }),
         // ...(owner_id != null && { owner_id }),
         ...(searchConditions != null && searchConditions),
         state,
@@ -538,85 +550,66 @@ export class JobProfileService {
     return jobProfile;
   }
 
-  async getJobProfileByNumber(number: number, version: number, userRoles: string[] = []) {
-    const where = version ? { number: number, version: version } : { number };
-    const jobProfiles = version
-      ? await this.prisma.jobProfile.findMany({
-          where: where,
+  async getJobProfileByNumber(number: number, userRoles: string[] = []) {
+    // since number is not necessarily unique on the job profiles model,
+    // we get the latest
+    const currentJobProfiles = await this.prisma.currentJobProfile.findMany({
+      where: { number },
+      orderBy: { published_at: 'desc' },
+    });
+    const currentJobProfile = currentJobProfiles[0];
+    const includesWhere1 = {
+      job_profile_id: currentJobProfile.id,
+      job_profile_version: currentJobProfile.version,
+    };
+    const includesWhere2 = {
+      jobProfileId: currentJobProfile.id,
+      jobProfileVersion: currentJobProfile.version,
+    };
+    const jobProfiles = await this.prisma.currentJobProfile.findMany({
+      where: { id: currentJobProfile.id },
+      include: {
+        classifications: {
+          where: includesWhere1,
           include: {
-            classifications: {
-              include: {
-                classification: true,
-              },
-            },
-            jobFamilies: {
-              include: {
-                jobFamily: true,
-              },
-            },
-            organizations: {
-              include: {
-                organization: true,
-              },
-            },
-            scopes: {
-              include: {
-                scope: true,
-              },
-            },
-            role: true,
-            role_type: true,
-            streams: {
-              include: {
-                stream: true,
-              },
-            },
-
-            behavioural_competencies: {
-              include: {
-                behavioural_competency: true,
-              },
-            },
+            classification: true,
           },
-        })
-      : await this.prisma.currentJobProfile.findMany({
-          where: where,
+        },
+        jobFamilies: {
+          where: includesWhere2,
           include: {
-            classifications: {
-              include: {
-                classification: true,
-              },
-            },
-            jobFamilies: {
-              include: {
-                jobFamily: true,
-              },
-            },
-            organizations: {
-              include: {
-                organization: true,
-              },
-            },
-            scopes: {
-              include: {
-                scope: true,
-              },
-            },
-            role: true,
-            role_type: true,
-            streams: {
-              include: {
-                stream: true,
-              },
-            },
-
-            behavioural_competencies: {
-              include: {
-                behavioural_competency: true,
-              },
-            },
+            jobFamily: true,
           },
-        });
+        },
+        organizations: {
+          where: includesWhere1,
+          include: {
+            organization: true,
+          },
+        },
+        scopes: {
+          where: includesWhere1,
+          include: {
+            scope: true,
+          },
+        },
+        role: true,
+        role_type: true,
+        streams: {
+          where: includesWhere2,
+          include: {
+            stream: true,
+          },
+        },
+
+        behavioural_competencies: {
+          where: includesWhere1,
+          include: {
+            behavioural_competency: true,
+          },
+        },
+      },
+    });
     if (jobProfiles.length > 1) {
       throw AlexandriaError('More than one job profile found for job number ' + number + '. Please contact support.');
     }
@@ -778,21 +771,19 @@ export class JobProfileService {
     // find the max id and increment.
     const sorted = (await this.prisma.jobProfile.findMany({ select: { id: true } })).sort((a, b) => b.id - a.id);
     const id = data.id == 0 ? sorted[0].id + 1 : data.id;
-
+    const currentJobProfile = await this.prisma.currentJobProfile.findUnique({ where: { id: data.id } });
     const profileIsUsed =
       data.version > 0 &&
       (await this.prisma.positionRequest.findFirst({
         where: {
           AND: [
             {
-              profile_json: {
-                path: ['id'],
+              parent_job_profile_id: {
                 equals: id,
               },
             },
             {
-              profile_json: {
-                path: ['original_profile_json', 'version'],
+              parent_job_profile_version: {
                 equals: data.version,
               },
             },
@@ -807,12 +798,12 @@ export class JobProfileService {
     let publishedAt;
     let version;
     if (data.id == id) {
-      if (profileIsUsed) {
+      if (profileIsUsed || currentJobProfile.version > data.version) {
         //we are publishing a new version.
         owner = userId;
         publishedBy = jobProfileState === 'PUBLISHED' ? userId : data.published_by.connect.id;
         publishedAt = jobProfileState === 'PUBLISHED' ? new Date(Date.now()) : data.published_at;
-        version = data.version + 1;
+        version = currentJobProfile.version + 1;
       } else {
         // we are updating a record. - DRAFT or PUBLISHED
         owner = data.owner.connect.id;

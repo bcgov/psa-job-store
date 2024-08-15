@@ -253,7 +253,7 @@ view CurrentJobProfile {
   program_overview                       String?
   review_required                        Boolean?
   title                                  String
-  number                                 Int
+  number                                 Int                               @unique
   overview                               String
   accountabilities                       Json?                             @db.JsonB
   education                              Json?                             @db.JsonB
@@ -273,7 +273,7 @@ view CurrentJobProfile {
   valid_to                               DateTime?
   views                                  Int?
 
-  @@unique(name: "id_version", [id, version])
+  @@id(name: "id_version", [id, version])
   @@map("current_job_profiles")
 }
 

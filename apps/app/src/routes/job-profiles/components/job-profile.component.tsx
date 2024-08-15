@@ -25,7 +25,10 @@ import {
   ProfessionsModel,
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
-import { useLazyGetJobProfileByNumberQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import {
+  useLazyGetJobProfileByNumberQuery,
+  useLazyGetJobProfileQuery,
+} from '../../../redux/services/graphql-api/job-profile.api';
 import AccessibleDocumentFromDescriptions from './accessible-document-from-descriptions';
 import './job-profile.component.css';
 
@@ -34,10 +37,11 @@ const { useBreakpoint } = Grid;
 
 interface JobProfileProps {
   profileData?: any;
-  id?: string; // The id is optional, as it can also be retrieved from the params
   onProfileLoad?: (profileData: JobProfileModel) => void;
   showBackToResults?: boolean;
   showDiff?: boolean;
+  parentJobProfileId?: number;
+  parentJobProfileVersion?: number;
   style?: CSSProperties;
   // onUseProfile?: () => void;
   showBasicInfo?: boolean;
@@ -390,62 +394,77 @@ export class JobProfileValidationModel {
 }
 
 export const JobProfile: React.FC<JobProfileProps> = ({
-  id,
   profileData,
   onProfileLoad,
   showBackToResults = true,
   showDiff = false,
+  parentJobProfileId,
+  parentJobProfileVersion,
   style,
   // onUseProfile,
   showBasicInfo = true,
 }) => {
   const [searchParams] = useSearchParams();
   const params = useParams();
-  const resolvedId = id ?? params.number ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
+  const jobNumber = params.number ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
+
   // console.log('resolvedId: ', resolvedId);
   const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
-  if (!resolvedId && !profileData) throw new Error('No ID');
+  if (!jobNumber && !profileData) throw new Error('No ID');
 
   const [originalData, setOriginalData] = useState<JobProfileModel | null>(null); // for diff
 
   // Using the lazy query to have control over when the fetch action is dispatched
   // (not dispatching if profileData was already provided)
-  const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileByNumberQuery();
+  const [triggerGetJobProfileByNumber, { data: profileByNumber, isLoading }] = useLazyGetJobProfileByNumberQuery();
+  const [triggerGetJobProfile, { data: diffProfileData, isLoading: isLoadingDiff }] = useLazyGetJobProfileQuery();
 
   // State to hold the effectiveData which can be from profileData prop or fetched from API
   const initialData = profileData ?? null;
   const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
-  const [effectiveDataExtra, setEffectiveDataExtra] = useState<JobProfileModel | null>(
-    initialData?.original_profile_json ?? initialData,
-  );
+  const [effectiveDataExtra, setEffectiveDataExtra] = useState<JobProfileModel | null>(initialData);
 
   useEffect(() => {
     // If profileData exists, use it to set the form state
     if (profileData && !showDiff) {
       setEffectiveData(profileData);
-      setEffectiveDataExtra(profileData?.original_profile_json ?? profileData);
-    } else if ((!profileData && resolvedId) || (profileData && showDiff && resolvedId)) {
+      setEffectiveDataExtra(profileData);
+    } else if (!profileData && jobNumber) {
+      triggerGetJobProfileByNumber({ number: +jobNumber });
+    } else if (profileData && showDiff && parentJobProfileId) {
       // If no profileData is provided and an id exists, fetch the data
       // OR profileData was provided, but we also want to run a diff
-      triggerGetJobProfile({ number: +resolvedId });
+      triggerGetJobProfile({ id: parentJobProfileId, version: parentJobProfileVersion });
     }
-  }, [resolvedId, profileData, triggerGetJobProfile, showDiff]);
+  }, [
+    profileData,
+    triggerGetJobProfile,
+    showDiff,
+    jobNumber,
+    triggerGetJobProfileByNumber,
+    parentJobProfileId,
+    parentJobProfileVersion,
+  ]);
 
   // useEffect to set effectiveData when data is fetched from the API
   useEffect(() => {
-    if (!profileData && data && !isLoading) {
+    if (!profileData && profileByNumber && !isLoading) {
       // Only set effectiveData from fetched data if profileData is not provided
-      if (onProfileLoad) onProfileLoad(data.jobProfileByNumber);
-      setEffectiveData(data.jobProfileByNumber);
-      setEffectiveDataExtra(data.jobProfileByNumber);
-    } else if (profileData && showDiff && data && !isLoading) {
-      if (onProfileLoad) onProfileLoad(data.jobProfileByNumber);
+      if (onProfileLoad) onProfileLoad(profileByNumber.jobProfileByNumber);
+      setEffectiveData(profileByNumber.jobProfileByNumber);
+      setEffectiveDataExtra(profileByNumber.jobProfileByNumber);
+    } else if (profileData && showDiff && profileByNumber && !isLoading) {
+      if (onProfileLoad) onProfileLoad(profileByNumber.jobProfileByNumber);
       // do diff between profile as it was submitted at the time, otherwise compare to the latest
-      setOriginalData(profileData?.original_profile_json ?? data.jobProfileByNumber); // for diff
+      setOriginalData(profileByNumber.jobProfileByNumber); // for diff
+    } else if (profileData && showDiff && diffProfileData && !isLoadingDiff) {
+      if (onProfileLoad) onProfileLoad(diffProfileData.jobProfile);
+      // do diff between profile as it was submitted at the time, otherwise compare to the latest
+      setOriginalData(diffProfileData.jobProfile); // for diff
     }
-  }, [data, isLoading, profileData, onProfileLoad, showDiff]);
+  }, [profileByNumber, isLoading, profileData, onProfileLoad, showDiff, diffProfileData, isLoadingDiff]);
 
   const compareData = (original: string | undefined, modified: string | undefined): JSX.Element[] => {
     const blank: JSX.Element[] = [];

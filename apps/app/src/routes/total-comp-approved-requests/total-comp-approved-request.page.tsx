@@ -1,7 +1,6 @@
 import { CopyOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typography, message } from 'antd';
 import copy from 'copy-to-clipboard';
-import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   default as LoadingComponent,
@@ -15,12 +14,11 @@ import { useGetLocationQuery } from '../../redux/services/graphql-api/location.a
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
 import { formatDateTime } from '../../utils/Utils';
+import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import ContentWrapper from '../home/components/content-wrapper.component';
-import { JobProfile } from '../job-profiles/components/job-profile.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
-import WizardEditControlBar from '../wizard/components/wizard-edit-control-bar';
 import './total-comp-approved-request.page.css';
 const { Text } = Typography;
 
@@ -245,12 +243,6 @@ export const TotalCompApprovedRequestPage = () => {
   //   };
   // }, []);
 
-  const [showDiff, setShowDiff] = useState(true);
-
-  const handleToggleShowDiff = (checked: boolean) => {
-    setShowDiff(checked);
-  };
-
   // END PROFILE TAB INFO
   // const handleDownload = () => {
   //   // Implement download functionality here
@@ -354,36 +346,40 @@ export const TotalCompApprovedRequestPage = () => {
       key: '3',
       label: 'Job Profile',
       children: (
-        <>
-          <Row justify="center">
-            <Col xs={24} sm={24} md={24} lg={20} xl={16} style={{ background: '#fff' }}>
-              <WizardEditControlBar
-                onToggleShowDiff={handleToggleShowDiff}
-                showDiffToggle={true}
-                showDiff={showDiff}
-                showNext={false}
-              />
-              {/* <Collapse
-                ref={collapseRef}
-                bordered={false}
-                ghost
-                activeKey={showDiff ? ['1'] : []} // Control the active key based on showDiff
-                className={hasScrolledPast ? 'no-animation' : ''}
-              >
-                <Collapse.Panel key="1" showArrow={false} header="">
-                  {diffLegendContent}
-                </Collapse.Panel>
-              </Collapse> */}
-              <JobProfile
-                style={{ marginTop: '1rem' }}
-                profileData={data?.positionRequest?.profile_json}
-                showBackToResults={false}
-                showDiff={showDiff}
-                id={data?.positionRequest?.parent_job_profile?.number?.toString() ?? undefined}
-              />
-            </Col>
-          </Row>
-        </>
+        <JobProfileWithDiff
+          positionRequestData={{ positionRequest: data?.positionRequest }}
+          rowProps={{ justify: 'center' }}
+          colProps={{ xs: 24, sm: 24, md: 24, lg: 20, xl: 16 }}
+        />
+        // <>
+        //   <Row justify="center">
+        //     <Col xs={24} sm={24} md={24} lg={20} xl={16} style={{ background: '#fff' }}>
+        //       <WizardEditControlBar
+        //         onToggleShowDiff={handleToggleShowDiff}
+        //         showDiffToggle={true}
+        //         showDiff={showDiff}
+        //         showNext={false}
+        //       />
+        //       {/* <Collapse
+        //         ref={collapseRef}
+        //         bordered={false}
+        //         ghost
+        //         activeKey={showDiff ? ['1'] : []} // Control the active key based on showDiff
+        //         className={hasScrolledPast ? 'no-animation' : ''}
+        //       >
+        //         <Collapse.Panel key="1" showArrow={false} header="">
+        //           {diffLegendContent}
+        //         </Collapse.Panel>
+        //       </Collapse> */}
+        //       <JobProfile
+        //         style={{ marginTop: '1rem' }}
+        //         profileData={data?.positionRequest?.profile_json}
+        //         showBackToResults={false}
+        //         showDiff={showDiff}
+        //       />
+        //     </Col>
+        //   </Row>
+        // </>
       ),
     },
     {
