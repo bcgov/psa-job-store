@@ -330,7 +330,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const {
     control,
     handleSubmit,
-    watch,
     setValue,
     setError,
     clearErrors,
