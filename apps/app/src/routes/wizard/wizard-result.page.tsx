@@ -844,7 +844,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             )}
 
             <Modal
-              title="Affirmation"
+              title={<div style={{ fontWeight: 600, fontSize: '16px' }}>Affirmation</div>}
               open={isModalVisible}
               onOk={handleOk}
               onCancel={handleCancel}
@@ -864,6 +864,29 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 </Button>,
               ]}
             >
+              <Divider></Divider>
+              <b>Confirmation</b>
+              <div style={{ paddingBottom: '10px' }}>
+                <Row>
+                  <Col span={2}>
+                    <Switch
+                      size="small"
+                      aria-labelledby="confirmation-label-id"
+                      data-testid="confirmation-switch"
+                      checked={confirmation}
+                      onChange={(newValue: boolean | ((prevState: boolean) => boolean)) => {
+                        setConfirmation(newValue);
+                      }}
+                    />
+                  </Col>
+                  <Col span={22}>
+                    <span id="confirmation-label-id">
+                      I confirm that I have received executive approval (Deputy Minister or delegate) for this new
+                      position.
+                    </span>
+                  </Col>
+                </Row>
+              </div>
               <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                 <div>
                   <b>By clicking “Generate position number” I affirm that:</b>
@@ -896,31 +919,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   </ul>
                 </div>
               </div>
-              <Card
-                title={<h3 style={{ fontWeight: '600', fontSize: '16px' }}>Confirmation</h3>}
-                bordered={false}
-                className="custom-card"
-              >
-                <Row>
-                  <Col span={4}>
-                    <Switch
-                      aria-labelledby="confirmation-label-id"
-                      checkedChildren="Yes"
-                      data-testid="confirmation-switch"
-                      checked={confirmation}
-                      onChange={(newValue: boolean | ((prevState: boolean) => boolean)) => {
-                        setConfirmation(newValue);
-                      }}
-                    />
-                  </Col>
-                  <Col span={20}>
-                    <span id="confirmation-label-id">
-                      I confirm that I have received executive approval (Deputy Minister or delegate) for this new
-                      position.
-                    </span>
-                  </Col>
-                </Row>
-              </Card>
             </Modal>
 
             <Modal
