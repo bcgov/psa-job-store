@@ -26,6 +26,7 @@ import {
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfileByNumberQuery } from '../../../redux/services/graphql-api/job-profile.api';
+import AccessibleDocumentFromDescriptions from './accessible-document-from-descriptions';
 import './job-profile.component.css';
 
 const { Text } = Typography;
@@ -1248,9 +1249,15 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         style={{ marginBottom: '24px' }}
       />
 
+      <div className="sr-only">
+        <h2 style={{ margin: '0' }}>Job profile</h2>
+        <AccessibleDocumentFromDescriptions items={items} />
+      </div>
+
       <Descriptions
+        aria-hidden
         className="customDescriptions"
-        title={<h2 style={{ margin: '-7px 0' }}>Job profile</h2>}
+        title={<h2 style={{ margin: '0' }}>Job profile</h2>}
         bordered
         column={24}
         items={items}
@@ -1267,24 +1274,31 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       />
 
       {showBasicInfo && (
-        <Descriptions
-          className="customDescriptions"
-          title={<h2 style={{ margin: '-7px 0' }}>Basic information</h2>}
-          bordered
-          column={24}
-          items={basicInfoItems}
-          style={{ marginTop: '24px', marginBottom: '24px' }}
-          labelStyle={{
-            fontWeight: 700,
-            width: '100px',
-            verticalAlign: 'top',
-            background: '#FAFAFA',
-          }}
-          contentStyle={{
-            background: 'white',
-            verticalAlign: 'top',
-          }}
-        />
+        <>
+          <div className="sr-only">
+            <h2 style={{ margin: '0' }}>Basic information</h2>
+            <AccessibleDocumentFromDescriptions items={basicInfoItems} />
+          </div>
+          <Descriptions
+            aria-hidden
+            className="customDescriptions"
+            title={<h2 style={{ margin: '0' }}>Basic information</h2>}
+            bordered
+            column={24}
+            items={basicInfoItems}
+            style={{ marginTop: '24px', marginBottom: '24px' }}
+            labelStyle={{
+              fontWeight: 700,
+              width: '100px',
+              verticalAlign: 'top',
+              background: '#FAFAFA',
+            }}
+            contentStyle={{
+              background: 'white',
+              verticalAlign: 'top',
+            }}
+          />
+        </>
       )}
       <div
         style={{

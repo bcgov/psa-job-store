@@ -1,7 +1,8 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Modal, Popover, Row, Typography } from 'antd';
+import { Button, Card, Col, Menu, Modal, Row, Typography } from 'antd';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -173,9 +174,11 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           <div style={{ marginRight: '1rem' }}>
             <StatusIndicator status={positionRequest?.status ?? ''} />
           </div>,
-          <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
-            <Button icon={<EllipsisOutlined />}></Button>
-          </Popover>,
+          <AcessiblePopoverMenu
+            triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+            content={getMenuContent()}
+            ariaLabel="Open position request menu"
+          ></AcessiblePopoverMenu>,
           <Button onClick={onBackCallback} key="back" data-testid="back-button">
             Back
           </Button>,

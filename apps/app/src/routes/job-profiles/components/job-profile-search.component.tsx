@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CloseCircleFilled } from '@ant-design/icons';
+import { CloseCircleFilled, CloseOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Input, Row, Tag, Tooltip } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -501,7 +501,10 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                 }}
                 value={searchText}
                 onBlur={() => {
-                  handleSearch(searchText);
+                  // doing on this blur causes unexpected behaviour when using keyboard navigation
+                  // for example there may be previously selected profile, then when user tabs through the fields
+                  // it gets deselected
+                  // handleSearch(searchText);
                 }}
                 suffix={
                   <Tooltip placement="top" title={'Clear search'}>
@@ -835,6 +838,21 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
             <Col lg={15} xs={24}>
               {allSelections.map((selection) => (
                 <Tag
+                  closeIcon={
+                    <Button
+                      type="link"
+                      size="small"
+                      style={{ padding: '0', width: 'auto', height: 'auto' }}
+                      icon={<CloseOutlined aria-hidden style={{ fontSize: '0.7rem', color: 'rgba(0, 0, 0, 0.88)' }} />}
+                      aria-label={`Remove ${findLabel(selection.value, selection.type)} filter`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          removeSelection(selection.value, selection.type);
+                        }
+                      }}
+                    />
+                  }
                   style={{ marginTop: '10px' }}
                   key={`${selection.type}-${selection.value}`}
                   closable
