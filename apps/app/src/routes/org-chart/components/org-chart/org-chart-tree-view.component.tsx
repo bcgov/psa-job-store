@@ -447,7 +447,6 @@ const OrgChartTreeView = ({
 
       {/* <div aria-live="polite">{announcement}</div> */}
       <TreeView
-        // tab-index="-1"
         key={renderKey}
         data={finalTreeData}
         className="org-chart-tree"

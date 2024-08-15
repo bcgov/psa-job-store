@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ExclamationCircleFilled, InfoCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Alert, Col, Descriptions, Form, Input, List, Row, Tooltip } from 'antd';
+import { Alert, Button, Col, Descriptions, Form, Input, List, Row, Tooltip } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -790,11 +790,20 @@ const WizardEditProfile = forwardRef(
                 <div>
                   Job Details
                   <div style={{ float: 'right', fontSize: '90%' }}>
-                    <Tooltip title="Information shown here is dependent on the values that you selected in the previous steps.">
-                      <a href="#" style={{ marginLeft: 8 }}>
+                    <Tooltip
+                      trigger={['hover', 'focus']}
+                      title="Information shown here is dependent on the values that you selected in the previous steps."
+                      id="tooltip-info"
+                    >
+                      <Button
+                        type="link"
+                        role="button"
+                        aria-describedby="tooltip-info"
+                        aria-label="Why can't I make changes?"
+                      >
                         Why can't I make changes?
-                        <QuestionCircleOutlined style={{ marginLeft: 4 }} />
-                      </a>
+                        <QuestionCircleOutlined aria-hidden style={{ marginLeft: 4 }} />
+                      </Button>
                     </Tooltip>
                   </div>
                 </div>
