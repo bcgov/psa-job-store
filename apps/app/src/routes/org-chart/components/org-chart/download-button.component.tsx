@@ -785,8 +785,7 @@ function parseStyle(styleString: string): StyleObject {
   return styleObj;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function DownloadButton({ focusable = true }: { focusable?: boolean }) {
+function DownloadButton() {
   const [isLoading, setIsLoading] = useState(false);
   const { getNodes } = useReactFlow();
 
