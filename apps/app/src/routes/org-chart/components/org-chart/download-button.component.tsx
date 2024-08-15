@@ -1,10 +1,11 @@
 import { DownloadOutlined } from '@ant-design/icons';
-import { Button, Dropdown } from 'antd';
+import { Button, Menu } from 'antd';
 import canvasSize from 'canvas-size';
 import { toSvg } from 'html-to-image';
 import { Options } from 'html-to-image/lib/types';
 import { useState } from 'react';
 import { Panel, Rect, getNodesBounds, getRectOfNodes, getTransformForBounds, useReactFlow } from 'reactflow';
+import AcessiblePopoverMenu from '../../../../components/app/common/components/accessible-popover-menu';
 
 // interface NodesBounds {
 //   width: number;
@@ -784,6 +785,7 @@ function parseStyle(styleString: string): StyleObject {
   return styleObj;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function DownloadButton({ focusable = true }: { focusable?: boolean }) {
   const [isLoading, setIsLoading] = useState(false);
   const { getNodes } = useReactFlow();
@@ -813,26 +815,50 @@ function DownloadButton({ focusable = true }: { focusable?: boolean }) {
     }
   };
 
-  const items = [
-    {
-      key: '1',
-      label: 'Download PNG',
-      onClick: onClick_png,
-    },
-    {
-      key: '2',
-      label: 'Download SVG',
-      onClick: onClick_svg,
-    },
-  ];
-
   return (
     <Panel position="top-right" style={{ marginTop: 0 }}>
-      <Dropdown menu={{ items }} placement="bottomRight">
+      {/* <Dropdown menu={{ items }} placement="bottomRight">
         <Button tabIndex={focusable ? 0 : -1} loading={isLoading} icon={<DownloadOutlined />}>
           Download
         </Button>
-      </Dropdown>
+      </Dropdown> */}
+      <AcessiblePopoverMenu
+        triggerButton={
+          <Button
+            loading={isLoading}
+            tabIndex={-1}
+            style={{}}
+            icon={
+              <DownloadOutlined aria-hidden />
+
+              // <UserOutlined style={{ color: 'white' }} aria-hidden />
+              // {
+              //   key: '1',
+              //   label: 'Download PNG',
+              //   onClick: onClick_png,
+              // },
+              // {
+              //   key: '2',
+              //   label: 'Download SVG',
+              //   onClick: onClick_svg,
+              // },
+            }
+          >
+            Download
+          </Button>
+        }
+        ariaLabel="Open user menu"
+        content={
+          <Menu selectedKeys={[]}>
+            <Menu.Item key="png" onClick={onClick_png}>
+              Download PNG
+            </Menu.Item>
+            <Menu.Item key="svg" onClick={onClick_svg}>
+              Download SVG
+            </Menu.Item>
+          </Menu>
+        }
+      ></AcessiblePopoverMenu>
     </Panel>
   );
 }

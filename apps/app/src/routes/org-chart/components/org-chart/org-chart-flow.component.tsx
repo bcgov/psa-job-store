@@ -86,7 +86,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
             style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
             zoomable
           />
-          <DownloadButton focusable={false} />
+          <DownloadButton />
         </ReactFlow>
       </PositionProvider>
     </>
