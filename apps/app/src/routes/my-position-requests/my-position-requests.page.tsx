@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { CloseOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Row, Select, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
 import { useEffect, useState } from 'react';
@@ -344,6 +345,23 @@ export const MyPositionsPage = () => {
                     key={`${selection.type}-${selection.value}`}
                     closable
                     onClose={() => removeSelection(selection.value, selection.type)}
+                    closeIcon={
+                      <Button
+                        type="link"
+                        size="small"
+                        style={{ padding: '0', width: 'auto', height: 'auto' }}
+                        icon={
+                          <CloseOutlined aria-hidden style={{ fontSize: '0.7rem', color: 'rgba(0, 0, 0, 0.88)' }} />
+                        }
+                        aria-label={`Remove ${findLabel(selection.value, selection.type)} filter`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            removeSelection(selection.value, selection.type);
+                          }
+                        }}
+                      />
+                    }
                   >
                     {findLabel(selection.value, selection.type)}
                   </Tag>

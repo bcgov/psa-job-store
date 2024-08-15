@@ -8,7 +8,7 @@ import {
   MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Typography } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { Divider } from 'antd/lib';
@@ -16,6 +16,7 @@ import { autolayout, updateSupervisorAndAddNewPositionNode } from 'common-kit';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
+import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import {
   GetPositionRequestResponseContent,
@@ -383,9 +384,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             <div style={{ marginRight: '1rem' }}>
               <StatusIndicator status={positionRequest?.status ?? ''} />
             </div>,
-            <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
-              <Button icon={<EllipsisOutlined />}></Button>
-            </Popover>,
+            <AcessiblePopoverMenu
+              triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+              content={getMenuContent()}
+              ariaLabel="Open position request menu"
+            ></AcessiblePopoverMenu>,
             <Button onClick={back} key="back" data-testid="back-button">
               Back
             </Button>,
