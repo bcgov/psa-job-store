@@ -40,6 +40,7 @@ const NaiveCreatePositionButton = ({
         data-testid="create-direct-report-button"
         style={{ borderRadius: 0, border: 'none', width: '100%' }}
         type="default"
+        tabIndex={-1}
         // loading={isLoading}
       >
         Create new direct report

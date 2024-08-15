@@ -60,6 +60,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
             treeViewInFocusCallback={treeViewInFocusCallback}
           />
         </div>
+
         <ReactFlow
           aria-hidden="true"
           onPaneClick={() => {
@@ -76,6 +77,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
           nodesFocusable={false}
           edgesFocusable={false}
           disableKeyboardA11y={true}
+
           // selectedNodes={selectedNodeId ? [selectedNodeId] : []}
         >
           <Background />
