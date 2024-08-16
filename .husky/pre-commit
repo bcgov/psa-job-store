@@ -10,4 +10,11 @@ then
     exit 1
 fi
 
+. "$(dirname -- "$0")/check_secrets.sh"
+
+if [ $? -ne 0 ]; then
+    echo "\n🚫 Secrets detected in the code. Please remove or secure them before committing.\n"
+    exit 1
+fi
+
 npx lint-staged
