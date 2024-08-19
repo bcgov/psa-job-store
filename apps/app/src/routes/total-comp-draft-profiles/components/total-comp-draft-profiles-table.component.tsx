@@ -185,6 +185,8 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     }
   }, [data]);
 
+  const next = location.pathname.includes('next') ? 'next' : '';
+
   const columns: ColumnTypes[] = [
     {
       title: 'Job Title',
@@ -192,7 +194,11 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       key: 'title',
       sorter: allowSorting,
       defaultSortOrder: getSortOrder('title'),
-      render: (text: any, record: any) => <Link to={`${link}${record.id}`}>{text?.trim() || 'Untitled'}</Link>,
+      render: (text: any, record: any) => (
+        <Link to={`${next.length > 0 ? '/next/job-profiles/manage/draft/' : link}${record.id}`}>
+          {text?.trim() || 'Untitled'}
+        </Link>
+      ),
     },
     {
       sorter: allowSorting,

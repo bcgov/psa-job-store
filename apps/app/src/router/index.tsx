@@ -125,8 +125,70 @@ export const router = createBrowserRouter([
                     },
                   },
                   {
+                    path: 'saved',
+                    element: <JobProfilesRoute />,
+                    handle: {
+                      icon: <FileTextOutlined />,
+                    },
+                    children: [
+                      {
+                        index: true,
+                        element: <SavedJobProfilesPage />,
+                      },
+                      {
+                        path: ':number',
+                        element: <SavedJobProfilesPage />,
+                        handle: {
+                          icon: <FileTextOutlined />,
+                        },
+                      },
+                    ],
+                  },
+                  {
                     path: 'manage',
                     children: [
+                      {
+                        path: 'archived',
+                        element: (
+                          <RoleGuard roles={['total-compensation']}>
+                            <TotalCompPublishedProfilesRoute />
+                          </RoleGuard>
+                        ),
+                        handle: {
+                          breadcrumb: () => 'Archived Job Profiles',
+                        },
+                        children: [
+                          {
+                            index: true,
+                            element: <TotalCompArchivedProfilesPage />,
+                          },
+                          {
+                            path: ':id',
+                            element: <TotalCompCreateProfilePage />,
+                          },
+                        ],
+                      },
+                      {
+                        path: 'create',
+                        handle: {
+                          breadcrumb: () => 'Create profile',
+                        },
+                        element: (
+                          <RoleGuard roles={['total-compensation']}>
+                            <TotalCompDraftProfilesRoute />
+                          </RoleGuard>
+                        ),
+                        children: [
+                          {
+                            index: true,
+                            element: <TotalCompCreateProfilePage />,
+                          },
+                          {
+                            path: ':id',
+                            element: <TotalCompCreateProfilePage />,
+                          },
+                        ],
+                      },
                       {
                         path: 'draft',
                         element: (
@@ -139,33 +201,33 @@ export const router = createBrowserRouter([
                         },
                         children: [
                           {
-                            path: 'create',
-                            element: (
-                              <RoleGuard roles={['total-compensation']}>
-                                <TotalCompDraftProfilesRoute />
-                              </RoleGuard>
-                            ),
-                            children: [
-                              {
-                                index: true,
-                                element: <TotalCompCreateProfilePage />,
-                              },
-                              {
-                                path: ':id',
-                                element: <TotalCompCreateProfilePage />,
-                              },
-                            ],
-                          },
-                          {
                             path: ':id',
                             element: <TotalCompCreateProfilePage />,
                           },
                           {
-                            handle: {
-                              breadcrumb: () => 'Create profile',
-                            },
                             index: true,
                             element: <TotalCompDraftProfilesPage />,
+                          },
+                        ],
+                      },
+                      {
+                        path: 'published',
+                        element: (
+                          <RoleGuard roles={['total-compensation']}>
+                            <TotalCompPublishedProfilesRoute />
+                          </RoleGuard>
+                        ),
+                        handle: {
+                          breadcrumb: () => 'Published Job Profiles',
+                        },
+                        children: [
+                          {
+                            index: true,
+                            element: <TotalCompPublishedProfilesPage />,
+                          },
+                          {
+                            path: ':id',
+                            element: <TotalCompCreateProfilePage />,
                           },
                         ],
                       },
@@ -173,6 +235,144 @@ export const router = createBrowserRouter([
                   },
                 ],
               },
+              // Requests
+              {
+                path: 'requests',
+                children: [
+                  {
+                    path: 'positions',
+                    element: <MyPositionsRoute />,
+                    children: [
+                      {
+                        index: true,
+                        element: <MyPositionsPage />,
+                      },
+                      {
+                        path: 'create',
+                        element: <WizardOrgChartPage />,
+                      },
+                      {
+                        path: 'manage',
+                        handle: {
+                          breadcrumb: () => 'Manage position requests',
+                        },
+                        children: [
+                          {
+                            element: (
+                              <RoleGuard roles={['classification']}>
+                                <ClassificationTasksRoute />
+                              </RoleGuard>
+                            ),
+                            children: [
+                              {
+                                index: true,
+                                element: <ClassificationTasksPage />,
+                              },
+                              {
+                                path: ':positionRequestId',
+                                element: <ClassificationTaskPage />,
+                              },
+                            ],
+                          },
+                          {
+                            path: 'approved',
+                            element: (
+                              <RoleGuard roles={['total-compensation']}>
+                                <TotalCompApprovedRequestsRoute />
+                              </RoleGuard>
+                            ),
+                            handle: {
+                              breadcrumb: () => 'Approved requests',
+                            },
+                            children: [
+                              {
+                                index: true,
+                                element: <TotalCompApprovedRequestsPage />,
+                              },
+                              {
+                                path: ':positionRequestId',
+                                element: <TotalCompApprovedRequestPage />,
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                      {
+                        path: ':positionRequestId',
+                        element: <WizardRoute />,
+                        children: [
+                          {
+                            index: true,
+                            element: <PositionRequestPage />,
+                            handle: {
+                              icon: <FileTextOutlined />,
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        path: 'share/:positionRequestId',
+                        element: <WizardRoute />,
+                        children: [
+                          {
+                            index: true,
+                            element: <PositionRequestPage />,
+                            handle: {
+                              breadcrumb: () => 'My position requests',
+                              icon: <FileTextOutlined />,
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              // {
+              //   path: '/my-position-requests',
+              //   element: <MyPositionsRoute />,
+              //   handle: {
+              //     breadcrumb: () => 'My Position Requests',
+              //     icon: <UserAddOutlined />,
+              //   },
+              //   children: [
+              //     {
+              //       index: true,
+              //       element: <MyPositionsPage />,
+              //     },
+              //     {
+              //       path: 'create',
+              //       element: <WizardOrgChartPage />,
+              //     },
+              //     {
+              //       path: '/my-position-requests/:positionRequestId',
+              //       element: <WizardRoute />,
+              //       children: [
+              //         {
+              //           index: true,
+              //           element: <PositionRequestPage />,
+              //           handle: {
+              //             icon: <FileTextOutlined />,
+              //           },
+              //         },
+              //       ],
+              //     },
+              //     {
+              //       path: 'share/:positionRequestId',
+              //       element: <WizardRoute />,
+              //       children: [
+              //         {
+              //           index: true,
+              //           element: <PositionRequestPage />,
+              //           handle: {
+              //             breadcrumb: () => 'My position requests',
+              //             icon: <FileTextOutlined />,
+              //           },
+              //         },
+              //       ],
+              //     },
+              //   ],
+              // },
               // Settings
               {
                 path: 'settings',

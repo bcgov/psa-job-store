@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  FileDoneOutlined,
   FileOutlined,
   FileProtectOutlined,
   FileSearchOutlined,
@@ -54,6 +55,15 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                     ...(userCanAccess(auth.user, ['user'])
                       ? [createMenuItem({ key: '/next/job-profiles', icon: <FileSearchOutlined />, label: 'Explore' })]
                       : []),
+                    ...(userCanAccess(auth.user, ['user'])
+                      ? [
+                          createMenuItem({
+                            key: '/next/job-profiles/saved',
+                            icon: <FileDoneOutlined />,
+                            label: 'Saved Profiles',
+                          }),
+                        ]
+                      : []),
                     ...(userCanAccess(auth.user, ['total-compensation'])
                       ? [
                           createSubMenu({
@@ -101,18 +111,31 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                           }),
                         ]
                       : []),
-                    ...(userCanAccess(auth.user, ['classification'])
+                    ...(userCanAccess(auth.user, ['classification', 'total-compensation'])
                       ? [
                           createSubMenu({
                             key: '/next/requests/positions',
                             icon: <SendSettingOutlined />,
                             label: 'Manage requests',
                             children: [
-                              createMenuItem({
-                                key: '/next/requests/positions/manage',
-                                icon: <PositionRequestSettingOutlined />,
-                                label: 'New position',
-                              }),
+                              ...(userCanAccess(auth.user, ['classification'])
+                                ? [
+                                    createMenuItem({
+                                      key: '/next/requests/positions/manage',
+                                      icon: <PositionRequestSettingOutlined />,
+                                      label: 'New position',
+                                    }),
+                                  ]
+                                : []),
+                              ...(userCanAccess(auth.user, ['total-compensation'])
+                                ? [
+                                    createMenuItem({
+                                      key: '/next/requests/positions/manage/approved',
+                                      icon: <FileDoneOutlined />,
+                                      label: 'Approved',
+                                    }),
+                                  ]
+                                : []),
                             ],
                           }),
                         ]
