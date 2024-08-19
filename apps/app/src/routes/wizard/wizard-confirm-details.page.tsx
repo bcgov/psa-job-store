@@ -3,7 +3,7 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import { Button, Card, Col, Empty, Form, Input, Menu, Modal, Row, Select, Typography } from 'antd';
-import { IsNotEmpty, ValidationOptions, registerDecorator } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -32,23 +32,6 @@ interface WizardConfirmPageProps {
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
   setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
-}
-
-function IsTrue(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
-    registerDecorator({
-      name: 'isTrue',
-      target: object.constructor,
-      propertyName: propertyName,
-      constraints: [],
-      options: validationOptions,
-      validator: {
-        validate(value: boolean) {
-          return value === true;
-        },
-      },
-    });
-  };
 }
 
 // @ValidatorConstraint({ async: true })
