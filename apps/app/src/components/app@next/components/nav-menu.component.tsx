@@ -38,41 +38,41 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         theme="light"
         items={[
           ...(userCanAccess(auth.user, ['user'])
-            ? [createMenuItem({ key: '/', icon: <HomeOutlined />, label: 'Home' })]
+            ? [createMenuItem({ key: '/next', icon: <HomeOutlined />, label: 'Home' })]
             : []),
           ...(userCanAccess(auth.user, ['user'])
-            ? [createMenuItem({ key: '/my-departments', icon: <PartitionOutlined />, label: 'My departments' })]
+            ? [createMenuItem({ key: '/next/my-departments', icon: <PartitionOutlined />, label: 'My departments' })]
             : []),
           ...(userCanAccess(auth.user, ['user', 'total-compensation'])
             ? [
                 createMenuGroup({
-                  key: '/job-profiles',
+                  key: '/next/job-profiles',
                   collapsed,
                   icon: <FileOutlined />,
                   label: 'Job Profiles',
                   children: [
                     ...(userCanAccess(auth.user, ['user'])
-                      ? [createMenuItem({ key: '/job-profiles', icon: <FileSearchOutlined />, label: 'Explore' })]
+                      ? [createMenuItem({ key: '/next/job-profiles', icon: <FileSearchOutlined />, label: 'Explore' })]
                       : []),
                     ...(userCanAccess(auth.user, ['total-compensation'])
                       ? [
                           createSubMenu({
-                            key: '/job-profiles/manage',
+                            key: '/next/job-profiles/manage',
                             icon: <FileSettingOutlined />,
                             label: 'Manage profiles',
                             children: [
                               createMenuItem({
-                                key: '/job-profiles/manage/draft',
+                                key: '/next/job-profiles/manage/draft',
                                 icon: <FileOutlined />,
                                 label: 'Drafts',
                               }),
                               createMenuItem({
-                                key: '/job-profiles/manage/published',
+                                key: '/next/job-profiles/manage/published',
                                 icon: <FileProtectOutlined />,
-                                label: 'Drafts',
+                                label: 'Published',
                               }),
                               createMenuItem({
-                                key: '/job-profiles/manage/archived',
+                                key: '/next/job-profiles/manage/archived',
                                 icon: <FileZipOutlined />,
                                 label: 'Archived',
                               }),
@@ -87,7 +87,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
           ...(userCanAccess(auth.user, ['hiring-manager', 'classification'])
             ? [
                 createMenuGroup({
-                  key: '/requests',
+                  key: '/next/requests',
                   collapsed,
                   icon: <InboxOutlined />,
                   label: 'Requests',
@@ -95,7 +95,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                     ...(userCanAccess(auth.user, ['hiring-manager'])
                       ? [
                           createMenuItem({
-                            key: '/requests/positions',
+                            key: '/next/requests/positions',
                             icon: <PositionRequestOutlined />,
                             label: 'New position',
                           }),
@@ -104,12 +104,12 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                     ...(userCanAccess(auth.user, ['classification'])
                       ? [
                           createSubMenu({
-                            key: '/requests/positions',
+                            key: '/next/requests/positions',
                             icon: <SendSettingOutlined />,
                             label: 'Manage requests',
                             children: [
                               createMenuItem({
-                                key: '/requests/positions/manage',
+                                key: '/next/requests/positions/manage',
                                 icon: <PositionRequestSettingOutlined />,
                                 label: 'New position',
                               }),
@@ -124,18 +124,18 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
           ...(userCanAccess(auth.user, ['super-admin'])
             ? [
                 createMenuGroup({
-                  key: '/settings',
+                  key: '/next/settings',
                   collapsed,
                   icon: <SettingOutlined />,
                   label: 'Settings',
                   children: [
                     createMenuItem({
-                      key: '/settings/departments',
+                      key: '/next/settings/departments',
                       icon: <PartitionSettingOutlined />,
                       label: 'Departments',
                     }),
                     createMenuItem({
-                      key: '/settings/users',
+                      key: '/next/settings/users',
                       icon: <UserGroupSettingOutlined />,
                       label: 'Users',
                     }),

@@ -58,7 +58,7 @@ export const ListFilter = ({ setSearchParams, filterData, filters, searchConfig,
   };
 
   return (
-    <Row role="search" style={{ position: 'relative', zIndex: 9001 }}>
+    <Row role="search" style={{ position: 'relative', zIndex: 2 }}>
       <Col span={24}>
         <Card style={{ marginTop: '1rem', marginBottom: '1rem' }}>
           <Row wrap>

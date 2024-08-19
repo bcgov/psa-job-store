@@ -55,19 +55,21 @@ export const JobProfileSearchResults = ({
     //   searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
     // }`
 
+    const next = location.pathname.includes('next') ? '/next' : '';
+
     // Check if we're on /saved-profiles route
     if (location.pathname.includes('/saved-profiles')) {
-      return `/saved-profiles/${profileNumber}`;
+      return `${next}/saved-profiles/${profileNumber}`;
     }
 
     // Check if we're on the position-request route
     const newSearchParams = new URLSearchParams(searchParams.toString());
     if (positionRequestId) {
       newSearchParams.set('selectedProfile', profileNumber.toString());
-      return `/my-position-requests/${positionRequestId}?${newSearchParams.toString()}`;
+      return `${next}/my-position-requests/${positionRequestId}?${newSearchParams.toString()}`;
     } else {
       // If not on the position-request route, use the standard job-profiles path
-      return `/job-profiles/${profileNumber}?${newSearchParams.toString()}`;
+      return `${next}/job-profiles/${profileNumber}?${newSearchParams.toString()}`;
     }
   };
 

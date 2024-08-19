@@ -1,6 +1,7 @@
 import { FileTextOutlined, PartitionOutlined, UserAddOutlined } from '@ant-design/icons';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
+import { AppLayout as AppLayoutNext } from '../components/app@next/app-layout.component';
 import RoleGuard from '../components/guards/role.guard';
 import { RouteGuard } from '../components/guards/route.guard';
 import { AuthRoute } from '../routes/auth';
@@ -45,7 +46,7 @@ export const router = createBrowserRouter([
     element: <AuthRoute />,
     children: [
       {
-        element: <AppLayout />,
+        element: <AppLayoutNext />,
         children: [
           {
             path: 'login',
@@ -54,6 +55,180 @@ export const router = createBrowserRouter([
           {
             path: 'logout',
             element: <LoginPage />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    element: <RouteGuard />,
+    children: [
+      {
+        element: <AppLayoutNext />,
+        children: [
+          {
+            path: 'next',
+            element: <HomeRoute />,
+            children: [
+              // Home
+              {
+                index: true,
+                handle: {
+                  // breadcrumb: () => 'My tasks',
+                },
+                element: (
+                  <RoleBasedRouting
+                    roleComponentMapping={{
+                      classification: ClassificationTasksPage,
+                      'total-compensation': TotalCompDraftProfilesPage,
+                      'hiring-manager': HomePage,
+                      user: UnauthorizedPage,
+                      default: UnauthorizedPage,
+
+                      // default: HomePage,
+                    }}
+                  />
+                ),
+              },
+              // Org Chart
+              {
+                path: 'my-departments',
+                element: <OrgChartRoute />,
+                handle: {
+                  breadcrumb: () => 'My departments',
+                  icon: <PartitionOutlined />,
+                },
+                children: [
+                  {
+                    index: true,
+                    element: <OrgChartPage />,
+                  },
+                ],
+              },
+              // Job Profiles
+              {
+                path: 'job-profiles',
+                element: <JobProfilesRoute />,
+                handle: {
+                  icon: <FileTextOutlined />,
+                },
+                children: [
+                  {
+                    index: true,
+                    element: <JobProfilesPage />,
+                  },
+                  {
+                    path: ':number',
+                    element: <JobProfilesPage />,
+                    handle: {
+                      icon: <FileTextOutlined />,
+                    },
+                  },
+                  {
+                    path: 'manage',
+                    children: [
+                      {
+                        path: 'draft',
+                        element: (
+                          <RoleGuard roles={['total-compensation']}>
+                            <TotalCompDraftProfilesRoute />
+                          </RoleGuard>
+                        ),
+                        handle: {
+                          breadcrumb: () => 'Draft Job Profiles',
+                        },
+                        children: [
+                          {
+                            path: 'create',
+                            element: (
+                              <RoleGuard roles={['total-compensation']}>
+                                <TotalCompDraftProfilesRoute />
+                              </RoleGuard>
+                            ),
+                            children: [
+                              {
+                                index: true,
+                                element: <TotalCompCreateProfilePage />,
+                              },
+                              {
+                                path: ':id',
+                                element: <TotalCompCreateProfilePage />,
+                              },
+                            ],
+                          },
+                          {
+                            path: ':id',
+                            element: <TotalCompCreateProfilePage />,
+                          },
+                          {
+                            handle: {
+                              breadcrumb: () => 'Create profile',
+                            },
+                            index: true,
+                            element: <TotalCompDraftProfilesPage />,
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              // Settings
+              {
+                path: 'settings',
+                element: (
+                  <RoleGuard roles={['super-admin']}>
+                    <SettingsRoute />
+                  </RoleGuard>
+                ),
+                children: [
+                  {
+                    path: 'departments',
+                    handle: {
+                      breadcrumb: () => 'Departments',
+                    },
+                    children: [
+                      {
+                        index: true,
+                        element: <DepartmentListPage />,
+                      },
+                      {
+                        path: ':id',
+                        element: <DepartmentDetailPage />,
+                      },
+                    ],
+                  },
+                  {
+                    path: 'users',
+                    handle: {
+                      breadcrumb: () => 'Users',
+                    },
+                    children: [
+                      {
+                        index: true,
+                        element: <UserListPage />,
+                      },
+                      {
+                        path: ':id',
+                        element: <UserDetailPage />,
+                      },
+                    ],
+                  },
+                  {
+                    path: 'widgets',
+                    handle: {
+                      breadcrumb: () => 'Widgets',
+                    },
+                    children: [
+                      {
+                        index: true,
+                        element: <WidgetListPage />,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
