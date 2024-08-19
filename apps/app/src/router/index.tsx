@@ -79,10 +79,11 @@ export const router = createBrowserRouter([
                 element: (
                   <RoleBasedRouting
                     roleComponentMapping={{
+                      'super-admin': HomePage,
                       classification: ClassificationTasksPage,
                       'total-compensation': TotalCompDraftProfilesPage,
                       'hiring-manager': HomePage,
-                      user: UnauthorizedPage,
+                      user: HomePage,
                       default: UnauthorizedPage,
 
                       // default: HomePage,
@@ -452,12 +453,12 @@ export const router = createBrowserRouter([
                 element: (
                   <RoleBasedRouting
                     roleComponentMapping={{
+                      'super-admin': HomePage,
                       classification: ClassificationTasksPage,
                       'total-compensation': TotalCompDraftProfilesPage,
                       'hiring-manager': HomePage,
-                      user: UnauthorizedPage,
+                      user: HomePage,
                       default: UnauthorizedPage,
-
                       // default: HomePage,
                     }}
                   />

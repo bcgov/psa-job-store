@@ -30,7 +30,7 @@ export class RolesGlobalGuard extends PassportAuthGuard('keycloak') {
     }
 
     // Check if user has one of the required roles
-    const requiredRoles = ['hiring-manager', 'total-compensation', 'classification'];
+    const requiredRoles = ['user', 'hiring-manager', 'total-compensation', 'classification', 'super-admin'];
 
     return user && user.roles.some((role) => requiredRoles.includes(role));
   }
