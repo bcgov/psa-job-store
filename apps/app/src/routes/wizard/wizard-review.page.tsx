@@ -10,6 +10,7 @@ import {
 } from '../../redux/services/graphql-api/position-request.api';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import OtherDetails from './components/other-details.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
@@ -30,7 +31,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   setCurrentStep,
 }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
-  const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
+  const { positionRequestId, wizardData, positionRequestData, setPositionRequestData } = useWizardContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const onNextCallback = async () => {
@@ -205,6 +206,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
             rowProps={{ justify: 'center' }}
             colProps={{ sm: 24, md: 24, lg: 24, xxl: 18 }}
           />
+          <OtherDetails wizardData={wizardData} positionRequestData={positionRequestData}></OtherDetails>
         </div>
       </WizardPageWrapper>
     </div>
