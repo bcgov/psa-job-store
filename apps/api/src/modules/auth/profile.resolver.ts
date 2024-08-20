@@ -57,6 +57,7 @@ export class ProfileResolver {
     return { success: true };
   }
 
+  @AllowNoRoles()
   @Query(() => Profile, { name: 'profile' })
   async getProfile(@CurrentUser() { id }: Express.User) {
     const CACHE_KEY = `${CACHE_USER_PREFIX}${id}`;

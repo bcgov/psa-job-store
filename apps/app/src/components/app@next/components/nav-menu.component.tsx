@@ -29,8 +29,6 @@ export interface NavMenuProps {
 export const NavMenu = ({ collapsed }: NavMenuProps) => {
   const auth = useAuth();
 
-  console.log('ZZZZZ: ', userCanAccess(auth.user, ['classification', 'total-compensation']));
-
   return (
     <Flex vertical style={{ paddingTop: 0, width: '100%' }}>
       {userCanAccess(auth.user, ['hiring-manager', 'total-compensation']) && <CreateButton collapsed={collapsed} />}
@@ -96,7 +94,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                 }),
               ]
             : []),
-          ...(userCanAccess(auth.user, ['hiring-manager', 'classification', 'total-compensation'])
+          ...(userCanAccess(auth.user, ['hiring-manager', 'classification'])
             ? [
                 createMenuGroup({
                   key: '/next/requests',
