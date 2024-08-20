@@ -243,6 +243,11 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
 
       const { key, shiftKey } = event;
       switch (key) {
+        case 'Escape':
+          setSelectedNodeId(null);
+          setIsButtonFocused(false);
+          document.getElementById('org-chart-search-input')?.focus();
+          break;
         case 'ArrowUp':
           event.preventDefault();
           if (selectedNodeId === null) {
@@ -289,7 +294,9 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
           }
 
           const nodeElement = document.getElementById(`node-${selectedNodeId}`);
+          console.log('node element: ', nodeElement);
           const buttonElement = nodeElement ? nodeElement.querySelector('button') : null;
+          console.log('button element: ', buttonElement);
           const isButtonDisabled = buttonElement ? buttonElement.disabled : true;
 
           if (shiftKey) {
@@ -341,17 +348,18 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
               event.preventDefault();
             }
           } else {
-            console.log('no shift key');
+            console.log('no shift key, isButtonDisabled: ', isButtonDisabled, 'isButtonFocused: ', isButtonFocused);
             // Tab (forward navigation)
             if (isButtonFocused || isButtonDisabled) {
               // If button is focused or disabled, move to the next node
               if (hasNextNode()) {
+                console.log('has next node');
                 event.preventDefault();
                 navigateNext();
                 setIsButtonFocused(false);
               } else {
-                setSelectedNodeId(null);
                 console.log('no next node!');
+                setSelectedNodeId(null);
               }
             } else {
               // If node is focused and button is not disabled, focus on the button

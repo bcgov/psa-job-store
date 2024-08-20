@@ -12,7 +12,7 @@ import { Elements } from '../../interfaces/elements.interface';
 import { getFocusedElements } from '../../utils/get-focused-elements.util';
 import { DepartmentFilter } from '../department-filter.component';
 import { OrgChartNode } from '../org-chart-node.component';
-import { PositionSearch } from '../position-search.component';
+import { PositionSearch, SearchResult } from '../position-search.component';
 import './dynamic-org-chart.component.css';
 import OrgChartFlow from './org-chart-flow.component';
 
@@ -57,13 +57,14 @@ export const DynamicOrgChart = ({
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>(targetId != null ? [targetId] : []);
   const [searchResultCount, setSearchResultCount] = useState<number>(0);
 
-  const { fitView } = useReactFlow();
+  const { fitView, setCenter } = useReactFlow();
   // const [dataUpdated, setDataUpdated] = useState<boolean>(true);
   const [edges, setEdges] = useEdgesState([]);
   const [nodes, setNodes] = useNodesState([]);
   // const [treeviewInFocus, setTreeviewInFocus] = useState<boolean>(false);
   // const treeViewInFocus = useRef(false);
   const isKeyboardNav = useRef(false);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   useEffect(() => {
     setIsDirty(false);
@@ -273,6 +274,7 @@ export const DynamicOrgChart = ({
         if (searchTerm != null && searchTerm.length > 0 && nodeIds.length === 0) {
           // this is to handle when user selected a node, then did a search
           // search will clear the selected nodes, so we want to show search results instead of default
+          console.log('onSearch');
           onSearch(searchTerm, { source: 'input' });
         } else {
           // if user is navigating using keyboard throughout the treeview, do not run this
@@ -310,6 +312,21 @@ export const DynamicOrgChart = ({
     if (sSearchTerm != null && sSearchTerm.length > 0) {
       const searchResultIds = search(sSearchTerm);
 
+      const results = nodes
+        .filter((node: Node) => searchResultIds.includes(node.id))
+        .map((node: Node) => {
+          const employeeName =
+            node.data.employees && node.data.employees.length > 0 ? node.data.employees[0].name : 'Vacant';
+          const classification = node.data.classification?.code || 'N/A';
+          const positionNumber = node.data.id || 'N/A';
+
+          return {
+            id: node.id,
+            title: `${employeeName} - ${node.data.title || node.id} (${classification}) - ${positionNumber}`,
+          };
+        });
+      setSearchResults(results);
+
       edges.forEach((edge: Edge) => {
         edge.animated = false;
         edge.selected = false;
@@ -334,6 +351,9 @@ export const DynamicOrgChart = ({
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setSearchResultCount(nodes.filter((node: any) => node.data.isSearchResult === true).length);
+    } else {
+      setSearchResults([]);
+      setSearchResultCount(0);
     }
     console.log('setNodes onsearch');
     setEdges(edges);
@@ -346,6 +366,26 @@ export const DynamicOrgChart = ({
   //   treeViewInFocus.current = inFocus;
   //   // setTreeviewInFocus(inFocus);
   // };
+
+  const handleSelectResult = (id: string) => {
+    setSelectedNodeIds([id]);
+    setSelectedNodeId(id);
+    renderSelectedNodes([id]);
+    const node = nodes.find((node) => node.id === id);
+    if (node) {
+      setCenter(node.position.x + (node.width ?? 0) / 2, node.position.y + (node.height ?? 0) / 2, {
+        zoom: 1,
+        duration: 0,
+      });
+      setTimeout(() => {
+        const nodeElement = document.getElementById(`node-${id}`);
+        console.log('nodeElement: ', nodeElement);
+        if (nodeElement) {
+          nodeElement.focus();
+        }
+      }, 600);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
@@ -364,6 +404,8 @@ export const DynamicOrgChart = ({
               disabled={departmentId == null || departmentIdIsLoading}
               searchResultsCount={searchTerm ? searchResultCount : null}
               searchTerm={searchTerm}
+              searchResults={searchResults}
+              onSelectResult={handleSelectResult}
               // focusable={false}
             />
           </Space>
