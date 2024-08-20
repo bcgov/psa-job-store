@@ -1,4 +1,3 @@
-import { UseGuards } from '@nestjs/common';
 import { Args, Field, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { UUID } from 'crypto';
 import {
@@ -9,7 +8,6 @@ import {
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AllowNoRoles } from '../auth/guards/role-global.guard';
-import { RoleGuard } from '../auth/guards/role.guard';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
   PositionRequestApiService,
@@ -162,28 +160,24 @@ export class PositionRequestApiResolver {
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestClassifications' })
   async getPositionRequestClassifications() {
     return this.positionRequestService.getPositionRequestClassifications();
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [Int], { name: 'positionRequestJobStoreNumbers' })
   async getPositionRequestJobStoreNumbers() {
     return this.positionRequestService.getPositionRequestJobStoreNumbers();
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [String], { name: 'positionRequestStatuses' })
   async getPositionRequestStatuses() {
     return this.positionRequestService.getPositionRequestStatuses();
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [UserBasicInfo], { name: 'positionRequestSubmittedBy' })
   async getpositionRequestSubmittedBy() {
     return this.positionRequestService.getPositionRequestSubmittedBy();
