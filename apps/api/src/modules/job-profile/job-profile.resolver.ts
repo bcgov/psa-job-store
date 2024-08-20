@@ -12,7 +12,6 @@ import {
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { AllowNoRoles } from '../auth/guards/role-global.guard';
 import { JobFamilyService } from '../job-family/job-family.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 import { JobProfileService } from './job-profile.service';
@@ -109,25 +108,21 @@ export class JobProfileResolver {
     private readonly jobProfileService: JobProfileService,
   ) {}
 
-  @AllowNoRoles()
   @Query(() => [JobProfile], { name: 'jobProfiles' })
   async getJobProfiles(@Args() args?: FindManyJobProfileWithSearch) {
     return this.jobProfileService.getJobProfiles(args);
   }
 
-  @AllowNoRoles()
   @Query(() => Int, { name: 'pageNumberForSelectProfile' })
   async pageNumberForSelectProfile(@Args() args?: FindManyJobProfileWithSearch) {
     return await this.jobProfileService.getPageNumberForSelectProfile(args);
   }
 
-  @AllowNoRoles()
   @Query(() => Int, { name: 'jobProfilesCount' })
   async jobProfilesCount(@Args() args?: FindManyJobProfileWithSearch) {
     return await this.jobProfileService.getJobProfileCount(args);
   }
 
-  @AllowNoRoles()
   @Mutation(() => Int, { name: 'updateJobProfileViewCount' })
   async updateJobProfileViewCount(@Args('jobProfiles', { type: () => [Int], nullable: true }) jobProfiles: number[]) {
     return await this.jobProfileService.updateJobProfileViewCountCache(jobProfiles);
@@ -176,8 +171,7 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfilesDraftsMinistries(userId);
   }
 
-  @Query(() => JobProfile, { name: 'jobProfile' })
-  @AllowNoRoles() // so that share position request feature can fetch relevant data
+  @Query(() => JobProfile, { name: 'jobProfile' }) // so that share position request feature can fetch relevant data
   async getJobProfile(
     @CurrentUser() user: Express.User,
     @Args('id') id: number,
@@ -187,8 +181,7 @@ export class JobProfileResolver {
     return res;
   }
 
-  @Query(() => JobProfile, { name: 'jobProfileByNumber' })
-  @AllowNoRoles() // so that share position request feature can fetch relevant data
+  @Query(() => JobProfile, { name: 'jobProfileByNumber' }) // so that share position request feature can fetch relevant data
   async getJobProfileByNumber(@CurrentUser() user: Express.User, @Args('number') number: string) {
     const res = await this.jobProfileService.getJobProfileByNumber(+number, user.roles);
     return res;
@@ -206,7 +199,6 @@ export class JobProfileResolver {
   //   return this.jobProfileService.getJobProfilesDraftsCareerGroups(userId);
   // }
 
-  @AllowNoRoles()
   @Query(() => [Organization], { name: 'jobProfilesMinistries' })
   async getJobProfilesMinistries(
     @Args('positionRequestId', { type: () => Int, nullable: true }) positionRequestId?: number,
@@ -214,7 +206,6 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfilesMinistries(positionRequestId);
   }
 
-  @AllowNoRoles()
   @Query(() => [Classification], { name: 'jobProfilesClassifications' })
   async getJobProfilesClassifications() {
     return this.jobProfileService.getJobProfilesClassifications();

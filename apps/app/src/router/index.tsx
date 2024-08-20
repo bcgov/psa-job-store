@@ -10,6 +10,7 @@ import { ClassificationTasksRoute } from '../routes/classification-tasks';
 import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
 import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
 import { HomeRoute } from '../routes/home';
+import { DynamicHomePage } from '../routes/home/dynamic-home.page';
 import { HomePage } from '../routes/home/home.page';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
@@ -76,20 +77,7 @@ export const router = createBrowserRouter([
                 handle: {
                   // breadcrumb: () => 'My tasks',
                 },
-                element: (
-                  <RoleBasedRouting
-                    roleComponentMapping={{
-                      'super-admin': HomePage,
-                      classification: ClassificationTasksPage,
-                      'total-compensation': TotalCompDraftProfilesPage,
-                      'hiring-manager': HomePage,
-                      user: HomePage,
-                      default: UnauthorizedPage,
-
-                      // default: HomePage,
-                    }}
-                  />
-                ),
+                element: <DynamicHomePage />,
               },
               // Org Chart
               {

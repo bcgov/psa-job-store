@@ -7,7 +7,6 @@ import {
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { AllowNoRoles } from '../auth/guards/role-global.guard';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
   PositionRequestApiService,
@@ -118,6 +117,7 @@ export class PositionRequestApiResolver {
     return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles);
   }
 
+  @Roles('classification', 'hiring-manager', 'total-compensation')
   @Query(() => [PositionRequest], { name: 'positionRequests' })
   async getPositionRequests(
     @CurrentUser() user: Express.User,
@@ -132,7 +132,6 @@ export class PositionRequestApiResolver {
   }
 
   @Query(() => PositionRequest, { name: 'sharedPositionRequest' })
-  @AllowNoRoles()
   async getSharedPositionRequest(@Args('uuid') uuid: string) {
     return this.positionRequestService.getSharedPositionRequest(uuid);
   }

@@ -94,7 +94,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                 }),
               ]
             : []),
-          ...(userCanAccess(auth.user, ['hiring-manager', 'classification'])
+          ...(userCanAccess(auth.user, ['hiring-manager', 'classification', 'total-compensation'])
             ? [
                 createMenuGroup({
                   key: '/next/requests',
