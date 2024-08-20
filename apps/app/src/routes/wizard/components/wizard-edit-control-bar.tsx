@@ -36,7 +36,7 @@ const WizardEditControlBar: React.FC<WizardEditControlBarProps> = ({
   const { positionRequestId } = useWizardContext();
 
   const chooseDifferentProfile = async () => {
-    if (positionRequestId) await updatePositionRequest({ id: positionRequestId, step: 1 }).unwrap();
+    if (positionRequestId) await updatePositionRequest({ id: positionRequestId, step: 2 }).unwrap();
     if (onChooseDifferentProfile) onChooseDifferentProfile();
   };
 

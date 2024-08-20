@@ -2,30 +2,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import {
-  Button,
-  Card,
-  Col,
-  Divider,
-  Empty,
-  Form,
-  Input,
-  Menu,
-  Modal,
-  Row,
-  Select,
-  Switch,
-  Tooltip,
-  Typography,
-} from 'antd';
-import { IsNotEmpty, ValidationOptions, registerDecorator } from 'class-validator';
+import { Button, Card, Col, Empty, Form, Input, Menu, Modal, Row, Select, Typography } from 'antd';
+import { IsNotEmpty } from 'class-validator';
 import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
-import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/custom-form.css';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
 import { useGetLocationsQuery } from '../../redux/services/graphql-api/location.api';
@@ -50,23 +34,6 @@ interface WizardConfirmPageProps {
   setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
-function IsTrue(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
-    registerDecorator({
-      name: 'isTrue',
-      target: object.constructor,
-      propertyName: propertyName,
-      constraints: [],
-      options: validationOptions,
-      validator: {
-        validate(value: boolean) {
-          return value === true;
-        },
-      },
-    });
-  };
-}
-
 // @ValidatorConstraint({ async: true })
 // class PositionValidator implements ValidatorConstraintInterface {
 //   validate(value: any, args: ValidationArguments) {
@@ -81,9 +48,6 @@ function IsTrue(validationOptions?: ValidationOptions) {
 // }
 
 export class WizardConfirmDetailsModel {
-  @IsTrue({ message: 'You must confirm that you have received executive approval (Deputy Minister or delegate)' })
-  confirmation: boolean;
-
   @IsNotEmpty({ message: 'Work location is required' })
   workLocation: string | null;
 
@@ -126,7 +90,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [isFormModified, setIsFormModified] = useState(false);
-  const { positionRequestId, wizardData, positionRequestData, setPositionRequestData } = useWizardContext();
+  const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
 
   const handleFormChange = () => {
     setIsFormModified(true);
@@ -277,6 +241,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           content: (
             <div>
               <p>The form contains errors, please fix them before proceeding.</p>
+              <p></p>
             </div>
           ),
           onOk() {},
@@ -305,13 +270,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         // console.log('updatePositionRequest');
         const resp = await updatePositionRequest({
           id: positionRequestId,
-          step: step == -1 ? (updateStep ? (action == 'next' ? 5 : 3) : 4) : step,
+          step: step == -1 ? (updateStep ? (action == 'next' ? 2 : 0) : 1) : step,
           // status: 'COMPLETED',
           // position_number: 123456,
 
           // increment max step only if it's not incremented, and we're not moving back
-          ...(updateStep && action == 'next' && (positionRequest?.max_step_completed ?? 0) < 5 && step == -1
-            ? { max_step_completed: 5 }
+          ...(updateStep && action == 'next' && (positionRequest?.max_step_completed ?? 0) < 2 && step == -1
+            ? { max_step_completed: 2 }
             : {}),
 
           // attach additional information
@@ -345,7 +310,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const {
     control,
     handleSubmit,
-    watch,
     setValue,
     setError,
     clearErrors,
@@ -355,7 +319,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   } = useForm<WizardConfirmDetailsModel>({
     resolver: classValidatorResolver(WizardConfirmDetailsModel),
     defaultValues: {
-      confirmation: false,
       workLocation: null as string | null,
       excludedManagerPositionNumber: '',
       payListDepartmentId: null as string | null,
@@ -401,14 +364,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       }
 
       setValue('comments', comments || '');
-
-      if (work_location_id || department_id || excluded_mgr_position_number || comments || branch || division) {
-        setValue('confirmation', true);
-      }
     }
   }, [departmentsData, positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
-
-  const confirmation = watch('confirmation');
 
   const [deletePositionRequest] = useDeletePositionRequestMutation();
   const deleteRequest = async () => {
@@ -534,7 +491,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       >
         <WizardSteps
           onStepClick={switchStep}
-          current={4}
+          current={1}
           maxStepCompleted={positionRequest?.max_step_completed}
           disabledTooltip={isFetchingPositionProfile ? 'Loading, please wait...' : null}
         ></WizardSteps>
@@ -562,44 +519,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     })}
                     onChange={handleFormChange}
                   >
-                    <Card
-                      title={<h3 style={{ fontWeight: '600', fontSize: '16px' }}>Confirmation</h3>}
-                      bordered={false}
-                      className="custom-card"
-                    >
-                      <Row justify="start">
-                        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-                          <Form.Item
-                            name="confirmation"
-                            validateStatus={errors.confirmation ? 'error' : ''}
-                            help={errors.confirmation?.message}
-                          >
-                            <Controller
-                              name="confirmation"
-                              control={control}
-                              render={({ field: { onChange, value } }) => {
-                                return (
-                                  <Switch
-                                    aria-labelledby="confirmation-label-id"
-                                    checkedChildren="Yes"
-                                    data-testid="confirmation-switch"
-                                    checked={value}
-                                    onChange={(newValue) => {
-                                      onChange(newValue);
-                                    }}
-                                  />
-                                );
-                              }}
-                            />
-                            <span style={{ marginLeft: '1rem' }} id="confirmation-label-id">
-                              I confirm that I have received executive approval (Deputy Minister or delegate) for this
-                              new position.
-                            </span>
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                    </Card>
-
                     <Card
                       title={
                         <span id="department-id-label">
@@ -646,7 +565,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                     value: group.id,
                                   }))}
                                   placeholder="Select department"
-                                  disabled={!confirmation}
                                   notFoundContent={
                                     <Empty
                                       image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -721,7 +639,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                     onChange(e); // Update controller state
                                   }}
                                   placeholder="Position number"
-                                  disabled={!confirmation}
                                 />
                               )}
                             />
@@ -774,11 +691,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                             validateStatus={errors.branch ? 'error' : ''}
                             help={errors.branch?.message}
                           >
-                            <Controller
-                              name="branch"
-                              control={control}
-                              render={({ field }) => <Input {...field} disabled={!confirmation} />}
-                            />
+                            <Controller name="branch" control={control} render={({ field }) => <Input {...field} />} />
                           </Form.Item>
 
                           <Form.Item
@@ -790,7 +703,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                             <Controller
                               name="division"
                               control={control}
-                              render={({ field }) => <Input {...field} disabled={!confirmation} />}
+                              render={({ field }) => <Input {...field} />}
                             />
                           </Form.Item>
                         </Col>
@@ -834,111 +747,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                   </Form>
                 </Col>
               </Row>
-
-              {/* Other details card */}
-              <Card
-                style={{ marginTop: '1rem' }}
-                title={
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>
-                      <h3 style={{ fontWeight: '600', fontSize: '16px' }}>Other Details</h3>
-                    </span>
-                    <Tooltip
-                      trigger={['hover', 'click']}
-                      title="Information shown here is dependent on the values that you selected in the previous steps."
-                    >
-                      <Button
-                        id="changes"
-                        role="note"
-                        type="link"
-                        aria-label="Why can't I make changes? Because information shown here is dependent on the values that you selected in the previous steps."
-                      >
-                        Why can't I make changes?
-                      </Button>
-                    </Tooltip>
-                  </div>
-                }
-                bordered={false}
-              >
-                <Form layout="vertical" data-testid="job-info">
-                  <Form.Item
-                    name="jobTitle"
-                    label={<h4 style={{ margin: 0 }}>Job title</h4>}
-                    labelCol={{ className: 'card-label' }}
-                    colon={false}
-                  >
-                    <div style={{ margin: 0 }}>
-                      {typeof wizardData?.title === 'string' ? wizardData?.title : wizardData?.title?.text}
-                    </div>
-                  </Form.Item>
-
-                  <Divider className="hr-reduced-margin" />
-
-                  <Form.Item
-                    name="expectedClass"
-                    label={<h4 style={{ margin: 0 }}>Expected classification level</h4>}
-                    labelCol={{ className: 'card-label' }}
-                    colon={false}
-                  >
-                    <div style={{ margin: 0 }}>{wizardData?.classifications?.[0]?.classification?.name ?? ''}</div>
-                  </Form.Item>
-
-                  <Divider className="hr-reduced-margin" />
-
-                  <Form.Item
-                    name="jobTitle"
-                    label={<h4 style={{ margin: 0 }}>Reporting Manager</h4>}
-                    labelCol={{ className: 'card-label' }}
-                    colon={false}
-                  >
-                    <div data-testid="reporting-manager-info">
-                      <PositionProfile
-                        positionNumber={positionRequestData?.reports_to_position_id}
-                        orgChartData={positionRequestData?.orgchart_json}
-                      ></PositionProfile>
-                    </div>
-                    {/* <div style={{ margin: 0 }}>
-                      {firstActivePosition2 && !isFetchingPositionProfile2 && !isFetchingPositionProfileError2 && (
-                        <div data-testid="reporting-manager-info">
-                          <p
-                            style={{ margin: 0 }}
-                          >{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
-                          <Typography.Paragraph type="secondary">
-                            {`${firstActivePosition2.positionDescription}, ${firstActivePosition2.classification}`}
-                            <br></br>
-                            {`Position No.: ${firstActivePosition2.positionNumber}`}
-                            {additionalPositions2 > 0 && ` +${additionalPositions2}`}
-                          </Typography.Paragraph>
-                        </div>
-                      )}
-                      {isFetchingPositionProfile2 && <LoadingSpinnerWithMessage mode={'small'} />}
-                      {isFetchingPositionProfileError2 && <p>Error loading, please refresh page</p>}
-                    </div> */}
-                  </Form.Item>
-
-                  <Divider className="hr-reduced-margin" />
-
-                  <Form.Item
-                    name="jobTitle"
-                    label={<h4 style={{ margin: 0 }}>Type</h4>}
-                    labelCol={{ className: 'card-label' }}
-                    colon={false}
-                  >
-                    <div style={{ margin: 0 }}>Full-time, regular</div>
-                  </Form.Item>
-
-                  <Divider className="hr-reduced-margin" />
-
-                  <Form.Item
-                    name="jobTitle"
-                    label={<h4 style={{ margin: 0 }}>Job Store profile number</h4>}
-                    labelCol={{ className: 'card-label' }}
-                    colon={false}
-                  >
-                    <div style={{ margin: 0 }}>{wizardData?.number}</div>
-                  </Form.Item>
-                </Form>
-              </Card>
             </Col>
           </Row>
         </div>
