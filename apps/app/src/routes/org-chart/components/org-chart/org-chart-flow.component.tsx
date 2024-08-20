@@ -114,6 +114,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
 
   const hasPreviousNode = () => {
     const currentIndex = getCurrentNodeIndex();
+    console.log('hasPreviousNode, currentIndex: ', currentIndex);
     return currentIndex > 0;
   };
 
@@ -279,9 +280,10 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
           setIsButtonFocused(false);
           break;
         case 'Tab': {
-          event.preventDefault();
           console.log('TAB, isButtonFocused: ', isButtonFocused, 'selectedNodeId: ', selectedNodeId);
           if (!selectedNodeId) {
+            console.log('no selected node');
+            event.preventDefault();
             navigateNext();
             return;
           }
@@ -291,12 +293,16 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
           const isButtonDisabled = buttonElement ? buttonElement.disabled : true;
 
           if (shiftKey) {
+            console.log('shift key');
             // Shift+Tab (backward navigation)
             if (isButtonFocused) {
+              console.log('button focused');
               // If button is focused, move focus to the node
               setIsButtonFocused(false);
               updateSelectedNode(selectedNodeId, false);
             } else if (hasPreviousNode()) {
+              console.log('has previous node!');
+              event.preventDefault();
               // If node is focused, move to the previous node and focus on the button
               navigatePrevious();
 
@@ -329,17 +335,27 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
               // const prevButtonElement = prevNodeElement ? prevNodeElement.querySelector('button') : null;
               // const isPrevButtonDisabled = prevButtonElement ? prevButtonElement.disabled : true;
               // setIsButtonFocused(!isPrevButtonDisabled);
+            } else {
+              console.log('no previous node!');
+              document.getElementById('org-chart-search-button')?.focus();
+              event.preventDefault();
             }
           } else {
+            console.log('no shift key');
             // Tab (forward navigation)
             if (isButtonFocused || isButtonDisabled) {
               // If button is focused or disabled, move to the next node
               if (hasNextNode()) {
+                event.preventDefault();
                 navigateNext();
                 setIsButtonFocused(false);
+              } else {
+                setSelectedNodeId(null);
+                console.log('no next node!');
               }
             } else {
               // If node is focused and button is not disabled, focus on the button
+              event.preventDefault();
               setIsButtonFocused(true);
               updateSelectedNode(selectedNodeId, true);
             }
@@ -368,6 +384,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
       <PositionProvider>
         {/* role application allows for arrow keys to work with screen readers, otherwise it gets overriden */}
         <div
+          id="org-chart-container"
           role="application"
           aria-label="Organizational chart - use arrow keys or tab to navigate. Press enter to create a new position."
           style={{ height: '100%', width: '100%' }}
