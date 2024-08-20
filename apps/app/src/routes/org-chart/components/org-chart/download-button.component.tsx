@@ -823,30 +823,11 @@ function DownloadButton() {
       </Dropdown> */}
       <AcessiblePopoverMenu
         triggerButton={
-          <Button
-            loading={isLoading}
-            tabIndex={-1}
-            style={{}}
-            icon={
-              <DownloadOutlined aria-hidden />
-
-              // <UserOutlined style={{ color: 'white' }} aria-hidden />
-              // {
-              //   key: '1',
-              //   label: 'Download PNG',
-              //   onClick: onClick_png,
-              // },
-              // {
-              //   key: '2',
-              //   label: 'Download SVG',
-              //   onClick: onClick_svg,
-              // },
-            }
-          >
+          <Button loading={isLoading} tabIndex={-1} style={{}} icon={<DownloadOutlined aria-hidden />}>
             Download
           </Button>
         }
-        ariaLabel="Open user menu"
+        ariaLabel="Download organization chart"
         content={
           <Menu selectedKeys={[]}>
             <Menu.Item key="png" onClick={onClick_png}>

@@ -31,9 +31,11 @@ const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
   };
 
   const handlePopoverOpen = (visible: any) => {
+    // console.log('handlePopoverOpen: ', visible);
     if (visible) {
       setTimeout(() => {
         const popover = contentRef.current?.querySelector(`.ant-menu-item:not(.ant-menu-item-disabled)`);
+        // console.log('focusing on: ', popover);
         if (popover) {
           const popoverElement = popover as HTMLElement;
           popoverElement.focus();
@@ -69,6 +71,13 @@ const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
       role="button"
       aria-label={ariaLabel}
       data-testid="popover-trigger"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleVisibleChange(!visible);
+          handlePopoverOpen(!visible);
+        }
+      }}
     >
       {children}
     </div>

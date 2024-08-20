@@ -307,7 +307,7 @@ export const WizardOrgChartPage = ({
                   departmentIdIsLoading={isFetchingUserProfile}
                   targetId={selectedPositionId ?? profileData?.profile.position_id}
                   wrapProvider={false}
-                  wizardNextHandler={next}
+                  // wizardNextHandler={next}
                 />
               </div>
               {
