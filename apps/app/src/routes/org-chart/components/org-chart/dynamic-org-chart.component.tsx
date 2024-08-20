@@ -23,7 +23,7 @@ interface BaseDynamicOrgChartProps {
   departmentIdIsLoading?: boolean;
   targetId?: string | undefined;
   wrapProvider?: boolean;
-  wizardNextHandler?: ({ switchStep }?: { switchStep?: boolean }) => Promise<string | undefined>;
+  // wizardNextHandler?: ({ switchStep }?: { switchStep?: boolean }) => Promise<string | undefined>;
 }
 
 export interface DefaultContextDynamicOrgChartProps {
@@ -44,7 +44,7 @@ export const DynamicOrgChart = ({
   departmentId,
   departmentIdIsLoading,
   targetId,
-  wizardNextHandler,
+  // wizardNextHandler,
   ...props
 }: DynamicOrgChartProps) => {
   const [elements, setElements] = useState<Elements>(initialElements);
@@ -53,15 +53,17 @@ export const DynamicOrgChart = ({
   const [getOrgChart, { currentData: orgChartData, isFetching: orgChartDataIsFetching }] = useLazyGetOrgChartQuery();
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>(targetId != null ? [targetId] : []);
   const [searchResultCount, setSearchResultCount] = useState<number>(0);
 
   const { fitView } = useReactFlow();
-  const [dataUpdated, setDataUpdated] = useState<boolean>(true);
+  // const [dataUpdated, setDataUpdated] = useState<boolean>(true);
   const [edges, setEdges] = useEdgesState([]);
   const [nodes, setNodes] = useNodesState([]);
   // const [treeviewInFocus, setTreeviewInFocus] = useState<boolean>(false);
-  const treeViewInFocus = useRef(false);
+  // const treeViewInFocus = useRef(false);
+  const isKeyboardNav = useRef(false);
 
   useEffect(() => {
     setIsDirty(false);
@@ -75,10 +77,10 @@ export const DynamicOrgChart = ({
   }, [departmentId]);
 
   useEffect(() => {
-    if (orgChartDataIsFetching) setDataUpdated(false);
-    // setTimeout(() => {
-    else setDataUpdated(true);
-    // }, 2000);
+    // if (orgChartDataIsFetching) setDataUpdated(false);
+    // // setTimeout(() => {
+    // else setDataUpdated(true);
+    // // }, 2000);
 
     if (orgChartData?.orgChart != null) {
       const elements = autolayout(orgChartData?.orgChart);
@@ -140,7 +142,8 @@ export const DynamicOrgChart = ({
 
   const renderSelectedNodes = useCallback(
     (sNodeIds: string[]) => {
-      // console.log('renderSelectedNodes');
+      console.log('renderSelectedNodes: ', sNodeIds);
+
       const { edges, nodes } = JSON.parse(JSON.stringify(elements));
       const focusedElements = [
         ...getFocusedElements(
@@ -158,7 +161,8 @@ export const DynamicOrgChart = ({
 
       edges.forEach((edge: Edge) => {
         edge.animated = focusedElementIds.includes(edge.id);
-        edge.selected = focusedElementIds.includes(edge.id);
+        // edge.selected = focusedElementIds.includes(edge.id);
+
         edge.style = {
           ...edge.style,
           stroke: focusedElementIds.includes(edge.id) ? 'blue' : '#B1B1B1',
@@ -171,13 +175,14 @@ export const DynamicOrgChart = ({
           isSearchResult: false,
         };
         node.selected = sNodeIds.includes(node.id);
+        // node.data.selectedRender = sNodeIds.includes(node.id);
         node.style = {
           ...node.style,
           opacity:
             sNodeIds.length > 0 ? (sNodeIds.includes(node.id) || focusedElementIds.includes(node.id) ? 1 : 0.25) : 1,
         };
       });
-      // console.log('setNodes renderSelectedNodes');
+      console.log('setNodes renderSelectedNodes');
       setEdges(edges);
       setNodes(nodes);
     },
@@ -208,7 +213,7 @@ export const DynamicOrgChart = ({
         opacity: 1,
       };
     });
-    // console.log('setNodes renderDefault');
+    // console.log('setNodes renderDefault: ', nodes);
     setEdges(edges);
     setNodes(nodes);
   }, []);
@@ -234,11 +239,11 @@ export const DynamicOrgChart = ({
     // console.log('useEffect nodes: ', nodes);
     const searchResultNodes = nodes.filter((node) => node.data.isSearchResult === true);
     const selectedNodes = nodes.filter((node) => node.selected === true);
-    const adjacentNodes = selectedNodes.length > 0 ? nodes.filter((node) => node.data.isAdjacent === true) : [];
+    // const adjacentNodes = selectedNodes.length > 0 ? nodes.filter((node) => node.data.isAdjacent === true) : [];
 
     if (selectedNodes.length > 0) {
       // console.log('fitView A: ', selectedNodes, adjacentNodes);
-      fitView({ duration: 800, nodes: [...selectedNodes, ...adjacentNodes] });
+      // fitView({ duration: 800, nodes: [...selectedNodes, ...adjacentNodes] });
     } else if (searchResultNodes.length > 0) {
       // console.log('fitView B: ', searchResultNodes);
       fitView({ duration: 800, nodes: searchResultNodes });
@@ -252,7 +257,7 @@ export const DynamicOrgChart = ({
 
   useOnSelectionChange({
     onChange: ({ nodes }) => {
-      // console.log('useOnSelectionChange onChange: ', nodes);
+      console.log('useOnSelectionChange onChange: ', nodes);
       if (nodes.length > 0) {
         setIsDirty(true);
         // setSearchTerm(undefined);
@@ -261,8 +266,9 @@ export const DynamicOrgChart = ({
       const nodeIds = nodes.flatMap((node) => node.id);
       // console.log('useOnSelectionChange onChange setSelectedNodeIds: ', nodeIds, selectedNodeIds);
       if (JSON.stringify(nodeIds) != JSON.stringify(selectedNodeIds)) {
-        // console.log('CHANGED');
+        console.log('CHANGED: ', nodeIds);
         setSelectedNodeIds(nodeIds);
+        setSelectedNodeId(nodeIds[0]);
 
         if (searchTerm != null && searchTerm.length > 0 && nodeIds.length === 0) {
           // this is to handle when user selected a node, then did a search
@@ -271,7 +277,8 @@ export const DynamicOrgChart = ({
         } else {
           // if user is navigating using keyboard throughout the treeview, do not run this
           // since we want to focus on the individual single node to bring into focus
-          if (!treeViewInFocus.current) renderSelectedNodes(nodeIds);
+          // if (!treeViewInFocus.current)
+          renderSelectedNodes(nodeIds);
         }
       }
     },
@@ -328,17 +335,17 @@ export const DynamicOrgChart = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setSearchResultCount(nodes.filter((node: any) => node.data.isSearchResult === true).length);
     }
-    // console.log('setNodes onsearch');
+    console.log('setNodes onsearch');
     setEdges(edges);
     setNodes(nodes);
     // console.log('onsearch done');
   };
 
-  const treeViewInFocusCallback = (inFocus: boolean) => {
-    // console.log('treeViewInFocusCallback: ', inFocus);
-    treeViewInFocus.current = inFocus;
-    // setTreeviewInFocus(inFocus);
-  };
+  // const treeViewInFocusCallback = (inFocus: boolean) => {
+  //   // console.log('treeViewInFocusCallback: ', inFocus);
+  //   treeViewInFocus.current = inFocus;
+  //   // setTreeviewInFocus(inFocus);
+  // };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
@@ -372,13 +379,16 @@ export const DynamicOrgChart = ({
             edges={edges}
             nodes={nodes}
             nodeTypes={nodeTypes}
-            departmentId={departmentId ?? ''}
-            wizardNextHandler={wizardNextHandler}
-            searchTerm={searchTerm}
-            loading={!dataUpdated}
-            treeViewInFocusCallback={treeViewInFocusCallback}
+            // departmentId={departmentId ?? ''}
+            // wizardNextHandler={wizardNextHandler}
+            // searchTerm={searchTerm}
+            // loading={!dataUpdated}
+            // treeViewInFocusCallback={treeViewInFocusCallback}
+            setSelectedNodeId={setSelectedNodeId}
+            selectedNodeId={selectedNodeId}
+            isKeyboardNav={isKeyboardNav}
             onPaneClick={() => {
-              // console.log('onPaneClick, searchTerm: ', searchTerm);
+              console.log('onPaneClick, searchTerm: ', searchTerm);
               setIsDirty(true);
               // setSearchTerm(undefined);
               setSelectedNodeIds([]);

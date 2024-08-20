@@ -35,8 +35,9 @@ const NaiveCreatePositionButton = ({
             // setIsLoading(false);
           }
         }}
+        id={`create-button-${supervisorId}`}
         disabled={positionIsVacant}
-        icon={<UserAddOutlined />}
+        icon={<UserAddOutlined aria-hidden />}
         data-testid="create-direct-report-button"
         style={{ borderRadius: 0, border: 'none', width: '100%' }}
         type="default"

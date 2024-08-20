@@ -30,30 +30,38 @@ export const PositionSearch = ({
   }, [searchTermFromProps]);
 
   return (
-    <Input.Search
-      onChange={(event) => setSearchTerm(event.currentTarget.value)}
-      onSearch={(value, _, source) => onSearch(value, source)}
-      addonAfter={
-        searchTermFromProps != null &&
-        searchResultsCount != null && (
-          <Tag
-            color={searchTermFromProps != null && searchResultsCount === 0 ? 'red' : 'green'}
-            style={{ marginLeft: '0.5rem', marginRight: 0 }}
-          >
-            {searchResultsCount === 1 ? '1 result' : `${searchResultsCount} results`}
-          </Tag>
-        )
-      }
-      addonBefore="Search"
-      allowClear
-      disabled={disabled}
-      loading={disabled}
-      placeholder="Search by Position Number, Title, or Employee Name"
-      value={searchTerm}
-      // tabIndex={focusable ? 0 : -1}
-      enterButton={
-        <Button id="org-chart-search-button" icon={<SearchOutlined aria-hidden />} aria-label="Search"></Button>
-      } // tabIndex={focusable ? 0 : -1}
-    />
+    <>
+      {searchTermFromProps != null && searchResultsCount != null && (
+        <div aria-live="assertive" className="sr-only">
+          {searchResultsCount === 1 ? '1 result' : `${searchResultsCount} results`}
+        </div>
+      )}
+
+      <Input.Search
+        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+        onSearch={(value, _, source) => onSearch(value, source)}
+        addonAfter={
+          searchTermFromProps != null &&
+          searchResultsCount != null && (
+            <Tag
+              color={searchTermFromProps != null && searchResultsCount === 0 ? 'red' : 'green'}
+              style={{ marginLeft: '0.5rem', marginRight: 0 }}
+            >
+              {searchResultsCount === 1 ? '1 result' : `${searchResultsCount} results`}
+            </Tag>
+          )
+        }
+        addonBefore="Search"
+        allowClear
+        disabled={disabled}
+        loading={disabled}
+        placeholder="Search by Position Number, Title, or Employee Name"
+        value={searchTerm}
+        // tabIndex={focusable ? 0 : -1}
+        enterButton={
+          <Button id="org-chart-search-button" icon={<SearchOutlined aria-hidden />} aria-label="Search"></Button>
+        } // tabIndex={focusable ? 0 : -1}
+      />
+    </>
   );
 };
