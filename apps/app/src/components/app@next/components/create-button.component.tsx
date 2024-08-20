@@ -1,5 +1,5 @@
-import { FileOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Dropdown } from 'antd';
+import { FileAddOutlined, FileOutlined } from '@ant-design/icons';
+import { Dropdown, Flex } from 'antd';
 import { useMemo } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { NavLink } from 'react-router-dom';
@@ -40,15 +40,16 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
 
   const renderButton = useMemo(
     () => (
-      <Button icon={<PlusOutlined />} style={{ width: '100%' }} type="primary">
-        {!collapsed && 'Create'}
-      </Button>
+      <Flex justify={collapsed ? 'left' : 'center'} style={{ width: '100%' }}>
+        <FileAddOutlined />
+        <span>Create</span>
+      </Flex>
     ),
     [collapsed],
   );
 
   return menuItems.length > 0 ? (
-    <div style={{ margin: '8px 8px 0 8px' }}>
+    <div style={{ width: '100%' }}>
       {menuItems.length === 1 ? (
         <NavLink to={menuItems[0].key as string}>{renderButton}</NavLink>
       ) : (

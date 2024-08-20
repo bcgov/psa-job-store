@@ -31,13 +31,22 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
 
   return (
     <Flex vertical style={{ paddingTop: 0, width: '100%' }}>
-      {userCanAccess(auth.user, ['hiring-manager', 'total-compensation']) && <CreateButton collapsed={collapsed} />}
       <Menu
         inlineIndent={16}
         mode="inline"
         selectedKeys={[]}
         theme="light"
         items={[
+          ...(userCanAccess(auth.user, ['hiring-manager', 'total-compensation'])
+            ? [
+                {
+                  key: 'create-button',
+                  icon: <></>,
+                  label: <CreateButton collapsed={collapsed} />,
+                  style: { backgroundColor: '#0057ad', color: 'white' },
+                },
+              ]
+            : []),
           ...(userCanAccess(auth.user, ['user'])
             ? [createMenuItem({ key: '/next', icon: <HomeOutlined />, label: 'Home' })]
             : []),

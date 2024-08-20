@@ -11,7 +11,13 @@ type NavMenuGroupProps = {
   icon?: React.ReactNode;
   label: string;
 };
-type NavMenuItemProps = { key: string; icon?: React.ReactNode; label: string; title?: string };
+type NavMenuItemProps = {
+  key: string;
+  icon?: React.ReactNode;
+  label: string;
+  style?: React.CSSProperties;
+  title?: string;
+};
 type NavSubMenuProps = {
   key: string;
   children?: (MenuItemGroupType<MenuItemType> | MenuItemType)[];
@@ -45,10 +51,11 @@ export const createMenuGroup = ({ key, children, collapsed, icon, label }: NavMe
       };
 };
 
-export const createMenuItem = ({ key, icon, label, title }: NavMenuItemProps): MenuItemType => ({
+export const createMenuItem = ({ key, icon, label, style, title }: NavMenuItemProps): MenuItemType => ({
   key,
   icon,
   label: <Link to={key}>{label}</Link>,
+  style,
   title,
 });
 
