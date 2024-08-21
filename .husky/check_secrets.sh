@@ -1,29 +1,28 @@
 #!/bin/bash
 export LC_ALL=C.UTF-8
+
 # Define the regex pattern for secrets
 SECRET_PATTERN='[a-z]*_(secret|Secret|SECRET)\s*=\s*(?![''"]?\$)[0-9A-Za-z"'']+'
 
 SECRETS_FOUND=0
 WHITELIST_ENV_VARS=(NODE_ENV TEST_ENV POSTGRES_DB POSTGRES_USER KEYCLOAK_REALM_URL ELASTIC_NODE ELASTIC_USERNAME PEOPLESOFT_URL CRM_APPLICATION_CONTEXT CRM_URL SSO_ENVIRONMENT SSO_INTEGRATION_ID KEYCLOAK_API_URL KEYCLOAK_API_TOKEN_URL KEYCLOAK_API_ENVIRONMENT KEYCLOAK_API_INTEGRATION_ID)
 SKIP_FOLDERS=(.changeset .git .husky .vscode .turbo assets node_modules dist @generated)
+
 # Get the list of staged files
-STAGED_FILES=$(git diff --name-only)
+STAGED_FILES=$(git diff --cached --name-only)
 
 # Extract environment variable values from .env file
 declare -A APP_ENV_VARS
 if [ -f ../apps/app/.env ]; then
   while IFS='=' read -r key value; do
-    
     if [ -z "$value" ]; then
       continue
     fi
     if [[ " ${WHITELIST_ENV_VARS[*]} " == *" $key "* ]]; then
       continue
     fi
-    
     # Remove surrounding quotes if present
     value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//')
-    # echo "$key $value"
     APP_ENV_VARS[$key]=$value
   done < ../apps/app/.env
 fi
@@ -39,13 +38,12 @@ if [ -f ../apps/api/.env ]; then
     fi
     # Remove surrounding quotes if present
     value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//')
-    # echo "secret $value"
     API_ENV_VARS[$key]=$value
   done < ../apps/api/.env
 fi
 
 # Process each staged file
-echo "$STAGED_FILES" | while read -r file; do
+while read -r file; do
   # Skip empty lines
   if [ -z "$file" ]; then
     continue
@@ -59,35 +57,31 @@ echo "$STAGED_FILES" | while read -r file; do
   done
 
   # Search for secrets in the staged file
-  if grep -P "$SECRET_PATTERN" ../"$file" > /dev/null; then
+  if grep -P "$SECRET_PATTERN" ./"$file" > /dev/null; then
     echo "Secret found in: $file"
-    grep -P "$SECRET_PATTERN" ../"$file"
+    grep -P "$SECRET_PATTERN" ./"$file"
     echo "----------------------------------------"
-    SECRETS_FOUND=$((SECRETS_FOUND+1))
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
   fi
 
-   for key in "${!API_ENV_VARS[@]}"; do
-  #  echo "$key ${API_ENV_VARS[$key]}"
+  for key in "${!API_ENV_VARS[@]}"; do
     value=${API_ENV_VARS[$key]}
-   
     if grep -F "$value" "../$file" > /dev/null; then
       echo "Environment variable $key=$value used as literal in: $file"
-      #grep -F "$value" "../$file"
       echo "----------------------------------------"
-      SECRETS_FOUND=$((SECRETS_FOUND+1))
+      SECRETS_FOUND=$((SECRETS_FOUND + 1))
     fi
   done
+
   for key in "${!APP_ENV_VARS[@]}"; do
     value=${APP_ENV_VARS[$key]}
-   
     if grep -F "$value" "../$file" > /dev/null; then
       echo "Environment variable $key=$value used as literal in: $file"
-      #grep -F "$value" "../$file"
       echo "----------------------------------------"
-      SECRETS_FOUND=$((SECRETS_FOUND+1))
+      SECRETS_FOUND=$((SECRETS_FOUND + 1))
     fi
   done
-done
+done <<< "$STAGED_FILES"
 
 exit $SECRETS_FOUND
 
