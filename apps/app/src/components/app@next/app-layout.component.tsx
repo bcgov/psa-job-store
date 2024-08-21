@@ -10,7 +10,7 @@ const { Content, Sider } = Layout;
 
 export const AppLayout = () => {
   const auth = useAuth();
-  const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', true);
+  const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', false);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
