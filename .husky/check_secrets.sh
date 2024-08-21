@@ -11,7 +11,7 @@ STAGED_FILES=$(git diff --name-only)
 
 # Extract environment variable values from .env file
 declare -A APP_ENV_VARS
-if [ -f ./apps/app/.env ]; then
+if [ -f ../apps/app/.env ]; then
   while IFS='=' read -r key value; do
     
     if [ -z "$value" ]; then
@@ -25,11 +25,11 @@ if [ -f ./apps/app/.env ]; then
     value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//')
     # echo "$key $value"
     APP_ENV_VARS[$key]=$value
-  done < ./apps/app/.env
+  done < ../apps/app/.env
 fi
 
 declare -A API_ENV_VARS
-if [ -f ./apps/api/.env ]; then
+if [ -f ../apps/api/.env ]; then
   while IFS='=' read -r key value; do
     if [ -z "$value" ]; then
       continue
@@ -41,7 +41,7 @@ if [ -f ./apps/api/.env ]; then
     value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//')
     # echo "secret $value"
     API_ENV_VARS[$key]=$value
-  done < ./apps/api/.env
+  done < ../apps/api/.env
 fi
 
 # Process each staged file
@@ -50,7 +50,7 @@ echo "$STAGED_FILES" | while read -r file; do
   if [ -z "$file" ]; then
     continue
   fi
- echo $file
+
   # Skip files in specified folders
   for folder in "${SKIP_FOLDERS[@]}"; do
     if [[ "$file" == "$folder/"* || "$file" == *"/$folder/"* ]]; then
@@ -59,9 +59,9 @@ echo "$STAGED_FILES" | while read -r file; do
   done
 
   # Search for secrets in the staged file
-  if grep -P "$SECRET_PATTERN" ./"$file" > /dev/null; then
+  if grep -P "$SECRET_PATTERN" ../"$file" > /dev/null; then
     echo "Secret found in: $file"
-    grep -P "$SECRET_PATTERN" ./"$file"
+    grep -P "$SECRET_PATTERN" ../"$file"
     echo "----------------------------------------"
     SECRETS_FOUND=$((SECRETS_FOUND+1))
   fi
@@ -70,7 +70,7 @@ echo "$STAGED_FILES" | while read -r file; do
   #  echo "$key ${API_ENV_VARS[$key]}"
     value=${API_ENV_VARS[$key]}
    
-    if grep -F "$value" "./$file" > /dev/null; then
+    if grep -F "$value" "../$file" > /dev/null; then
       echo "Environment variable $key=$value used as literal in: $file"
       #grep -F "$value" "../$file"
       echo "----------------------------------------"
@@ -80,7 +80,7 @@ echo "$STAGED_FILES" | while read -r file; do
   for key in "${!APP_ENV_VARS[@]}"; do
     value=${APP_ENV_VARS[$key]}
    
-    if grep -F "$value" "./$file" > /dev/null; then
+    if grep -F "$value" "../$file" > /dev/null; then
       echo "Environment variable $key=$value used as literal in: $file"
       #grep -F "$value" "../$file"
       echo "----------------------------------------"
