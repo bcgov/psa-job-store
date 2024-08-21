@@ -1,3 +1,7 @@
+.ant-page-header-heading-title {
+  flex-shrink: 0;
+}
+
 .ant-breadcrumb a {
   background: var(--Neutral-1, #fff);
   color: #6e6e6e;

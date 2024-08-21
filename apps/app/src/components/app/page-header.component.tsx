@@ -176,37 +176,38 @@ export const PageHeader = ({
 
   const showVersions = (versions?.versions?.length ?? 0) > 0;
 
-  const renderButtons = () => (
-    <div style={{ display: 'flex', gap: '10px' }}>
-      {showVersions && selectedVersion && (
-        <Select
-          filterSort={(optionA: { label: any }, optionB: { label: any }) =>
-            (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
-          }
-          options={jobProfileVersions}
-          onChange={onChange}
-          value={selectedVersion?.id + '-' + selectedVersion?.version}
-        >
-          <Button>
-            Select Version
-            <DownOutlined />
+  const renderButtons = () =>
+    showVersions || selectedVersion?.id !== 0 || showButton1 || showButton2 ? (
+      <div style={{ display: 'flex', gap: '10px' }}>
+        {showVersions && selectedVersion && (
+          <Select
+            filterSort={(optionA: { label: any }, optionB: { label: any }) =>
+              (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+            }
+            options={jobProfileVersions}
+            onChange={onChange}
+            value={selectedVersion?.id + '-' + selectedVersion?.version}
+          >
+            <Button>
+              Select Version
+              <DownOutlined />
+            </Button>
+          </Select>
+        )}
+        {showButton1 && (
+          <Popover content={button1Content} trigger="click" placement="bottomRight">
+            <Button icon={<EllipsisOutlined />} onClick={button1Callback}>
+              {button1Text}
+            </Button>
+          </Popover>
+        )}
+        {showButton2 && (
+          <Button disabled={!isCurrentVersion} type="primary" onClick={button2Callback}>
+            {button2Text}
           </Button>
-        </Select>
-      )}
-      {showButton1 && (
-        <Popover content={button1Content} trigger="click" placement="bottomRight">
-          <Button icon={<EllipsisOutlined />} onClick={button1Callback}>
-            {button1Text}
-          </Button>
-        </Popover>
-      )}
-      {showButton2 && (
-        <Button disabled={!isCurrentVersion} type="primary" onClick={button2Callback}>
-          {button2Text}
-        </Button>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    ) : undefined;
 
   return (
     <AntdProPageHeader
