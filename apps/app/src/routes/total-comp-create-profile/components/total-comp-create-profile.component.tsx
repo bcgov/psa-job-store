@@ -63,6 +63,7 @@ import MinistriesSelect from '../../../components/app/common/components/ministri
 import '../../../components/app/common/css/custom-form.css';
 import '../../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../../components/app/page-header.component';
+import ContentWrapper from '../../../components/content-wrapper.component';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
 import {
   useGetFilteredClassificationsQuery,
@@ -97,7 +98,6 @@ import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-rol
 import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
 import { useLazyGetPositionRequestsCountQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { FormItem } from '../../../utils/FormItem';
-import ContentWrapper from '../../home/components/content-wrapper.component';
 import {
   JobProfileValidationModel,
   OverviewField,

@@ -8,8 +8,8 @@ import { useSearchParams } from 'react-router-dom';
 import '../../components/app/common/css/filtered-table.page.css';
 import '../../components/app/common/css/select-external-tags.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import MyPositionsTable from './components/my-position-requests-table.component';
 
 // eslint-disable-next-line react-refresh/only-export-components

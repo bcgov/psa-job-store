@@ -25,7 +25,6 @@ import {
   useSubmitPositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -34,6 +33,7 @@ import CommentsList from './components/comments-list.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
+import ContentWrapper from '../../components/content-wrapper.component';
 
 interface WizardResultPageProps {
   onBack?: () => void;

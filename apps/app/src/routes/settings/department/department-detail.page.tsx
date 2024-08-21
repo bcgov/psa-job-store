@@ -2,8 +2,8 @@ import { Space, Spin } from 'antd';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
+import ContentWrapper from '../../../components/content-wrapper.component';
 import { useLazyGetDepartmentForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
-import ContentWrapper from '../../home/components/content-wrapper.component';
 import { OtherDetailsCard } from './components/other-details-card.component';
 import { PrimaryActionsCard } from './components/primary-actions-card.component';
 

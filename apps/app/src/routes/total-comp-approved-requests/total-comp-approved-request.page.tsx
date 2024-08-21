@@ -9,13 +9,13 @@ import {
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetLocationQuery } from '../../redux/services/graphql-api/location.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
 import { formatDateTime } from '../../utils/Utils';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';

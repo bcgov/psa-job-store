@@ -18,13 +18,13 @@ import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import './classification-tasks.page.css';
 import { JobProfileWithDiff } from './components/job-profile-with-diff.component';
 import { NextSteps } from './components/next-steps';
 import { ServiceRequestDetails } from './components/service-request-details.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 
 // import '../wizard/wizard-review.page.css';
 // import './total-comp-approved-request.page.css';

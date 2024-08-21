@@ -15,10 +15,10 @@ import { TreeOrgChartSearch } from '../org-chart/components/tree-org-chart/tree-
 import TreeOrgChart from '../org-chart/components/tree-org-chart/tree-org-chart.component';
 import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
-import ContentWrapper from './components/content-wrapper.component';
 import HeaderWrapper from './components/header-wrapper.component';
 import { InitialsAvatar } from './components/initials-avatar.component';
 import './home.page.css';
+import ContentWrapper from '../../components/content-wrapper.component';
 
 const { Text } = Typography;
 
