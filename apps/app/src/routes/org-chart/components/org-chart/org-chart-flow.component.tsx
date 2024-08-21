@@ -39,7 +39,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
   const store = useStoreApi();
   const { addSelectedNodes } = store.getState();
   const [isButtonFocused, setIsButtonFocused] = useState(false);
-  console.log('component render, isButtonFocused: ', isButtonFocused);
+  // console.log('component render, isButtonFocused: ', isButtonFocused);
 
   useEffect(() => {
     if (selectedNodeId) {
@@ -230,7 +230,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
     setIsButtonFocused(false);
   };
 
-  console.log('isButtonFocused: ', isButtonFocused);
+  // console.log('isButtonFocused: ', isButtonFocused);
 
   // Update the handleKeyDown function
   const handleKeyDown = useCallback(
@@ -420,7 +420,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
             // selectedNodes={selectedNodeId ? [selectedNodeId] : []}
           >
             <Background />
-            <Controls position="top-right" focusable={false} />
+            <Controls position="top-right" showInteractive={false} />
 
             <MiniMap
               nodeStrokeWidth={3}
