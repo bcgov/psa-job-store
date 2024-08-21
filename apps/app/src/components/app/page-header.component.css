@@ -1,50 +1,42 @@
-.ant-page-header .ant-page-header-heading-left {
-    align-items: baseline !important;
-}
-
-
-.ant-breadcrumb a{
-    background: var(--Neutral-1, #FFF);
-    color: #6E6E6E;
-    font-family: Roboto;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px; /* 157.143% */
-    text-decoration-line: underline;
+.ant-breadcrumb a {
+  background: var(--Neutral-1, #fff);
+  color: #6e6e6e;
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px; /* 157.143% */
+  text-decoration-line: underline;
 }
 
 .ant-breadcrumb a:focus {
-    border-radius: 4px;
-    background: rgba(0, 0, 0, 0.06);
-    color: var(--BC-Blue-8, #0057AD);
-    font-family: Roboto;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px; /* 157.143% */
-    text-decoration-line: underline;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--BC-Blue-8, #0057ad);
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px; /* 157.143% */
+  text-decoration-line: underline;
 }
 
 .ant-breadcrumb a:hover {
-    color: var(--BC-Blue-8, #0057AD);
-    font-family: Roboto;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px; /* 157.143% */
-    text-decoration-line: underline;
+  color: var(--BC-Blue-8, #0057ad);
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px; /* 157.143% */
+  text-decoration-line: underline;
 }
 
-
-
-
 .breadcrumb-current {
-    color: #6E6E6E;
-    font-family: Roboto;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px; /* 157.143% */
-    text-decoration-line: none;
+  color: #6e6e6e;
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px; /* 157.143% */
+  text-decoration-line: none;
 }

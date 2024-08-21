@@ -9,9 +9,10 @@ import { LoginPage } from '../routes/auth/login.page';
 import { ClassificationTasksRoute } from '../routes/classification-tasks';
 import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
 import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
+import { HomeRoute as HomeRouteNext } from '../routes/home';
 import { HomeRoute } from '../routes/home-old';
-import { DynamicHomePage } from '../routes/home-old/dynamic-home.page';
 import { HomePage } from '../routes/home-old/home.page';
+import { HomePage as HomePageNext } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
 import { SavedJobProfilesPage } from '../routes/job-profiles/saved-job-profiles.page';
@@ -69,7 +70,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: 'next',
-            element: <HomeRoute />,
+            element: <HomeRouteNext />,
             children: [
               // Home
               {
@@ -77,7 +78,7 @@ export const router = createBrowserRouter([
                 handle: {
                   // breadcrumb: () => 'My tasks',
                 },
-                element: <DynamicHomePage />,
+                element: <HomePageNext />,
               },
               // Org Chart
               {

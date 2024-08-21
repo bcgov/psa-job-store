@@ -94,16 +94,18 @@ export const OrgChartNode = ({
       >
         <Card
           actions={
-            selected && orgChartType === OrgChartType.DYNAMIC
-              ? orgChartContext === OrgChartContext.DEFAULT
-                ? [
-                    <CreatePositionButton
-                      departmentId={data.department?.id}
-                      elements={orgChartData}
-                      positionIsVacant={positionIsVacant}
-                      supervisorId={data.id}
-                    />,
-                  ]
+            roles.includes('hiring-manager')
+              ? selected && orgChartType === OrgChartType.DYNAMIC
+                ? orgChartContext === OrgChartContext.DEFAULT
+                  ? [
+                      <CreatePositionButton
+                        departmentId={data.department?.id}
+                        elements={orgChartData}
+                        positionIsVacant={positionIsVacant}
+                        supervisorId={data.id}
+                      />,
+                    ]
+                  : undefined
                 : undefined
               : undefined
           }

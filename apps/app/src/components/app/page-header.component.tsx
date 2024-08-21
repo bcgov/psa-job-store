@@ -2,6 +2,7 @@
 import { DownOutlined, EllipsisOutlined, TagOutlined } from '@ant-design/icons';
 import { PageHeader as AntdProPageHeader, PageHeaderProps } from '@ant-design/pro-layout';
 import { Button, Popover, Select } from 'antd';
+import { AvatarProps } from 'antd/lib';
 import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation, useMatches, useParams, useSearchParams } from 'react-router-dom';
 import { IdVersion, JobProfileMetaModel } from '../../redux/services/graphql-api/job-profile-types';
@@ -15,6 +16,7 @@ interface BreadcrumbItem {
 
 export interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
   additionalBreadcrumb?: { title?: string; path?: string; icon?: React.ReactNode };
+  avatar?: AvatarProps;
   button1Text?: string;
   button1Callback?: () => void;
   showButton1?: boolean;
@@ -210,9 +212,9 @@ export const PageHeader = ({
     <AntdProPageHeader
       extra={renderButtons()}
       {...breadcrumbProps}
-      title={<h1 style={{ fontWeight: 600, fontSize: '20px', lineHeight: '32px' }}>{title}</h1>}
+      title={<h1 style={{ fontWeight: 600, fontSize: '20px', margin: 0 }}>{title}</h1>}
       {...props}
-      style={{ backgroundColor: '#FFF' }}
+      style={{ backgroundColor: '#FFF', padding: '16px' }}
     >
       {subHeader}
     </AntdProPageHeader>

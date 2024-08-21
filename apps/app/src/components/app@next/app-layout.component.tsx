@@ -30,7 +30,7 @@ export const AppLayout = () => {
           </Sider>
         )}
         <Layout>
-          <Content>
+          <Content style={{ display: 'flex', flexDirection: 'column' }}>
             <Outlet />
           </Content>
         </Layout>
