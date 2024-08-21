@@ -4,7 +4,7 @@ import canvasSize from 'canvas-size';
 import { toSvg } from 'html-to-image';
 import { Options } from 'html-to-image/lib/types';
 import { useState } from 'react';
-import { Panel, Rect, getNodesBounds, getRectOfNodes, getTransformForBounds, useReactFlow } from 'reactflow';
+import { Rect, getNodesBounds, getRectOfNodes, getTransformForBounds, useReactFlow } from 'reactflow';
 import AcessiblePopoverMenu from '../../../../components/app/common/components/accessible-popover-menu';
 
 // interface NodesBounds {
@@ -815,31 +815,25 @@ function DownloadButton() {
   };
 
   return (
-    <Panel position="top-right" style={{ marginTop: 0 }}>
-      {/* <Dropdown menu={{ items }} placement="bottomRight">
-        <Button tabIndex={focusable ? 0 : -1} loading={isLoading} icon={<DownloadOutlined />}>
+    <AcessiblePopoverMenu
+      triggerButton={
+        <Button loading={isLoading} tabIndex={-1} style={{}} icon={<DownloadOutlined aria-hidden />}>
           Download
         </Button>
-      </Dropdown> */}
-      <AcessiblePopoverMenu
-        triggerButton={
-          <Button loading={isLoading} tabIndex={-1} style={{}} icon={<DownloadOutlined aria-hidden />}>
-            Download
-          </Button>
-        }
-        ariaLabel="Download organization chart"
-        content={
-          <Menu selectedKeys={[]}>
-            <Menu.Item key="png" onClick={onClick_png}>
-              Download PNG
-            </Menu.Item>
-            <Menu.Item key="svg" onClick={onClick_svg}>
-              Download SVG
-            </Menu.Item>
-          </Menu>
-        }
-      ></AcessiblePopoverMenu>
-    </Panel>
+      }
+      buttonId="download-orgchart-button"
+      ariaLabel="Download organization chart"
+      content={
+        <Menu selectedKeys={[]}>
+          <Menu.Item key="png" onClick={onClick_png}>
+            Download PNG
+          </Menu.Item>
+          <Menu.Item key="svg" onClick={onClick_svg}>
+            Download SVG
+          </Menu.Item>
+        </Menu>
+      }
+    ></AcessiblePopoverMenu>
   );
 }
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CloseCircleFilled, CloseOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Input, Row, Tag, Tooltip } from 'antd';
+import { Button, Card, Col, Form, Input, Row, Tag, Tooltip } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
@@ -523,41 +523,44 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
             <Col xl={18} lg={16} md={12} sm={24}>
               <Row gutter={8} justify="end">
                 <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
-                  <Select
-                    closeMenuOnSelect={false}
-                    isClearable={false}
-                    backspaceRemovesValue={false}
-                    hideSelectedOptions={false}
-                    value={ministriesFilterData.filter((jf) =>
-                      allSelections
-                        .filter((selection) => selection.type === 'ministry')
-                        .map((selection) => selection.value)
-                        .includes(jf.value),
-                    )}
-                    styles={{
-                      container: (css) => ({ ...css, width: '200px' }),
-                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                    }}
-                    components={{
-                      ValueContainer: CustomValueContainer,
-                    }}
-                    classNamePrefix="react-select"
-                    isMulti
-                    aria-label="Ministries"
-                    placeholder="Ministries"
-                    options={ministriesFilterData}
-                    onChange={(selectedItems) => {
-                      const newValues = selectedItems.map((item) => item.value);
-                      if (newValues == null) return;
+                  {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                  <Form.Item label="Ministries" name="ministries" className="sr-only-label">
+                    <Select
+                      closeMenuOnSelect={false}
+                      isClearable={false}
+                      backspaceRemovesValue={false}
+                      hideSelectedOptions={false}
+                      value={ministriesFilterData.filter((jf) =>
+                        allSelections
+                          .filter((selection) => selection.type === 'ministry')
+                          .map((selection) => selection.value)
+                          .includes(jf.value),
+                      )}
+                      styles={{
+                        container: (css) => ({ ...css, width: '200px' }),
+                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                      }}
+                      components={{
+                        ValueContainer: CustomValueContainer,
+                      }}
+                      classNamePrefix="react-select"
+                      isMulti
+                      aria-label="Ministries"
+                      placeholder="Ministries"
+                      options={ministriesFilterData}
+                      onChange={(selectedItems) => {
+                        const newValues = selectedItems.map((item) => item.value);
+                        if (newValues == null) return;
 
-                      newValues.forEach((val: any) => {
-                        if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
-                      });
-                      selectedMinistry.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'ministry');
-                      });
-                    }}
-                  ></Select>
+                        newValues.forEach((val: any) => {
+                          if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
+                        });
+                        selectedMinistry.forEach((val) => {
+                          if (!newValues.includes(val)) removeSelection(val, 'ministry');
+                        });
+                      }}
+                    ></Select>
+                  </Form.Item>
                 </Col>
                 <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
                   <AccessibleTreeSelect
@@ -691,79 +694,85 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                   /> */}
                 </Col>
                 <Col data-testid="Classification-filter" data-cy="Classification-filter">
-                  <Select
-                    closeMenuOnSelect={false}
-                    isClearable={false}
-                    backspaceRemovesValue={false}
-                    hideSelectedOptions={false}
-                    value={classificationFilterData.filter((jf) =>
-                      allSelections
-                        .filter((selection) => selection.type === 'classification')
-                        .map((selection) => selection.value)
-                        .includes(jf.value),
-                    )}
-                    styles={{
-                      container: (css) => ({ ...css, width: '200px' }),
-                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                    }}
-                    components={{
-                      ValueContainer: CustomValueContainer,
-                    }}
-                    classNamePrefix="react-select"
-                    isMulti
-                    placeholder="Classification"
-                    aria-label="Classification"
-                    options={classificationFilterData}
-                    onChange={(selectedItems) => {
-                      const newValues = selectedItems.map((item) => item.value);
-                      if (newValues == null) return;
+                  {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                  <Form.Item label="Classification" name="classification" className="sr-only-label">
+                    <Select
+                      closeMenuOnSelect={false}
+                      isClearable={false}
+                      backspaceRemovesValue={false}
+                      hideSelectedOptions={false}
+                      value={classificationFilterData.filter((jf) =>
+                        allSelections
+                          .filter((selection) => selection.type === 'classification')
+                          .map((selection) => selection.value)
+                          .includes(jf.value),
+                      )}
+                      styles={{
+                        container: (css) => ({ ...css, width: '200px' }),
+                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                      }}
+                      components={{
+                        ValueContainer: CustomValueContainer,
+                      }}
+                      classNamePrefix="react-select"
+                      isMulti
+                      placeholder="Classification"
+                      aria-label="Classification"
+                      options={classificationFilterData}
+                      onChange={(selectedItems) => {
+                        const newValues = selectedItems.map((item) => item.value);
+                        if (newValues == null) return;
 
-                      newValues.forEach((val: any) => {
-                        if (!selectedClassification.includes(val)) addSelection(val, 'classification');
-                      });
-                      selectedClassification.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'classification');
-                      });
-                    }}
-                  ></Select>
+                        newValues.forEach((val: any) => {
+                          if (!selectedClassification.includes(val)) addSelection(val, 'classification');
+                        });
+                        selectedClassification.forEach((val) => {
+                          if (!newValues.includes(val)) removeSelection(val, 'classification');
+                        });
+                      }}
+                    ></Select>
+                  </Form.Item>
                 </Col>
 
                 <Col data-testid="Job role type-filter" data-cy="Job role type-filter">
-                  <Select
-                    closeMenuOnSelect={false}
-                    isClearable={false}
-                    backspaceRemovesValue={false}
-                    hideSelectedOptions={false}
-                    value={jobRoleTypeFilterData.filter((jf) =>
-                      allSelections
-                        .filter((selection) => selection.type === 'jobRoleType')
-                        .map((selection) => selection.value)
-                        .includes(jf.value),
-                    )}
-                    styles={{
-                      container: (css) => ({ ...css, width: '200px' }),
-                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                    }}
-                    components={{
-                      ValueContainer: CustomValueContainer,
-                    }}
-                    classNamePrefix="react-select"
-                    isMulti
-                    placeholder="Role"
-                    aria-label="Role"
-                    options={jobRoleTypeFilterData}
-                    onChange={(selectedItems) => {
-                      const newValues = selectedItems.map((item) => item.value);
-                      if (newValues == null) return;
+                  {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                  <Form.Item label="Role" name="role" className="sr-only-label">
+                    <Select
+                      closeMenuOnSelect={false}
+                      isClearable={false}
+                      backspaceRemovesValue={false}
+                      hideSelectedOptions={false}
+                      value={jobRoleTypeFilterData.filter((jf) =>
+                        allSelections
+                          .filter((selection) => selection.type === 'jobRoleType')
+                          .map((selection) => selection.value)
+                          .includes(jf.value),
+                      )}
+                      styles={{
+                        container: (css) => ({ ...css, width: '200px' }),
+                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                      }}
+                      components={{
+                        ValueContainer: CustomValueContainer,
+                      }}
+                      classNamePrefix="react-select"
+                      isMulti
+                      placeholder="Role"
+                      aria-label="Role"
+                      options={jobRoleTypeFilterData}
+                      onChange={(selectedItems) => {
+                        const newValues = selectedItems.map((item) => item.value);
+                        if (newValues == null) return;
 
-                      newValues.forEach((val: any) => {
-                        if (!selectedJobRoleType.includes(val)) addSelection(val, 'jobRoleType');
-                      });
-                      selectedJobRoleType.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
-                      });
-                    }}
-                  ></Select>
+                        newValues.forEach((val: any) => {
+                          if (!selectedJobRoleType.includes(val)) addSelection(val, 'jobRoleType');
+                        });
+                        selectedJobRoleType.forEach((val) => {
+                          if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
+                        });
+                      }}
+                    ></Select>
+                  </Form.Item>
                 </Col>
 
                 {/* if filters contains careerGroup, then render it */}

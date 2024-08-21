@@ -13,6 +13,7 @@ import { getFocusedElements } from '../../utils/get-focused-elements.util';
 import { DepartmentFilter } from '../department-filter.component';
 import { OrgChartNode } from '../org-chart-node.component';
 import { PositionSearch, SearchResult } from '../position-search.component';
+import DownloadButton from './download-button.component';
 import './dynamic-org-chart.component.css';
 import OrgChartFlow from './org-chart-flow.component';
 
@@ -408,6 +409,9 @@ export const DynamicOrgChart = ({
               onSelectResult={handleSelectResult}
               // focusable={false}
             />
+            <div style={{ position: 'absolute', bottom: '-32px', right: '0', zIndex: '1' }}>
+              <DownloadButton />
+            </div>
           </Space>
         </Col>
       </Row>

@@ -3,7 +3,6 @@ import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } f
 import ReactFlow, { Background, Edge, MiniMap, Node, NodeTypes, useReactFlow, useStoreApi } from 'reactflow';
 import { PositionProvider } from '../../../../components/app/common/contexts/position.context';
 import { Controls } from '../controls';
-import DownloadButton from './download-button.component';
 import { convertData } from './org-chart-tree-view.component';
 
 interface OrgChartFlowProps {
@@ -344,7 +343,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
               // setIsButtonFocused(!isPrevButtonDisabled);
             } else {
               console.log('no previous node!');
-              document.getElementById('org-chart-search-button')?.focus();
+              document.getElementById('download-orgchart-button')?.focus();
               event.preventDefault();
             }
           } else {
@@ -422,13 +421,13 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
           >
             <Background />
             <Controls position="top-right" focusable={false} />
+
             <MiniMap
               nodeStrokeWidth={3}
               pannable
               style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
               zoomable
             />
-            <DownloadButton />
           </ReactFlow>
         </div>
       </PositionProvider>
