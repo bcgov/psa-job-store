@@ -926,6 +926,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   }, [selectedClassificationId, handleSelectAllReportTo, allReportsTo]);
 
   const [isCurrentVersion, setIsCurrentVersion] = useState(true);
+  // classifications selector data
+  const { data: classificationsData } = useGetFilteredClassificationsQuery();
+
   useEffect(() => {
     // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
@@ -936,10 +939,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
 
       setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup ?? null);
-      const filtered = classificationsData.classifications.filter(
+      const filtered = classificationsData?.classifications.filter(
         (c) => c.employee_group_id === jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup,
       );
-      setFilteredClassifications(filtered);
+      setFilteredClassifications(filtered ?? []);
       const rawClassification = jobProfileData.jobProfile?.classifications?.[0]?.classification ?? null;
       let classificationString = '';
       if (rawClassification != null) {
@@ -1075,6 +1078,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     getAllTreeValues,
     triggerBasicDetailsValidation,
     triggerProfileValidation,
+    classificationsData?.classifications,
   ]);
 
   // Update local state when URL parameter changes
@@ -1393,9 +1397,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const { data: employeeGroupData } = useGetEmployeeGroupsQuery({
     ids: employeeGroupIds,
   });
-
-  // classifications selector data
-  const { data: classificationsData } = useGetFilteredClassificationsQuery();
 
   // useEffect to update the filteredClassifications when employeeGroup changes
   useEffect(() => {
