@@ -107,7 +107,17 @@ export const OrgChartNode = ({
               : undefined
           }
           title={
-            <Tooltip title={data.title}>
+            // Link for dragon naturally speaking targetting
+            <a
+              tabIndex={-1}
+              role="link"
+              style={{
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+              onClick={(e) => e.preventDefault()}
+              title={(positionIsVacant ? 'Vacant position' : data.employees[0].name) + ' - ' + data.title}
+            >
               <Text
                 style={{
                   color:
@@ -116,7 +126,7 @@ export const OrgChartNode = ({
               >
                 {data.title}
               </Text>
-            </Tooltip>
+            </a>
           }
           extra={
             <Text

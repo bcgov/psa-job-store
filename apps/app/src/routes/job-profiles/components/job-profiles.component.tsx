@@ -479,7 +479,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                 {renderJobProfile()}
               </Col>
             </>
-          ) : params.id ? (
+          ) : params.number ? (
             <Col span={24} role="region" aria-label="Selected job profile contents">
               {renderJobProfile()}
             </Col>
