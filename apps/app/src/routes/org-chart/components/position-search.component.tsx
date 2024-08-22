@@ -32,18 +32,23 @@ export const PositionSearch = ({
   onSelectResult,
 }: PositionSearchProps) => {
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [lastSearchedTerm, setLastSearchedTerm] = useState<string | undefined>(undefined);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const autoCompleteRef = useRef<any>(null);
 
   useEffect(() => {
     setSearchTerm(searchTermFromProps);
+    setLastSearchedTerm(searchTermFromProps);
   }, [searchTermFromProps]);
 
   const handleSearch = (value: string) => {
     onSearch(value, { source: 'input' });
+    setLastSearchedTerm(value);
   };
 
   const handleSelect = (value: string) => {
+    console.log('handleSelect: ', value);
     onSelectResult(value);
   };
 
@@ -53,6 +58,16 @@ export const PositionSearch = ({
       autoCompleteRef.current?.blur();
     }
   };
+
+  // if there's only one result, select it automatically
+  useEffect(() => {
+    if (searchResults.length === 1) {
+      console.log('select single result');
+      onSelectResult(searchResults[0].id);
+    }
+  }, [searchResults]);
+
+  const shouldShowOptions = isInputFocused && searchTerm === lastSearchedTerm && searchResults.length > 1;
 
   return (
     <>
@@ -71,7 +86,10 @@ export const PositionSearch = ({
           onSearch={(value) => setSearchTerm(value)}
           value={searchTerm}
           disabled={disabled}
+          open={shouldShowOptions}
           id="org-chart-search-input"
+          onFocus={() => setIsInputFocused(true)}
+          onBlur={() => setIsInputFocused(false)}
         >
           <Input.Search
             placeholder="Search by Position Number, Title, or Employee Name"

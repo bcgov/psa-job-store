@@ -3,7 +3,6 @@ import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } f
 import ReactFlow, { Background, Edge, MiniMap, Node, NodeTypes, useReactFlow, useStoreApi } from 'reactflow';
 import { PositionProvider } from '../../../../components/app/common/contexts/position.context';
 import { Controls } from '../controls';
-import DownloadButton from './download-button.component';
 import { convertData } from './org-chart-tree-view.component';
 
 interface OrgChartFlowProps {
@@ -40,7 +39,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
   const store = useStoreApi();
   const { addSelectedNodes } = store.getState();
   const [isButtonFocused, setIsButtonFocused] = useState(false);
-  console.log('component render, isButtonFocused: ', isButtonFocused);
+  // console.log('component render, isButtonFocused: ', isButtonFocused);
 
   useEffect(() => {
     if (selectedNodeId) {
@@ -231,7 +230,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
     setIsButtonFocused(false);
   };
 
-  console.log('isButtonFocused: ', isButtonFocused);
+  // console.log('isButtonFocused: ', isButtonFocused);
 
   // Update the handleKeyDown function
   const handleKeyDown = useCallback(
@@ -344,7 +343,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
               // setIsButtonFocused(!isPrevButtonDisabled);
             } else {
               console.log('no previous node!');
-              document.getElementById('org-chart-search-button')?.focus();
+              document.getElementById('download-orgchart-button')?.focus();
               event.preventDefault();
             }
           } else {
@@ -421,14 +420,14 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
             // selectedNodes={selectedNodeId ? [selectedNodeId] : []}
           >
             <Background />
-            <Controls position="top-right" focusable={false} />
+            <Controls position="top-right" showInteractive={false} />
+
             <MiniMap
               nodeStrokeWidth={3}
               pannable
               style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
               zoomable
             />
-            <DownloadButton />
           </ReactFlow>
         </div>
       </PositionProvider>

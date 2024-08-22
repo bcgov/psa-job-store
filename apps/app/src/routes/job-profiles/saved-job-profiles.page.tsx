@@ -20,7 +20,7 @@ export const SavedJobProfilesPage = () => {
 
   return (
     <>
-      <PageHeader title="Saved profiles" />
+      <PageHeader title="Saved profiles" subTitle="View profiles that you have previously saved." />
       <ContentWrapper>
         <JobProfiles
           key={'SavedProfiles'}

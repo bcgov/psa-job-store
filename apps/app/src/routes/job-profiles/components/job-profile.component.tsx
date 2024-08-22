@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined, ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
-import { Alert, Descriptions, DescriptionsProps, Divider, Grid, Tooltip, Typography } from 'antd';
+import { Alert, Button, Descriptions, DescriptionsProps, Divider, Grid, Tooltip, Typography } from 'antd';
 import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -620,6 +620,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return comparisonResult;
   };
 
+  // Construct the back URL
+  console.log('searchParams: ', searchParams);
+  const backUrl = `/job-profiles?${searchParams}`;
+
   if (isLoading) {
     return <LoadingSpinnerWithMessage />;
   }
@@ -1217,8 +1221,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     <div data-testid="job-profile" style={{ ...style }}>
       {screens.xl === false && showBackToResults ? (
         <nav aria-label="Breadcrumb">
-          <Link to="/job-profiles">
-            <ArrowLeftOutlined aria-hidden="true" /> Back to Search Results
+          <Link to={backUrl}>
+            <Button type="link" icon={<ArrowLeftOutlined aria-hidden="true" />} style={{ padding: 0 }}>
+              Back to Search Results
+            </Button>
           </Link>
         </nav>
       ) : (

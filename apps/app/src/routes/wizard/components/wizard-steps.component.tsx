@@ -71,7 +71,7 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
           responsive={false}
           direction={stepsDirection}
           progressDot={(dot, { index }) => {
-            if (index == 2 && requiresVerification)
+            if (index == 3 && requiresVerification)
               return (
                 <div
                   style={{

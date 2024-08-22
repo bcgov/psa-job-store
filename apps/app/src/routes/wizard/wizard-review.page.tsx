@@ -1,5 +1,5 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Menu, Modal, Typography } from 'antd';
+import { Button, Col, Menu, Modal, Row, Typography } from 'antd';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
@@ -206,7 +206,11 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
             rowProps={{ justify: 'center' }}
             colProps={{ sm: 24, md: 24, lg: 24, xxl: 18 }}
           />
-          <OtherDetails wizardData={wizardData} positionRequestData={positionRequestData}></OtherDetails>
+          <Row {...{ justify: 'center' }}>
+            <Col {...{ sm: 24, md: 24, lg: 24, xxl: 18 }}>
+              <OtherDetails wizardData={wizardData} positionRequestData={positionRequestData}></OtherDetails>
+            </Col>
+          </Row>
         </div>
       </WizardPageWrapper>
     </div>

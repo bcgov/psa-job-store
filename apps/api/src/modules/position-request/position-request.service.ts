@@ -143,7 +143,6 @@ export class PositionRequestApiService {
         reports_to_position_id: data.reports_to_position_id,
         profile_json: data.profile_json === null ? Prisma.DbNull : data.profile_json,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
-        orgchart_png: data.orgchart_png === null ? Prisma.DbNull : data.orgchart_png,
         // TODO: AL-146
         // user: data.user,
         user_id: userId,
@@ -223,23 +222,12 @@ export class PositionRequestApiService {
           throw AlexandriaError('Failed to save position number');
         }
 
-        try {
-          positionRequest = await this.prisma.positionRequest.update({
-            where: { id },
-            data: {
-              orgchart_png: orgchart_png,
-            },
-          });
-        } catch (error) {
-          this.logger.error('Failed to set orgchart_png: ' + position.positionNbr);
-          this.logger.error(error);
-        }
-
         if (position.positionNbr.length > 0) {
           positionRequest = await this.submitPositionRequest_afterCreatePosition(
             position.positionNbr,
             id,
             positionRequest,
+            orgchart_png,
           );
         } else {
           throw AlexandriaError('Peoplesoft returned a blank position number');
@@ -265,24 +253,11 @@ export class PositionRequestApiService {
           this.logger.error(error);
         }
 
-        // update org chart snapshot
-
-        try {
-          positionRequest = await this.prisma.positionRequest.update({
-            where: { id },
-            data: {
-              orgchart_png: orgchart_png,
-            },
-          });
-        } catch (error) {
-          this.logger.error('Failed to set orgchart_png: ' + positionRequest.position_number.toString());
-          this.logger.error(error);
-        }
-
         positionRequest = await this.submitPositionRequest_afterCreatePosition(
           `${positionRequest.position_number.toString()}`.padStart(8, '0'),
           id,
           positionRequest,
+          orgchart_png,
         );
       }
     } catch (error) {
@@ -295,7 +270,7 @@ export class PositionRequestApiService {
     return positionRequest;
   }
 
-  private async submitPositionRequest_afterCreatePosition(positionNumber: string, id, positionRequest) {
+  private async submitPositionRequest_afterCreatePosition(positionNumber: string, id, positionRequest, orgchart_png) {
     // this function runs after a position has been created in peoplesoft
     // we're going to update org chart (update supervisor and add new position nodes),
     // create or update CRM incident, and update position request status
@@ -327,7 +302,7 @@ export class PositionRequestApiService {
     let crm_status;
     let crm_category;
     try {
-      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
+      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id, orgchart_png);
       ({ crm_id, crm_lookup_name, crm_status, crm_category } = incident);
       await this.prisma.positionRequest.update({
         where: { id },
@@ -1009,10 +984,6 @@ export class PositionRequestApiService {
       updatePayload.reports_to_position_id = updateData.reports_to_position_id;
     }
 
-    if (updateData.orgchart_png !== undefined) {
-      updatePayload.orgchart_png = updateData.orgchart_png;
-    }
-
     if (updateData.profile_json !== undefined) {
       updatePayload.profile_json = updateData.profile_json === null ? Prisma.DbNull : updateData.profile_json;
       // attach original profile json
@@ -1433,7 +1404,7 @@ export class PositionRequestApiService {
     };
   }
 
-  async createOrUpdateCrmIncidentForPositionRequest(id: number) {
+  async createOrUpdateCrmIncidentForPositionRequest(id: number, orgchartPng: string) {
     try {
       const needsReview = (await this.positionRequestNeedsReview(id)).result;
       const formattedDate = dayjs().format('YYYYMMDD');
@@ -1600,7 +1571,7 @@ export class PositionRequestApiService {
             name: 'Org chart',
             fileName: pngFileName,
             contentType: 'image/png',
-            data: positionRequest.orgchart_png,
+            data: orgchartPng,
           },
         ],
       };

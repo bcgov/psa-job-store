@@ -86,7 +86,7 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
         onNodeClick={() => {}}
       >
         <Background />
-        <Controls position="top-right" />
+        <Controls position="top-right" showInteractive={false} />
         <MiniMap
           nodeStrokeWidth={3}
           pannable

@@ -13,6 +13,7 @@ import { getFocusedElements } from '../../utils/get-focused-elements.util';
 import { DepartmentFilter } from '../department-filter.component';
 import { OrgChartNode } from '../org-chart-node.component';
 import { PositionSearch, SearchResult } from '../position-search.component';
+import DownloadButton from './download-button.component';
 import './dynamic-org-chart.component.css';
 import OrgChartFlow from './org-chart-flow.component';
 
@@ -237,7 +238,7 @@ export const DynamicOrgChart = ({
   // [isDirty, elements, searchTerm, selectedNodeIds]
 
   useEffect(() => {
-    // console.log('useEffect nodes: ', nodes);
+    console.log('useEffect nodes: ', nodes);
     const searchResultNodes = nodes.filter((node) => node.data.isSearchResult === true);
     const selectedNodes = nodes.filter((node) => node.selected === true);
     // const adjacentNodes = selectedNodes.length > 0 ? nodes.filter((node) => node.data.isAdjacent === true) : [];
@@ -246,11 +247,14 @@ export const DynamicOrgChart = ({
       // console.log('fitView A: ', selectedNodes, adjacentNodes);
       // fitView({ duration: 800, nodes: [...selectedNodes, ...adjacentNodes] });
     } else if (searchResultNodes.length > 0) {
-      // console.log('fitView B: ', searchResultNodes);
-      fitView({ duration: 800, nodes: searchResultNodes });
+      // if there's only one result, we will select that node
+      if (searchResultNodes.length != 1) {
+        console.log('fitView B: ', searchResultNodes);
+        fitView({ duration: 800, nodes: searchResultNodes });
+      }
     } else {
       if (isDirty === false) {
-        // console.log('fitView C: ', nodes);
+        console.log('fitView C: ', nodes);
         fitView({ duration: 800, nodes });
       }
     }
@@ -368,6 +372,7 @@ export const DynamicOrgChart = ({
   // };
 
   const handleSelectResult = (id: string) => {
+    console.log('handleSelectResult: ', id);
     setSelectedNodeIds([id]);
     setSelectedNodeId(id);
     renderSelectedNodes([id]);
@@ -408,6 +413,9 @@ export const DynamicOrgChart = ({
               onSelectResult={handleSelectResult}
               // focusable={false}
             />
+            <div style={{ position: 'absolute', bottom: '-32px', right: '0', zIndex: '1' }}>
+              <DownloadButton />
+            </div>
           </Space>
         </Col>
       </Row>
