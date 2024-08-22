@@ -936,6 +936,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
 
       setValue('employeeGroup', jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup ?? null);
+      const filtered = classificationsData.classifications.filter(
+        (c) => c.employee_group_id === jobProfileData.jobProfile.total_comp_create_form_misc?.employeeGroup,
+      );
+      setFilteredClassifications(filtered);
       const rawClassification = jobProfileData.jobProfile?.classifications?.[0]?.classification ?? null;
       let classificationString = '';
       if (rawClassification != null) {
