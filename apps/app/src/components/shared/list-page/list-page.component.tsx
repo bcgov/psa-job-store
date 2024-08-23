@@ -157,7 +157,7 @@ export const ListPage = ({
     <>
       <PageHeader {...pageHeaderProps} />
       <ContentWrapper>
-        <Space direction="vertical" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+        <Space size="middle" direction="vertical">
           <ListFilter
             setSearchParams={setSearchParams}
             filterData={filterData}
