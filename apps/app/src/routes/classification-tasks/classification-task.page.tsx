@@ -16,7 +16,6 @@ import LoadingSpinnerWithMessage from '../../components/app/common/components/lo
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
-import ContentWrapper from '../../components/content-wrapper.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { OrgChart } from '../org-chart/components/org-chart';
@@ -96,17 +95,23 @@ export const ClassificationTaskPage = () => {
       key: '2',
       label: 'Organization Chart',
       children: (
-        <OrgChart
-          type={OrgChartType.READONLY}
-          departmentId={data.positionRequest?.department_id ?? ''}
-          elements={snapshotCopy}
-        />
+        <div style={{ height: '100%' }}>
+          <OrgChart
+            type={OrgChartType.READONLY}
+            departmentId={data.positionRequest?.department_id ?? ''}
+            elements={snapshotCopy}
+          />
+        </div>
       ),
     },
     {
       key: '3',
       label: 'Job Profile',
-      children: <JobProfileWithDiff positionRequestData={data} />,
+      children: (
+        <div style={{ padding: '0 1rem 1rem 1rem' }}>
+          <JobProfileWithDiff positionRequestData={data} />
+        </div>
+      ),
     },
     {
       key: '4',
@@ -256,46 +261,38 @@ export const ClassificationTaskPage = () => {
 
   return (
     <>
-      <Row align="middle" justify="space-between">
-        <Col xs={24} lg={21}>
-          <PageHeader
-            title={data?.positionRequest?.title}
-            subTitle={
-              <div>
-                <PositionProfile
-                  prefix="Reporting to"
-                  mode="compact"
-                  positionNumber={data?.positionRequest?.reports_to_position_id}
-                  orgChartData={data?.positionRequest?.orgchart_json}
-                ></PositionProfile>
-              </div>
-            }
-            additionalBreadcrumb={{ title: data?.positionRequest?.title }}
-          />
-        </Col>
-        <Col xs={24} lg={3}>
-          <Row justify="start">
-            <Col>
-              {data?.positionRequest?.status && <StatusIcon status={data.positionRequest.status} />}
+      <PageHeader
+        extra={
+          <>
+            {data?.positionRequest?.status && <StatusIcon status={data.positionRequest.status} />}
 
-              <Divider type="vertical" />
-              <Dropdown menu={{ items }} placement="bottom" trigger={['click']}>
-                <Button icon={<EllipsisOutlined />}></Button>
-              </Dropdown>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-
-      <ContentWrapper>
-        <Tabs
-          activeKey={activeTabKey}
-          onChange={(key) => setActiveTabKey(key)}
-          defaultActiveKey="1"
-          items={tabItems}
-          tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
-        />
-      </ContentWrapper>
+            <Divider type="vertical" />
+            <Dropdown menu={{ items }} placement="bottom" trigger={['click']}>
+              <Button icon={<EllipsisOutlined />}></Button>
+            </Dropdown>
+          </>
+        }
+        title={data?.positionRequest?.title}
+        subTitle={
+          <div>
+            <PositionProfile
+              prefix="Reporting to"
+              mode="compact"
+              positionNumber={data?.positionRequest?.reports_to_position_id}
+              orgChartData={data?.positionRequest?.orgchart_json}
+            />
+          </div>
+        }
+        additionalBreadcrumb={{ title: data?.positionRequest?.title }}
+      />
+      <Tabs
+        activeKey={activeTabKey}
+        onChange={(key) => setActiveTabKey(key)}
+        defaultActiveKey="1"
+        items={tabItems}
+        tabBarStyle={{ backgroundColor: '#fff', padding: '0 1rem 0px 1rem' }}
+        style={{ backgroundColor: '#F0F2F5' }}
+      />
     </>
   );
 };
