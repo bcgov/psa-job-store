@@ -15,7 +15,7 @@ interface OrgChartFlowProps {
   // searchTerm?: string;
   // loading?: boolean;
   // treeViewInFocusCallback: (inFocus: boolean) => void;
-  setSelectedNodeId: (nodeId: string | null) => void;
+  setSelectedNodeIds: React.Dispatch<React.SetStateAction<string[]>>;
   selectedNodeId: string | null;
   // isKeyboardNav is a ref
   isKeyboardNav: React.MutableRefObject<boolean>;
@@ -31,7 +31,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
   // searchTerm,
   // loading,
   // treeViewInFocusCallback,
-  setSelectedNodeId,
+  setSelectedNodeIds,
   selectedNodeId,
   isKeyboardNav,
 }) => {
@@ -150,11 +150,12 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
     return parent ? parent.children.map((childId: any) => findNodeById(childId)).filter(Boolean) : [];
   };
 
+  // Update the selected node and focus on it - called from all arrow keys, etc
   const updateSelectedNode = (selectedNodeId = '', focusButton = false) => {
     console.log('updateSelectedNode, nodeId/focusButton: ', selectedNodeId, focusButton);
     isKeyboardNav.current = true;
     addSelectedNodes([selectedNodeId]);
-    setSelectedNodeId(selectedNodeId);
+    setSelectedNodeIds([selectedNodeId]);
 
     // Focus on the selected node
     // this will read out aria-label
@@ -243,7 +244,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
       const { key, shiftKey } = event;
       switch (key) {
         case 'Escape':
-          setSelectedNodeId(null);
+          setSelectedNodeIds([]);
           setIsButtonFocused(false);
           document.getElementById('org-chart-search-input')?.focus();
           break;
@@ -358,7 +359,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
                 setIsButtonFocused(false);
               } else {
                 console.log('no next node!');
-                setSelectedNodeId(null);
+                setSelectedNodeIds([]);
               }
             } else {
               // If node is focused and button is not disabled, focus on the button
@@ -402,7 +403,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
         >
           <ReactFlow
             onPaneClick={() => {
-              setSelectedNodeId(null);
+              setSelectedNodeIds([]);
               setIsButtonFocused(false);
               onPaneClick();
             }}
