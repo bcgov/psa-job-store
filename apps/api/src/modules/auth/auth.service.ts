@@ -61,20 +61,35 @@ export class AuthService {
     return [this.configService.get('KEYCLOAK_CLIENT_ID_PRIVATE'), this.configService.get('KEYCLOAK_CLIENT_ID_PUBLIC')];
   }
 
+  getExpectedKeyCloakIssuer(): string {
+    return this.configService.get('KEYCLOAK_REALM_URL');
+  }
+
   async getUser(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id: id } });
     return user;
   }
 
   async getUserFromPayload(data: JwtPayload) {
+    // Get User ID from payload
     const { idir_user_guid, exp } = data;
     const uuid = guidToUuid(idir_user_guid);
 
+    // Attempt to find user in the cache
     const CACHE_KEY = `${CACHE_USER_PREFIX}${uuid}`;
     let match = await this.cacheManager.get<Express.User>(CACHE_KEY);
 
     if (!match) {
-      const user = await this.userService.getUser({ where: { id: uuid } });
+      // Attempt to find the user in the database
+      let user = await this.userService.getUser({ where: { id: uuid } });
+
+      // If user doesn't exist in the database, sync the user
+      if (!user) {
+        await this.userService.syncUser(uuid);
+        user = await this.userService.getUser({ where: { id: uuid } });
+      }
+
+      // Add the user to the cache
       await this.cacheManager.set(CACHE_KEY, user, (exp ?? 0) * 1000 - Date.now());
       match = await this.cacheManager.get<Express.User>(CACHE_KEY);
     }

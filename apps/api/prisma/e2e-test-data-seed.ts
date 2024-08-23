@@ -4,7 +4,7 @@ import { BehaviouralCompetencyCategory, BehaviouralCompetencyType, JobProfile, P
 const prisma = new PrismaClient();
 
 const SYSTEM_USER_ID = 'f1851282-d875-4f22-9590-6c0405d3bc78';
-const TEST_USER_ID = '6405580e-c713-411d-b9c6-6bfab4f512cd';
+const TEST_USER_ID = '88bd8bb6-c449-4c13-8204-d91539f548d4';
 
 async function seed() {
   await prisma.user.upsert({
@@ -1042,7 +1042,6 @@ async function seed() {
     all_reports_to: false,
     all_organizations: true,
     is_archived: false,
-
     role_id: 1,
     role_type_id: null,
     type: 'CORPORATE',
@@ -1050,6 +1049,8 @@ async function seed() {
     title: 'Senior Software Engineer',
     number: 189,
     overview: 'Senior Software Engineer responsible for developing scalable web applications.',
+    context:
+      'The position often collaborates closely with the IT department to ensure the security and efficiency of data management systems, receiving technical support as needed.',
     accountabilities: [
       { text: 'Design, develop, and maintain web applications.', is_significant: false, is_readonly: false },
       {
@@ -1131,7 +1132,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    current_version: true,
+    views: 1,
   };
 
   const profile194: JobProfile = {
@@ -1148,7 +1149,6 @@ async function seed() {
     all_reports_to: false,
     all_organizations: true,
     is_archived: false,
-
     role_id: 1,
     role_type_id: null,
     type: 'CORPORATE',
@@ -1157,6 +1157,9 @@ async function seed() {
     number: 194,
     overview:
       'Data Scientist responsible for analyzing large data sets to derive actionable insights and support strategic decision-making.',
+    context:
+      "This role is directly accountable to the Senior Marketing Manager, who oversees the marketing department's strategies and execution, offering strategic guidance and performance feedback.",
+
     accountabilities: [
       {
         text: 'Work with stakeholders to understand business requirements and deliver data-driven solutions.',
@@ -1241,7 +1244,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    current_version: true,
+    views: 1,
   };
 
   const profile200: JobProfile = {
@@ -1258,7 +1261,6 @@ async function seed() {
     all_reports_to: false,
     all_organizations: true,
     is_archived: false,
-
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -1267,6 +1269,9 @@ async function seed() {
     number: 200,
     overview:
       'Experienced Project Manager to lead cross-functional teams in the successful delivery of high-stake projects.',
+    context:
+      "The employee will work under the guidance of the Chief Financial Officer, who is responsible for the company's financial health and provides direction on budget management and financial planning.",
+
     accountabilities: [
       {
         text: 'Define project scope, goals, and deliverables that support business goals.',
@@ -1381,7 +1386,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    current_version: true,
+    views: 10,
   };
 
   const profile208: JobProfile = {
@@ -1398,7 +1403,6 @@ async function seed() {
     all_reports_to: false,
     all_organizations: true,
     is_archived: false,
-
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -1407,6 +1411,8 @@ async function seed() {
     number: 208,
     overview:
       'Dynamic Digital Marketing Specialist to develop, implement, track, and optimize our digital marketing campaigns across multiple programs and all digital channels.',
+    context:
+      'The role frequently interfaces with external vendors and partners, coordinating with the Procurement Manager to negotiate contracts and manage supplier relationships effectively.',
     accountabilities: [
       {
         text: 'Plan and execute all web, SEO/SEM, database marketing, email, social media, and display advertising campaigns.',
@@ -1507,7 +1513,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    current_version: true,
+    views: 74,
   };
 
   const profile210: JobProfile = {
@@ -1524,7 +1530,6 @@ async function seed() {
     all_reports_to: false,
     all_organizations: true,
     is_archived: false,
-
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -1533,6 +1538,8 @@ async function seed() {
     number: 210,
     overview:
       'Strategic HR Analyst Manager to lead multiple programs for our HR practices and objectives that will provide an employee-oriented, high-performance culture emphasizing empowerment, quality, productivity, and standards.',
+    context:
+      'Team members report to the Project Lead, who coordinates project tasks and timelines, ensuring alignment with client expectations and project goals.',
     accountabilities: [
       {
         text: 'Develop and implement HR strategies and initiatives aligned with the overall business strategy.',
@@ -1648,7 +1655,7 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    current_version: true,
+    views: 474,
   };
 
   const profile212: JobProfile = {
@@ -1665,7 +1672,6 @@ async function seed() {
     all_reports_to: false,
     all_organizations: true,
     is_archived: false,
-
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -1674,6 +1680,8 @@ async function seed() {
     number: 212,
     overview:
       'Passionate Environmental Scientist to analyze environmental data and develop strategies to address environmental issues and promote sustainability.',
+    context:
+      'The individual occupies a critical position within the customer service team, reporting to the Customer Service Manager, who sets service standards and monitors team performance.',
     accountabilities: [
       {
         text: 'Conduct fieldwork and collect environmental data on air, water, soil, and plant life.',
@@ -1793,11 +1801,11 @@ async function seed() {
     valid_from: undefined,
     valid_to: undefined,
     version: 1,
-    current_version: true,
+    views: 747,
   };
 
   const profile247: JobProfile = {
-    id: 7,
+    id: 6,
     review_required: false,
     program_overview: '',
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
@@ -1809,10 +1817,11 @@ async function seed() {
     type: 'CORPORATE',
     title: 'Financial Analyst',
     is_archived: false,
-
     number: 247,
     overview:
       'Detail-oriented Financial Analyst to provide analysis of financial data, forecast future trends, and advise on investment decisions.',
+    context:
+      'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
     accountabilities: [
       {
         text: 'Analyze financial data and create financial models for decision support.',
@@ -1964,18 +1973,19 @@ async function seed() {
     published_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
     valid_from: undefined,
     valid_to: undefined,
-    version: 1,
-    current_version: true,
+    version: 2,
+    views: 0,
   };
 
   const jobProfiles = [profile189, profile194, profile200, profile208, profile210, profile212, profile247];
   for await (const profile of jobProfiles) {
-    const { id, ...rest } = profile;
+    const { id, version, ...rest } = profile;
 
     await prisma.jobProfile.upsert({
-      where: { id },
+      where: { id_version: { id, version } },
       create: {
         id,
+        version,
         ...rest,
       },
       update: {
@@ -2010,42 +2020,49 @@ async function seed() {
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
+      job_profile_version: profile189.version,
     },
     {
       classification_id: '508010',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
+      job_profile_version: profile194.version,
     },
     {
       classification_id: '508013',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
+      job_profile_version: profile200.version,
     },
     {
       classification_id: '752203',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
+      job_profile_version: profile208.version,
     },
     {
       classification_id: '501537',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
+      job_profile_version: profile210.version,
     },
     {
       classification_id: '621252',
       classification_employee_group_id: 'GEU',
       classification_peoplesoft_id: 'STTSS',
       job_profile_id: profile212.id,
+      job_profile_version: profile212.version,
     },
     {
       classification_id: '551409',
       classification_employee_group_id: '805G',
       classification_peoplesoft_id: 'ST805',
       job_profile_id: profile247.id,
+      job_profile_version: profile247.version,
     },
   ];
 
@@ -2078,65 +2095,25 @@ async function seed() {
 
   await prisma.jobProfileJobFamilyLink.createMany({
     data: [
-      { jobProfileId: profile189.id, jobFamilyId: 1 },
-      { jobProfileId: profile194.id, jobFamilyId: 1 },
-      { jobProfileId: profile200.id, jobFamilyId: 1 },
-      { jobProfileId: profile208.id, jobFamilyId: 1 },
-      { jobProfileId: profile210.id, jobFamilyId: 7 },
-      { jobProfileId: profile212.id, jobFamilyId: 7 },
-      { jobProfileId: profile247.id, jobFamilyId: 7 },
+      { jobProfileId: profile189.id, jobProfileVersion: profile189.version, jobFamilyId: 1 },
+      { jobProfileId: profile194.id, jobProfileVersion: profile194.version, jobFamilyId: 1 },
+      { jobProfileId: profile200.id, jobProfileVersion: profile200.version, jobFamilyId: 1 },
+      { jobProfileId: profile208.id, jobProfileVersion: profile208.version, jobFamilyId: 1 },
+      { jobProfileId: profile210.id, jobProfileVersion: profile210.version, jobFamilyId: 7 },
+      { jobProfileId: profile212.id, jobProfileVersion: profile212.version, jobFamilyId: 7 },
+      { jobProfileId: profile247.id, jobProfileVersion: profile247.version, jobFamilyId: 7 },
     ],
   });
 
   await prisma.jobProfileStreamLink.createMany({
     data: [
-      { jobProfileId: profile189.id, streamId: 33 },
-      { jobProfileId: profile194.id, streamId: 1 },
-      { jobProfileId: profile200.id, streamId: 1 },
-      { jobProfileId: profile208.id, streamId: 1 },
-      { jobProfileId: profile210.id, streamId: 33 },
-      { jobProfileId: profile212.id, streamId: 1 },
-      { jobProfileId: profile247.id, streamId: 1 },
-    ],
-  });
-
-  await prisma.jobProfileContext.createMany({
-    data: [
-      {
-        job_profile_id: profile189.id,
-        description:
-          'The position often collaborates closely with the IT department to ensure the security and efficiency of data management systems, receiving technical support as needed.',
-      },
-      {
-        job_profile_id: profile194.id,
-        description:
-          "This role is directly accountable to the Senior Marketing Manager, who oversees the marketing department's strategies and execution, offering strategic guidance and performance feedback.",
-      },
-      {
-        job_profile_id: profile200.id,
-        description:
-          "The employee will work under the guidance of the Chief Financial Officer, who is responsible for the company's financial health and provides direction on budget management and financial planning.",
-      },
-      {
-        job_profile_id: profile208.id,
-        description:
-          'The role frequently interfaces with external vendors and partners, coordinating with the Procurement Manager to negotiate contracts and manage supplier relationships effectively.',
-      },
-      {
-        job_profile_id: profile210.id,
-        description:
-          'Team members report to the Project Lead, who coordinates project tasks and timelines, ensuring alignment with client expectations and project goals.',
-      },
-      {
-        job_profile_id: profile212.id,
-        description:
-          'The individual occupies a critical position within the customer service team, reporting to the Customer Service Manager, who sets service standards and monitors team performance.',
-      },
-      {
-        job_profile_id: profile247.id,
-        description:
-          'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
-      },
+      { jobProfileId: profile189.id, jobProfileVersion: profile189.version, streamId: 33 },
+      { jobProfileId: profile194.id, jobProfileVersion: profile194.version, streamId: 1 },
+      { jobProfileId: profile200.id, jobProfileVersion: profile200.version, streamId: 1 },
+      { jobProfileId: profile208.id, jobProfileVersion: profile208.version, streamId: 1 },
+      { jobProfileId: profile210.id, jobProfileVersion: profile210.version, streamId: 33 },
+      { jobProfileId: profile212.id, jobProfileVersion: profile212.version, streamId: 1 },
+      { jobProfileId: profile247.id, jobProfileVersion: profile247.version, streamId: 1 },
     ],
   });
 
@@ -2145,66 +2122,82 @@ async function seed() {
       {
         behavioural_competency_id: 45,
         job_profile_id: profile194.id,
+        job_profile_version: profile194.version,
       },
       {
         behavioural_competency_id: 22,
         job_profile_id: profile194.id,
+        job_profile_version: profile194.version,
       },
       {
         behavioural_competency_id: 36,
         job_profile_id: profile194.id,
+        job_profile_version: profile194.version,
       },
       {
         behavioural_competency_id: 45,
         job_profile_id: profile200.id,
+        job_profile_version: profile200.version,
       },
       {
         behavioural_competency_id: 41,
         job_profile_id: profile200.id,
+        job_profile_version: profile200.version,
       },
       {
         behavioural_competency_id: 22,
         job_profile_id: profile200.id,
+        job_profile_version: profile200.version,
       },
       {
         behavioural_competency_id: 45,
         job_profile_id: profile208.id,
+        job_profile_version: profile208.version,
       },
       {
         behavioural_competency_id: 41,
         job_profile_id: profile208.id,
+        job_profile_version: profile208.version,
       },
       {
         behavioural_competency_id: 22,
         job_profile_id: profile208.id,
+        job_profile_version: profile208.version,
       },
       {
         behavioural_competency_id: 45,
         job_profile_id: profile189.id,
+        job_profile_version: profile189.version,
       },
       {
         behavioural_competency_id: 35,
         job_profile_id: profile189.id,
+        job_profile_version: profile189.version,
       },
       {
         behavioural_competency_id: 36,
         job_profile_id: profile189.id,
+        job_profile_version: profile189.version,
       },
       {
         behavioural_competency_id: 17,
         job_profile_id: profile210.id,
+        job_profile_version: profile210.version,
       },
       {
         behavioural_competency_id: 21,
         job_profile_id: profile210.id,
+        job_profile_version: profile210.version,
       },
       {
         behavioural_competency_id: 23,
         job_profile_id: profile210.id,
+        job_profile_version: profile210.version,
       },
       {
         behavioural_competency_id: 22,
         job_profile_id: profile210.id,
+        job_profile_version: profile210.version,
       },
       // {
       //   behavioural_competency_id: 22,
@@ -2213,38 +2206,47 @@ async function seed() {
       {
         behavioural_competency_id: 17,
         job_profile_id: profile212.id,
+        job_profile_version: profile212.version,
       },
       {
         behavioural_competency_id: 21,
         job_profile_id: profile212.id,
+        job_profile_version: profile212.version,
       },
       {
         behavioural_competency_id: 23,
         job_profile_id: profile212.id,
+        job_profile_version: profile212.version,
       },
       {
         behavioural_competency_id: 22,
         job_profile_id: profile212.id,
+        job_profile_version: profile212.version,
       },
       {
         behavioural_competency_id: 17,
         job_profile_id: profile247.id,
+        job_profile_version: profile247.version,
       },
       {
         behavioural_competency_id: 21,
         job_profile_id: profile247.id,
+        job_profile_version: profile247.version,
       },
       {
         behavioural_competency_id: 23,
         job_profile_id: profile247.id,
+        job_profile_version: profile247.version,
       },
       {
         behavioural_competency_id: 22,
         job_profile_id: profile247.id,
+        job_profile_version: profile247.version,
       },
       {
         behavioural_competency_id: 42,
         job_profile_id: profile247.id,
+        job_profile_version: profile247.version,
       },
     ],
   });
@@ -2255,180 +2257,210 @@ async function seed() {
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
+      job_profile_version: profile194.version,
     },
     {
       classification_id: '185002',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
+      job_profile_version: profile194.version,
     },
     {
       classification_id: '185003',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
+      job_profile_version: profile194.version,
     },
     {
       classification_id: '185004',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
+      job_profile_version: profile194.version,
     },
     {
       classification_id: '185005',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
+      job_profile_version: profile194.version,
     },
     {
       classification_id: '185006',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile194.id,
+      job_profile_version: profile194.version,
     },
     {
       classification_id: '185001',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
+      job_profile_version: profile200.version,
     },
     {
       classification_id: '185002',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
+      job_profile_version: profile200.version,
     },
     {
       classification_id: '185003',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
+      job_profile_version: profile200.version,
     },
     {
       classification_id: '185004',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
+      job_profile_version: profile200.version,
     },
     {
       classification_id: '185005',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
+      job_profile_version: profile200.version,
     },
     {
       classification_id: '185006',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile200.id,
+      job_profile_version: profile200.version,
     },
     {
       classification_id: '185001',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
+      job_profile_version: profile208.version,
     },
     {
       classification_id: '185002',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
+      job_profile_version: profile208.version,
     },
     {
       classification_id: '185003',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
+      job_profile_version: profile208.version,
     },
     {
       classification_id: '185004',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
+      job_profile_version: profile208.version,
     },
     {
       classification_id: '185005',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
+      job_profile_version: profile208.version,
     },
     {
       classification_id: '185006',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile208.id,
+      job_profile_version: profile208.version,
     },
     {
       classification_id: '185001',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
+      job_profile_version: profile189.version,
     },
     {
       classification_id: '185002',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
+      job_profile_version: profile189.version,
     },
     {
       classification_id: '185003',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
+      job_profile_version: profile189.version,
     },
     {
       classification_id: '185004',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
+      job_profile_version: profile189.version,
     },
     {
       classification_id: '185005',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
+      job_profile_version: profile189.version,
     },
     {
       classification_id: '185006',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile189.id,
+      job_profile_version: profile189.version,
     },
     {
       classification_id: '185001',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
+      job_profile_version: profile210.version,
     },
     {
       classification_id: '185002',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
+      job_profile_version: profile210.version,
     },
     {
       classification_id: '185003',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
+      job_profile_version: profile210.version,
     },
     {
       classification_id: '185004',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
+      job_profile_version: profile210.version,
     },
     {
       classification_id: '185005',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
+      job_profile_version: profile210.version,
     },
     {
       classification_id: '185006',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile210.id,
+      job_profile_version: profile210.version,
     },
 
     {
@@ -2436,78 +2468,95 @@ async function seed() {
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
+      job_profile_version: profile212.version,
     },
     {
       classification_id: '185002',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
+      job_profile_version: profile212.version,
     },
     {
       classification_id: '185003',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
+      job_profile_version: profile212.version,
     },
     {
       classification_id: '185004',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
+      job_profile_version: profile212.version,
     },
     {
       classification_id: '185005',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
+      job_profile_version: profile212.version,
     },
     {
       classification_id: '185006',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
+      job_profile_version: profile212.version,
     },
     {
       classification_id: '185001',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
+      job_profile_version: profile247.version,
     },
     {
       classification_id: '185002',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
+      job_profile_version: profile247.version,
     },
     {
       classification_id: '185003',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
+      job_profile_version: profile247.version,
     },
     {
       classification_id: '185004',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
+      job_profile_version: profile247.version,
     },
     {
       classification_id: '185005',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
+      job_profile_version: profile247.version,
     },
     {
       classification_id: '185006',
       classification_employee_group_id: 'MGT',
       classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
+      job_profile_version: profile247.version,
     },
   ];
 
   for await (const reportsTo of jobProfileReportsTo) {
-    const { classification_id, classification_employee_group_id, classification_peoplesoft_id, job_profile_id } =
-      reportsTo;
+    const {
+      classification_id,
+      classification_employee_group_id,
+      classification_peoplesoft_id,
+      job_profile_id,
+      job_profile_version,
+    } = reportsTo;
 
     await prisma.classification.upsert({
       where: {
@@ -2532,18 +2581,21 @@ async function seed() {
 
     await prisma.jobProfileReportsTo.upsert({
       where: {
-        job_profile_id_classification_id_classification_employee_group_id_classification_peoplesoft_id: {
-          job_profile_id,
-          classification_id,
-          classification_employee_group_id,
-          classification_peoplesoft_id,
-        },
+        job_profile_id_job_profile_version_classification_id_classification_employee_group_id_classification_peoplesoft_id:
+          {
+            job_profile_id,
+            job_profile_version,
+            classification_id,
+            classification_employee_group_id,
+            classification_peoplesoft_id,
+          },
       },
       create: {
         classification_id,
         classification_employee_group_id,
         classification_peoplesoft_id,
         job_profile_id,
+        job_profile_version,
       },
       update: {},
     });
@@ -2734,7 +2786,8 @@ async function seed() {
         step: 2,
         reports_to_position_id: '00121521',
         department_id: '112-0072',
-        parent_job_profile_id: 7,
+        parent_job_profile_id: profile212.id,
+        parent_job_profile_version: 1,
         crm_json: null,
         profile_json: null,
         orgchart_json: {
@@ -2948,9 +3001,10 @@ async function seed() {
         reports_to_position_id: '00121521',
         department_id: '112-0072',
         parent_job_profile_id: profile200.id,
+        parent_job_profile_version: 1,
         crm_json: null,
         profile_json: {
-          id: 7,
+          id: profile200.id,
           role: { id: null },
           type: 'USER',
           scope: { id: null },
@@ -3365,9 +3419,10 @@ async function seed() {
         reports_to_position_id: 'POS456',
         department_id: 'DEPT02',
         parent_job_profile_id: profile200.id,
+        parent_job_profile_version: 1,
         crm_json: null,
         profile_json: {
-          id: 7,
+          id: profile200.id,
           role: { id: null },
           type: 'USER',
           scope: { id: null },
@@ -3768,9 +3823,10 @@ async function seed() {
         reports_to_position_id: 'POS789',
         department_id: 'DEPT03',
         parent_job_profile_id: profile208.id,
+        parent_job_profile_version: 1,
         crm_json: null,
         profile_json: {
-          id: 7,
+          id: profile208.id,
           role: { id: null },
           type: 'USER',
           scope: { id: null },

@@ -39,7 +39,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
 }) => {
   const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, update } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove } = useFormFields({
     useFormReturn,
     fieldName: 'professional_registration_requirements',
     setEditedFields: setEditedFields,
@@ -102,7 +102,6 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
         testId="professional_registration_requirements"
         confirmRemoveModal={() => handleProfRegRemoveModal(index)}
         onFocus={() => handleProfRegFocusModal(field)}
-        update={update}
         remove={remove}
         fields={fields}
         trigger={trigger}

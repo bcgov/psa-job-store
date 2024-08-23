@@ -13,6 +13,8 @@ interface WizardPickerProps {
   triggerValidation?: () => void;
   title: string;
   buttonText: string;
+  addAsSignificantAndReadonly?: boolean;
+  tc_is_readonly?: boolean;
 }
 
 const WizardPicker: React.FC<WizardPickerProps> = ({
@@ -23,6 +25,8 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
   triggerValidation,
   title,
   buttonText,
+  addAsSignificantAndReadonly,
+  tc_is_readonly,
 }) => {
   // Fetching data from the API
   // console.log('data: ', data);
@@ -89,10 +93,19 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
             existingFields.delete(selectedOption.text);
             return existingField;
           } else {
-            return {
-              tc_is_readonly: true,
-              text: selectedOption.text,
-            };
+            if (addAsSignificantAndReadonly)
+              return {
+                tc_is_readonly: tc_is_readonly,
+                nonEditable: true,
+                is_significant: true,
+                text,
+              };
+            else
+              return {
+                tc_is_readonly: tc_is_readonly,
+                is_significant: true,
+                text,
+              };
           }
         }
         return null;

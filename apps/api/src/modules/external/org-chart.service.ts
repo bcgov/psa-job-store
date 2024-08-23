@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { isEmpty } from 'class-validator';
+import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClassificationService } from './classification.service';
-import { DepartmentService } from './department.service';
 import { Employee } from './models/employee.model';
 import { FindUniqueOrgChartArgs } from './models/find-unique-org-chart.args';
 import { OrgChart, OrgChartEdge, OrgChartNode } from './models/org-chart.model';
@@ -109,8 +109,8 @@ export class OrgChartService {
       select: { id: true, name: true },
     });
 
-    console.log('departments: ', departments);
-    console.log('ministries: ', ministries);
+    // console.log('departments: ', departments);
+    // console.log('ministries: ', ministries);
 
     return ministries.map((ministry) => {
       return {

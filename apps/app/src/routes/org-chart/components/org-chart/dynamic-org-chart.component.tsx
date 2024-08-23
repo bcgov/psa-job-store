@@ -2,29 +2,20 @@ import { Col, Row, Space, Spin } from 'antd';
 import { autolayout } from 'common-kit';
 import Fuse from 'fuse.js';
 import debounce from 'lodash.debounce';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import ReactFlow, {
-  Background,
-  Edge,
-  MiniMap,
-  Node,
-  NodeProps,
-  useEdgesState,
-  useNodesState,
-  useOnSelectionChange,
-  useReactFlow,
-} from 'reactflow';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Edge, Node, NodeProps, useEdgesState, useNodesState, useOnSelectionChange, useReactFlow } from 'reactflow';
 import { useLazyGetOrgChartQuery } from '../../../../redux/services/graphql-api/org-chart.api';
 import { initialElements } from '../../constants/initial-elements.constant';
 import { OrgChartContext } from '../../enums/org-chart-context.enum';
 import { OrgChartType } from '../../enums/org-chart-type.enum';
 import { Elements } from '../../interfaces/elements.interface';
 import { getFocusedElements } from '../../utils/get-focused-elements.util';
-import { Controls } from '../controls';
 import { DepartmentFilter } from '../department-filter.component';
 import { OrgChartNode } from '../org-chart-node.component';
-import { PositionSearch } from '../position-search.component';
+import { PositionSearch, SearchResult } from '../position-search.component';
 import DownloadButton from './download-button.component';
+import './dynamic-org-chart.component.css';
+import OrgChartFlow from './org-chart-flow.component';
 
 interface BaseDynamicOrgChartProps {
   type: OrgChartType.DYNAMIC;
@@ -33,6 +24,7 @@ interface BaseDynamicOrgChartProps {
   departmentIdIsLoading?: boolean;
   targetId?: string | undefined;
   wrapProvider?: boolean;
+  // wizardNextHandler?: ({ switchStep }?: { switchStep?: boolean }) => Promise<string | undefined>;
 }
 
 export interface DefaultContextDynamicOrgChartProps {
@@ -53,6 +45,7 @@ export const DynamicOrgChart = ({
   departmentId,
   departmentIdIsLoading,
   targetId,
+  // wizardNextHandler,
   ...props
 }: DynamicOrgChartProps) => {
   const [elements, setElements] = useState<Elements>(initialElements);
@@ -61,16 +54,18 @@ export const DynamicOrgChart = ({
   const [getOrgChart, { currentData: orgChartData, isFetching: orgChartDataIsFetching }] = useLazyGetOrgChartQuery();
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>(targetId != null ? [targetId] : []);
+  const [searchResultCount, setSearchResultCount] = useState<number>(0);
 
-  const { fitView } = useReactFlow();
+  const { fitView, setCenter } = useReactFlow();
+  // const [dataUpdated, setDataUpdated] = useState<boolean>(true);
   const [edges, setEdges] = useEdgesState([]);
   const [nodes, setNodes] = useNodesState([]);
-
-  const getSearchResults = useCallback(
-    () => (searchTerm ? nodes.filter((node) => node.data.isSearchResult === true) : undefined),
-    [nodes],
-  );
+  // const [treeviewInFocus, setTreeviewInFocus] = useState<boolean>(false);
+  // const treeViewInFocus = useRef(false);
+  const isKeyboardNav = useRef(false);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   useEffect(() => {
     setIsDirty(false);
@@ -84,6 +79,11 @@ export const DynamicOrgChart = ({
   }, [departmentId]);
 
   useEffect(() => {
+    // if (orgChartDataIsFetching) setDataUpdated(false);
+    // // setTimeout(() => {
+    // else setDataUpdated(true);
+    // // }, 2000);
+
     if (orgChartData?.orgChart != null) {
       const elements = autolayout(orgChartData?.orgChart);
 
@@ -96,7 +96,10 @@ export const DynamicOrgChart = ({
         }
       }
 
-      debounceSetElements(JSON.parse(JSON.stringify(elements)));
+      // console.log('setElements: ', elements);
+      const els = JSON.parse(JSON.stringify(elements));
+      debounceSetElements(els);
+      renderDefault(els);
     }
   }, [orgChartData?.orgChart, orgChartDataIsFetching]);
 
@@ -139,20 +142,194 @@ export const DynamicOrgChart = ({
     }
   }, [props.context, edges, nodes, selectedNodeIds]);
 
-  useEffect(() => {
-    const { edges, nodes } = JSON.parse(JSON.stringify(elements));
-    // if (searchTerm != null && searchTerm.length > 0 && selectedNodeIds.length > 0) setSelectedNodeIds([]);
-    // if (
-    //   isDirty === false &&
-    //   targetId != null &&
-    //   targetId.length > 0 &&
-    //   nodes.filter((node: Node) => node.id === targetId).length > 0 &&
-    //   !selectedNodeIds.includes(targetId)
-    // )
-    //   setSelectedNodeIds([targetId]);
+  const renderSelectedNodes = useCallback(
+    (sNodeIds: string[]) => {
+      console.log('renderSelectedNodes: ', sNodeIds);
 
-    if (searchTerm != null && searchTerm.length > 0) {
-      const searchResultIds = search(searchTerm);
+      const { edges, nodes } = JSON.parse(JSON.stringify(elements));
+      const focusedElements = [
+        ...getFocusedElements(
+          nodes.filter((node: Node) => sNodeIds.includes(node.id)),
+          elements,
+          true,
+        ),
+        ...getFocusedElements(
+          nodes.filter((node: Node) => sNodeIds.includes(node.id)),
+          elements,
+          false,
+        ),
+      ];
+      const focusedElementIds = focusedElements.flatMap((el) => el.id);
+
+      edges.forEach((edge: Edge) => {
+        edge.animated = focusedElementIds.includes(edge.id);
+        // edge.selected = focusedElementIds.includes(edge.id);
+
+        edge.style = {
+          ...edge.style,
+          stroke: focusedElementIds.includes(edge.id) ? 'blue' : '#B1B1B1',
+        };
+      });
+      nodes.forEach((node: Node) => {
+        node.data = {
+          ...node.data,
+          isAdjacent: focusedElementIds.includes(node.id),
+          isSearchResult: false,
+        };
+        node.selected = sNodeIds.includes(node.id);
+        // node.data.selectedRender = sNodeIds.includes(node.id);
+        node.style = {
+          ...node.style,
+          opacity:
+            sNodeIds.length > 0 ? (sNodeIds.includes(node.id) || focusedElementIds.includes(node.id) ? 1 : 0.25) : 1,
+        };
+      });
+      console.log('setNodes renderSelectedNodes');
+      setEdges(edges);
+      setNodes(nodes);
+    },
+    [elements, selectedNodeIds],
+  );
+
+  const renderDefault = useCallback((els: Elements) => {
+    // console.log('renderDefault', els);
+    const { edges, nodes } = els;
+
+    edges.forEach((edge: Edge) => {
+      edge.animated = false;
+      edge.selected = false;
+      edge.style = {
+        stroke: '#B1B1B1',
+      };
+    });
+
+    nodes.forEach((node: Node) => {
+      node.data = {
+        ...node.data,
+        isAdjacent: false,
+        isSearchResult: false,
+      };
+      node.selected = false;
+      node.style = {
+        ...node.style,
+        opacity: 1,
+      };
+    });
+    // console.log('setNodes renderDefault: ', nodes);
+    setEdges(edges);
+    setNodes(nodes);
+  }, []);
+
+  // useEffect(() => {
+  //   console.log('useEffect [isDirty, elements, searchTerm, selectedNodeIds]');
+
+  //   if (searchTerm != null && searchTerm.length > 0) return;
+
+  //   if (selectedNodeIds.length > 0) {
+  //     // selectedNodeIds is set - select those elements
+  //     renderSelectedNodes()
+  //   } else {
+  //     // no selectedNodeIds - render default
+  //     renderDefault();
+  //   }
+  // }, [isDirty, elements, searchTerm, selectedNodeIds]);
+
+  //  [elements, searchTerm]
+  // [isDirty, elements, searchTerm, selectedNodeIds]
+
+  useEffect(() => {
+    console.log('useEffect nodes: ', nodes);
+    const searchResultNodes = nodes.filter((node) => node.data.isSearchResult === true);
+    const selectedNodes = nodes.filter((node) => node.selected === true);
+    // const adjacentNodes = selectedNodes.length > 0 ? nodes.filter((node) => node.data.isAdjacent === true) : [];
+
+    if (selectedNodes.length > 0) {
+      // console.log('fitView A: ', selectedNodes, adjacentNodes);
+      // fitView({ duration: 800, nodes: [...selectedNodes, ...adjacentNodes] });
+    } else if (searchResultNodes.length > 0) {
+      // if there's only one result, we will select that node
+      if (searchResultNodes.length != 1) {
+        console.log('fitView B: ', searchResultNodes);
+        fitView({ duration: 800, nodes: searchResultNodes });
+      }
+    } else {
+      if (isDirty === false) {
+        console.log('fitView C: ', nodes);
+        fitView({ duration: 800, nodes });
+      }
+    }
+  }, [nodes]);
+
+  useOnSelectionChange({
+    onChange: ({ nodes }) => {
+      console.log('useOnSelectionChange onChange: ', nodes);
+      if (nodes.length > 0) {
+        setIsDirty(true);
+        // setSearchTerm(undefined);
+      }
+
+      const nodeIds = nodes.flatMap((node) => node.id);
+      // console.log('useOnSelectionChange onChange setSelectedNodeIds: ', nodeIds, selectedNodeIds);
+      if (JSON.stringify(nodeIds) != JSON.stringify(selectedNodeIds)) {
+        console.log('CHANGED: ', nodeIds);
+        setSelectedNodeIds(nodeIds);
+        setSelectedNodeId(nodeIds[0]);
+
+        if (searchTerm != null && searchTerm.length > 0 && nodeIds.length === 0) {
+          // this is to handle when user selected a node, then did a search
+          // search will clear the selected nodes, so we want to show search results instead of default
+          console.log('onSearch');
+          onSearch(searchTerm, { source: 'input' });
+        } else {
+          // if user is navigating using keyboard throughout the treeview, do not run this
+          // since we want to focus on the individual single node to bring into focus
+          // if (!treeViewInFocus.current)
+          renderSelectedNodes(nodeIds);
+        }
+      }
+    },
+  });
+
+  const nodeTypes = useMemo(() => {
+    return {
+      'org-chart-card': ({ ...nodeProps }: NodeProps) => (
+        <OrgChartNode
+          {...nodeProps}
+          isConnectable={false}
+          orgChartData={{ edges: elements.edges, nodes: elements.nodes }}
+          orgChartContext={props.context}
+          orgChartType={type}
+        />
+      ),
+    };
+  }, [props.context, elements, type]);
+
+  // console.log('nodes/edges: ', nodes, edges);
+
+  const onSearch = (term: string, source?: { source?: 'input' | 'clear' }) => {
+    // console.log('onSearch: ', term, source);
+
+    const { edges, nodes } = JSON.parse(JSON.stringify(elements));
+    const sSearchTerm = source?.source === 'clear' ? undefined : term.length > 0 ? term : undefined;
+    setSearchTerm(sSearchTerm);
+
+    if (sSearchTerm != null && sSearchTerm.length > 0) {
+      const searchResultIds = search(sSearchTerm);
+
+      const results = nodes
+        .filter((node: Node) => searchResultIds.includes(node.id))
+        .map((node: Node) => {
+          const employeeName =
+            node.data.employees && node.data.employees.length > 0 ? node.data.employees[0].name : 'Vacant';
+          const classification = node.data.classification?.code || 'N/A';
+          const positionNumber = node.data.id || 'N/A';
+
+          return {
+            id: node.id,
+            title: `${employeeName} - ${node.data.title || node.id} (${classification}) - ${positionNumber}`,
+          };
+        });
+      setSearchResults(results);
 
       edges.forEach((edge: Edge) => {
         edge.animated = false;
@@ -175,117 +352,45 @@ export const DynamicOrgChart = ({
           opacity: 1,
         };
       });
-    } else if (selectedNodeIds.length > 0) {
-      // selectedNodeIds is set - select those elements
-      const focusedElements = [
-        ...getFocusedElements(
-          nodes.filter((node: Node) => selectedNodeIds.includes(node.id)),
-          elements,
-          true,
-        ),
-        ...getFocusedElements(
-          nodes.filter((node: Node) => selectedNodeIds.includes(node.id)),
-          elements,
-          false,
-        ),
-      ];
-      const focusedElementIds = focusedElements.flatMap((el) => el.id);
 
-      edges.forEach((edge: Edge) => {
-        edge.animated = focusedElementIds.includes(edge.id);
-        edge.selected = focusedElementIds.includes(edge.id);
-        edge.style = {
-          ...edge.style,
-          stroke: focusedElementIds.includes(edge.id) ? 'blue' : '#B1B1B1',
-        };
-      });
-      nodes.forEach((node: Node) => {
-        node.data = {
-          ...node.data,
-          isAdjacent: focusedElementIds.includes(node.id),
-          isSearchResult: false,
-        };
-        node.selected = selectedNodeIds.includes(node.id);
-        node.style = {
-          ...node.style,
-          opacity:
-            selectedNodeIds.length > 0
-              ? selectedNodeIds.includes(node.id) || focusedElementIds.includes(node.id)
-                ? 1
-                : 0.25
-              : 1,
-        };
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setSearchResultCount(nodes.filter((node: any) => node.data.isSearchResult === true).length);
     } else {
-      edges.forEach((edge: Edge) => {
-        edge.animated = false;
-        edge.selected = false;
-        edge.style = {
-          stroke: '#B1B1B1',
-        };
-      });
-
-      nodes.forEach((node: Node) => {
-        node.data = {
-          ...node.data,
-          isAdjacent: false,
-          isSearchResult: false,
-        };
-        node.selected = false;
-        node.style = {
-          ...node.style,
-          opacity: 1,
-        };
-      });
+      setSearchResults([]);
+      setSearchResultCount(0);
     }
-
+    console.log('setNodes onsearch');
     setEdges(edges);
     setNodes(nodes);
-  }, [isDirty, elements, searchTerm, selectedNodeIds]);
+    // console.log('onsearch done');
+  };
 
-  useEffect(() => {
-    const searchResultNodes = nodes.filter((node) => node.data.isSearchResult === true);
-    const selectedNodes = nodes.filter((node) => node.selected === true);
-    const adjacentNodes = selectedNodes.length > 0 ? nodes.filter((node) => node.data.isAdjacent === true) : [];
+  // const treeViewInFocusCallback = (inFocus: boolean) => {
+  //   // console.log('treeViewInFocusCallback: ', inFocus);
+  //   treeViewInFocus.current = inFocus;
+  //   // setTreeviewInFocus(inFocus);
+  // };
 
-    if (selectedNodes.length > 0) {
-      fitView({ duration: 800, nodes: [...selectedNodes, ...adjacentNodes] });
-    } else if (searchResultNodes.length > 0) {
-      fitView({ duration: 800, nodes: searchResultNodes });
-    } else {
-      if (isDirty === false) {
-        fitView({ duration: 800, nodes });
-      }
+  const handleSelectResult = (id: string) => {
+    console.log('handleSelectResult: ', id);
+    setSelectedNodeIds([id]);
+    setSelectedNodeId(id);
+    renderSelectedNodes([id]);
+    const node = nodes.find((node) => node.id === id);
+    if (node) {
+      setCenter(node.position.x + (node.width ?? 0) / 2, node.position.y + (node.height ?? 0) / 2, {
+        zoom: 1,
+        duration: 0,
+      });
+      setTimeout(() => {
+        const nodeElement = document.getElementById(`node-${id}`);
+        console.log('nodeElement: ', nodeElement);
+        if (nodeElement) {
+          nodeElement.focus();
+        }
+      }, 600);
     }
-  }, [nodes]);
-
-  useOnSelectionChange({
-    onChange: ({ nodes }) => {
-      if (nodes.length > 0) {
-        setIsDirty(true);
-        setSearchTerm(undefined);
-      }
-
-      const nodeIds = nodes.flatMap((node) => node.id);
-      if (JSON.stringify(nodeIds) != JSON.stringify(selectedNodeIds)) {
-        setSelectedNodeIds(nodeIds);
-      }
-    },
-  });
-
-  const nodeTypes = useMemo(() => {
-    return {
-      'org-chart-card': ({ ...nodeProps }: NodeProps) => (
-        <OrgChartNode
-          {...nodeProps}
-          isConnectable={false}
-          orgChartData={{ edges: elements.edges, nodes: elements.nodes }}
-          orgChartContext={props.context}
-          orgChartType={type}
-        />
-      ),
-    };
-  }, [props.context, elements, type]);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
@@ -296,13 +401,21 @@ export const DynamicOrgChart = ({
               setDepartmentId={setDepartmentId}
               departmentId={departmentId}
               loading={departmentIdIsLoading}
+              // focusable={false}
             />
             <PositionSearch
-              setSearchTerm={setSearchTerm}
+              // setSearchTerm={setSearchTerm}
+              onSearch={onSearch}
               disabled={departmentId == null || departmentIdIsLoading}
-              searchResults={getSearchResults()}
+              searchResultsCount={searchTerm ? searchResultCount : null}
               searchTerm={searchTerm}
+              searchResults={searchResults}
+              onSelectResult={handleSelectResult}
+              // focusable={false}
             />
+            <div style={{ position: 'absolute', bottom: '-32px', right: '0', zIndex: '1' }}>
+              <DownloadButton />
+            </div>
           </Space>
         </Col>
       </Row>
@@ -311,30 +424,33 @@ export const DynamicOrgChart = ({
           <Spin spinning style={{ margin: 'auto' }} />
         </div>
       ) : (
-        <ReactFlow
-          onPaneClick={() => {
-            setIsDirty(true);
-            setSearchTerm(undefined);
-            setSelectedNodeIds([]);
-          }}
-          edges={edges}
-          elevateEdgesOnSelect
-          minZoom={0}
-          nodeTypes={nodeTypes}
-          nodes={nodes}
-          nodesConnectable={false}
-          nodesDraggable={false}
-        >
-          <Background />
-          <Controls position="top-right" />
-          <MiniMap
-            nodeStrokeWidth={3}
-            pannable
-            style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
-            zoomable
+        <>
+          <OrgChartFlow
+            edges={edges}
+            nodes={nodes}
+            nodeTypes={nodeTypes}
+            // departmentId={departmentId ?? ''}
+            // wizardNextHandler={wizardNextHandler}
+            // searchTerm={searchTerm}
+            // loading={!dataUpdated}
+            // treeViewInFocusCallback={treeViewInFocusCallback}
+            setSelectedNodeId={setSelectedNodeId}
+            selectedNodeId={selectedNodeId}
+            isKeyboardNav={isKeyboardNav}
+            onPaneClick={() => {
+              console.log('onPaneClick, searchTerm: ', searchTerm);
+              setIsDirty(true);
+              // setSearchTerm(undefined);
+              setSelectedNodeIds([]);
+
+              if (searchTerm != null && searchTerm.length > 0) {
+                onSearch(searchTerm, { source: 'input' });
+              } else {
+                renderSelectedNodes([]);
+              }
+            }}
           />
-          <DownloadButton />
-        </ReactFlow>
+        </>
       )}
     </div>
   );

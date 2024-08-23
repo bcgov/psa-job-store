@@ -71,3 +71,7 @@ the input box renders at the beginning of the box, instead of after placeholder
     border-color: hsl(0, 0%, 80%) !important;
     border-radius: 4px;
 }
+
+.sr-only-label label{
+    width:0;
+}

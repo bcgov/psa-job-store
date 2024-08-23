@@ -62,6 +62,47 @@ class RequirementWithoutReadOnly {
     id: string;
   };
 }
+@ObjectType()
+class PublishedBy {
+  @Field(() => Date, { nullable: true })
+  date: Date | null;
+
+  @Field(() => String, { nullable: true })
+  user: string | null;
+}
+
+@ObjectType()
+class CreatedBy {
+  @Field(() => Date, { nullable: true })
+  date: Date | null;
+
+  @Field(() => String, { nullable: true })
+  owner: string | null;
+}
+
+@ObjectType()
+class Version {
+  @Field(() => Number)
+  id: number;
+
+  @Field(() => String)
+  version: number;
+}
+
+@ObjectType()
+class JobProfileMetaModel {
+  @Field(() => Int)
+  totalViews: number;
+
+  @Field(() => PublishedBy)
+  firstPublishedBy: PublishedBy;
+
+  @Field(() => CreatedBy)
+  firstCreatedBy: CreatedBy;
+
+  @Field(() => [Version])
+  versions: Version[];
+}
 
 @Resolver(() => JobProfile)
 export class JobProfileResolver {
@@ -84,10 +125,13 @@ export class JobProfileResolver {
   async jobProfilesCount(@Args() args?: FindManyJobProfileWithSearch) {
     return await this.jobProfileService.getJobProfileCount(args);
   }
-
-  @Query(() => [JobProfile], { name: 'jobProfileMeta' })
-  async jobProfileMeta(@Args('number') number: number) {
-    return await this.jobProfileService.getJobProfileMeta(number);
+  @Mutation(() => Int, { name: 'updateJobProfileViewCount' })
+  async updateJobProfileViewCount(@Args('jobProfiles', { type: () => [Int], nullable: true }) jobProfiles: number[]) {
+    return await this.jobProfileService.updateJobProfileViewCountCache(jobProfiles);
+  }
+  @Query(() => JobProfileMetaModel, { name: 'jobProfileMeta' })
+  async jobProfileMeta(@Args('id') id: number) {
+    return await this.jobProfileService.getJobProfileMeta(id);
   }
 
   @Query(() => [JobProfile], { name: 'jobProfilesDrafts' })
@@ -136,19 +180,19 @@ export class JobProfileResolver {
 
   @Query(() => JobProfile, { name: 'jobProfile' })
   @AllowNoRoles() // so that share position request feature can fetch relevant data
-  async getJobProfile(@Args('id') id: string, @CurrentUser() user: Express.User) {
-    const res = await this.jobProfileService.getJobProfile(+id, user.roles);
+  async getJobProfile(
+    @CurrentUser() user: Express.User,
+    @Args('id') id: number,
+    @Args({ name: 'version', nullable: true }) version?: number,
+  ) {
+    const res = await this.jobProfileService.getJobProfile(+id, version, user.roles);
     return res;
   }
 
   @Query(() => JobProfile, { name: 'jobProfileByNumber' })
   @AllowNoRoles() // so that share position request feature can fetch relevant data
-  async getJobProfileByNumber(
-    @CurrentUser() user: Express.User,
-    @Args('number') number: string,
-    @Args('version', { type: () => Int, nullable: true }) version?: number,
-  ) {
-    const res = await this.jobProfileService.getJobProfileByNumber(+number, version, user.roles);
+  async getJobProfileByNumber(@CurrentUser() user: Express.User, @Args('number') number: string) {
+    const res = await this.jobProfileService.getJobProfileByNumber(+number, user.roles);
     return res;
   }
 
@@ -184,8 +228,8 @@ export class JobProfileResolver {
   }
 
   @ResolveField(() => JobProfileBehaviouralCompetency)
-  async behavioural_competencies(@Parent() { id }: JobProfile) {
-    return this.jobProfileService.getBehaviouralCompetencies(id);
+  async behavioural_competencies(@Parent() { id, version }: JobProfile) {
+    return this.jobProfileService.getBehaviouralCompetencies(id, version);
   }
 
   @Mutation(() => Int)
@@ -197,7 +241,7 @@ export class JobProfileResolver {
     @Args({ name: 'data', type: () => JobProfileCreateInput }) data: JobProfileCreateInput,
   ) {
     try {
-      const newJobProfile = await this.jobProfileService.createOrUpdateJobProfile(data, userId, id);
+      const newJobProfile = await this.jobProfileService.createOrUpdateJobProfile(data, userId);
       return newJobProfile.id;
     } catch (error: any) {
       // Check if the error is due to a unique constraint failure on the 'number' field
@@ -218,8 +262,9 @@ export class JobProfileResolver {
   async duplicateJobProfile(
     @CurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
+    @Args('jobProfileVersion', { type: () => Int }) jobProfileVersion: number,
   ) {
-    return this.jobProfileService.duplicateJobProfile(jobProfileId, userId);
+    return this.jobProfileService.duplicateJobProfile(jobProfileId, jobProfileVersion, userId);
   }
 
   @Mutation(() => Int)
@@ -248,14 +293,16 @@ export class JobProfileResolver {
   async updateJobProfileState(
     @CurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
+    @Args('jobProfileVersion', { type: () => Int }) jobProfileVersion: number,
+
     @Args('state') state: string,
   ) {
-    return this.jobProfileService.updateJobProfileState(jobProfileId, state, userId);
+    return this.jobProfileService.updateJobProfileState(jobProfileId, jobProfileVersion, state, userId);
   }
 
   @ResolveField(() => JobProfileReportsTo)
-  async reports_to(@Parent() { id }: JobProfile) {
-    return this.jobProfileService.getReportsTo(id);
+  async reports_to(@Parent() { id, version }: JobProfile) {
+    return this.jobProfileService.getReportsTo(id, version);
   }
 
   @Query(() => Int, { name: 'nextAvailableJobProfileNumber' })
@@ -280,6 +327,7 @@ export class JobProfileResolver {
     @Args('ministryIds', { type: () => [String], nullable: true }) ministryIds?: string[],
     @Args('jobFamilyWithNoStream', { type: () => [Int], nullable: true }) jobFamilyWithNoStream?: number[],
     @Args('excludeProfileId', { type: () => Int, nullable: true }) excludeProfileId?: number,
+    @Args('excludeProfileId', { type: () => Int, nullable: true }) excludeProfileVersion?: number,
   ) {
     return this.jobProfileService.getRequirementsWithoutReadOnly(
       jobFamilyIds,
@@ -289,6 +337,7 @@ export class JobProfileResolver {
       ministryIds,
       jobFamilyWithNoStream ?? [],
       excludeProfileId,
+      excludeProfileVersion,
       classificationPeoplesoftId,
     );
   }

@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Divider, Form, Input, List } from 'antd';
+import { MinusCircleOutlined } from '@ant-design/icons';
+import { Button, Form, Input, List, Tooltip } from 'antd';
 import { UseFormReturn } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import useFormFields from '../hooks/wizardUseFieldArray';
 import { AllowedFieldNames } from './wizard-edit-profile-list-item';
+import './wizard-edit-profile-optional-list.css';
 
 interface OptionalListProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,7 +19,7 @@ interface OptionalListProps {
 const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, fieldName }) => {
   // const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
 
-  const { fields } = useFormFields({
+  const { fields, handleRemove } = useFormFields({
     useFormReturn,
     fieldName: fieldName,
   });
@@ -49,7 +51,21 @@ const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, field
             <Input />
           </FormItem>
 
-          {field.text}
+          <div>{field.text}</div>
+          <div>
+            <Tooltip title={'Delete'}>
+              <Button
+                className="remove-item-btn"
+                icon={<MinusCircleOutlined />}
+                aria-label={'Remove ' + field.text}
+                onClick={() => {
+                  handleRemove(index);
+                  // isDisabled ? doAction('add') : doAction('remove');
+                }}
+                style={{ marginLeft: '10px' }}
+              />
+            </Tooltip>
+          </div>
         </List.Item>
       </>
     );
@@ -59,14 +75,21 @@ const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, field
     <>
       {anyEnabled && (
         <>
-          <Divider className="hr-reduced-margin" />
-          <Form.Item
-            label={label}
-            labelCol={{ className: 'card-label' }}
-            className="label-only"
-            colon={false}
-          ></Form.Item>
-          <AccessibleList dataSource={fields} renderItem={renderOptReqFields} ariaLabel={label} />
+          {/* <Divider className="hr-reduced-margin" /> */}
+          <div
+            style={{ borderLeft: '1px solid #D8D8D8', paddingLeft: '12px', marginBottom: '12px' }}
+            className="optionalList"
+          >
+            <Form.Item
+              label={<span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>{label}</span>}
+              labelCol={{ className: 'card-label' }}
+              className="label-only"
+              colon={false}
+            ></Form.Item>
+            <div style={{ paddingLeft: '10px' }}>
+              <AccessibleList dataSource={fields} renderItem={renderOptReqFields} ariaLabel={label} />
+            </div>
+          </div>
         </>
       )}
     </>

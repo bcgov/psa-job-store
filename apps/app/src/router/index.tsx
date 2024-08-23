@@ -18,8 +18,11 @@ import { MyPositionsPage } from '../routes/my-position-requests/my-position-requ
 import { OrgChartRoute as OrgChartOldRoute, OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage as OrgChartOldPage, OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { SettingsRoute } from '../routes/settings';
+import { DepartmentDetailPage } from '../routes/settings/department/department-detail.page';
+import { DepartmentListPage } from '../routes/settings/department/department-list.page';
 import { UserDetailPage } from '../routes/settings/user/user-detail.page';
 import { UserListPage } from '../routes/settings/user/user-list.page';
+import { WidgetListPage } from '../routes/settings/widget/widget-list-page.component';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
@@ -96,6 +99,22 @@ export const router = createBrowserRouter([
             ),
             children: [
               {
+                path: 'departments',
+                handle: {
+                  breadcrumb: () => 'Departments',
+                },
+                children: [
+                  {
+                    index: true,
+                    element: <DepartmentListPage />,
+                  },
+                  {
+                    path: ':id',
+                    element: <DepartmentDetailPage />,
+                  },
+                ],
+              },
+              {
                 path: 'users',
                 handle: {
                   breadcrumb: () => 'Users',
@@ -108,6 +127,18 @@ export const router = createBrowserRouter([
                   {
                     path: ':id',
                     element: <UserDetailPage />,
+                  },
+                ],
+              },
+              {
+                path: 'widgets',
+                handle: {
+                  breadcrumb: () => 'Widgets',
+                },
+                children: [
+                  {
+                    index: true,
+                    element: <WidgetListPage />,
                   },
                 ],
               },

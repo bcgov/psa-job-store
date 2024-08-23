@@ -1,49 +1,126 @@
-import { Input, Tag } from 'antd';
-import { useEffect, useState } from 'react';
-import { Node } from 'reactflow';
+import { SearchOutlined } from '@ant-design/icons';
+import { AutoComplete, Button, Input, Space } from 'antd';
+import { useEffect, useRef, useState } from 'react';
+
+export interface SearchResult {
+  id: string;
+  title: string;
+}
 
 export interface PositionSearchProps {
-  setSearchTerm: React.Dispatch<React.SetStateAction<string | undefined>>;
   disabled?: boolean;
   searchTerm?: string | undefined;
-  searchResults: (() => Node[]) | Node[] | undefined;
+  searchResultsCount: number | null;
+  searchResults: SearchResult[];
+  onSearch: (
+    value: string,
+    source:
+      | {
+          source?: 'input' | 'clear' | undefined;
+        }
+      | undefined,
+  ) => void;
+  onSelectResult: (id: string) => void;
 }
 
 export const PositionSearch = ({
-  setSearchTerm: setSearchTermFromProps,
   disabled = false,
   searchTerm: searchTermFromProps,
+  searchResultsCount,
   searchResults,
+  onSearch,
+  onSelectResult,
 }: PositionSearchProps) => {
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [lastSearchedTerm, setLastSearchedTerm] = useState<string | undefined>(undefined);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const autoCompleteRef = useRef<any>(null);
 
   useEffect(() => {
     setSearchTerm(searchTermFromProps);
+    setLastSearchedTerm(searchTermFromProps);
   }, [searchTermFromProps]);
 
+  const handleSearch = (value: string) => {
+    onSearch(value, { source: 'input' });
+    setLastSearchedTerm(value);
+  };
+
+  const handleSelect = (value: string) => {
+    console.log('handleSelect: ', value);
+    onSelectResult(value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      autoCompleteRef.current?.blur();
+    }
+  };
+
+  // if there's only one result, select it automatically
+  useEffect(() => {
+    if (searchResults.length === 1) {
+      console.log('select single result');
+      onSelectResult(searchResults[0].id);
+    }
+  }, [searchResults]);
+
+  const shouldShowOptions = isInputFocused && searchTerm === lastSearchedTerm && searchResults.length > 1;
+
   return (
-    <Input.Search
-      onChange={(event) => setSearchTerm(event.currentTarget.value)}
-      onSearch={(value, _, source) =>
-        setSearchTermFromProps(source?.source === 'clear' ? undefined : (value ?? '').length > 0 ? value : undefined)
-      }
-      addonAfter={
-        searchTermFromProps != null &&
-        searchResults != null && (
-          <Tag
-            color={searchTermFromProps != null && searchResults.length === 0 ? 'red' : 'green'}
-            style={{ marginLeft: '0.5rem', marginRight: 0 }}
+    <>
+      {searchTermFromProps != null && searchResultsCount != null && (
+        <div aria-live="assertive" className="sr-only">
+          {searchResultsCount === 1 ? '1 result' : `${searchResultsCount} results`}
+        </div>
+      )}
+
+      <Space.Compact style={{ width: '100%' }}>
+        <AutoComplete
+          ref={autoCompleteRef}
+          style={{ width: searchResultsCount != null ? 'calc(100% - 100px)' : '100%' }}
+          options={searchResults.map((result) => ({ value: result.id, label: result.title }))}
+          onSelect={handleSelect}
+          onSearch={(value) => setSearchTerm(value)}
+          value={searchTerm}
+          disabled={disabled}
+          open={shouldShowOptions}
+          id="org-chart-search-input"
+          onFocus={() => setIsInputFocused(true)}
+          onBlur={() => setIsInputFocused(false)}
+        >
+          <Input.Search
+            placeholder="Search by Position Number, Title, or Employee Name"
+            onSearch={handleSearch}
+            disabled={disabled}
+            loading={disabled}
+            addonBefore="Search"
+            enterButton={
+              <Button id="org-chart-search-button" icon={<SearchOutlined aria-hidden />} aria-label="Search"></Button>
+            }
+            allowClear
+            onKeyDown={handleKeyDown}
+          />
+        </AutoComplete>
+        {searchTermFromProps != null && searchResultsCount != null && (
+          <div
+            style={{
+              width: '100px',
+              backgroundColor: 'white',
+              color: searchResultsCount === 0 ? 'red' : 'green',
+              lineHeight: '32px',
+              textAlign: 'center',
+              border: '1px solid #d9d9d9',
+              borderLeft: 'none',
+              height: '32px',
+            }}
           >
-            {searchResults.length === 1 ? '1 result' : `${searchResults.length} results`}
-          </Tag>
-        )
-      }
-      addonBefore="Search"
-      allowClear
-      disabled={disabled}
-      loading={disabled}
-      placeholder="Search by Position Number, Title, or Employee Name"
-      value={searchTerm}
-    />
+            {searchResultsCount === 1 ? '1 result' : `${searchResultsCount} results`}
+          </div>
+        )}
+      </Space.Compact>
+    </>
   );
 };

@@ -34,7 +34,7 @@ interface CreateNewPositionParams {
   current_reports_to_position_id?: number;
   reSelectSupervisor?: () => void;
   changeStep?: boolean;
-  svg: string;
+  // svg: string;
 }
 
 export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) => {
@@ -52,7 +52,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
       current_reports_to_position_id,
       reSelectSupervisor,
       changeStep = true,
-      svg,
+      // svg,
     } = params;
 
     // we are not editing a draft position request (creatign position from dashboard or from org chart page)
@@ -74,7 +74,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         reports_to_position_id: reportingPositionId,
         department: { connect: { id: selectedDepartment ?? '' } },
         orgchart_json: orgChartData,
-        orgchart_png: svg,
+        // orgchart_png: svg,
       };
       // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
       const resp = await createPositionRequest(positionRequestInput).unwrap();
@@ -117,11 +117,11 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   orgchart_json: orgChartData,
                   // clear previous data
                   profile_json: null,
-                  parent_job_profile: { connect: { id: null } },
+                  parent_job_profile: { connect: { id_version: null } },
                   additional_info: null,
                   title: null,
                   returnFullObject: true,
-                  orgchart_png: svg,
+                  // orgchart_png: svg,
                 }).unwrap();
 
                 setPositionRequestData(resp.updatePositionRequest ?? null);

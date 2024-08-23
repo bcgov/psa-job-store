@@ -496,14 +496,14 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const navigate = useNavigate();
   const duplicate = async (record: any) => {
     // console.log('duplicate', record);
-    const res = await duplicateJobProfile({ jobProfileId: record.id }).unwrap();
+    const res = await duplicateJobProfile({ jobProfileId: record.id, jobProfileVersion: record.version }).unwrap();
     // console.log('res: ', res);
     navigate(`${link}${res.duplicateJobProfile}`);
   };
 
   const update = async (record: any, state: string) => {
     // console.log('duplicate', record);
-    await updateJobProfileState({ jobProfileId: record.id, state: state }).unwrap();
+    await updateJobProfileState({ jobProfileId: record.id, jobProfileVersion: record.version, state: state }).unwrap();
     message.success(state === 'PUBLISHED' ? 'Job Profile published!' : 'Job Profile unpublished!');
     setSelectedKeys([]);
     updateData();

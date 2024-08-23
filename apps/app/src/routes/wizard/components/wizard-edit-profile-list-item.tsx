@@ -2,7 +2,7 @@
 import { Input, List, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import debounce from 'lodash.debounce';
-import { Controller, UseFieldArrayRemove, UseFieldArrayUpdate, UseFormReturn, UseFormTrigger } from 'react-hook-form';
+import { Controller, UseFieldArrayRemove, UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { ContextOptions } from './context-options.component';
@@ -38,7 +38,6 @@ interface FieldItemProps {
   onFocus?: () => void;
   originalFields?: any[];
   isAdmin?: boolean | undefined;
-  update?: UseFieldArrayUpdate<any, string>;
   remove?: UseFieldArrayRemove;
   fields?: Record<'id', string>[];
   trigger?: UseFormTrigger<JobProfileValidationModel>;
@@ -61,7 +60,6 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
   onFocus,
   originalFields,
   isAdmin = undefined,
-  update,
 }) => {
   const ariaLabel = field.disabled
     ? `Undo remove ${label ?? fieldName} ${index + 1}`
@@ -76,6 +74,12 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
       setEditedFields((prev) => ({ ...prev, [index]: updatedValue !== originalFields?.[index]?.['text'] }));
     useFormReturn.trigger();
   }, 300);
+
+  // let debug = false;
+  // if (field.text.startsWith('editable, sig')) {
+  //   console.log('field: ', field);
+  //   debug = true;
+  // }
 
   return (
     <List.Item
@@ -115,6 +119,9 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
         control={useFormReturn.control}
         name={`${fieldName}.${index}.text`}
         render={({ field: { onChange, onBlur, value } }) => {
+          // if (debug) {
+          //   console.log('field: ', field, value);
+          // }
           // if (fieldName === 'accountabilities') console.log('field: ', field);
 
           return (
@@ -152,11 +159,16 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                       // onChange(originalFields?.[index]?.['text']);
                       setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: true }));
                       // set disabled to true
-                      update?.(index, {
-                        ...field,
-                        text: originalFields?.[index]?.['text'],
-                        disabled: true,
-                      });
+
+                      // update for some reason doesn't update the value in the text box
+                      // update?.(index, {
+                      //   ...field,
+                      //   text: originalFields?.[index]?.['text'],
+                      //   disabled: true,
+                      // });
+
+                      useFormReturn.setValue(`${fieldName}.${index}.text`, originalFields?.[index]?.['text']);
+                      useFormReturn.setValue(`${fieldName}.${index}.disabled`, true);
                       useFormReturn.trigger();
                     }
 

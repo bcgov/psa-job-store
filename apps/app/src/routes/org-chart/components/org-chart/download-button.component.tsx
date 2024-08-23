@@ -1,14 +1,18 @@
 import { DownloadOutlined } from '@ant-design/icons';
-import { Button, Dropdown } from 'antd';
-import { toPng, toSvg } from 'html-to-image';
-import { Panel, Rect, getRectOfNodes, getTransformForBounds, useReactFlow } from 'reactflow';
+import { Button, Menu } from 'antd';
+import canvasSize from 'canvas-size';
+import { toSvg } from 'html-to-image';
+import { Options } from 'html-to-image/lib/types';
+import { useState } from 'react';
+import { Rect, getNodesBounds, getRectOfNodes, getTransformForBounds, useReactFlow } from 'reactflow';
+import AcessiblePopoverMenu from '../../../../components/app/common/components/accessible-popover-menu';
 
-interface NodesBounds {
-  width: number;
-  height: number;
-  x: number;
-  y: number;
-}
+// interface NodesBounds {
+//   width: number;
+//   height: number;
+//   x: number;
+//   y: number;
+// }
 
 interface StyleObject {
   [key: string]: string | undefined;
@@ -86,149 +90,532 @@ export async function generateSVG(getNodes: () => any[]): Promise<string> {
   }
 }
 
+const canvasDimensionLimit = 16384;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function generatePNGBase64(getNodes: () => any[]): Promise<string> {
-  const resolution = 200;
-  const tileSize = 16382;
-  const padding = 40;
-  const maxDimension = 16382 * 3;
+  const canvasAreaTestResults = await canvasSize.maxArea({
+    max: 18000,
+    min: 1,
+    step: 300,
+    usePromise: true,
+  });
+
+  const canvasWidthTestResults = await canvasSize.maxWidth({
+    max: 65500,
+    min: 1,
+    step: 5000,
+    usePromise: true,
+  });
+
+  const maxArea = canvasAreaTestResults.width * canvasAreaTestResults.height;
+  console.log('maxArea: ', maxArea);
+  const maxWidth = canvasWidthTestResults.width;
+  const maxHeight = maxWidth; // Set maxHeight to be the same as maxWidth
+
+  console.log('maxWidth/height: ', maxWidth);
+
+  const padding = 20;
+  const resolution = 1.5;
 
   const nodes = getNodes();
   console.log('nodes: ', nodes);
-  if (!nodes) {
-    throw new Error('No nodes found');
+  const nodesBounds = getNodesBounds(nodes);
+
+  console.log('nodesBounds: ', nodesBounds);
+
+  const width = nodesBounds.width * resolution + 2 * padding;
+  const height = nodesBounds.height * resolution + 2 * padding;
+  const aspectRatio = width / height;
+
+  let imageWidth = width;
+  let imageHeight = height;
+
+  console.log('initial width/height: ', imageWidth, imageHeight);
+
+  // Check if the scaled size exceeds the max area, max width, or max height
+  if (imageWidth * imageHeight > maxArea || imageWidth > maxWidth || imageHeight > maxHeight) {
+    console.log('image doesnt fit', imageWidth * imageHeight > maxArea, imageWidth > maxWidth, imageHeight > maxHeight);
+    // Reduce size to fit within all limits
+    const areaConstrainedWidth = Math.sqrt(maxArea * aspectRatio);
+    const areaConstrainedHeight = areaConstrainedWidth / aspectRatio;
+
+    if (aspectRatio > 1) {
+      imageWidth = Math.min(areaConstrainedWidth, maxWidth);
+      imageHeight = imageWidth / aspectRatio;
+      if (imageHeight > maxHeight) {
+        imageHeight = maxHeight;
+        imageWidth = imageHeight * aspectRatio;
+      }
+    } else {
+      imageHeight = Math.min(areaConstrainedHeight, maxHeight);
+      imageWidth = imageHeight * aspectRatio;
+      if (imageWidth > maxWidth) {
+        imageWidth = maxWidth;
+        imageHeight = imageWidth / aspectRatio;
+      }
+    }
   }
 
-  const nodesBounds = getRectOfNodes(nodes);
-  if (!nodesBounds) {
-    throw new Error('Unable to calculate node bounds');
+  // Ensure the final dimensions don't exceed maxArea
+  if (imageWidth * imageHeight > maxArea) {
+    console.log('image still too big');
+    const scale = Math.sqrt(maxArea / (imageWidth * imageHeight));
+    imageWidth *= scale;
+    imageHeight *= scale;
   }
 
-  const { width, height } = calculateDimensions(nodesBounds, resolution, padding, maxDimension);
+  // TILING
 
-  const numCols = Math.ceil(width / tileSize);
-  const numRows = Math.ceil(height / tileSize);
+  console.log('final width/height/area: ', imageWidth, imageHeight, imageWidth * imageHeight);
+
+  // Calculate the number of tiles needed
+
+  const tileWidth = Math.min(canvasDimensionLimit, imageWidth);
+  const tileHeight = Math.min(canvasDimensionLimit, imageHeight);
+
+  const numCols = Math.ceil(imageWidth / tileWidth);
+  const numRows = Math.ceil(imageHeight / tileHeight);
+
+  console.log('Tiles:', numCols, 'x', numRows, 'Tile size:', tileWidth, 'x', tileHeight);
 
   try {
-    const tileDataUrls = await renderTiles(width, height, numCols, numRows, tileSize, nodesBounds);
-    const finalDataUrl = await combineTiles(tileDataUrls, width, height, numCols, tileSize);
+    const finalImageDataUrl = await renderAndCombineTiles(
+      imageWidth,
+      imageHeight,
+      numCols,
+      numRows,
+      tileWidth,
+      tileHeight,
+      nodesBounds,
+    );
 
-    if (finalDataUrl) {
-      return finalDataUrl;
+    if (finalImageDataUrl) {
+      // downloadImage(
+      //   `data:image/png;base64,${finalImageDataUrl}`,
+      //   `reactflow_${Math.round(imageWidth)}x${Math.round(imageHeight)}.png`,
+      // );
+      return finalImageDataUrl;
     } else {
-      throw new Error('Failed to generate final image data URL');
+      throw new Error('Failed to generate image');
     }
   } catch (error) {
-    console.error('Error generating image:', error);
+    console.error('Error generating PNG:', error);
     throw error;
   }
+
+  // END TILING
+
+  // const zoom = Math.min(
+  //   imageWidth / (nodesBounds.width + 2 * padding),
+  //   imageHeight / (nodesBounds.height + 2 * padding),
+  // );
+
+  // const x = -(nodesBounds.x - padding) * zoom + (imageWidth - (nodesBounds.width + 2 * padding) * zoom) / 2;
+  // const y = -(nodesBounds.y - padding) * zoom + (imageHeight - (nodesBounds.height + 2 * padding) * zoom) / 2;
+
+  // console.log('final width/height/area: ', imageWidth, imageHeight, imageWidth * imageHeight);
+  // console.log('x/y/zoom: ', x, y, zoom);
+
+  // toPng(document.querySelector('.react-flow__viewport'), {
+  //   skipAutoScale: true,
+  //   backgroundColor: '#ffffff',
+  //   width: imageWidth,
+  //   height: imageHeight,
+  //   style: {
+  //     width: imageWidth,
+  //     height: imageHeight,
+  //     transform: `translate(${x}px, ${y}px) scale(${zoom})`,
+  //   },
+  // }).then((dataUrl) => downloadImage(dataUrl, `reactflow_${Math.round(imageWidth)}x${Math.round(imageHeight)}.png`));
+
+  // === OLD CODE ===
+
+  // console.log('=== generatePNGBase64 ===');
+  // console.log('canvasAreaTestResults: ', canvasAreaTestResults);
+  // console.log('canvasWidthTestResults: ', canvasWidthTestResults);
+
+  // const resolution = 300;
+
+  // const padding = 40;
+  // const maxArea = canvasAreaTestResults.width * canvasAreaTestResults.height;
+
+  // const nodes = getNodes();
+  // // console.log('nodes: ', nodes);
+  // if (!nodes) {
+  //   throw new Error('No nodes found');
+  // }
+
+  // const nodesBounds = getRectOfNodes(nodes);
+  // if (!nodesBounds) {
+  //   throw new Error('Unable to calculate node bounds');
+  // }
+
+  // console.log('nodesBounds: ', nodesBounds);
+
+  // const { width, height } = calculateDimensions(nodesBounds, resolution, padding, maxArea);
+
+  // console.log('final width/height: ', width, height);
+
+  // const tileWidth = width; //canvasAreaTestResults.width;
+  // const tileHeight = height; //canvasAreaTestResults.height;
+
+  // const numCols = Math.ceil(width / tileWidth);
+  // const numRows = Math.ceil(height / tileHeight);
+
+  // console.log('numCols/numRows: ', numCols, numRows);
+
+  // try {
+  //   const tileDataUrls = await renderTiles(width, height, numCols, numRows, tileWidth, tileHeight, nodesBounds);
+  //   // const finalDataUrl = await combineTiles(tileDataUrls, width, height, numCols, tileWidth, tileHeight);
+
+  //   // if (finalDataUrl) {
+  //   //   return finalDataUrl;
+  //   // } else {
+  //   //   throw new Error('Failed to generate final image data URL');
+  //   // }
+  // } catch (error) {
+  //   console.error('Error generating image:', error);
+  //   throw error;
+  // }
 }
 
-function loadImage(dataUrl: string): Promise<HTMLImageElement> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.src = dataUrl;
-  });
-}
+// function loadImage(dataUrl: string): Promise<HTMLImageElement> {
+//   return new Promise((resolve, reject) => {
+//     const img = new Image();
+//     img.onload = () => resolve(img);
+//     img.onerror = (error) => {
+//       console.error('Error loading image:', error);
+//       reject(new Error('Failed to load image'));
+//     };
+//     img.src = dataUrl;
+//   });
+// }
 
-function calculateDimensions(
-  nodesBounds: NodesBounds,
-  resolution: number,
-  padding: number,
-  maxDimension: number,
-): { width: number; height: number } {
-  let width = Math.ceil((nodesBounds.width + padding * 2) * (resolution / 72));
-  let height = Math.ceil((nodesBounds.height + padding * 2) * (resolution / 72));
+// function renderTiles(
+//   width: number,
+//   height: number,
+//   numCols: number,
+//   numRows: number,
+//   tileWidth: number,
+//   tileHeight: number,
+//   nodesBounds: Rect,
+// ): Promise<string[]> {
+//   console.log('== renderTiles');
 
-  if (width > maxDimension || height > maxDimension) {
-    const scale = Math.min(maxDimension / width, maxDimension / height);
-    width = Math.floor(width * scale);
-    height = Math.floor(height * scale);
-  }
+//   const transform = getTransformForBounds(nodesBounds, width, height, 0.5, 2);
 
-  return { width, height };
-}
+//   console.log('getTransformForBounds result: ', transform);
 
-function renderTiles(
+//   if (!transform) {
+//     return Promise.reject(new Error('Failed to get transform for bounds'));
+//   }
+
+//   const tiles: Promise<string>[] = [];
+
+//   for (let row = 0; row < numRows; row++) {
+//     for (let col = 0; col < numCols; col++) {
+//       const useTileWidth = Math.min(tileWidth, width - col * tileWidth);
+//       const useTileHeight = Math.min(tileHeight, height - row * tileHeight);
+//       console.log(
+//         'tileNumber: ',
+//         row * numCols + col + 1,
+//         useTileWidth,
+//         useTileHeight,
+//         col,
+//         row,
+//         tileWidth,
+//         tileHeight,
+//       );
+
+//       tiles.push(renderTile(useTileWidth, useTileHeight, col, row, transform, tileWidth, tileHeight));
+//     }
+//   }
+
+//   return Promise.all(tiles);
+// }
+
+// function renderTile(
+//   useTileWidth: number,
+//   useTileHeight: number,
+//   col: number,
+//   row: number,
+//   transform: [number, number, number],
+//   tileWidth: number,
+//   tileHeight: number,
+// ): Promise<string> {
+//   console.log('== renderTile', useTileWidth, useTileHeight);
+//   console.log(
+//     'transform:',
+//     `translate(${transform[0] - col * tileWidth}px, ${transform[1] - row * tileHeight}px) scale(${transform[2]})`,
+//   );
+
+//   const viewport = document.querySelector('.react-flow__viewport') as HTMLElement;
+//   if (!viewport) {
+//     return Promise.reject(new Error('Viewport element not found'));
+//   }
+
+//   return toPng(viewport, {
+//     backgroundColor: '#ffffff', // can also make it 'transparent'
+//     width: useTileWidth,
+//     height: useTileHeight,
+//     style: {
+//       width: `${useTileWidth}px`,
+//       height: `${useTileHeight}px`,
+//       transform: `translate(${transform[0] - col * tileWidth}px, ${transform[1] - row * tileHeight}px) scale(${
+//         transform[2]
+//       })`,
+//     },
+//   });
+// }
+
+// function combineTiles(
+//   tileDataUrls: string[],
+//   width: number,
+//   height: number,
+//   numCols: number,
+//   tileWidth: number,
+//   tileHeight: number,
+// ): Promise<string | null> {
+//   console.log('== combineTiles start ==');
+//   console.log('Input parameters:', { width, height, numCols, tileWidth, tileHeight });
+//   console.log('Number of tile data URLs:', tileDataUrls.length);
+
+//   try {
+//     let canvas: HTMLCanvasElement | OffscreenCanvas;
+//     let ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
+
+//     if (typeof OffscreenCanvas !== 'undefined') {
+//       canvas = new OffscreenCanvas(width, height);
+//       ctx = canvas.getContext('2d');
+//       console.log('Using OffscreenCanvas');
+//     } else {
+//       canvas = document.createElement('canvas');
+//       canvas.width = width;
+//       canvas.height = height;
+//       ctx = canvas.getContext('2d');
+//       console.log('Using DOM Canvas');
+//     }
+
+//     console.log('Canvas created with dimensions:', width, 'x', height);
+
+//     if (!ctx) {
+//       throw new Error('Failed to get canvas context');
+//     }
+
+//     return Promise.all(
+//       tileDataUrls.map((url, index) => {
+//         console.log(`Loading image ${index + 1}/${tileDataUrls.length}`);
+//         return loadImage(url);
+//       }),
+//     )
+//       .then((images) => {
+//         console.log('All images loaded, total:', images.length);
+//         try {
+//           images.forEach((img, index) => {
+//             const col = index % numCols;
+//             const row = Math.floor(index / numCols);
+//             const x = col * tileWidth;
+//             const y = row * tileHeight;
+//             console.log(`Drawing image ${index + 1} at (${x}, ${y})`);
+//             ctx!.drawImage(img, x, y);
+//           });
+
+//           if (canvas instanceof OffscreenCanvas) {
+//             return canvas.convertToBlob({ type: 'image/png' }).then((blob) => blobToBase64(blob));
+//           } else {
+//             const dataUrl = canvas.toDataURL('image/png');
+//             return Promise.resolve(dataUrl.split(',')[1]);
+//           }
+//         } catch (error) {
+//           console.error('Error while drawing images:', error);
+//           throw error;
+//         }
+//       })
+//       .then((finalResult) => {
+//         console.log('Final result length:', finalResult.length);
+//         if (!finalResult) {
+//           throw new Error('Generated data is invalid');
+//         }
+//         return finalResult;
+//       })
+//       .catch((error) => {
+//         console.error('Error while loading or processing images:', error);
+//         throw error;
+//       });
+//   } catch (error) {
+//     console.error('Error in combineTiles:', error);
+//     return Promise.reject(error);
+//   }
+// }
+
+async function renderAndCombineTiles(
   width: number,
   height: number,
   numCols: number,
   numRows: number,
-  tileSize: number,
+  tileWidth: number,
+  tileHeight: number,
   nodesBounds: Rect,
-): Promise<string[]> {
+): Promise<string> {
+  console.log('== renderAndCombineTiles');
+
   const transform = getTransformForBounds(nodesBounds, width, height, 0.5, 2);
+
+  console.log('getTransformForBounds result: ', transform);
+
   if (!transform) {
-    return Promise.reject(new Error('Failed to get transform for bounds'));
+    throw new Error('Failed to get transform for bounds');
   }
 
-  const tiles: Promise<string>[] = [];
+  let canvas: HTMLCanvasElement | OffscreenCanvas;
+  let ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
 
+  console.log('creative main canvas with size: ', width, height);
+  if (typeof OffscreenCanvas !== 'undefined') {
+    canvas = new OffscreenCanvas(width, height);
+    ctx = canvas.getContext('2d');
+    console.log('Using OffscreenCanvas');
+  } else {
+    canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    ctx = canvas.getContext('2d');
+    console.log('Using DOM Canvas');
+  }
+
+  if (!ctx) {
+    throw new Error('Failed to get canvas context');
+  }
+
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, width, height);
+
+  let i = 0;
+  const c = document.createElement('canvas');
   for (let row = 0; row < numRows; row++) {
     for (let col = 0; col < numCols; col++) {
-      const tileWidth = Math.min(tileSize, width - col * tileSize);
-      const tileHeight = Math.min(tileSize, height - row * tileSize);
-      console.log('tileNumber: ', row * numCols + col + 1, tileWidth, tileHeight);
+      i++;
+      const useTileWidth = Math.min(tileWidth, width - col * tileWidth);
+      const useTileHeight = Math.min(tileHeight, height - row * tileHeight);
+      console.log(
+        'Rendering tile:',
+        row * numCols + col + 1,
+        useTileWidth,
+        useTileHeight,
+        col,
+        row,
+        tileWidth,
+        tileHeight,
+      );
 
-      tiles.push(renderTile(tileWidth, tileHeight, col, row, transform, tileSize));
+      // tileDataUrl = await renderTile(useTileWidth, useTileHeight, col, row, transform, tileWidth, tileHeight, c);
+      // tileImage = await loadImage(tileDataUrl);
+
+      // const x = col * tileWidth;
+      // const y = row * tileHeight;
+      // console.log(`Drawing tile at (${x}, ${y})`);
+      // ctx.drawImage(tileImage, x, y);
+
+      const tileCanvas = await renderTile(useTileWidth, useTileHeight, col, row, transform, tileWidth, tileHeight, c);
+
+      // //  DEBUG
+      // // Create a temporary canvas for the tile
+      // const tileCanvas = document.createElement('canvas');
+      // tileCanvas.width = useTileWidth;
+      // tileCanvas.height = useTileHeight;
+      // const tileCtx = tileCanvas.getContext('2d');
+
+      // // Fill the tile with a random color
+      // if (tileCtx) {
+      //   tileCtx.fillStyle = getRandomColor();
+      //   tileCtx.fillRect(0, 0, useTileWidth, useTileHeight);
+
+      //   // Add tile number for easier identification
+      //   tileCtx.fillStyle = 'white';
+      //   tileCtx.font = '20px Arial';
+      //   tileCtx.textAlign = 'center';
+      //   tileCtx.textBaseline = 'middle';
+      //   tileCtx.fillText(`${i}`, useTileWidth / 2, useTileHeight / 2);
+      // }
+
+      // END DEBUG
+
+      const x = col * tileWidth;
+      const y = row * tileHeight;
+      console.log(`Drawing tile ${i} at (${x}, ${y}) with size ${useTileWidth}x${useTileHeight}`);
+      console.log('i:  ', i);
+      // if (i == 1) ctx.drawImage(tileCanvas, 0, 0);
+      ctx.drawImage(tileCanvas, x, y);
     }
   }
 
-  return Promise.all(tiles);
+  if (canvas instanceof OffscreenCanvas) {
+    console.log('Converting OffscreenCanvas to Blob');
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    return await blobToBase64(blob);
+  } else {
+    const dataUrl = canvas.toDataURL('image/png');
+    return dataUrl.split(',')[1];
+  }
 }
 
+// function getRandomColor() {
+//   const r = Math.floor(Math.random() * 256);
+//   const g = Math.floor(Math.random() * 256);
+//   const b = Math.floor(Math.random() * 256);
+//   return `rgb(${r},${g},${b})`;
+// }
+
 function renderTile(
-  tileWidth: number,
-  tileHeight: number,
+  useTileWidth: number,
+  useTileHeight: number,
   col: number,
   row: number,
   transform: [number, number, number],
-  tileSize: number,
-): Promise<string> {
+  tileWidth: number,
+  tileHeight: number,
+  canvas: HTMLCanvasElement,
+): Promise<HTMLCanvasElement> {
+  console.log('== renderTile', useTileWidth, useTileHeight);
+  console.log(
+    'transform:',
+    `translate(${transform[0] - col * tileWidth}px, ${transform[1] - row * tileHeight}px) scale(${transform[2]})`,
+  );
+
   const viewport = document.querySelector('.react-flow__viewport') as HTMLElement;
   if (!viewport) {
     return Promise.reject(new Error('Viewport element not found'));
   }
 
-  return toPng(viewport, {
-    backgroundColor: '#ffffff', // can also make it 'transparent'
-    width: tileWidth,
-    height: tileHeight,
-    style: {
-      width: `${tileWidth}px`,
-      height: `${tileHeight}px`,
-      transform: `translate(${transform[0] - col * tileSize}px, ${transform[1] - row * tileSize}px) scale(${
-        transform[2]
-      })`,
+  return myToCanvas(
+    viewport,
+    {
+      backgroundColor: '#ffffff',
+      width: useTileWidth,
+      height: useTileHeight,
+      pixelRatio: 1,
+      style: {
+        width: `${useTileWidth}px`,
+        height: `${useTileHeight}px`,
+        transform: `translate(${transform[0] - col * tileWidth}px, ${transform[1] - row * tileHeight}px) scale(${
+          transform[2]
+        })`,
+      },
     },
-  });
+    canvas,
+  );
 }
 
-function combineTiles(
-  tileDataUrls: string[],
-  width: number,
-  height: number,
-  numCols: number,
-  tileSize: number,
-): Promise<string | null> {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-
-  if (!ctx) {
-    return Promise.reject(new Error('Failed to get canvas context'));
-  }
-
-  return Promise.all(tileDataUrls.map(loadImage)).then((images) => {
-    images.forEach((img, index) => {
-      const col = index % numCols;
-      const row = Math.floor(index / numCols);
-      ctx.drawImage(img, col * tileSize, row * tileSize);
-    });
-    return canvas.toDataURL('image/png').split(',')[1];
-  });
+// Helper function to convert Blob to Base64
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }).then((dataUrl: any) => dataUrl.split(',')[1]);
 }
 
 function removeStyleTags(svgString: string) {
@@ -399,41 +786,193 @@ function parseStyle(styleString: string): StyleObject {
 }
 
 function DownloadButton() {
+  const [isLoading, setIsLoading] = useState(false);
   const { getNodes } = useReactFlow();
 
   // SVG GENERATION
-  const onClick_svg = () => {
-    generateSVG(getNodes).then((svgString: string) => {
-      downloadImage('data:image/svg+xml;base64,' + btoa(svgString), 'chart.svg');
-    });
+  const onClick_svg = async () => {
+    setIsLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      generateSVG(getNodes).then((svgString: string) => {
+        downloadImage('data:image/svg+xml;base64,' + btoa(svgString), 'chart.svg');
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // // TILE PNG
   const onClick_png = async () => {
-    const pngBase64 = await generatePNGBase64(getNodes);
-    downloadImage('data:image/png;base64,' + pngBase64, 'org-chart.png');
+    setIsLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      const pngBase64 = await generatePNGBase64(getNodes);
+      downloadImage('data:image/png;base64,' + pngBase64, 'org-chart.png');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const items = [
-    {
-      key: '1',
-      label: 'Download PNG',
-      onClick: onClick_png,
-    },
-    {
-      key: '2',
-      label: 'Download SVG',
-      onClick: onClick_svg,
-    },
-  ];
-
   return (
-    <Panel position="top-right">
-      <Dropdown menu={{ items }} placement="bottomRight">
-        <Button icon={<DownloadOutlined />}>Download</Button>
-      </Dropdown>
-    </Panel>
+    <AcessiblePopoverMenu
+      triggerButton={
+        <Button loading={isLoading} tabIndex={-1} style={{}} icon={<DownloadOutlined aria-hidden />}>
+          Download
+        </Button>
+      }
+      buttonId="download-orgchart-button"
+      ariaLabel="Download organization chart"
+      content={
+        <Menu selectedKeys={[]}>
+          <Menu.Item key="png" onClick={onClick_png}>
+            Download PNG
+          </Menu.Item>
+          <Menu.Item key="svg" onClick={onClick_svg}>
+            Download SVG
+          </Menu.Item>
+        </Menu>
+      }
+    ></AcessiblePopoverMenu>
   );
+}
+
+// html-to-image library extract - modified toCanvas function to re-use the canvas object instead of re-creating it
+// this improves memory usage for the tiling process.
+function px(node: HTMLElement, styleProperty: string) {
+  const win = node.ownerDocument.defaultView || window;
+  const val = win.getComputedStyle(node).getPropertyValue(styleProperty);
+  return val ? parseFloat(val.replace('px', '')) : 0;
+}
+
+function getNodeWidth(node: HTMLElement) {
+  const leftBorder = px(node, 'border-left-width');
+  const rightBorder = px(node, 'border-right-width');
+  return node.clientWidth + leftBorder + rightBorder;
+}
+
+function getNodeHeight(node: HTMLElement) {
+  const topBorder = px(node, 'border-top-width');
+  const bottomBorder = px(node, 'border-bottom-width');
+  return node.clientHeight + topBorder + bottomBorder;
+}
+
+function getImageSize(targetNode: HTMLElement, options: Options = {}) {
+  const width = options.width || getNodeWidth(targetNode);
+  const height = options.height || getNodeHeight(targetNode);
+
+  return { width, height };
+}
+
+export function createImage(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    img.decode = () => resolve(img) as any;
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.crossOrigin = 'anonymous';
+    img.decoding = 'async';
+    img.src = url;
+  });
+}
+
+export function getPixelRatio() {
+  let ratio;
+
+  let FINAL_PROCESS;
+  try {
+    FINAL_PROCESS = process;
+  } catch (e) {
+    // pass
+  }
+
+  const val = FINAL_PROCESS && FINAL_PROCESS.env ? FINAL_PROCESS.env.devicePixelRatio : null;
+  if (val) {
+    ratio = parseInt(val, 10);
+    if (Number.isNaN(ratio)) {
+      ratio = 1;
+    }
+  }
+  return ratio || window.devicePixelRatio || 1;
+}
+
+export function checkCanvasDimensions(canvas: HTMLCanvasElement) {
+  if (canvas.width > canvasDimensionLimit || canvas.height > canvasDimensionLimit) {
+    console.log(
+      'checkCanvasDimensions TRIGGERED, canvas.width: ',
+      canvas.width,
+      'canvas.height: ',
+      canvas.height,
+      'canvasDimensionLimit: ',
+      canvasDimensionLimit,
+    );
+    if (canvas.width > canvasDimensionLimit && canvas.height > canvasDimensionLimit) {
+      if (canvas.width > canvas.height) {
+        canvas.height *= canvasDimensionLimit / canvas.width;
+        canvas.width = canvasDimensionLimit;
+      } else {
+        canvas.width *= canvasDimensionLimit / canvas.height;
+        canvas.height = canvasDimensionLimit;
+      }
+    } else if (canvas.width > canvasDimensionLimit) {
+      canvas.height *= canvasDimensionLimit / canvas.width;
+      canvas.width = canvasDimensionLimit;
+    } else {
+      canvas.width *= canvasDimensionLimit / canvas.height;
+      canvas.height = canvasDimensionLimit;
+    }
+  }
+}
+
+export async function toCanvas<T extends HTMLElement>(
+  node: T,
+  options: Options = {},
+  canvas: HTMLCanvasElement,
+): Promise<HTMLCanvasElement> {
+  const { width, height } = getImageSize(node, options);
+  const svg = await toSvg(node, options);
+  const img = await createImage(svg);
+
+  const context = canvas.getContext('2d')!;
+  const ratio = options.pixelRatio || getPixelRatio();
+  const canvasWidth = options.canvasWidth || width;
+  const canvasHeight = options.canvasHeight || height;
+
+  canvas.width = canvasWidth * ratio;
+  canvas.height = canvasHeight * ratio;
+
+  if (!options.skipAutoScale) {
+    checkCanvasDimensions(canvas);
+  }
+  canvas.style.width = `${canvasWidth}`;
+  canvas.style.height = `${canvasHeight}`;
+
+  if (options.backgroundColor) {
+    context.fillStyle = options.backgroundColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  return canvas;
+}
+
+// async function myToPng<T extends HTMLElement>(
+//   node: T,
+//   options: Options = {},
+//   canvas: HTMLCanvasElement,
+// ): Promise<string> {
+//   const c = await toCanvas(node, options, canvas);
+//   return c.toDataURL();
+// }
+
+async function myToCanvas<T extends HTMLElement>(
+  node: T,
+  options: Options = {},
+  canvas: HTMLCanvasElement,
+): Promise<HTMLCanvasElement> {
+  return toCanvas(node, options, canvas);
 }
 
 export default DownloadButton;

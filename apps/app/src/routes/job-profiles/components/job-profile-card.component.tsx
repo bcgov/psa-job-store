@@ -69,28 +69,18 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
         borderLeft: data.number === +number ? '4px solid #0070E0' : '4px solid transparent',
         background: data.number === +number ? '#F0F8FF' : 'white',
         padding: '1rem',
+        position: 'relative',
       }}
     >
-      <Row justify="space-between" align="middle">
-        <Col>
+      <Row gutter={8} align="top" style={{ display: 'flex', flexWrap: 'nowrap', alignItems: 'flex-start' }}>
+        <Col flex="1 1 calc(100% - 32px)">
           <Title level={3} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
             {typeof data?.title === 'string' ? data?.title : data?.title?.text}
           </Title>
         </Col>
-        <Col>
-          {initIsSaved && (
-            <div>
-              {isSaved ? (
-                <Tooltip title="Remove from saved profiles">
-                  <Button type="link" icon={<TagFilled></TagFilled>} onClick={handleRemoveSavedJobProfile}></Button>
-                </Tooltip>
-              ) : (
-                <Tooltip title="Save profile">
-                  <Button type="link" icon={<TagOutlined></TagOutlined>} onClick={handleSaveJobProfile}></Button>
-                </Tooltip>
-              )}
-            </div>
-          )}
+        {/* This is for absolutely positioned save button so it appears in correct tab order */}
+        <Col flex="0 0 32px">
+          <div style={{ width: '32px', height: '32px' }}></div>
         </Col>
       </Row>
 
@@ -124,9 +114,7 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
         <Paragraph ellipsis={{ rows: 3 }}>
           <span
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(
-                typeof data?.context === 'string' ? data.context : data.context.description ?? '',
-              ),
+              __html: DOMPurify.sanitize(typeof data?.context === 'string' ? data.context : data.context ?? ''),
             }}
           ></span>
         </Paragraph>
@@ -137,9 +125,41 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
           {typeof data?.overview === 'string' ? data?.overview : data?.overview?.text}
         </Paragraph>
       </div>
-      <Button type="link" aria-label={`click to see details for ${data.title}`} style={{ padding: '0' }}>
+      <Button
+        type="link"
+        aria-label={`view details for ${data.title} - ${data.classifications
+          ?.map((c) => c.classification.name)
+          .join(', ')}`}
+        style={{ padding: '0' }}
+      >
         See details
       </Button>
+
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+        {initIsSaved && (
+          <div>
+            {isSaved ? (
+              <Tooltip title="Remove from saved profiles">
+                <Button
+                  aria-label="Remove from saved profiles"
+                  type="link"
+                  icon={<TagFilled aria-hidden />}
+                  onClick={handleRemoveSavedJobProfile}
+                ></Button>
+              </Tooltip>
+            ) : (
+              <Tooltip title="Save profile">
+                <Button
+                  aria-label="Save profile"
+                  type="link"
+                  icon={<TagOutlined aria-hidden />}
+                  onClick={handleSaveJobProfile}
+                ></Button>
+              </Tooltip>
+            )}
+          </div>
+        )}
+      </div>
     </Space>
   );
 };

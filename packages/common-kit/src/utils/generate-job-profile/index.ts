@@ -341,7 +341,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                                   smallCaps: true,
                                 }),
                                 new TextRun({
-                                  text: supervisorProfile.employeeName,
+                                  text: supervisorProfile.positionDescription ?? '',
                                   bold: true,
                                   font: 'Calibri',
                                   size: '12pt',
@@ -684,7 +684,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
 
           ...(transformedJobProfile.optional_requirements && transformedJobProfile.optional_requirements.length > 0
             ? [
-                createHeading('Optional Requirements', false),
+                createHeading('Other Requirements', false),
                 ...transformedJobProfile.optional_requirements.map(
                   (obj: string) =>
                     new Paragraph({

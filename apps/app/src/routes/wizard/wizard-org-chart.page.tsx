@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Button, Tooltip } from 'antd';
+import { Button, Col, Radio, Row, Tooltip } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
@@ -12,8 +12,11 @@ import {
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
+import { DepartmentFilter } from '../org-chart/components/department-filter.component';
 import { OrgChart } from '../org-chart/components/org-chart';
-import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
+import { TreeChartSearchProvider } from '../org-chart/components/tree-org-chart/tree-org-chart-search-context';
+import { TreeOrgChartSearch } from '../org-chart/components/tree-org-chart/tree-org-chart-search.component';
+import TreeOrgChart from '../org-chart/components/tree-org-chart/tree-org-chart.component';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -52,11 +55,15 @@ export const WizardOrgChartPage = ({
   }, [location.pathname]);
 
   const [selectedDepartment, setSelectedDepartment] = useState<string | null | undefined>(positionRequestDepartmentId);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [nextButtonTooltipTitle, setNextButtonTooltipTitle] = useState<string>('');
   const [positionVacant, setPositionVacant] = useState<boolean>(false);
   const positionVacantTooltipText = "You can't create a new position which reports to a vacant position.";
+
+  const [currentView] = useState<'chart' | 'tree'>('chart');
+  const [horizontal, setHorizontal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
   const {
     data: profileData,
@@ -104,18 +111,18 @@ export const WizardOrgChartPage = ({
   }, [nextButtonIsDisabled, orgChartData.nodes, selectedPositionId]);
 
   const { createNewPosition } = usePosition();
-  const { getNodes } = useReactFlow();
+  const { getNodes, getEdges } = useReactFlow();
 
   const next = async ({ switchStep = true }: { switchStep?: boolean } = {}) => {
     if (selectedDepartment == null || selectedPositionId == null) return;
 
-    setIsLoading(true);
+    // setIsLoading(true);
 
     try {
       // 1-second delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const png = await generatePNGBase64(getNodes);
+      // const png = await generatePNGBase64(getNodes);
 
       // downloadImage('data:image/png;base64,' + png, 'org-chart.png');
 
@@ -127,7 +134,7 @@ export const WizardOrgChartPage = ({
         current_reports_to_position_id: positionRequestData?.reports_to_position_id,
         reSelectSupervisor: reSelectSupervisor,
         changeStep: switchStep,
-        svg: png,
+        // svg: png,
       });
 
       if (result != 'CANCELLED' && switchStep) {
@@ -143,7 +150,7 @@ export const WizardOrgChartPage = ({
       console.error('An error occurred:', error);
       return undefined;
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -167,6 +174,10 @@ export const WizardOrgChartPage = ({
       setCurrentStep?.(2); // if the user changed the supervisor, switch to step 2, even if user selected something else
     }
   };
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+  }, []);
 
   if (locationProcessed === false) {
     return <LoadingComponent />;
@@ -197,7 +208,7 @@ export const WizardOrgChartPage = ({
             onClick={() => {
               next();
             }}
-            loading={isLoading}
+            // loading={isLoading}
           >
             Save and next
           </Button>
@@ -228,19 +239,97 @@ export const WizardOrgChartPage = ({
         {isLoadingUserProfile || isFetchingUserProfile || isResetting ? (
           <LoadingComponent height="100%"></LoadingComponent>
         ) : (
-          <OrgChart
-            type={OrgChartType.DYNAMIC}
-            context={OrgChartContext.WIZARD}
-            setDepartmentId={setSelectedDepartment}
-            onSelectedNodeIdsChange={(ids, elements) => {
-              setSelectedPositionId(ids.length > 0 ? ids[0] : undefined);
-              setOrgChartData(elements);
-            }}
-            departmentId={selectedDepartment}
-            departmentIdIsLoading={isFetchingUserProfile}
-            targetId={selectedPositionId ?? profileData?.profile.position_id}
-            wrapProvider={false}
-          />
+          <TreeChartSearchProvider>
+            <Row
+              gutter={16}
+              align="middle"
+              justify="space-between"
+              style={{ padding: '10px', position: currentView === 'chart' ? 'absolute' : undefined }}
+            >
+              {/* <Col>
+                <ViewToggle
+                  view={currentView}
+                  onToggle={(view) => {
+                    setCurrentView(view);
+                  }}
+                />
+              </Col> */}
+              <Col flex="500px">
+                {currentView === 'tree' && (
+                  <TreeOrgChartSearch
+                    setSearchTerm={setSearchTerm}
+                    onSearch={handleSearch}
+                    disabled={selectedDepartment == null || isFetchingUserProfile}
+                    searchTerm={searchTerm}
+                  />
+                )}
+              </Col>
+              <Col>
+                {currentView === 'tree' && (
+                  <Radio.Group value={horizontal} onChange={(e) => setHorizontal(e.target.value)}>
+                    <Radio.Button value={true}>Horizontal</Radio.Button>
+                    <Radio.Button value={false}>Vertical</Radio.Button>
+                  </Radio.Group>
+                )}
+              </Col>
+              <Col flex="auto"> {/* This empty column will create the gap */}</Col>
+              <Col flex="500px">
+                {currentView === 'tree' && (
+                  <DepartmentFilter
+                    setDepartmentId={setSelectedDepartment}
+                    departmentId={selectedDepartment}
+                    loading={isFetchingUserProfile}
+                  />
+                )}
+              </Col>
+            </Row>
+
+            <>
+              {/* <div className="sr-only" style={{ display: currentView !== 'chart' ? 'none' : 'block' }} tabIndex={0}>
+                This chart view is not keyboard accessible. Please switch to the tree view for a keyboard-navigable
+                version.
+              </div> */}
+              <div
+                style={{ display: currentView !== 'chart' ? 'none' : 'block', height: '100%' }}
+                aria-hidden={true}
+                tabIndex={-1}
+              >
+                <OrgChart
+                  type={OrgChartType.DYNAMIC}
+                  context={OrgChartContext.WIZARD}
+                  setDepartmentId={setSelectedDepartment}
+                  onSelectedNodeIdsChange={(ids, elements) => {
+                    // console.log('elements: ', JSON.stringify(elements, null, 2));
+                    setSelectedPositionId(ids.length > 0 ? ids[0] : undefined);
+                    setOrgChartData(elements);
+                  }}
+                  departmentId={selectedDepartment}
+                  departmentIdIsLoading={isFetchingUserProfile}
+                  targetId={selectedPositionId ?? profileData?.profile.position_id}
+                  wrapProvider={false}
+                  // wizardNextHandler={next}
+                />
+              </div>
+              {
+                currentView !== 'chart' && (
+                  <TreeOrgChart
+                    departmentIdIsLoading={isFetchingUserProfile}
+                    departmentId={selectedDepartment ?? ''}
+                    isHorizontal={horizontal}
+                    searchTerm={searchTerm}
+                    source={'wizard'}
+                    onSelectedPositionIdChange={(positionId: string | null) => {
+                      setSelectedPositionId(positionId);
+                      const elements = { edges: getEdges(), nodes: getNodes() };
+                      // console.log('elements: ', JSON.stringify(elements, null, 2));
+                      setOrgChartData(elements);
+                    }}
+                  />
+                )
+                // 022-2801
+              }
+            </>
+          </TreeChartSearchProvider>
         )}
       </div>
     </WizardPageWrapper>

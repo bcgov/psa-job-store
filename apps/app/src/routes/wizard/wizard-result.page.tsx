@@ -4,13 +4,19 @@ import {
   CheckCircleOutlined,
   EllipsisOutlined,
   ExclamationCircleFilled,
+  ExclamationCircleOutlined,
+  MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Popover, Result, Row, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Switch, Typography } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
+import { Divider } from 'antd/lib';
+import { autolayout, updateSupervisorAndAddNewPositionNode } from 'common-kit';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useReactFlow } from 'reactflow';
+import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import {
   GetPositionRequestResponseContent,
@@ -20,6 +26,9 @@ import {
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import ContentWrapper from '../home/components/content-wrapper.component';
+import { OrgChart } from '../org-chart/components/org-chart';
+import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
+import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import CommentsList from './components/comments-list.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -58,7 +67,12 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   const [mode, setMode] = useState('');
   const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
-  const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData } = useWizardContext();
+  const [confirmation, setConfirmation] = useState<boolean>(false);
+  const [orgChartDataForPng, setOrgChartDataForPng] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData, getClassificationById } =
+    useWizardContext();
+  const { getNodes } = useReactFlow();
 
   // const {
   //   data: positionRequestData,
@@ -76,9 +90,14 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     // isError: positionNeedsRivewError,
     refetch: refetchPositionNeedsRivew,
     isFetching: isFetchingPositionNeedsRivew,
-  } = usePositionNeedsRivewQuery({
-    id: positionRequestId ?? -1,
-  });
+  } = usePositionNeedsRivewQuery(
+    {
+      id: positionRequestId ?? -1,
+    },
+    {
+      skip: !positionRequestId,
+    },
+  );
 
   useEffect(() => {
     // Fetch position request and needs review data when positionRequestId changes
@@ -161,8 +180,18 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   ]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isVerificationModalVisible, setIsVerificationModalVisible] = useState(false);
+
   // const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [submitPositionRequest, { isLoading: submitPositionRequestIsLoading }] = useSubmitPositionRequestMutation();
+
+  const showVerificationModal = async () => {
+    setIsVerificationModalVisible(true);
+  };
+
+  const handleVerificationCancel = () => {
+    setIsVerificationModalVisible(false);
+  };
 
   const showModal = async () => {
     setIsModalVisible(true);
@@ -187,28 +216,39 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       //   step: 6,
       // }).unwrap();
 
-      const result = await submitPositionRequest({
-        id: positionRequestId,
-        comment: comment,
-      }).unwrap();
+      setIsLoading(true);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // console.log('submitPositionRequest result: ', result);
-      // todo - change check for position_number
-      if (!result?.submitPositionRequest.id) throw new Error('API failure');
+        const png = await generatePNGBase64(getNodes);
+        const result = await submitPositionRequest({
+          id: positionRequestId,
+          comment: comment,
+          orgchart_png: png,
+        }).unwrap();
 
-      // if successfull, switch parent to readonly mode and show success message
-      // switchParentMode, switchParentReadonlyMode
-      if (result?.submitPositionRequest.status === 'COMPLETED') {
-        switchParentMode && switchParentMode('readonly');
-        switchParentReadonlyMode && switchParentReadonlyMode('completed');
-        setReadOnlySelectedTab && setReadOnlySelectedTab('4');
-      } else if (result?.submitPositionRequest.status === 'VERIFICATION') {
-        switchParentMode && switchParentMode('readonly');
-        switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
-        setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+        // console.log('submitPositionRequest result: ', result);
+        // todo - change check for position_number
+        if (!result?.submitPositionRequest.id) throw new Error('API failure');
+
+        // if successfull, switch parent to readonly mode and show success message
+        // switchParentMode, switchParentReadonlyMode
+        if (result?.submitPositionRequest.status === 'COMPLETED') {
+          switchParentMode && switchParentMode('readonly');
+          switchParentReadonlyMode && switchParentReadonlyMode('completed');
+          setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+        } else if (result?.submitPositionRequest.status === 'VERIFICATION') {
+          switchParentMode && switchParentMode('readonly');
+          switchParentReadonlyMode && switchParentReadonlyMode('sentForVerification');
+          setReadOnlySelectedTab && setReadOnlySelectedTab('4');
+        }
+
+        setPositionRequestData(result?.submitPositionRequest ?? null);
+      } catch (error) {
+        console.error('Error submitting position request: ', error);
+      } finally {
+        setIsLoading(false);
       }
-
-      setPositionRequestData(result?.submitPositionRequest ?? null);
     } else {
       throw Error('Position request not found');
     }
@@ -221,7 +261,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
 
   const handleVerificationClick = (reason: string) => {
-    setStep && setStep(2, reason);
+    setStep && setStep(3, reason);
     setCurrentSection(reason);
   };
 
@@ -241,7 +281,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
   const getMenuContent = () => {
     return (
-      <Menu>
+      <Menu className="wizard-menu">
         <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
           <div style={{ padding: '5px 0' }}>
             Save and quit
@@ -285,7 +325,38 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       });
   };
 
-  if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew) return <LoadingSpinnerWithMessage />;
+  useEffect(() => {
+    if (positionRequest) {
+      // console.log(
+      //   'positionRequest?.classification_id for getClassificationById : ',
+      //   positionRequest?.classification_id,
+      //   positionRequest,
+      // );
+      const classification = getClassificationById(positionRequest?.classification_id ?? '');
+      // console.log('classification: ', classification);
+
+      // const { data: departmentData } = useGetDepartmentQuery(positionRequest?.department_id);
+      let orgChartDataForPng = JSON.parse(JSON.stringify(positionRequest?.orgchart_json));
+      orgChartDataForPng = updateSupervisorAndAddNewPositionNode(
+        orgChartDataForPng.edges,
+        orgChartDataForPng.nodes,
+        positionRequest?.additional_info?.excluded_mgr_position_number ?? '',
+        positionRequest?.reports_to_position_id,
+        '000000',
+        positionRequest?.title,
+        classification,
+        { id: positionRequest?.department_id, organization_id: '', name: '' },
+      );
+      setOrgChartDataForPng(autolayout(orgChartDataForPng));
+    }
+  }, [positionRequest, setOrgChartDataForPng, getClassificationById]);
+
+  // augment data the way it's done upon submission for position creation, e.g.
+  // - update supervisor and excluded manager nodes
+  // - add node for new position
+
+  if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew || !orgChartDataForPng)
+    return <LoadingSpinnerWithMessage />;
 
   return (
     <>
@@ -313,20 +384,32 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             <div style={{ marginRight: '1rem' }}>
               <StatusIndicator status={positionRequest?.status ?? ''} />
             </div>,
-            <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
-              <Button icon={<EllipsisOutlined />}></Button>
-            </Popover>,
+            <AcessiblePopoverMenu
+              triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+              content={getMenuContent()}
+              ariaLabel="Open position request menu"
+            ></AcessiblePopoverMenu>,
             <Button onClick={back} key="back" data-testid="back-button">
               Back
             </Button>,
             <>
               {mode === 'readyToCreatePositionNumber' && (
-                <Button onClick={showModal} key="back" type="primary" loading={submitPositionRequestIsLoading}>
+                <Button
+                  onClick={showModal}
+                  key="back"
+                  type="primary"
+                  loading={submitPositionRequestIsLoading || isLoading}
+                >
                   Generate position number
                 </Button>
               )}
               {(mode === 'verificationRequired_edits' || mode === 'verificationRequired_retry') && (
-                <Button key="back" type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
+                <Button
+                  key="back"
+                  type="primary"
+                  onClick={handleOk}
+                  loading={submitPositionRequestIsLoading || isLoading}
+                >
                   Submit for verification
                 </Button>
               )}
@@ -338,6 +421,17 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             current={5}
             maxStepCompleted={positionRequest?.max_step_completed}
           ></WizardSteps>
+          {/* Invisible org chart so we can generate a png image to attach with the submission to CRM */}
+          <div style={{ height: '1px', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ height: '400px', width: '100%', position: 'absolute', top: 0, left: 0 }}>
+              <OrgChart
+                type={OrgChartType.READONLY}
+                departmentId={positionRequest?.department_id ?? ''}
+                elements={orgChartDataForPng}
+                wrapProvider={false}
+              />
+            </div>
+          </div>
 
           <div
             style={{
@@ -374,7 +468,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         <Button
                           type="primary"
                           onClick={showModal}
-                          loading={submitPositionRequestIsLoading}
+                          loading={submitPositionRequestIsLoading || isLoading}
                           data-testid="generate-position-button"
                         >
                           Generate position number
@@ -529,11 +623,36 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       </Form.Item>
                       <Button
                         type="primary"
-                        onClick={handleOk}
-                        loading={submitPositionRequestIsLoading}
+                        onClick={showVerificationModal}
+                        loading={submitPositionRequestIsLoading || isLoading}
                         data-testid="submit-for-verification-button"
                       >
                         Submit for verification
+                      </Button>
+                      <Divider />
+                      <h3>Get support</h3>
+                      <Typography.Paragraph>
+                        Get advice from the classification services team before sending the request for verification.
+                        The classification services team will contact you via email after they have reviewed the
+                        request.
+                      </Typography.Paragraph>
+                      <Button
+                        type="dashed"
+                        icon={<MailOutlined />}
+                        onClick={() => {
+                          const subject = encodeURIComponent('Support Request');
+                          const body = encodeURIComponent(
+                            `Hello, \n\n` +
+                              `I need assistance with my position request.\n\n` +
+                              `Please review the details at this link (do not share this link):\n` +
+                              `${window.location.origin}/my-position-requests/share/${positionRequest?.shareUUID}`,
+                          );
+                          window.location.href = `mailto:${
+                            import.meta.env.VITE_SUPPORT_EMAIL
+                          }?subject=${subject}&body=${body}`;
+                        }}
+                      >
+                        Get support
                       </Button>
                     </Card>
                     <Card
@@ -624,7 +743,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                           <CommentsList positionRequestId={positionRequestId ?? -1} />
                         </>
                       </Form.Item>
-                      <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading}>
+                      <Button type="primary" onClick={handleOk} loading={submitPositionRequestIsLoading || isLoading}>
                         Re-submit for verification
                       </Button>
                     </Card>
@@ -725,7 +844,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             )}
 
             <Modal
-              title="Affirmation"
+              title={<div style={{ fontWeight: 600, fontSize: '16px' }}>Affirmation</div>}
               open={isModalVisible}
               onOk={handleOk}
               onCancel={handleCancel}
@@ -737,13 +856,37 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   key="submit"
                   type="primary"
                   onClick={handleOk}
-                  loading={submitPositionRequestIsLoading}
+                  disabled={!confirmation}
+                  loading={submitPositionRequestIsLoading || isLoading}
                   data-testid="confirm-modal-ok"
                 >
                   Generate position number
                 </Button>,
               ]}
             >
+              <Divider></Divider>
+              <b>Confirmation</b>
+              <div style={{ paddingBottom: '10px' }}>
+                <Row>
+                  <Col span={2}>
+                    <Switch
+                      size="small"
+                      aria-labelledby="confirmation-label-id"
+                      data-testid="confirmation-switch"
+                      checked={confirmation}
+                      onChange={(newValue: boolean | ((prevState: boolean) => boolean)) => {
+                        setConfirmation(newValue);
+                      }}
+                    />
+                  </Col>
+                  <Col span={22}>
+                    <span id="confirmation-label-id">
+                      I confirm that I have received executive approval (Deputy Minister or delegate) for this new
+                      position.
+                    </span>
+                  </Col>
+                </Row>
+              </div>
               <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                 <div>
                   <b>By clicking “Generate position number” I affirm that:</b>
@@ -774,6 +917,42 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       related to this position.
                     </li>
                   </ul>
+                </div>
+              </div>
+            </Modal>
+
+            <Modal
+              title={
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: '8px', fontSize: '22px' }} />
+                  <span>Submit for verification?</span>
+                </div>
+              }
+              open={isVerificationModalVisible}
+              onOk={handleOk}
+              onCancel={handleVerificationCancel}
+              footer={[
+                <Button key="back" onClick={handleVerificationCancel}>
+                  Cancel
+                </Button>,
+                <Button
+                  key="submit"
+                  type="primary"
+                  onClick={() => {
+                    setIsVerificationModalVisible(false);
+                    handleOk();
+                  }}
+                  loading={submitPositionRequestIsLoading || isLoading}
+                  data-testid="confirm-modal-ok"
+                >
+                  Submit for verification
+                </Button>,
+              ]}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                <div>
+                  Once submitted, you won’t be able to cancel the request from the job store. Are you sure you wish to
+                  proceed?
                 </div>
               </div>
             </Modal>

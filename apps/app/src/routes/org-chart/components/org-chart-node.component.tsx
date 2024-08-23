@@ -70,7 +70,27 @@ export const OrgChartNode = ({
   return (
     <>
       <Handle type="target" position={targetPosition} isConnectable={isConnectable} />
-      <div>
+      <div
+        tabIndex={0}
+        aria-label={`
+        Level ${data.level}.
+        ${
+          positionIsVacant
+            ? 'Vacant position'
+            : `${data.employees[0].name}${data.employees.length > 1 ? ` and ${data.employees.length - 1} others` : ''}`
+        }. 
+      ${data.classification?.code} ${data.title}. 
+      ${data.directReports ? `${data.directReports} direct reports.` : 'No direct reports'}
+      Position Number: ${renderPositionNumber(roles, data)}. 
+      Department ID: ${data.department?.id}. 
+      ${data.isExcludedManager ? 'Excluded Manager. ' : ''}
+      ${data.isSupervisor ? 'Supervisor. ' : ''}
+      ${data.isNewPosition ? 'New Position. ' : ''}
+    `
+          .trim()
+          .replace(/\s+/g, ' ')}
+        id={`node-${data.id}`}
+      >
         <Card
           actions={
             selected && orgChartType === OrgChartType.DYNAMIC
@@ -87,7 +107,17 @@ export const OrgChartNode = ({
               : undefined
           }
           title={
-            <Tooltip title={data.title}>
+            // Link for dragon naturally speaking targetting
+            <a
+              tabIndex={-1}
+              role="link"
+              style={{
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+              onClick={(e) => e.preventDefault()}
+              title={(positionIsVacant ? 'Vacant position' : data.employees[0].name) + ' - ' + data.title}
+            >
               <Text
                 style={{
                   color:
@@ -96,7 +126,7 @@ export const OrgChartNode = ({
               >
                 {data.title}
               </Text>
-            </Tooltip>
+            </a>
           }
           extra={
             <Text

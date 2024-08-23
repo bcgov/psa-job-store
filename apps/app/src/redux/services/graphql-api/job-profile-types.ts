@@ -73,11 +73,6 @@ export interface JobProfilesDraftsCareerGroupsResponse {
   }[];
 }
 
-export interface ContextModel {
-  id: number;
-  description: string;
-}
-
 export interface GetClassificationsResponse {
   classifications: ClassificationModel[];
 }
@@ -139,7 +134,7 @@ export interface JobProfileModel {
   jobFamilies: JobFamily[];
   title: string | TrackedFieldArrayItem;
   number: number;
-  context: ContextModel | string;
+  context: string;
   overview: string | TrackedFieldArrayItem;
   type: string;
   role: { id: number; name?: string };
@@ -180,19 +175,24 @@ export interface JobProfileModel {
   all_reports_to: boolean;
   state?: string;
   is_archived?: boolean;
-  original_profile_json?: JobProfileModel;
-  version?: number;
-  current_version: boolean;
+  version: number;
+}
+
+export interface IdVersion {
+  id: number;
+  version: number;
 }
 export interface JobProfileMetaModel {
-  id: string;
-  version: string;
-  updated_at: string;
-  updated_by: string;
-  created_at: string;
-  owner: string;
-  published_at: string;
-  published_by: string;
+  totalViews: number;
+  firstPublishedBy: {
+    date: string | null;
+    user: string | null;
+  };
+  firstCreatedBy: {
+    date: string | null;
+    owner: string | null;
+  };
+  versions: Array<IdVersion>;
 }
 
 export interface ProfessionsModel {
@@ -400,6 +400,10 @@ export interface CreateJobProfileInput {
   id?: number;
 }
 
+export interface updateJobProfileViewCountInput {
+  //jobProfileId, addViews
+  jobProfiles: number[];
+}
 export interface CreateJobProfileResponse {
   createOrUpdateJobProfile: {
     id: number;
@@ -442,7 +446,7 @@ export interface GetJobProfilesResponse {
 }
 
 export interface GetJobProfileMetaResponse {
-  jobProfileMeta: JobProfileMetaModel[];
+  jobProfileMeta: JobProfileMetaModel;
 }
 
 export interface GetJobProfilesDraftsResponse {
