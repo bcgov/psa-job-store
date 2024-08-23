@@ -676,7 +676,6 @@ export const PositionRequestPage = () => {
                 </DownloadJobProfileComponent>
               ),
             ]}
-            spaceSize="small"
             hpad={false}
             additionalBreadcrumb={{
               title:

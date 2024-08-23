@@ -24,12 +24,6 @@ const NewHomePage = () => {
   const renderHomePageForRole = useMemo(() => {
     if (roles.includes('super-admin')) {
       return <SuperAdminHomePage />;
-    } else if (roles.includes('total-compensation')) {
-      return <DefaultHomePage />;
-    } else if (roles.includes('classification')) {
-      return <DefaultHomePage />;
-    } else if (roles.includes('hiring-manager')) {
-      return <DefaultHomePage />;
     } else {
       return <DefaultHomePage />;
     }
