@@ -18,6 +18,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
 import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -33,7 +34,6 @@ import CommentsList from './components/comments-list.component';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
-import ContentWrapper from '../../components/content-wrapper.component';
 
 interface WizardResultPageProps {
   onBack?: () => void;
@@ -645,7 +645,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                             `Hello, \n\n` +
                               `I need assistance with my position request.\n\n` +
                               `Please review the details at this link (do not share this link):\n` +
-                              `${window.location.origin}/my-position-requests/share/${positionRequest?.shareUUID}`,
+                              `${window.location.origin}/requests/positions/share/${positionRequest?.shareUUID}`,
                           );
                           window.location.href = `mailto:${
                             import.meta.env.VITE_SUPPORT_EMAIL

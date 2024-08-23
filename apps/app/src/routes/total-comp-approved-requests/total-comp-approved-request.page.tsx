@@ -250,7 +250,7 @@ export const TotalCompApprovedRequestPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
-    const linkToCopy = `${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
@@ -458,7 +458,7 @@ export const TotalCompApprovedRequestPage = () => {
                             <strong>Invite others to review</strong>
                             <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                             <Space>
-                              <Text>{`${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`}</Text>
+                              <Text>{`${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`}</Text>
                               <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                                 Copy URL
                               </Button>
@@ -477,7 +477,7 @@ export const TotalCompApprovedRequestPage = () => {
                         <div>
                           <Text strong>View all approved requests</Text>
                           <p>View all approved requests in JobStore.</p>
-                          <Link to="/approved-requests">
+                          <Link to="/requests/positions/manage/approved">
                             <Button>Go to Approved requests</Button>
                           </Link>
                         </div>

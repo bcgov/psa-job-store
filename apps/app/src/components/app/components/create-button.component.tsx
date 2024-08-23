@@ -17,7 +17,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
       ...(userCanAccess(auth.user, ['hiring-manager'])
         ? [
             createMenuItem({
-              key: '/next/requests/positions/create',
+              key: '/requests/positions/create',
               icon: <PositionRequestOutlined />,
               label: 'New position',
               title: '',
@@ -27,7 +27,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
       ...(userCanAccess(auth.user, ['total-compensation'])
         ? [
             createMenuItem({
-              key: '/next/job-profiles/manage/create',
+              key: '/job-profiles/manage/create',
               icon: <FileOutlined />,
               label: 'Job profile',
               title: '',

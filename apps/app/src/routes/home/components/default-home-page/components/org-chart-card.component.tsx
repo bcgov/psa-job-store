@@ -42,7 +42,7 @@ export const OrgChartCard = () => {
         }
         extra={
           <Space direction="horizontal">
-            <Link to="/next/my-departments">
+            <Link to="/my-departments">
               <Button type="link" style={{ padding: '0' }}>
                 View all organizations
               </Button>

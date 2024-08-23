@@ -16,6 +16,7 @@ import LoadingSpinnerWithMessage from '../../components/app/common/components/lo
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { OrgChart } from '../org-chart/components/org-chart';
@@ -24,7 +25,6 @@ import './classification-tasks.page.css';
 import { JobProfileWithDiff } from './components/job-profile-with-diff.component';
 import { NextSteps } from './components/next-steps';
 import { ServiceRequestDetails } from './components/service-request-details.component';
-import ContentWrapper from '../../components/content-wrapper.component';
 
 // import '../wizard/wizard-review.page.css';
 // import './total-comp-approved-request.page.css';
@@ -49,7 +49,7 @@ export const ClassificationTaskPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
-    const linkToCopy = `${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
@@ -184,7 +184,7 @@ export const ClassificationTaskPage = () => {
                           <strong>Invite others to review</strong>
                           <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                           <Space>
-                            <Text>{`${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`}</Text>
+                            <Text>{`${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`}</Text>
                             <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                               Copy URL
                             </Button>

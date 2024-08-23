@@ -274,12 +274,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   if (jobProfileData?.jobProfile.state === 'DRAFT') {
     if (jobProfileData?.jobProfile.is_archived === false) {
-      link = '/draft-job-profiles/';
+      link = '/job-profiles/manage/drafts/';
     } else {
-      link = '/archived-job-profiles/';
+      link = '/job-profiles/manage/published/';
     }
   } else {
-    link = '/published-job-profiles/';
+    link = '/job-profiles/manage/published/';
   }
   const handleCopyLink = () => {
     // Dynamically construct the link to include the current base URL
@@ -809,7 +809,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     if (
       pickerData?.requirementsWithoutReadOnly?.securityScreenings &&
       !autoSecuritySettingsSetup.current &&
-      location.pathname === '/draft-job-profiles/create'
+      location.pathname === '/job-profiles/manage/drafts/create'
     ) {
       const securityScreenings = pickerData.requirementsWithoutReadOnly.securityScreenings;
       const securityScreeningsWithoutFamilyStream = securityScreenings.filter(
@@ -1710,11 +1710,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         // saving as draft
         const newId = response.createOrUpdateJobProfile.toString();
         setId(newId);
-        navigate(`/draft-job-profiles/${newId}`); // Update the URL
+        navigate(`/job-profiles/manage/drafts/${newId}`); // Update the URL
       } else {
         // saving as published
         const newId = response.createOrUpdateJobProfile.toString();
-        navigate(`/published-job-profiles/${newId}`); // Update the URL
+        navigate(`/job-profiles/manage/published/${newId}`); // Update the URL
       }
 
       notification.success({
@@ -4642,7 +4642,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                       <Space.Compact style={{ width: '70%' }}>
                         <Input
                           readOnly
-                          value={`${window.location.origin}/published-job-profiles/${profileJson?.jobProfile.id}?version=${profileJson?.jobProfile.version}`}
+                          value={`${window.location.origin}/job-profiles/manage/published/${profileJson?.jobProfile.id}?version=${profileJson?.jobProfile.version}`}
                         ></Input>
                         <Button icon={<CopyOutlined />} onClick={handleCopyLink}>
                           Copy URL
@@ -4658,7 +4658,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Typography.Title level={5}>View all published profiles</Typography.Title>
                     <Typography.Text>View all published profiles that you have created.</Typography.Text>
                     <br></br>
-                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/published-job-profiles')}>
+                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/job-profiles/manage/published')}>
                       Go to published profiles
                     </Button>
                   </>
@@ -4669,7 +4669,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Typography.Title level={5}>View all profiles</Typography.Title>
                     <Typography.Text>View all profiles that you have created.</Typography.Text>
                     <br></br>
-                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/draft-job-profiles')}>
+                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/job-profiles/manage/drafts')}>
                       Go to drafts
                     </Button>
                   </>
@@ -5049,9 +5049,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     <>
       <PageHeader
         title={
-          location.pathname.startsWith('/draft-job-profiles') && title.trim() == ''
+          location.pathname.startsWith('/job-profiles/manage/drafts') && title.trim() == ''
             ? 'New profile'
-            : !location.pathname.startsWith('/draft-job-profiles') && title.trim() == ''
+            : !location.pathname.startsWith('/job-profiles/manage/drafts') && title.trim() == ''
               ? 'Untitled'
               : title
         }
@@ -5066,7 +5066,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         selectVersionCallback={(selectedVersion: IdVersion) => {
           setId(selectedVersion.id.toString());
           setVersion(selectedVersion.version.toString());
-          navigate('/published-job-profiles/' + selectedVersion.id + '?version=' + selectedVersion.version);
+          navigate('/job-profiles/manage/published/' + selectedVersion.id + '?version=' + selectedVersion.version);
         }}
       />
 

@@ -119,7 +119,7 @@ export const PositionRequestPage = () => {
 
   const location = useLocation();
   // Determine if the current path is a shared URL
-  const isSharedRoute = location.pathname.includes('/my-position-requests/share/');
+  const isSharedRoute = location.pathname.includes('/requests/positions/share/');
 
   // position request id changed from what's being stored in the context,
   // clear context

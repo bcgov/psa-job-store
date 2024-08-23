@@ -94,8 +94,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
   const [hasSearched, setHasSearched] = useState(false);
 
-  const next = location.pathname.includes('next') ? 'next' : '';
-
   const getSortOrder = (fieldName: string): SortOrder | undefined => {
     // console.log('getSortOrder: ', fieldName, sortField, sortOrder);
     if (sortField === fieldName) {
@@ -138,7 +136,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const handleCopyLink = (record: any) => {
     // shareUUID
     // Dynamically construct the link to include the current base URL
-    const linkToCopy = `${window.location.origin}/my-position-requests/share/${record.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/requests/positions/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     // if (import.meta.env.VITE_TEST_ENV !== 'true')
@@ -160,15 +158,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   key="edit"
                   icon={<EditOutlined aria-hidden />}
                   data-testid="menu-option-edit"
-                  onClick={() => navigate(`/my-position-requests/${record.id}`)}
+                  onClick={() => navigate(`/requests/positions/${record.id}`)}
                 >
-                  <Link
-                    to={
-                      next.length > 0 ? `/next/requests/positions/${record.id}` : `/my-position-requests/${record.id}`
-                    }
-                  >
-                    Edit
-                  </Link>
+                  <Link to={`/requests/positions/${record.id}`}>Edit</Link>
                 </Menu.Item>
                 <Menu.Item
                   key="copy"
@@ -195,18 +187,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   data-testid="menu-option-view"
                   key="view"
                   icon={<EyeOutlined aria-hidden />}
-                  onClick={() =>
-                    navigate(
-                      next.length > 0 ? `/next/requests/positions/${record.id}` : `/my-position-requests/${record.id}`,
-                    )
-                  }
+                  onClick={() => navigate(`/requests/positions/${record.id}`)}
                 >
-                  <Link
-                    data-testid="view-link"
-                    to={
-                      next.length > 0 ? `/next/requests/positions/${record.id}` : `/my-position-requests/${record.id}`
-                    }
-                  >
+                  <Link data-testid="view-link" to={`/requests/positions/${record.id}`}>
                     View
                   </Link>
                 </Menu.Item>
@@ -233,19 +216,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   data-testid="menu-option-view"
                   key="view"
                   icon={<EyeOutlined aria-hidden />}
-                  onClick={() =>
-                    navigate(
-                      next.length > 0 ? `/next/requests/positions/${record.id}` : `/my-position-requests/${record.id}`,
-                    )
-                  }
+                  onClick={() => navigate(`/requests/positions/${record.id}`)}
                 >
-                  <Link
-                    to={
-                      next.length > 0 ? `/next/requests/positions/${record.id}` : `/my-position-requests/${record.id}`
-                    }
-                  >
-                    View
-                  </Link>
+                  <Link to={`/requests/positions/${record.id}`}>View</Link>
                 </Menu.Item>
                 <Menu.Item
                   key="copy"
@@ -269,7 +242,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               data-testid="menu-option-view"
               key="view"
               icon={<EyeOutlined aria-hidden />}
-              onClick={() => navigate(`/my-position-requests/${record.id}`)}
+              onClick={() => navigate(`/requests/positions/${record.id}`)}
             >
               View
             </Menu.Item>
@@ -293,7 +266,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               data-testid="menu-option-view"
               key="view"
               icon={<EyeOutlined aria-hidden />}
-              onClick={() => navigate(`/my-position-requests/${record.id}`)}
+              onClick={() => navigate(`/requests/positions/${record.id}`)}
             >
               View
             </Menu.Item>
@@ -326,32 +299,19 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
         const renderText = text || 'New position';
         if (mode == null)
           return (
-            <Link
-              to={next.length > 0 ? `/next/requests/positions/${record.id}` : `/my-position-requests/${record.id}`}
-              data-testid={`job-position-${record.id}`}
-            >
+            <Link to={`/requests/positions/${record.id}`} data-testid={`job-position-${record.id}`}>
               <div data-testid="job-title">{renderText}</div>
             </Link>
           );
         else if (mode == 'total-compensation') {
           return (
-            <Link
-              to={
-                next.length > 0
-                  ? `/next/requests/positions/manage/approved/${record.id}`
-                  : `/approved-requests/${record.id}`
-              }
-            >
+            <Link to={`/requests/positions/manage/approved/${record.id}`}>
               <div data-testid="job-title">{renderText}</div>
             </Link>
           );
         } else if (mode == 'classification') {
           return (
-            <Link
-              to={
-                next.length > 0 ? `/next/requests/positions/manage/${record.id}` : `/classification-tasks/${record.id}`
-              }
-            >
+            <Link to={`/requests/positions/manage/${record.id}`}>
               <div data-testid="job-title">{renderText}</div>
             </Link>
           );
@@ -908,7 +868,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                     <img src={EmptyJobPositionGraphic} alt="No positions" />
                     <div>New to the JobStore?</div>
                     {/* Link button to the orgchart page */}
-                    <Link to={next.length > 0 ? '/next/requests/positions/create' : '/my-position-requests/create'}>
+                    <Link to={'/requests/positions/create'}>
                       <Button type="primary" style={{ marginTop: '1rem' }}>
                         Create new position
                       </Button>
