@@ -1,5 +1,4 @@
-import { SearchOutlined } from '@ant-design/icons';
-import { AutoComplete, Button, Input, Space } from 'antd';
+import { AutoComplete, Input, Space } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 
 export interface SearchResult {
@@ -43,6 +42,7 @@ export const PositionSearch = ({
   }, [searchTermFromProps]);
 
   const handleSearch = (value: string) => {
+    console.log('handleSearch: ', value);
     onSearch(value, { source: 'input' });
     setLastSearchedTerm(value);
   };
@@ -54,6 +54,7 @@ export const PositionSearch = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
+      console.log('escape key pressed, blur');
       e.preventDefault();
       autoCompleteRef.current?.blur();
     }
@@ -88,8 +89,6 @@ export const PositionSearch = ({
           disabled={disabled}
           open={shouldShowOptions}
           id="org-chart-search-input"
-          onFocus={() => setIsInputFocused(true)}
-          onBlur={() => setIsInputFocused(false)}
         >
           <Input.Search
             placeholder="Search by Position Number, Title, or Employee Name"
@@ -97,11 +96,24 @@ export const PositionSearch = ({
             disabled={disabled}
             loading={disabled}
             addonBefore="Search"
-            enterButton={
-              <Button id="org-chart-search-button" icon={<SearchOutlined aria-hidden />} aria-label="Search"></Button>
-            }
+            // enterButton={
+            //   <Button
+            //     id="org-chart-search-button"
+            //     icon={<SearchOutlined aria-hidden />}
+            //     aria-label="Search"
+            //     onClick={handleButtonClick}
+            //   ></Button>
+            // }
             allowClear
             onKeyDown={handleKeyDown}
+            onFocus={() => {
+              console.log('onFocus');
+              setIsInputFocused(true);
+            }}
+            onBlur={() => {
+              console.log('onBlur');
+              setIsInputFocused(false);
+            }}
           />
         </AutoComplete>
         {searchTermFromProps != null && searchResultsCount != null && (

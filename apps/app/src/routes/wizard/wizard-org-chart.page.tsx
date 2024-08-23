@@ -179,7 +179,10 @@ export const WizardOrgChartPage = ({
     setSearchTerm(value);
   }, []);
 
-  if (locationProcessed === false) {
+  // ensure that position request and profile data are loaded to prevent race condition
+  // for what node to select when org chart loads: targetId={selectedPositionId ?? profileData?.profile.position_id}
+  // selectedPositionId is sourced from positionRequest data, which will always be defined when this component renders
+  if (locationProcessed === false || !profileData?.profile) {
     return <LoadingComponent />;
   }
 
