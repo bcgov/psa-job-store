@@ -12,20 +12,16 @@ const JobProfileViewCounter: React.FC<JobProfileViewCounterProps> = ({ children,
   const [viewedJobProfiles, setViewedJobProfiles] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (viewedJobProfiles.size > 0) {
+    if (viewedJobProfiles.size > 0) {
+      const timeout = setTimeout(() => {
         updateJobProfileViewCount({ jobProfiles: Array.from(viewedJobProfiles) });
         setViewedJobProfiles(new Set());
-      }
-    }, 10000);
+      }, 3000);
 
-    return () => {
-      if (viewedJobProfiles.size > 0) {
-        updateJobProfileViewCount({ jobProfiles: Array.from(viewedJobProfiles) });
-        setViewedJobProfiles(new Set());
-      }
-      clearInterval(intervalId);
-    };
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
   }, [viewedJobProfiles, updateJobProfileViewCount]);
 
   const updateJobProfileViewCountCache = (profile: JobProfileModel) => {

@@ -1,10 +1,7 @@
 import { UserAddOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
-import { useState } from 'react';
-import { useReactFlow } from 'reactflow';
 import { PositionProvider, usePosition } from '../../../components/app/common/contexts/position.context';
 import { Elements } from '../interfaces/elements.interface';
-import { generatePNGBase64 } from './org-chart/download-button.component';
 
 const NaiveCreatePositionButton = ({
   departmentId,
@@ -13,8 +10,8 @@ const NaiveCreatePositionButton = ({
   supervisorId,
 }: CreatePositionButtonProps) => {
   const { createNewPosition } = usePosition();
-  const { getNodes } = useReactFlow();
-  const [isLoading, setIsLoading] = useState(false);
+  // const { getNodes } = useReactFlow();
+  // const [isLoading, setIsLoading] = useState(false);
 
   return (
     <Tooltip
@@ -23,27 +20,29 @@ const NaiveCreatePositionButton = ({
       <Button
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onClick={async () => {
-          setIsLoading(true);
+          // setIsLoading(true);
           try {
-            await new Promise((resolve) => setTimeout(resolve, 300));
-            const png = await generatePNGBase64(getNodes);
+            // await new Promise((resolve) => setTimeout(resolve, 300));
+            // const png = await generatePNGBase64(getNodes);
             await createNewPosition({
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               reportingPositionId: supervisorId as any,
               selectedDepartment: departmentId,
               orgChartData: elements,
-              svg: png,
+              // svg: png,
             });
           } finally {
-            setIsLoading(false);
+            // setIsLoading(false);
           }
         }}
+        id={`create-button-${supervisorId}`}
         disabled={positionIsVacant}
-        icon={<UserAddOutlined />}
+        icon={<UserAddOutlined aria-hidden />}
         data-testid="create-direct-report-button"
         style={{ borderRadius: 0, border: 'none', width: '100%' }}
         type="default"
-        loading={isLoading}
+        tabIndex={-1}
+        // loading={isLoading}
       >
         Create new direct report
       </Button>

@@ -1,4 +1,3 @@
-import { UseGuards } from '@nestjs/common';
 import { Args, Field, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { UUID } from 'crypto';
 import {
@@ -8,8 +7,6 @@ import {
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { AllowNoRoles } from '../auth/guards/role-global.guard';
-import { RoleGuard } from '../auth/guards/role.guard';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
   PositionRequestApiService,
@@ -88,8 +85,9 @@ export class PositionRequestApiResolver {
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: Express.User,
     @Args('comment', { nullable: true }) comment?: string,
+    @Args('orgchart_png', { nullable: true }) orgchart_png?: string,
   ) {
-    await this.positionRequestService.submitPositionRequest(id, comment, user.id);
+    await this.positionRequestService.submitPositionRequest(id, comment, user.id, orgchart_png);
 
     // this ensures that returned object is the same as the one returned by getPositionRequest
     return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
@@ -119,6 +117,7 @@ export class PositionRequestApiResolver {
     return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles);
   }
 
+  @Roles('classification', 'hiring-manager', 'total-compensation')
   @Query(() => [PositionRequest], { name: 'positionRequests' })
   async getPositionRequests(
     @CurrentUser() user: Express.User,
@@ -133,7 +132,6 @@ export class PositionRequestApiResolver {
   }
 
   @Query(() => PositionRequest, { name: 'sharedPositionRequest' })
-  @AllowNoRoles()
   async getSharedPositionRequest(@Args('uuid') uuid: string) {
     return this.positionRequestService.getSharedPositionRequest(uuid);
   }
@@ -161,28 +159,24 @@ export class PositionRequestApiResolver {
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestClassifications' })
   async getPositionRequestClassifications() {
     return this.positionRequestService.getPositionRequestClassifications();
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [Int], { name: 'positionRequestJobStoreNumbers' })
   async getPositionRequestJobStoreNumbers() {
     return this.positionRequestService.getPositionRequestJobStoreNumbers();
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [String], { name: 'positionRequestStatuses' })
   async getPositionRequestStatuses() {
     return this.positionRequestService.getPositionRequestStatuses();
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [UserBasicInfo], { name: 'positionRequestSubmittedBy' })
   async getpositionRequestSubmittedBy() {
     return this.positionRequestService.getPositionRequestSubmittedBy();

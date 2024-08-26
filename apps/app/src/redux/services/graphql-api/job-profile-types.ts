@@ -73,11 +73,6 @@ export interface JobProfilesDraftsCareerGroupsResponse {
   }[];
 }
 
-export interface ContextModel {
-  id: number;
-  description: string;
-}
-
 export interface GetClassificationsResponse {
   classifications: ClassificationModel[];
 }
@@ -139,7 +134,7 @@ export interface JobProfileModel {
   jobFamilies: JobFamily[];
   title: string | TrackedFieldArrayItem;
   number: number;
-  context: ContextModel | string;
+  context: string;
   overview: string | TrackedFieldArrayItem;
   type: string;
   role: { id: number; name?: string };
@@ -180,9 +175,12 @@ export interface JobProfileModel {
   all_reports_to: boolean;
   state?: string;
   is_archived?: boolean;
-  original_profile_json?: JobProfileModel;
-  version?: number;
-  current_version: boolean;
+  version: number;
+}
+
+export interface IdVersion {
+  id: number;
+  version: number;
 }
 export interface JobProfileMetaModel {
   totalViews: number;
@@ -194,10 +192,7 @@ export interface JobProfileMetaModel {
     date: string | null;
     owner: string | null;
   };
-  versions: Array<{
-    id: number;
-    version: string;
-  }>;
+  versions: Array<IdVersion>;
 }
 
 export interface ProfessionsModel {

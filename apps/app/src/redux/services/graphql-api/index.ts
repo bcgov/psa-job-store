@@ -135,6 +135,8 @@ export const graphqlApi = createApi({
     'getOrgChart',
     'jobProfiles',
     'importUserSearch',
+    'settingsDepartment',
+    'settingsDepartmentMetadata',
     'settingsUser',
     'settingsUserRoles',
   ],

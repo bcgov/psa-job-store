@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Empty, Pagination, Skeleton, Typography } from 'antd';
+import { useEffect } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import useAnnounce from '../../../components/app/common/hooks/announce';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { JobProfileCard } from './job-profile-card.component';
 import styles from './job-profile-search-results.module.css';
@@ -15,6 +18,7 @@ export interface JobProfileSearchResultsProps {
   pageSize: number;
   totalResults: number;
   onPageChange: (page: number, pageSize: number) => void;
+  isSearchingOrFiltering: boolean;
 }
 
 export const JobProfileSearchResults = ({
@@ -25,13 +29,14 @@ export const JobProfileSearchResults = ({
   pageSize,
   totalResults,
   onPageChange,
+  isSearchingOrFiltering,
 }: JobProfileSearchResultsProps) => {
   const isTestEnvironment = import.meta.env.VITE_TEST_ENV === 'true';
 
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
-  const isPositionRequestRoute = location.pathname.includes('/my-position-requests/');
+  const isPositionRequestRoute = location.pathname.includes('/requests/positions/');
   const { positionRequestId } = useParams<{ positionRequestId?: string }>();
 
   const getBasePath = (path: string) => {
@@ -50,29 +55,41 @@ export const JobProfileSearchResults = ({
     //   searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
     // }`
 
-    // Check if we're on /saved-profiles route
-    if (location.pathname.includes('/saved-profiles')) {
-      return `/saved-profiles/${profileNumber}`;
+    // Check if we're on /job-profiles/saved route
+    if (location.pathname.includes('/job-profiles/saved')) {
+      return `/job-profiles/saved/${profileNumber}`;
     }
 
-    // Check if we're on the position-request route
+    // Check if we're on the /requests/positions route
     const newSearchParams = new URLSearchParams(searchParams.toString());
     if (positionRequestId) {
       newSearchParams.set('selectedProfile', profileNumber.toString());
-      return `/my-position-requests/${positionRequestId}?${newSearchParams.toString()}`;
+      return `/requests/positions/${positionRequestId}?${newSearchParams.toString()}`;
     } else {
-      // If not on the position-request route, use the standard job-profiles path
+      // If not on the /requests/positions route, use the standard job-profiles path
       return `/job-profiles/${profileNumber}?${newSearchParams.toString()}`;
     }
   };
+
+  const { announce, announcement } = useAnnounce();
+  // console.log('isSearchingOrFiltering, isLoading: ', isSearchingOrFiltering, isLoading);
+  useEffect(() => {
+    if (isSearchingOrFiltering && !isLoading) {
+      // console.log('announce: ', totalResults);
+      announce(`${totalResults} results found.`);
+    }
+  }, [totalResults, announce, isSearchingOrFiltering, isLoading]);
 
   return (
     <div
       style={{ border: '1px solid #D9D9D9', borderRadius: '8px', background: 'white' }}
       role="region"
-      aria-label="job profiles list"
+      aria-label="job profiles"
       data-testid="job-profile-search-results"
     >
+      <div aria-live="polite" className="sr-only">
+        {announcement}
+      </div>
       <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0rem 1rem' }}>
         <h2 style={{ margin: '16px 0' }}>Job profiles</h2>
       </div>
@@ -90,10 +107,15 @@ export const JobProfileSearchResults = ({
       ) : data?.jobProfiles.length === 0 ? (
         <Empty data-testid="empty-state" style={{ margin: '1rem' }} />
       ) : (
-        <ul className={styles.job_profile_search_results_ul} data-cy="search-results-list" style={{ padding: '0' }}>
+        <ul
+          aria-label="list"
+          className={styles.job_profile_search_results_ul}
+          data-cy="search-results-list"
+          style={{ padding: '0' }}
+        >
           {(data?.jobProfiles ?? []).map((d) => (
             <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d)}>
-              <Link to={getLinkPath(d.number)} replace>
+              <Link to={getLinkPath(d.number)} replace tabIndex={-1}>
                 <JobProfileCard
                   data={d}
                   link={`${getBasePath(location.pathname)}/${d.number}${
@@ -106,6 +128,10 @@ export const JobProfileSearchResults = ({
         </ul>
       )}
       <Pagination
+        aria-label="Page navigation"
+        prevIcon={<LeftOutlined aria-label="Previous page" />}
+        nextIcon={<RightOutlined aria-label="Next page" />}
+        showTitle={true}
         data-testid="pagination"
         // have a hidden size changer for testing purposes
         // className="hideSizeChanger"

@@ -31,7 +31,9 @@ export const OrgChartPage = () => {
   // }, []);
 
   return (
-    <Content style={{ backgroundColor: '#FFF', display: 'flex', flex: '1 0 auto', flexDirection: 'column' }}>
+    <Content
+      style={{ backgroundColor: '#FFF', display: 'flex', flex: '1 0 auto', flexDirection: 'column', height: '100%' }}
+    >
       <TreeChartSearchProvider>
         <PageHeader
           title="My organizations"

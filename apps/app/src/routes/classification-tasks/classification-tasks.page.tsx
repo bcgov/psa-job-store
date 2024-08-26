@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
-import ContentWrapper from '../home/components/content-wrapper.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import MyPositionsTable from '../my-position-requests/components/my-position-requests-table.component';
 import { PositionRequestsSearch } from '../total-comp-approved-requests/components/position-requests-search.component';
 

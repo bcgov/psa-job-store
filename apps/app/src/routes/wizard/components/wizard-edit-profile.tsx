@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ExclamationCircleFilled, InfoCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Alert, Col, Descriptions, Form, Input, List, Row, Tooltip } from 'antd';
+import { Alert, Button, Col, Descriptions, Form, Input, List, Row, Tooltip } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -34,6 +34,7 @@ interface ConfigProps {
 
 interface WizardEditProfileProps {
   id?: string;
+  version?: string;
   profileData?: JobProfileModel | null;
   config?: ConfigProps;
   submitText?: string;
@@ -55,7 +56,10 @@ type sectionMap = {
 };
 
 const WizardEditProfile = forwardRef(
-  ({ id, profileData, config, onVerificationRequiredChange, handleFormChange }: WizardEditProfileProps, ref) => {
+  (
+    { id, version, profileData, config, onVerificationRequiredChange, handleFormChange }: WizardEditProfileProps,
+    ref,
+  ) => {
     const {
       originalValuesSet,
       setOriginalValuesSet,
@@ -91,6 +95,7 @@ const WizardEditProfile = forwardRef(
       originalBehaviouralCompetenciesFields,
       setOriginalBehaviouralCompetenciesFields,
       positionRequestProfileId,
+      positionRequestProfileVersion,
       // errors,
       currentSection,
       setCurrentSection,
@@ -146,7 +151,10 @@ const WizardEditProfile = forwardRef(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [acctSection.current]);
     // get original profile data for comparison to the edited state
-    const { data: originalProfileData } = useGetJobProfileQuery({ id: positionRequestProfileId ?? -1 });
+    const { data: originalProfileData } = useGetJobProfileQuery({
+      id: positionRequestProfileId ?? -1,
+      version: positionRequestProfileVersion ?? -1,
+    });
     const initialData = profileData ?? null;
     const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
     const [requiresVerification, setRequiresVerification] = useState(false);
@@ -169,11 +177,11 @@ const WizardEditProfile = forwardRef(
       // If profileData exists, use it to set the form state
       if (profileData) {
         setEffectiveData(profileData);
-      } else if (!profileData && id) {
+      } else if (!profileData && id && version) {
         // If no profileData is provided and an id exists, fetch the data
-        triggerGetJobProfile({ id: +id });
+        triggerGetJobProfile({ id: +id, version: +version });
       }
-    }, [id, profileData, triggerGetJobProfile]);
+    }, [id, profileData, triggerGetJobProfile, version]);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const useFormReturn = useForm<JobProfileValidationModel>({
@@ -201,11 +209,8 @@ const WizardEditProfile = forwardRef(
     useEffect(() => {
       if (!effectiveData) return;
 
-      const useProfile = effectiveData?.original_profile_json ?? effectiveData;
-
       // construct picklist data by looking at fields that are marked as editable + non-significant
 
-      console.log('useProfile: ', useProfile);
       const pickListData = {
         requirementsWithoutReadOnly: {
           professionalRegistrationRequirements: [] as { text: string }[],
@@ -215,7 +220,7 @@ const WizardEditProfile = forwardRef(
       };
 
       // professional registrations
-      const profRegs = useProfile.professional_registration_requirements;
+      const profRegs = effectiveData.professional_registration_requirements;
 
       profRegs?.forEach((profReg) => {
         const isSignificant = profReg.is_significant;
@@ -229,7 +234,7 @@ const WizardEditProfile = forwardRef(
       });
 
       // accountabilities
-      const accs = useProfile.accountabilities;
+      const accs = effectiveData.accountabilities;
 
       accs.forEach((acc) => {
         const isSignificant = acc.is_significant;
@@ -243,7 +248,7 @@ const WizardEditProfile = forwardRef(
       });
 
       // security screenings
-      const secs = useProfile.security_screenings;
+      const secs = effectiveData.security_screenings;
 
       secs.forEach((acc) => {
         const isSignificant = acc.is_significant;
@@ -573,8 +578,7 @@ const WizardEditProfile = forwardRef(
           id: effectiveData?.id,
           number: effectiveData?.number,
           title: getInitialValue(effectiveData.title),
-          context:
-            typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description,
+          context: typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context,
           overview: getInitialValue(effectiveData.overview),
           program_overview: getInitialValue(effectiveData.program_overview),
           classifications: classificationIds,
@@ -773,11 +777,7 @@ const WizardEditProfile = forwardRef(
               description={
                 <p
                   dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(
-                      typeof effectiveData?.context === 'string'
-                        ? effectiveData?.context
-                        : effectiveData?.context?.description ?? '',
-                    ),
+                    __html: DOMPurify.sanitize(effectiveData?.context ?? ''),
                   }}
                 ></p>
               }
@@ -790,11 +790,20 @@ const WizardEditProfile = forwardRef(
                 <div>
                   Job Details
                   <div style={{ float: 'right', fontSize: '90%' }}>
-                    <Tooltip title="Information shown here is dependent on the values that you selected in the previous steps.">
-                      <a href="#" style={{ marginLeft: 8 }}>
+                    <Tooltip
+                      trigger={['hover', 'focus']}
+                      title="Information shown here is dependent on the values that you selected in the previous steps."
+                      id="tooltip-info"
+                    >
+                      <Button
+                        type="link"
+                        role="button"
+                        aria-describedby="tooltip-info"
+                        aria-label="Why can't I make changes?"
+                      >
                         Why can't I make changes?
-                        <QuestionCircleOutlined style={{ marginLeft: 4 }} />
-                      </a>
+                        <QuestionCircleOutlined aria-hidden style={{ marginLeft: 4 }} />
+                      </Button>
                     </Tooltip>
                   </div>
                 </div>

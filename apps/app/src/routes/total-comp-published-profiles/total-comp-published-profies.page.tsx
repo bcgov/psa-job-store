@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
-import ContentWrapper from '../home/components/content-wrapper.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import { JobProfileSearch } from '../job-profiles/components/job-profile-search.component';
 import TotalCompProfilesTable from '../total-comp-draft-profiles/components/total-comp-draft-profiles-table.component';
 

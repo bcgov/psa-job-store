@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { CloseOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Row, Select, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
 import { useEffect, useState } from 'react';
@@ -7,8 +8,8 @@ import { useSearchParams } from 'react-router-dom';
 import '../../components/app/common/css/filtered-table.page.css';
 import '../../components/app/common/css/select-external-tags.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import MyPositionsTable from './components/my-position-requests-table.component';
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -344,6 +345,23 @@ export const MyPositionsPage = () => {
                     key={`${selection.type}-${selection.value}`}
                     closable
                     onClose={() => removeSelection(selection.value, selection.type)}
+                    closeIcon={
+                      <Button
+                        type="link"
+                        size="small"
+                        style={{ padding: '0', width: 'auto', height: 'auto' }}
+                        icon={
+                          <CloseOutlined aria-hidden style={{ fontSize: '0.7rem', color: 'rgba(0, 0, 0, 0.88)' }} />
+                        }
+                        aria-label={`Remove ${findLabel(selection.value, selection.type)} filter`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            removeSelection(selection.value, selection.type);
+                          }
+                        }}
+                      />
+                    }
                   >
                     {findLabel(selection.value, selection.type)}
                   </Tag>

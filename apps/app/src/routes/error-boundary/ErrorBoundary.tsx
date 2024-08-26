@@ -1,7 +1,7 @@
 import { Card, Col, Divider, Row, Typography } from 'antd';
 import { Component, ReactNode } from 'react';
 import { sendLogToServer } from '../../utils/logger-service.util';
-import ContentWrapper from '../home/components/content-wrapper.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 const { Title, Text } = Typography;
 
 interface ErrorBoundaryProps {

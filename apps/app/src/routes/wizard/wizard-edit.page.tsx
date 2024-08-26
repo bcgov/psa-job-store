@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Col, FormInstance, List, Menu, Modal, Popover, Row, Typography } from 'antd';
+import { Button, Col, FormInstance, List, Menu, Modal, Row, Typography } from 'antd';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingComponent from '../../components/app/common/components/loading.component';
-import { ClassificationModel, JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
+import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -41,8 +42,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   const {
     wizardData,
     setWizardData,
-    classificationsData,
+    getClassificationById,
     positionRequestProfileId,
+    positionRequestProfileVersion,
     positionRequestId,
     setRequiresVerification,
     setPositionRequestData,
@@ -59,22 +61,10 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
-  const profileId = positionRequestProfileId;
-
-  function getClassificationById(id: string): ClassificationModel | undefined {
-    // If data is loaded, find the classification by ID
-    // console.log('classificationsData: ', classificationsData, id);
-    if (classificationsData) {
-      return classificationsData.classifications.find(
-        (classification: ClassificationModel) => classification.id === id,
-      );
-    }
-    return;
-  }
-
   function transformFormData(originalData: any): JobProfileModel {
     return {
       id: originalData.id,
+      version: originalData.version,
       type: 'USER',
       title: originalData.title,
       number: originalData.number,
@@ -155,7 +145,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       all_reports_to: false,
       owner: originalData.owner,
       created_at: originalData.created_at,
-      current_version: originalData.current_version,
     };
   }
 
@@ -235,10 +224,10 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         if (positionRequestId) {
           const resp = await updatePositionRequest({
             id: positionRequestId,
-            step: !step && step != 0 ? (action === 'next' ? 3 : action === 'back' ? 1 : 2) : step,
+            step: !step && step != 0 ? (action === 'next' ? 4 : action === 'back' ? 2 : 3) : step,
             // increment max step only if it's not incremented
-            ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 3 && !step && step != 0
-              ? { max_step_completed: 3 }
+            ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 4 && !step && step != 0
+              ? { max_step_completed: 4 }
               : {}),
             profile_json: transformedData,
             title: formData.title.text,
@@ -405,9 +394,15 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         <div style={{ marginRight: '1rem' }}>
           <StatusIndicator status={positionRequest?.status ?? ''} />
         </div>,
-        <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
-          <Button icon={<EllipsisOutlined />}></Button>
-        </Popover>,
+
+        <AcessiblePopoverMenu
+          triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+          content={getMenuContent()}
+          ariaLabel="Open position request menu"
+        ></AcessiblePopoverMenu>,
+        // <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
+        //   <Button icon={<EllipsisOutlined />}></Button>
+        // </Popover>
         <Button onClick={onBackCallback} key="back" data-testid="back-button" loading={isLoadingBack}>
           Back
         </Button>,
@@ -425,7 +420,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       ]}
     >
       <WizardSteps
-        current={2}
+        current={3}
         onStepClick={switchStep}
         maxStepCompleted={positionRequest?.max_step_completed}
       ></WizardSteps>
@@ -455,7 +450,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
               onVerificationRequiredChange={setRequiresVerification}
               ref={wizardEditProfileRef}
               profileData={wizardData}
-              id={profileId?.toString()}
+              id={positionRequestProfileId?.toString()}
+              version={positionRequestProfileVersion?.toString()}
               submitText="Review Profile"
               showBackButton={true}
               handleFormChange={handleFormChange}

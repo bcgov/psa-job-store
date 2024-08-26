@@ -1,7 +1,8 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Menu, Modal, Popover, Typography } from 'antd';
+import { Button, Menu, Modal, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { useGetDepartmentQuery } from '../../redux/services/graphql-api/department.api';
@@ -38,6 +39,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   // const { id } = useParams();
   const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileVersion, setSelectedProfileVersion] = useState<string | null>(null);
   const [selectedProfileNumber, setSelectedProfileNumber] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | null>(null);
 
@@ -56,7 +58,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { setPositionRequestProfileId } = useWizardContext();
+  const { setPositionRequestProfileId, setPositionRequestProfileVersion } = useWizardContext();
   const navigate = useNavigate();
 
   // get organization for the department in which the position is being created in
@@ -77,7 +79,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   }, [positionRequestData, setSearchParams, searchParams]);
 
   const getBasePath = (path: string) => {
-    if (positionRequestId) return `/my-position-requests/${positionRequestId}`;
+    if (positionRequestId) return `/requests/positions/${positionRequestId}`;
 
     const pathParts = path.split('/');
     // Check if the last part is a number (ID), if so, remove it
@@ -165,12 +167,12 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
-      if (selectedProfileNumber && selectedProfileId) {
+      if (selectedProfileNumber && selectedProfileId && selectedProfileVersion) {
         if (positionRequestId) {
           if (state == 'CHANGED_PROFILE' || (state == 'NO_CHANGE' && switchStep)) {
             const resp = await updatePositionRequest({
               id: positionRequestId,
-              step: step == -1 ? (action === 'next' ? 2 : 1) : step,
+              step: step == -1 ? (action === 'next' ? 3 : 1) : step,
               // increment max step only if it's not incremented
               ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 2 && step == -1
                 ? { max_step_completed: 2 }
@@ -178,12 +180,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               // if user selected same profile as before, do not clear profile_json
               // also do not update title to default
               ...(positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
-                additional_info: null,
                 profile_json: null,
                 title: selectedProfileName ?? undefined,
                 max_step_completed: 2,
               }),
-              parent_job_profile: { connect: { id: parseInt(selectedProfileId) } },
+              parent_job_profile: {
+                connect: { id_version: { id: parseInt(selectedProfileId), version: parseInt(selectedProfileVersion) } },
+              },
               classification_id: selectedClassification?.id,
               classification_employee_group_id: selectedClassification?.employee_group_id,
               classification_peoplesoft_id: selectedClassification?.peoplesoft_id,
@@ -194,6 +197,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           }
         }
         setPositionRequestProfileId(parseInt(selectedProfileId));
+        setPositionRequestProfileVersion(parseInt(selectedProfileVersion));
 
         if (action === 'next') {
           if (onNext && switchStep) onNext();
@@ -214,6 +218,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       setSelectedProfileNumber(selectedProfile);
     } else {
       setSelectedProfileId(null);
+      setSelectedProfileVersion(null);
       setSelectedProfileNumber(null);
     }
   }, [searchParams]); // picks up profile id from search params
@@ -240,6 +245,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     // if there is a profile already associated with the position request, show a warning
     setSelectedProfileName(profile.title.toString());
     setSelectedProfileId(profile.id.toString());
+    setSelectedProfileVersion(profile.version.toString());
     setSelectedProfileNumber(profile.number.toString());
 
     if (profile?.classifications != null) {
@@ -353,9 +359,11 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       hpad={false}
       grayBg={false}
       pageHeaderExtra={[
-        <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
-          <Button icon={<EllipsisOutlined />}></Button>
-        </Popover>,
+        <AcessiblePopoverMenu
+          triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+          content={getMenuContent()}
+          ariaLabel="Open position request menu"
+        ></AcessiblePopoverMenu>,
         <Button onClick={back} key="back" data-testid="back-button">
           Back
         </Button>,
@@ -372,7 +380,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       ]}
     >
       <WizardSteps
-        current={1}
+        current={2}
         //  onStepClick={handleStepClick}
         //   hasUnsavedChanges={hasUnsavedChanges}
         maxStepCompleted={positionRequest?.max_step_completed}

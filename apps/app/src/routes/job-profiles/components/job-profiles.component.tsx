@@ -57,6 +57,9 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(page_size); // Default page size, adjust as needed
     const [totalResults, setTotalResults] = useState(0); // Total results count from API
+    const [isSearchingOrFiltering, setIsSearchingOrFiltering] = useState(false);
+    const [isLoadingCalcualted, setIsLoadingCalculated] = useState(false);
+
     const navigate = useNavigate();
     const { positionRequestId, number } = useParams();
     const params = useParams();
@@ -118,7 +121,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     const getBasePath = useCallback(
       (path: string) => {
-        if (positionRequestId) return `/my-position-requests/${positionRequestId}`;
+        if (positionRequestId) return `/requests/positions/${positionRequestId}`;
 
         const pathParts = path.split('/');
         // Check if the last part is a number (ID), if so, remove it
@@ -154,12 +157,18 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         return;
       }
 
+      // console.log('setUseData to null');
       setUseData(null);
       setInitialFetchDone(true);
 
       const filtersOrSearchApplied =
         organizationFilter || jobRoleFilter || classificationFilter || jobFamilyFilter || jobStreamFilter || search;
 
+      // console.log('filtersOrSearchApplied: ', filtersOrSearchApplied != null);
+      setIsSearchingOrFiltering(filtersOrSearchApplied != null);
+      if (filtersOrSearchApplied != null) {
+        setIsLoadingCalculated(true);
+      }
       // use reloaded the page while having fitlers or search applied
       // however we need to select the profile that was originally selected for this position request
       // (for case where user pressed "back" from edit page)
@@ -328,6 +337,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     // Update totalResults based on the response (if applicable)
     useEffect(() => {
       if (useData && useData.jobProfilesCount !== undefined) {
+        // console.log('updating count..: ', useData.jobProfilesCount);
         setTotalResults(useData.jobProfilesCount);
       }
       // if search params has selected profile, ensure we call back to parent
@@ -348,6 +358,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     useEffect(() => {
       if (data && !isFetching && !isLoading) {
+        // console.log('setting useData: ', data.jobProfilesCount);
         setUseData({
           jobProfiles: data.jobProfiles,
           jobProfilesCount: data.jobProfilesCount,
@@ -424,7 +435,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                 <Text>Choose a profile from the sidebar on the left.</Text>
               </Space>
             }
-            image={<FileTextFilled style={{ fontSize: '60pt', color: '#0057ad' }} />}
+            image={<FileTextFilled aria-hidden style={{ fontSize: '60pt', color: '#0057ad' }} />}
           />
         </div>
       );
@@ -434,6 +445,11 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const ministriesData = organizationFilterExtra && [
       { id: organizationFilterExtra.id, name: organizationFilterExtra.name },
     ];
+
+    useEffect(() => {
+      if (useData == null || positionFilteringProcessActive || isLoading || isFetching) setIsLoadingCalculated(true);
+      else setIsLoadingCalculated(false);
+    }, [useData, positionFilteringProcessActive, isLoading, isFetching]);
 
     return (
       <>
@@ -450,11 +466,12 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                   <JobProfileSearchResults
                     data={useData}
                     //  jobProfilesLoading || isLoading
-                    isLoading={useData == null || positionFilteringProcessActive}
+                    isLoading={isLoadingCalcualted}
                     currentPage={currentPage}
                     pageSize={5}
                     totalResults={totalResults}
                     onPageChange={handlePageChange}
+                    isSearchingOrFiltering={isSearchingOrFiltering}
                   />
                 </JobProfileViewCounter>
               </Col>
@@ -462,7 +479,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                 {renderJobProfile()}
               </Col>
             </>
-          ) : params.id ? (
+          ) : params.number ? (
             <Col span={24} role="region" aria-label="Selected job profile contents">
               {renderJobProfile()}
             </Col>
@@ -475,6 +492,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                 pageSize={pageSize}
                 totalResults={totalResults}
                 onPageChange={handlePageChange}
+                isSearchingOrFiltering={isSearchingOrFiltering}
               />
             </JobProfileViewCounter>
           )}

@@ -59,6 +59,7 @@ export const PositionRequestPage = () => {
     setWizardData,
     setPositionRequestId,
     setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
     setPositionRequestData,
     resetWizardContext,
@@ -118,7 +119,7 @@ export const PositionRequestPage = () => {
 
   const location = useLocation();
   // Determine if the current path is a shared URL
-  const isSharedRoute = location.pathname.includes('/my-position-requests/share/');
+  const isSharedRoute = location.pathname.includes('/requests/positions/share/');
 
   // position request id changed from what's being stored in the context,
   // clear context
@@ -176,6 +177,7 @@ export const PositionRequestPage = () => {
     setWizardData,
     setPositionRequestId,
     setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
     setPositionRequestData,
 
@@ -183,31 +185,38 @@ export const PositionRequestPage = () => {
   ]);
 
   useEffect(() => {
-    const step = wizardContextPositionRequestData?.step;
+    if (wizardContextPositionRequestData) {
+      const step = wizardContextPositionRequestData?.step;
 
-    if (step != null) {
-      setCurrentStep(step);
-    }
+      if (step != null) {
+        setCurrentStep(step);
+      }
 
-    if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: wizardContextPositionRequestData?.id });
+      //TODO
+      if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: wizardContextPositionRequestData?.id });
 
-    if (wizardContextPositionRequestData?.id) {
-      setPositionRequestId(wizardContextPositionRequestData?.id);
-    }
+      if (wizardContextPositionRequestData?.id) {
+        setPositionRequestId(wizardContextPositionRequestData?.id);
+      }
 
-    if (wizardContextPositionRequestData?.profile_json) setWizardData(wizardContextPositionRequestData?.profile_json);
+      if (wizardContextPositionRequestData?.profile_json) setWizardData(wizardContextPositionRequestData?.profile_json);
 
-    if (wizardContextPositionRequestData?.parent_job_profile_id)
-      setPositionRequestProfileId(wizardContextPositionRequestData?.parent_job_profile_id);
+      if (wizardContextPositionRequestData?.parent_job_profile_id)
+        setPositionRequestProfileId(wizardContextPositionRequestData?.parent_job_profile_id);
 
-    if (wizardContextPositionRequestData?.department_id) {
-      setPositionRequestDepartmentId(wizardContextPositionRequestData?.department_id);
+      if (wizardContextPositionRequestData?.parent_job_profile_version)
+        setPositionRequestProfileVersion(wizardContextPositionRequestData?.parent_job_profile_version);
+
+      if (wizardContextPositionRequestData?.department_id) {
+        setPositionRequestDepartmentId(wizardContextPositionRequestData?.department_id);
+      }
     }
   }, [
     wizardContextPositionRequestData,
     setPositionRequestId,
     setWizardData,
     setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
     triggerPositionNeedsReviewQuery,
   ]);
@@ -266,7 +275,7 @@ export const PositionRequestPage = () => {
         );
       case 1:
         return (
-          <WizardPage
+          <WizardConfirmDetailsPage
             setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
@@ -275,6 +284,17 @@ export const PositionRequestPage = () => {
           />
         );
       case 2:
+        return (
+          <WizardPage
+            setCurrentStep={setCurrentStep}
+            onNext={onNext}
+            onBack={onBack}
+            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
+            positionRequest={wizardContextPositionRequestData}
+          />
+        );
+
+      case 3:
         return (
           <WizardEditPage
             setCurrentStep={setCurrentStep}
@@ -285,7 +305,7 @@ export const PositionRequestPage = () => {
           />
         );
 
-      case 3:
+      case 4:
         return (
           <WizardReviewPage
             setCurrentStep={setCurrentStep}
@@ -295,16 +315,7 @@ export const PositionRequestPage = () => {
             positionRequest={wizardContextPositionRequestData}
           />
         );
-      case 4:
-        return (
-          <WizardConfirmDetailsPage
-            setCurrentStep={setCurrentStep}
-            onNext={onNext}
-            onBack={onBack}
-            disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
-            positionRequest={wizardContextPositionRequestData}
-          />
-        );
+
       case 5:
         return (
           <WizardResultPage
@@ -358,7 +369,11 @@ export const PositionRequestPage = () => {
             key: '3',
             label: 'Job Profile',
             children: (
-              <JobProfileWithDiff positionRequestData={{ positionRequest: wizardContextPositionRequestData }} />
+              <JobProfileWithDiff
+                positionRequestData={{ positionRequest: wizardContextPositionRequestData }}
+                rowProps={{ justify: 'center' }}
+                colProps={{ xs: 24, sm: 24, md: 24, lg: 20, xl: 16 }}
+              />
             ),
           },
         ]
@@ -619,7 +634,7 @@ export const PositionRequestPage = () => {
       : []),
   ];
 
-  if (classificationsDataLoading) return <LoadingSpinnerWithMessage />;
+  if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
 
   return (
     <>
@@ -661,7 +676,6 @@ export const PositionRequestPage = () => {
                 </DownloadJobProfileComponent>
               ),
             ]}
-            spaceSize="small"
             hpad={false}
             additionalBreadcrumb={{
               title:

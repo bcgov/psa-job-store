@@ -28,7 +28,7 @@ When('the user presses "Create new direct report" on the home page org chart', (
 Then('they are taken to the job profile selection step', () => {
   // Check if the URL is correct
   // The URL pattern should match /position-request/{id}
-  cy.url().should('match', /\/my-position-requests\/\d+/);
+  cy.url().should('match', /\/requests\/positions\/\d+/);
 
   // Check for a unique element on the job profile selection page
   // Replace 'unique-element-selector' with an actual selector for an element unique to this page

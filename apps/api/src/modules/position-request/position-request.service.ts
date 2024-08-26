@@ -1,8 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
-import { btoa } from 'buffer';
-import { Elements, autolayout, generateJobProfile, getALStatus } from 'common-kit';
+import {
+  Elements,
+  autolayout,
+  generateJobProfile,
+  getALStatus,
+  updateSupervisorAndAddNewPositionNode,
+} from 'common-kit';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import { Packer } from 'docx';
@@ -17,7 +22,6 @@ import {
 import { AlexandriaError, AlexandriaErrorClass } from '../../utils/alexandria-error';
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
-import { DepartmentService } from '../external/department.service';
 import {
   IncidentCreateUpdateInput,
   IncidentStatus,
@@ -34,6 +38,7 @@ import {
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PositionService } from '../external/position.service';
 import { JobProfileService } from '../job-profile/job-profile.service';
+import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 
@@ -138,7 +143,6 @@ export class PositionRequestApiService {
         reports_to_position_id: data.reports_to_position_id,
         profile_json: data.profile_json === null ? Prisma.DbNull : data.profile_json,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
-        orgchart_png: data.orgchart_png === null ? Prisma.DbNull : data.orgchart_png,
         // TODO: AL-146
         // user: data.user,
         user_id: userId,
@@ -157,7 +161,7 @@ export class PositionRequestApiService {
     });
   }
 
-  async submitPositionRequest(id: number, comment: string, userId: string) {
+  async submitPositionRequest(id: number, comment: string, userId: string, orgchart_png: string) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
     if (!positionRequest) throw AlexandriaError('Position request not found');
@@ -165,7 +169,8 @@ export class PositionRequestApiService {
     // ensure comments are saved
     try {
       if (comment != null && comment.length > 0) {
-        const c = await this.prisma.comment.create({
+        //  const c =
+        await this.prisma.comment.create({
           data: {
             author_id: userId,
             record_id: positionRequest.id,
@@ -173,7 +178,7 @@ export class PositionRequestApiService {
             text: comment,
           },
         });
-        console.log('comment ', c);
+        // console.log('comment ', c);
       }
     } catch (error) {
       this.logger.error(error);
@@ -202,11 +207,13 @@ export class PositionRequestApiService {
         }
 
         // write position number back to position request immidietely to prevent data loss and duplicate position creation
+        // also set submitted_at date
         try {
           positionRequest = await this.prisma.positionRequest.update({
             where: { id },
             data: {
               position_number: +position.positionNbr,
+              submitted_at: dayjs().toDate(),
             },
           });
         } catch (error) {
@@ -220,17 +227,37 @@ export class PositionRequestApiService {
             position.positionNbr,
             id,
             positionRequest,
+            orgchart_png,
           );
         } else {
           throw AlexandriaError('Peoplesoft returned a blank position number');
         }
       } else {
         // we already have a position number assigned to this position request
+        // this happens if something went wrong previously and we did not get to changing the status of this position request
+        // this should not be a common occurrence
+        this.logger.warn('Position request already has a position number assigned: ' + positionRequest.position_number);
+
         // check crm status etc
+
+        // update submitted_at
+        try {
+          positionRequest = await this.prisma.positionRequest.update({
+            where: { id },
+            data: {
+              submitted_at: dayjs().toDate(),
+            },
+          });
+        } catch (error) {
+          this.logger.error('Failed to update submitted_at: ' + positionRequest.position_number.toString());
+          this.logger.error(error);
+        }
+
         positionRequest = await this.submitPositionRequest_afterCreatePosition(
           `${positionRequest.position_number.toString()}`.padStart(8, '0'),
           id,
           positionRequest,
+          orgchart_png,
         );
       }
     } catch (error) {
@@ -243,7 +270,11 @@ export class PositionRequestApiService {
     return positionRequest;
   }
 
-  private async submitPositionRequest_afterCreatePosition(positionNumber: string, id, positionRequest) {
+  private async submitPositionRequest_afterCreatePosition(positionNumber: string, id, positionRequest, orgchart_png) {
+    // this function runs after a position has been created in peoplesoft
+    // we're going to update org chart (update supervisor and add new position nodes),
+    // create or update CRM incident, and update position request status
+
     // retrieve position we just created from peoplesoft
     let positionObj: Record<string, any> | null;
     try {
@@ -271,7 +302,7 @@ export class PositionRequestApiService {
     let crm_status;
     let crm_category;
     try {
-      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
+      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id, orgchart_png);
       ({ crm_id, crm_lookup_name, crm_status, crm_category } = incident);
       await this.prisma.positionRequest.update({
         where: { id },
@@ -306,10 +337,14 @@ export class PositionRequestApiService {
       }
 
       // we will potentially create PRs with UNKNOWN status if there is an issue with CRM or PS creation
+      // if status is completed, update approved_at date
+      const status = incomingPositionRequestStatus as PositionRequestStatus;
+      const approved_at = status === 'COMPLETED' ? dayjs().toDate() : null;
       return await this.prisma.positionRequest.update({
         where: { id },
         data: {
-          status: incomingPositionRequestStatus as PositionRequestStatus,
+          status: status,
+          ...(approved_at === null ? {} : { approved_at }),
         },
       });
     } catch (error) {
@@ -330,67 +365,34 @@ export class PositionRequestApiService {
     const department = await this.departmentService.getDepartment({ where: { id: positionObj['A.DEPTID'] } });
     const { edges, nodes } = positionRequest.orgchart_json as Record<string, any> as Elements;
 
-    // Update supervisor, excluded manager nodes
     const excludedManagerId = (positionRequest.additional_info as AdditionalInfo | null)?.excluded_mgr_position_number;
     const supervisorId = positionObj['A.REPORTS_TO'];
-    nodes.forEach((node) => {
-      node.data = {
-        ...node.data,
-        isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
-        isExcludedManager: node.id === excludedManagerId,
-        isNewPosition: false, // Clear previous positions marked as new
-        isSelected: false,
-        isSupervisor: node.id === supervisorId,
-      };
-    });
+    const positionNumber = positionObj['A.POSITION_NBR'];
+    const positionTitle = positionObj['A.DESCR'];
 
-    // Add edge & node for new position
-    // add edge
-    const edgeId = `${supervisorId}-${positionObj['A.POSITION_NBR']}`;
-    if (edges.find((edge) => edge.id === edgeId) == null) {
-      edges.push({
-        id: edgeId,
-        source: supervisorId,
-        target: positionObj['A.POSITION_NBR'],
-        style: { stroke: 'blue' },
-        type: 'smoothstep',
-        animated: true,
-        selected: true,
-      });
-    }
+    const { edges: newEdges, nodes: newNodes } = updateSupervisorAndAddNewPositionNode(
+      edges,
+      nodes,
+      excludedManagerId,
+      supervisorId,
+      positionNumber,
+      positionTitle,
+      classification,
+      department,
+    );
 
-    // add node
-    const nodeId = positionObj['A.POSITION_NBR'];
-    if (nodes.find((node) => node.id === nodeId) == null) {
-      nodes.push({
-        id: nodeId,
-        type: 'org-chart-card',
-        data: {
-          id: nodeId,
-          isAdjacent: true,
-          isNewPosition: true,
-          title: positionObj['A.DESCR'],
-          classification: {
-            id: classification.id,
-            code: classification.code,
-            name: classification.name,
-          },
-          department: {
-            id: department.id,
-            organization_id: department.organization_id,
-            name: department.name,
-          },
-          employees: [],
-        },
-        position: { x: 0, y: 0 },
-      });
-    }
+    const elementsData: Elements = {
+      edges: newEdges,
+      nodes: newNodes,
+    };
+
+    const orgchart_json = autolayout(elementsData) as any;
 
     //write org chart changes
     const positionRequestNew = await this.prisma.positionRequest.update({
       where: { id },
       data: {
-        orgchart_json: autolayout({ edges, nodes }) as any,
+        orgchart_json: orgchart_json,
       },
     });
     return positionRequestNew;
@@ -982,15 +984,15 @@ export class PositionRequestApiService {
       updatePayload.reports_to_position_id = updateData.reports_to_position_id;
     }
 
-    if (updateData.orgchart_png !== undefined) {
-      updatePayload.orgchart_png = updateData.orgchart_png;
-    }
-
     if (updateData.profile_json !== undefined) {
       updatePayload.profile_json = updateData.profile_json === null ? Prisma.DbNull : updateData.profile_json;
       // attach original profile json
       if (updateData.profile_json !== null) {
-        const originalProfile = await this.jobProfileService.getJobProfile(updateData.profile_json.id, userRoles);
+        const originalProfile = await this.jobProfileService.getJobProfile(
+          updateData.profile_json.id,
+          updateData.profile_json.version,
+          userRoles,
+        );
         updateData.profile_json.original_profile_json = originalProfile;
       }
     }
@@ -1004,12 +1006,22 @@ export class PositionRequestApiService {
     }
 
     if (updateData.parent_job_profile !== undefined) {
-      if (updateData.parent_job_profile.connect.id == null) {
+      if (updateData.parent_job_profile.connect.id_version == null) {
         updatePayload.parent_job_profile = { disconnect: true };
       } else {
-        updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
+        updatePayload.parent_job_profile = {
+          connect: {
+            id_version: {
+              id: updateData.parent_job_profile.connect.id_version.id,
+              version: updateData.parent_job_profile.connect.id_version.version,
+            },
+          },
+        };
 
-        const parentJobProfile = await this.jobProfileService.getJobProfile(updateData.parent_job_profile.connect.id);
+        const parentJobProfile = await this.jobProfileService.getJobProfile(
+          updateData.parent_job_profile.connect.id_version.id,
+          updateData.parent_job_profile.connect.id_version.version,
+        );
 
         // Set Classification IDs on positionRequest
         updatePayload.classification_id = parentJobProfile.classifications[0].classification.id;
@@ -1081,6 +1093,7 @@ export class PositionRequestApiService {
 
         if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
           // Remove existing node with isExcludedManager = true
+          // isExcludedManager indicates it's a custom added node
           const updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.isExcludedManager !== true);
 
           const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
@@ -1118,7 +1131,7 @@ export class PositionRequestApiService {
                   data: {
                     id: additionalInfo.excluded_mgr_position_number,
                     title: employeeInfo[0].positionDescription,
-                    isExcludedManager: true,
+                    isExcludedManager: true, // isExcludedManager indicates it's a custom added node
                     employees: employeeInfo.map((employee) => ({
                       id: employee.employeeId,
                       name: employee.employeeName,
@@ -1230,7 +1243,9 @@ export class PositionRequestApiService {
       return { result: false, reasons: reasons };
     }
     const jobProfile = await this.prisma.jobProfile.findUnique({
-      where: { id: positionRequest.parent_job_profile_id },
+      where: {
+        id_version: { id: positionRequest.parent_job_profile_id, version: positionRequest.parent_job_profile_version },
+      },
       include: {
         jobFamilies: {
           include: {
@@ -1389,10 +1404,10 @@ export class PositionRequestApiService {
     };
   }
 
-  async createOrUpdateCrmIncidentForPositionRequest(id: number) {
+  async createOrUpdateCrmIncidentForPositionRequest(id: number, orgchartPng: string) {
     try {
       const needsReview = (await this.positionRequestNeedsReview(id)).result;
-
+      const formattedDate = dayjs().format('YYYYMMDD');
       const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
       const classification = await this.classificationService.getClassification({
         where: {
@@ -1433,11 +1448,13 @@ export class PositionRequestApiService {
           : null;
       const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
 
-      const orgChartBase64 =
-        positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
+      // const orgChartBase64 =
+      //   positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
 
       const zeroFilledPositionNumber =
         positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
+
+      const pngFileName = `Organization Chart ${zeroFilledPositionNumber} ${positionRequest.title} ${formattedDate}.png`;
 
       const data: IncidentCreateUpdateInput = {
         subject: `Job Store Beta - Position Number Request - ${classification.code}`,
@@ -1544,17 +1561,17 @@ export class PositionRequestApiService {
             contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             data: jobProfileBase64,
           },
-          {
-            name: `${zeroFilledPositionNumber} - Organization Chart.json`.substring(0, 40),
-            fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
-            contentType: 'application/json',
-            data: orgChartBase64,
-          },
+          // {
+          //   name: `${zeroFilledPositionNumber} - Organization Chart.json`.substring(0, 40),
+          //   fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
+          //   contentType: 'application/json',
+          //   data: orgChartBase64,
+          // },
           {
             name: 'Org chart',
-            fileName: 'org-chart.png',
+            fileName: pngFileName,
             contentType: 'image/png',
-            data: positionRequest.orgchart_png,
+            data: orgchartPng,
           },
         ],
       };

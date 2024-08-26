@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
-import ContentWrapper from '../home/components/content-wrapper.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import TotalCompProfilesTable from '../total-comp-draft-profiles/components/total-comp-draft-profiles-table.component';
 
 export const TotalCompArchivedProfilesPage = () => {

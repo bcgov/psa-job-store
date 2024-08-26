@@ -104,10 +104,10 @@ export class KeycloakService {
   }
 
   async getUser(id: string): Promise<User> {
-    console.log('getUser id: ', id);
+    // console.log('getUser id: ', id);
 
     const guid = uuidToGuid(id);
-    console.log('getUser guid: ', guid);
+    // console.log('getUser guid: ', guid);
 
     const matches = await this.findUsers('guid', uuidToGuid(id));
     const user = matches.length > 0 ? matches[0] : null;

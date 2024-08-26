@@ -2,8 +2,8 @@ import { InfoCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import { Button, Space, Spin, Table, Tag, Tooltip, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
+import ContentWrapper from '../../../components/content-wrapper.component';
 import { useGetUsersForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
-import ContentWrapper from '../../home/components/content-wrapper.component';
 import { useSettingsContext } from '../hooks/use-settings-context.hook';
 import { ImportUserModal } from './components/import-user-modal.component';
 
