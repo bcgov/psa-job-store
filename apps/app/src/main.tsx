@@ -8,7 +8,7 @@ import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
 import 'reflect-metadata';
-import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../envConfig';
+import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL, VITE_KEYCLOAK_REDIRECT_URL } from '../envConfig';
 import './global.css';
 import { store } from './redux/redux.store';
 import { router } from './router/index';
@@ -16,15 +16,19 @@ import ErrorBoundary from './routes/error-boundary/ErrorBoundary';
 import { WizardProvider } from './routes/wizard/components/wizard.provider';
 import { sendLogToServer } from './utils/logger-service.util';
 
-const origin = window.location.origin;
-console.log(window.location);
+// const origin = window.location.origin;
+// console.log('window.location: ', window.location.toString());
+
+// origin on login is http://localhost:5173/?state=123...
+// VITE_KEYCLOAK_REDIRECT_URL is http://localhost:5173/login/auth/login
+
 export const oidcConfig: AuthProviderProps = {
   userStore: new WebStorageStateStore({
     store: localStorage,
   }),
   authority: VITE_KEYCLOAK_REALM_URL,
   client_id: VITE_KEYCLOAK_CLIENT_ID,
-  redirect_uri: origin,
+  redirect_uri: VITE_KEYCLOAK_REDIRECT_URL, //origin, // using origin here causes a login bug
 };
 
 window.addEventListener('error', function (event) {
