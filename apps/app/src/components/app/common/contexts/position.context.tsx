@@ -59,7 +59,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
     // we can create a new position from the requests/positions org chart view, or directly from the org chart, or from home page
     if (
       location.pathname.startsWith('/requests/positions/create') ||
-      location.pathname.startsWith('/org-chart') ||
+      location.pathname.startsWith('/my-departments') ||
       location.pathname == '/' || // home page
       location.pathname == '' // home page
     ) {
@@ -84,7 +84,9 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
     } else {
       // we are editing a draft position request - update existing position request
       if (positionRequestId != null && selectedDepartment != null) {
+        // console.log('editing a draft positionRequestId, selectedDepartment: ', positionRequestId, selectedDepartment);
         if (current_reports_to_position_id != reportingPositionId) {
+          // console.log('changing supervisor: ', reportingPositionId, current_reports_to_position_id);
           return new Promise((resolve) => {
             Modal.confirm({
               title: 'Change supervisor?',
