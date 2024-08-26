@@ -16,7 +16,7 @@ import { autolayout, updateSupervisorAndAddNewPositionNode } from 'common-kit';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
-import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import ContentWrapper from '../../components/content-wrapper.component';
 import {
@@ -384,11 +384,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             <div style={{ marginRight: '1rem' }}>
               <StatusIndicator status={positionRequest?.status ?? ''} />
             </div>,
-            <AcessiblePopoverMenu
+            <AccessiblePopoverMenu
               triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
               content={getMenuContent()}
               ariaLabel="Open position request menu"
-            ></AcessiblePopoverMenu>,
+            ></AccessiblePopoverMenu>,
             <Button onClick={back} key="back" data-testid="back-button">
               Back
             </Button>,

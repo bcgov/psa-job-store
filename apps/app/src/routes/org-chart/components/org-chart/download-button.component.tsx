@@ -5,7 +5,7 @@ import { toSvg } from 'html-to-image';
 import { Options } from 'html-to-image/lib/types';
 import { useState } from 'react';
 import { Rect, getNodesBounds, getRectOfNodes, getTransformForBounds, useReactFlow } from 'reactflow';
-import AcessiblePopoverMenu from '../../../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../../../components/app/common/components/accessible-popover-menu';
 
 // interface NodesBounds {
 //   width: number;
@@ -815,7 +815,7 @@ function DownloadButton() {
   };
 
   return (
-    <AcessiblePopoverMenu
+    <AccessiblePopoverMenu
       triggerButton={
         <Button loading={isLoading} tabIndex={-1} style={{}} icon={<DownloadOutlined aria-hidden />}>
           Download
@@ -833,7 +833,7 @@ function DownloadButton() {
           </Menu.Item>
         </Menu>
       }
-    ></AcessiblePopoverMenu>
+    ></AccessiblePopoverMenu>
   );
 }
 

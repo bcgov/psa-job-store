@@ -1,0 +1,8 @@
+.jobstore-side-menu.expanded .create-button{
+    margin: 0.8rem auto 0.8rem auto;
+    width: 90%;
+}
+
+.jobstore-side-menu .create-button{
+    margin-top: 0.8rem;
+}

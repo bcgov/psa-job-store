@@ -8,7 +8,7 @@ import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
@@ -465,11 +465,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           <div style={{ marginRight: '1rem' }}>
             <StatusIndicator status={positionRequest?.status ?? ''} />
           </div>,
-          <AcessiblePopoverMenu
+          <AccessiblePopoverMenu
             triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
             content={getMenuContent()}
             ariaLabel="Open position request menu"
-          ></AcessiblePopoverMenu>,
+          ></AccessiblePopoverMenu>,
           <Button
             onClick={() => showModal({ skipValidation: true, action: 'back' })}
             key="back"
