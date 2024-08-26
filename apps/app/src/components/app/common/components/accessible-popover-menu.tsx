@@ -1,21 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Popover } from 'antd';
 import React, { ReactNode, forwardRef, useEffect, useRef, useState } from 'react';
+import './accessible-popover-menu.css';
 
-interface AcessiblePopoverMenuProps {
+interface AccessiblePopoverMenuProps {
   triggerButton: ReactNode;
   content: ReactNode;
   ariaLabel?: string;
   padding?: string;
   buttonId?: string;
+  compact?: boolean;
 }
 
-const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
+const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
   triggerButton,
   content,
   ariaLabel = 'Open menu',
   padding,
   buttonId,
+  compact,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -107,6 +110,7 @@ const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
       trigger="click"
       placement="bottom"
       overlayInnerStyle={{ padding: padding }}
+      overlayClassName={compact ? 'compact-popover' : ''}
     >
       {/* add ref to triggerButton, e.g. ref={(el) => (ellipsisRef.current = el)} */}
       <TriggerButtonWrapper ref={ellipsisRef} buttonId={buttonId}>
@@ -116,4 +120,4 @@ const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
   );
 };
 
-export default AcessiblePopoverMenu;
+export default AccessiblePopoverMenu;

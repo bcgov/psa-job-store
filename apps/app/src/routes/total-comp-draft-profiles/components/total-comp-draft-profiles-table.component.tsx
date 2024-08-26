@@ -21,7 +21,7 @@ import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'reac
 import { ErrorResponse, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
-import AcessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import {
@@ -298,10 +298,10 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
         // <Popover content={getMenuContent(record)} trigger="click" placement="bottomRight">
         //   <EllipsisOutlined />
         // </Popover>
-        <AcessiblePopoverMenu
+        <AccessiblePopoverMenu
           triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
           content={getMenuContent(record)}
-        ></AcessiblePopoverMenu>
+        ></AccessiblePopoverMenu>
       ),
     },
   ];

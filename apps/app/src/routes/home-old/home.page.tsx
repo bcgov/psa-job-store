@@ -159,9 +159,9 @@ export const HomePage = () => {
             }
             extra={
               <Space direction="horizontal">
-                <Link to="/org-chart">
+                <Link to="/my-departments">
                   <Button type="link" style={{ padding: '0' }}>
-                    View all organizations
+                    View all departments
                   </Button>
                 </Link>
                 <OrgChartHelpButton />

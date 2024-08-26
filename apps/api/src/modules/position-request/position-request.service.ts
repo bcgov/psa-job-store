@@ -195,10 +195,10 @@ export class PositionRequestApiService {
             const positionRequestNeedsReview = await this.positionRequestNeedsReview(id);
 
             if (positionRequestNeedsReview.result === true)
-              position = { positionNbr: '00137068' }; // 00137068 is proposed (for verification required test)
-            else position = { positionNbr: '00137120' }; // this position needs to be in approved status in order to have valid final state
+              position = { positionNbr: '00142558' }; // 00142558 is proposed (for verification required test)
+            else position = { positionNbr: '00132136' }; // this position needs to be in approved status in order to have valid final state
           } else {
-            // note this returns data with this format (string with leading zeros): { positionNbr: '00137120', errMessage: '' }
+            // note this returns data with this format (string with leading zeros): { positionNbr: '00132136', errMessage: '' }
             position = await this.createPositionForPositionRequest(id);
           }
         } catch (error) {
