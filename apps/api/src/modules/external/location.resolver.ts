@@ -1,6 +1,5 @@
 import { Args, Field, Int, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { FindManyLocationArgs, FindUniqueLocationArgs, Location } from '../../@generated/prisma-nestjs-graphql';
-import { AllowNoRoles } from '../auth/guards/role-global.guard';
 import { LocationService } from './location.service';
 
 @ObjectType()
@@ -24,7 +23,6 @@ export class LocationResolver {
   }
 
   @Query(() => Location, { name: 'location', nullable: true })
-  @AllowNoRoles() // so that share position request feature can fetch relevant data
   getLocation(@Args() args: FindUniqueLocationArgs) {
     return this.locationService.getLocation(args);
   }

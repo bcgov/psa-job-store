@@ -79,7 +79,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   }, [positionRequestData, setSearchParams, searchParams]);
 
   const getBasePath = (path: string) => {
-    if (positionRequestId) return `/my-position-requests/${positionRequestId}`;
+    if (positionRequestId) return `/requests/positions/${positionRequestId}`;
 
     const pathParts = path.split('/');
     // Check if the last part is a number (ID), if so, remove it

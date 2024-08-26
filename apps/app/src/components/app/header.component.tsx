@@ -3,7 +3,7 @@ import { Button, Col, Layout, Menu, Row, Typography } from 'antd';
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { useLazyLogoutQuery } from '../../redux/services/graphql-api/profile.api';
-import { InitialsAvatar } from '../../routes/home/components/initials-avatar.component';
+import { InitialsAvatar } from '../../routes/home-old/components/initials-avatar.component';
 import AcessiblePopoverMenu from './common/components/accessible-popover-menu';
 import styles from './header.module.css';
 import { HelpButton } from './help-button.component';

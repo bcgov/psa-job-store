@@ -131,16 +131,16 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     if (is_archived === false) {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesDraftsQuery();
-      link = '/draft-job-profiles/';
+      link = '/job-profiles/manage/draft/';
     } else {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesArchivedQuery();
-      link = '/archived-job-profiles/';
+      link = '/job-profiles/manage/archived/';
     }
   } else {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesQuery();
-    link = '/published-job-profiles/';
+    link = '/job-profiles/manage/published/';
   }
 
   // Check if data is available and call the callback function to notify the parent component
@@ -768,7 +768,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
               <>
                 <div>Looks like you’re not working on anything right now.</div>
                 {/* Link button to the orgchart page */}
-                <Link to="/draft-job-profiles/create">
+                <Link to="/job-profils/manage/drafts/create">
                   <Button type="primary" style={{ marginTop: '1rem' }}>
                     Create new profile
                   </Button>

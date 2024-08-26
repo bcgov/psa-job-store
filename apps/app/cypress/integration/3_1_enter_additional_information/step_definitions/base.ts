@@ -5,7 +5,7 @@ Given('the user is logged in', () => {
 });
 
 Given('the user is on the additional info form page', () => {
-  cy.visit('/my-position-requests/2');
+  cy.visit('/requests/positions/2');
 });
 
 Given('the approval toggle is off', () => {
@@ -104,7 +104,7 @@ When('the user presses save and quit', () => {
 });
 
 When('the user returns to the additional info form page', () => {
-  cy.visit('/my-position-requests/2');
+  cy.visit('/requests/positions/2');
 });
 
 Then('the previously entered data is displayed on the form', () => {

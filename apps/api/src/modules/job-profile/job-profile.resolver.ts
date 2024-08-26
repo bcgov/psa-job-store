@@ -1,4 +1,3 @@
-import { UseGuards } from '@nestjs/common';
 import { Args, Field, Int, Mutation, ObjectType, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import {
   Classification,
@@ -13,8 +12,6 @@ import {
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { AllowNoRoles } from '../auth/guards/role-global.guard';
-import { RoleGuard } from '../auth/guards/role.guard';
 import { JobFamilyService } from '../job-family/job-family.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 import { JobProfileService } from './job-profile.service';
@@ -125,6 +122,7 @@ export class JobProfileResolver {
   async jobProfilesCount(@Args() args?: FindManyJobProfileWithSearch) {
     return await this.jobProfileService.getJobProfileCount(args);
   }
+
   @Mutation(() => Int, { name: 'updateJobProfileViewCount' })
   async updateJobProfileViewCount(@Args('jobProfiles', { type: () => [Int], nullable: true }) jobProfiles: number[]) {
     return await this.jobProfileService.updateJobProfileViewCountCache(jobProfiles);
@@ -136,14 +134,12 @@ export class JobProfileResolver {
 
   @Query(() => [JobProfile], { name: 'jobProfilesDrafts' })
   @Roles('total-compensation')
-  @UseGuards(RoleGuard)
   async getJobProfilesDrafts(@CurrentUser() { id: userId }: Express.User, @Args() args?: FindManyJobProfileWithSearch) {
     return this.jobProfileService.getJobProfilesDrafts(args, userId);
   }
 
   @Query(() => Int, { name: 'jobProfilesDraftsCount' })
   @Roles('total-compensation')
-  @UseGuards(RoleGuard)
   async jobProfilesDraftsCount(
     @CurrentUser() { id: userId }: Express.User,
     @Args() args?: FindManyJobProfileWithSearch,
@@ -153,7 +149,6 @@ export class JobProfileResolver {
 
   @Query(() => [JobProfile], { name: 'jobProfilesArchived' })
   @Roles('total-compensation')
-  @UseGuards(RoleGuard)
   async getJobProfilesArchived(
     @CurrentUser() { id: userId }: Express.User,
     @Args() args?: FindManyJobProfileWithSearch,
@@ -163,7 +158,6 @@ export class JobProfileResolver {
 
   @Query(() => Int, { name: 'jobProfilesArchivedCount' })
   @Roles('total-compensation')
-  @UseGuards(RoleGuard)
   async jobProfilesArchivedCount(
     @CurrentUser() { id: userId }: Express.User,
     @Args() args?: FindManyJobProfileWithSearch,
@@ -173,13 +167,11 @@ export class JobProfileResolver {
 
   @Query(() => [Organization], { name: 'jobProfilesDraftsMinistries' })
   @Roles('total-compensation')
-  @UseGuards(RoleGuard)
   async getJobProfilesDraftsMinistries(@CurrentUser() { id: userId }: Express.User) {
     return this.jobProfileService.getJobProfilesDraftsMinistries(userId);
   }
 
-  @Query(() => JobProfile, { name: 'jobProfile' })
-  @AllowNoRoles() // so that share position request feature can fetch relevant data
+  @Query(() => JobProfile, { name: 'jobProfile' }) // so that share position request feature can fetch relevant data
   async getJobProfile(
     @CurrentUser() user: Express.User,
     @Args('id') id: number,
@@ -189,8 +181,7 @@ export class JobProfileResolver {
     return res;
   }
 
-  @Query(() => JobProfile, { name: 'jobProfileByNumber' })
-  @AllowNoRoles() // so that share position request feature can fetch relevant data
+  @Query(() => JobProfile, { name: 'jobProfileByNumber' }) // so that share position request feature can fetch relevant data
   async getJobProfileByNumber(@CurrentUser() user: Express.User, @Args('number') number: string) {
     const res = await this.jobProfileService.getJobProfileByNumber(+number, user.roles);
     return res;
@@ -222,7 +213,6 @@ export class JobProfileResolver {
 
   @Query(() => [Classification], { name: 'jobProfilesDraftsClassifications' })
   @Roles('total-compensation')
-  @UseGuards(RoleGuard)
   async getJobProfilesDraftsClassifications() {
     return this.jobProfileService.getJobProfilesDraftsClassifications();
   }
@@ -234,7 +224,6 @@ export class JobProfileResolver {
 
   @Mutation(() => Int)
   @Roles('total-compensation')
-  @UseGuards(RoleGuard)
   async createOrUpdateJobProfile(
     @CurrentUser() { id: userId }: Express.User,
     @Args('id', { type: () => Int, nullable: true }) id: number | null,
@@ -258,7 +247,6 @@ export class JobProfileResolver {
 
   @Mutation(() => Int)
   @Roles('total-compensation') // Adjust role as per your requirements
-  @UseGuards(RoleGuard)
   async duplicateJobProfile(
     @CurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
@@ -269,7 +257,6 @@ export class JobProfileResolver {
 
   @Mutation(() => Int)
   @Roles('total-compensation') // Adjust role as per your requirements
-  @UseGuards(RoleGuard)
   async deleteJobProfile(
     @CurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
@@ -279,7 +266,6 @@ export class JobProfileResolver {
 
   @Mutation(() => Int)
   @Roles('total-compensation') // Adjust role as per your requirements
-  @UseGuards(RoleGuard)
   async unarchiveJobProfile(
     @CurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
@@ -289,7 +275,6 @@ export class JobProfileResolver {
 
   @Mutation(() => Boolean)
   @Roles('total-compensation')
-  @UseGuards(RoleGuard)
   async updateJobProfileState(
     @CurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,

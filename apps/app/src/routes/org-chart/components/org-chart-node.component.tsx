@@ -4,6 +4,7 @@ import { Card, Col, Row, Tag, Tooltip, Typography } from 'antd';
 import { CSSProperties } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { Handle, NodeProps, Position } from 'reactflow';
+import { getUserRoles } from '../../../utils/get-user-roles.util';
 import { OrgChartContext } from '../enums/org-chart-context.enum';
 import { OrgChartType } from '../enums/org-chart-type.enum';
 import { Elements } from '../interfaces/elements.interface';
@@ -65,7 +66,7 @@ export const OrgChartNode = ({
   const auth = useAuth();
   const positionIsVacant = data.employees.length === 0;
 
-  const roles: string[] = auth.user?.profile['client_roles'] as string[];
+  const roles: string[] = getUserRoles(auth.user);
 
   return (
     <>
@@ -93,16 +94,18 @@ export const OrgChartNode = ({
       >
         <Card
           actions={
-            selected && orgChartType === OrgChartType.DYNAMIC
-              ? orgChartContext === OrgChartContext.DEFAULT
-                ? [
-                    <CreatePositionButton
-                      departmentId={data.department?.id}
-                      elements={orgChartData}
-                      positionIsVacant={positionIsVacant}
-                      supervisorId={data.id}
-                    />,
-                  ]
+            roles.includes('hiring-manager')
+              ? selected && orgChartType === OrgChartType.DYNAMIC
+                ? orgChartContext === OrgChartContext.DEFAULT
+                  ? [
+                      <CreatePositionButton
+                        departmentId={data.department?.id}
+                        elements={orgChartData}
+                        positionIsVacant={positionIsVacant}
+                        supervisorId={data.id}
+                      />,
+                    ]
+                  : undefined
                 : undefined
               : undefined
           }

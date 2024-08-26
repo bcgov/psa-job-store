@@ -18,6 +18,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
 import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -25,7 +26,6 @@ import {
   useSubmitPositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -645,7 +645,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                             `Hello, \n\n` +
                               `I need assistance with my position request.\n\n` +
                               `Please review the details at this link (do not share this link):\n` +
-                              `${window.location.origin}/my-position-requests/share/${positionRequest?.shareUUID}`,
+                              `${window.location.origin}/requests/positions/share/${positionRequest?.shareUUID}`,
                           );
                           window.location.href = `mailto:${
                             import.meta.env.VITE_SUPPORT_EMAIL

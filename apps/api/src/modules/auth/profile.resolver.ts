@@ -6,7 +6,6 @@ import { PeoplesoftService } from '../external/peoplesoft.service';
 import { CACHE_USER_PREFIX } from './auth.constants';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
-import { AllowNoRoles } from './guards/role-global.guard';
 import { Profile } from './models/profile.model';
 
 @ObjectType()
@@ -25,33 +24,7 @@ export class ProfileResolver {
     private authService: AuthService,
   ) {}
 
-  // @Query(() => LogoutResponse, { name: 'throwGraphQLError' })
-  // @AllowNoRoles()
-  // async throwGraphQLError() {
-  //   return { success: 1 / 0 };
-  // }
-
-  // @Query(() => LogoutResponse, { name: 'throwError' })
-  // @AllowNoRoles()
-  // async throwError() {
-  //   throw new Error('Test error');
-  // }
-
-  // @Query(() => LogoutResponse, { name: 'throwAlexandriaError' })
-  // @AllowNoRoles()
-  // async throwAlexandriaError() {
-  //   throw AlexandriaError('Test error');
-  // }
-
-  // @Query(() => LogoutResponse, { name: 'okTestResponse' })
-  // @AllowNoRoles()
-  // async okTestResponse() {
-  //   globalLogger.info('Test log');
-  //   return { success: true };
-  // }
-
   @Query(() => LogoutResponse, { name: 'logout' })
-  @AllowNoRoles()
   async logout(@CurrentUser() { id: userId }: Express.User) {
     await this.authService.logoutUser(userId);
     return { success: true };

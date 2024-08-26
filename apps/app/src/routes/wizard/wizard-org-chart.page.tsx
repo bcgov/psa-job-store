@@ -40,12 +40,12 @@ export const WizardOrgChartPage = ({
   const { positionRequestDepartmentId, resetWizardContext, positionRequestData, positionRequestId } =
     useWizardContext();
 
-  // this page gets displayed on two routes: /my-position-requests/create and /my-position-requests/:id
-  // if we navigate to /my-position-requests/create, wipe all wizard context info
+  // this page gets displayed on two routes: /requests/positions/create and /requests/positions/:id
+  // if we navigate to /requests/positions/create, wipe all wizard context info
   const [locationProcessed, setLocationProcessed] = useState(false);
   const location = useLocation();
   useEffect(() => {
-    if (location.pathname === '/my-position-requests/create') {
+    if (location.pathname === '/requests/positions/create') {
       resetWizardContext();
       setSelectedDepartment(null);
       setSelectedPositionId(null);

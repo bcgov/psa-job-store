@@ -5,5 +5,5 @@ Given('the user is logged in', () => {
 });
 
 Given('the user is on the My Position Requests page', () => {
-  cy.visit('/my-position-requests');
+  cy.visit('/requests/positions');
 });

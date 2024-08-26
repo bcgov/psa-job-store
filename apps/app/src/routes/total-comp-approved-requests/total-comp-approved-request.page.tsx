@@ -9,13 +9,13 @@ import {
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetLocationQuery } from '../../redux/services/graphql-api/location.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
 import { formatDateTime } from '../../utils/Utils';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -250,7 +250,7 @@ export const TotalCompApprovedRequestPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
-    const linkToCopy = `${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
@@ -458,7 +458,7 @@ export const TotalCompApprovedRequestPage = () => {
                             <strong>Invite others to review</strong>
                             <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                             <Space>
-                              <Text>{`${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`}</Text>
+                              <Text>{`${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`}</Text>
                               <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                                 Copy URL
                               </Button>
@@ -477,7 +477,7 @@ export const TotalCompApprovedRequestPage = () => {
                         <div>
                           <Text strong>View all approved requests</Text>
                           <p>View all approved requests in JobStore.</p>
-                          <Link to="/approved-requests">
+                          <Link to="/requests/positions/manage/approved">
                             <Button>Go to Approved requests</Button>
                           </Link>
                         </div>

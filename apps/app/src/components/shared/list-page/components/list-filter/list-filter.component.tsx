@@ -58,11 +58,11 @@ export const ListFilter = ({ setSearchParams, filterData, filters, searchConfig,
   };
 
   return (
-    <Row role="search" style={{ position: 'relative', zIndex: 9001 }}>
+    <Row role="search" style={{ position: 'relative', zIndex: 2 }}>
       <Col span={24}>
-        <Card style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-          <Row wrap>
-            <Col span={12}>
+        <Card>
+          <Row gutter={[8, 8]} wrap>
+            <Col xs={24} md={12}>
               {searchConfig != null && (
                 <Search
                   onPressEnter={(e) => handleSearch(e.currentTarget.value)}
@@ -74,8 +74,8 @@ export const ListFilter = ({ setSearchParams, filterData, filters, searchConfig,
                 />
               )}
             </Col>
-            <Col span={12}>
-              <Row justify="end" gutter={8}>
+            <Col xs={24} md={12}>
+              <Row justify="end" gutter={[8, 8]}>
                 {filters.map((props) => {
                   return (
                     <Col key={props.name}>

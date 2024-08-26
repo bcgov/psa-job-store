@@ -4,6 +4,7 @@ import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
 import PositionProfile from '../../components/app/common/components/positionProfile';
+import ContentWrapper from '../../components/content-wrapper.component';
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-position-requests/components/my-position-requests-table.component';
@@ -15,7 +16,6 @@ import { TreeOrgChartSearch } from '../org-chart/components/tree-org-chart/tree-
 import TreeOrgChart from '../org-chart/components/tree-org-chart/tree-org-chart.component';
 import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
-import ContentWrapper from './components/content-wrapper.component';
 import HeaderWrapper from './components/header-wrapper.component';
 import { InitialsAvatar } from './components/initials-avatar.component';
 import './home.page.css';
@@ -114,7 +114,7 @@ export const HomePage = () => {
             itemsPerPage={5}
             tableTitle="My recent positions"
             topRightComponent={
-              <Link to="/my-position-requests">
+              <Link to="/requests/positions">
                 <Button type="link" style={{ padding: '0' }}>
                   View all positions
                 </Button>

@@ -36,7 +36,7 @@ export const JobProfileSearchResults = ({
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
-  const isPositionRequestRoute = location.pathname.includes('/my-position-requests/');
+  const isPositionRequestRoute = location.pathname.includes('/requests/positions/');
   const { positionRequestId } = useParams<{ positionRequestId?: string }>();
 
   const getBasePath = (path: string) => {
@@ -55,18 +55,18 @@ export const JobProfileSearchResults = ({
     //   searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
     // }`
 
-    // Check if we're on /saved-profiles route
-    if (location.pathname.includes('/saved-profiles')) {
-      return `/saved-profiles/${profileNumber}`;
+    // Check if we're on /job-profiles/saved route
+    if (location.pathname.includes('/job-profiles/saved')) {
+      return `/job-profiles/saved/${profileNumber}`;
     }
 
-    // Check if we're on the position-request route
+    // Check if we're on the /requests/positions route
     const newSearchParams = new URLSearchParams(searchParams.toString());
     if (positionRequestId) {
       newSearchParams.set('selectedProfile', profileNumber.toString());
-      return `/my-position-requests/${positionRequestId}?${newSearchParams.toString()}`;
+      return `/requests/positions/${positionRequestId}?${newSearchParams.toString()}`;
     } else {
-      // If not on the position-request route, use the standard job-profiles path
+      // If not on the /requests/positions route, use the standard job-profiles path
       return `/job-profiles/${profileNumber}?${newSearchParams.toString()}`;
     }
   };

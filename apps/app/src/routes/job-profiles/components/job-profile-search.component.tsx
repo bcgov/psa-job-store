@@ -71,7 +71,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const isPositionRequestRoute = location.pathname.includes('/my-position-requests/');
+  const isPositionRequestRoute = location.pathname.includes('/requests/positions/');
 
   // const organizationData = useGetOrganizationsQuery().data?.organizations;
   // const jobRoleData = useGetJobRolesQuery().data?.jobRoles;

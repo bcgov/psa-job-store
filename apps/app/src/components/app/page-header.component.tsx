@@ -2,6 +2,7 @@
 import { DownOutlined, EllipsisOutlined, TagOutlined } from '@ant-design/icons';
 import { PageHeader as AntdProPageHeader, PageHeaderProps } from '@ant-design/pro-layout';
 import { Button, Popover, Select } from 'antd';
+import { AvatarProps } from 'antd/lib';
 import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation, useMatches, useParams, useSearchParams } from 'react-router-dom';
 import { IdVersion, JobProfileMetaModel } from '../../redux/services/graphql-api/job-profile-types';
@@ -15,6 +16,7 @@ interface BreadcrumbItem {
 
 export interface ExtendedPageHeaderProps extends Omit<PageHeaderProps, 'breadcrumb'> {
   additionalBreadcrumb?: { title?: string; path?: string; icon?: React.ReactNode };
+  avatar?: AvatarProps;
   button1Text?: string;
   button1Callback?: () => void;
   showButton1?: boolean;
@@ -174,45 +176,46 @@ export const PageHeader = ({
 
   const showVersions = (versions?.versions?.length ?? 0) > 0;
 
-  const renderButtons = () => (
-    <div style={{ display: 'flex', gap: '10px' }}>
-      {showVersions && selectedVersion && (
-        <Select
-          filterSort={(optionA: { label: any }, optionB: { label: any }) =>
-            (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
-          }
-          options={jobProfileVersions}
-          onChange={onChange}
-          value={selectedVersion?.id + '-' + selectedVersion?.version}
-        >
-          <Button>
-            Select Version
-            <DownOutlined />
+  const renderButtons = () =>
+    showVersions || selectedVersion?.id !== 0 || showButton1 || showButton2 ? (
+      <div style={{ display: 'flex', gap: '10px' }}>
+        {showVersions && selectedVersion && (
+          <Select
+            filterSort={(optionA: { label: any }, optionB: { label: any }) =>
+              (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+            }
+            options={jobProfileVersions}
+            onChange={onChange}
+            value={selectedVersion?.id + '-' + selectedVersion?.version}
+          >
+            <Button>
+              Select Version
+              <DownOutlined />
+            </Button>
+          </Select>
+        )}
+        {showButton1 && (
+          <Popover content={button1Content} trigger="click" placement="bottomRight">
+            <Button icon={<EllipsisOutlined />} onClick={button1Callback}>
+              {button1Text}
+            </Button>
+          </Popover>
+        )}
+        {showButton2 && (
+          <Button disabled={!isCurrentVersion} type="primary" onClick={button2Callback}>
+            {button2Text}
           </Button>
-        </Select>
-      )}
-      {showButton1 && (
-        <Popover content={button1Content} trigger="click" placement="bottomRight">
-          <Button icon={<EllipsisOutlined />} onClick={button1Callback}>
-            {button1Text}
-          </Button>
-        </Popover>
-      )}
-      {showButton2 && (
-        <Button disabled={!isCurrentVersion} type="primary" onClick={button2Callback}>
-          {button2Text}
-        </Button>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    ) : undefined;
 
   return (
     <AntdProPageHeader
       extra={renderButtons()}
       {...breadcrumbProps}
-      title={<h1 style={{ fontWeight: 600, fontSize: '20px', lineHeight: '32px' }}>{title}</h1>}
+      title={<h1 style={{ fontWeight: 600, fontSize: '20px', margin: 0 }}>{title}</h1>}
       {...props}
-      style={{ backgroundColor: '#FFF' }}
+      style={{ backgroundColor: '#FFF', padding: '16px' }}
     >
       {subHeader}
     </AntdProPageHeader>

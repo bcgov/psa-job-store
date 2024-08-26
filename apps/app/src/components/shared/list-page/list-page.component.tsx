@@ -8,8 +8,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageInfo } from '../../../redux/services/dtos/page-info.dto';
 import { deserializeOrderBy } from '../../../redux/services/graphql-api/utils/deserialize-order-by.util';
-import ContentWrapper from '../../../routes/home/components/content-wrapper.component';
 import { ExtendedPageHeaderProps, PageHeader } from '../../app/page-header.component';
+import ContentWrapper from '../../content-wrapper.component';
 import { Filter } from './components/list-filter/components/filters';
 import { ListFilter } from './components/list-filter/list-filter.component';
 import { ListTable } from './components/list-table.component';
@@ -157,7 +157,7 @@ export const ListPage = ({
     <>
       <PageHeader {...pageHeaderProps} />
       <ContentWrapper>
-        <Space direction="vertical" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+        <Space size="middle" direction="vertical">
           <ListFilter
             setSearchParams={setSearchParams}
             filterData={filterData}
