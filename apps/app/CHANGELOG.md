@@ -1,5 +1,44 @@
 # app
 
+## 0.8.0
+
+### Minor Changes
+
+- [#651](https://github.com/bcgov/psa-job-store/pull/651) [`f1c64bf05441aecd64be04705fe6041f0093aa8a`](https://github.com/bcgov/psa-job-store/commit/f1c64bf05441aecd64be04705fe6041f0093aa8a) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-875 Replace department selector treeview
+
+- [#668](https://github.com/bcgov/psa-job-store/pull/668) [`9fd9a0045295dc2a77d1907eb79597a223f5f58d`](https://github.com/bcgov/psa-job-store/commit/9fd9a0045295dc2a77d1907eb79597a223f5f58d) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-839 Tweaks to the downloaded job profile
+
+- [#659](https://github.com/bcgov/psa-job-store/pull/659) [`b9759ff7dfcc9a11ab8fa4f6835ae3607c8107cd`](https://github.com/bcgov/psa-job-store/commit/b9759ff7dfcc9a11ab8fa4f6835ae3607c8107cd) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-877 Fix org chart cropping issues on macOS
+
+- [#668](https://github.com/bcgov/psa-job-store/pull/668) [`02de17a31ea1aa1b49726b19019e765155e8119b`](https://github.com/bcgov/psa-job-store/commit/02de17a31ea1aa1b49726b19019e765155e8119b) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-801 HM - Confirm submission before sending for verification
+
+- [#659](https://github.com/bcgov/psa-job-store/pull/659) [`b9759ff7dfcc9a11ab8fa4f6835ae3607c8107cd`](https://github.com/bcgov/psa-job-store/commit/b9759ff7dfcc9a11ab8fa4f6835ae3607c8107cd) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-860 Attach org chart to CRM with proposed position indicated
+
+- [#651](https://github.com/bcgov/psa-job-store/pull/651) [`f1c64bf05441aecd64be04705fe6041f0093aa8a`](https://github.com/bcgov/psa-job-store/commit/f1c64bf05441aecd64be04705fe6041f0093aa8a) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-874 Replace job family and stream treeview on profile search
+
+- [#660](https://github.com/bcgov/psa-job-store/pull/660) [`eb30dd2cbb2c4d2b0a334437d01e479c05b3f9d1`](https://github.com/bcgov/psa-job-store/commit/eb30dd2cbb2c4d2b0a334437d01e479c05b3f9d1) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-836 change job profile id to use id and version as compound id
+
+- [#668](https://github.com/bcgov/psa-job-store/pull/668) [`dbe7a09766d6741b4253717ebcc298a5b158ec23`](https://github.com/bcgov/psa-job-store/commit/dbe7a09766d6741b4253717ebcc298a5b158ec23) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-803 HM - Consult with Classification services
+
+- [#656](https://github.com/bcgov/psa-job-store/pull/656) [`7fb8b53583ac7f3d1a436390673a8ce2c41f4dc4`](https://github.com/bcgov/psa-job-store/commit/7fb8b53583ac7f3d1a436390673a8ce2c41f4dc4) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-876 Implement org chart accessibility for regular view
+
+### Patch Changes
+
+- [#668](https://github.com/bcgov/psa-job-store/pull/668) [`706d1eaa239f14f7594565fd9445c513d9e84eef`](https://github.com/bcgov/psa-job-store/commit/706d1eaa239f14f7594565fd9445c513d9e84eef) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-895 Adding security screening in TC with "mark all as non-editable" adds it as optional
+
+- [#669](https://github.com/bcgov/psa-job-store/pull/669) [`3a8583c7c9960e3d0d2e43da7bbfffb32720e73e`](https://github.com/bcgov/psa-job-store/commit/3a8583c7c9960e3d0d2e43da7bbfffb32720e73e) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-886 Additional information page may show incorrect excluded manager info
+
+- [#669](https://github.com/bcgov/psa-job-store/pull/669) [`678413032fc60d671bfc23126984925aa44d80b3`](https://github.com/bcgov/psa-job-store/commit/678413032fc60d671bfc23126984925aa44d80b3) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-888 Switching departments does not layout the org chart properly
+
+- [#679](https://github.com/bcgov/psa-job-store/pull/679) [`67e8fde772b77e6e7747d4514db23eb3d423acfc`](https://github.com/bcgov/psa-job-store/commit/67e8fde772b77e6e7747d4514db23eb3d423acfc) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-852 move basic details page
+
+- [#690](https://github.com/bcgov/psa-job-store/pull/690) [`c5062c9e19ee2572335a913b250e16dc91b74f78`](https://github.com/bcgov/psa-job-store/commit/c5062c9e19ee2572335a913b250e16dc91b74f78) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-905 Responsive mode for profile browsing page is broken
+
+- [#668](https://github.com/bcgov/psa-job-store/pull/668) [`706d1eaa239f14f7594565fd9445c513d9e84eef`](https://github.com/bcgov/psa-job-store/commit/706d1eaa239f14f7594565fd9445c513d9e84eef) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-861 HM - Updated UI for 'optional' fields
+
+- Updated dependencies [[`67e8fde772b77e6e7747d4514db23eb3d423acfc`](https://github.com/bcgov/psa-job-store/commit/67e8fde772b77e6e7747d4514db23eb3d423acfc)]:
+  - common-kit@0.0.2
+
 ## 0.7.0
 
 ### Minor Changes

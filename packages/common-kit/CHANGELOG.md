@@ -1,5 +1,11 @@
 # common-kit
 
+## 0.0.2
+
+### Patch Changes
+
+- [#679](https://github.com/bcgov/psa-job-store/pull/679) [`67e8fde772b77e6e7747d4514db23eb3d423acfc`](https://github.com/bcgov/psa-job-store/commit/67e8fde772b77e6e7747d4514db23eb3d423acfc) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-852 move basic details page
+
 ## 0.0.1
 
 ### Patch Changes

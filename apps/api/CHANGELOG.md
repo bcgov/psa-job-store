@@ -1,5 +1,22 @@
 # api
 
+## 0.7.0
+
+### Minor Changes
+
+- [#660](https://github.com/bcgov/psa-job-store/pull/660) [`eb30dd2cbb2c4d2b0a334437d01e479c05b3f9d1`](https://github.com/bcgov/psa-job-store/commit/eb30dd2cbb2c4d2b0a334437d01e479c05b3f9d1) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-836 change job profile id to use id and version as compound id
+
+### Patch Changes
+
+- [#659](https://github.com/bcgov/psa-job-store/pull/659) [`b9759ff7dfcc9a11ab8fa4f6835ae3607c8107cd`](https://github.com/bcgov/psa-job-store/commit/b9759ff7dfcc9a11ab8fa4f6835ae3607c8107cd) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-873 CRM attachment format for the org chart
+
+- [#679](https://github.com/bcgov/psa-job-store/pull/679) [`67e8fde772b77e6e7747d4514db23eb3d423acfc`](https://github.com/bcgov/psa-job-store/commit/67e8fde772b77e6e7747d4514db23eb3d423acfc) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-852 move basic details page
+
+- [#668](https://github.com/bcgov/psa-job-store/pull/668) [`706d1eaa239f14f7594565fd9445c513d9e84eef`](https://github.com/bcgov/psa-job-store/commit/706d1eaa239f14f7594565fd9445c513d9e84eef) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-885 Fix Position approved at
+
+- Updated dependencies [[`67e8fde772b77e6e7747d4514db23eb3d423acfc`](https://github.com/bcgov/psa-job-store/commit/67e8fde772b77e6e7747d4514db23eb3d423acfc)]:
+  - common-kit@0.0.2
+
 ## 0.6.0
 
 ### Minor Changes
