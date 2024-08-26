@@ -18,7 +18,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
         ? [
             createMenuItem({
               key: '/requests/positions/create',
-              icon: <PositionRequestOutlined />,
+              icon: <PositionRequestOutlined aria-hidden />,
               label: 'New position',
               title: '',
             }),
@@ -28,7 +28,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
         ? [
             createMenuItem({
               key: '/job-profiles/manage/create',
-              icon: <FileOutlined />,
+              icon: <FileOutlined aria-hidden />,
               label: 'Job profile',
               title: '',
             }),
@@ -40,8 +40,15 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
 
   const renderButton = useMemo(
     () => (
-      <Flex justify={collapsed ? 'left' : 'center'} style={{ width: '100%' }}>
-        <FileAddOutlined />
+      <Flex
+        justify={collapsed ? 'left' : 'center'}
+        style={{ width: '100%' }}
+        role="button"
+        aria-label="Create"
+        title="Create"
+        tabIndex={0}
+      >
+        <FileAddOutlined aria-hidden />
         <span>Create</span>
       </Flex>
     ),
@@ -53,9 +60,37 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
       {menuItems.length === 1 ? (
         <NavLink to={menuItems[0].key as string}>{renderButton}</NavLink>
       ) : (
-        <Dropdown menu={{ items: menuItems }} trigger={['click']}>
-          {renderButton}
-        </Dropdown>
+        <>
+          {/* If current solution is found to lack accessibility, implement something like below */}
+          {/* <AccessiblePopoverMenu
+            compact
+            triggerButton={
+              // <Button tabIndex={-1} style={{}} icon={<FileAddOutlined aria-hidden />} type="primary">
+              //   Create
+              // </Button>
+              renderButton
+            }
+            ariaLabel="Create new request"
+            content={
+              <Menu selectedKeys={[]}>
+                {userCanAccess(auth.user, ['hiring-manager']) && (
+                  <Menu.Item key="/requests/positions/create" icon={<PositionRequestOutlined />}>
+                    <Link to="/requests/positions/create">New position</Link>
+                  </Menu.Item>
+                )}
+                {userCanAccess(auth.user, ['total-compensation']) && (
+                  <Menu.Item key="/job-profiles/manage/create" icon={<FileOutlined />}>
+                    <Link to="/job-profiles/manage/create">Job profile</Link>
+                  </Menu.Item>
+                )}
+              </Menu>
+            }
+          ></AccessiblePopoverMenu> */}
+
+          <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+            {renderButton}
+          </Dropdown>
+        </>
       )}
     </div>
   ) : (

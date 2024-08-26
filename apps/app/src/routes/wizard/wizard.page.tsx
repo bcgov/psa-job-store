@@ -2,7 +2,7 @@ import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Menu, Modal, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { useGetDepartmentQuery } from '../../redux/services/graphql-api/department.api';
@@ -359,11 +359,11 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       hpad={false}
       grayBg={false}
       pageHeaderExtra={[
-        <AcessiblePopoverMenu
+        <AccessiblePopoverMenu
           triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
           content={getMenuContent()}
           ariaLabel="Open position request menu"
-        ></AcessiblePopoverMenu>,
+        ></AccessiblePopoverMenu>,
         <Button onClick={back} key="back" data-testid="back-button">
           Back
         </Button>,

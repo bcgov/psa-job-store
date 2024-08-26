@@ -21,6 +21,7 @@ import { UserGroupSettingOutlined } from '../../icons/user-group-setting-outline
 import { createMenuGroup, createMenuItem, createSubMenu } from '../utils/nav-menu.utils';
 import { userCanAccess } from '../utils/user-has-roles.util';
 import { CreateButton } from './create-button.component';
+import './nav-menu.component.css';
 
 export interface NavMenuProps {
   collapsed: boolean;
@@ -30,7 +31,12 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
   const auth = useAuth();
 
   return (
-    <Flex vertical style={{ paddingTop: 0, width: '100%' }}>
+    <Flex
+      vertical
+      style={{ paddingTop: 0, width: '100%' }}
+      className={`${collapsed ? 'collapsed' : 'expanded'} jobstore-side-menu`}
+    >
+      {/* {userCanAccess(auth.user, ['hiring-manager', 'total-compensation']) && <CreateButton collapsed={collapsed} />} */}
       <Menu
         inlineIndent={16}
         mode="inline"
@@ -41,17 +47,27 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
             ? [
                 {
                   key: 'create-button',
+                  className: 'create-button',
                   icon: <></>,
                   label: <CreateButton collapsed={collapsed} />,
-                  style: { backgroundColor: '#0057ad', color: 'white' },
+                  style: {
+                    backgroundColor: '#0057ad',
+                    color: 'white',
+                  },
                 },
               ]
             : []),
           ...(userCanAccess(auth.user, ['user'])
-            ? [createMenuItem({ key: '/', icon: <HomeOutlined />, label: 'Home' })]
+            ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden />, label: 'Home' })]
             : []),
           ...(userCanAccess(auth.user, ['user'])
-            ? [createMenuItem({ key: '/my-departments', icon: <PartitionOutlined />, label: 'My departments' })]
+            ? [
+                createMenuItem({
+                  key: '/my-departments',
+                  icon: <PartitionOutlined aria-hidden />,
+                  label: 'My departments',
+                }),
+              ]
             : []),
           ...(userCanAccess(auth.user, ['user', 'total-compensation'])
             ? [
@@ -62,13 +78,19 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                   label: 'Job Profiles',
                   children: [
                     ...(userCanAccess(auth.user, ['user'])
-                      ? [createMenuItem({ key: '/job-profiles', icon: <FileSearchOutlined />, label: 'Explore' })]
+                      ? [
+                          createMenuItem({
+                            key: '/job-profiles',
+                            icon: <FileSearchOutlined aria-hidden />,
+                            label: 'Explore',
+                          }),
+                        ]
                       : []),
                     ...(userCanAccess(auth.user, ['user'])
                       ? [
                           createMenuItem({
                             key: '/job-profiles/saved',
-                            icon: <FileDoneOutlined />,
+                            icon: <FileDoneOutlined aria-hidden />,
                             label: 'Saved Profiles',
                           }),
                         ]
@@ -77,22 +99,22 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                       ? [
                           createSubMenu({
                             key: '/job-profiles/manage',
-                            icon: <FileSettingOutlined />,
+                            icon: <FileSettingOutlined aria-hidden />,
                             label: 'Manage profiles',
                             children: [
                               createMenuItem({
                                 key: '/job-profiles/manage/draft',
-                                icon: <FileOutlined />,
+                                icon: <FileOutlined aria-hidden />,
                                 label: 'Drafts',
                               }),
                               createMenuItem({
                                 key: '/job-profiles/manage/published',
-                                icon: <FileProtectOutlined />,
+                                icon: <FileProtectOutlined aria-hidden />,
                                 label: 'Published',
                               }),
                               createMenuItem({
                                 key: '/job-profiles/manage/archived',
-                                icon: <FileZipOutlined />,
+                                icon: <FileZipOutlined aria-hidden />,
                                 label: 'Archived',
                               }),
                             ],
@@ -108,14 +130,14 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                 createMenuGroup({
                   key: '/requests',
                   collapsed,
-                  icon: <InboxOutlined />,
+                  icon: <InboxOutlined aria-hidden />,
                   label: 'Requests',
                   children: [
                     ...(userCanAccess(auth.user, ['hiring-manager'])
                       ? [
                           createMenuItem({
                             key: '/requests/positions',
-                            icon: <PositionRequestOutlined />,
+                            icon: <PositionRequestOutlined aria-hidden />,
                             label: 'New position',
                           }),
                         ]
@@ -124,14 +146,14 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                       ? [
                           createSubMenu({
                             key: '/requests/positions',
-                            icon: <SendSettingOutlined />,
+                            icon: <SendSettingOutlined aria-hidden />,
                             label: 'Manage requests',
                             children: [
                               ...(userCanAccess(auth.user, ['classification'])
                                 ? [
                                     createMenuItem({
                                       key: '/requests/positions/manage',
-                                      icon: <PositionRequestSettingOutlined />,
+                                      icon: <PositionRequestSettingOutlined aria-hidden />,
                                       label: 'New position',
                                     }),
                                   ]
@@ -140,7 +162,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                                 ? [
                                     createMenuItem({
                                       key: '/requests/positions/manage/approved',
-                                      icon: <FileDoneOutlined />,
+                                      icon: <FileDoneOutlined aria-hidden />,
                                       label: 'Approved',
                                     }),
                                   ]
@@ -158,17 +180,17 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                 createMenuGroup({
                   key: '/settings',
                   collapsed,
-                  icon: <SettingOutlined />,
+                  icon: <SettingOutlined aria-hidden />,
                   label: 'Settings',
                   children: [
                     createMenuItem({
                       key: '/settings/departments',
-                      icon: <PartitionSettingOutlined />,
+                      icon: <PartitionSettingOutlined aria-hidden />,
                       label: 'Departments',
                     }),
                     createMenuItem({
                       key: '/settings/users',
-                      icon: <UserGroupSettingOutlined />,
+                      icon: <UserGroupSettingOutlined aria-hidden />,
                       label: 'Users',
                     }),
                   ],

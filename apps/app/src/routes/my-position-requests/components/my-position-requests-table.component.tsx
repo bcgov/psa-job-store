@@ -18,7 +18,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
-import AcessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
@@ -491,7 +491,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           <></>
         ) : (
           <>
-            <AcessiblePopoverMenu
+            <AccessiblePopoverMenu
               triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
               content={
                 <MenuContent
@@ -501,7 +501,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                   selectedKeys={selectedKeys}
                 />
               }
-            ></AcessiblePopoverMenu>
+            ></AccessiblePopoverMenu>
 
             {/* <Popover
             open={popoverVisible[record.id]}

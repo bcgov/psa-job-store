@@ -1,12 +1,12 @@
 import { QuestionCircleFilled } from '@ant-design/icons';
 import { Button, Menu } from 'antd';
-import AcessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import './org-chart-help-button.component.css';
 
 export const OrgChartHelpButton = () => {
   return (
     <>
-      <AcessiblePopoverMenu
+      <AccessiblePopoverMenu
         padding={'0px'}
         triggerButton={<Button type="link" icon={<QuestionCircleFilled />} />}
         content={
@@ -25,7 +25,7 @@ export const OrgChartHelpButton = () => {
           </Menu>
         }
         ariaLabel="Org chart need updating?"
-      ></AcessiblePopoverMenu>
+      ></AccessiblePopoverMenu>
     </>
   );
 };

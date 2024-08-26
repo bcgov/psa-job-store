@@ -3,7 +3,7 @@ import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Col, FormInstance, List, Menu, Modal, Row, Typography } from 'antd';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import AcessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
@@ -395,11 +395,11 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
           <StatusIndicator status={positionRequest?.status ?? ''} />
         </div>,
 
-        <AcessiblePopoverMenu
+        <AccessiblePopoverMenu
           triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
           content={getMenuContent()}
           ariaLabel="Open position request menu"
-        ></AcessiblePopoverMenu>,
+        ></AccessiblePopoverMenu>,
         // <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
         //   <Button icon={<EllipsisOutlined />}></Button>
         // </Popover>
