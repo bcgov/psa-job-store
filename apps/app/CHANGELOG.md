@@ -1,5 +1,11 @@
 # app
 
+## 0.9.0
+
+### Minor Changes
+
+- [#707](https://github.com/bcgov/psa-job-store/pull/707) [`b2f17b9d5361772967b781a3edaac2d4b427dbb9`](https://github.com/bcgov/psa-job-store/commit/b2f17b9d5361772967b781a3edaac2d4b427dbb9) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-921 Incorrect classification displayed for Clerk 12 (shows Clerk 11)
+
 ## 0.8.0
 
 ### Minor Changes
