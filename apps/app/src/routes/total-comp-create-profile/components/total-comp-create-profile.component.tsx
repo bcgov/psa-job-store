@@ -274,9 +274,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   if (jobProfileData?.jobProfile.state === 'DRAFT') {
     if (jobProfileData?.jobProfile.is_archived === false) {
-      link = '/job-profiles/manage/drafts/';
+      link = '/job-profiles/manage/draft/';
     } else {
-      link = '/job-profiles/manage/published/';
+      link = '/job-profiles/manage/archived/'; //'/job-profiles/manage/published/';
     }
   } else {
     link = '/job-profiles/manage/published/';
@@ -809,7 +809,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     if (
       pickerData?.requirementsWithoutReadOnly?.securityScreenings &&
       !autoSecuritySettingsSetup.current &&
-      location.pathname === '/job-profiles/manage/drafts/create'
+      location.pathname === '/job-profiles/manage/draft/create'
     ) {
       const securityScreenings = pickerData.requirementsWithoutReadOnly.securityScreenings;
       const securityScreeningsWithoutFamilyStream = securityScreenings.filter(
@@ -1518,6 +1518,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [createJobProfile] = useCreateOrUpdateJobProfileMutation();
 
   function transformFormDataToApiSchema(formData: any): CreateJobProfileInput {
+    // console.log('transformFormDataToApiSchema formData: ', formData, ', jobProfileData: ', jobProfileData);
     return {
       data: {
         state: formData.state,
@@ -1711,7 +1712,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         // saving as draft
         const newId = response.createOrUpdateJobProfile.toString();
         setId(newId);
-        navigate(`/job-profiles/manage/drafts/${newId}`); // Update the URL
+        navigate(`/job-profiles/manage/draft/${newId}`); // Update the URL
       } else {
         // saving as published
         const newId = response.createOrUpdateJobProfile.toString();
@@ -1783,6 +1784,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const save = async (isPublishing = false, isUnpublishing = false) => {
     // validate only if publishing
     if (state === 'PUBLISHED' || isPublishing) {
+      // console.log('PUBLISHING, state: ', state, ', isPublishing: ', isPublishing);
       const errors = Object.values(profileFormErrors).map((error: any) => {
         const message =
           error.message != null
@@ -4546,7 +4548,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     type="primary"
                     style={{ marginTop: 16 }}
                     onClick={async () => {
-                      await save();
+                      await save(true);
                     }}
                   >
                     Save and publish
@@ -4670,7 +4672,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     <Typography.Title level={5}>View all profiles</Typography.Title>
                     <Typography.Text>View all profiles that you have created.</Typography.Text>
                     <br></br>
-                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/job-profiles/manage/drafts')}>
+                    <Button style={{ marginTop: 10 }} onClick={() => navigate('/job-profiles/manage/draft')}>
                       Go to drafts
                     </Button>
                   </>
@@ -5050,9 +5052,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     <>
       <PageHeader
         title={
-          location.pathname.startsWith('/job-profiles/manage/drafts') && title.trim() == ''
+          location.pathname.startsWith('/job-profiles/manage/draft') && title.trim() == ''
             ? 'New profile'
-            : !location.pathname.startsWith('/job-profiles/manage/drafts') && title.trim() == ''
+            : !location.pathname.startsWith('/job-profiles/manage/draft') && title.trim() == ''
               ? 'Untitled'
               : title
         }
@@ -5061,7 +5063,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         button1Content={getMenuContent}
         button2Text={state == 'PUBLISHED' ? 'Save and publish' : 'Save as draft'}
         button2Callback={async () => {
-          await save();
+          await save(state == 'PUBLISHED' ? true : false);
         }}
         versions={jobProfileMeta?.jobProfileMeta}
         selectVersionCallback={(selectedVersion: IdVersion) => {
