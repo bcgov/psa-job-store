@@ -220,7 +220,14 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       try {
         await new Promise((resolve) => setTimeout(resolve, 300));
 
-        const png = await generatePNGBase64(getNodes);
+        let png = '';
+
+        try {
+          png = await generatePNGBase64(getNodes);
+        } catch (error) {
+          console.error('Error generating PNG: ', error);
+        }
+
         const result = await submitPositionRequest({
           id: positionRequestId,
           comment: comment,

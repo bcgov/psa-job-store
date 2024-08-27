@@ -1561,18 +1561,16 @@ export class PositionRequestApiService {
             contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             data: jobProfileBase64,
           },
-          // {
-          //   name: `${zeroFilledPositionNumber} - Organization Chart.json`.substring(0, 40),
-          //   fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
-          //   contentType: 'application/json',
-          //   data: orgChartBase64,
-          // },
-          {
-            name: 'Org chart',
-            fileName: pngFileName,
-            contentType: 'image/png',
-            data: orgchartPng,
-          },
+          ...(orgchartPng && orgchartPng.trim() !== ''
+            ? [
+                {
+                  name: 'Org chart',
+                  fileName: pngFileName,
+                  contentType: 'image/png',
+                  data: orgchartPng,
+                },
+              ]
+            : []),
         ],
       };
 

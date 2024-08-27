@@ -33,7 +33,9 @@ export class OrgChartService {
     const positionsWithIncumbentsIds = filteredPositions.map((row) => row['A.POSITION_NBR']);
 
     const employees: Map<string, Employee[]> = await this.peoplesoftService.getEmployeesForPositions(
-      process.env.TEST_ENV === 'true' ? ['00054971', '00100306', '00033584', '00109865'] : positionsWithIncumbentsIds,
+      process.env.TEST_ENV === 'true'
+        ? ['00054971', '00100306', '00033584', '00109865', '00078742', '00022287']
+        : positionsWithIncumbentsIds,
     );
 
     // Loop through response and generate the tree for everyone in the _current department_
