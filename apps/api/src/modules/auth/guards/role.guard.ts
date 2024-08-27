@@ -17,7 +17,7 @@ export class RoleGuard extends PassportAuthGuard('keycloak') {
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     // for local development only - allows postman access
-    if (process.env.TEST_ENV) return true;
+    if (process.env.TEST_ENV === 'true') return true;
 
     const roles = this.reflector.get<string[]>(ROLES, context.getHandler());
     if (!roles) return true;
