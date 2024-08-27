@@ -9,6 +9,7 @@ interface WizardStepsProps {
   maxStepCompleted?: number;
   onStepClick: (step: number) => void;
   disabledTooltip?: string | null;
+  disableTooltipForBasicInfo?: boolean;
 }
 
 export const WizardSteps: React.FC<WizardStepsProps> = ({
@@ -17,6 +18,7 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
   maxStepCompleted = 0,
   onStepClick,
   disabledTooltip,
+  disableTooltipForBasicInfo = true,
 }) => {
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [stepsDirection, setStepsDirection] = useState<'horizontal' | 'vertical'>('horizontal');
@@ -111,11 +113,17 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
             },
             {
               title: (
-                <Tooltip title={disabledTooltip && maxStepCompleted >= 1 && current != 1 ? disabledTooltip : ''}>
+                <Tooltip
+                  title={
+                    disabledTooltip && disableTooltipForBasicInfo && maxStepCompleted >= 1 && current != 1
+                      ? disabledTooltip
+                      : ''
+                  }
+                >
                   <div>
                     {current == 1 ? (
                       <h2 className={current == 1 ? 'current' : ''}>Basic Details</h2>
-                    ) : maxStepCompleted >= 1 && current != 1 && !disabledTooltip ? (
+                    ) : maxStepCompleted >= 1 && current != 1 && (!disabledTooltip || !disableTooltipForBasicInfo) ? (
                       <span aria-label="Go to step 2 of the wizard - basic details" tabIndex={0} role="button">
                         Basic Details
                       </span>
@@ -126,9 +134,12 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                   </div>
                 </Tooltip>
               ),
-              onClick: () => (maxStepCompleted >= 1 && current != 1 && !disabledTooltip ? handleStepClick(1) : {}),
+              onClick: () =>
+                maxStepCompleted >= 1 && current != 1 && (!disabledTooltip || !disableTooltipForBasicInfo)
+                  ? handleStepClick(1)
+                  : {},
               className: `${maxStepCompleted >= 1 && current != 1 ? 'clickable' : 'waiting'} ${
-                disabledTooltip && maxStepCompleted >= 1 && current != 1 ? 'no-click' : ''
+                disabledTooltip && disableTooltipForBasicInfo && maxStepCompleted >= 1 && current != 1 ? 'no-click' : ''
               }`,
             },
             {

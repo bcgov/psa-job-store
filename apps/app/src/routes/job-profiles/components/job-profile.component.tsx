@@ -621,7 +621,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   };
 
   // Construct the back URL
-  console.log('searchParams: ', searchParams);
   const backUrl = `/job-profiles?${searchParams}`;
 
   if (isLoading) {

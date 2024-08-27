@@ -468,7 +468,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                     //  jobProfilesLoading || isLoading
                     isLoading={isLoadingCalcualted}
                     currentPage={currentPage}
-                    pageSize={5}
+                    pageSize={pageSize}
                     totalResults={totalResults}
                     onPageChange={handlePageChange}
                     isSearchingOrFiltering={isSearchingOrFiltering}

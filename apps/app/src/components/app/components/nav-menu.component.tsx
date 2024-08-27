@@ -145,7 +145,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                     ...(userCanAccess(auth.user, ['classification', 'total-compensation'])
                       ? [
                           createSubMenu({
-                            key: '/requests/positions',
+                            key: 'manage-requests',
                             icon: <SendSettingOutlined aria-hidden />,
                             label: 'Manage requests',
                             children: [
