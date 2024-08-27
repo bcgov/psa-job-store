@@ -126,7 +126,7 @@ export interface JobProfileModel {
   id: number;
   accountabilities: AccountabilitiesModel[];
   behavioural_competencies: BehaviouralCompetencies[];
-  classifications: ClassificationModelWrapped[] | null;
+  classifications?: ClassificationModelWrapped[] | null;
   education: AccountabilitiesModel[];
   job_experience: AccountabilitiesModel[];
   organization_id: string;

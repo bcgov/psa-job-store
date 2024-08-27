@@ -42,7 +42,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   const {
     wizardData,
     setWizardData,
-    getClassificationById,
+    // getClassificationById,
     positionRequestProfileId,
     positionRequestProfileVersion,
     positionRequestId,
@@ -90,9 +90,9 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         (exp: { text: string; isCustom?: boolean }) => !exp.isCustom || exp.text.trim() !== '',
       ),
       behavioural_competencies: originalData.behavioural_competencies,
-      classifications: originalData.classifications.map((classification: any) => ({
-        classification: getClassificationById(classification.classification),
-      })),
+      // classifications: originalData.classifications.map((classification: any) => ({
+      //   classification: getClassificationById(classification.classification),
+      // })),
       role: { id: originalData.roleId || null },
       role_type: { id: originalData.roleTypeId || null },
       scopes: [], //{ id: originalData.scopeId || null },
@@ -201,21 +201,21 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       // console.log('transformedData: ', transformedData);
 
       // Check if any classification is undefined or if the array is empty
-      const hasUndefinedClassification = transformedData?.classifications?.some(
-        (item) => item.classification === undefined,
-      );
-      const isClassificationsEmpty = transformedData?.classifications?.length === 0;
+      // const hasUndefinedClassification = transformedData?.classifications?.some(
+      //   (item) => item.classification === undefined,
+      // );
+      // const isClassificationsEmpty = transformedData?.classifications?.length === 0;
 
-      if (
-        (hasUndefinedClassification || isClassificationsEmpty || !transformedData?.classifications) &&
-        action === 'next'
-      ) {
-        Modal.error({
-          title: 'Error',
-          content: 'Could not find classification, please try again later or contact an administrator.',
-        });
-        return;
-      }
+      // if (
+      //   (hasUndefinedClassification || isClassificationsEmpty || !transformedData?.classifications) &&
+      action === 'next';
+      // ) {
+      //   Modal.error({
+      //     title: 'Error',
+      //     content: 'Could not find classification, please try again later or contact an administrator.',
+      //   });
+      //   return;
+      // }
 
       // if (transformedData.classifications == [{}]) console.log('whhoops');
 
