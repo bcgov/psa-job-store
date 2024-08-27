@@ -385,7 +385,7 @@ const WizardEditProfile = forwardRef(
         // console.log('effectiveData?.classifications: ', effectiveData?.classifications);
 
         const classificationIds =
-          effectiveData?.classifications?.map((c) => ({ classification: c.classification?.id })) ?? [];
+          originalProfileData.jobProfile?.classifications?.map((c) => ({ classification: c.classification?.id })) ?? [];
 
         const fieldMappings = [
           {
@@ -812,7 +812,7 @@ const WizardEditProfile = forwardRef(
               column={1}
             >
               <Descriptions.Item label="Expected classification">
-                {effectiveData?.classifications?.[0]?.classification?.name}
+                {originalProfileData?.jobProfile?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
                 <PositionProfile

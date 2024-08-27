@@ -1,14 +1,15 @@
 import { Button, Card, Divider, Form, Tooltip } from 'antd';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
-import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
+import { GetJobProfileResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { GetPositionRequestResponseContent } from '../../../redux/services/graphql-api/position-request.api';
 
 interface OtherDetailsProps {
   wizardData: JobProfileModel | null;
   positionRequestData: GetPositionRequestResponseContent | null;
+  originalProfileData: GetJobProfileResponse | undefined;
 }
 
-const OtherDetails: React.FC<OtherDetailsProps> = ({ wizardData, positionRequestData }) => {
+const OtherDetails: React.FC<OtherDetailsProps> = ({ wizardData, positionRequestData, originalProfileData }) => {
   {
     /* Other details card */
   }
@@ -57,7 +58,9 @@ const OtherDetails: React.FC<OtherDetailsProps> = ({ wizardData, positionRequest
           labelCol={{ className: 'card-label' }}
           colon={false}
         >
-          <div style={{ margin: 0 }}>{wizardData?.classifications?.[0]?.classification?.name ?? ''}</div>
+          <div style={{ margin: 0 }}>
+            {originalProfileData?.jobProfile?.classifications?.[0]?.classification?.name ?? ''}
+          </div>
         </Form.Item>
 
         <Divider className="hr-reduced-margin" />

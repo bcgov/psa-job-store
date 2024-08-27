@@ -19,6 +19,7 @@ import { useReactFlow } from 'reactflow';
 import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -67,12 +68,21 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   const [mode, setMode] = useState('');
   const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
+  // todo: move this to a context
+  const [triggerGetJobProfile, { data: originalProfileData, isFetching: originalJobProfileFetching }] =
+    useLazyGetJobProfileQuery();
   const [confirmation, setConfirmation] = useState<boolean>(false);
   const [orgChartDataForPng, setOrgChartDataForPng] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData, getClassificationById } =
-    useWizardContext();
+  const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData } = useWizardContext();
   const { getNodes } = useReactFlow();
+
+  useEffect(() => {
+    triggerGetJobProfile({
+      id: positionRequestData?.parent_job_profile_id,
+      version: positionRequestData?.parent_job_profile_version,
+    });
+  }, [triggerGetJobProfile, positionRequestData]);
 
   // const {
   //   data: positionRequestData,
@@ -339,7 +349,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       //   positionRequest?.classification_id,
       //   positionRequest,
       // );
-      const classification = getClassificationById(positionRequest?.classification_id ?? '');
+      const classification = originalProfileData?.jobProfile?.classifications?.[0].classification; //getClassificationById(positionRequest?.classification_id ?? '');
+      if (!classification) return;
       // console.log('classification: ', classification);
 
       // const { data: departmentData } = useGetDepartmentQuery(positionRequest?.department_id);
@@ -356,13 +367,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       );
       setOrgChartDataForPng(autolayout(orgChartDataForPng));
     }
-  }, [positionRequest, setOrgChartDataForPng, getClassificationById]);
+  }, [positionRequest, setOrgChartDataForPng, originalProfileData]);
 
   // augment data the way it's done upon submission for position creation, e.g.
   // - update supervisor and excluded manager nodes
   // - add node for new position
 
-  if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew || !orgChartDataForPng)
+  if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew || !orgChartDataForPng || originalJobProfileFetching)
     return <LoadingSpinnerWithMessage />;
 
   return (
