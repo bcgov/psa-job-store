@@ -96,7 +96,7 @@ export const OrgChartNode = ({
           actions={
             selected && orgChartType === OrgChartType.DYNAMIC
               ? orgChartContext === OrgChartContext.DEFAULT
-                ? !roles.includes('hiring-manager')
+                ? roles.includes('hiring-manager')
                   ? [
                       <CreatePositionButton
                         departmentId={data.department?.id}
