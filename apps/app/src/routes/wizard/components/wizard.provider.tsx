@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ReactNode, useContext, useState } from 'react';
-import {
-  ClassificationModel,
-  GetClassificationsResponse,
-  JobProfileModel,
-} from '../../../redux/services/graphql-api/job-profile-types';
+import { GetClassificationsResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { GetPositionRequestResponseContent } from '../../../redux/services/graphql-api/position-request.api';
 
 // interface WizardData {
@@ -99,7 +95,7 @@ interface WizardContextProps {
   setRequiresVerification: React.Dispatch<React.SetStateAction<boolean>>;
 
   resetWizardContext: () => void;
-  getClassificationById: (id: string) => ClassificationModel | undefined;
+  // getClassificationById: (id: string) => ClassificationModel | undefined;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -154,16 +150,16 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [currentSection, setCurrentSection] = useState<string | null>(null);
   const [requiresVerification, setRequiresVerification] = useState(false);
 
-  function getClassificationById(id: string): ClassificationModel | undefined {
-    // If data is loaded, find the classification by ID
-    // console.log('classificationsData: ', classificationsData, id);
-    if (classificationsData) {
-      return classificationsData.classifications.find(
-        (classification: ClassificationModel) => classification.id === id,
-      );
-    }
-    return;
-  }
+  // function getClassificationById(id: string): ClassificationModel | undefined {
+  //   // If data is loaded, find the classification by ID
+  //   // console.log('classificationsData: ', classificationsData, id);
+  //   if (classificationsData) {
+  //     return classificationsData.classifications.find(
+  //       (classification: ClassificationModel) => classification.id === id,
+  //     );
+  //   }
+  //   return;
+  // }
 
   const resetWizardContext = () => {
     setWizardData(null);
@@ -272,7 +268,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     requiresVerification,
     setRequiresVerification,
     resetWizardContext,
-    getClassificationById,
+    // getClassificationById,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

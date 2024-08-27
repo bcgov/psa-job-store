@@ -1,8 +1,9 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Col, Menu, Modal, Row, Typography } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
+import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -31,8 +32,17 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   setCurrentStep,
 }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
+  // todo: move this to a context
+  const [triggerGetJobProfile, { data: originalProfileData }] = useLazyGetJobProfileQuery();
   const { positionRequestId, wizardData, positionRequestData, setPositionRequestData } = useWizardContext();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    triggerGetJobProfile({
+      id: positionRequestData?.parent_job_profile_id,
+      version: positionRequestData?.parent_job_profile_version,
+    });
+  }, [triggerGetJobProfile, positionRequestData]);
 
   const onNextCallback = async () => {
     setIsLoading(true);
@@ -208,7 +218,11 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           />
           <Row {...{ justify: 'center' }}>
             <Col {...{ sm: 24, md: 24, lg: 24, xxl: 18 }}>
-              <OtherDetails wizardData={wizardData} positionRequestData={positionRequestData}></OtherDetails>
+              <OtherDetails
+                wizardData={wizardData}
+                positionRequestData={positionRequestData}
+                originalProfileData={originalProfileData}
+              ></OtherDetails>
             </Col>
           </Row>
         </div>
