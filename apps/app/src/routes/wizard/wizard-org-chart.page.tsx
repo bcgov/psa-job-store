@@ -14,7 +14,6 @@ import {
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { DepartmentFilter } from '../org-chart/components/department-filter.component';
 import { OrgChart } from '../org-chart/components/org-chart';
-import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
 import { TreeChartSearchProvider } from '../org-chart/components/tree-org-chart/tree-org-chart-search-context';
 import { TreeOrgChartSearch } from '../org-chart/components/tree-org-chart/tree-org-chart-search.component';
 import TreeOrgChart from '../org-chart/components/tree-org-chart/tree-org-chart.component';
@@ -41,12 +40,12 @@ export const WizardOrgChartPage = ({
   const { positionRequestDepartmentId, resetWizardContext, positionRequestData, positionRequestId } =
     useWizardContext();
 
-  // this page gets displayed on two routes: /my-position-requests/create and /my-position-requests/:id
-  // if we navigate to /my-position-requests/create, wipe all wizard context info
+  // this page gets displayed on two routes: /requests/positions/create and /requests/positions/:id
+  // if we navigate to /requests/positions/create, wipe all wizard context info
   const [locationProcessed, setLocationProcessed] = useState(false);
   const location = useLocation();
   useEffect(() => {
-    if (location.pathname === '/my-position-requests/create') {
+    if (location.pathname === '/requests/positions/create') {
       resetWizardContext();
       setSelectedDepartment(null);
       setSelectedPositionId(null);
@@ -56,7 +55,7 @@ export const WizardOrgChartPage = ({
   }, [location.pathname]);
 
   const [selectedDepartment, setSelectedDepartment] = useState<string | null | undefined>(positionRequestDepartmentId);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [nextButtonTooltipTitle, setNextButtonTooltipTitle] = useState<string>('');
   const [positionVacant, setPositionVacant] = useState<boolean>(false);
@@ -117,13 +116,13 @@ export const WizardOrgChartPage = ({
   const next = async ({ switchStep = true }: { switchStep?: boolean } = {}) => {
     if (selectedDepartment == null || selectedPositionId == null) return;
 
-    setIsLoading(true);
+    // setIsLoading(true);
 
     try {
       // 1-second delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const png = await generatePNGBase64(getNodes);
+      // const png = await generatePNGBase64(getNodes);
 
       // downloadImage('data:image/png;base64,' + png, 'org-chart.png');
 
@@ -135,7 +134,7 @@ export const WizardOrgChartPage = ({
         current_reports_to_position_id: positionRequestData?.reports_to_position_id,
         reSelectSupervisor: reSelectSupervisor,
         changeStep: switchStep,
-        svg: png,
+        // svg: png,
       });
 
       if (result != 'CANCELLED' && switchStep) {
@@ -151,7 +150,7 @@ export const WizardOrgChartPage = ({
       console.error('An error occurred:', error);
       return undefined;
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -180,7 +179,10 @@ export const WizardOrgChartPage = ({
     setSearchTerm(value);
   }, []);
 
-  if (locationProcessed === false) {
+  // ensure that position request and profile data are loaded to prevent race condition
+  // for what node to select when org chart loads: targetId={selectedPositionId ?? profileData?.profile.position_id}
+  // selectedPositionId is sourced from positionRequest data, which will always be defined when this component renders
+  if (locationProcessed === false || !profileData?.profile) {
     return <LoadingComponent />;
   }
 
@@ -209,7 +211,7 @@ export const WizardOrgChartPage = ({
             onClick={() => {
               next();
             }}
-            loading={isLoading}
+            // loading={isLoading}
           >
             Save and next
           </Button>
@@ -286,7 +288,15 @@ export const WizardOrgChartPage = ({
             </Row>
 
             <>
-              <div style={{ display: currentView !== 'chart' ? 'none' : 'block', height: '100%' }}>
+              {/* <div className="sr-only" style={{ display: currentView !== 'chart' ? 'none' : 'block' }} tabIndex={0}>
+                This chart view is not keyboard accessible. Please switch to the tree view for a keyboard-navigable
+                version.
+              </div> */}
+              <div
+                style={{ display: currentView !== 'chart' ? 'none' : 'block', height: '100%' }}
+                aria-hidden={true}
+                tabIndex={-1}
+              >
                 <OrgChart
                   type={OrgChartType.DYNAMIC}
                   context={OrgChartContext.WIZARD}
@@ -300,6 +310,7 @@ export const WizardOrgChartPage = ({
                   departmentIdIsLoading={isFetchingUserProfile}
                   targetId={selectedPositionId ?? profileData?.profile.position_id}
                   wrapProvider={false}
+                  // wizardNextHandler={next}
                 />
               </div>
               {

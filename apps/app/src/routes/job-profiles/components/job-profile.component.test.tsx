@@ -172,7 +172,7 @@ describe('JobProfile Component Tests', () => {
   it('fetches data when id is provided', async () => {
     render(
       <MemoryRouter>
-        <JobProfile id="123" />
+        <JobProfile parentJobProfileId={123} parentJobProfileVersion={1} />
       </MemoryRouter>,
     );
 

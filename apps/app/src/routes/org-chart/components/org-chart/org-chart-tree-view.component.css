@@ -1,0 +1,4 @@
+.org-chart-tree ul, .org-chart-tree li {
+    list-style-type: none;
+    padding-left: 0;
+}

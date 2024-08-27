@@ -16,13 +16,19 @@ import ErrorBoundary from './routes/error-boundary/ErrorBoundary';
 import { WizardProvider } from './routes/wizard/components/wizard.provider';
 import { sendLogToServer } from './utils/logger-service.util';
 
+// const origin = window.location.origin;
+// console.log('window.location: ', window.location.toString());
+
+// origin on login is http://localhost:5173/?state=123...
+// VITE_KEYCLOAK_REDIRECT_URL is http://localhost:5173/login/auth/login
+
 export const oidcConfig: AuthProviderProps = {
   userStore: new WebStorageStateStore({
     store: localStorage,
   }),
   authority: VITE_KEYCLOAK_REALM_URL,
   client_id: VITE_KEYCLOAK_CLIENT_ID,
-  redirect_uri: VITE_KEYCLOAK_REDIRECT_URL,
+  redirect_uri: VITE_KEYCLOAK_REDIRECT_URL, //origin, // using origin here causes a login bug
 };
 
 window.addEventListener('error', function (event) {

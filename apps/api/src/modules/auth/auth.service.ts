@@ -61,6 +61,10 @@ export class AuthService {
     return [this.configService.get('KEYCLOAK_CLIENT_ID_PRIVATE'), this.configService.get('KEYCLOAK_CLIENT_ID_PUBLIC')];
   }
 
+  getExpectedKeyCloakIssuer(): string {
+    return this.configService.get('KEYCLOAK_REALM_URL');
+  }
+
   async getUser(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id: id } });
     return user;

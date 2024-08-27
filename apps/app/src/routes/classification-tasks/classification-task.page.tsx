@@ -18,7 +18,6 @@ import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import './classification-tasks.page.css';
@@ -49,7 +48,7 @@ export const ClassificationTaskPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
-    const linkToCopy = `${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
@@ -96,17 +95,23 @@ export const ClassificationTaskPage = () => {
       key: '2',
       label: 'Organization Chart',
       children: (
-        <OrgChart
-          type={OrgChartType.READONLY}
-          departmentId={data.positionRequest?.department_id ?? ''}
-          elements={snapshotCopy}
-        />
+        <div style={{ height: '100%' }}>
+          <OrgChart
+            type={OrgChartType.READONLY}
+            departmentId={data.positionRequest?.department_id ?? ''}
+            elements={snapshotCopy}
+          />
+        </div>
       ),
     },
     {
       key: '3',
       label: 'Job Profile',
-      children: <JobProfileWithDiff positionRequestData={data} />,
+      children: (
+        <div style={{ padding: '0 1rem 1rem 1rem' }}>
+          <JobProfileWithDiff positionRequestData={data} />
+        </div>
+      ),
     },
     {
       key: '4',
@@ -184,7 +189,7 @@ export const ClassificationTaskPage = () => {
                           <strong>Invite others to review</strong>
                           <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                           <Space>
-                            <Text>{`${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`}</Text>
+                            <Text>{`${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`}</Text>
                             <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                               Copy URL
                             </Button>
@@ -256,46 +261,38 @@ export const ClassificationTaskPage = () => {
 
   return (
     <>
-      <Row align="middle" justify="space-between">
-        <Col xs={24} lg={21}>
-          <PageHeader
-            title={data?.positionRequest?.title}
-            subTitle={
-              <div>
-                <PositionProfile
-                  prefix="Reporting to"
-                  mode="compact"
-                  positionNumber={data?.positionRequest?.reports_to_position_id}
-                  orgChartData={data?.positionRequest?.orgchart_json}
-                ></PositionProfile>
-              </div>
-            }
-            additionalBreadcrumb={{ title: data?.positionRequest?.title }}
-          />
-        </Col>
-        <Col xs={24} lg={3}>
-          <Row justify="start">
-            <Col>
-              {data?.positionRequest?.status && <StatusIcon status={data.positionRequest.status} />}
+      <PageHeader
+        extra={
+          <>
+            {data?.positionRequest?.status && <StatusIcon status={data.positionRequest.status} />}
 
-              <Divider type="vertical" />
-              <Dropdown menu={{ items }} placement="bottom" trigger={['click']}>
-                <Button icon={<EllipsisOutlined />}></Button>
-              </Dropdown>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-
-      <ContentWrapper>
-        <Tabs
-          activeKey={activeTabKey}
-          onChange={(key) => setActiveTabKey(key)}
-          defaultActiveKey="1"
-          items={tabItems}
-          tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
-        />
-      </ContentWrapper>
+            <Divider type="vertical" />
+            <Dropdown menu={{ items }} placement="bottom" trigger={['click']}>
+              <Button icon={<EllipsisOutlined />}></Button>
+            </Dropdown>
+          </>
+        }
+        title={data?.positionRequest?.title}
+        subTitle={
+          <div>
+            <PositionProfile
+              prefix="Reporting to"
+              mode="compact"
+              positionNumber={data?.positionRequest?.reports_to_position_id}
+              orgChartData={data?.positionRequest?.orgchart_json}
+            />
+          </div>
+        }
+        additionalBreadcrumb={{ title: data?.positionRequest?.title }}
+      />
+      <Tabs
+        activeKey={activeTabKey}
+        onChange={(key) => setActiveTabKey(key)}
+        defaultActiveKey="1"
+        items={tabItems}
+        tabBarStyle={{ backgroundColor: '#fff', padding: '0 1rem 0px 1rem' }}
+        style={{ backgroundColor: '#F0F2F5' }}
+      />
     </>
   );
 };

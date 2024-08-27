@@ -50,6 +50,9 @@ interface WizardContextProps {
   positionRequestProfileId: number | null;
   setPositionRequestProfileId: React.Dispatch<React.SetStateAction<number | null>>;
 
+  positionRequestProfileVersion: number | null;
+  setPositionRequestProfileVersion: React.Dispatch<React.SetStateAction<number | null>>;
+
   positionRequestDepartmentId: string | null;
   setPositionRequestDepartmentId: React.Dispatch<React.SetStateAction<string | null>>;
 
@@ -92,6 +95,7 @@ interface WizardContextProps {
   setRequiresVerification: React.Dispatch<React.SetStateAction<boolean>>;
 
   resetWizardContext: () => void;
+  // getClassificationById: (id: string) => ClassificationModel | undefined;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -100,6 +104,7 @@ interface WizardProviderProps {
   children: ReactNode;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useWizardContext = () => {
   const context = useContext(WizardContext);
   if (!context) {
@@ -133,6 +138,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
 
   const [positionRequestId, setPositionRequestId] = useState<number | null>(null);
   const [positionRequestProfileId, setPositionRequestProfileId] = useState<number | null>(null);
+  const [positionRequestProfileVersion, setPositionRequestProfileVersion] = useState<number | null>(null);
   const [positionRequestDepartmentId, setPositionRequestDepartmentId] = useState<string | null>(null);
 
   const [originalProfessionalRegistrationFields, setOriginalProfessionalRegistrationFields] = useState<any[]>([]);
@@ -143,6 +149,17 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [originalBehaviouralCompetenciesFields, setOriginalBehaviouralCompetenciesFields] = useState<any[]>([]);
   const [currentSection, setCurrentSection] = useState<string | null>(null);
   const [requiresVerification, setRequiresVerification] = useState(false);
+
+  // function getClassificationById(id: string): ClassificationModel | undefined {
+  //   // If data is loaded, find the classification by ID
+  //   // console.log('classificationsData: ', classificationsData, id);
+  //   if (classificationsData) {
+  //     return classificationsData.classifications.find(
+  //       (classification: ClassificationModel) => classification.id === id,
+  //     );
+  //   }
+  //   return;
+  // }
 
   const resetWizardContext = () => {
     setWizardData(null);
@@ -166,6 +183,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setPositionRequestData(null);
     setPositionRequestId(null);
     setPositionRequestProfileId(null);
+    setPositionRequestProfileVersion(null);
     setPositionRequestDepartmentId(null);
     setOriginalProfessionalRegistrationFields([]);
     setOriginalOptionalRequirementsFields([]);
@@ -224,6 +242,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setPositionRequestId,
     positionRequestProfileId,
     setPositionRequestProfileId,
+    positionRequestProfileVersion,
+    setPositionRequestProfileVersion,
     positionRequestDepartmentId,
     setPositionRequestDepartmentId,
 
@@ -248,6 +268,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     requiresVerification,
     setRequiresVerification,
     resetWizardContext,
+    // getClassificationById,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

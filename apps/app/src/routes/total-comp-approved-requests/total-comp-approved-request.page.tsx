@@ -1,7 +1,6 @@
 import { CopyOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typography, message } from 'antd';
 import copy from 'copy-to-clipboard';
-import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   default as LoadingComponent,
@@ -10,17 +9,16 @@ import {
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetLocationQuery } from '../../redux/services/graphql-api/location.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
 import { formatDateTime } from '../../utils/Utils';
-import ContentWrapper from '../home/components/content-wrapper.component';
-import { JobProfile } from '../job-profiles/components/job-profile.component';
+import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
-import WizardEditControlBar from '../wizard/components/wizard-edit-control-bar';
 import './total-comp-approved-request.page.css';
 const { Text } = Typography;
 
@@ -245,12 +243,6 @@ export const TotalCompApprovedRequestPage = () => {
   //   };
   // }, []);
 
-  const [showDiff, setShowDiff] = useState(true);
-
-  const handleToggleShowDiff = (checked: boolean) => {
-    setShowDiff(checked);
-  };
-
   // END PROFILE TAB INFO
   // const handleDownload = () => {
   //   // Implement download functionality here
@@ -258,7 +250,7 @@ export const TotalCompApprovedRequestPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
-    const linkToCopy = `${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
@@ -354,36 +346,40 @@ export const TotalCompApprovedRequestPage = () => {
       key: '3',
       label: 'Job Profile',
       children: (
-        <>
-          <Row justify="center">
-            <Col xs={24} sm={24} md={24} lg={20} xl={16} style={{ background: '#fff' }}>
-              <WizardEditControlBar
-                onToggleShowDiff={handleToggleShowDiff}
-                showDiffToggle={true}
-                showDiff={showDiff}
-                showNext={false}
-              />
-              {/* <Collapse
-                ref={collapseRef}
-                bordered={false}
-                ghost
-                activeKey={showDiff ? ['1'] : []} // Control the active key based on showDiff
-                className={hasScrolledPast ? 'no-animation' : ''}
-              >
-                <Collapse.Panel key="1" showArrow={false} header="">
-                  {diffLegendContent}
-                </Collapse.Panel>
-              </Collapse> */}
-              <JobProfile
-                style={{ marginTop: '1rem' }}
-                profileData={data?.positionRequest?.profile_json}
-                showBackToResults={false}
-                showDiff={showDiff}
-                id={data?.positionRequest?.parent_job_profile?.number?.toString() ?? undefined}
-              />
-            </Col>
-          </Row>
-        </>
+        <JobProfileWithDiff
+          positionRequestData={{ positionRequest: data?.positionRequest }}
+          rowProps={{ justify: 'center' }}
+          colProps={{ xs: 24, sm: 24, md: 24, lg: 20, xl: 16 }}
+        />
+        // <>
+        //   <Row justify="center">
+        //     <Col xs={24} sm={24} md={24} lg={20} xl={16} style={{ background: '#fff' }}>
+        //       <WizardEditControlBar
+        //         onToggleShowDiff={handleToggleShowDiff}
+        //         showDiffToggle={true}
+        //         showDiff={showDiff}
+        //         showNext={false}
+        //       />
+        //       {/* <Collapse
+        //         ref={collapseRef}
+        //         bordered={false}
+        //         ghost
+        //         activeKey={showDiff ? ['1'] : []} // Control the active key based on showDiff
+        //         className={hasScrolledPast ? 'no-animation' : ''}
+        //       >
+        //         <Collapse.Panel key="1" showArrow={false} header="">
+        //           {diffLegendContent}
+        //         </Collapse.Panel>
+        //       </Collapse> */}
+        //       <JobProfile
+        //         style={{ marginTop: '1rem' }}
+        //         profileData={data?.positionRequest?.profile_json}
+        //         showBackToResults={false}
+        //         showDiff={showDiff}
+        //       />
+        //     </Col>
+        //   </Row>
+        // </>
       ),
     },
     {
@@ -462,7 +458,7 @@ export const TotalCompApprovedRequestPage = () => {
                             <strong>Invite others to review</strong>
                             <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
                             <Space>
-                              <Text>{`${window.location.origin}/my-position-requests/share/${data?.positionRequest?.shareUUID}`}</Text>
+                              <Text>{`${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`}</Text>
                               <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
                                 Copy URL
                               </Button>
@@ -481,7 +477,7 @@ export const TotalCompApprovedRequestPage = () => {
                         <div>
                           <Text strong>View all approved requests</Text>
                           <p>View all approved requests in JobStore.</p>
-                          <Link to="/approved-requests">
+                          <Link to="/requests/positions/manage/approved">
                             <Button>Go to Approved requests</Button>
                           </Link>
                         </div>
@@ -521,7 +517,7 @@ export const TotalCompApprovedRequestPage = () => {
         <Tabs
           defaultActiveKey="1"
           items={tabItems}
-          tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
+          tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem 1rem -1rem', padding: '0 1rem 0px 1rem' }}
         />
       </ContentWrapper>
       {/* subTitle={positionRequest.title} */}

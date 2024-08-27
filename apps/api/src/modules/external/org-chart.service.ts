@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { isEmpty } from 'class-validator';
+import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClassificationService } from './classification.service';
-import { DepartmentService } from './department.service';
 import { Employee } from './models/employee.model';
 import { FindUniqueOrgChartArgs } from './models/find-unique-org-chart.args';
 import { OrgChart, OrgChartEdge, OrgChartNode } from './models/org-chart.model';
@@ -33,7 +33,9 @@ export class OrgChartService {
     const positionsWithIncumbentsIds = filteredPositions.map((row) => row['A.POSITION_NBR']);
 
     const employees: Map<string, Employee[]> = await this.peoplesoftService.getEmployeesForPositions(
-      process.env.TEST_ENV === 'true' ? ['00054971', '00100306', '00033584', '00109865'] : positionsWithIncumbentsIds,
+      process.env.TEST_ENV === 'true'
+        ? ['00054971', '00100306', '00033584', '00109865', '00078742', '00022287']
+        : positionsWithIncumbentsIds,
     );
 
     // Loop through response and generate the tree for everyone in the _current department_
@@ -109,8 +111,8 @@ export class OrgChartService {
       select: { id: true, name: true },
     });
 
-    console.log('departments: ', departments);
-    console.log('ministries: ', ministries);
+    // console.log('departments: ', departments);
+    // console.log('ministries: ', ministries);
 
     return ministries.map((ministry) => {
       return {

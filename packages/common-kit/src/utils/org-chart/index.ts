@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import dagre from '@dagrejs/dagre';
 import { Edge, Node, Position } from 'reactflow';
 
@@ -14,13 +15,13 @@ export enum AutolayoutDirection {
 const { Top, Right, Bottom, Left } = Position;
 const { Vertical } = AutolayoutDirection;
 
-const graph = new dagre.graphlib.Graph();
-graph.setDefaultEdgeLabel(() => ({}));
-
 const nodeWidth = 300;
 const nodeHeight = 200;
 
 export const autolayout = (elements: Elements, direction: AutolayoutDirection = AutolayoutDirection.Vertical) => {
+  const graph = new dagre.graphlib.Graph();
+  graph.setDefaultEdgeLabel(() => ({}));
+
   graph.setGraph({});
 
   const clone: Elements = {
@@ -62,4 +63,71 @@ export const autolayout = (elements: Elements, direction: AutolayoutDirection = 
   }
 
   return clone;
+};
+
+export const updateSupervisorAndAddNewPositionNode = (
+  edges: Edge[],
+  nodes: Node[],
+  excludedManagerId: string,
+  supervisorId: any,
+  positionNumber: any,
+  positionTitle: any,
+  classification: any,
+  department: any,
+) => {
+  // Update supervisor, excluded manager nodes
+
+  nodes.forEach((node) => {
+    node.data = {
+      ...node.data,
+      isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
+      isExcludedManager: node.id === excludedManagerId,
+      isNewPosition: false, // Clear previous positions marked as new
+      isSelected: false,
+      isSupervisor: node.id === supervisorId,
+    };
+  });
+
+  // Add edge & node for new position
+  // add edge
+  const edgeId = `${supervisorId}-${positionNumber}`;
+  if (edges.find((edge) => edge.id === edgeId) == null) {
+    edges.push({
+      id: edgeId,
+      source: supervisorId,
+      target: positionNumber,
+      style: { stroke: 'blue' },
+      type: 'smoothstep',
+      animated: true,
+      selected: true,
+    });
+  }
+
+  // add node
+  const nodeId = positionNumber;
+  if (nodes.find((node) => node.id === nodeId) == null) {
+    nodes.push({
+      id: nodeId,
+      type: 'org-chart-card',
+      data: {
+        id: nodeId,
+        isAdjacent: true,
+        isNewPosition: true,
+        title: positionTitle,
+        classification: {
+          id: classification.id,
+          code: classification.code,
+          name: classification.name,
+        },
+        department: {
+          id: department.id,
+          organization_id: department.organization_id,
+          name: department.name,
+        },
+        employees: [],
+      },
+      position: { x: 0, y: 0 },
+    });
+  }
+  return { edges, nodes };
 };

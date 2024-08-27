@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { CloseOutlined } from '@ant-design/icons';
 import { Button, Card, Col, DatePicker, Input, Row, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
@@ -615,6 +616,23 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
                     key={`${selection.type}-${selection.value}`}
                     closable
                     onClose={() => removeSelection(selection.value, selection.type)}
+                    closeIcon={
+                      <Button
+                        type="link"
+                        size="small"
+                        style={{ padding: '0', width: 'auto', height: 'auto' }}
+                        icon={
+                          <CloseOutlined aria-hidden style={{ fontSize: '0.7rem', color: 'rgba(0, 0, 0, 0.88)' }} />
+                        }
+                        aria-label={`Remove ${findLabel(selection.value, selection.type)} filter`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            removeSelection(selection.value, selection.type);
+                          }
+                        }}
+                      />
+                    }
                   >
                     {selection.type === 'dateRange'
                       ? `Date: ${selection.value}`

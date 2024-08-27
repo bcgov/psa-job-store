@@ -5,6 +5,7 @@ import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { SearchIndex, SearchService } from '../search/search.service';
 import { Employee } from './models/employee.model';
 import { PositionCreateInput } from './models/position-create.input';
 
@@ -58,6 +59,7 @@ export class PeoplesoftService {
     private readonly configService: ConfigService<AppConfigDto, true>,
     private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
+    private readonly searchService: SearchService,
   ) {
     this.headers = new AxiosHeaders();
     this.headers.set(
@@ -237,6 +239,8 @@ export class PeoplesoftService {
       ),
     );
 
+    await this.searchService.resetIndex(SearchIndex.JobProfile);
+
     for await (const row of response?.data?.query?.rows ?? []) {
       try {
         await this.prisma.department.upsert({
@@ -291,6 +295,20 @@ export class PeoplesoftService {
                 id: organizations.find((org) => org.peoplesoft_id === row.SETID).id,
               },
             },
+          },
+        });
+
+        await this.searchService.indexDocument(SearchIndex.SettingsDocument, row.DEPTID, {
+          id: row.DEPTID,
+          name: row.DESCR,
+        });
+      } catch (error) {}
+
+      // Try to create a metadata entry if it doesn't already exist.  Ignore the FK error
+      try {
+        await this.prisma.departmentMetadata.create({
+          data: {
+            department_id: row.DEPTID,
           },
         });
       } catch (error) {}

@@ -4,6 +4,7 @@ import { Card, Col, Row, Tag, Tooltip, Typography } from 'antd';
 import { CSSProperties } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { Handle, NodeProps, Position } from 'reactflow';
+import { getUserRoles } from '../../../utils/get-user-roles.util';
 import { OrgChartContext } from '../enums/org-chart-context.enum';
 import { OrgChartType } from '../enums/org-chart-type.enum';
 import { Elements } from '../interfaces/elements.interface';
@@ -37,7 +38,7 @@ const applyDoubleBunkingStyles = (employees: unknown[]): CSSProperties => {
 const renderPositionNumber = (roles: string[], positionData: Record<string, any>) => {
   if (roles.includes('classification') || roles.includes('total-compensation')) {
     return positionData.id;
-  } else if (roles.includes('hiring-manager')) {
+  } else if (roles.includes('hiring-manager') || roles.includes('user')) {
     if (positionData.position_status === 'Approved') {
       return positionData.id;
     } else {
@@ -65,29 +66,63 @@ export const OrgChartNode = ({
   const auth = useAuth();
   const positionIsVacant = data.employees.length === 0;
 
-  const roles: string[] = auth.user?.profile['client_roles'] as string[];
+  const roles: string[] = getUserRoles(auth.user);
 
   return (
     <>
       <Handle type="target" position={targetPosition} isConnectable={isConnectable} />
-      <div>
+      <div
+        tabIndex={0}
+        aria-label={`
+        Level ${data.level}.
+        ${
+          positionIsVacant
+            ? 'Vacant position'
+            : `${data.employees[0].name}${data.employees.length > 1 ? ` and ${data.employees.length - 1} others` : ''}`
+        }. 
+      ${data.classification?.code} ${data.title}. 
+      ${data.directReports ? `${data.directReports} direct reports.` : 'No direct reports'}
+      Position Number: ${renderPositionNumber(roles, data)}. 
+      Department ID: ${data.department?.id}. 
+      ${data.isExcludedManager ? 'Excluded Manager. ' : ''}
+      ${data.isSupervisor ? 'Supervisor. ' : ''}
+      ${data.isNewPosition ? 'New Position. ' : ''}
+    `
+          .trim()
+          .replace(/\s+/g, ' ')}
+        id={`node-${data.id}`}
+      >
         <Card
           actions={
             selected && orgChartType === OrgChartType.DYNAMIC
               ? orgChartContext === OrgChartContext.DEFAULT
-                ? [
-                    <CreatePositionButton
-                      departmentId={data.department?.id}
-                      elements={orgChartData}
-                      positionIsVacant={positionIsVacant}
-                      supervisorId={data.id}
-                    />,
-                  ]
+                ? roles.includes('hiring-manager')
+                  ? [
+                      <CreatePositionButton
+                        departmentId={data.department?.id}
+                        elements={orgChartData}
+                        positionIsVacant={positionIsVacant}
+                        supervisorId={data.id}
+                      />,
+                    ]
+                  : // without this select node doesn't fire for some reason, need to render something
+                    // otherwise node doesn't get selected properly
+                    [<div style={{ display: 'none' }}></div>]
                 : undefined
               : undefined
           }
           title={
-            <Tooltip title={data.title}>
+            // Link for dragon naturally speaking targetting
+            <a
+              tabIndex={-1}
+              role="link"
+              style={{
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+              onClick={(e) => e.preventDefault()}
+              title={(positionIsVacant ? 'Vacant position' : data.employees[0].name) + ' - ' + data.title}
+            >
               <Text
                 style={{
                   color:
@@ -96,7 +131,7 @@ export const OrgChartNode = ({
               >
                 {data.title}
               </Text>
-            </Tooltip>
+            </a>
           }
           extra={
             <Text

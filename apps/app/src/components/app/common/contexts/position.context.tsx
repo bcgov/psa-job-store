@@ -34,7 +34,7 @@ interface CreateNewPositionParams {
   current_reports_to_position_id?: number;
   reSelectSupervisor?: () => void;
   changeStep?: boolean;
-  svg: string;
+  // svg: string;
 }
 
 export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) => {
@@ -52,14 +52,14 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
       current_reports_to_position_id,
       reSelectSupervisor,
       changeStep = true,
-      svg,
+      // svg,
     } = params;
 
     // we are not editing a draft position request (creatign position from dashboard or from org chart page)
-    // we can create a new position from the my-position-requests org chart view, or directly from the org chart, or from home page
+    // we can create a new position from the requests/positions org chart view, or directly from the org chart, or from home page
     if (
-      location.pathname.startsWith('/my-position-requests/create') ||
-      location.pathname.startsWith('/org-chart') ||
+      location.pathname.startsWith('/requests/positions/create') ||
+      location.pathname.startsWith('/my-departments') ||
       location.pathname == '/' || // home page
       location.pathname == '' // home page
     ) {
@@ -74,17 +74,19 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         reports_to_position_id: reportingPositionId,
         department: { connect: { id: selectedDepartment ?? '' } },
         orgchart_json: orgChartData,
-        orgchart_png: svg,
+        // orgchart_png: svg,
       };
       // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
       const resp = await createPositionRequest(positionRequestInput).unwrap();
       // setPositionRequestId(resp.createPositionRequest);
-      navigate(`/my-position-requests/${resp.createPositionRequest}`, { replace: true });
+      navigate(`/requests/positions/${resp.createPositionRequest}`, { replace: true });
       return 'CREATE_NEW';
     } else {
       // we are editing a draft position request - update existing position request
       if (positionRequestId != null && selectedDepartment != null) {
+        // console.log('editing a draft positionRequestId, selectedDepartment: ', positionRequestId, selectedDepartment);
         if (current_reports_to_position_id != reportingPositionId) {
+          // console.log('changing supervisor: ', reportingPositionId, current_reports_to_position_id);
           return new Promise((resolve) => {
             Modal.confirm({
               title: 'Change supervisor?',
@@ -117,11 +119,11 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   orgchart_json: orgChartData,
                   // clear previous data
                   profile_json: null,
-                  parent_job_profile: { connect: { id: null } },
+                  parent_job_profile: { connect: { id_version: null } },
                   additional_info: null,
                   title: null,
                   returnFullObject: true,
-                  orgchart_png: svg,
+                  // orgchart_png: svg,
                 }).unwrap();
 
                 setPositionRequestData(resp.updatePositionRequest ?? null);

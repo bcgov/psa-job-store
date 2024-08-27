@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import { PageHeader } from '../../components/app/page-header.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import { useGetSavedJobProfileIdsQuery } from '../../redux/services/graphql-api/saved-job-profile.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import JobProfiles from './components/job-profiles.component';
 
 export const SavedJobProfilesPage = () => {
@@ -20,7 +20,7 @@ export const SavedJobProfilesPage = () => {
 
   return (
     <>
-      <PageHeader title="Saved profiles" />
+      <PageHeader title="Saved profiles" subTitle="View profiles that you have previously saved." />
       <ContentWrapper>
         <JobProfiles
           key={'SavedProfiles'}

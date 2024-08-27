@@ -10,7 +10,6 @@ import { AppResolver } from './app.resolver';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
-import { RolesGlobalGuard } from './modules/auth/guards/role-global.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
@@ -23,17 +22,18 @@ import { JobProfileScopeModule } from './modules/job-profile-scope/job-profile-s
 import { JobProfileStreamModule } from './modules/job-profile-stream/job-profile-stream.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
+import { KeycloakModule } from './modules/keycloak/keycloak.module';
+import { OrganizationModule } from './modules/organization/organization.module';
 import { PositionRequestModule } from './modules/position-request/position-request.module';
 import { SavedJobProfileModule } from './modules/saved-job-profile/saved-job-profile.module';
 import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
 import { SearchModule } from './modules/search/search.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { UserModule } from './modules/user/user.module';
 import { apolloPinoLoggingPlugin } from './utils/logging/apolloPinoLoggingPlugin';
 import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerOptions } from './utils/logging/logger.factory';
 import { validateAppConfig } from './utils/validate-app-config.util';
-import { UserModule } from './modules/user/user.module';
-import { KeycloakModule } from './modules/keycloak/keycloak.module';
-import { SettingsModule } from './modules/settings/settings.module';
 
 @Module({
   imports: [
@@ -74,17 +74,10 @@ import { SettingsModule } from './modules/settings/settings.module';
     UserModule,
     KeycloakModule,
     SettingsModule,
+    OrganizationModule,
   ],
   controllers: [],
-  providers: [
-    { provide: APP_GUARD, useClass: AuthGuard },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGlobalGuard,
-    },
-    { provide: APP_GUARD, useClass: RoleGuard },
-    AppResolver,
-  ],
+  providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

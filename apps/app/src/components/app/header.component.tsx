@@ -3,8 +3,8 @@ import { Button, Col, Layout, Menu, Row, Typography } from 'antd';
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { useLazyLogoutQuery } from '../../redux/services/graphql-api/profile.api';
-import { InitialsAvatar } from '../../routes/home/components/initials-avatar.component';
-import AcessiblePopoverMenu from './common/components/accessible-popover-menu';
+import { InitialsAvatar } from '../../routes/home-old/components/initials-avatar.component';
+import AccessiblePopoverMenu from './common/components/accessible-popover-menu';
 import styles from './header.module.css';
 import { HelpButton } from './help-button.component';
 
@@ -71,7 +71,7 @@ export const AppHeader = () => {
                 <HelpButton />
               </div>
 
-              <AcessiblePopoverMenu
+              <AccessiblePopoverMenu
                 triggerButton={
                   <Button
                     tabIndex={-1}
@@ -92,7 +92,7 @@ export const AppHeader = () => {
                 }
                 content={content}
                 ariaLabel="Open user menu"
-              ></AcessiblePopoverMenu>
+              ></AccessiblePopoverMenu>
 
               {/* <Popover content={content} trigger="click">
                 <Button

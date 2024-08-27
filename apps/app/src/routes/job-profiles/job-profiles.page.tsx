@@ -1,6 +1,6 @@
 import { useParams, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/app/page-header.component';
-import ContentWrapper from '../home/components/content-wrapper.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import JobProfiles from './components/job-profiles.component';
 
 export const JobProfilesPage = () => {

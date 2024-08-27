@@ -21,7 +21,7 @@ import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'reac
 import { ErrorResponse, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
-import AcessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import {
@@ -131,16 +131,16 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     if (is_archived === false) {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesDraftsQuery();
-      link = '/draft-job-profiles/';
+      link = '/job-profiles/manage/draft/';
     } else {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesArchivedQuery();
-      link = '/archived-job-profiles/';
+      link = '/job-profiles/manage/archived/';
     }
   } else {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesQuery();
-    link = '/published-job-profiles/';
+    link = '/job-profiles/manage/published/';
   }
 
   // Check if data is available and call the callback function to notify the parent component
@@ -298,10 +298,10 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
         // <Popover content={getMenuContent(record)} trigger="click" placement="bottomRight">
         //   <EllipsisOutlined />
         // </Popover>
-        <AcessiblePopoverMenu
+        <AccessiblePopoverMenu
           triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
           content={getMenuContent(record)}
-        ></AcessiblePopoverMenu>
+        ></AccessiblePopoverMenu>
       ),
     },
   ];
@@ -496,14 +496,14 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const navigate = useNavigate();
   const duplicate = async (record: any) => {
     // console.log('duplicate', record);
-    const res = await duplicateJobProfile({ jobProfileId: record.id }).unwrap();
+    const res = await duplicateJobProfile({ jobProfileId: record.id, jobProfileVersion: record.version }).unwrap();
     // console.log('res: ', res);
     navigate(`${link}${res.duplicateJobProfile}`);
   };
 
   const update = async (record: any, state: string) => {
     // console.log('duplicate', record);
-    await updateJobProfileState({ jobProfileId: record.id, state: state }).unwrap();
+    await updateJobProfileState({ jobProfileId: record.id, jobProfileVersion: record.version, state: state }).unwrap();
     message.success(state === 'PUBLISHED' ? 'Job Profile published!' : 'Job Profile unpublished!');
     setSelectedKeys([]);
     updateData();
@@ -768,7 +768,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
               <>
                 <div>Looks like you’re not working on anything right now.</div>
                 {/* Link button to the orgchart page */}
-                <Link to="/draft-job-profiles/create">
+                <Link to="/job-profils/manage/draft/create">
                   <Button type="primary" style={{ marginTop: '1rem' }}>
                     Create new profile
                   </Button>

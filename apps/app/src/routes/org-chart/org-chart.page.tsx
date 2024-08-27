@@ -31,11 +31,13 @@ export const OrgChartPage = () => {
   // }, []);
 
   return (
-    <Content style={{ backgroundColor: '#FFF', display: 'flex', flex: '1 0 auto', flexDirection: 'column' }}>
+    <Content
+      style={{ backgroundColor: '#FFF', display: 'flex', flex: '1 0 auto', flexDirection: 'column', height: '100%' }}
+    >
       <TreeChartSearchProvider>
         <PageHeader
-          title="My organizations"
-          subTitle="You are viewing the current organization structure for your base work area. To begin,  click the supervisor of the new position you would like to create."
+          title="My departments"
+          subTitle="You are viewing the current organization structure for your base work area. To begin, click the supervisor of the new position you would like to create."
           extra={<OrgChartHelpButton />}
           // subHeader={
           //   <Row gutter={16} align="middle" justify="space-between" style={{ paddingBottom: '10px' }}>

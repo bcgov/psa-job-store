@@ -4,11 +4,11 @@ import { useState } from 'react';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import ContentWrapper from '../../components/content-wrapper.component';
 import {
   useGetJobProfilesDraftsClassificationsQuery,
   useGetJobProfilesDraftsMinistriesQuery,
 } from '../../redux/services/graphql-api/job-profile.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
 import { JobProfileSearch } from '../job-profiles/components/job-profile-search.component';
 import TotalCompProfilesTable from './components/total-comp-draft-profiles-table.component';
 

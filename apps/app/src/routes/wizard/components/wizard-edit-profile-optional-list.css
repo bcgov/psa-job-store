@@ -1,0 +1,4 @@
+/* last li item should have no padding */
+.optionalList li:last-child {
+    padding-bottom: 0;
+}

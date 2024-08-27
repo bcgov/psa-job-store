@@ -6,7 +6,7 @@ When('the user clicks on a job position from the list', () => {
 
 Then('the details of the selected job position are displayed', () => {
   // Verify the URL to ensure navigation occurred
-  cy.url().should('include', '/my-position-requests/4');
+  cy.url().should('include', '/requests/positions/4');
 
   // Add assertions to verify elements specific to the job position details page are displayed
   // For example, check for the presence of a title or description specific to job position 3

@@ -306,6 +306,26 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
                           key={`${selection.type}-${selection.value}`}
                           closable
                           onClose={() => removeSelection(selection.value, selection.type)}
+                          closeIcon={
+                            <Button
+                              type="link"
+                              size="small"
+                              style={{ padding: '0', width: 'auto', height: 'auto' }}
+                              icon={
+                                <CloseOutlined
+                                  aria-hidden
+                                  style={{ fontSize: '0.7rem', color: 'rgba(0, 0, 0, 0.88)' }}
+                                />
+                              }
+                              aria-label={`Remove ${findLabel(selection.value, selection.type)} filter`}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  removeSelection(selection.value, selection.type);
+                                }
+                              }}
+                            />
+                          }
                         >
                           {findLabel(selection.value, selection.type)}
                         </Tag>
