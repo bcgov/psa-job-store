@@ -205,7 +205,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         }
       } else {
         // Here you can display an error message.
-        if (alertNoProfile) alert('Please select a profile before proceeding.');
+        if (alertNoProfile && action != 'quit') alert('Please select a profile before proceeding.');
       }
     } finally {
       setIsLoading(false);

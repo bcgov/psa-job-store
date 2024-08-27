@@ -184,7 +184,7 @@ Upload backup file to dev/test sql pod:
 
 Login to sql, and clear all data:
 
-`psql -d DB_NAME -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`
+`psql -d api -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`
 
 If importing to local:
 

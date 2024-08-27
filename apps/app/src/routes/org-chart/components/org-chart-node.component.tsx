@@ -38,7 +38,7 @@ const applyDoubleBunkingStyles = (employees: unknown[]): CSSProperties => {
 const renderPositionNumber = (roles: string[], positionData: Record<string, any>) => {
   if (roles.includes('classification') || roles.includes('total-compensation')) {
     return positionData.id;
-  } else if (roles.includes('hiring-manager')) {
+  } else if (roles.includes('hiring-manager') || roles.includes('user')) {
     if (positionData.position_status === 'Approved') {
       return positionData.id;
     } else {
@@ -94,9 +94,9 @@ export const OrgChartNode = ({
       >
         <Card
           actions={
-            roles.includes('hiring-manager')
-              ? selected && orgChartType === OrgChartType.DYNAMIC
-                ? orgChartContext === OrgChartContext.DEFAULT
+            selected && orgChartType === OrgChartType.DYNAMIC
+              ? orgChartContext === OrgChartContext.DEFAULT
+                ? roles.includes('hiring-manager')
                   ? [
                       <CreatePositionButton
                         departmentId={data.department?.id}
@@ -105,7 +105,9 @@ export const OrgChartNode = ({
                         supervisorId={data.id}
                       />,
                     ]
-                  : undefined
+                  : // without this select node doesn't fire for some reason, need to render something
+                    // otherwise node doesn't get selected properly
+                    [<div style={{ display: 'none' }}></div>]
                 : undefined
               : undefined
           }
