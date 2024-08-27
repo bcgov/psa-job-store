@@ -193,7 +193,8 @@ export const PositionRequestPage = () => {
       }
 
       //TODO
-      if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: wizardContextPositionRequestData?.id });
+      // if (step ?? 0 > 2)
+      triggerPositionNeedsReviewQuery({ id: wizardContextPositionRequestData?.id });
 
       if (wizardContextPositionRequestData?.id) {
         setPositionRequestId(wizardContextPositionRequestData?.id);
