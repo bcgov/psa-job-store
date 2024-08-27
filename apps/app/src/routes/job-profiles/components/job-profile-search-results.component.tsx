@@ -31,7 +31,7 @@ export const JobProfileSearchResults = ({
   onPageChange,
   isSearchingOrFiltering,
 }: JobProfileSearchResultsProps) => {
-  const isTestEnvironment = import.meta.env.VITE_TEST_ENV === 'true';
+  const isTestEnvironment = false; //import.meta.env.VITE_TEST_ENV === 'true';
 
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -40,7 +40,7 @@ export const JobProfileSearchResults = ({
   const { positionRequestId } = useParams<{ positionRequestId?: string }>();
 
   const getBasePath = (path: string) => {
-    if (isPositionRequestRoute) return location.pathname.split('/').slice(0, 3).join('/');
+    if (isPositionRequestRoute) return location.pathname.split('/').slice(0, 4).join('/');
 
     const pathParts = path.split('/');
     // Check if the last part is a number (ID), if so, remove it

@@ -386,6 +386,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         maxStepCompleted={positionRequest?.max_step_completed}
         onStepClick={switchStep}
         disabledTooltip={selectedProfileId == null ? 'Please select a profile before proceeding.' : null}
+        disableTooltipForBasicInfo={false} // allow stepping back to basic info even if profile is not selected
       ></WizardSteps>
       <div
         style={{

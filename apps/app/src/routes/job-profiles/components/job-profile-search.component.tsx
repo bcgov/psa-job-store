@@ -150,7 +150,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // Get the base path for the current route
   const getBasePath = useCallback(
     (path: string) => {
-      if (isPositionRequestRoute) return location.pathname.split('/').slice(0, 3).join('/');
+      if (isPositionRequestRoute) return location.pathname.split('/').slice(0, 4).join('/');
 
       const pathParts = path.split('/');
       // Check if the last part is a number (ID), if so, remove it
@@ -364,6 +364,9 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
       // Only update search params if there's a change
       if (searchParams.toString() !== newSearchParams.toString()) {
         // console.log('navigating.. A', getBasePath(location.pathname));
+        // console.log('search params were: ', searchParams.toString());
+        // console.log('search params now: ', newSearchParams.toString());
+
         navigate(
           {
             pathname: getBasePath(location.pathname),
