@@ -5073,11 +5073,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         }}
       />
 
-      <ContentWrapper>
+      <ContentWrapper padTop={false}>
         <Tabs
           defaultActiveKey="1"
           items={tabItems}
-          tabBarStyle={{ backgroundColor: '#fff', margin: '-1rem -1rem 1rem -1rem', padding: '0 1rem 0px 1rem' }}
+          tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem 1rem -1rem', padding: '0 1rem 0px 1rem' }}
           renderTabBar={renderTabBar}
         />
       </ContentWrapper>
