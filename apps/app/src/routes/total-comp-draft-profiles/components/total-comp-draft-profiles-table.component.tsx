@@ -768,7 +768,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
               <>
                 <div>Looks like you’re not working on anything right now.</div>
                 {/* Link button to the orgchart page */}
-                <Link to="/job-profils/manage/drafts/create">
+                <Link to="/job-profils/manage/draft/create">
                   <Button type="primary" style={{ marginTop: '1rem' }}>
                     Create new profile
                   </Button>

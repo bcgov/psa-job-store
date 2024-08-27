@@ -1,5 +1,6 @@
 import { FileAddOutlined, FileOutlined } from '@ant-design/icons';
 import { Dropdown, Flex } from 'antd';
+import { MenuItemType } from 'antd/es/menu/hooks/useItems';
 import { useMemo } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { NavLink } from 'react-router-dom';
@@ -20,7 +21,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
               key: '/requests/positions/create',
               icon: <PositionRequestOutlined aria-hidden />,
               label: 'New position',
-              title: '',
+              title: 'new position',
             }),
           ]
         : []),
@@ -30,7 +31,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
               key: '/job-profiles/manage/create',
               icon: <FileOutlined aria-hidden />,
               label: 'Job profile',
-              title: '',
+              title: 'job profile',
             }),
           ]
         : []),
@@ -39,17 +40,17 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
   );
 
   const renderButton = useMemo(
-    () => (
+    () => (menuItems: MenuItemType[]) => (
       <Flex
         justify={collapsed ? 'left' : 'center'}
         style={{ width: '100%' }}
         role="button"
-        aria-label="Create"
-        title="Create"
+        aria-label={menuItems.length === 1 ? `Create ${menuItems[0].title}` : 'Create'}
+        title={menuItems.length === 1 ? `Create ${menuItems[0].title}` : 'Create'}
         tabIndex={0}
       >
         <FileAddOutlined aria-hidden />
-        <span>Create</span>
+        <span>{menuItems.length === 1 ? `Create ${menuItems[0].title}` : 'Create'}</span>
       </Flex>
     ),
     [collapsed],
@@ -58,7 +59,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
   return menuItems.length > 0 ? (
     <div style={{ width: '100%' }}>
       {menuItems.length === 1 ? (
-        <NavLink to={menuItems[0].key as string}>{renderButton}</NavLink>
+        <NavLink to={menuItems[0].key as string}>{renderButton(menuItems)}</NavLink>
       ) : (
         <>
           {/* If current solution is found to lack accessibility, implement something like below */}
@@ -88,7 +89,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
           ></AccessiblePopoverMenu> */}
 
           <Dropdown menu={{ items: menuItems }} trigger={['click']}>
-            {renderButton}
+            {renderButton(menuItems)}
           </Dropdown>
         </>
       )}
