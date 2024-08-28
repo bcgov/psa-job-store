@@ -54,7 +54,11 @@ export const createMenuGroup = ({ key, children, collapsed, icon, label }: NavMe
 export const createMenuItem = ({ key, icon, label, style, title }: NavMenuItemProps): MenuItemType => ({
   key,
   icon,
-  label: <Link to={key}>{label}</Link>,
+  label: (
+    <Link to={key} style={{ display: 'block', paddingLeft: '5px' }}>
+      {label}
+    </Link>
+  ),
   style,
   title,
 });
