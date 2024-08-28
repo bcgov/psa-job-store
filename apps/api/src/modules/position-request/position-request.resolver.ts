@@ -122,8 +122,9 @@ export class PositionRequestApiResolver {
   async getPositionRequests(
     @CurrentUser() user: Express.User,
     @Args() args?: ExtendedFindManyPositionRequestWithSearch,
+    @Args('requestingFeature', { type: () => String, nullable: true }) requestingFeature?: string,
   ) {
-    return this.positionRequestService.getPositionRequests(args, user.id, user.roles);
+    return this.positionRequestService.getPositionRequests(args, user.id, user.roles, requestingFeature);
   }
 
   @Query(() => PositionRequest, { name: 'positionRequest' })
