@@ -8,6 +8,7 @@ import { PrismaService } from '../../modules/prisma/prisma.service';
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
+import { ClassificationInput } from './inputs/classification-requirements.inputs';
 @Injectable()
 export class JobProfileService {
   constructor(
@@ -1594,13 +1595,11 @@ export class JobProfileService {
   async getRequirementsWithoutReadOnly(
     jobFamilyIds: number[],
     jobFamilyStreamIds: number[],
-    classificationId?: string,
-    classificationEmployeeGroupId?: string,
+    classifications: ClassificationInput[],
     ministryIds?: string[],
     jobFamilyWithNoStream?: number[],
     excludeProfileId?: number,
     excludeProfileVersion?: number,
-    classificationPeoplesoftId?: string,
   ) {
     // get job profiles from which to draw the requirements from based on job family and stream
     let jobProfiles = await this.prisma.currentJobProfile.findMany({
@@ -1717,30 +1716,30 @@ export class JobProfileService {
     let professionalRegistrationRequirements = await this.prisma.professionalRegistrationRequirement.findMany({
       where: {
         OR: [
-          {
-            // select based on classification only
+          // Classification only (multiple)
+          ...classifications.map((classification) => ({
             AND: [
               {
-                classification_id: classificationId,
-                classification_employee_group_id: classificationEmployeeGroupId,
+                classification_id: classification.id,
+                classification_employee_group_id: classification.employee_group_id,
               },
               {
                 job_family_id: null,
               },
             ],
-          },
-          // select by classification and job family
-          {
+          })),
+          // Classification and job family (multiple)
+          ...classifications.map((classification) => ({
             AND: [
               {
-                classification_id: classificationId,
-                classification_employee_group_id: classificationEmployeeGroupId,
+                classification_id: classification.id,
+                classification_employee_group_id: classification.employee_group_id,
               },
               {
                 job_family_id: { in: jobFamilyIds },
               },
             ],
-          },
+          })),
         ],
       },
       include: {
@@ -1753,11 +1752,11 @@ export class JobProfileService {
       const professionalRegistrationRequirements2 = await this.prisma.professionalRegistrationRequirement.findMany({
         where: {
           OR: [
-            {
+            ...classifications.map((classification) => ({
               AND: [
                 {
-                  classification_id: classificationId,
-                  classification_employee_group_id: classificationEmployeeGroupId,
+                  classification_id: classification.id,
+                  classification_employee_group_id: classification.employee_group_id,
                 },
                 {
                   job_family_id: null,
@@ -1766,12 +1765,12 @@ export class JobProfileService {
                   organization_id: { in: ministryIds },
                 },
               ],
-            },
-            {
+            })),
+            ...classifications.map((classification) => ({
               AND: [
                 {
-                  classification_id: classificationId,
-                  classification_employee_group_id: classificationEmployeeGroupId,
+                  classification_id: classification.id,
+                  classification_employee_group_id: classification.employee_group_id,
                 },
                 {
                   job_family_id: { in: jobFamilyIds },
@@ -1780,7 +1779,7 @@ export class JobProfileService {
                   organization_id: { in: ministryIds },
                 },
               ],
-            },
+            })),
           ],
         },
         include: {
@@ -1988,22 +1987,22 @@ export class JobProfileService {
 
     // fetch minimum requirements based on classification
     // New code to fetch classification grade
-    let classificationGrade: string | null = null;
-    if (classificationId && classificationEmployeeGroupId) {
-      const classification = await this.prisma.classification.findUnique({
-        where: {
-          id_employee_group_id_peoplesoft_id: {
-            id: classificationId,
-            employee_group_id: classificationEmployeeGroupId,
-            peoplesoft_id: classificationPeoplesoftId,
-          },
-        },
-        select: {
-          grade: true,
-        },
-      });
-      classificationGrade = classification?.grade ?? null;
-    }
+    // let classificationGrade: string | null = null;
+    // if (classificationId && classificationEmployeeGroupId) {
+    //   const classification = await this.prisma.classification.findUnique({
+    //     where: {
+    //       id_employee_group_id_peoplesoft_id: {
+    //         id: classificationId,
+    //         employee_group_id: classificationEmployeeGroupId,
+    //         peoplesoft_id: classificationPeoplesoftId,
+    //       },
+    //     },
+    //     select: {
+    //       grade: true,
+    //     },
+    //   });
+    // }
+    const classificationGrade = classifications.map((classification) => classification.grade) ?? null;
 
     // Fetch job profile minimum requirements
     let jobProfileMinimumRequirements = [];
@@ -2011,18 +2010,19 @@ export class JobProfileService {
     if (classificationGrade) {
       const minimumRequirements = await this.prisma.jobProfileMinimumRequirements.findMany({
         where: {
-          grade: classificationGrade,
+          grade: { in: classificationGrade },
         },
       });
 
+      //we are only using the first classification as a basis for min requirements for now.
       jobProfileMinimumRequirements = minimumRequirements.map((req) => ({
         text: req.requirement,
         jobFamilies: [],
         streams: [],
         classification:
-          classificationId && classificationEmployeeGroupId
-            ? { id: classificationId, employee_group_id: classificationEmployeeGroupId }
-            : null,
+          classifications[0].id && classifications[0].employee_group_id
+            ? [{ id: classifications[0].id, employee_group_id: classifications[0].employee_group_id }]
+            : [],
         organization: null,
         tc_is_readonly: true, // Assuming these are read-only
       }));
@@ -2048,7 +2048,7 @@ export class JobProfileService {
           streams: Array.from(new Set(entry.streams.map((s) => s.id)))
             .filter((id) => jobFamilyStreamIds.includes(id))
             .map((id) => ({ id })),
-          classification: entry.classification,
+          classification: [entry.classification],
         }))
         .sort((a, b) => a.text.localeCompare(b.text));
     }

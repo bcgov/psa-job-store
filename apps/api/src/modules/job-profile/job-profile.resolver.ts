@@ -14,6 +14,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JobFamilyService } from '../job-family/job-family.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
+import { ClassificationInput } from './inputs/classification-requirements.inputs';
 import { JobProfileService } from './job-profile.service';
 
 @ObjectType()
@@ -48,11 +49,8 @@ class RequirementWithoutReadOnly {
   @Field(() => [JobProfileStream])
   streams: JobProfileStream[];
 
-  @Field(() => Classification, { nullable: true })
-  classification?: {
-    id: string;
-    employee_group_id: string;
-  };
+  @Field(() => [Classification], { nullable: true })
+  classification?: Classification[];
 
   @Field(() => Organization, { nullable: true })
   organization?: {
@@ -304,11 +302,8 @@ export class JobProfileResolver {
   async getRequirementsWithoutReadOnly(
     @Args('jobFamilyIds', { type: () => [Int] }) jobFamilyIds: number[],
     @Args('jobFamilyStreamIds', { type: () => [Int] }) jobFamilyStreamIds: number[],
-    @Args('classificationId', { type: () => String, nullable: true }) classificationId?: string,
-    @Args('classificationEmployeeGroupId', { type: () => String, nullable: true })
-    classificationEmployeeGroupId?: string,
-    @Args('classificationPeoplesoftId', { type: () => String, nullable: true })
-    classificationPeoplesoftId?: string,
+    @Args('classifications', { type: () => [ClassificationInput], nullable: true })
+    classifications?: ClassificationInput[],
     @Args('ministryIds', { type: () => [String], nullable: true }) ministryIds?: string[],
     @Args('jobFamilyWithNoStream', { type: () => [Int], nullable: true }) jobFamilyWithNoStream?: number[],
     @Args('excludeProfileId', { type: () => Int, nullable: true }) excludeProfileId?: number,
@@ -317,13 +312,11 @@ export class JobProfileResolver {
     return this.jobProfileService.getRequirementsWithoutReadOnly(
       jobFamilyIds,
       jobFamilyStreamIds,
-      classificationId,
-      classificationEmployeeGroupId,
+      classifications,
       ministryIds,
       jobFamilyWithNoStream ?? [],
       excludeProfileId,
       excludeProfileVersion,
-      classificationPeoplesoftId,
     );
   }
 }

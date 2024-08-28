@@ -200,6 +200,11 @@ export interface ProfessionsModel {
   jobStreams: number[];
 }
 
+export interface EmployeeGroupClassificationsModel {
+  employeeGroup: string | null;
+  classification: string | null;
+}
+
 export interface OrganizationsModelWrapped {
   organization: {
     id: string;
