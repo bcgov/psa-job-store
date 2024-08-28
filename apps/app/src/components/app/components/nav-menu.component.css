@@ -6,3 +6,18 @@
 .jobstore-side-menu .create-button{
     margin-top: 0.8rem;
 }
+
+.jobstore-side-menu .ant-menu-item:focus-visible a,
+.jobstore-side-menu .ant-menu-item a:focus-visible {
+  outline: 4px solid #66a8d4;
+  outline-offset: -4px;
+  border-radius: 8px;
+}
+
+.jobstore-side-menu .anticon{
+    margin-right: -5px;
+}
+
+.jobstore-side-menu .ant-menu-submenu-title .anticon{
+    margin-right: 0px;
+}
