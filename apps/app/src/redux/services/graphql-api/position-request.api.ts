@@ -248,7 +248,12 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 crm_id
                 crm_lookup_name
               }
-              positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
+              positionRequestsCount(
+                search: $search
+                where: $where
+                onlyCompletedForAll: $onlyCompletedForAll
+                requestingFeature: $requestingFeature
+              ) {
                 draft
                 completed
                 verification

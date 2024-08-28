@@ -94,7 +94,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
       ...(userCanAccess(auth.user, ['user', 'total-compensation'])
         ? [
             createMenuGroup({
-              key: '/job-profiles',
+              key: 'job-profiles',
               collapsed,
               icon: <FileOutlined />,
               label: 'Job Profiles',
@@ -243,12 +243,14 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
     >
       {/* {userCanAccess(auth.user, ['hiring-manager', 'total-compensation']) && <CreateButton collapsed={collapsed} />} */}
       <Menu
+        rootClassName="jobstore-side-menu-popup"
         inlineIndent={16}
         mode="inline"
         selectedKeys={[location.pathname]}
         theme="light"
         items={menuItems}
         openKeys={openKeys}
+        // openKeys={['job-profiles']}
         onOpenChange={onOpenChange}
       />
     </Flex>
