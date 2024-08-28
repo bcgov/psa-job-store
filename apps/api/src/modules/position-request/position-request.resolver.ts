@@ -113,8 +113,9 @@ export class PositionRequestApiResolver {
   async positionRequestsCount(
     @CurrentUser() user: Express.User,
     @Args() args?: ExtendedFindManyPositionRequestWithSearch,
+    @Args('requestingFeature', { type: () => String, nullable: true }) requestingFeature?: string,
   ) {
-    return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles);
+    return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles, requestingFeature);
   }
 
   @Roles('classification', 'hiring-manager', 'total-compensation')

@@ -82,6 +82,9 @@ export class PositionRequestStatusCounts {
 
   @Field(() => Int)
   actionRequiredCount: number;
+
+  @Field(() => Int)
+  cancelledCount: number;
 }
 
 interface AdditionalInfo {
@@ -698,58 +701,47 @@ export class PositionRequestApiService {
     { search, where, onlyCompletedForAll }: ExtendedFindManyPositionRequestWithSearch,
     userId: string,
     userRoles: string[] = [],
+    requestingFeature?: string | null,
   ): Promise<PositionRequestStatusCounts> {
     let searchConditions = {};
     if (search) {
       searchConditions = {
         OR: [
-          {
-            title: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            submission_id: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
+          { title: { contains: search, mode: 'insensitive' } },
+          { submission_id: { contains: search, mode: 'insensitive' } },
         ],
       };
     }
 
-    let whereConditions = {
+    const whereConditions = {
       ...searchConditions,
       ...where,
     };
 
-    // Update where conditions based on the "total-compensation" role and onlyCompletedForAll flag
-    if (userRoles.includes('total-compensation') && onlyCompletedForAll) {
-      whereConditions = {
-        ...whereConditions,
-        status: { equals: 'COMPLETED' },
-      };
-    } else if (userRoles.includes('classification')) {
-      // for classification, return the count of all entries that are not in draft state, across the board
-      whereConditions = {
-        ...whereConditions,
-        // classificationAssignedTo: { equals: userId }, // todo: enable this after testing session
-        status: { not: { equals: 'DRAFT' } },
-      };
-    } else {
-      whereConditions = {
-        ...whereConditions,
-        user_id: { equals: userId },
-      };
+    // Initial phase: Set up status filtering
+    if (
+      userRoles.includes('total-compensation') &&
+      onlyCompletedForAll &&
+      requestingFeature === 'totalCompApprovedRequests'
+    ) {
+      whereConditions.status = { equals: 'COMPLETED' };
+    } else if (userRoles.includes('classification') && requestingFeature === 'classificationTasks') {
+      whereConditions.status = { not: { equals: 'DRAFT' } };
+    } else if (requestingFeature === 'myPositions') {
+      whereConditions.user_id = { equals: userId };
     }
 
-    // Function to get count for a specific status
+    // Store the initial status condition
+    const initialStatusCondition = whereConditions.status;
+
+    // Function to get count for a specific status, respecting initial filter
     const getCountForStatus = async (status: PositionRequestStatus) => {
+      const statusFilter = initialStatusCondition ? { ...initialStatusCondition, equals: status } : { equals: status };
+
       return await this.prisma.positionRequest.count({
         where: {
           ...whereConditions,
-          status: status,
+          status: statusFilter,
         },
       });
     };
@@ -760,6 +752,7 @@ export class PositionRequestApiService {
     const verificationCount = await getCountForStatus(PositionRequestStatus.VERIFICATION);
     const reviewCount = await getCountForStatus(PositionRequestStatus.REVIEW);
     const actionRequiredCount = await getCountForStatus(PositionRequestStatus.ACTION_REQUIRED);
+    const cancelledCount = await getCountForStatus(PositionRequestStatus.CANCELLED);
 
     // Return the counts
     return {
@@ -768,7 +761,8 @@ export class PositionRequestApiService {
       verification: verificationCount,
       reviewCount: reviewCount,
       actionRequiredCount: actionRequiredCount,
-      total: draftCount + completedCount + verificationCount + reviewCount + actionRequiredCount,
+      cancelledCount: cancelledCount,
+      total: draftCount + completedCount + verificationCount + reviewCount + actionRequiredCount + cancelledCount,
     };
   }
 

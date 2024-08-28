@@ -86,7 +86,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const [selectedRowKeys] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [pageSize, setPageSize] = useState(import.meta.env.VITE_TEST_ENV === 'true' ? 2 : initialPageSize);
+  // const [pageSize, setPageSize] = useState(import.meta.env.VITE_TEST_ENV === 'true' ? 2 : initialPageSize);
+  const [pageSize, setPageSize] = useState(initialPageSize);
   const [sortField, setSortField] = useState(initialSortField);
   const [sortOrder, setSortOrder] = useState(initialSortOrder);
   const [hasPositionRequests, setHasPositionRequests] = useState(false);
