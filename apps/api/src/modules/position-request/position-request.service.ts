@@ -403,6 +403,7 @@ export class PositionRequestApiService {
     { search, where, onlyCompletedForAll, ...args }: ExtendedFindManyPositionRequestWithSearch,
     userId: string,
     userRoles: string[] = [],
+    requestingFeature?: string | null,
   ) {
     let searchConditions = {};
     if (search) {
@@ -429,20 +430,26 @@ export class PositionRequestApiService {
       ...where,
     };
 
+    // 'classificationTasks'|'myPositions'|'totalCompApprovedRequests'
+
     // If the user has the "total-compensation" role and wants only completed requests for all users
-    if (userRoles.includes('total-compensation') && onlyCompletedForAll) {
+    if (
+      userRoles.includes('total-compensation') &&
+      onlyCompletedForAll &&
+      requestingFeature === 'totalCompApprovedRequests'
+    ) {
       whereConditions = {
         ...whereConditions,
         status: { equals: 'COMPLETED' },
       };
       // If the user is in "classification" role, then return only requests assigned to this user using classificationAssignedTo property
-    } else if (userRoles.includes('classification')) {
+    } else if (userRoles.includes('classification') && requestingFeature === 'classificationTasks') {
       whereConditions = {
         ...whereConditions,
         // classificationAssignedTo: { equals: userId }, // todo: enable this after testing session
         status: { not: { equals: 'DRAFT' } },
       };
-    } else {
+    } else if (requestingFeature === 'myPositions') {
       // Default behavior for other users - get position requests for the current user only
       whereConditions = {
         ...whereConditions,
@@ -457,8 +464,9 @@ export class PositionRequestApiService {
       //   ...where,
       //   user_id: userId,
       // },
-      ...args,
       orderBy: [...(args.orderBy || []), { id: 'desc' }],
+      take: args.take,
+      skip: args.skip,
       select: {
         id: true,
         parent_job_profile_id: true,
