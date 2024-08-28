@@ -70,6 +70,7 @@ export const ClassificationTasksPage = () => {
         ></TotalCompProfilesTable> */}
 
         <MyPositionsTable
+          requestingFeature={'classificationTasks'}
           onDataAvailable={handleDataAvailability}
           tableTitle={'Requests'}
           mode="classification"

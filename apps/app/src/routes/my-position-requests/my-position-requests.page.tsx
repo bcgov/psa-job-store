@@ -374,6 +374,7 @@ export const MyPositionsPage = () => {
         <MyPositionsTable
           style={{ marginTop: '1rem', flexGrow: '1', display: 'flex', flexDirection: 'column' }}
           handleTableChangeCallback={handleTableChangeCallback}
+          requestingFeature={'myPositions'}
         ></MyPositionsTable>
       </ContentWrapper>
     </>

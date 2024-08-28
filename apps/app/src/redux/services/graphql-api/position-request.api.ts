@@ -165,6 +165,7 @@ export interface GetPositionRequestsArgs {
   take?: number;
   skip?: number;
   onlyCompletedForAll?: boolean;
+  requestingFeature?: string;
 }
 
 export interface GetPositionRequestUserClassificationsResponse {
@@ -211,6 +212,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               $skip: Int
               $orderBy: [PositionRequestOrderByWithRelationAndSearchRelevanceInput!]
               $onlyCompletedForAll: Boolean
+              $requestingFeature: String
             ) {
               positionRequests(
                 search: $search
@@ -219,6 +221,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 skip: $skip
                 orderBy: $orderBy
                 onlyCompletedForAll: $onlyCompletedForAll
+                requestingFeature: $requestingFeature
               ) {
                 id
                 step
@@ -260,6 +263,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
             take: args.take,
             orderBy: args.orderBy,
             onlyCompletedForAll: args.onlyCompletedForAll,
+            requestingFeature: args.requestingFeature,
           },
         };
       },

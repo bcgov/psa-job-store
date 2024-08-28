@@ -43,6 +43,7 @@ interface MyPositionsTableProps {
   mode?: string | null;
   onDataAvailable?: (isDataAvailable: boolean) => void;
   clearFilters?: () => void;
+  requestingFeature?: string;
 }
 
 type ColumnTypes = {
@@ -53,6 +54,7 @@ type ColumnTypes = {
   defaultSortOrder?: SortOrder;
   render?: (text: any, record: any) => React.ReactNode;
   align?: 'left' | 'center' | 'right'; // AlignType is typically one of these string literals
+  requestingFeature?: 'classificationTasks' | 'myPositions' | 'totalCompApprovedRequests';
 };
 
 // Declare the MyPositionsTable component with TypeScript
@@ -68,6 +70,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   mode = null,
   onDataAvailable,
   clearFilters,
+  requestingFeature,
   ...props
 }) => {
   const [trigger, { data, isLoading, error: fetchError, isFetching }] = useLazyGetPositionRequestsQuery();
@@ -618,6 +621,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       ...sortParams,
       skip: (currentPage - 1) * pageSize,
       take: pageSize,
+      requestingFeature: requestingFeature,
       onlyCompletedForAll: mode === 'total-compensation',
       ...(mode == null || mode === 'classification'
         ? {
@@ -629,7 +633,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           }
         : {}),
     });
-  }, [searchParams, trigger, currentPage, pageSize, sortField, sortOrder, mode]);
+  }, [searchParams, trigger, currentPage, pageSize, sortField, sortOrder, mode, requestingFeature]);
 
   useEffect(() => {
     updateData();
