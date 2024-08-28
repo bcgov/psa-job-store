@@ -8,16 +8,29 @@
 }
 
 .jobstore-side-menu .ant-menu-item:focus-visible a,
-.jobstore-side-menu .ant-menu-item a:focus-visible {
+.jobstore-side-menu .ant-menu-item a:focus-visible,
+.jobstore-side-menu-popup .ant-menu-item:focus-visible a,
+.jobstore-side-menu-popup .ant-menu-item a:focus-visible{
   outline: 4px solid #66a8d4;
   outline-offset: -4px;
   border-radius: 8px;
 }
 
-.jobstore-side-menu .anticon{
-    margin-right: -5px;
+
+.jobstore-side-menu-popup a,
+.jobstore-side-menu a{
+    display:block;
 }
 
-.jobstore-side-menu .ant-menu-submenu-title .anticon{
-    margin-right: 0px;
+.ant-layout-sider-collapsed a{
+    display: block;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    text-align: center;
+}
+
+.ant-layout-sider-collapsed .link-label{
+    display:none !important;
 }
