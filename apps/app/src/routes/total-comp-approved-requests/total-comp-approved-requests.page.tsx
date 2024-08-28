@@ -67,6 +67,7 @@ export const TotalCompApprovedRequestsPage = () => {
         ></TotalCompProfilesTable> */}
 
         <MyPositionsTable
+          requestingFeature={'totalCompApprovedRequests'}
           tableTitle={'Requests'}
           mode="total-compensation"
           style={{ marginTop: '1rem', flexGrow: '1', display: 'flex', flexDirection: 'column' }}

@@ -106,6 +106,7 @@ export const HomePage = () => {
         </HeaderWrapper>
         <ContentWrapper>
           <MyPositionsTable
+            requestingFeature={'myPositions'}
             data-testid="recent-positions"
             style={{ paddingTop: '1rem' }}
             allowSorting={false}
