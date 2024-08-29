@@ -1431,7 +1431,31 @@ export class PositionRequestApiService {
       }
 
       const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
-      const jobProfile = positionRequest.profile_json as Record<string, any>;
+
+      // Fetch the parent job profile with its classification info
+      const parentJobProfile = await this.prisma.jobProfile.findUnique({
+        where: {
+          id_version: {
+            id: positionRequest.parent_job_profile_id,
+            version: positionRequest.parent_job_profile_version,
+          },
+        },
+        include: {
+          classifications: {
+            include: {
+              classification: true,
+            },
+          },
+        },
+      });
+
+      // Augment the profile data with classification info
+      const jobProfile = {
+        ...(positionRequest.profile_json as Record<string, any>),
+        classifications: parentJobProfile.classifications,
+      } as Record<string, any>;
+
+      // const jobProfile = positionRequest.profile_json as Record<string, any>;
       const paylist_department = await this.prisma.department.findUnique({
         where: { id: additionalInfo.department_id },
       });
