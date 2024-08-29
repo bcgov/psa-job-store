@@ -627,6 +627,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return <LoadingSpinnerWithMessage />;
   }
 
+  console.log('effectiveData: ', effectiveData);
+
   const basicInfoItems: DescriptionsProps['items'] = [
     {
       key: 'number',
@@ -747,13 +749,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     {
       key: 'classification',
       label: <h3 tabIndex={0}>Classification</h3>,
-      children: (
-        <div tabIndex={0}>
-          {showDiff
-            ? originalData?.classifications?.map((c) => c.classification?.code).join(', ')
-            : effectiveData?.classifications?.map((c) => c.classification?.code).join(', ')}
-        </div>
-      ),
+      children: <div tabIndex={0}>{originalData?.classifications?.map((c) => c.classification?.code).join(', ')}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     ...(effectiveData?.program_overview &&

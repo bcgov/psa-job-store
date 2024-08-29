@@ -425,7 +425,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 <Button
                   key="back"
                   type="primary"
-                  onClick={handleOk}
+                  onClick={showVerificationModal}
                   loading={submitPositionRequestIsLoading || isLoading}
                 >
                   Submit for verification

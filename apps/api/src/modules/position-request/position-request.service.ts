@@ -13,7 +13,6 @@ import { diff_match_patch } from 'diff-match-patch';
 import { Packer } from 'docx';
 import GraphQLJSON from 'graphql-type-json';
 import {
-  PositionRequestCreateInput,
   PositionRequestStatus,
   PositionRequestUpdateInput,
   PositionRequestWhereInput,
@@ -41,6 +40,7 @@ import { JobProfileService } from '../job-profile/job-profile.service';
 import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
+import { PositionRequestCreateInputWithoutUser } from './position-request.resolver';
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -134,7 +134,7 @@ export class PositionRequestApiService {
     throw AlexandriaError('Failed to generate a unique ID');
   }
 
-  async createPositionRequest(data: PositionRequestCreateInput, userId: string) {
+  async createPositionRequest(data: PositionRequestCreateInputWithoutUser) {
     const uniqueSubmissionId = await this.generateUniqueShortId(10);
 
     return this.prisma.positionRequest.create({
@@ -147,15 +147,15 @@ export class PositionRequestApiService {
         profile_json: data.profile_json === null ? Prisma.DbNull : data.profile_json,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
         // TODO: AL-146
-        // user: data.user,
-        user_id: userId,
+        user: data.user,
+        // user_id: userId,
         parent_job_profile: data.parent_job_profile,
         submission_id: uniqueSubmissionId,
         status: 'DRAFT',
         title: data.title,
         // TODO: AL-146
-        // classification: data.classification,
-        classification_id: data.classification_id,
+        classification: data.classification,
+        // classification_id: data.classification_id,
       } as any as Prisma.PositionRequestCreateInput, // To prevent Excessive Stack Depth error,
       // include: {
       //   user: true,
@@ -403,7 +403,7 @@ export class PositionRequestApiService {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequests(
-    { search, where, onlyCompletedForAll, ...args }: ExtendedFindManyPositionRequestWithSearch,
+    { search, where, ...args }: ExtendedFindManyPositionRequestWithSearch,
     userId: string,
     userRoles: string[] = [],
     requestingFeature?: string | null,
@@ -436,11 +436,7 @@ export class PositionRequestApiService {
     // 'classificationTasks'|'myPositions'|'totalCompApprovedRequests'
 
     // If the user has the "total-compensation" role and wants only completed requests for all users
-    if (
-      userRoles.includes('total-compensation') &&
-      onlyCompletedForAll &&
-      requestingFeature === 'totalCompApprovedRequests'
-    ) {
+    if (userRoles.includes('total-compensation') && requestingFeature === 'totalCompApprovedRequests') {
       whereConditions = {
         ...whereConditions,
         status: { equals: 'COMPLETED' },
@@ -460,14 +456,15 @@ export class PositionRequestApiService {
       };
     }
 
+    // Prepare orderBy
+    const orderBy = (args.orderBy as any[]) || [];
+
+    // Add default sorting by id
+    orderBy.push({ id: 'desc' });
+
     const positionRequests = await this.prisma.positionRequest.findMany({
       where: whereConditions,
-      // where: {
-      //   ...searchConditions,
-      //   ...where,
-      //   user_id: userId,
-      // },
-      orderBy: [...(args.orderBy || []), { id: 'desc' }],
+      orderBy,
       take: args.take,
       skip: args.skip,
       select: {
@@ -491,79 +488,28 @@ export class PositionRequestApiService {
         crm_lookup_name: true,
         shareUUID: true,
         additional_info: true,
-      },
-    });
-
-    // todo: AL-146 this should not be needed if the foreign key relationship is working properly in schema.prisma
-
-    // Get classification code for the position requeset classification id, employdd_group_id, peoplesoft_id
-    const classificationMap = new Map();
-    for await (const pr of positionRequests) {
-      if (
-        pr.classification_id != null &&
-        pr.classification_employee_group_id != null &&
-        pr.classification_peoplesoft_id != null
-      ) {
-        const classification = await this.classificationService.getClassification({
-          where: {
-            id_employee_group_id_peoplesoft_id: {
-              id: pr.classification_id,
-              employee_group_id: pr.classification_employee_group_id,
-              peoplesoft_id: pr.classification_peoplesoft_id,
-            },
+        classification: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
-        });
-
-        classificationMap.set(pr.id, classification.code);
-      }
-    }
-
-    // Collect all unique user IDs from the position requests
-    const userIds = [...new Set(positionRequests.map((pr) => pr.user_id).filter((id) => id != null))];
-
-    // Fetch users based on the collected IDs
-    const users = await this.prisma.user.findMany({
-      where: {
-        id: { in: userIds },
-      },
-      select: {
-        id: true,
-        name: true, // Assuming 'name' is the field in your User model
+        },
       },
     });
 
-    // Create a map for easy user lookup
-    const userMap = new Map(users.map((u) => [u.id, u.name]));
-
-    // Merge position requests with classification codes
+    // Transform the results
     const mergedResults = positionRequests.map((pr) => ({
       ...pr,
-      classification_code: classificationMap.get(pr.id),
-      user_name: userMap.get(pr.user_id),
+      classification_code: pr.classification?.code,
+      user_name: pr.user?.name,
     }));
 
-    // Check if we need to sort by classification_code
-    const orderByClassificationCode = args.orderBy?.find((o) => o.classification_code);
-    if (orderByClassificationCode) {
-      // Determine the sort direction
-      const sortDirection = orderByClassificationCode.classification_code.sort === 'asc' ? 1 : -1;
-
-      // Sort mergedResults by classification_code
-      mergedResults.sort((a, b) => {
-        if (a.classification_code < b.classification_code) {
-          return -1 * sortDirection;
-        }
-        if (a.classification_code > b.classification_code) {
-          return 1 * sortDirection;
-        }
-        return 0;
-      });
-    }
-    return mergedResults; //.reverse();
+    return mergedResults;
   }
 
   async getSharedPositionRequest(shareUUID: string) {
-    // console.log('getPositionRequest!', userRoles);
     if (!shareUUID || shareUUID === '') {
       throw AlexandriaError('Invalid share URL');
     }
@@ -576,65 +522,40 @@ export class PositionRequestApiService {
         where: whereCondition,
         include: {
           parent_job_profile: true,
+          classification: {
+            select: {
+              code: true,
+            },
+          },
+          user: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
         },
       });
-      // catch findFirstOrThrow error
     } catch (error) {
       throw AlexandriaError('Invalid share URL');
     }
-
-    // console.log('positionRequest: ', positionRequest, JSON.stringify(whereCondition));
 
     if (!positionRequest) {
       return null;
     }
 
-    // TODO: AL-146 - this should not be needed if the foreign key relationship is working properly in schema.prisma
-    // Fetch classification
-
-    const classification =
-      positionRequest.classification_id == null
-        ? null
-        : await this.prisma.classification.findUnique({
-            where: {
-              id_employee_group_id_peoplesoft_id: {
-                id: positionRequest.classification_id,
-                employee_group_id: positionRequest.classification_employee_group_id,
-                peoplesoft_id: positionRequest.classification_peoplesoft_id,
-              },
-            },
-            select: {
-              code: true, // Assuming 'code' is the field you want from the classification
-            },
-          });
-
-    // Fetch user
-    const user = await this.prisma.user.findUnique({
-      where: { id: positionRequest.user_id },
-      select: {
-        name: true, // Assuming 'name' is the field you want from the user
-        email: true,
-      },
-    });
-
     return {
       ...positionRequest,
-      classification_code: classification?.code,
-      user_name: user?.name,
-      email: user?.email,
+      classification_code: positionRequest.classification?.code,
+      user_name: positionRequest.user?.name,
+      email: positionRequest.user?.email,
     };
   }
 
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
     let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
-    // If the user does not have the "total-compesation" or "classification" role, the filter will include the requesting user id
-    // otherwise, allow user to access any position by id, except those in "DRAFT" status
     if (['classification', 'total-compensation'].some((value) => userRoles.includes(value))) {
-      whereCondition = {
-        ...whereCondition,
-        // NOT: [{ status: { equals: 'DRAFT' } }],
-      };
+      whereCondition = { ...whereCondition };
     } else {
       whereCondition = {
         ...whereCondition,
@@ -646,59 +567,41 @@ export class PositionRequestApiService {
       where: whereCondition,
       include: {
         parent_job_profile: true,
+        classification: {
+          select: {
+            id: true,
+            code: true,
+            employee_group_id: true,
+            peoplesoft_id: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
-
-    // console.log('positionRequest: ', positionRequest, JSON.stringify(whereCondition));
 
     if (!positionRequest) {
       return null;
     }
 
-    // TODO: AL-146 - this should not be needed if the foreign key relationship is working properly in schema.prisma
-    // Fetch classification
-
-    const classification =
-      positionRequest.classification_id == null
-        ? null
-        : await this.prisma.classification.findUnique({
-            where: {
-              id_employee_group_id_peoplesoft_id: {
-                id: positionRequest.classification_id,
-                employee_group_id: positionRequest.classification_employee_group_id,
-                peoplesoft_id: positionRequest.classification_peoplesoft_id,
-              },
-            },
-            select: {
-              id: true,
-              code: true, // Assuming 'code' is the field you want from the classification
-              employee_group_id: true,
-              peoplesoft_id: true,
-            },
-          });
-
-    // Fetch user
-    const user = await this.prisma.user.findUnique({
-      where: { id: positionRequest.user_id },
-      select: {
-        name: true, // Assuming 'name' is the field you want from the user
-        email: true,
-      },
-    });
-
     return {
       ...positionRequest,
-      classification_employee_group_id: classification?.employee_group_id,
-      classification_peoplesoft_id: classification?.peoplesoft_id,
-      classification_code: classification?.code,
-      user_name: user?.name,
-      email: user?.email,
+      classification_employee_group_id: positionRequest.classification?.employee_group_id,
+      classification_peoplesoft_id: positionRequest.classification?.peoplesoft_id,
+      classification_code: positionRequest.classification?.code,
+      user_name: positionRequest.user?.name,
+      email: positionRequest.user?.email,
     };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequestCount(
-    { search, where, onlyCompletedForAll }: ExtendedFindManyPositionRequestWithSearch,
+    { search, where }: ExtendedFindManyPositionRequestWithSearch,
     userId: string,
     userRoles: string[] = [],
     requestingFeature?: string | null,
@@ -719,11 +622,7 @@ export class PositionRequestApiService {
     };
 
     // Initial phase: Set up status filtering
-    if (
-      userRoles.includes('total-compensation') &&
-      onlyCompletedForAll &&
-      requestingFeature === 'totalCompApprovedRequests'
-    ) {
+    if (userRoles.includes('total-compensation') && requestingFeature === 'totalCompApprovedRequests') {
       whereConditions.status = { equals: 'COMPLETED' };
     } else if (userRoles.includes('classification') && requestingFeature === 'classificationTasks') {
       whereConditions.status = { not: { equals: 'DRAFT' } };
@@ -767,61 +666,13 @@ export class PositionRequestApiService {
   }
 
   async getPositionRequestUserClassifications(userId: string) {
-    const positionRequests = await this.prisma.positionRequest.findMany({
-      where: {
-        user_id: userId,
-      },
-      select: {
-        id: true,
-        parent_job_profile_id: true,
-        step: true,
-        reports_to_position_id: true,
-        user_id: true,
-        title: true,
-        position_number: true,
-        classification_id: true,
-        classification_employee_group_id: true,
-        classification_peoplesoft_id: true,
-        submission_id: true,
-        status: true,
-      },
-    });
-
-    const classificationIds = Array.from(
-      new Set(
-        positionRequests
-          .filter(
-            (req) =>
-              req.classification_id != null &&
-              req.classification_employee_group_id != null &&
-              req.classification_peoplesoft_id != null,
-          )
-          .map((req) => {
-            const {
-              classification_id: id,
-              classification_employee_group_id: employee_group_id,
-              classification_peoplesoft_id: peoplesoft_id,
-            } = req;
-
-            return {
-              id,
-              employee_group_id,
-              peoplesoft_id,
-            };
-          }),
-      ),
-    );
-
-    // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
       where: {
-        OR: [
-          ...classificationIds.map(({ id, employee_group_id, peoplesoft_id }) => ({
-            id,
-            employee_group_id,
-            peoplesoft_id,
-          })),
-        ],
+        PositionRequest: {
+          some: {
+            user_id: userId,
+          },
+        },
       },
       select: {
         id: true,
@@ -829,6 +680,7 @@ export class PositionRequestApiService {
         peoplesoft_id: true,
         code: true,
       },
+      distinct: ['id', 'employee_group_id', 'peoplesoft_id'],
     });
 
     return classifications;
@@ -843,82 +695,30 @@ export class PositionRequestApiService {
   }
 
   async getPositionRequestSubmittedBy() {
-    const positionRequests = await this.prisma.positionRequest.findMany({
-      select: {
-        user_id: true,
-      },
-    });
-
-    // todo: AL-146 this should not be needed if the foreign key relationship is working properly in schema.prisma
-    // Collect all unique user IDs from the position requests
-    const userIds = [...new Set(positionRequests.map((pr) => pr.user_id).filter((id) => id != null))];
-
-    // Fetch users based on the collected IDs
     const users = await this.prisma.user.findMany({
       where: {
-        id: { in: userIds },
+        PositionRequest: {
+          some: {}, // This ensures we only get users who have submitted position requests
+        },
       },
       select: {
         id: true,
-        name: true, // Assuming 'name' is the field in your User model
+        name: true,
       },
+      distinct: ['id'], // This ensures we get unique users
     });
 
-    return Array.from(new Map(users.map((user) => [user.id, user])).values());
+    return users;
   }
 
   async getPositionRequestClassifications() {
-    const positionRequests = await this.prisma.positionRequest.findMany({
-      where: {
-        status: 'COMPLETED',
-      },
-      select: {
-        classification_id: true,
-        classification_employee_group_id: true,
-        classification_peoplesoft_id: true,
-      },
-    });
-
-    const idStrings = Array.from(
-      new Set(
-        positionRequests
-          .filter(
-            (req) =>
-              req.classification_id != null &&
-              req.classification_employee_group_id != null &&
-              req.classification_peoplesoft_id != null,
-          )
-          .map((req) => {
-            const {
-              classification_id: id,
-              classification_employee_group_id: employee_group_id,
-              classification_peoplesoft_id: peoplesoft_id,
-            } = req;
-
-            return `${id}.${employee_group_id}.${peoplesoft_id}`;
-          }),
-      ),
-    );
-    const classificationIds = idStrings.map((str) => {
-      const [id, employee_group_id, peoplesoft_id] = str.split('.');
-
-      return {
-        id,
-        employee_group_id,
-        peoplesoft_id,
-      };
-    });
-
-    // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
       where: {
-        OR: [
-          ...classificationIds.map(({ id, employee_group_id, peoplesoft_id }) => ({
-            id,
-            employee_group_id,
-            peoplesoft_id,
-          })),
-        ],
+        PositionRequest: {
+          some: {
+            status: 'COMPLETED',
+          },
+        },
       },
       select: {
         id: true,
@@ -926,6 +726,7 @@ export class PositionRequestApiService {
         peoplesoft_id: true,
         code: true,
       },
+      distinct: ['id', 'employee_group_id', 'peoplesoft_id'],
     });
 
     return classifications;
@@ -1025,11 +826,22 @@ export class PositionRequestApiService {
           updateData.parent_job_profile.connect.id_version.version,
         );
 
-        // Set Classification IDs on positionRequest
-        updatePayload.classification_id = parentJobProfile.classifications[0].classification.id;
-        updatePayload.classification_employee_group_id =
-          parentJobProfile.classifications[0].classification.employee_group_id;
-        updatePayload.classification_peoplesoft_id = parentJobProfile.classifications[0].classification.peoplesoft_id;
+        // Set Classification on positionRequest
+        if (parentJobProfile.classifications && parentJobProfile.classifications.length > 0) {
+          const classification = parentJobProfile.classifications[0].classification;
+          updatePayload.classification = {
+            connect: {
+              id_employee_group_id_peoplesoft_id: {
+                id: classification.id,
+                employee_group_id: classification.employee_group_id,
+                peoplesoft_id: classification.peoplesoft_id,
+              },
+            },
+          };
+        } else {
+          // If there's no classification, disconnect the existing one
+          updatePayload.classification = { disconnect: true };
+        }
       }
     }
 
@@ -1188,6 +1000,16 @@ export class PositionRequestApiService {
     const positionRequest = await this.prisma.positionRequest.update({
       where: { id: id },
       data: updatePayload,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        classification: true,
+      },
     });
 
     return positionRequest;

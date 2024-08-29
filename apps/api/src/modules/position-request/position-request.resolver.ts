@@ -1,9 +1,10 @@
-import { Args, Field, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
+import { Args, Field, InputType, Int, Mutation, ObjectType, OmitType, Query, Resolver } from '@nestjs/graphql';
 import { UUID } from 'crypto';
 import {
   PositionRequest,
   PositionRequestCreateInput,
   PositionRequestUpdateInput,
+  UserCreateNestedOneWithoutPositionRequestInput,
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -59,6 +60,12 @@ export class PositionRequestSubmittedBy {
   name: string;
 }
 
+@InputType()
+export class PositionRequestCreateInputWithoutUser extends OmitType(PositionRequestCreateInput, ['user'] as const) {
+  @Field(() => UserCreateNestedOneWithoutPositionRequestInput, { nullable: true })
+  user?: UserCreateNestedOneWithoutPositionRequestInput;
+}
+
 @Resolver()
 export class PositionRequestApiResolver {
   constructor(private positionRequestService: PositionRequestApiService) {}
@@ -66,17 +73,18 @@ export class PositionRequestApiResolver {
   @Mutation(() => Int)
   async createPositionRequest(
     @CurrentUser() { id: userId }: Express.User,
-    @Args({ name: 'data', type: () => PositionRequestCreateInput }) data: PositionRequestCreateInput,
+    @Args({ name: 'data', type: () => PositionRequestCreateInputWithoutUser })
+    data: PositionRequestCreateInputWithoutUser,
   ) {
     // console.log('create DATA: ', data);
 
     // TODO: AL-146
-    // data.user = { connect: { id: userId } };
+    data.user = { connect: { id: userId } };
 
     // TODO: AL-146 - replace below with above
-    data.user_id = userId;
+    // data.user_id = userId;
 
-    const newPositionRequest = await this.positionRequestService.createPositionRequest(data, userId);
+    const newPositionRequest = await this.positionRequestService.createPositionRequest(data);
     return newPositionRequest.id;
   }
 

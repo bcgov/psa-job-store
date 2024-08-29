@@ -350,7 +350,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
         title: <span data-testid="class-header">Class</span>,
         dataIndex: 'classification_code',
         key: 'classification_code',
-        render: (text: string) => <div data-testid={`classification-${text}`}> {text}</div>,
+        render: (_text: string, record: any) => (
+          <div data-testid={`classification-${record.classification?.code}`}>{record.classification?.code}</div>
+        ),
       },
     ],
 
@@ -387,6 +389,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             title: <span data-testid="submitted-by-header">Submitted by</span>,
             dataIndex: 'user_name',
             key: 'user_name',
+            render: (_text: string, record: any) => (
+              <span data-testid={`submitted-by-${record.user?.name}`}>{record.user?.name}</span>
+            ),
           },
         ]
       : []),
@@ -455,7 +460,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                         background: 'transparent',
                       }}
                       onClick={() => {
-                        if (import.meta.env.VITE_TEST_ENV !== 'true') copy(valueString);
+                        // if (import.meta.env.VITE_TEST_ENV !== 'true')
+                        copy(valueString);
                         message.success('Position number copied!');
                       }}
                     />
@@ -544,7 +550,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   };
 
   const updateData = useCallback(() => {
-    // console.log('updateData');
+    console.log('updateData');
     const search = searchParams.get('search');
     const statusFilter = searchParams.get('status') || searchParams.get('status__in');
     const classificationFilter = searchParams.get('classification') || searchParams.get('classification_id__in');
@@ -556,25 +562,63 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
       setHasSearched(true);
     }
 
+    // const sortParams = sortField
+    //   ? {
+    //       orderBy: [
+    //         {
+    //           [sortField]: ['approved_at', 'submitted_at', 'updated_at'].includes(sortField)
+    //             ? sortOrder === 'ascend'
+    //               ? 'asc'
+    //               : 'desc' // Directly use 'asc'/'desc' for updated_at
+    //             : sortField === 'parent_job_profile'
+    //               ? { number: sortOrder === 'ascend' ? 'asc' : 'desc' }
+    //               : sortField === 'title'
+    //                 ? { sort: sortOrder === 'ascend' ? 'asc' : 'desc' } // Use SortOrderInput for title
+    //                 : { sort: sortOrder === 'ascend' ? 'asc' : 'desc' }, // Use SortOrderInput for other fields as needed
+    //         },
+    //       ],
+    //     }
+    //   : {};
+
     const sortParams = sortField
       ? {
           orderBy: [
             {
-              [sortField]: ['approved_at', 'submitted_at', 'updated_at'].includes(sortField)
-                ? sortOrder === 'ascend'
-                  ? 'asc'
-                  : 'desc' // Directly use 'asc'/'desc' for updated_at
-                : sortField === 'parent_job_profile'
-                  ? { number: sortOrder === 'ascend' ? 'asc' : 'desc' }
-                  : sortField === 'title'
-                    ? { sort: sortOrder === 'ascend' ? 'asc' : 'desc' } // Use SortOrderInput for title
-                    : { sort: sortOrder === 'ascend' ? 'asc' : 'desc' }, // Use SortOrderInput for other fields as needed
+              ...(sortField === 'classification_code'
+                ? {
+                    classification: {
+                      code: sortOrder === 'ascend' ? 'asc' : 'desc',
+                    },
+                  }
+                : sortField === 'user_name'
+                  ? {
+                      user: {
+                        name: sortOrder === 'ascend' ? 'asc' : 'desc',
+                      },
+                    }
+                  : ['approved_at', 'submitted_at', 'updated_at'].includes(sortField)
+                    ? {
+                        [sortField]: sortOrder === 'ascend' ? 'asc' : 'desc',
+                      }
+                    : sortField === 'parent_job_profile'
+                      ? {
+                          parent_job_profile: {
+                            number: sortOrder === 'ascend' ? 'asc' : 'desc',
+                          },
+                        }
+                      : sortField === 'title'
+                        ? {
+                            [sortField]: { sort: sortOrder === 'ascend' ? 'asc' : 'desc' },
+                          }
+                        : {
+                            [sortField]: { sort: sortOrder === 'ascend' ? 'asc' : 'desc' },
+                          }),
             },
           ],
         }
       : {};
 
-    console.log('sortParams: ', sortParams);
+    console.log('updateData sortParams: ', sortParams);
 
     trigger({
       ...(search != null && { search }),
@@ -619,11 +663,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             : []),
         ],
       },
-      ...sortParams,
-      skip: (currentPage - 1) * pageSize,
-      take: pageSize,
-      requestingFeature: requestingFeature,
-      onlyCompletedForAll: mode === 'total-compensation',
+      // by default, sort by updated_at
       ...(mode == null || mode === 'classification'
         ? {
             orderBy: [
@@ -633,6 +673,12 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             ],
           }
         : {}),
+      // if sortParams is defined (because user did custom sorting)
+      // it will override the above default setting
+      ...sortParams,
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
+      requestingFeature: requestingFeature,
     });
   }, [searchParams, trigger, currentPage, pageSize, sortField, sortOrder, mode, requestingFeature]);
 
@@ -641,12 +687,13 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   }, [updateData]);
 
   const handleTableChange = (pagination: any, _filters: any, sorter: any) => {
+    console.log('handleTableChange');
     const newPage = pagination.current;
     const newPageSize = pagination.pageSize;
     const newSortField = sorter.field;
     const newSortOrder = sorter.order;
 
-    console.log('sorter: ', sorter);
+    console.log('handleTableChange sorter: ', sorter);
 
     // console.log('sorter: ', JSON.stringify(sorter));
 
@@ -658,6 +705,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     if (!newSortOrder) setSortField(null);
 
     if (handleTableChangeCallback) handleTableChangeCallback(pagination, _filters, sorter);
+    else console.log('no handleTableChangeCallback');
   };
 
   useEffect(() => {
