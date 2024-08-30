@@ -97,7 +97,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       children: (
         <PositionProfile
           positionNumber={positionRequestData?.positionRequest?.reports_to_position_id}
-          positionProfile={data?.positionRequest?.reports_to_position}
+          positionProfile={positionRequestData?.positionRequest?.reports_to_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
 
@@ -132,7 +132,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       children: (
         <PositionProfile
           positionNumber={positionRequestData?.positionRequest?.additional_info?.excluded_mgr_position_number}
-          positionProfile={data?.positionRequest?.reports_to_position}
+          positionProfile={positionRequestData?.positionRequest?.reports_to_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>
