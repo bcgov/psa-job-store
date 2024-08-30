@@ -666,6 +666,7 @@ export const PositionRequestPage = () => {
                   prefix="Reporting to"
                   mode="compact"
                   positionNumber={wizardContextPositionRequestData?.reports_to_position_id}
+                  positionProfile={wizardContextPositionRequestData?.reports_to_position}
                   orgChartData={wizardContextPositionRequestData?.orgchart_json}
                 ></PositionProfile>
               </div>

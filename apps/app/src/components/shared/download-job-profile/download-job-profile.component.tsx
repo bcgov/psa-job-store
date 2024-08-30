@@ -86,8 +86,12 @@ export const DownloadJobProfileComponent = ({
           ? `Job Profile ${positionNumber} ${profileTitle} ${date}.docx`
           : `Job Profile ${profileTitle} ${date}.docx`;
       });
-      const supervisorPosition = prData.positionRequest?.additional_info?.excluded_mgr_position_number;
-      supervisorPosition && profileTrigger({ positionNumber: supervisorPosition.toString() });
+      if (prData.positionRequest?.excluded_manager_position) {
+        setDoDownload(true);
+      } else {
+        const supervisorPosition = prData.positionRequest?.additional_info?.excluded_mgr_position_number;
+        supervisorPosition && profileTrigger({ positionNumber: supervisorPosition.toString() });
+      }
     }
   }, [prData, isLoadingPositionRequest, title, profileTrigger]);
 
@@ -114,7 +118,8 @@ export const DownloadJobProfileComponent = ({
             ? generateJobProfile({
                 jobProfile: profile,
                 positionRequest: positionRequest ?? prData?.positionRequest,
-                supervisorProfile: positionProfileData?.positionProfile[0],
+                supervisorProfile:
+                  prData?.positionRequest?.excluded_manager_position ?? positionProfileData?.positionProfile[0],
               })
             : null;
 
