@@ -97,7 +97,9 @@ export class PositionService {
           departmentId: extraInfo ? positionDetails.department_id : '',
           organizationId: extraInfo ? positionDetails.organization_id : '',
           classificationId: extraInfo ? positionDetails.classification_id : '',
-          classificationCode: extraInfo ? positionDetails.classification.code : '',
+          classificationPeoplesoftId: extraInfo ? positionDetails.classification_peoplesoft_id : '',
+          classificationEmployeeGroupId: extraInfo ? positionDetails.classification_employee_group_id : '',
+          effectiveDate: positionDetails.effective_date,
         };
       }),
     );

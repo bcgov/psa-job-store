@@ -60,4 +60,5 @@ export const locationApi = graphqlApi.injectEndpoints({
   }),
 });
 
-export const { useGetLocationsQuery, useLazyGetLocationsQuery, useGetLocationQuery } = locationApi;
+export const { useGetLocationsQuery, useLazyGetLocationsQuery, useLazyGetLocationQuery, useGetLocationQuery } =
+  locationApi;
