@@ -980,7 +980,8 @@ export class PositionRequestApiService {
     return isDifferent;
   }
 
-  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput, userRoles: string[] = []) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
     // todo: AL-146 - tried to do this with a spread operator, but getting an error
     let updatingAdditionalInfo = false;
     const updatePayload: Prisma.PositionRequestUpdateInput = {
@@ -1002,14 +1003,15 @@ export class PositionRequestApiService {
     if (updateData.profile_json !== undefined) {
       updatePayload.profile_json = updateData.profile_json === null ? Prisma.DbNull : updateData.profile_json;
       // attach original profile json
-      if (updateData.profile_json !== null) {
-        const originalProfile = await this.jobProfileService.getJobProfile(
-          updateData.profile_json.id,
-          updateData.profile_json.version,
-          userRoles,
-        );
-        updateData.profile_json.original_profile_json = originalProfile;
-      }
+      // no longer need to do this, as profile versioning can now be used to retreive original profile
+      // if (updateData.profile_json !== null) {
+      //   const originalProfile = await this.jobProfileService.getJobProfile(
+      //     updateData.profile_json.id,
+      //     updateData.profile_json.version,
+      //     userRoles,
+      //   );
+      //   updateData.profile_json.original_profile_json = originalProfile;
+      // }
     }
 
     if (updateData.orgchart_json !== undefined) {

@@ -1,5 +1,6 @@
 import { Spin } from 'antd';
 import { FC } from 'react';
+import './loading.component.css';
 
 interface LoadingProps {
   loadingText?: string;
