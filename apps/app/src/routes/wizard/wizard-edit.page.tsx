@@ -232,7 +232,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
             profile_json: transformedData,
             title: formData.title.text,
             returnFullObject: true,
-            // classification_code: classification ? classification.code : '',
           }).unwrap();
           setPositionRequestData(resp.updatePositionRequest ?? null);
         }

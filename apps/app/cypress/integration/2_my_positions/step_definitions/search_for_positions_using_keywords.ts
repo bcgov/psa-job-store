@@ -35,7 +35,6 @@ Then('the GraphQL query for "analyst" positions should be made', () => {
         where: { AND: [] },
         skip: 0,
         take: 2,
-        onlyCompletedForAll: false,
       });
     });
 });

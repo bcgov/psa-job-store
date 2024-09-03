@@ -24,12 +24,12 @@ export const AppHeader = () => {
         // may fail because user is already logged out, just reload the page then
         // console.log(e);
       }
-
-      const loginUrl = import.meta.env.VITE_KEYCLOAK_REDIRECT_URL;
+      const origin = window.location.origin;
+      // const loginUrl = import.meta.env.VITE_KEYCLOAK_REDIRECT_URL;
 
       // Also, sign out from OIDC if necessary
       auth.signoutRedirect({
-        post_logout_redirect_uri: `${loginUrl.replace('login', 'logout')}`,
+        post_logout_redirect_uri: origin + '/auth/logout',
         redirectMethod: 'replace',
       }); // can also do signoutPopup to show popup. signoutRedirect() is inconvinient as it stays on "you have been logged out" page
     } catch (error) {
