@@ -768,7 +768,8 @@ export class PositionRequestApiService {
     return isDifferent;
   }
 
-  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput, userRoles: string[] = []) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
     // todo: AL-146 - tried to do this with a spread operator, but getting an error
     let updatingAdditionalInfo = false;
     const updatePayload: Prisma.PositionRequestUpdateInput = {
@@ -790,14 +791,15 @@ export class PositionRequestApiService {
     if (updateData.profile_json !== undefined) {
       updatePayload.profile_json = updateData.profile_json === null ? Prisma.DbNull : updateData.profile_json;
       // attach original profile json
-      if (updateData.profile_json !== null) {
-        const originalProfile = await this.jobProfileService.getJobProfile(
-          updateData.profile_json.id,
-          updateData.profile_json.version,
-          userRoles,
-        );
-        updateData.profile_json.original_profile_json = originalProfile;
-      }
+      // no longer need to do this, as profile versioning can now be used to retreive original profile
+      // if (updateData.profile_json !== null) {
+      //   const originalProfile = await this.jobProfileService.getJobProfile(
+      //     updateData.profile_json.id,
+      //     updateData.profile_json.version,
+      //     userRoles,
+      //   );
+      //   updateData.profile_json.original_profile_json = originalProfile;
+      // }
     }
 
     if (updateData.orgchart_json !== undefined) {
@@ -1253,7 +1255,31 @@ export class PositionRequestApiService {
       }
 
       const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
-      const jobProfile = positionRequest.profile_json as Record<string, any>;
+
+      // Fetch the parent job profile with its classification info
+      const parentJobProfile = await this.prisma.jobProfile.findUnique({
+        where: {
+          id_version: {
+            id: positionRequest.parent_job_profile_id,
+            version: positionRequest.parent_job_profile_version,
+          },
+        },
+        include: {
+          classifications: {
+            include: {
+              classification: true,
+            },
+          },
+        },
+      });
+
+      // Augment the profile data with classification info
+      const jobProfile = {
+        ...(positionRequest.profile_json as Record<string, any>),
+        classifications: parentJobProfile.classifications,
+      } as Record<string, any>;
+
+      // const jobProfile = positionRequest.profile_json as Record<string, any>;
       const paylist_department = await this.prisma.department.findUnique({
         where: { id: additionalInfo.department_id },
       });

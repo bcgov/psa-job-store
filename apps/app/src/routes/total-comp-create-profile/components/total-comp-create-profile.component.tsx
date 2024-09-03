@@ -1682,7 +1682,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         version: formData.version,
         id: parseInt(id ?? '0'),
         owner: {
-          connect: { id: jobProfileData?.jobProfile.owner.id },
+          connect: { id: jobProfileData?.jobProfile.owner?.id },
         },
         created_at: jobProfileData?.jobProfile.created_at,
         published_by: {
