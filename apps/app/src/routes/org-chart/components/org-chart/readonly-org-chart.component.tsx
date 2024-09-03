@@ -54,7 +54,10 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
       <Row gutter={[8, 8]} justify="space-between" style={{ margin: '0.5rem 1rem' }}>
-        <Col xs={24} md={{ offset: 12, span: 12 }}>
+        <Col xs={24} md={12}>
+          <DownloadButton />
+        </Col>
+        <Col xs={24} md={12}>
           <Space direction="vertical" style={{ textAlign: 'right', width: '100%' }}>
             {departmentDataIsFetching ? (
               <Spin spinning />
@@ -72,6 +75,7 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
           </Space>
         </Col>
       </Row>
+
       <ReactFlow
         edges={edges}
         fitView
@@ -93,7 +97,6 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
           style={{ border: '1px solid #B1B1B1', height: 100, width: 150 }}
           zoomable
         />
-        <DownloadButton />
       </ReactFlow>
     </div>
   );

@@ -98,7 +98,7 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                   <h2 className={current == 0 ? 'current' : ''}>Organization chart</h2>
                 ) : current != 0 ? (
                   <span
-                    aria-label="Go to step 1 of the wizard - organizational chart - select supervisor"
+                    aria-label="Go to step 1 of the wizard - organization chart - select supervisor"
                     tabIndex={0}
                     role="button"
                   >

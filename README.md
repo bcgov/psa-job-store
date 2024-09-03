@@ -2,7 +2,7 @@
 
 ![JobStore Beta Screenshot](/screenshot.PNG?raw=true)
 
-Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one solution for navigating and managing your organizational chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
+Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one solution for navigating and managing your organization chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
 
 ## Features
 
