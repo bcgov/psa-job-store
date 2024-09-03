@@ -679,8 +679,9 @@ export const PositionRequestPage = () => {
                   positionRequest={wizardContextPositionRequestData}
                   jobProfile={wizardContextPositionRequestData?.profile_json}
                   useModal={readonlyMode === 'completed'}
+                  buttonType="primary"
                 >
-                  <Button type="primary">Download profile</Button>
+                  {/* <Button type="primary">Download profile</Button> */}
                 </DownloadJobProfileComponent>
               ),
             ]}
