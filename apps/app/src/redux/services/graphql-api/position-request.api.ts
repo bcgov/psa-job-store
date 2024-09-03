@@ -47,6 +47,7 @@ export interface GetPositionRequestResponseContent {
   user?: {
     id?: string;
     name?: string;
+    email?: string;
   };
   classification?: {
     code?: string;
@@ -62,7 +63,6 @@ export interface GetPositionRequestResponseContent {
   approved_at?: string;
   updated_at?: string;
   submitted_at?: string;
-  email?: string;
   shareUUID?: string;
   parent_job_profile?: {
     number: number;
@@ -565,17 +565,23 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    getPositionRequestSubmittedBy: build.query<GetPositionRequestSubmittedByResponse, void>({
-      query: () => {
+    getPositionRequestSubmittedBy: build.query<
+      GetPositionRequestSubmittedByResponse,
+      GetPositionRequestsArgs | undefined
+    >({
+      query: (args: GetPositionRequestsArgs = {}) => {
         return {
           document: gql`
-            query PositionRequestSubmittedBy {
-              positionRequestSubmittedBy {
+            query PositionRequestSubmittedBy($requestingFeature: String) {
+              positionRequestSubmittedBy(requestingFeature: $requestingFeature) {
                 id
                 name
               }
             }
           `,
+          variables: {
+            requestingFeature: args.requestingFeature,
+          },
         };
       },
     }),

@@ -50,6 +50,7 @@ export const ClassificationTasksPage = () => {
       <ContentWrapper>
         {hasData && (
           <PositionRequestsSearch
+            requestingFeature="classificationTasks"
             searchPlaceHolderText={'Search by job title or submission ID'}
             // additionalFilters={true}
             mode="classification"

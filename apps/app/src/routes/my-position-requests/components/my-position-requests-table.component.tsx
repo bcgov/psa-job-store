@@ -555,10 +555,19 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const statusFilter = searchParams.get('status') || searchParams.get('status__in');
     const classificationFilter = searchParams.get('classification') || searchParams.get('classification_id__in');
     const submittedByFilter = searchParams.get('submitted_by__in');
+    const jobstoreNumberFilter = searchParams.get('job_store_number__in');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    if (search || statusFilter || classificationFilter || submittedByFilter || startDate || endDate) {
+    if (
+      search ||
+      statusFilter ||
+      classificationFilter ||
+      submittedByFilter ||
+      startDate ||
+      endDate ||
+      jobstoreNumberFilter
+    ) {
       setHasSearched(true);
     }
 
@@ -593,7 +602,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                 : sortField === 'user_name'
                   ? {
                       user: {
-                        name: sortOrder === 'ascend' ? 'asc' : 'desc',
+                        name: { sort: sortOrder === 'ascend' ? 'asc' : 'desc' },
                       },
                     }
                   : ['approved_at', 'submitted_at', 'updated_at'].includes(sortField)
@@ -651,10 +660,23 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                 },
               ]
             : []),
+          ...(jobstoreNumberFilter != null
+            ? [
+                {
+                  parent_job_profile: {
+                    is: {
+                      number: {
+                        in: JSON.parse(`[${jobstoreNumberFilter.split(',').map((v) => `${v}`)}]`),
+                      },
+                    },
+                  },
+                },
+              ]
+            : []),
           ...(startDate != null && endDate != null
             ? [
                 {
-                  updated_at: {
+                  approved_at: {
                     gte: startDate,
                     lte: endDate,
                   },

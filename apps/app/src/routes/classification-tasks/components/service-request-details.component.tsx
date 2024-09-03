@@ -25,7 +25,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'submittedBy',
       label: 'Submitted by',
-      children: <div>{positionRequestData?.positionRequest?.user_name}</div>,
+      children: <div>{positionRequestData?.positionRequest?.user?.name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -82,7 +82,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'expectedClassificationLevel',
       label: 'Expected classification level',
-      children: <div>{positionRequestData?.positionRequest?.classification_code}</div>,
+      children: <div>{positionRequestData?.positionRequest?.classification?.code}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {

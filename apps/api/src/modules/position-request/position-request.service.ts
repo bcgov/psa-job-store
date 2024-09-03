@@ -146,21 +146,13 @@ export class PositionRequestApiService {
         reports_to_position_id: data.reports_to_position_id,
         profile_json: data.profile_json === null ? Prisma.DbNull : data.profile_json,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
-        // TODO: AL-146
         user: data.user,
-        // user_id: userId,
         parent_job_profile: data.parent_job_profile,
         submission_id: uniqueSubmissionId,
         status: 'DRAFT',
         title: data.title,
-        // TODO: AL-146
         classification: data.classification,
-        // classification_id: data.classification_id,
       } as any as Prisma.PositionRequestCreateInput, // To prevent Excessive Stack Depth error,
-      // include: {
-      //   user: true,
-      //   parent_job_profile: true,
-      // },
     });
   }
 
@@ -435,6 +427,7 @@ export class PositionRequestApiService {
 
     // 'classificationTasks'|'myPositions'|'totalCompApprovedRequests'
 
+    // console.log('whereConditions: ', JSON.stringify(whereConditions));
     // If the user has the "total-compensation" role and wants only completed requests for all users
     if (userRoles.includes('total-compensation') && requestingFeature === 'totalCompApprovedRequests') {
       whereConditions = {
@@ -445,7 +438,6 @@ export class PositionRequestApiService {
     } else if (userRoles.includes('classification') && requestingFeature === 'classificationTasks') {
       whereConditions = {
         ...whereConditions,
-        // classificationAssignedTo: { equals: userId }, // todo: enable this after testing session
         status: { not: { equals: 'DRAFT' } },
       };
     } else if (requestingFeature === 'myPositions') {
@@ -461,6 +453,8 @@ export class PositionRequestApiService {
 
     // Add default sorting by id
     orderBy.push({ id: 'desc' });
+
+    // console.log('final whereConditions: ', JSON.stringify(whereConditions));
 
     const positionRequests = await this.prisma.positionRequest.findMany({
       where: whereConditions,
@@ -499,14 +493,7 @@ export class PositionRequestApiService {
       },
     });
 
-    // Transform the results
-    const mergedResults = positionRequests.map((pr) => ({
-      ...pr,
-      classification_code: pr.classification?.code,
-      user_name: pr.user?.name,
-    }));
-
-    return mergedResults;
+    return positionRequests;
   }
 
   async getSharedPositionRequest(shareUUID: string) {
@@ -543,12 +530,7 @@ export class PositionRequestApiService {
       return null;
     }
 
-    return {
-      ...positionRequest,
-      classification_code: positionRequest.classification?.code,
-      user_name: positionRequest.user?.name,
-      email: positionRequest.user?.email,
-    };
+    return positionRequest;
   }
 
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
@@ -593,9 +575,6 @@ export class PositionRequestApiService {
       ...positionRequest,
       classification_employee_group_id: positionRequest.classification?.employee_group_id,
       classification_peoplesoft_id: positionRequest.classification?.peoplesoft_id,
-      classification_code: positionRequest.classification?.code,
-      user_name: positionRequest.user?.name,
-      email: positionRequest.user?.email,
     };
   }
 
@@ -694,13 +673,21 @@ export class PositionRequestApiService {
     return states;
   }
 
-  async getPositionRequestSubmittedBy() {
-    const users = await this.prisma.user.findMany({
-      where: {
-        PositionRequest: {
-          some: {}, // This ensures we only get users who have submitted position requests
-        },
+  async getPositionRequestSubmittedBy(userRoles: string[] = [], requestingFeature: string) {
+    const whereConditions: any = {
+      PositionRequest: {
+        some: {}, // This ensures we only get users who have submitted position requests
       },
+    };
+
+    if (userRoles.includes('total-compensation') && requestingFeature === 'totalCompApprovedRequests') {
+      whereConditions.PositionRequest.some.status = { equals: 'COMPLETED' };
+    } else if (userRoles.includes('classification') && requestingFeature === 'classificationTasks') {
+      whereConditions.PositionRequest.some.status = { not: { equals: 'DRAFT' } };
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: whereConditions,
       select: {
         id: true,
         name: true,
@@ -770,7 +757,7 @@ export class PositionRequestApiService {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
-    // todo: AL-146 - tried to do this with a spread operator, but getting an error
+    // todo: AL-146 - tried to do this with a spread operator, but getting an error (todo: this can now be fixed)
     let updatingAdditionalInfo = false;
     const updatePayload: Prisma.PositionRequestUpdateInput = {
       additional_info: {} as Prisma.JsonValue,

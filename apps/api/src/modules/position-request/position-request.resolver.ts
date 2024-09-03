@@ -76,13 +76,7 @@ export class PositionRequestApiResolver {
     @Args({ name: 'data', type: () => PositionRequestCreateInputWithoutUser })
     data: PositionRequestCreateInputWithoutUser,
   ) {
-    // console.log('create DATA: ', data);
-
-    // TODO: AL-146
     data.user = { connect: { id: userId } };
-
-    // TODO: AL-146 - replace below with above
-    // data.user_id = userId;
 
     const newPositionRequest = await this.positionRequestService.createPositionRequest(data);
     return newPositionRequest.id;
@@ -188,8 +182,11 @@ export class PositionRequestApiResolver {
 
   @Roles('total-compensation', 'classification')
   @Query(() => [UserBasicInfo], { name: 'positionRequestSubmittedBy' })
-  async getpositionRequestSubmittedBy() {
-    return this.positionRequestService.getPositionRequestSubmittedBy();
+  async getpositionRequestSubmittedBy(
+    @CurrentUser() user: Express.User,
+    @Args('requestingFeature', { type: () => String, nullable: true }) requestingFeature?: string,
+  ) {
+    return this.positionRequestService.getPositionRequestSubmittedBy(user.roles, requestingFeature);
   }
 
   @Mutation(() => Boolean)
