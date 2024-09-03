@@ -1330,7 +1330,7 @@ export class PositionRequestApiService {
             },
             text: `   
           <div>         
-            <a href="https://jobstore.apps.silver.devops.gov.bc.ca/classification-tasks/${
+            <a href="https://jobstore.gov.bc.ca/requests/positions/manage/${
               positionRequest.id
             }">View this position in the Job Store</a>
             <br />
