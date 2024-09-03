@@ -9,7 +9,6 @@ import {
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
-import ContentWrapper from '../../components/content-wrapper.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetLocationQuery } from '../../redux/services/graphql-api/location.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
@@ -61,13 +60,13 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'submittedBy',
       label: 'Submitted by',
-      children: <div>{data?.positionRequest?.user_name}</div>,
+      children: <div>{data?.positionRequest?.user?.name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'contactEmail',
       label: 'Contact Email',
-      children: <div>{data?.positionRequest?.email}</div>,
+      children: <div>{data?.positionRequest?.user?.email}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -88,7 +87,7 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'expectedClassificationLevel',
       label: 'Expected classification level',
-      children: <div>{data?.positionRequest?.classification_code}</div>,
+      children: <div>{data?.positionRequest?.classification?.code}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -404,11 +403,13 @@ export const TotalCompApprovedRequestPage = () => {
                       <p>Reach out to the hiring manager or reporting managers for feedback.</p>
                       <Descriptions bordered column={2}>
                         <Descriptions.Item label="Hiring Manager" span={3}>
-                          {data?.positionRequest?.user_name} -{' '}
-                          <a href={`mailto:${data?.positionRequest?.email}`}>{data?.positionRequest?.email}</a>
+                          {data?.positionRequest?.user?.name} -{' '}
+                          <a href={`mailto:${data?.positionRequest?.user?.email}`}>
+                            {data?.positionRequest?.user?.email}
+                          </a>
                           <CopyOutlined
                             onClick={() => {
-                              navigator.clipboard.writeText(data?.positionRequest?.email || '');
+                              navigator.clipboard.writeText(data?.positionRequest?.user?.email || '');
                               message.success('Email copied to clipboard');
                             }}
                             style={{ cursor: 'pointer' }}
@@ -513,13 +514,13 @@ export const TotalCompApprovedRequestPage = () => {
         }
         additionalBreadcrumb={{ title: data?.positionRequest?.title }}
       />
-      <ContentWrapper>
-        <Tabs
-          defaultActiveKey="1"
-          items={tabItems}
-          tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem 1rem -1rem', padding: '0 1rem 0px 1rem' }}
-        />
-      </ContentWrapper>
+      {/* <ContentWrapper> */}
+      <Tabs
+        defaultActiveKey="1"
+        items={tabItems}
+        tabBarStyle={{ backgroundColor: '#fff', padding: '0 1rem 0px 1rem' }}
+      />
+      {/* </ContentWrapper> */}
       {/* subTitle={positionRequest.title} */}
     </>
   );

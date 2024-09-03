@@ -394,7 +394,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
         <div
           id="org-chart-container"
           role="application"
-          aria-label="Organizational chart - use arrow keys or tab to navigate. Press enter to create a new position."
+          aria-label="Organization chart - use arrow keys or tab to navigate. Press enter to create a new position."
           style={{ height: '100%', width: '100%' }}
           tabIndex={0}
           ref={flowRef}

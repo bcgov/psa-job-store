@@ -41,6 +41,7 @@ interface JobProfileSearchProps {
   mode?: string | null;
   allSelections: Selection[];
   setAllSelections: React.Dispatch<React.SetStateAction<Selection[]>>;
+  requestingFeature: string;
 }
 
 // Unified state for all selections
@@ -57,6 +58,7 @@ interface SelectionOption {
 export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   searchButtonText = 'Find requests',
   searchPlaceHolderText = 'Search by job title or keyword',
+  requestingFeature,
   fullWidth = false,
   mode = null,
   allSelections,
@@ -80,7 +82,8 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   const statusData = useGetPositionRequestStatusesQuery().data?.positionRequestStatuses;
 
   // get unique approved by for approved position requests
-  const submittedByData = useGetPositionRequestSubmittedByQuery().data?.positionRequestSubmittedBy;
+  const submittedByData = useGetPositionRequestSubmittedByQuery({ requestingFeature: requestingFeature }).data
+    ?.positionRequestSubmittedBy;
   // }
 
   const [classificationFilterData, setClassificationOptions] = useState<SelectionOption[]>([]);

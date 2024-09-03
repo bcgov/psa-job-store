@@ -59,15 +59,12 @@ model PositionRequest {
   crm_json                         Json?                  @db.JsonB
   profile_json                     Json?                  @db.JsonB
   orgchart_json                    Json?                  @db.JsonB
-  user_id                          String?                @db.Uuid
+  user_id                          String                 @db.Uuid
   title                            String?
   position_number                  Int?
   classification_id                String?
   classification_employee_group_id String?
   classification_peoplesoft_id     String?
-  classification_code              String? // this is just to satisfy type definition, no data is stored here AL-146
-  user_name                        String? // this is just to satisfy type definition, no data is stored here AL-146
-  email                            String? // this is just to satisfy type definition, no data is stored here AL-146
   submission_id                    String?
   submitted_at                     DateTime               @default(now())
   approved_at                      DateTime               @default(now())
@@ -75,16 +72,10 @@ model PositionRequest {
   updated_at                       DateTime               @default(now()) @updatedAt
   shareUUID                        String?                @default(uuid()) @db.Uuid
 
-  // additional information form data
-  // additional_info_work_location_id             String?
-  // additional_info_department_id                String? // this is department id collected from the additional information form
-  // additional_info_excluded_mgr_position_number String?
-  // additional_info_comments                     String?
   additional_info Json? @db.JsonB
 
-  // TODO: AL-146
-  // user        User       @relation(fields: [user_id], references: [id])
-  // classification     Classification @relation(fields: [classification_id], references: [id])
+  user               User               @relation(fields: [user_id], references: [id])
+  classification     Classification?    @relation(fields: [classification_id, classification_employee_group_id, classification_peoplesoft_id], references: [id, employee_group_id, peoplesoft_id])
   parent_job_profile JobProfile?        @relation(fields: [parent_job_profile_id, parent_job_profile_version], references: [id, version])
   department         Department         @relation(fields: [department_id], references: [id])
   CurrentJobProfile  CurrentJobProfile? @relation(fields: [parent_job_profile_id], references: [id])
@@ -105,8 +96,6 @@ model User {
 
   comments Comment[]
 
-  // TODO: AL-146
-  // PositionRequest PositionRequest[]
   JobProfile                  JobProfile[]
   SavedJobProfile             SavedJobProfile[]
   draftedJobProfiles          JobProfile[]        @relation(name: "updatedByRelation")
@@ -114,6 +103,7 @@ model User {
   CurrentSavedJobProfiles     CurrentJobProfile[]
   CurrentDraftedJobProfiles   CurrentJobProfile[] @relation(name: "currentDraftedByRelation")
   CurrentPublishedJobProfiles CurrentJobProfile[] @relation(name: "currentPublishedByRelation")
+  PositionRequest             PositionRequest[]
 
   @@map("user")
 }
@@ -518,9 +508,10 @@ model Classification {
   effective_status  String // EFF_STATUS
   effective_date    DateTime @db.Date // EFFDT
 
-  employee_group EmployeeGroup              @relation(fields: [employee_group_id], references: [id])
-  job_profiles   JobProfileClassification[]
-  reportees      JobProfileReportsTo[]
+  employee_group  EmployeeGroup              @relation(fields: [employee_group_id], references: [id])
+  job_profiles    JobProfileClassification[]
+  reportees       JobProfileReportsTo[]
+  PositionRequest PositionRequest[]
 
   @@id([id, employee_group_id, peoplesoft_id])
   @@map("classification")
