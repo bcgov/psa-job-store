@@ -85,7 +85,7 @@ function flattenObject(obj: any, parentKey = '', result: Record<string, any> = {
           flattenObject(value, newKey, result);
         }
       } else {
-        result[newKey] = String(value);
+        result[newKey] = value === null ? null : String(value);
       }
     }
   }
@@ -101,8 +101,8 @@ function mapToFlatRecord(input: any): Record<string, any> {
 
 const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: GenerateJobProfileProps) => {
   const transformedJobProfile = mapToFlatRecord(jobProfile);
-  // console.log('jobProfile: ', jobProfile);
-  // console.log('transformedJobProfile',transformedJobProfile);
+  // console.log('commonkit generateJobProfile, jobProfile: ', jobProfile);
+  // console.log('commonkit transformedJobProfile', transformedJobProfile);
   // console.log('supervisorProfile', supervisorProfile);
   // console.log('positionRequest', positionRequest);
   return new Document({

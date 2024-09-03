@@ -21,6 +21,7 @@ export interface DownloadJobProfileComponentProps {
   ignoreAbsentParent?: boolean;
   renderTrigger?: (generate: () => void, isLoading: boolean) => React.ReactNode;
   useModal?: boolean;
+  buttonType?: string;
 }
 
 export const DownloadJobProfileComponent = ({
@@ -32,6 +33,7 @@ export const DownloadJobProfileComponent = ({
   ignoreAbsentParent = false,
   useModal = false,
   renderTrigger,
+  buttonType = 'default',
 }: DownloadJobProfileComponentProps & React.PropsWithChildren & any) => {
   const [prTrigger, { isFetching: isLoadingPositionRequest }] = useLazyGetPositionRequestQuery();
   const [profileTrigger, { isFetching: profileIsLoading }] = useLazyGetPositionProfileQuery();
@@ -63,15 +65,24 @@ export const DownloadJobProfileComponent = ({
           ? positionRequest?.profile_json
           : prData?.positionRequest?.profile_json;
 
-      console.log('downloadDocument, profile: ', profile);
+      console.log('downloadDocument(), profile: ', profile);
       if (!profile) return;
       // if profile is being sourced from a position request, we need to merge in the parent profile data to get missing data
       const isPositionRequestProfile = positionRequest != null || prData?.positionRequest?.profile_json;
       if (isPositionRequestProfile) {
-        if (!parentProfileData) return;
+        console.log('isPositionRequestProfile');
+        if (!parentProfileData) {
+          console.log('no parentProfileData');
+          return;
+        }
         profile = { classifications: parentProfileData?.jobProfile?.classifications, ...profile };
       }
 
+      if (profile == null) {
+        console.log('profile is null, not generating');
+      } else {
+        console.log('generaring with profile: ', profile);
+      }
       const document =
         profile != null
           ? generateJobProfile({
@@ -240,7 +251,7 @@ export const DownloadJobProfileComponent = ({
       <>
         <span onClick={() => setIsModalVisible(true)} style={{ position: 'relative' }}>
           {children}{' '}
-          {!(isLoadingPositionRequest || profileIsLoading || isFetching) && (
+          {(isLoadingPositionRequest || profileIsLoading || isFetching) && (
             <span
               className="alignIconTop"
               style={{
@@ -287,6 +298,7 @@ export const DownloadJobProfileComponent = ({
           loading={isLoadingPositionRequest || profileIsLoading || isFetching}
           disabled={jobProfile == null && !ignoreAbsentParent}
           onClick={() => setIsModalVisible(true)}
+          type={buttonType}
         >
           Download Job Profile
         </Button>
@@ -322,7 +334,7 @@ export const DownloadJobProfileComponent = ({
       }}
     >
       {children}
-      {!(isLoadingPositionRequest || profileIsLoading || isFetching) && (
+      {(isLoadingPositionRequest || profileIsLoading || isFetching) && (
         <span
           className="alignIconTop"
           style={{
