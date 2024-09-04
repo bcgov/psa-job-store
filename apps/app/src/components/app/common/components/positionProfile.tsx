@@ -32,7 +32,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
     {
       positionNumber: positionNumber?.toString() ?? '',
     },
-    { skip: positionNumber != null },
+    { skip: positionNumber == null },
   );
   // const [getPositionProfile, { data: positionProfileData, isFetching, error: positionProfileError }] =
   //   useLazyGetPositionProfileQuery();

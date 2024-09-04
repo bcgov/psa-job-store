@@ -20,10 +20,10 @@ export class PositionResolver {
     //   this.departments = await this.departmentService.getDepartments();
     // })();
   }
-  // @Query(() => Position, { name: 'position' })
-  // async getPosition(@Args() args?: FindUniquePositionArgs) {
-  //   return await this.positionService.getPosition(args);
-  // }
+  @Query(() => Position, { name: 'position' })
+  async getPosition(@Args() args?: FindUniquePositionArgs) {
+    return await this.positionService.getPosition(args);
+  }
 
   @Query(() => [PositionProfile], { name: 'positionProfile' })
   async getPositionProfile(
