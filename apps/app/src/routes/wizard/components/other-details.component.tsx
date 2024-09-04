@@ -74,6 +74,7 @@ const OtherDetails: React.FC<OtherDetailsProps> = ({ wizardData, positionRequest
           <div data-testid="reporting-manager-info">
             <PositionProfile
               positionNumber={positionRequestData?.reports_to_position_id}
+              positionProfile={positionRequestData?.reports_to_position}
               orgChartData={positionRequestData?.orgchart_json}
             ></PositionProfile>
           </div>

@@ -9,11 +9,10 @@ import {
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
-import ContentWrapper from '../../components/content-wrapper.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetLocationQuery } from '../../redux/services/graphql-api/location.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
-import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
+import { useGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
 import { formatDateTime } from '../../utils/Utils';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { OrgChart } from '../org-chart/components/org-chart';
@@ -37,12 +36,12 @@ export const TotalCompApprovedRequestPage = () => {
     {
       id: data?.positionRequest?.additional_info?.work_location_id,
     },
-    { skip: !data?.positionRequest?.additional_info?.work_location_id },
+    { skip: data?.positionRequest?.additional_info?.work_location_id != null },
   );
 
-  const { data: positionInfo, isLoading: positionLoading } = useGetPositionQuery(
-    { where: { id: `${data?.positionRequest?.position_number?.toString().padStart(8, '0')}` } },
-    { skip: !data?.positionRequest?.position_number },
+  const { data: positionInfo, isLoading: positionLoading } = useGetPositionProfileQuery(
+    { positionNumber: `${data?.positionRequest?.position_number?.toString().padStart(8, '0')}` },
+    { skip: data?.positionRequest?.reports_to_position == null },
   );
 
   const submissionDetailsItems = [
@@ -61,13 +60,13 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'submittedBy',
       label: 'Submitted by',
-      children: <div>{data?.positionRequest?.user_name}</div>,
+      children: <div>{data?.positionRequest?.user?.name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
       key: 'contactEmail',
       label: 'Contact Email',
-      children: <div>{data?.positionRequest?.email}</div>,
+      children: <div>{data?.positionRequest?.user?.email}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -88,7 +87,7 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'expectedClassificationLevel',
       label: 'Expected classification level',
-      children: <div>{data?.positionRequest?.classification_code}</div>,
+      children: <div>{data?.positionRequest?.classification?.code}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -103,6 +102,7 @@ export const TotalCompApprovedRequestPage = () => {
       children: (
         <PositionProfile
           positionNumber={data?.positionRequest?.reports_to_position_id}
+          positionProfile={data?.positionRequest?.reports_to_position}
           orgChartData={data?.positionRequest?.orgchart_json}
         ></PositionProfile>
 
@@ -120,6 +120,7 @@ export const TotalCompApprovedRequestPage = () => {
       children: (
         <PositionProfile
           positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          positionProfile={data?.positionRequest?.excluded_manager_position}
           orgChartData={data?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>
@@ -190,7 +191,7 @@ export const TotalCompApprovedRequestPage = () => {
       children: (
         <div>
           {locationLoading && <LoadingComponent mode="small" />}
-          {locationInfo?.location?.name}
+          {data?.positionRequest?.additional_info?.work_location_name ?? locationInfo?.location.name}
         </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
@@ -201,7 +202,10 @@ export const TotalCompApprovedRequestPage = () => {
       children: (
         <div>
           {positionLoading && <LoadingComponent mode="small" />}
-          {formatDateTime(positionInfo?.position.effective_date, true)}
+          {formatDateTime(
+            data?.positionRequest?.reports_to_position?.effectiveDate ?? positionInfo?.positionProfile[0].effectiveDate,
+            true,
+          )}
         </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
@@ -404,11 +408,13 @@ export const TotalCompApprovedRequestPage = () => {
                       <p>Reach out to the hiring manager or reporting managers for feedback.</p>
                       <Descriptions bordered column={2}>
                         <Descriptions.Item label="Hiring Manager" span={3}>
-                          {data?.positionRequest?.user_name} -{' '}
-                          <a href={`mailto:${data?.positionRequest?.email}`}>{data?.positionRequest?.email}</a>
+                          {data?.positionRequest?.user?.name} -{' '}
+                          <a href={`mailto:${data?.positionRequest?.user?.email}`}>
+                            {data?.positionRequest?.user?.email}
+                          </a>
                           <CopyOutlined
                             onClick={() => {
-                              navigator.clipboard.writeText(data?.positionRequest?.email || '');
+                              navigator.clipboard.writeText(data?.positionRequest?.user?.email || '');
                               message.success('Email copied to clipboard');
                             }}
                             style={{ cursor: 'pointer' }}
@@ -417,6 +423,7 @@ export const TotalCompApprovedRequestPage = () => {
                         <Descriptions.Item label="Reporting Manager" span={3}>
                           <PositionProfile
                             positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+                            positionProfile={data?.positionRequest?.reports_to_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
                           ></PositionProfile>
@@ -424,6 +431,7 @@ export const TotalCompApprovedRequestPage = () => {
                         <Descriptions.Item label="First Band Manager" span={3}>
                           <PositionProfile
                             positionNumber={data?.positionRequest?.reports_to_position_id}
+                            positionProfile={data?.positionRequest?.reports_to_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
                           ></PositionProfile>
@@ -507,19 +515,20 @@ export const TotalCompApprovedRequestPage = () => {
               prefix="Reporting to"
               mode="compact"
               positionNumber={data?.positionRequest?.reports_to_position_id}
+              positionProfile={data?.positionRequest?.reports_to_position}
               orgChartData={data?.positionRequest?.orgchart_json}
             ></PositionProfile>
           </div>
         }
         additionalBreadcrumb={{ title: data?.positionRequest?.title }}
       />
-      <ContentWrapper>
-        <Tabs
-          defaultActiveKey="1"
-          items={tabItems}
-          tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem 1rem -1rem', padding: '0 1rem 0px 1rem' }}
-        />
-      </ContentWrapper>
+      {/* <ContentWrapper> */}
+      <Tabs
+        defaultActiveKey="1"
+        items={tabItems}
+        tabBarStyle={{ backgroundColor: '#fff', padding: '0 1rem 0px 1rem' }}
+      />
+      {/* </ContentWrapper> */}
       {/* subTitle={positionRequest.title} */}
     </>
   );

@@ -2,6 +2,7 @@
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
 import { IdVersion } from './job-profile-types';
+import { PositionProfileModel } from './position.api';
 
 export interface UserConnect {
   id: string;
@@ -22,8 +23,13 @@ export interface CreatePositionRequestInput {
   orgchart_json?: any;
   parent_job_profile?: JobProfileConnectItem;
   title?: string;
-  classification_id?: string;
-  classification_code?: string;
+  classification?: {
+    connect: {
+      classification_id: string;
+      classification_employee_group_id: string;
+      classification_peoplesoft_id: string;
+    };
+  };
   department?: {
     connect: {
       id: string;
@@ -31,30 +37,34 @@ export interface CreatePositionRequestInput {
   };
   orgchart_png?: string;
 }
-
 export interface GetPositionRequestResponseContent {
   id: number;
   step?: number;
   max_step_completed?: number;
-  reports_to_position_id?: number;
+  reports_to_position_id: number;
+  reports_to_position: PositionProfileModel;
+  excluded_manager_position: PositionProfileModel;
   orgchart_json?: any;
   profile_json?: any;
-  user_id?: string;
-  user_name?: string;
+  user?: {
+    id?: string;
+    name?: string;
+    email?: string;
+  };
+  classification?: {
+    code?: string;
+    id?: string;
+  };
   parent_job_profile_id?: number;
   parent_job_profile_version?: number;
   title?: string;
   position_number?: number;
-  classification?: string;
-  classification_code?: string;
-  classification_id?: string;
   submission_id?: string;
   status?: string;
   department_id?: string;
   approved_at?: string;
   updated_at?: string;
   submitted_at?: string;
-  email?: string;
   shareUUID?: string;
   parent_job_profile?: {
     number: number;
@@ -68,6 +78,7 @@ export interface GetPositionRequestResponseContent {
 
 export interface AdditionalInfo {
   work_location_id?: string;
+  work_location_name?: string;
   department_id?: string;
   excluded_mgr_position_number?: string;
   comments?: string;
@@ -132,9 +143,15 @@ export interface UpdatePositionRequestInput {
   user_id?: string;
   title?: string | null;
   position_number?: number;
-  classification_id?: string;
-  classification_employee_group_id?: string;
-  classification_peoplesoft_id?: string;
+  classification?: {
+    connect: {
+      id_employee_group_id_peoplesoft_id: {
+        id: string;
+        employee_group_id: string;
+        peoplesoft_id: string;
+      };
+    };
+  };
   submission_id?: string;
   status?: string;
   additional_info?: AdditionalInfo | null;
@@ -164,7 +181,6 @@ export interface GetPositionRequestsArgs {
   orderBy?: Record<string, any>;
   take?: number;
   skip?: number;
-  onlyCompletedForAll?: boolean;
   requestingFeature?: string;
 }
 
@@ -211,7 +227,6 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               $take: Int
               $skip: Int
               $orderBy: [PositionRequestOrderByWithRelationAndSearchRelevanceInput!]
-              $onlyCompletedForAll: Boolean
               $requestingFeature: String
             ) {
               positionRequests(
@@ -220,7 +235,6 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 take: $take
                 skip: $skip
                 orderBy: $orderBy
-                onlyCompletedForAll: $onlyCompletedForAll
                 requestingFeature: $requestingFeature
               ) {
                 id
@@ -229,14 +243,18 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 reports_to_position_id
                 parent_job_profile_id
                 parent_job_profile_version
-                user_id
-                user_name
-                email
+                user {
+                  id
+                  name
+                  email
+                }
+                classification {
+                  code
+                  id
+                }
                 title
                 approved_at
                 position_number
-                classification_code
-                classification_id
                 submission_id
                 status
                 updated_at
@@ -248,7 +266,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 crm_id
                 crm_lookup_name
               }
-              positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
+              positionRequestsCount(search: $search, where: $where, requestingFeature: $requestingFeature) {
                 draft
                 completed
                 verification
@@ -262,7 +280,6 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
             skip: args.skip,
             take: args.take,
             orderBy: args.orderBy,
-            onlyCompletedForAll: args.onlyCompletedForAll,
             requestingFeature: args.requestingFeature,
           },
         };
@@ -282,17 +299,23 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   step
                   max_step_completed
                   reports_to_position_id
+                  reports_to_position
+                  excluded_manager_position
                   parent_job_profile_id
                   parent_job_profile_version
                   profile_json
                   orgchart_json
-                  user_id
-                  user_name
-                  email
+                  user {
+                    id
+                    name
+                    email
+                  }
+                  classification {
+                    code
+                    id
+                  }
                   title
                   position_number
-                  classification_code
-                  classification_id
                   submission_id
                   status
                   updated_at
@@ -326,16 +349,22 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   step
                   max_step_completed
                   reports_to_position_id
+                  reports_to_position
+                  excluded_manager_position
                   parent_job_profile_id
                   parent_job_profile_version
                   profile_json
                   orgchart_json
-                  user_id
-                  user_name
-                  email
+                  user {
+                    id
+                    name
+                    email
+                  }
+                  classification {
+                    code
+                  }
                   title
                   position_number
-                  classification_code
                   submission_id
                   status
                   updated_at
@@ -359,7 +388,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (input: CreatePositionRequestInput) => {
         return {
           document: gql`
-            mutation CreatePositionRequest($data: PositionRequestCreateInput!) {
+            mutation CreatePositionRequest($data: PositionRequestCreateInputWithoutUser!) {
               createPositionRequest(data: $data)
             }
           `,
@@ -388,13 +417,17 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 parent_job_profile_version
                 profile_json
                 orgchart_json
-                user_id
-                user_name
-                email
+                user {
+                  id
+                  name
+                  email
+                }
+                classification {
+                  code
+                  id
+                }
                 title
                 position_number
-                classification_code
-                classification_id
                 submission_id
                 status
                 updated_at
@@ -438,13 +471,17 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 parent_job_profile_version
                 profile_json
                 orgchart_json
-                user_id
-                user_name
-                email
+                user {
+                  id
+                  name
+                  email
+                }
+                classification {
+                  code
+                  id
+                }
                 title
                 position_number
-                classification_code
-                submission_id
                 status
                 updated_at
                 submitted_at
@@ -535,17 +572,23 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    getPositionRequestSubmittedBy: build.query<GetPositionRequestSubmittedByResponse, void>({
-      query: () => {
+    getPositionRequestSubmittedBy: build.query<
+      GetPositionRequestSubmittedByResponse,
+      GetPositionRequestsArgs | undefined
+    >({
+      query: (args: GetPositionRequestsArgs = {}) => {
         return {
           document: gql`
-            query PositionRequestSubmittedBy {
-              positionRequestSubmittedBy {
+            query PositionRequestSubmittedBy($requestingFeature: String) {
+              positionRequestSubmittedBy(requestingFeature: $requestingFeature) {
                 id
                 name
               }
             }
           `,
+          variables: {
+            requestingFeature: args.requestingFeature,
+          },
         };
       },
     }),

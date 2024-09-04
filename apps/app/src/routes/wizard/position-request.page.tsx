@@ -666,6 +666,7 @@ export const PositionRequestPage = () => {
                   prefix="Reporting to"
                   mode="compact"
                   positionNumber={wizardContextPositionRequestData?.reports_to_position_id}
+                  positionProfile={wizardContextPositionRequestData?.reports_to_position}
                   orgChartData={wizardContextPositionRequestData?.orgchart_json}
                 ></PositionProfile>
               </div>
@@ -679,8 +680,9 @@ export const PositionRequestPage = () => {
                   positionRequest={wizardContextPositionRequestData}
                   jobProfile={wizardContextPositionRequestData?.profile_json}
                   useModal={readonlyMode === 'completed'}
+                  buttonType="primary"
                 >
-                  <Button type="primary">Download profile</Button>
+                  {/* <Button type="primary">Download profile</Button> */}
                 </DownloadJobProfileComponent>
               ),
             ]}

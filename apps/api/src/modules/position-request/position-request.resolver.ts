@@ -1,9 +1,10 @@
-import { Args, Field, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
+import { Args, Field, InputType, Int, Mutation, ObjectType, OmitType, Query, Resolver } from '@nestjs/graphql';
 import { UUID } from 'crypto';
 import {
   PositionRequest,
   PositionRequestCreateInput,
   PositionRequestUpdateInput,
+  UserCreateNestedOneWithoutPositionRequestInput,
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -59,6 +60,12 @@ export class PositionRequestSubmittedBy {
   name: string;
 }
 
+@InputType()
+export class PositionRequestCreateInputWithoutUser extends OmitType(PositionRequestCreateInput, ['user'] as const) {
+  @Field(() => UserCreateNestedOneWithoutPositionRequestInput, { nullable: true })
+  user?: UserCreateNestedOneWithoutPositionRequestInput;
+}
+
 @Resolver()
 export class PositionRequestApiResolver {
   constructor(private positionRequestService: PositionRequestApiService) {}
@@ -66,17 +73,12 @@ export class PositionRequestApiResolver {
   @Mutation(() => Int)
   async createPositionRequest(
     @CurrentUser() { id: userId }: Express.User,
-    @Args({ name: 'data', type: () => PositionRequestCreateInput }) data: PositionRequestCreateInput,
+    @Args({ name: 'data', type: () => PositionRequestCreateInputWithoutUser })
+    data: PositionRequestCreateInputWithoutUser,
   ) {
-    // console.log('create DATA: ', data);
+    data.user = { connect: { id: userId } };
 
-    // TODO: AL-146
-    // data.user = { connect: { id: userId } };
-
-    // TODO: AL-146 - replace below with above
-    data.user_id = userId;
-
-    const newPositionRequest = await this.positionRequestService.createPositionRequest(data, userId);
+    const newPositionRequest = await this.positionRequestService.createPositionRequest(data);
     return newPositionRequest.id;
   }
 
@@ -100,7 +102,7 @@ export class PositionRequestApiResolver {
     @Args('returnFullObject', { type: () => Boolean, defaultValue: false }) returnFullObject: boolean,
     @CurrentUser() user: Express.User,
   ) {
-    const updatedPositionRequest = await this.positionRequestService.updatePositionRequest(id, updateInput, user.roles);
+    const updatedPositionRequest = await this.positionRequestService.updatePositionRequest(id, updateInput);
 
     if (returnFullObject) {
       return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
@@ -113,8 +115,9 @@ export class PositionRequestApiResolver {
   async positionRequestsCount(
     @CurrentUser() user: Express.User,
     @Args() args?: ExtendedFindManyPositionRequestWithSearch,
+    @Args('requestingFeature', { type: () => String, nullable: true }) requestingFeature?: string,
   ) {
-    return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles);
+    return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles, requestingFeature);
   }
 
   @Roles('classification', 'hiring-manager', 'total-compensation')
@@ -179,8 +182,11 @@ export class PositionRequestApiResolver {
 
   @Roles('total-compensation', 'classification')
   @Query(() => [UserBasicInfo], { name: 'positionRequestSubmittedBy' })
-  async getpositionRequestSubmittedBy() {
-    return this.positionRequestService.getPositionRequestSubmittedBy();
+  async getpositionRequestSubmittedBy(
+    @CurrentUser() user: Express.User,
+    @Args('requestingFeature', { type: () => String, nullable: true }) requestingFeature?: string,
+  ) {
+    return this.positionRequestService.getPositionRequestSubmittedBy(user.roles, requestingFeature);
   }
 
   @Mutation(() => Boolean)

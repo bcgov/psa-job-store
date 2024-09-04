@@ -817,6 +817,7 @@ const WizardEditProfile = forwardRef(
               <Descriptions.Item label="Reporting manager">
                 <PositionProfile
                   positionNumber={positionRequestData?.reports_to_position_id?.toString()}
+                  positionProfile={positionRequestData?.reports_to_position}
                   orgChartData={positionRequestData?.orgchart_json}
                 ></PositionProfile>
               </Descriptions.Item>

@@ -81,7 +81,7 @@ const WizardTextField: React.FC<SingleTextFieldProps> = ({
                   formErrors[name]?.text?.message
                     ? formErrors[name].text.message
                     : valueOver30 && jobTitleWarning
-                      ? 'Warning: Job titles over 30 characters will be truncated by PeopleSoft and will appear so in the Organizational Chart.'
+                      ? 'Warning: Job titles over 30 characters will be truncated by PeopleSoft and will appear so in the Organization Chart.'
                       : ''
                 }
               >

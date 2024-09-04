@@ -48,6 +48,7 @@ export const TotalCompApprovedRequestsPage = () => {
       <ContentWrapper>
         {hasData && (
           <PositionRequestsSearch
+            requestingFeature="totalCompApprovedRequests"
             searchPlaceHolderText={'Search by job title or submission ID'}
             // additionalFilters={true}
             fullWidth={true}

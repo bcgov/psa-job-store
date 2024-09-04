@@ -51,9 +51,11 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const jobProfileSearchResultsRef = useRef<JobProfileSearchResultsRef>(null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedClassification, setSelectedClassification] = useState<
-    { id: string; employee_group_id: string; peoplesoft_id: string } | undefined
-  >();
+  const [selectedClassification, setSelectedClassification] = useState<{
+    id: string;
+    employee_group_id: string;
+    peoplesoft_id: string;
+  }>({ id: '', employee_group_id: '', peoplesoft_id: '' });
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
@@ -187,9 +189,15 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               parent_job_profile: {
                 connect: { id_version: { id: parseInt(selectedProfileId), version: parseInt(selectedProfileVersion) } },
               },
-              classification_id: selectedClassification?.id,
-              classification_employee_group_id: selectedClassification?.employee_group_id,
-              classification_peoplesoft_id: selectedClassification?.peoplesoft_id,
+              classification: {
+                connect: {
+                  id_employee_group_id_peoplesoft_id: {
+                    id: selectedClassification.id,
+                    employee_group_id: selectedClassification.employee_group_id,
+                    peoplesoft_id: selectedClassification.peoplesoft_id,
+                  },
+                },
+              },
               returnFullObject: true,
             }).unwrap();
 
@@ -349,6 +357,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
             prefix="Reporting to"
             mode="compact"
             positionNumber={positionRequestData?.reports_to_position_id}
+            positionProfile={positionRequestData?.reports_to_position}
             orgChartData={positionRequestData?.orgchart_json}
           ></PositionProfile>
         </div>

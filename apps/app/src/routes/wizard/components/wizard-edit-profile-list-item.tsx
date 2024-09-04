@@ -212,6 +212,7 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
         isEdited={(() => {
           return editedFields?.[index] ?? false;
         })()}
+        isSignificant={field.is_significant}
         ariaLabel={ariaLabel}
         testId={testId}
         handleReset={handleReset}

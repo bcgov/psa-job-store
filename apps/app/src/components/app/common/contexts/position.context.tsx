@@ -76,7 +76,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         orgchart_json: orgChartData,
         // orgchart_png: svg,
       };
-      // 'CreatePositionRequestInput': profile_json, parent_job_profile, title, classification_code
+
       const resp = await createPositionRequest(positionRequestInput).unwrap();
       // setPositionRequestId(resp.createPositionRequest);
       navigate(`/requests/positions/${resp.createPositionRequest}`, { replace: true });

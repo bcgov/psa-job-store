@@ -399,6 +399,10 @@ export const router = createBrowserRouter([
                 path: '/published-job-profiles/:id',
                 element: <Redirect to="/job-profiles/manage/published/:id" replace />,
               },
+              {
+                path: '/classification-tasks/:id',
+                element: <Redirect to="/requests/positions/manage/:id" replace />,
+              },
             ],
           },
         ],

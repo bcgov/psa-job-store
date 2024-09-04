@@ -25,7 +25,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'submittedBy',
       label: 'Submitted by',
-      children: <div>{positionRequestData?.positionRequest?.user_name}</div>,
+      children: <div>{positionRequestData?.positionRequest?.user?.name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -82,7 +82,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'expectedClassificationLevel',
       label: 'Expected classification level',
-      children: <div>{positionRequestData?.positionRequest?.classification_code}</div>,
+      children: <div>{positionRequestData?.positionRequest?.classification?.code}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -97,6 +97,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       children: (
         <PositionProfile
           positionNumber={positionRequestData?.positionRequest?.reports_to_position_id}
+          positionProfile={positionRequestData?.positionRequest?.reports_to_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
 
@@ -131,6 +132,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       children: (
         <PositionProfile
           positionNumber={positionRequestData?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          positionProfile={positionRequestData?.positionRequest?.reports_to_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>
@@ -199,7 +201,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       children: (
         <div>
           {locationLoading && <LoadingComponent mode="small" />}
-          {locationInfo?.location?.name}
+          {positionRequestData.positionRequest?.additional_info?.work_location_name ?? locationInfo?.location.name}
         </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },

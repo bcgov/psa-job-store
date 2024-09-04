@@ -19,6 +19,7 @@ export const statusFilterDataMap = [
   { label: 'Completed', value: 'COMPLETED' },
   { label: 'Escalated', value: 'REVIEW' },
   { label: 'Action required', value: 'ACTION_REQUIRED' },
+  { label: 'Cancelled', value: 'CANCELLED' },
 ];
 
 export const MyPositionsPage = () => {

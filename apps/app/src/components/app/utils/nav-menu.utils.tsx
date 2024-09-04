@@ -53,8 +53,12 @@ export const createMenuGroup = ({ key, children, collapsed, icon, label }: NavMe
 
 export const createMenuItem = ({ key, icon, label, style, title }: NavMenuItemProps): MenuItemType => ({
   key,
-  icon,
-  label: <Link to={key}>{label}</Link>,
+  // icon, // include menu in the link, since it focuses on the link when using keyboard, this way outline encompasses the whole menu item
+  label: (
+    <Link to={key} style={{}}>
+      {icon} <span className="link-label">{label}</span>
+    </Link>
+  ),
   style,
   title,
 });

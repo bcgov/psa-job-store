@@ -918,7 +918,7 @@ export class JobProfileService {
         }),
         state: jobProfileState,
         type: data.organizations.create.length > 0 ? JobProfileType.MINISTRY : JobProfileType.CORPORATE, // should be MINISTRY if ministries provided, otherwise corporate
-        owner: { connect: { id: owner } },
+        ...(owner && { owner: { connect: { id: owner } } }),
         published_by: publishedBy ? { connect: { id: publishedBy } } : undefined,
         published_at: publishedAt,
         updated_by: updatedBy ? { connect: { id: updatedBy } } : undefined,
@@ -1021,7 +1021,7 @@ export class JobProfileService {
             })),
           },
         }),
-        owner: { connect: { id: owner } },
+        ...(owner && { owner: { connect: { id: owner } } }),
         published_by: publishedBy ? { connect: { id: publishedBy } } : undefined,
         published_at: publishedAt,
         updated_by: updatedBy ? { connect: { id: updatedBy } } : undefined,
