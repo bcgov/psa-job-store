@@ -8,18 +8,6 @@ export class AppConfigDto {
 
   @IsNotEmpty()
   @IsString()
-  BI_URL: string;
-
-  @IsNotEmpty()
-  @IsString()
-  BI_USERNAME: string;
-
-  @IsNotEmpty()
-  @IsString()
-  BI_PASSWORD: string;
-
-  @IsNotEmpty()
-  @IsString()
   CRM_APPLICATION_CONTEXT: string;
 
   @IsNotEmpty()

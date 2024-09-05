@@ -105,7 +105,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       // If we have a positionRequestId, position request data, and position data, get the classification ID for the position
       const { classificationId, classificationEmployeeGroupId, classificationPeoplesoftId } =
-        pData?.positionProfile[0] ?? {};
+        prData?.reports_to_position ?? pData?.positionProfile[0] ?? {};
       // const classificationId = pData?.position?.classification_id;
       const classification =
         classificationId != null

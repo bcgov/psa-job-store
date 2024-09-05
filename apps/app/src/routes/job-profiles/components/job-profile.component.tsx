@@ -378,7 +378,7 @@ export class JobProfileValidationModel {
   markAllNonEditableSec: boolean;
   jobStoreNumber: string;
   originalJobStoreNumber: string;
-  employeeGroup: string | null;
+  employeeGroups: string[];
   classification: string | null;
 
   jobRole: number | null;
