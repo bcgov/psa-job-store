@@ -465,7 +465,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
-          <div style={{ marginRight: '1rem' }}>
+          <div style={{ marginRight: '1rem' }} key="statusIndicator">
             <StatusIndicator status={positionRequest?.status ?? ''} />
           </div>,
           <AccessiblePopoverMenu

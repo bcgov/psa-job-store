@@ -175,10 +175,11 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
-          <div style={{ marginRight: '1rem' }}>
+          <div style={{ marginRight: '1rem' }} key="statusIndicator">
             <StatusIndicator status={positionRequest?.status ?? ''} />
           </div>,
           <AccessiblePopoverMenu
+            key={'menu'}
             triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
             content={getMenuContent()}
             ariaLabel="Open position request menu"

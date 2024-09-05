@@ -203,8 +203,10 @@ export const WizardOrgChartPage = ({
       }}
       grayBg={false}
       pageHeaderExtra={[
-        <Button onClick={() => navigate('/')}>Cancel</Button>,
-        <Tooltip title={nextButtonTooltipTitle}>
+        <Button onClick={() => navigate('/')} key="cancel">
+          Cancel
+        </Button>,
+        <Tooltip title={nextButtonTooltipTitle} key="saveAndNext">
           <Button
             type="primary"
             disabled={nextButtonIsDisabled()}

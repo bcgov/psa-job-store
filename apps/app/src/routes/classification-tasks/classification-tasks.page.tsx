@@ -51,7 +51,7 @@ export const ClassificationTasksPage = () => {
         {hasData && (
           <PositionRequestsSearch
             requestingFeature="classificationTasks"
-            searchPlaceHolderText={'Search by job title or submission ID'}
+            searchPlaceHolderText={'Search by job title'}
             // additionalFilters={true}
             mode="classification"
             fullWidth={true}

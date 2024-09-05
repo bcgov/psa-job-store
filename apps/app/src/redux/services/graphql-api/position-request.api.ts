@@ -259,6 +259,8 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 status
                 updated_at
                 submitted_at
+                time_to_approve
+                approval_type
                 shareUUID
                 parent_job_profile {
                   number
