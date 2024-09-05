@@ -224,6 +224,7 @@ export class PositionRequestApiService {
             id,
             positionRequest,
             orgchart_png,
+            comment,
           );
         } else {
           throw AlexandriaError('Peoplesoft returned a blank position number');
@@ -237,23 +238,24 @@ export class PositionRequestApiService {
         // check crm status etc
 
         // update submitted_at
-        try {
-          positionRequest = await this.prisma.positionRequest.update({
-            where: { id },
-            data: {
-              submitted_at: dayjs().toDate(),
-            },
-          });
-        } catch (error) {
-          this.logger.error('Failed to update submitted_at: ' + positionRequest.position_number.toString());
-          this.logger.error(error);
-        }
+        // try {
+        //   positionRequest = await this.prisma.positionRequest.update({
+        //     where: { id },
+        //     data: {
+        //       submitted_at: dayjs().toDate(),
+        //     },
+        //   });
+        // } catch (error) {
+        //   this.logger.error('Failed to update submitted_at: ' + positionRequest.position_number.toString());
+        //   this.logger.error(error);
+        // }
 
         positionRequest = await this.submitPositionRequest_afterCreatePosition(
           `${positionRequest.position_number.toString()}`.padStart(8, '0'),
           id,
           positionRequest,
           orgchart_png,
+          comment,
         );
       }
     } catch (error) {
@@ -266,7 +268,13 @@ export class PositionRequestApiService {
     return positionRequest;
   }
 
-  private async submitPositionRequest_afterCreatePosition(positionNumber: string, id, positionRequest, orgchart_png) {
+  private async submitPositionRequest_afterCreatePosition(
+    positionNumber: string,
+    id,
+    positionRequest,
+    orgchart_png,
+    comment,
+  ) {
     // this function runs after a position has been created in peoplesoft
     // we're going to update org chart (update supervisor and add new position nodes),
     // create or update CRM incident, and update position request status
@@ -310,7 +318,7 @@ export class PositionRequestApiService {
     let crm_status;
     let crm_category;
     try {
-      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id, orgchart_png);
+      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id, orgchart_png, comment);
       ({ crm_id, crm_lookup_name, crm_status, crm_category } = incident);
       await this.prisma.positionRequest.update({
         where: { id },
@@ -1235,7 +1243,7 @@ export class PositionRequestApiService {
     };
   }
 
-  async createOrUpdateCrmIncidentForPositionRequest(id: number, orgchartPng: string) {
+  async createOrUpdateCrmIncidentForPositionRequest(id: number, orgchartPng: string, comment: string) {
     try {
       const needsReview = (await this.positionRequestNeedsReview(id)).result;
       const formattedDate = dayjs().format('YYYYMMDD');
@@ -1321,11 +1329,14 @@ export class PositionRequestApiService {
         },
         statusWithType: {
           status: {
-            id: needsReview
-              ? positionRequest.status === PositionRequestStatus.ACTION_REQUIRED
+            // if user is re-submitting, set crm status to updated, always
+            id:
+              positionRequest.status === PositionRequestStatus.ACTION_REQUIRED
                 ? IncidentStatus.Updated
-                : IncidentStatus.Unresolved
-              : IncidentStatus.Solved,
+                : // if user is not resubmitting (submitting for the first time), set status based on needsReview
+                  needsReview
+                  ? IncidentStatus.Unresolved
+                  : IncidentStatus.Solved,
           },
         },
         // Need to determine usage of this block
@@ -1355,7 +1366,13 @@ export class PositionRequestApiService {
             <strong>
             ${
               positionRequest.position_number != null
-                ? `The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}`
+                ? `The ${
+                    // if user is re-submitting, it means position was originally created in proposed state
+                    // if not re-submitting, it depends on needsReview flag
+                    positionRequest.status === PositionRequestStatus.ACTION_REQUIRED || needsReview === true
+                      ? 'proposed'
+                      : 'approved'
+                  } position # is: ${zeroFilledPositionNumber}`
                 : `No position was created for this request`
             }
             </strong> 
@@ -1373,16 +1390,25 @@ export class PositionRequestApiService {
             },
             text: `
           <div>
-            ${
-              (additionalInfo.comments ?? '').length > 0
-                ? `
-            <br />
-            <strong>The following note was added to this position request:</strong>
-            <br />
-            <em>${additionalInfo.comments}</em>`
-                : ''
-            }
-            <br />
+          ${
+            (comment ?? '').length > 0
+              ? `
+          <br />
+          <strong>The following note was added to this position request:</strong>
+          <br />
+          <em>${comment}</em> <br />`
+              : ''
+          }
+          ${
+            // user is re-submitting (so initially was requiring verification) but now selected a profile that does not reuqire review
+            positionRequest.status === PositionRequestStatus.ACTION_REQUIRED && !needsReview
+              ? `
+          <strong>Note:</strong> User modified the profile such that it no longer requires a review. You still need to set the status of this request to 'Solved' and approve the position in PeopleSoft as usual.
+          <br />
+          `
+              : ``
+          }
+          
             <ul>
               <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
               <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
