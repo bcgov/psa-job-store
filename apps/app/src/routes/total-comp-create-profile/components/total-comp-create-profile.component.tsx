@@ -597,11 +597,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       const oexClassification = classificationsData?.classifications.find(
         (c) => c.employee_group_id == 'OEX' && c.grade == classification.grade && c.code == classification.code,
       );
-      oexClassification &&
+      if (oexClassification) {
         appendEmployeeGroup({
           employeeGroup: 'OEX',
           classification: `${oexClassification.id}.${oexClassification.employee_group_id}.${oexClassification.peoplesoft_id}`,
         });
+      } else {
+        message.warning('No Schedule A classification found for the corresponding general employee group.');
+      }
     }
   };
   const allReportsTo = watch('all_reports_to');
@@ -612,9 +615,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // setValue('professions', [{ jobFamily: '', jobStreams: [] }]);
   }
 
-  if (selectedEmployeeClassificationGroups?.length == 0) {
-    appendEmployeeGroup({ employeeGroup: null, classification: null });
-  }
+  // if (selectedEmployeeClassificationGroups?.length == 0) {
+  //   appendEmployeeGroup({ employeeGroup: null, classification: null });
+  // }
 
   // Dummy data for professions and job streams
   // const professions = ['Administration', 'Finance'];
@@ -973,7 +976,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           selected?.classification?.split('.')[2] == cl.peoplesoft_id,
       );
       const list =
-        selected?.employeeGroup == 'OEX'
+        selected?.employeeGroup == 'OEX' && selectedEmployeeClassificationGroups.length > 1
           ? classificationsData?.classifications.filter(
               (c) => c.employee_group_id == classification?.employee_group_id && classification.code == c.code,
             )
@@ -2336,14 +2339,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                 <Card title="Classification" style={{ marginTop: 16 }} bordered={false}>
                   <Form.Item label="Employee groups" labelCol={{ className: 'card-label' }} className="label-only" />
-                  <div style={{ marginBottom: '1.5rem' }}>You can enter multiple employee groups.</div>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    You must assign this profile to at least one classification.
+                  </div>
                   {employeeClassificationGroupsFields.map((field, index: number) => (
                     <div key={field.id}>
                       <Row justify="start">
                         <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                           <div key={field.id}>
                             <Form.Item
-                              label={index == 1 ? 'Schedule A Group ' : 'Group'}
+                              label={index == 1 ? 'Schedule A group ' : 'General employee group'}
                               style={{ marginBottom: '0.5rem' }}
                             >
                               <>
@@ -2359,14 +2364,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             disabled={index == 1}
                                             onChange={(arg) => {
                                               setValue(`employeeClassificationGroups.${index}.employeeGroup`, arg);
-                                              // setValue(
-                                              //   `employeeClassificationGroups.${index}.classification`,
-                                              //   classificationsData?.classifications.find(
-                                              //     (c) => c.employee_group_id === arg,
-                                              //   ) ?? null,
-                                              // );
+                                              setValue(
+                                                `employeeClassificationGroups.${index}.classification`,
+
+                                                null,
+                                              );
                                               onChange(arg);
-                                              handleJobFamilyChange();
                                               triggerBasicDetailsValidation();
                                             }}
                                             onBlur={onBlur}
@@ -2381,24 +2384,22 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           />
                                         </Col>
                                         <Col>
-                                          {index == 1 && (
-                                            <Button
-                                              onClick={() => {
-                                                Modal.confirm({
-                                                  title: 'Confirmation',
-                                                  content:
-                                                    'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
-                                                  onOk: () => {
-                                                    removeEmployeeGroup(index);
+                                          <Button
+                                            onClick={() => {
+                                              Modal.confirm({
+                                                title: 'Confirmation',
+                                                content:
+                                                  'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
+                                                onOk: () => {
+                                                  removeEmployeeGroup(index);
 
-                                                    // handleClassificationChange();
-                                                    triggerBasicDetailsValidation();
-                                                  },
-                                                });
-                                              }}
-                                              icon={<DeleteOutlined />}
-                                            ></Button>
-                                          )}
+                                                  handleClassificationChange(null);
+                                                  triggerBasicDetailsValidation();
+                                                },
+                                              });
+                                            }}
+                                            icon={<DeleteOutlined />}
+                                          ></Button>
                                         </Col>
                                       </Row>
                                     );
@@ -2410,12 +2411,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </div>
                         </Col>
                       </Row>
-                      <Divider className="hr-reduced-margin" />
                       <Row justify="start">
                         <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                           <Form.Item
                             label="Classification"
-                            style={{ borderLeft: '2px solid rgba(5, 5, 5, 0.06)', paddingLeft: '1rem' }}
+                            style={{
+                              borderLeft: '2px solid rgba(5, 5, 5, 0.06)',
+                              paddingLeft: '1rem',
+                            }}
                           >
                             <>
                               <Controller
@@ -2423,44 +2426,58 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 control={control}
                                 render={({ field: { onChange, onBlur, value } }) => {
                                   return (
-                                    <Select
-                                      placeholder="Choose a classification"
-                                      onChange={(newValue) => {
-                                        if (selectedEmployeeClassificationGroups) {
-                                          showWarningModal(
-                                            () => {
-                                              onChange(newValue);
-                                              handleClassificationChange(newValue);
-                                            },
-                                            () => {
-                                              // User canceled the change
-                                            },
-                                          );
-                                        } else {
-                                          onChange(newValue);
-                                          // handleClassificationChange(newValue);
-                                        }
-                                        triggerBasicDetailsValidation();
-                                      }}
-                                      onBlur={onBlur}
-                                      value={value}
-                                      style={{ width: '100%' }}
-                                      showSearch
-                                      filterOption={(input, option) => {
-                                        if (!option) return false;
-                                        return option.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                                      }}
-                                      options={getClassificationsForEmployeeGroup(index)?.map(
-                                        // ({ id, employee_group_id, peoplesoft_id, name }) => ({
-                                        //   label: name,
-                                        //   value: `${id}.${employee_group_id}.${peoplesoft_id}`,
-                                        // }),
-                                        ({ id, employee_group_id, peoplesoft_id, name }) => ({
-                                          label: employee_group_id != 'OEX' ? name : name + ' jobcode ' + id,
-                                          value: `${id}.${employee_group_id}.${peoplesoft_id}`,
-                                        }),
+                                    <>
+                                      <Select
+                                        placeholder="Choose a classification"
+                                        onChange={(newValue) => {
+                                          if (selectedEmployeeClassificationGroups) {
+                                            showWarningModal(
+                                              () => {
+                                                onChange(newValue);
+                                                handleClassificationChange(newValue);
+                                              },
+                                              () => {
+                                                // User canceled the change
+                                              },
+                                            );
+                                          } else {
+                                            onChange(newValue);
+                                            // handleClassificationChange(newValue);
+                                          }
+                                          triggerBasicDetailsValidation();
+                                        }}
+                                        onBlur={onBlur}
+                                        value={value}
+                                        style={{ width: '100%' }}
+                                        showSearch
+                                        filterOption={(input, option) => {
+                                          if (!option) return false;
+                                          return option.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                                        }}
+                                        options={getClassificationsForEmployeeGroup(index)?.map(
+                                          // ({ id, employee_group_id, peoplesoft_id, name }) => ({
+                                          //   label: name,
+                                          //   value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+                                          // }),
+                                          ({ id, employee_group_id, peoplesoft_id, name }) => ({
+                                            label: (
+                                              <div>
+                                                {' '}
+                                                {employee_group_id != 'OEX' ? name : name + ' '}{' '}
+                                                <span style={{ color: '#9F9D9C' }}>{'(' + id + ')'}</span>
+                                              </div>
+                                            ),
+                                            value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+                                          }),
+                                        )}
+                                      />
+
+                                      {selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX' && (
+                                        <div style={{ color: '#9F9D9C' }}>
+                                          Please make sure you select the Schedule A job code (denoted in brackets)
+                                        </div>
                                       )}
-                                    />
+                                    </>
                                   );
                                 }}
                               />
@@ -2469,23 +2486,49 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           </Form.Item>
                         </Col>
                       </Row>{' '}
+                      <Divider className="hr-reduced-margin" />
                     </div>
                   ))}
                   {isCurrentVersion && (
-                    <Form.Item>
-                      <Button
-                        type="dashed"
-                        onClick={() => {
-                          addScheduleA();
-                        }}
-                        block
-                        icon={<PlusOutlined />}
-                        hidden={selectedEmployeeClassificationGroups.length > 1}
-                        disabled={selectedEmployeeClassificationGroups?.[0]?.employeeGroup == null}
-                      >
-                        Add a Schedule A Classification
-                      </Button>
-                    </Form.Item>
+                    <Row>
+                      <Col>
+                        <Form.Item>
+                          <Button
+                            type="link"
+                            onClick={() => {
+                              appendEmployeeGroup({
+                                employeeGroup: null,
+                                classification: null,
+                              });
+                            }}
+                            icon={<PlusOutlined />}
+                            disabled={
+                              selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup != 'OEX') !=
+                              undefined
+                            }
+                          >
+                            Add a general classification
+                          </Button>
+                        </Form.Item>
+                      </Col>
+                      <Col>
+                        <Form.Item>
+                          <Button
+                            type="link"
+                            onClick={() => {
+                              addScheduleA();
+                            }}
+                            icon={<PlusOutlined />}
+                            disabled={
+                              selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup == 'OEX') !=
+                              undefined
+                            }
+                          >
+                            Add a Schedule A classification
+                          </Button>
+                        </Form.Item>
+                      </Col>
+                    </Row>
                   )}
                 </Card>
 

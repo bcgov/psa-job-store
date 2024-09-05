@@ -1,4 +1,5 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
+import { FindUniquePositionArgs } from './models/find-unique-position.args';
 import { PositionProfile } from './models/position-profile.model';
 import { Position } from './models/position.model';
 import { PositionService } from './position.service';
