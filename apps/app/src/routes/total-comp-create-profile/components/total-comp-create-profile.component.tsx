@@ -2452,7 +2452,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         showSearch
                                         filterOption={(input, option) => {
                                           if (!option) return false;
-                                          return option.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                                          const { name, id } = option;
+
+                                          return (
+                                            name.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                                            id.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                          );
                                         }}
                                         options={getClassificationsForEmployeeGroup(index)?.map(
                                           // ({ id, employee_group_id, peoplesoft_id, name }) => ({
@@ -2468,6 +2473,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                               </div>
                                             ),
                                             value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+                                            name,
+                                            id,
                                           }),
                                         )}
                                       />
