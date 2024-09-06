@@ -2048,7 +2048,7 @@ export class JobProfileService {
           streams: Array.from(new Set(entry.streams.map((s) => s.id)))
             .filter((id) => jobFamilyStreamIds.includes(id))
             .map((id) => ({ id })),
-          classification: [entry.classification],
+          classification: entry.classification,
         }))
         .sort((a, b) => a.text.localeCompare(b.text));
     }
