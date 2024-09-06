@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
+import { UseFieldArrayRemove, UseFieldArrayUpdate, UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
-import useFormFields from '../hooks/wizardUseFieldArray';
 import { WizardModal } from './modal.component';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
@@ -18,6 +17,13 @@ interface RequiredAccountabilitiesProps {
   setEditedFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
+
+  fields: Record<'id', string>[];
+  handleRemove: (index: number) => void;
+  handleAddBack: (index: number) => void;
+  handleReset: (index: number) => void;
+  update: UseFieldArrayUpdate<any, string>;
+  remove: UseFieldArrayRemove;
 }
 
 const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
@@ -28,16 +34,19 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
   setEditedFields,
   formErrors,
   trigger,
+  fields,
+  handleRemove,
+  handleAddBack,
+  handleReset,
+  update,
+  remove,
 }) => {
   const { reqAlertShown, setReqAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleReset, update } = useFormFields({
-    useFormReturn,
-    fieldName: 'accountabilities',
-    setEditedFields: setEditedFields,
-    originalFields: originalFields,
-    significant: true,
-  });
+  // const { fields, append, remove, update } = useFieldArray({
+  //   control: useFormReturn.control,
+  //   name: 'accountabilities',
+  // });
 
   const handleAccountabilityRemoveModal = (index: number) => {
     WizardModal(
@@ -77,16 +86,20 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
       handleRemove,
       originalFields,
       update,
+      remove,
     };
 
+    // console.log('field: ', field);
     return (
-      <WizardEditProfileListItem
-        {...commonProps}
-        fieldName="accountabilities"
-        testId="accountability"
-        confirmRemoveModal={() => handleAccountabilityRemoveModal(index)}
-        onFocus={handleAccountabilityFocusModal}
-      />
+      <>
+        <WizardEditProfileListItem
+          {...commonProps}
+          fieldName="accountabilities"
+          testId="accountability"
+          confirmRemoveModal={() => handleAccountabilityRemoveModal(index)}
+          onFocus={handleAccountabilityFocusModal}
+        />
+      </>
     );
   };
 
@@ -96,25 +109,6 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
         <AccessibleList dataSource={fields} ariaLabel="Accountabilities" renderItem={renderAccReqFields} />
       )}
       <WizardValidationError formErrors={formErrors} fieldName="accountabilities" />
-
-      {/* <WizardEditAddButton
-        testId="add-accountability-button"
-        onClick={() => {
-          WizardModal(
-            'Do you want to make changes to accountabilities?',
-            reqAlertShown,
-            setReqAlertShown,
-            () => {
-              handleAddNew();
-            },
-            true,
-            undefined,
-            'accountabilities-warning',
-          );
-        }}
-      >
-        Add another accountability
-      </WizardEditAddButton> */}
     </>
   );
 };

@@ -627,7 +627,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return <LoadingSpinnerWithMessage />;
   }
 
-  console.log('effectiveData: ', effectiveData);
+  // console.log('effectiveData: ', effectiveData);
 
   const basicInfoItems: DescriptionsProps['items'] = [
     {

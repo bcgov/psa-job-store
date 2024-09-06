@@ -58,9 +58,18 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   }>({ id: '', employee_group_id: '', peoplesoft_id: '' });
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
-  const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
+  const {
+    positionRequestId,
+    positionRequestData,
+    setPositionRequestData,
+    setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
+    setReqAlertShown,
+    setOriginalValuesSet,
+    setMinReqAlertShown,
+    setWizardData,
+  } = useWizardContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { setPositionRequestProfileId, setPositionRequestProfileVersion } = useWizardContext();
   const navigate = useNavigate();
 
   // get organization for the department in which the position is being created in
@@ -93,7 +102,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
   const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
 
-  const onSubmit = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1): Promise<string> => {
+  const onSubmit = async (
+    action = 'next',
+    switchToNextStep = true,
+    alertNoProfile = true,
+    step = -1,
+  ): Promise<string> => {
+    console.log('onSubmit: ', action, switchToNextStep, alertNoProfile, step);
     if (
       positionRequestData?.parent_job_profile?.number &&
       positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '')
@@ -121,12 +136,12 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           onOk: async () => {
             setIsSwitchStepLoading(true);
             // setWizardData(null); // this ensures that any previous edits are cleared
-            // await handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step, 'CHANGED_PROFILE');
+            // await handleNext(action, switchToNextStep, alertNoProfile, step > 2 ? 2 : step, 'CHANGED_PROFILE');
             // setIsSwitchStepLoading(false);
             // resolve('CHANGED_PROFILE');
             return new Promise((resolveOk) => {
               setWizardData(null); // this ensures that any previous edits are cleared
-              handleNext(action, switchStep, alertNoProfile, step > 2 ? 2 : step, 'CHANGED_PROFILE').then(() => {
+              handleNext(action, switchToNextStep, alertNoProfile, step > 3 ? 3 : step, 'CHANGED_PROFILE').then(() => {
                 setIsSwitchStepLoading(false);
                 resolve('CHANGED_PROFILE');
                 resolveOk(undefined);
@@ -161,30 +176,42 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     }
 
     // user is not changing from previous profile
-    handleNext(action, switchStep, alertNoProfile, step, 'NO_CHANGE');
+    handleNext(action, switchToNextStep, alertNoProfile, step, 'NO_CHANGE');
     return 'NO_CHANGE';
   };
 
-  const handleNext = async (action = 'next', switchStep = true, alertNoProfile = true, step = -1, state = '') => {
+  const handleNext = async (action = 'next', switchToNextStep = true, alertNoProfile = true, step = -1, state = '') => {
+    console.log('handleNext: ', action, switchToNextStep, alertNoProfile, step, state);
+
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
     try {
       if (selectedProfileNumber && selectedProfileId && selectedProfileVersion) {
         if (positionRequestId) {
-          if (state == 'CHANGED_PROFILE' || (state == 'NO_CHANGE' && switchStep)) {
-            const resp = await updatePositionRequest({
+          // we're either changing the profile or proceeding to the next step without change via "next" button
+          if (state == 'CHANGED_PROFILE' || (state == 'NO_CHANGE' && switchToNextStep)) {
+            const updateArgs = {
               id: positionRequestId,
-              step: step == -1 ? (action === 'next' ? 3 : 1) : step,
+              // action is either "next" or "quit"
+              // step is specified if user clicks on wizard
+              // so:
+              // - if user is quitting, set step to profile selection screen (2)
+              // - if user proceeding to next step, set step to edit form (3)
+              // - if user is clicking on the wizard, set step to that
+              //   - if user changed profile, this step is going to be no more than 3 (force users to edit page)
+              //   - if user didn't change profile, they can switch to any step
+              step: step == -1 ? (action === 'next' ? 3 : 2) : step,
+
               // increment max step only if it's not incremented
-              ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 2 && step == -1
-                ? { max_step_completed: 2 }
+              ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 3 && step == -1
+                ? { max_step_completed: 3 }
                 : {}),
               // if user selected same profile as before, do not clear profile_json
               // also do not update title to default
               ...(positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
                 profile_json: null,
                 title: selectedProfileName ?? undefined,
-                max_step_completed: 2,
+                max_step_completed: 3,
               }),
               parent_job_profile: {
                 connect: { id_version: { id: parseInt(selectedProfileId), version: parseInt(selectedProfileVersion) } },
@@ -199,7 +226,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
                 },
               },
               returnFullObject: true,
-            }).unwrap();
+            };
+
+            console.log('updatingPositionRequest args: ', updateArgs);
+            const resp = await updatePositionRequest(updateArgs).unwrap();
 
             setPositionRequestData(resp.updatePositionRequest ?? null);
           }
@@ -208,7 +238,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         setPositionRequestProfileVersion(parseInt(selectedProfileVersion));
 
         if (action === 'next') {
-          if (onNext && switchStep) onNext();
+          if (onNext && switchToNextStep) {
+            console.log('onNext callback');
+            onNext();
+          }
           setSearchParams({}, { replace: true });
         }
       } else {
@@ -231,13 +264,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     }
   }, [searchParams]); // picks up profile id from search params
 
-  // Ensure form alerts get displayed again
-  const { setReqAlertShown, setOriginalValuesSet, setMinReqAlertShown, setWizardData } = useWizardContext();
-
-  setMinReqAlertShown(false);
-  setReqAlertShown(false);
-
-  setOriginalValuesSet(false); // ensures original values get re-set once user navigates to edit page
+  useEffect(() => {
+    console.log('SET SET');
+    setMinReqAlertShown(false);
+    setReqAlertShown(false);
+    setOriginalValuesSet(false); // ensures original values get re-set once user navigates to edit page
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const back = async () => {
     if (positionRequestId)
@@ -331,6 +364,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   };
 
   const switchStep = async (step: number) => {
+    console.log('switchStep: ', step);
     const code = await onSubmit('next', false, false, step);
     if (code == 'NO_CHANGE') {
       updatePositionRequestAndSetStep(step);
@@ -372,6 +406,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
           content={getMenuContent()}
           ariaLabel="Open position request menu"
+          key="menu"
         ></AccessiblePopoverMenu>,
         <Button onClick={back} key="back" data-testid="back-button">
           Back

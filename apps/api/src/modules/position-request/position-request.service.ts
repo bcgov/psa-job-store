@@ -92,7 +92,6 @@ interface AdditionalInfo {
   work_location_name?: string;
   department_id?: string;
   excluded_mgr_position_number?: string;
-  comments?: string;
   branch?: string;
   division?: string;
 }
@@ -185,17 +184,17 @@ export class PositionRequestApiService {
       // there is no position number associated with this position request - create position in peoplesoft
       if (positionRequest.position_number == null) {
         // in testmode, we can skip the peoplesoft call to create position
-        let position;
+        let position, positionRequestNeedsReview;
         try {
           if (process.env.TEST_ENV === 'true') {
-            const positionRequestNeedsReview = await this.positionRequestNeedsReview(id);
+            positionRequestNeedsReview = (await this.positionRequestNeedsReview(id)).result;
 
-            if (positionRequestNeedsReview.result === true)
+            if (positionRequestNeedsReview === true)
               position = { positionNbr: '00142558' }; // 00142558 is proposed (for verification required test)
             else position = { positionNbr: '00132136' }; // this position needs to be in approved status in order to have valid final state
           } else {
             // note this returns data with this format (string with leading zeros): { positionNbr: '00132136', errMessage: '' }
-            position = await this.createPositionForPositionRequest(id);
+            [position, positionRequestNeedsReview] = await this.createPositionForPositionRequest(id);
           }
         } catch (error) {
           this.logger.error(error);
@@ -208,6 +207,7 @@ export class PositionRequestApiService {
           positionRequest = await this.prisma.positionRequest.update({
             where: { id },
             data: {
+              approval_type: positionRequestNeedsReview ? 'VERIFIED' : 'AUTOMATIC',
               position_number: +position.positionNbr,
               submitted_at: dayjs().toDate(),
             },
@@ -232,8 +232,7 @@ export class PositionRequestApiService {
       } else {
         // we already have a position number assigned to this position request
         // this happens if something went wrong previously and we did not get to changing the status of this position request
-        // this should not be a common occurrence
-        this.logger.warn('Position request already has a position number assigned: ' + positionRequest.position_number);
+        // or if user is re-submitting after CS requested HM to make changes
 
         // check crm status etc
 
@@ -304,7 +303,7 @@ export class PositionRequestApiService {
     const excludedMgr = (
       await this.positionService.getPositionProfile(positionRequest.additional_info.excluded_mgr_position_number, true)
     )[0];
-    console.log(reportsTo);
+
     await this.prisma.positionRequest.update({
       where: { id },
       data: {
@@ -499,6 +498,8 @@ export class PositionRequestApiService {
         parent_job_profile: true,
         approved_at: true,
         submitted_at: true,
+        approval_type: true,
+        time_to_approve: true,
         crm_id: true,
         crm_lookup_name: true,
         shareUUID: true,
@@ -999,10 +1000,6 @@ export class PositionRequestApiService {
             updatePayload.orgchart_json = updatedOrgChart;
           }
         }
-      }
-
-      if (additionalInfo.comments !== undefined) {
-        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).comments = additionalInfo.comments;
       }
     } else if (additionalInfo === null) {
       updatingAdditionalInfo = true;
@@ -1553,7 +1550,7 @@ export class PositionRequestApiService {
 
     const position = await this.peoplesoftService.createPosition(data);
 
-    return position;
+    return [position, positionRequestNeedsReview];
   }
 
   //deprecated

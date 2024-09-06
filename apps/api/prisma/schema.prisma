@@ -45,6 +45,11 @@ enum PositionRequestStatus {
   CANCELLED
 }
 
+enum ApprovalType {
+  AUTOMATIC
+  VERIFIED
+}
+
 model PositionRequest {
   id                               Int                    @id @default(autoincrement())
   crm_id                           Int?                   @unique
@@ -69,7 +74,9 @@ model PositionRequest {
   classification_peoplesoft_id     String?
   submission_id                    String?
   submitted_at                     DateTime               @default(now())
-  approved_at                      DateTime               @default(now())
+  approved_at                      DateTime?
+  time_to_approve                  Int?
+  approval_type                    ApprovalType?
   status                           PositionRequestStatus?
   updated_at                       DateTime               @default(now()) @updatedAt
   shareUUID                        String?                @default(uuid()) @db.Uuid

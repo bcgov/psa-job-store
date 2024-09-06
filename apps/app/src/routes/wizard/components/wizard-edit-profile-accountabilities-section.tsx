@@ -40,7 +40,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
     fieldName: 'optional_accountabilities',
   });
 
-  const { handleAddNew } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleReset, update, remove, handleAddNew } = useFormFields({
     useFormReturn,
     fieldName: 'accountabilities',
     setEditedFields: setEditedAccReqFields,
@@ -74,6 +74,12 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
               setEditedFields={setEditedAccReqFields}
               formErrors={formErrors}
               trigger={trigger}
+              fields={fields}
+              handleRemove={handleRemove}
+              handleAddBack={handleAddBack}
+              handleReset={handleReset}
+              update={update}
+              remove={remove}
             />
 
             <OptionalList
