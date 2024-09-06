@@ -2,14 +2,12 @@
 import { Skeleton, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useGetOrganizationQuery } from '../../../../redux/services/graphql-api/organization';
-import {
-  PositionProfileModel,
-  useLazyGetPositionProfileQuery,
-} from '../../../../redux/services/graphql-api/position.api';
+import { PositionProfileModel, useGetPositionProfileQuery } from '../../../../redux/services/graphql-api/position.api';
 import LoadingSpinnerWithMessage from '../components/loading.component';
 
 interface PositionProfileProps {
-  positionNumber: number | string | null | undefined;
+  positionNumber?: number | string | null | undefined;
+  positionProfile?: PositionProfileModel;
   prefix?: string;
   mode?: 'compact' | 'compact2' | 'full';
   unOccupiedText?: string;
@@ -19,14 +17,25 @@ interface PositionProfileProps {
 
 const PositionProfile: React.FC<PositionProfileProps> = ({
   positionNumber,
+  positionProfile,
   prefix,
   mode = 'full',
   loadingStyle = 'spinner',
   unOccupiedText,
   orgChartData,
 }) => {
-  const [getPositionProfile, { data: positionProfileData, isFetching, error: positionProfileError }] =
-    useLazyGetPositionProfileQuery();
+  const {
+    data: positionProfileData,
+    isLoading,
+    error: positionProfileError,
+  } = useGetPositionProfileQuery(
+    {
+      positionNumber: positionNumber?.toString() ?? '',
+    },
+    { skip: positionNumber == null },
+  );
+  // const [getPositionProfile, { data: positionProfileData, isFetching, error: positionProfileError }] =
+  //   useLazyGetPositionProfileQuery();
   const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel | null>(null);
   const [additionalPositions, setAdditionalPositions] = useState<number>(0);
   const [ministryId, setMinistryId] = useState<string | null>(null);
@@ -38,7 +47,14 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
   } = useGetOrganizationQuery({ id: ministryId ?? '' }, { skip: !ministryId || mode === 'compact2' });
 
   useEffect(() => {
-    if (orgChartData && positionNumber) {
+    if (positionProfile && !firstActivePosition) {
+      setFirstActivePosition(positionProfile);
+      setAdditionalPositions(0);
+    }
+  }, [positionProfile, firstActivePosition]);
+
+  useEffect(() => {
+    if (orgChartData && positionNumber && !positionProfile) {
       const node = orgChartData.nodes.find((node: any) => node.id === positionNumber.toString());
       if (node) {
         const activePositions = node.data.employees.filter((employee: any) => employee.status === 'Active');
@@ -57,10 +73,8 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
           setMinistryId(node.data.department.organization_id);
         }
       }
-    } else if (positionNumber) {
-      getPositionProfile({ positionNumber: positionNumber.toString() });
     }
-  }, [positionNumber, getPositionProfile, orgChartData]);
+  }, [positionNumber, orgChartData, positionProfile]);
 
   useEffect(() => {
     if (positionProfileData && positionProfileData.positionProfile) {
@@ -78,7 +92,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
 
   return (
     <>
-      {isFetching || isOrganizationFetching ? (
+      {isLoading || isOrganizationFetching ? (
         loadingStyle === 'spinner' ? (
           <LoadingSpinnerWithMessage mode="small" />
         ) : (

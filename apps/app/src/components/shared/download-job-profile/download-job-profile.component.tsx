@@ -88,7 +88,8 @@ export const DownloadJobProfileComponent = ({
           ? generateJobProfile({
               jobProfile: profile,
               positionRequest: positionRequest ?? prData?.positionRequest,
-              supervisorProfile: positionProfileData?.positionProfile[0],
+              supervisorProfile:
+                prData?.positionRequest?.excluded_manager_position ?? positionProfileData?.positionProfile[0],
             })
           : null;
 
@@ -128,6 +129,9 @@ export const DownloadJobProfileComponent = ({
 
       const supervisorPosition = prData.positionRequest?.additional_info?.excluded_mgr_position_number;
       console.log('supervisorPosition for profileTrigger: ', supervisorPosition);
+
+      // no need to fetch profile, since it's now embedded
+      if (prData.positionRequest?.excluded_manager_position) return Promise.resolve();
 
       if (supervisorPosition) {
         try {

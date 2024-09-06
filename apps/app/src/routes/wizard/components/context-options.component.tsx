@@ -7,6 +7,9 @@ import {
   RedoOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, MenuProps, Tooltip } from 'antd';
+import AddSignificant from '../../../assets/significant-add.svg';
+import RemoveSignificant from '../../../assets/significant-delete.svg';
+
 import './wizard-page-wrapper.component.css';
 
 interface ContextOptionsProps {
@@ -15,6 +18,7 @@ interface ContextOptionsProps {
   isDisabled: boolean; // Indicates if the item is disabled
   isCustom: boolean; // Indicates if the item is custom
   isEdited: boolean; // Indicates if the item has been edited
+  isSignificant: boolean; // Indicates if the item is significant
   ariaLabel: string; // The aria-label for accessibility
   testId: string; // The test ID for testing purposes
   handleReset: (index: number) => void; // Function to handle resetting the item
@@ -29,6 +33,7 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
   isDisabled,
   isCustom,
   isEdited,
+  isSignificant,
   ariaLabel,
   testId,
   handleReset,
@@ -94,9 +99,19 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
 
   // Set the icon based on the disabled state
   const icon = isDisabled ? (
-    <PlusOutlined style={{ color: '#000000' }} />
-  ) : (
+    isSignificant ? (
+      <PlusOutlined style={{ color: '#000000' }} />
+    ) : (
+      <span role="img" aria-label="plus" className="anticon anticon-plus">
+        <img src={AddSignificant}></img>
+      </span>
+    )
+  ) : isSignificant ? (
     <DeleteOutlined style={isReadonly ? {} : { color: '#000000' }} />
+  ) : (
+    <span role="img" aria-label="delete" className="anticon anticon-delete">
+      <img style={{ width: '16px', height: '16px', alignItems: 'center' }} src={RemoveSignificant}></img>
+    </span>
   );
 
   // Render the context options based on the number of menu items

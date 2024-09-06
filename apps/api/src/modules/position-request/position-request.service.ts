@@ -89,6 +89,7 @@ export class PositionRequestStatusCounts {
 
 interface AdditionalInfo {
   work_location_id?: string;
+  work_location_name?: string;
   department_id?: string;
   excluded_mgr_position_number?: string;
   comments?: string;
@@ -299,6 +300,18 @@ export class PositionRequestApiService {
       throw AlexandriaError('Failed to update org chart');
     }
 
+    const reportsTo = (await this.positionService.getPositionProfile(positionRequest.reports_to_position_id, true))[0];
+    const excludedMgr = (
+      await this.positionService.getPositionProfile(positionRequest.additional_info.excluded_mgr_position_number, true)
+    )[0];
+    console.log(reportsTo);
+    await this.prisma.positionRequest.update({
+      where: { id },
+      data: {
+        reports_to_position: reportsTo,
+        excluded_manager_position: excludedMgr,
+      },
+    });
     // CRM Incident Managements
     let crm_id;
     let crm_lookup_name;
@@ -873,6 +886,11 @@ export class PositionRequestApiService {
       if (additionalInfo.work_location_id !== undefined) {
         (updatePayload.additional_info as Record<string, Prisma.JsonValue>).work_location_id =
           additionalInfo.work_location_id;
+      }
+
+      if (additionalInfo.work_location_name !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).work_location_name =
+          additionalInfo.work_location_name;
       }
 
       if (

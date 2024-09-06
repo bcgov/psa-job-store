@@ -2,6 +2,7 @@
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
 import { IdVersion } from './job-profile-types';
+import { PositionProfileModel } from './position.api';
 
 export interface UserConnect {
   id: string;
@@ -36,12 +37,13 @@ export interface CreatePositionRequestInput {
   };
   orgchart_png?: string;
 }
-
 export interface GetPositionRequestResponseContent {
   id: number;
   step?: number;
   max_step_completed?: number;
-  reports_to_position_id?: number;
+  reports_to_position_id: number;
+  reports_to_position: PositionProfileModel;
+  excluded_manager_position: PositionProfileModel;
   orgchart_json?: any;
   profile_json?: any;
   user?: {
@@ -76,6 +78,7 @@ export interface GetPositionRequestResponseContent {
 
 export interface AdditionalInfo {
   work_location_id?: string;
+  work_location_name?: string;
   department_id?: string;
   excluded_mgr_position_number?: string;
   comments?: string;
@@ -296,6 +299,8 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   step
                   max_step_completed
                   reports_to_position_id
+                  reports_to_position
+                  excluded_manager_position
                   parent_job_profile_id
                   parent_job_profile_version
                   profile_json
@@ -344,6 +349,8 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   step
                   max_step_completed
                   reports_to_position_id
+                  reports_to_position
+                  excluded_manager_position
                   parent_job_profile_id
                   parent_job_profile_version
                   profile_json

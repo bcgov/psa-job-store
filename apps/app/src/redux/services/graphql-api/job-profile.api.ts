@@ -2,6 +2,7 @@
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
 import {
+  ClassificationModel,
   CreateJobProfileInput,
   CreateJobProfileResponse,
   DeleteJobProfileResponse,
@@ -832,9 +833,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       query: (args: {
         jobFamilyIds: number[];
         jobFamilyStreamIds: number[];
-        classificationId?: string | null;
-        classificationEmployeeGroupId?: string | null;
-        classificationPeoplesoftId?: string | null;
+        classifications: ClassificationModel[];
         ministryIds?: string[];
         jobFamilyWithNoStream?: number[];
         excludeProfileId?: number;
@@ -844,9 +843,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             query RequirementsWithoutReadOnly(
               $jobFamilyIds: [Int!]!
               $jobFamilyStreamIds: [Int!]!
-              $classificationId: String
-              $classificationPeoplesoftId: String
-              $classificationEmployeeGroupId: String
+              $classifications: [ClassificationInput!]!
               $ministryIds: [String!]
               $jobFamilyWithNoStream: [Int!]
               $excludeProfileId: Int
@@ -854,9 +851,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               requirementsWithoutReadOnly(
                 jobFamilyIds: $jobFamilyIds
                 jobFamilyStreamIds: $jobFamilyStreamIds
-                classificationId: $classificationId
-                classificationPeoplesoftId: $classificationPeoplesoftId
-                classificationEmployeeGroupId: $classificationEmployeeGroupId
+                classifications: $classifications
                 ministryIds: $ministryIds
                 jobFamilyWithNoStream: $jobFamilyWithNoStream
                 excludeProfileId: $excludeProfileId

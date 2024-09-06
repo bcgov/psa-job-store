@@ -12,7 +12,6 @@ import AccessiblePopoverMenu from '../../components/app/common/components/access
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
 import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
-import { useGetLocationsQuery } from '../../redux/services/graphql-api/location.api';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
@@ -181,8 +180,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     fetchExcludedManagerProfile();
   }, [positionRequestData?.additional_info?.excluded_mgr_position_number, getPositionProfile]);
 
-  const { data: allLocations } = useGetLocationsQuery();
-
   const showModal = async ({ skipValidation = false, updateStep = true, step = -1, action = 'next' } = {}) => {
     // console.log('showModal', skipValidation, updateStep);
 
@@ -282,7 +279,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           // attach additional information
           additional_info: {
             department_id: formData.payListDepartmentId ?? undefined,
-            work_location_id: formData.workLocation ?? undefined,
+            work_location_id: formData.workLocation?.split('|')[0] ?? undefined,
+            work_location_name: formData.workLocation?.split('|')[1] ?? undefined,
             excluded_mgr_position_number:
               !noPositions && formData.excludedManagerPositionNumber != ''
                 ? formData.excludedManagerPositionNumber
@@ -330,18 +328,25 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
   useEffect(() => {
     if (positionRequestData) {
-      const { work_location_id, department_id, excluded_mgr_position_number, comments, branch, division } =
-        positionRequestData.additional_info ?? {};
+      const {
+        work_location_id,
+        work_location_name,
+        department_id,
+        excluded_mgr_position_number,
+        comments,
+        branch,
+        division,
+      } = positionRequestData.additional_info ?? {};
 
       setValue('branch', branch || '');
       setValue('division', division || '');
 
-      setValue(
-        'workLocation',
-        work_location_id ||
-          departmentsData?.find((dept) => dept.id === positionRequestData?.department_id)?.location_id ||
-          null,
-      );
+      if (work_location_id && work_location_name) {
+        setValue('workLocation', work_location_id + '|' + work_location_name);
+      } else {
+        const dept = departmentsData?.find((dept) => dept.id === positionRequestData?.department_id);
+        setValue('workLocation', dept?.location_id + '|' + dept?.name);
+      }
       setValue('payListDepartmentId', department_id || positionRequestData?.department_id || null);
 
       const { orgchart_json, reports_to_position_id } = positionRequest ?? {
@@ -437,8 +442,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         });
     }
   };
-
-  if (!allLocations) return <LoadingSpinnerWithMessage />;
 
   // console.log('firstActivePosition:', firstActivePosition);
   // console.log('errors.excludedManagerPosit: ', errors.excludedManagerPositionNumber);
@@ -549,7 +552,10 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                   onChange={(newValue) => {
                                     const selectedDept = departmentsData?.find((dept) => dept.id === newValue);
                                     // setSelectedDepartment(selectedDept?.name || ''); // Update selected department name
-                                    setValue('workLocation', selectedDept?.location_id || null);
+                                    setValue(
+                                      'workLocation',
+                                      selectedDept?.location_id + '|' + selectedDept?.name || null,
+                                    );
                                     // setSelectedLocation(newValue);
                                     onChange(newValue); // Update the form state
                                   }}

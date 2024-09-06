@@ -53,6 +53,8 @@ model PositionRequest {
   step                             Int // Keeps track of the current step in the wizard
   max_step_completed               Int? // Keeps track of the highest step completed in the wizard
   reports_to_position_id           String
+  reports_to_position              Json? // position data as it was submitted
+  excluded_manager_position        Json? // position data as it was submitted
   department_id                    String // this is department id that user selected in org chart
   parent_job_profile_id            Int?
   parent_job_profile_version       Int?
