@@ -3,7 +3,6 @@ import {
   ArrowDownOutlined,
   CopyOutlined,
   DeleteOutlined,
-  DownloadOutlined,
   EditOutlined,
   EllipsisOutlined,
   EyeOutlined,
@@ -593,14 +592,16 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
                 {' '}
                 Edit
               </Menu.Item>
-              <Menu.Item
+              {/* Publishing from here is problematic as it void validation */}
+              {/* Users should open the detailed view to publish and pass validation */}
+              {/* <Menu.Item
                 key="publish"
                 icon={<DownloadOutlined />}
                 onClick={() => update(_record, 'PUBLISHED')}
                 data-testid="menu-option-publish link"
               >
                 Publish
-              </Menu.Item>
+              </Menu.Item> */}
               <Menu.Item
                 key="duplicate"
                 icon={<CopyOutlined />}
