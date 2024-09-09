@@ -1,7 +1,7 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { Prisma } from '@prisma/client';
+import { JobProfileState, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export enum SearchIndex {
@@ -32,11 +32,27 @@ export class SearchService {
     } catch (error) {}
   }
 
-  async resetIndex(index: SearchIndex) {
+  async resetIndex() {
     try {
-      await this.elasticService.indices.delete({ index });
-      await this.elasticService.indices.create({ index });
-    } catch (error) {}
+      const indexExists = await this.elasticService.indices.exists({ index: SearchIndex.JobProfile });
+      if (indexExists === true) {
+        await this.elasticService.indices.delete({ index: SearchIndex.JobProfile });
+      }
+      await this.elasticService.indices.create({
+        index: SearchIndex.JobProfile,
+      });
+
+      const jobProfiles = await this.prisma.currentJobProfile.findMany({
+        select: { id: true },
+        where: { state: { equals: JobProfileState.PUBLISHED } },
+      });
+
+      for await (const profile of jobProfiles) {
+        await this.updateJobProfileSearchIndex(profile.id);
+      }
+    } catch (error) {
+      console.error('ERROR during reset and reindex: ', error);
+    }
   }
 
   // private query(index: SearchIndex, value: string): QueryDslQueryContainer {
@@ -305,6 +321,7 @@ export class SearchService {
         id: `${job_profile_id}`,
       });
       if (documentExists) await this.elasticService.delete({ index: SearchIndex.JobProfile, id: `${job_profile_id}` });
+
       return;
     }
 
