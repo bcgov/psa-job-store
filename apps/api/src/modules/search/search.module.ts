@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ElasticsearchModule, ElasticsearchService } from '@nestjs/elasticsearch';
-import { JobProfileState } from '@prisma/client';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
-import { SearchIndex, SearchService } from './search.service';
+import { SearchService } from './search.service';
 
 @Module({
   imports: [
@@ -35,26 +34,7 @@ export class SearchModule {
     private readonly searchService: SearchService,
   ) {
     (async () => {
-      try {
-        const indexExists = await elasticService.indices.exists({ index: SearchIndex.JobProfile });
-        if (indexExists === true) {
-          await elasticService.indices.delete({ index: SearchIndex.JobProfile });
-        }
-        await elasticService.indices.create({
-          index: SearchIndex.JobProfile,
-        });
-
-        const jobProfiles = await prisma.jobProfile.findMany({
-          select: { id: true },
-          where: { state: { equals: JobProfileState.PUBLISHED } },
-        });
-
-        for await (const profile of jobProfiles) {
-          await this.searchService.updateJobProfileSearchIndex(profile.id);
-        }
-      } catch (error) {
-        console.error('ERROR: ', error);
-      }
+      await searchService.resetIndex();
     })();
   }
 }
