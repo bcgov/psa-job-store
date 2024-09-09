@@ -239,7 +239,7 @@ export class PeoplesoftService {
       ),
     );
 
-    await this.searchService.resetIndex(SearchIndex.JobProfile);
+    await this.searchService.resetIndex();
 
     for await (const row of response?.data?.query?.rows ?? []) {
       try {
