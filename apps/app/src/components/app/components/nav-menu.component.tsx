@@ -14,12 +14,12 @@ import { Flex, Menu } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useLocation } from 'react-router-dom';
-import { FileSettingOutlined } from '../../icons/file-setting-outlined.component';
-import { PartitionSettingOutlined } from '../../icons/partition-setting-outlined.component';
-import { PositionRequestOutlined } from '../../icons/position-request-outlined.component';
-import { PositionRequestSettingOutlined } from '../../icons/position-request-setting-outlined.component';
-import { SendSettingOutlined } from '../../icons/send-setting-outlined.component';
-import { UserGroupSettingOutlined } from '../../icons/user-group-setting-outlined.component';
+import { FileSettingOutlined } from '../../icons/file-setting-outlined';
+import { PartitionSettingOutlined } from '../../icons/partition-setting-outlined';
+import { PositionRequestOutlined } from '../../icons/position-request-outlined';
+import { PositionRequestSettingOutlined } from '../../icons/position-request-setting-outlined';
+import { SendSettingOutlined } from '../../icons/send-setting-outlined';
+import { UserGroupSettingOutlined } from '../../icons/user-group-setting-outlined';
 import { createMenuGroup, createMenuItem, createSubMenu } from '../utils/nav-menu.utils';
 import { userCanAccess } from '../utils/user-has-roles.util';
 import { CreateButton } from './create-button.component';
@@ -80,7 +80,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
           ]
         : []),
       ...(userCanAccess(auth.user, ['user'])
-        ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden />, label: 'Home' })]
+        ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden className="" />, label: 'Home' })]
         : []),
       ...(userCanAccess(auth.user, ['user'])
         ? [
@@ -121,7 +121,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                   ? [
                       createSubMenu({
                         key: '/job-profiles/manage',
-                        icon: <FileSettingOutlined aria-hidden />,
+                        icon: <FileSettingOutlined />,
                         label: 'Manage profiles',
                         children: [
                           createMenuItem({
@@ -250,7 +250,6 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         theme="light"
         items={menuItems}
         openKeys={openKeys}
-        // openKeys={['job-profiles']}
         onOpenChange={onOpenChange}
       />
     </Flex>
