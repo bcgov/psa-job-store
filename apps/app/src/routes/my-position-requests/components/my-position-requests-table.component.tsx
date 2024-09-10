@@ -66,7 +66,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   style,
   itemsPerPage = 10,
   topRightComponent,
-  tableTitle = 'My Position Requests',
+  tableTitle = 'Requests',
   mode = null,
   onDataAvailable,
   clearFilters,
