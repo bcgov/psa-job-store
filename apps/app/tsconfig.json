@@ -4,7 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "common-kit": ["../../node_modules/common-kit"]
-    }
+    },
+    "typeRoots": ["src/@types", "node_modules/@types"]
   },
   "include": ["src", "vite.config.ts", "envConfig.ts", "jest.setup.ts", "jest.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]

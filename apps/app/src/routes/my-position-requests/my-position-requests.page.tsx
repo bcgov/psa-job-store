@@ -233,7 +233,7 @@ export const MyPositionsPage = () => {
   return (
     <>
       <PageHeader
-        title="My Position Requests"
+        title="My new position requests"
         subTitle="These are your positions you have actioned. If you'd like to review or access to continue reviewing, please click the Job title of the request."
       />
 
