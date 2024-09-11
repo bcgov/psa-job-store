@@ -33,7 +33,7 @@ const Preferences: React.FC<PreferencesProps> = ({
 }) => {
   // const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, update } = useFormFields({
     useFormReturn,
     fieldName: 'preferences',
     setEditedFields: setEditedFields,
@@ -45,30 +45,8 @@ const Preferences: React.FC<PreferencesProps> = ({
   });
 
   const handleProfRegRemoveModal = (index: number) => {
-    // WizardModal(
-    //   'Do you want to make changes to professional registration and certification requirements?',
-    //   profRegAlertShown,
-    //   setProfRegAlertShown,
-    // () =>
     handleRemove(index);
-    //   true,
-    //   undefined,
-    //   'prof-reg-warning',
-    //   trigger,
-    // );
   };
-
-  // const handleProfRegFocusModal = (field: any) => {
-  //   WizardModal(
-  //     'Do you want to make changes to professional registration and certification requirements?',
-  //     profRegAlertShown,
-  //     setProfRegAlertShown,
-  //     () => {},
-  //     true,
-  //     field.is_significant,
-  //     'prof-reg-warning',
-  //   );
-  // };
 
   const renderFields = (field: any, index: number) => {
     const commonProps = {
@@ -82,6 +60,7 @@ const Preferences: React.FC<PreferencesProps> = ({
       handleAddBack,
       handleRemove,
       originalFields,
+      update,
     };
 
     return (

@@ -207,22 +207,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               trigger={trigger}
             />
 
-            {/* <WizardEditProfileArrayField
-              useFormReturn={useFormReturn}
-              originalFields={originalProvisosFields}
-              validateVerification={validateVerification}
-              label="Willingness statements or provisos"
-              tooltip="Use this section to define special requirements of the job to make applicants aware of work environment and other requirements. Examples include requiring travel as part of the job, or willingness to work flexible hours."
-              fieldName="willingness_statements"
-              testId="proviso"
-              addButtonText="Add a proviso"
-              setEditedFields={setEditedProvisosFields}
-              editedFields={editedProvisosFields}
-            /> */}
-
             <Divider className="hr-reduced-margin" />
-
-            {/* security screenings */}
 
             <div ref={securityScreeningsSectionRef}>
               <SecurityScreenings
@@ -239,7 +224,6 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
 
             <Divider className="hr-reduced-margin" />
 
-            {/* optional requirements */}
             <WizardEditProfileArrayField
               useFormReturn={useFormReturn}
               originalFields={originalOptionalRequirementsFields}

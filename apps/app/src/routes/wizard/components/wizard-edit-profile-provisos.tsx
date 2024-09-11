@@ -33,7 +33,7 @@ const Provisos: React.FC<ProvisosProps> = ({
 }) => {
   // const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, remove, update } = useFormFields({
     useFormReturn,
     fieldName: 'willingness_statements',
     setEditedFields: setEditedFields,
@@ -45,30 +45,8 @@ const Provisos: React.FC<ProvisosProps> = ({
   });
 
   const handleProfRegRemoveModal = (index: number) => {
-    // WizardModal(
-    //   'Do you want to make changes to professional registration and certification requirements?',
-    //   profRegAlertShown,
-    //   setProfRegAlertShown,
-    // () =>
     handleRemove(index);
-    //   true,
-    //   undefined,
-    //   'prof-reg-warning',
-    //   trigger,
-    // );
   };
-
-  // const handleProfRegFocusModal = (field: any) => {
-  //   WizardModal(
-  //     'Do you want to make changes to professional registration and certification requirements?',
-  //     profRegAlertShown,
-  //     setProfRegAlertShown,
-  //     () => {},
-  //     true,
-  //     field.is_significant,
-  //     'prof-reg-warning',
-  //   );
-  // };
 
   const renderFields = (field: any, index: number) => {
     const commonProps = {
@@ -82,6 +60,7 @@ const Provisos: React.FC<ProvisosProps> = ({
       handleAddBack,
       handleRemove,
       originalFields,
+      update,
     };
 
     return (
@@ -91,11 +70,9 @@ const Provisos: React.FC<ProvisosProps> = ({
         fieldName="willingness_statements"
         testId="provisos"
         confirmRemoveModal={() => handleProfRegRemoveModal(index)}
-        // onFocus={() => handleProfRegFocusModal(field)}
         remove={remove}
         fields={fields}
         trigger={trigger}
-        // isAdmin={isAdmin}
       />
     );
   };

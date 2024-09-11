@@ -5,7 +5,7 @@ import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import useFormFields from '../hooks/wizardUseFieldArray';
-import { WizardModal } from './modal.component';
+import { WizardModalComponent, useModalActions } from './modal.component';
 import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
@@ -41,30 +41,14 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
     significant: true,
   });
 
-  const handleRemoveModal = (index: number) => {
-    WizardModal(
-      'Do you want to make changes to related experiences?',
-      relWorkAlertShown,
-      setRelWorkAlertShown,
-      () => handleRemove(index),
-      true,
-      undefined,
-      'experience-warning',
-      trigger,
-    );
-  };
-
-  const handleFocusModal = (field: any) => {
-    WizardModal(
-      'Do you want to make changes to related experiences?',
-      relWorkAlertShown,
-      setRelWorkAlertShown,
-      () => {},
-      true,
-      field.is_significant,
-      'experience-warning',
-    );
-  };
+  const { modalProps, closeModal, handleRemoveModal, handleFocusModal, handleAddModal } = useModalActions({
+    title: 'Do you want to make changes to related experiences?',
+    alertShown: relWorkAlertShown,
+    setAlertShown: setRelWorkAlertShown,
+    dataTestId: 'experience-warning',
+    trigger,
+    isSignificant: true,
+  });
 
   const renderFields = (field: any, index: number) => {
     const commonProps = {
@@ -85,15 +69,19 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
       <WizardEditProfileListItem
         {...commonProps}
         fieldName="job_experience"
+        label="job experience"
         testId="job-experience"
-        confirmRemoveModal={() => handleRemoveModal(index)}
-        onFocus={() => handleFocusModal(field)}
+        confirmRemoveModal={() => handleRemoveModal({ index, handleRemove, field })}
+        onFocus={(inputRef) => {
+          handleFocusModal({ inputRef, field });
+        }}
       />
     );
   };
 
   return (
     <>
+      {modalProps && <WizardModalComponent {...modalProps} onClose={closeModal} />}
       <Form.Item
         label="Related experience"
         labelCol={{ className: 'card-label' }}
@@ -105,22 +93,7 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
       )}
       <WizardValidationError formErrors={formErrors} fieldName="job_experience" />
 
-      <WizardEditAddButton
-        testId="add-job-experience-button"
-        onClick={() => {
-          WizardModal(
-            'Do you want to make changes to related experiences?',
-            relWorkAlertShown,
-            setRelWorkAlertShown,
-            () => {
-              handleAddNew();
-            },
-            true,
-            undefined,
-            'experience-warning',
-          );
-        }}
-      >
+      <WizardEditAddButton testId="add-job-experience-button" onClick={() => handleAddModal(handleAddNew)}>
         Add a related experience
       </WizardEditAddButton>
     </>

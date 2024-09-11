@@ -17,7 +17,16 @@ const AccessibleList: React.FC<AccessibleListProps> = ({
 }) => (
   <div className={`ant-list ant-list-split ${className}`}>
     <ul aria-label={ariaLabel} className="ant-list-items" style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
-      {dataSource.map((item: any, index: any) => renderItem(item, index))}
+      {dataSource.map((item: any, index: any) => {
+        const renderedItem = renderItem(item, index);
+        // Check if renderedItem is a valid React element
+        if (React.isValidElement(renderedItem)) {
+          // If it is, clone it and add a key
+          return React.cloneElement(renderedItem, { key: item.id || `item-${index}` });
+        }
+        // If it's not a valid React element, wrap it in a fragment with a key
+        return <React.Fragment key={item.id || `item-${index}`}>{renderedItem}</React.Fragment>;
+      })}
     </ul>
   </div>
 );
