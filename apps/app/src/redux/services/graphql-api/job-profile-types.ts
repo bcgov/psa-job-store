@@ -442,6 +442,7 @@ export interface GetJobProfilesArgs {
   sortByOrganization?: boolean;
   sortOrder?: string;
   selectProfile?: string | null | undefined;
+  departmentId?: string;
 }
 
 export interface GetJobProfilesResponse {

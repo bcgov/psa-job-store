@@ -199,7 +199,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       title: 'Class',
       dataIndex: 'classifications',
       key: 'classifications',
-      render: (classifications: any[]) => classifications?.map((c) => c.classification.name).join(', '),
+      render: (classifications: any[]) => classifications?.map((c) => c.classification.name)[0],
     },
     {
       sorter: allowSorting,

@@ -777,10 +777,10 @@ export class PositionRequestApiService {
     return isDifferent;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
+  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput, user_id: string) {
     // todo: AL-146 - tried to do this with a spread operator, but getting an error (todo: this can now be fixed)
     let updatingAdditionalInfo = false;
+    const currentData = await this.getPositionRequest(id, user_id);
     const updatePayload: Prisma.PositionRequestUpdateInput = {
       additional_info: {} as Prisma.JsonValue,
     };
@@ -836,9 +836,29 @@ export class PositionRequestApiService {
           updateData.parent_job_profile.connect.id_version.id,
           updateData.parent_job_profile.connect.id_version.version,
         );
+        // if we have a department, try to filter for multiple classifications
+        if (parentJobProfile.classifications.length > 1) {
+          const getClassification = async (parentJobProfile: any, department_id: string) => {
+            const isExcluded = (await this.departmentService.getDepartment({ where: { id: department_id } })).metadata
+              .is_statutorily_excluded;
 
-        // Set Classification on positionRequest
-        if (parentJobProfile.classifications && parentJobProfile.classifications.length > 0) {
+            const classifications = parentJobProfile.classifications;
+            return isExcluded
+              ? classifications.filter((cl) => cl.classification_employee_group_id == 'OEX')
+              : classifications.filter((cl) => cl.classification_employee_group_id != 'OEX');
+          };
+          const classifications = await getClassification(parentJobProfile, currentData.department_id);
+          // Set Classification IDs on positionRequest
+          updatePayload.classification = {
+            connect: {
+              id_employee_group_id_peoplesoft_id: {
+                id: classifications[0].classification.id,
+                employee_group_id: classifications[0].classification.employee_group_id,
+                peoplesoft_id: classifications[0].classification.peoplesoft_id,
+              },
+            },
+          };
+        } else if (parentJobProfile.classifications && parentJobProfile.classifications.length > 0) {
           const classification = parentJobProfile.classifications[0].classification;
           updatePayload.classification = {
             connect: {

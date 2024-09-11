@@ -958,8 +958,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       // filter out the selected classification
       let filteredReportToRelationship = allValues;
       if (selectedEmployeeClassificationGroups)
-        filteredReportToRelationship = allValues.filter((r: string) =>
-          selectedEmployeeClassificationGroups.find((ecg) => ecg.classification == r),
+        filteredReportToRelationship = allValues.filter(
+          (r: string) => !selectedEmployeeClassificationGroups.find((ecg) => ecg.classification == r),
         );
       // Update the 'reportToRelationship' form variable
 
