@@ -316,6 +316,8 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         // if we need to have a specific profile selected, the server will ignore take and skip to get correct frame
         // it will also ignore filters and search query
         selectProfile: !selectProfileIdRan.current ? selectProfileNumber : null,
+        //pass departmentid to only return included/excluded profiles
+        departmentId: prData?.department_id,
       });
 
       // Fetch job profiles based on other filters and search query
