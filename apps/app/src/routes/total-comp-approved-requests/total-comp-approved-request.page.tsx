@@ -12,7 +12,7 @@ import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetLocationQuery } from '../../redux/services/graphql-api/location.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
-import { useGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
+import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
 import { formatDateTime } from '../../utils/Utils';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { OrgChart } from '../org-chart/components/org-chart';
@@ -36,12 +36,16 @@ export const TotalCompApprovedRequestPage = () => {
     {
       id: data?.positionRequest?.additional_info?.work_location_id,
     },
-    { skip: data?.positionRequest?.additional_info?.work_location_id != null },
+    { skip: data?.positionRequest?.additional_info?.work_location_id == null },
   );
 
-  const { data: positionInfo, isLoading: positionLoading } = useGetPositionProfileQuery(
-    { positionNumber: `${data?.positionRequest?.position_number?.toString().padStart(8, '0')}` },
-    { skip: data?.positionRequest?.reports_to_position == null },
+  // fetch positionInfo to find effective date
+  // this endpoint gets position info regardless if it's encumbered or not
+  // useGetPositionProfileQuery on the other hand will only return the result if position is encumbered
+  // together with employee info
+  const { data: positionInfo, isLoading: positionLoading } = useGetPositionQuery(
+    { where: { id: `${data?.positionRequest?.position_number?.toString().padStart(8, '0')}` } },
+    { skip: data?.positionRequest?.reports_to_position != null || !data?.positionRequest?.position_number },
   );
 
   const submissionDetailsItems = [
@@ -203,7 +207,7 @@ export const TotalCompApprovedRequestPage = () => {
         <div>
           {positionLoading && <LoadingComponent mode="small" />}
           {formatDateTime(
-            data?.positionRequest?.reports_to_position?.effectiveDate ?? positionInfo?.positionProfile[0].effectiveDate,
+            data?.positionRequest?.reports_to_position?.effectiveDate ?? positionInfo?.position?.effective_date,
             true,
           )}
         </div>
