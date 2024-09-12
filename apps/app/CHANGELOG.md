@@ -1,5 +1,27 @@
 # app
 
+## 0.11.0
+
+### Minor Changes
+
+- [#753](https://github.com/bcgov/psa-job-store/pull/753) [`5d353dc6200b79bd1209beec568b5bd041c2fcc0`](https://github.com/bcgov/psa-job-store/commit/5d353dc6200b79bd1209beec568b5bd041c2fcc0) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-885 Fix Position approved at
+
+- [#753](https://github.com/bcgov/psa-job-store/pull/753) [`a12758e552cbba0f82b96fffa1749b644794450c`](https://github.com/bcgov/psa-job-store/commit/a12758e552cbba0f82b96fffa1749b644794450c) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-890 Performance issues on HM edit form
+
+- [#759](https://github.com/bcgov/psa-job-store/pull/759) [`f66f41e7536a9da83709ae705a4eccff752a81cb`](https://github.com/bcgov/psa-job-store/commit/f66f41e7536a9da83709ae705a4eccff752a81cb) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-922 Auto-select classification based on department exclusion
+
+- [#753](https://github.com/bcgov/psa-job-store/pull/753) [`5d353dc6200b79bd1209beec568b5bd041c2fcc0`](https://github.com/bcgov/psa-job-store/commit/5d353dc6200b79bd1209beec568b5bd041c2fcc0) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-884 Update Classification View
+
+### Patch Changes
+
+- [#763](https://github.com/bcgov/psa-job-store/pull/763) [`e9682ec9cf0e4da9a3e047e0ceed5f900c5d503e`](https://github.com/bcgov/psa-job-store/commit/e9682ec9cf0e4da9a3e047e0ceed5f900c5d503e) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-907 Accessibility improvements - moved error pop-up to bottom right to prevent user menu occlusion
+
+- [#763](https://github.com/bcgov/psa-job-store/pull/763) [`e9682ec9cf0e4da9a3e047e0ceed5f900c5d503e`](https://github.com/bcgov/psa-job-store/commit/e9682ec9cf0e4da9a3e047e0ceed5f900c5d503e) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-899 Known errors are not displayed correctly on non-local environments
+
+- [#763](https://github.com/bcgov/psa-job-store/pull/763) [`c11f2d3448e46c842b5b4d2a1c28d4d3087c1c73`](https://github.com/bcgov/psa-job-store/commit/c11f2d3448e46c842b5b4d2a1c28d4d3087c1c73) Thanks [@alex-struk](https://github.com/alex-struk)! - Sub-menu states are now remembered between menu collapses and page reloads
+
+- [#763](https://github.com/bcgov/psa-job-store/pull/763) [`173215d3b32149f201401a8d9cfe3b59c4f0f31d`](https://github.com/bcgov/psa-job-store/commit/173215d3b32149f201401a8d9cfe3b59c4f0f31d) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-902 Show warning again if it was previously cancelled
+
 ## 0.10.0
 
 ### Minor Changes
