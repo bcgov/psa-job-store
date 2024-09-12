@@ -27,6 +27,20 @@ export class OrgChartService {
       (row) => row['A.EFF_STATUS'] === 'Active' && row['A.POSN_STATUS'] !== 'Frozen',
     );
 
+    const positionRequestsForFilteredPositions = await this.prisma.positionRequest.findMany({
+      where: {
+        AND: [
+          {
+            position_number: {
+              in: filteredPositions
+                .filter((row) => row['A.POSITION_NBR'])
+                .map((row) => (row['A.POSITION_NBR'] != null ? +row['A.POSITION_NBR'] : row['A.POSITION_NBR'])),
+            },
+          },
+        ],
+      },
+    });
+
     const classifications = await this.classificationService.getClassifications({});
     const classificationSetIds = await this.classificationService.getClassificationSetIds();
     const departments = await this.departmentService.getDepartments();
@@ -70,6 +84,14 @@ export class OrgChartService {
                 (classificationSetIds.includes(department.peoplesoft_id) ? department.peoplesoft_id : 'BCSET'),
           )
         : null;
+
+      const matchingPositionRequest = positionRequestsForFilteredPositions.find(
+        (pr) => pr.position_number === +position['A.POSITION_NBR'],
+      );
+
+      if (position['A.POSITION_NBR'] === '00142557') {
+        console.log('matchingPositionREquest: ', matchingPositionRequest);
+      }
 
       // If the node doesn't exist, create it.
       nodeMap.set(position['A.POSITION_NBR'], {
