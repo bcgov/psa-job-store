@@ -3,7 +3,7 @@ import React from 'react';
 import { UseFieldArrayRemove, UseFieldArrayUpdate, UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
-import { WizardModal } from './modal.component';
+import { WizardModalComponent, useModalActions } from './modal.component';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
@@ -43,35 +43,14 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
 }) => {
   const { reqAlertShown, setReqAlertShown } = useWizardContext();
 
-  // const { fields, append, remove, update } = useFieldArray({
-  //   control: useFormReturn.control,
-  //   name: 'accountabilities',
-  // });
-
-  const handleAccountabilityRemoveModal = (index: number) => {
-    WizardModal(
-      'Do you want to make changes to accountabilities?',
-      reqAlertShown,
-      setReqAlertShown,
-      () => handleRemove(index),
-      true,
-      undefined,
-      'accountabilities-warning',
-      trigger,
-    );
-  };
-
-  const handleAccountabilityFocusModal = () => {
-    WizardModal(
-      'Do you want to make changes to accountabilities?',
-      reqAlertShown,
-      setReqAlertShown,
-      () => {},
-      true,
-      undefined,
-      'accountabilities-warning',
-    );
-  };
+  const { modalProps, closeModal, handleRemoveModal, handleFocusModal } = useModalActions({
+    title: 'Do you want to make changes to accountabilities?',
+    alertShown: reqAlertShown,
+    setAlertShown: setReqAlertShown,
+    dataTestId: 'accountabilities-warning',
+    trigger,
+    isSignificant: true,
+  });
 
   const renderAccReqFields = (field: any, index: number) => {
     const commonProps = {
@@ -94,10 +73,13 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
       <>
         <WizardEditProfileListItem
           {...commonProps}
+          label={'accountability'}
           fieldName="accountabilities"
           testId="accountability"
-          confirmRemoveModal={() => handleAccountabilityRemoveModal(index)}
-          onFocus={handleAccountabilityFocusModal}
+          confirmRemoveModal={() => handleRemoveModal({ index, handleRemove, field })}
+          onFocus={(inputRef) => {
+            handleFocusModal({ inputRef, field });
+          }}
         />
       </>
     );
@@ -105,6 +87,7 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
 
   return (
     <>
+      {modalProps && <WizardModalComponent {...modalProps} onClose={closeModal} />}
       {fields.length > 0 && (
         <AccessibleList dataSource={fields} ariaLabel="Accountabilities" renderItem={renderAccReqFields} />
       )}

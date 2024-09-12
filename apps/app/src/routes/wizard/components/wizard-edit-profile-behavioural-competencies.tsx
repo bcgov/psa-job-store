@@ -30,11 +30,11 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
       title={
         <Row justify="start">
           <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-            <span style={{ fontWeight: '600', fontSize: '16px' }}>Behavioural competencies</span>
+            <h3 style={{ display: 'inline' }}>Behavioural competencies</h3>
             <Button
               data-testid={`reset-behavioral-competencies`}
               type="link" // No button styling, just the icon
-              aria-label={`Reset all changes`}
+              aria-label={`Reset all behavioural competency changes`}
               onClick={() => {
                 behavioural_competencies_replace(originalBehaviouralCompetenciesFields);
               }}

@@ -21,6 +21,7 @@ import { initialElements } from '../org-chart/constants/initial-elements.constan
 import { OrgChartContext } from '../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { Elements } from '../org-chart/interfaces/elements.interface';
+import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';
@@ -230,17 +231,7 @@ export const WizardOrgChartPage = ({
           positionVacant ? positionVacantTooltipText : nextButtonTooltipTitle != '' ? nextButtonTooltipTitle : null
         }
       ></WizardSteps>
-      <div
-        style={{
-          overflow: 'hidden',
-          position: 'relative',
-          height: '100%',
-          background: 'rgb(240, 242, 245)',
-          marginLeft: '-1rem',
-          marginRight: '-1rem',
-          marginTop: '-1px',
-        }}
-      >
+      <WizardContentWrapper>
         {isLoadingUserProfile || isFetchingUserProfile || isResetting ? (
           <LoadingComponent height="100%"></LoadingComponent>
         ) : (
@@ -336,7 +327,7 @@ export const WizardOrgChartPage = ({
             </>
           </TreeChartSearchProvider>
         )}
-      </div>
+      </WizardContentWrapper>
     </WizardPageWrapper>
   );
 };

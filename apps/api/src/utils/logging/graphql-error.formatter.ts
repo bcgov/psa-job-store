@@ -10,7 +10,7 @@ export function formatGraphQLError(error: GraphQLFormattedError): GraphQLFormatt
   let errorMessage = 'Unknown error has occurred';
 
   if (error.message.startsWith('ALEXANDRIA_ERROR: ')) {
-    errorMessage = error.message.replace('ALEXANDRIA_ERROR: ', '');
+    errorMessage = error.message; //.replace('ALEXANDRIA_ERROR: ', '');
   }
 
   // Exclude stacktrace and locations from the error object

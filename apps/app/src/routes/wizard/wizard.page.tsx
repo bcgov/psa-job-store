@@ -13,6 +13,7 @@ import {
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import JobProfiles from '../job-profiles/components/job-profiles.component';
+import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';
@@ -432,18 +433,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         disabledTooltip={selectedProfileId == null ? 'Please select a profile before proceeding.' : null}
         disableTooltipForBasicInfo={false} // allow stepping back to basic info even if profile is not selected
       ></WizardSteps>
-      <div
-        style={{
-          overflow: 'hidden',
-          position: 'relative',
-          height: '100%',
-          background: 'rgb(240, 242, 245)',
-          marginLeft: '-1rem',
-          marginRight: '-1rem',
-          marginTop: '-1px',
-          padding: '0 1rem',
-        }}
-      >
+      <WizardContentWrapper>
         <JobProfiles
           key={'WizardProfiles'}
           ref={jobProfileSearchResultsRef}
@@ -456,7 +446,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           organizationFilterExtra={departmentData?.department?.organization}
           prData={positionRequestData}
         />
-      </div>
+      </WizardContentWrapper>
     </WizardPageWrapper>
   );
 };

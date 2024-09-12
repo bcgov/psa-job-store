@@ -3,7 +3,7 @@ import { Alert, Card, Col, Form, Row } from 'antd';
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import useFormFields from '../hooks/wizardUseFieldArray';
-import { WizardModal } from './modal.component';
+import { WizardModalComponent, useModalActions } from './modal.component';
 import WizardEditAddButton from './wizard-edit-profile-add-button';
 import OptionalList from './wizard-edit-profile-optional-list';
 import RequiredAccountabilities from './wizard-edit-profile-required-accountabilities';
@@ -35,7 +35,11 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
   pickerData,
 }) => {
   const { reqAlertShown, setReqAlertShown } = useWizardContext();
-  const { fields: optionalFields, update: optionalUpdate } = useFormFields({
+  const {
+    fields: optionalFields,
+    update: optionalUpdate,
+    handleRemove: optionalHandleRemove,
+  } = useFormFields({
     useFormReturn,
     fieldName: 'optional_accountabilities',
   });
@@ -48,9 +52,20 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
     significant: true,
   });
 
+  const { modalProps, closeModal, handleAddModal } = useModalActions({
+    title: 'Do you want to make changes to accountabilities?',
+    alertShown: reqAlertShown,
+    setAlertShown: setReqAlertShown,
+    dataTestId: 'accountabilities-warning',
+    trigger,
+    isSignificant: true,
+  });
+
   return (
-    <Card ref={sectionRef} title="Accountabilities" className="custom-card" style={{ marginTop: 16 }}>
-      <section id="accountabilties" aria-label="Accountabilities" role="region">
+    <Card ref={sectionRef} title={<h3>Accountabilities</h3>} className="custom-card" style={{ marginTop: 16 }}>
+      <section id="accountabilities" aria-label="Accountabilities" role="region">
+        {modalProps && <WizardModalComponent {...modalProps} onClose={closeModal} />}
+
         <Row justify="start">
           <Col xs={24} sm={24} md={24} lg={18} xl={16}>
             <Alert
@@ -86,6 +101,8 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
               useFormReturn={useFormReturn}
               fieldName="optional_accountabilities"
               label="Optional accountabilities"
+              fields={optionalFields}
+              handleRemove={optionalHandleRemove}
             />
 
             <Form.Item style={{ marginBottom: 0 }}>
@@ -101,22 +118,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
                   />
                 </Col>
                 <Col>
-                  <WizardEditAddButton
-                    testId="add-accountability-button"
-                    onClick={() => {
-                      WizardModal(
-                        'Do you want to make changes to accountabilities?',
-                        reqAlertShown,
-                        setReqAlertShown,
-                        () => {
-                          handleAddNew();
-                        },
-                        true,
-                        undefined,
-                        'accountabilities-warning',
-                      );
-                    }}
-                  >
+                  <WizardEditAddButton testId="add-accountability-button" onClick={() => handleAddModal(handleAddNew)}>
                     Add a custom accountability
                   </WizardEditAddButton>
                 </Col>

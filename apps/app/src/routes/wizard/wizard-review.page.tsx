@@ -12,6 +12,7 @@ import {
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import OtherDetails from './components/other-details.component';
+import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
@@ -198,18 +199,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           maxStepCompleted={positionRequest?.max_step_completed}
         ></WizardSteps>
 
-        <div
-          style={{
-            overflow: 'hidden',
-            position: 'relative',
-            height: '100%',
-            background: 'rgb(240, 242, 245)',
-            marginLeft: '-1rem',
-            marginRight: '-1rem',
-            marginTop: '-1px',
-            padding: '2rem 1rem',
-          }}
-        >
+        <WizardContentWrapper>
           <JobProfileWithDiff
             positionRequestData={{ positionRequest: positionRequestData }}
             showBasicInfo={false}
@@ -226,7 +216,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
               ></OtherDetails>
             </Col>
           </Row>
-        </div>
+        </WizardContentWrapper>
       </WizardPageWrapper>
     </div>
   );
