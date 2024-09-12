@@ -39,7 +39,9 @@ const renderPositionNumber = (roles: string[], positionData: Record<string, any>
   if (roles.includes('classification') || roles.includes('total-compensation')) {
     return positionData.id;
   } else if (roles.includes('hiring-manager') || roles.includes('user')) {
-    if (positionData.position_status === 'Approved') {
+    // Approved is the PeopleSoft status, for positions which were created outside the Job Store
+    // COMPLETED is the Job Store status, for positions which were created inside the Job Store (PS === Active, CRM === Completed)
+    if (['Approved', 'COMPLETED'].includes(positionData.position_status)) {
       return positionData.id;
     } else {
       return <em>Pending approval</em>;
