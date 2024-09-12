@@ -29,6 +29,20 @@ export class ClassificationService {
     return this.prisma.classification.findUnique({ ...args });
   }
 
+  async getClassificationSetIds(): Promise<string[]> {
+    const data = await this.prisma.classification.findMany({
+      select: {
+        peoplesoft_id: true,
+      },
+      distinct: ['peoplesoft_id'],
+      orderBy: {
+        peoplesoft_id: 'asc',
+      },
+    });
+
+    return data.map(({ peoplesoft_id }) => peoplesoft_id);
+  }
+
   async getClassificationForPeoplesoftPosition(position: PeoplesoftPosition) {
     if (position['A.BUSINESS_UNIT'] == null || position['A.BUSINESS_UNIT'].length === 0) return null;
 
