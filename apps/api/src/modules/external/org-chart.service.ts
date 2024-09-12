@@ -28,6 +28,7 @@ export class OrgChartService {
     );
 
     const classifications = await this.classificationService.getClassifications({});
+    const classificationSetIds = await this.classificationService.getClassificationSetIds();
     const departments = await this.departmentService.getDepartments();
 
     const positionsWithIncumbentsIds = filteredPositions.map((row) => row['A.POSITION_NBR']);
@@ -55,12 +56,19 @@ export class OrgChartService {
         });
       }
 
-      const classification = !isEmpty(position['A.JOBCODE'])
-        ? classifications.find((classification) => classification.id === position['A.JOBCODE'])
-        : null;
-
       const department = !isEmpty(position['A.DEPTID'])
         ? departments.find((department) => department.id === position['A.DEPTID'])
+        : null;
+
+      const classification = !isEmpty(position['A.JOBCODE'])
+        ? classifications.find(
+            (classification) =>
+              classification.id === position['A.JOBCODE'] &&
+              classification.employee_group_id === position['A.SAL_ADMIN_PLAN'] &&
+              // Use the department SETID if it exists in SETIDs, otherwise revert to BCSET
+              classification.peoplesoft_id ===
+                (classificationSetIds.includes(department.peoplesoft_id) ? department.peoplesoft_id : 'BCSET'),
+          )
         : null;
 
       // If the node doesn't exist, create it.
