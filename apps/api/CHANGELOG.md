@@ -1,5 +1,13 @@
 # api
 
+## 0.8.0
+
+### Minor Changes
+
+- [#745](https://github.com/bcgov/psa-job-store/pull/745) [`7a9ef11653d36b335c8b9303891010de2da1eb4d`](https://github.com/bcgov/psa-job-store/commit/7a9ef11653d36b335c8b9303891010de2da1eb4d) Thanks [@kmandryk](https://github.com/kmandryk)! - Allow multiple classifications for Schedule A profiles
+
+- [#728](https://github.com/bcgov/psa-job-store/pull/728) [`8c9c6de1b6ac94bf91df7d8ca9114c2472054742`](https://github.com/bcgov/psa-job-store/commit/8c9c6de1b6ac94bf91df7d8ca9114c2472054742) Thanks [@kmandryk](https://github.com/kmandryk)! - Add reports to and excluded manager to submitted position request data
+
 ## 0.7.0
 
 ### Minor Changes
