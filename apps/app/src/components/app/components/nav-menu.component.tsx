@@ -14,12 +14,12 @@ import { Flex, Menu } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useLocation } from 'react-router-dom';
-import { FileSettingOutlined } from '../../icons/file-setting-outlined.component';
-import { PartitionSettingOutlined } from '../../icons/partition-setting-outlined.component';
-import { PositionRequestOutlined } from '../../icons/position-request-outlined.component';
-import { PositionRequestSettingOutlined } from '../../icons/position-request-setting-outlined.component';
-import { SendSettingOutlined } from '../../icons/send-setting-outlined.component';
-import { UserGroupSettingOutlined } from '../../icons/user-group-setting-outlined.component';
+import { FileSettingOutlined } from '../../icons/file-setting-outlined';
+import { PartitionSettingOutlined } from '../../icons/partition-setting-outlined';
+import { PositionRequestOutlined } from '../../icons/position-request-outlined';
+import { PositionRequestSettingOutlined } from '../../icons/position-request-setting-outlined';
+import { SendSettingOutlined } from '../../icons/send-setting-outlined';
+import { UserGroupSettingOutlined } from '../../icons/user-group-setting-outlined';
 import { createMenuGroup, createMenuItem, createSubMenu } from '../utils/nav-menu.utils';
 import { userCanAccess } from '../utils/user-has-roles.util';
 import { CreateButton } from './create-button.component';
@@ -32,8 +32,6 @@ export interface NavMenuProps {
 export const NavMenu = ({ collapsed }: NavMenuProps) => {
   const auth = useAuth();
   const location = useLocation();
-  const [openKeys, setOpenKeys] = useState<string[]>([]);
-  const [initialSet, setInitialSet] = useState(false);
 
   // Function to get all parent keys of a menu item
   const getParentKeys = useCallback((key: string, items: any[]): string[] => {
@@ -80,7 +78,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
           ]
         : []),
       ...(userCanAccess(auth.user, ['user'])
-        ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden />, label: 'Home' })]
+        ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden className="" />, label: 'Home' })]
         : []),
       ...(userCanAccess(auth.user, ['user'])
         ? [
@@ -121,7 +119,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                   ? [
                       createSubMenu({
                         key: '/job-profiles/manage',
-                        icon: <FileSettingOutlined aria-hidden />,
+                        icon: <FileSettingOutlined />,
                         label: 'Manage profiles',
                         children: [
                           createMenuItem({
@@ -223,17 +221,97 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
     [auth.user, collapsed],
   );
 
-  // Effect to set initial open keys based on current location
-  useEffect(() => {
-    if (collapsed || initialSet) return;
+  const getKeysWithChildren = useCallback((items: any[]): string[] => {
+    return items.reduce((keys: string[], item) => {
+      if (item.children && item.children.length > 0) {
+        keys.push(item.key);
+        keys.push(...getKeysWithChildren(item.children));
+      } else if (item.type === 'group' && item.children) {
+        keys.push(...getKeysWithChildren(item.children));
+      }
+      return keys;
+    }, []);
+  }, []);
+
+  const [openKeys, setOpenKeys] = useState<string[]>(() => {
+    // if side-menu is collapsed, do not expand any sub-menus, otherwise they just float, breaking the UI
+
+    if (collapsed) {
+      // console.log('collapsed, initialize openKeys to empty array');
+      return [];
+    }
+
+    // attach parent keys of current path to openKeys
+    // this way the submenu of the current path will alwys be expanded
     const parentKeys = getParentKeys(location.pathname, menuItems);
-    setOpenKeys(parentKeys);
-    setInitialSet(true);
-  }, [location.pathname, getParentKeys, menuItems, collapsed, initialSet]);
+    // console.log('parentKeys: ', parentKeys);
+
+    const savedOpenKeys = localStorage.getItem('navMenuOpenKeys');
+
+    if (savedOpenKeys) {
+      // console.log('initializing openKeys from localStorage: ', [...JSON.parse(savedOpenKeys), ...parentKeys]);
+      return [...JSON.parse(savedOpenKeys), ...parentKeys];
+    } else {
+      // console.log('initializing openKeys getKeysWithChildren: ', getKeysWithChildren(menuItems));
+      return [...getKeysWithChildren(menuItems), ...parentKeys];
+    }
+  });
+
+  // store expanded sub-menus in separate state for when side-menu is expanded
+  const [expandedOpenKeys, setExpandedOpenKeys] = useState<string[]>(() => {
+    const savedOpenKeys = localStorage.getItem('navMenuOpenKeys');
+
+    // attach parent keys of current path to openKeys
+    // this way the submenu of the current path will alwys be expanded
+    const parentKeys = getParentKeys(location.pathname, menuItems);
+
+    if (savedOpenKeys) {
+      // console.log('initializing openKeys from localStorage: ', [...JSON.parse(savedOpenKeys), ...parentKeys]);
+      return [...JSON.parse(savedOpenKeys), ...parentKeys];
+    } else {
+      // console.log('initializing openKeys getKeysWithChildren: ', getKeysWithChildren(menuItems));
+      return [...getKeysWithChildren(menuItems), ...parentKeys];
+    }
+  });
+
+  // Effect to set initial localStorage openKeys
+  useEffect(() => {
+    if (!localStorage.getItem('navMenuOpenKeys')) {
+      // console.log('== navMenuOpenKeys not in localStorage, setting..');
+      const allKeys = getKeysWithChildren(menuItems);
+      // console.log('allKeys: ', allKeys);
+      localStorage.setItem('navMenuOpenKeys', JSON.stringify(allKeys));
+
+      // if side menu is visible, expand all items initially
+      if (!collapsed) {
+        // console.log('not collapsed, setOpenKeys: ', allKeys);
+        setOpenKeys(allKeys);
+      }
+    }
+  }, [menuItems, collapsed, getKeysWithChildren]);
 
   const onOpenChange = (keys: string[]) => {
+    // console.log('onOpenChange: ', ', collapsed: ', collapsed, 'setOpenKeys');
     setOpenKeys(keys);
+
+    // this callback gets triggered when side menu is collapsed and expanded,
+    // so update localStorage for expanded keys only in response to user expanding the sub-menus
+    // otherwise will clear localStorage when side-menu is collapsed
+    if (!collapsed) {
+      // console.log('not collapsed, setting expandedOpenKeys: ', keys);
+      localStorage.setItem('navMenuOpenKeys', JSON.stringify(keys));
+      setExpandedOpenKeys(keys);
+    }
   };
+
+  useEffect(() => {
+    // if user expands the side menu, recover expanded sub-menu keys
+    // without this the sub-menus will be collapsed when user expands the side menu
+    if (!collapsed) {
+      // console.log('not collapsed, setOpenKeys from expandedOpenKeys: ', expandedOpenKeys);
+      setOpenKeys(expandedOpenKeys);
+    }
+  }, [setOpenKeys, expandedOpenKeys, collapsed]);
 
   return (
     <Flex
@@ -250,7 +328,6 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         theme="light"
         items={menuItems}
         openKeys={openKeys}
-        // openKeys={['job-profiles']}
         onOpenChange={onOpenChange}
       />
     </Flex>

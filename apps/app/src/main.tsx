@@ -66,6 +66,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               fontSizeHeading4: 14,
               fontSizeHeading5: 14,
 
+              controlItemBgActive: '#F1F8FE',
+
               lineHeightHeading1: 1.4,
               lineHeightHeading2: 1.33333,
               lineHeightHeading3: 1.375,

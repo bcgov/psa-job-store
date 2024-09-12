@@ -40,7 +40,7 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
   setEditedFields,
   formErrors,
 }) => {
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, update } = useFormFields({
     useFormReturn,
     fieldName,
     originalFields,
@@ -59,9 +59,10 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
       originalFields,
       editedFields,
       setEditedFields,
+      update,
     };
 
-    return <WizardEditProfileListItem {...commonProps} fieldName={fieldName} testId={testId} />;
+    return <WizardEditProfileListItem {...commonProps} label={label} fieldName={fieldName} testId={testId} />;
   };
 
   return (
@@ -69,7 +70,7 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
       <Form.Item
         label={
           !tooltip ? (
-            label
+            <h4>{label}</h4>
           ) : (
             <span>
               {label}{' '}

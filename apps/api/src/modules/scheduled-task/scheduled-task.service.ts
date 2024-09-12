@@ -128,7 +128,9 @@ export class ScheduledTaskService {
                   where: { crm_id: +crm_id },
                   data: {
                     status: status,
-                    ...(approved_at === null ? {} : { approved_at }),
+                    ...(approved_at === null
+                      ? {}
+                      : { approved_at, time_to_approve: dayjs().diff(positionRequest.submitted_at, 'second') }),
                   },
                 });
               }

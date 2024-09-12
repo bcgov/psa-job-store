@@ -22,7 +22,7 @@ export const TotalCompPublishedProfilesPage = () => {
 
   return (
     <>
-      <PageHeader title="Approved" subTitle="Job profiles available in the job store." />
+      <PageHeader title="Published profiles" subTitle="Job profiles available in the job store." />
 
       <ContentWrapper>
         {hasData && (

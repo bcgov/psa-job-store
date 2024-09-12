@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Popover } from 'antd';
+import { TooltipPlacement } from 'antd/es/tooltip';
 import React, { ReactNode, forwardRef, useEffect, useRef, useState } from 'react';
 import './accessible-popover-menu.css';
 
@@ -10,6 +11,8 @@ interface AccessiblePopoverMenuProps {
   padding?: string;
   buttonId?: string;
   compact?: boolean;
+  placement?: TooltipPlacement;
+  arrow?: boolean;
 }
 
 const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
@@ -19,6 +22,8 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
   padding,
   buttonId,
   compact,
+  placement,
+  arrow,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -30,9 +35,11 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
     // Update the visibility based on user interaction
     setVisible(isVisible);
 
-    if (!isVisible && ellipsisRef.current) {
-      ellipsisRef.current.focus();
-    }
+    // only focus back on the button in response to escape key
+    // on click it should focus on whatever the user is clicking (for example input box)
+    // if (!isVisible && ellipsisRef.current) {
+    //   ellipsisRef.current.focus();
+    // }
   };
 
   const handlePopoverOpen = (visible: any) => {
@@ -97,7 +104,8 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
     </div>
   ));
 
-  // console.log('open: ', visible);
+  // console.log('placement: ', placement);
+
   return (
     <Popover
       open={visible}
@@ -108,9 +116,10 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
       }}
       content={<ContentWrapper ref={contentRef}>{content}</ContentWrapper>}
       trigger="click"
-      placement="bottom"
+      placement={placement ?? 'bottom'}
       overlayInnerStyle={{ padding: padding }}
       overlayClassName={compact ? 'compact-popover' : ''}
+      arrow={arrow ?? true}
     >
       {/* add ref to triggerButton, e.g. ref={(el) => (ellipsisRef.current = el)} */}
       <TriggerButtonWrapper ref={ellipsisRef} buttonId={buttonId}>

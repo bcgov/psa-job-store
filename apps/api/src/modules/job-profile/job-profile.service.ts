@@ -24,6 +24,7 @@ export class JobProfileService {
     state: string = 'PUBLISHED',
     searchConditions?: any,
     include_archived = false,
+    excludedDepartment?: boolean,
   ) {
     // if searchConditions were provided, do a "dumb" search instead of elastic search
     let searchResultIds = null;
@@ -35,6 +36,19 @@ export class JobProfileService {
             where: { ...(searchResultIds != null && { id: { in: searchResultIds } }) },
           })
         : undefined;
+    const a = await this.prisma.jobProfile.findMany({
+      where: {
+        is_archived: false,
+
+        id: 47,
+        version: 2,
+
+        ...(searchConditions != null && searchConditions),
+        state,
+      },
+      orderBy: [...(args.orderBy || []), { title: 'asc' }],
+    });
+    console.log(a);
     return this.prisma.jobProfile.findMany({
       where: {
         is_archived: include_archived,
@@ -49,6 +63,21 @@ export class JobProfileService {
         ...(searchConditions != null && searchConditions),
         state,
         ...where,
+        classifications: excludedDepartment && {
+          some: excludedDepartment
+            ? {
+                classification: {
+                  employee_group_id: 'OEX',
+                },
+              }
+            : {
+                NOT: {
+                  classification: {
+                    employee_group_id: 'OEX',
+                  },
+                },
+              }, // include all classifications if excludedDepartment is false
+        },
       },
       ...args,
       orderBy: [...(args.orderBy || []), { title: 'asc' }],
@@ -58,6 +87,19 @@ export class JobProfileService {
         updated_by: true,
         behavioural_competencies: true,
         classifications: {
+          where: excludedDepartment
+            ? {
+                classification: {
+                  employee_group_id: 'OEX',
+                },
+              }
+            : {
+                NOT: {
+                  classification: {
+                    employee_group_id: 'OEX',
+                  },
+                },
+              }, // include all classifications if excludedDepartment is false
           include: {
             classification: true,
           },
@@ -289,6 +331,7 @@ export class JobProfileService {
     sortByOrganization,
     sortOrder,
     selectProfile,
+    departmentId,
     ...args
   }: FindManyJobProfileWithSearch) {
     let jobProfiles: any[];
@@ -298,13 +341,30 @@ export class JobProfileService {
     // if we are selecting a specific profile, we need to adjust page
     // used for when user presses back from the edit page and we need to select previously selected profile
     // on correct page
+    const department =
+      departmentId != null
+        ? await this.prisma.department.findUnique({
+            where: { id: departmentId },
+            include: {
+              metadata: true,
+            },
+          })
+        : undefined;
     if (selectProfile) {
       // Fetch all job profiles based on the search and where conditions
-      const allJobProfiles = await this.getJobProfilesWithSearch(search, where, {
-        ...args,
-        take: undefined,
-        skip: undefined,
-      });
+      const allJobProfiles = await this.getJobProfilesWithSearch(
+        search,
+        where,
+        {
+          ...args,
+          take: undefined,
+          skip: undefined,
+        },
+        undefined,
+        undefined,
+        undefined,
+        department?.metadata.is_statutorily_excluded,
+      );
 
       // Sort the job profiles based on the provided sorting parameters
       const sortedJobProfiles = this.sortJobProfiles(
@@ -335,7 +395,15 @@ export class JobProfileService {
       }
     } else {
       // If selectProfile is not provided, fetch profiles based on the search and where conditions
-      jobProfiles = await this.getJobProfilesWithSearch(search, where, args);
+      jobProfiles = await this.getJobProfilesWithSearch(
+        search,
+        where,
+        args,
+        undefined,
+        undefined,
+        undefined,
+        department?.metadata.is_statutorily_excluded,
+      );
     }
 
     return jobProfiles;
@@ -361,17 +429,6 @@ export class JobProfileService {
     }
 
     return jobProfiles;
-  }
-
-  private async getJobProfilesCount(search: string, where: any) {
-    const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
-
-    return this.prisma.currentJobProfile.count({
-      where: {
-        ...(searchResultIds != null && { id: { in: searchResultIds } }),
-        ...where,
-      },
-    });
   }
 
   private async sortJobProfilesByClassification(jobProfiles: JobProfile[], sortOrder: string): Promise<JobProfile[]> {
@@ -622,7 +679,17 @@ export class JobProfileService {
     return jobProfile;
   }
 
-  async getJobProfileCount({ search, where }: FindManyJobProfileWithSearch) {
+  async getJobProfileCount({ search, where, departmentId }: FindManyJobProfileWithSearch) {
+    const department =
+      departmentId != null
+        ? await this.prisma.department.findUnique({
+            where: { id: departmentId },
+            include: {
+              metadata: true,
+            },
+          })
+        : undefined;
+    const excludedDepartment = department?.metadata?.is_statutorily_excluded;
     const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
     return await this.prisma.currentJobProfile.count({
@@ -631,6 +698,21 @@ export class JobProfileService {
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
         ...this.transofrmWhereForAllOrgs(where),
+        classifications: excludedDepartment && {
+          some: excludedDepartment
+            ? {
+                classification: {
+                  employee_group_id: 'OEX',
+                },
+              }
+            : {
+                NOT: {
+                  classification: {
+                    employee_group_id: 'OEX',
+                  },
+                },
+              }, // include all classifications if excludedDepartment is false
+        },
       },
     });
   }
@@ -2048,7 +2130,7 @@ export class JobProfileService {
           streams: Array.from(new Set(entry.streams.map((s) => s.id)))
             .filter((id) => jobFamilyStreamIds.includes(id))
             .map((id) => ({ id })),
-          classification: [entry.classification],
+          classification: entry.classification,
         }))
         .sort((a, b) => a.text.localeCompare(b.text));
     }

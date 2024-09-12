@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ExclamationCircleFilled, InfoCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {
+  ExclamationCircleFilled,
+  InfoCircleFilled,
+  InfoCircleOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
 import { Alert, Button, Col, Descriptions, Form, Input, List, Row, Tooltip } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
+import TextArea from 'antd/es/input/TextArea';
 import DOMPurify from 'dompurify';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
@@ -347,7 +352,11 @@ const WizardEditProfile = forwardRef(
       anySsecurityScreeningsTrue && verificationReasons.push(reasons.SECURITY_SCREENINGS);
       anyProfRegTrue && verificationReasons.push(reasons.PROFESSIONAL_REGISTRATIONS);
       const verificationRequired = verificationReasons.length > 0;
-      setVerificationNeededReasons(verificationReasons);
+
+      // check if same to preven re-render unnecessarily (causes an issue where clicking directly from input to menu doesn't open menu on first click)
+      if (JSON.stringify(verificationReasons) !== JSON.stringify(verificationNeededReasons))
+        setVerificationNeededReasons(verificationReasons);
+
       setRequiresVerification(verificationRequired);
       onVerificationRequiredChange?.(verificationRequired); // call parent
     }, [
@@ -363,6 +372,7 @@ const WizardEditProfile = forwardRef(
       editedProfessionalRegistrationFields,
       originalProfessionalRegistrationFields,
       originalSecurityScreeningsFields,
+      verificationNeededReasons,
     ]);
 
     useEffect(() => {
@@ -740,6 +750,7 @@ const WizardEditProfile = forwardRef(
           <Col xs={24} sm={24} lg={8} aria-label="Context and job details" role="region">
             {requiresVerification && (
               <Alert
+                role="info"
                 data-testid="verification-warning-message"
                 message=""
                 description={
@@ -766,6 +777,7 @@ const WizardEditProfile = forwardRef(
               role="note"
               type="info"
               showIcon
+              icon={<InfoCircleFilled aria-hidden />}
               message={
                 <span>
                   Job context{' '}

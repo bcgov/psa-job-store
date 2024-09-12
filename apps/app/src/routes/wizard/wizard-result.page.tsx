@@ -32,6 +32,7 @@ import { generatePNGBase64 } from '../org-chart/components/org-chart/download-bu
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import CommentsList from './components/comments-list.component';
+import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
@@ -399,10 +400,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           hpad={false}
           grayBg={false}
           pageHeaderExtra={[
-            <div style={{ marginRight: '1rem' }}>
+            <div style={{ marginRight: '1rem' }} key="statusIndicator">
               <StatusIndicator status={positionRequest?.status ?? ''} />
             </div>,
             <AccessiblePopoverMenu
+              key="menu"
               triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
               content={getMenuContent()}
               ariaLabel="Open position request menu"
@@ -451,18 +453,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             </div>
           </div>
 
-          <div
-            style={{
-              overflow: 'hidden',
-              position: 'relative',
-              height: '100%',
-              background: 'rgb(240, 242, 245)',
-              marginLeft: '-1rem',
-              marginRight: '-1rem',
-              marginTop: '-1px',
-              padding: '2rem 1rem',
-            }}
-          >
+          <WizardContentWrapper>
             {mode === 'readyToCreatePositionNumber' && (
               <ContentWrapper>
                 <Result icon={<CheckCircleOutlined />} title="The job profile is ready!" />
@@ -974,7 +965,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 </div>
               </div>
             </Modal>
-          </div>
+          </WizardContentWrapper>
         </WizardPageWrapper>
       </div>
     </>

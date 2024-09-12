@@ -43,7 +43,10 @@ export const TotalCompApprovedRequestsPage = () => {
   };
   return (
     <>
-      <PageHeader title="Approved" subTitle="List of job profiles instantly approved by the JobStore." />
+      <PageHeader
+        title="Approved new position requests"
+        subTitle="List of job profiles instantly approved by the JobStore."
+      />
 
       <ContentWrapper>
         {hasData && (

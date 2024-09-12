@@ -70,7 +70,7 @@ const WizardTextField: React.FC<SingleTextFieldProps> = ({
         <Input />
       </FormItem>
 
-      <Card title={label} bordered={false} className="custom-card" style={{ marginTop: 16 }}>
+      <Card title={<h3>{label}</h3>} bordered={false} className="custom-card" style={{ marginTop: 16 }}>
         <section aria-label={label} role="region">
           <Row justify="start">
             <Col xs={24} sm={24} md={24} lg={18} xl={16}>

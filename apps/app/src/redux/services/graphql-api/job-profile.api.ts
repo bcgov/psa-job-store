@@ -45,6 +45,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               $sortByOrganization: Boolean
               $sortOrder: String
               $selectProfile: String
+              $departmentId: String
             ) {
               jobProfiles(
                 search: $search
@@ -57,6 +58,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 sortByJobFamily: $sortByJobFamily
                 sortByOrganization: $sortByOrganization
                 selectProfile: $selectProfile
+                departmentId: $departmentId
               ) {
                 id
                 all_reports_to
@@ -133,7 +135,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 valid_to
                 version
               }
-              jobProfilesCount(search: $search, where: $where)
+              jobProfilesCount(search: $search, where: $where, departmentId: $departmentId)
               pageNumberForSelectProfile(
                 search: $search
                 where: $where
@@ -145,6 +147,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 sortByJobFamily: $sortByJobFamily
                 sortByOrganization: $sortByOrganization
                 selectProfile: $selectProfile
+                departmentId: $departmentId
               )
             }
           `,
@@ -159,6 +162,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
             sortByOrganization: args.sortByOrganization,
             sortOrder: args.sortOrder,
             selectProfile: args.selectProfile,
+            departmentId: args.departmentId,
           },
         };
       },

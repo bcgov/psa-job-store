@@ -4,7 +4,7 @@ import { MenuItemType } from 'antd/es/menu/hooks/useItems';
 import { useMemo } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { NavLink } from 'react-router-dom';
-import { PositionRequestOutlined } from '../../icons/position-request-outlined.component';
+import { PositionRequestOutlined } from '../../icons/position-request-outlined';
 import { createMenuItem } from '../utils/nav-menu.utils';
 import { userCanAccess } from '../utils/user-has-roles.util';
 

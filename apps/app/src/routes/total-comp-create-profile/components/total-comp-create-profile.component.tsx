@@ -605,6 +605,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       } else {
         message.warning('No Schedule A classification found for the corresponding general employee group.');
       }
+    } else {
+      appendEmployeeGroup({
+        employeeGroup: 'OEX',
+        classification: null,
+      });
     }
   };
   const allReportsTo = watch('all_reports_to');
@@ -953,8 +958,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       // filter out the selected classification
       let filteredReportToRelationship = allValues;
       if (selectedEmployeeClassificationGroups)
-        filteredReportToRelationship = allValues.filter((r: string) =>
-          selectedEmployeeClassificationGroups.find((ecg) => ecg.classification == r),
+        filteredReportToRelationship = allValues.filter(
+          (r: string) => !selectedEmployeeClassificationGroups.find((ecg) => ecg.classification == r),
         );
       // Update the 'reportToRelationship' form variable
 
@@ -975,12 +980,25 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           selected?.classification?.split('.')[1] == cl.employee_group_id &&
           selected?.classification?.split('.')[2] == cl.peoplesoft_id,
       );
-      const list =
-        selected?.employeeGroup == 'OEX' && selectedEmployeeClassificationGroups.length > 1
-          ? classificationsData?.classifications.filter(
-              (c) => c.employee_group_id == classification?.employee_group_id && classification.code == c.code,
-            )
-          : classificationsData?.classifications.filter((c) => c.employee_group_id == selected?.employeeGroup);
+      let list;
+      if (selectedEmployeeClassificationGroups.length > 1 && index == 1) {
+        const otherClassification = classificationsData?.classifications.find(
+          (cl) =>
+            selectedEmployeeClassificationGroups.at(0)?.classification?.split('.')[0] == cl.id &&
+            selectedEmployeeClassificationGroups.at(0)?.classification?.split('.')[1] == cl.employee_group_id &&
+            selectedEmployeeClassificationGroups.at(0)?.classification?.split('.')[2] == cl.peoplesoft_id,
+        );
+        list =
+          selected?.employeeGroup == 'OEX'
+            ? classificationsData?.classifications.filter(
+                (c) => c.employee_group_id == classification?.employee_group_id && classification.code == c.code,
+              )
+            : classificationsData?.classifications.filter(
+                (c) => c.employee_group_id == selected?.employeeGroup && otherClassification?.code == c.code,
+              );
+      } else {
+        list = classificationsData?.classifications.filter((c) => c.employee_group_id == selected?.employeeGroup);
+      }
 
       return list;
     },
@@ -2348,7 +2366,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                           <div key={field.id}>
                             <Form.Item
-                              label={index == 1 ? 'Schedule A group ' : 'General employee group'}
+                              label={
+                                selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX'
+                                  ? 'Schedule A group '
+                                  : 'General employee group'
+                              }
                               style={{ marginBottom: '0.5rem' }}
                             >
                               <>
@@ -2361,7 +2383,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                         <Col flex="auto">
                                           <Select
                                             placeholder="Choose an employee group"
-                                            disabled={index == 1}
+                                            disabled={
+                                              selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX'
+                                            }
                                             onChange={(arg) => {
                                               setValue(`employeeClassificationGroups.${index}.employeeGroup`, arg);
                                               setValue(
@@ -2376,7 +2400,31 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             value={value}
                                             style={{ width: '100%' }}
                                             options={employeeGroupData?.employeeGroups
-                                              .filter((group) => group.id != 'OEX')
+                                              .filter((group) => {
+                                                if (
+                                                  selectedEmployeeClassificationGroups.at(0)?.employeeGroup == 'OEX' &&
+                                                  index == 1
+                                                ) {
+                                                  const selectedOEX = selectedEmployeeClassificationGroups.at(0);
+
+                                                  const oexClassification = classificationsData?.classifications.find(
+                                                    (cl) =>
+                                                      selectedOEX?.classification?.split('.')[0] == cl.id &&
+                                                      selectedOEX?.classification?.split('.')[1] ==
+                                                        cl.employee_group_id &&
+                                                      selectedOEX?.classification?.split('.')[2] == cl.peoplesoft_id,
+                                                  );
+                                                  return (
+                                                    group.id != 'OEX' &&
+                                                    classificationsData?.classifications.find(
+                                                      (c) =>
+                                                        c.employee_group_id == group.id &&
+                                                        c.code == oexClassification?.code,
+                                                    )
+                                                  );
+                                                }
+                                                return group.id != 'OEX';
+                                              })
                                               .map((group) => ({
                                                 label: group.id,
                                                 value: group.id,
@@ -2954,7 +3002,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           <WizardValidationError formErrors={basicFormErrors} fieldName="jobContext" />
                         </>
                       ) : (
-                        <Typography.Text type="secondary">
+                        <Typography.Text>
                           <span
                             dangerouslySetInnerHTML={{
                               __html: DOMPurify.sanitize(
@@ -3011,9 +3059,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
-                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
-                            <Col>
-                              {isCurrentVersion ? (
+                          isCurrentVersion && (
+                            <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                              <Col>
                                 <Form.Item style={{ margin: 0 }}>
                                   <Row>
                                     <Col>
@@ -3066,11 +3114,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     </Col>
                                   </Row>
                                 </Form.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </Col>
-                          </Row>
+                              </Col>
+                            </Row>
+                          )
                         }
                       >
                         {accountabilitiesFields.map((field, index) => (
@@ -3237,7 +3283,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
-                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                          <Row
+                            justify="space-between"
+                            align="middle"
+                            style={{ width: '100%', marginTop: !isCurrentVersion ? '1rem' : undefined }}
+                          >
                             <Col>Education and work experience</Col>
                             <Col>
                               <Form.Item style={{ margin: 0 }}>
@@ -4768,7 +4818,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <>
                     <Typography.Title level={5}>Duplicate</Typography.Title>
 
-                    <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                    <Typography.Text style={{ marginTop: '5px', display: 'block' }}>
                       This will create a draft copy of this version of the job profile.{' '}
                     </Typography.Text>
                     <Button type="primary" style={{ marginTop: 10 }} onClick={duplicate}>
@@ -5202,7 +5252,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               </Link>
             </>
           }
-          style={{ marginLeft: '-1rem', marginRight: '-1rem' }}
+          style={{ marginLeft: '-1rem', marginRight: '-1rem', marginTop: '-16px' }}
         ></Alert>
       )}
     </StickyBox>

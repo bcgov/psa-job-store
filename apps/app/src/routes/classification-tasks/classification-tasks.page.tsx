@@ -45,13 +45,13 @@ export const ClassificationTasksPage = () => {
   };
   return (
     <>
-      <PageHeader title="My tasks" subTitle="List of job profiles that need review." />
+      <PageHeader title="Manage new position requests" subTitle="List of job profiles that need review." />
 
       <ContentWrapper>
         {hasData && (
           <PositionRequestsSearch
             requestingFeature="classificationTasks"
-            searchPlaceHolderText={'Search by job title or submission ID'}
+            searchPlaceHolderText={'Search by job title'}
             // additionalFilters={true}
             mode="classification"
             fullWidth={true}

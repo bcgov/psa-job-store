@@ -101,7 +101,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
   pickerData,
 }) => {
   return (
-    <Card title="Minimum job requirements" className="custom-card" style={{ marginTop: 16 }}>
+    <Card title={<h3>Minimum job requirements</h3>} className="custom-card" style={{ marginTop: 16 }}>
       <section aria-label="Minimum job requirements" role="region">
         <Row justify="start">
           <Col xs={24} sm={24} md={24} lg={18} xl={16}>
@@ -119,7 +119,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
             />
             <div ref={educationSectionRef}>
               <Form.Item
-                label="Education and work experience"
+                label={<h4>Education and work experience</h4>}
                 labelCol={{ className: 'card-label' }}
                 className="label-only"
                 colon={false}
@@ -207,22 +207,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               trigger={trigger}
             />
 
-            {/* <WizardEditProfileArrayField
-              useFormReturn={useFormReturn}
-              originalFields={originalProvisosFields}
-              validateVerification={validateVerification}
-              label="Willingness statements or provisos"
-              tooltip="Use this section to define special requirements of the job to make applicants aware of work environment and other requirements. Examples include requiring travel as part of the job, or willingness to work flexible hours."
-              fieldName="willingness_statements"
-              testId="proviso"
-              addButtonText="Add a proviso"
-              setEditedFields={setEditedProvisosFields}
-              editedFields={editedProvisosFields}
-            /> */}
-
             <Divider className="hr-reduced-margin" />
-
-            {/* security screenings */}
 
             <div ref={securityScreeningsSectionRef}>
               <SecurityScreenings
@@ -239,7 +224,6 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
 
             <Divider className="hr-reduced-margin" />
 
-            {/* optional requirements */}
             <WizardEditProfileArrayField
               useFormReturn={useFormReturn}
               originalFields={originalOptionalRequirementsFields}
