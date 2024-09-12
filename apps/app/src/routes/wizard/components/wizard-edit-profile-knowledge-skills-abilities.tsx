@@ -82,7 +82,7 @@ const KnowledgeSkillsAbilities: React.FC<KnowledgeSkillsAbilitiesProps> = ({
   return (
     <>
       <Form.Item
-        label="Knowledge, skills and abilities"
+        label={<h4>Knowledge, skills and abilities</h4>}
         labelCol={{ className: 'card-label' }}
         className="label-only"
         colon={false}

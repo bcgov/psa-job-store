@@ -82,7 +82,7 @@ const Preferences: React.FC<PreferencesProps> = ({
   return (
     <>
       <Form.Item
-        label="Preferences"
+        label={<h4>Preferences</h4>}
         labelCol={{ className: 'card-label' }}
         className="label-only"
         colon={false}

@@ -83,7 +83,7 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
     <>
       {modalProps && <WizardModalComponent {...modalProps} onClose={closeModal} />}
       <Form.Item
-        label="Related experience"
+        label={<h4>Related experience</h4>}
         labelCol={{ className: 'card-label' }}
         className="label-only"
         colon={false}

@@ -291,6 +291,16 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
                                 if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
                               });
                             }}
+                            onKeyDown={(event) => {
+                              // Close the select menu when the user presses the Escape key
+                              // otherwise closes the sider, trapping the user inside the select
+                              if (event.key === 'Escape') {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                // Close the select menu
+                                (event.target as HTMLElement).blur();
+                              }
+                            }}
                           ></Select>
                         </Col>
                       </Row>

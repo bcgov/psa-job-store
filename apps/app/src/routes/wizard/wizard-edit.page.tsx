@@ -12,6 +12,7 @@ import {
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import WizardContentWrapper from './components/wizard-content-wrapper';
 import WizardEditProfile from './components/wizard-edit-profile';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
@@ -430,18 +431,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         nextText="Save and Next"
       /> */}
 
-      <div
-        style={{
-          overflow: 'hidden',
-          position: 'relative',
-          height: '100%',
-          background: 'rgb(240, 242, 245)',
-          marginLeft: '-1rem',
-          marginRight: '-1rem',
-          marginTop: '-1px',
-          padding: '2rem 1rem',
-        }}
-      >
+      <WizardContentWrapper>
         <Row justify="center" gutter={16}>
           <Col>
             <WizardEditProfile
@@ -456,7 +446,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
             ></WizardEditProfile>
           </Col>
         </Row>
-      </div>
+      </WizardContentWrapper>
     </WizardPageWrapper>
   );
 };

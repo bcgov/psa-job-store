@@ -70,7 +70,7 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
       <Form.Item
         label={
           !tooltip ? (
-            label
+            <h4>{label}</h4>
           ) : (
             <span>
               {label}{' '}

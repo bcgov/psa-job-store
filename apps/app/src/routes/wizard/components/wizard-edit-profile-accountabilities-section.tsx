@@ -62,7 +62,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
   });
 
   return (
-    <Card ref={sectionRef} title="Accountabilities" className="custom-card" style={{ marginTop: 16 }}>
+    <Card ref={sectionRef} title={<h3>Accountabilities</h3>} className="custom-card" style={{ marginTop: 16 }}>
       <section id="accountabilities" aria-label="Accountabilities" role="region">
         {modalProps && <WizardModalComponent {...modalProps} onClose={closeModal} />}
 

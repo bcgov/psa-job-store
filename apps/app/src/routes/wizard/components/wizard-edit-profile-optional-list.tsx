@@ -79,7 +79,11 @@ const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, field
             className="optionalList"
           >
             <Form.Item
-              label={<span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>{label}</span>}
+              label={
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                  <h4>{label}</h4>
+                </span>
+              }
               labelCol={{ className: 'card-label' }}
               className="label-only"
               colon={false}

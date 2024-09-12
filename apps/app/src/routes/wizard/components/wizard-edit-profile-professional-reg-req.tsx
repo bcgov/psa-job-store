@@ -105,7 +105,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
     <>
       {modalProps && <WizardModalComponent {...modalProps} onClose={closeModal} />}
       <Form.Item
-        label="Professional registration and certification requirements"
+        label={<h4>Professional registration and certification requirements</h4>}
         labelCol={{ className: 'card-label' }}
         className="label-only"
         colon={false}

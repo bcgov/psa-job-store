@@ -101,7 +101,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
   pickerData,
 }) => {
   return (
-    <Card title="Minimum job requirements" className="custom-card" style={{ marginTop: 16 }}>
+    <Card title={<h3>Minimum job requirements</h3>} className="custom-card" style={{ marginTop: 16 }}>
       <section aria-label="Minimum job requirements" role="region">
         <Row justify="start">
           <Col xs={24} sm={24} md={24} lg={18} xl={16}>
@@ -119,7 +119,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
             />
             <div ref={educationSectionRef}>
               <Form.Item
-                label="Education and work experience"
+                label={<h4>Education and work experience</h4>}
                 labelCol={{ className: 'card-label' }}
                 className="label-only"
                 colon={false}

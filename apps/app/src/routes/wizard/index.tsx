@@ -3,10 +3,8 @@ import { PositionProvider } from '../../components/app/common/contexts/position.
 
 export const WizardRoute = () => {
   return (
-    <div style={{ height: '100%' }}>
-      <PositionProvider>
-        <Outlet />
-      </PositionProvider>
-    </div>
+    <PositionProvider>
+      <Outlet />
+    </PositionProvider>
   );
 };

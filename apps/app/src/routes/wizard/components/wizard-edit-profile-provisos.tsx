@@ -80,7 +80,7 @@ const Provisos: React.FC<ProvisosProps> = ({
   return (
     <>
       <Form.Item
-        label="Provisos"
+        label={<h4>Provisos</h4>}
         labelCol={{ className: 'card-label' }}
         className="label-only"
         colon={false}

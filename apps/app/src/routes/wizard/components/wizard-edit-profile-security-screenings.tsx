@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Col, Form, Row, Tooltip } from 'antd';
+import { Col, Form, Row, Typography } from 'antd';
 import React from 'react';
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
@@ -102,20 +101,17 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
       <Form.Item
         label={
           <span>
-            {'Security screenings'}{' '}
-            <Tooltip
-              title={
-                "Use this section to add any security screenings required for the position. This could include a criminal record check, a security clearance, or a driver's abstract."
-              }
-            >
-              <InfoCircleOutlined style={{ cursor: 'pointer', fontSize: '0.9rem' }} />
-            </Tooltip>
+            <h4>{'Security screenings'}</h4>{' '}
           </span>
         }
         labelCol={{ className: 'card-label' }}
         className="label-only"
         colon={false}
       ></Form.Item>
+      <Typography.Paragraph type="secondary">
+        Use this section to add any security screenings required for the position. This could include a criminal record
+        check, a security clearance, or a driver's abstract.
+      </Typography.Paragraph>
       {fields.length > 0 && (
         <AccessibleList dataSource={fields} ariaLabel="Security screenings" renderItem={renderFields} />
       )}
