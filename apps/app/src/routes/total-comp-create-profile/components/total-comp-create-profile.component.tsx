@@ -3002,7 +3002,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           <WizardValidationError formErrors={basicFormErrors} fieldName="jobContext" />
                         </>
                       ) : (
-                        <Typography.Text type="secondary">
+                        <Typography.Text>
                           <span
                             dangerouslySetInnerHTML={{
                               __html: DOMPurify.sanitize(
@@ -3059,9 +3059,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
-                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
-                            <Col>
-                              {isCurrentVersion ? (
+                          isCurrentVersion && (
+                            <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                              <Col>
                                 <Form.Item style={{ margin: 0 }}>
                                   <Row>
                                     <Col>
@@ -3114,11 +3114,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     </Col>
                                   </Row>
                                 </Form.Item>
-                              ) : (
-                                <></>
-                              )}
-                            </Col>
-                          </Row>
+                              </Col>
+                            </Row>
+                          )
                         }
                       >
                         {accountabilitiesFields.map((field, index) => (
@@ -3285,7 +3283,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         style={{ marginBottom: '0' }}
                         labelCol={{ className: 'full-width-label card-label' }}
                         label={
-                          <Row justify="space-between" align="middle" style={{ width: '100%' }}>
+                          <Row
+                            justify="space-between"
+                            align="middle"
+                            style={{ width: '100%', marginTop: !isCurrentVersion ? '1rem' : undefined }}
+                          >
                             <Col>Education and work experience</Col>
                             <Col>
                               <Form.Item style={{ margin: 0 }}>
@@ -4816,7 +4818,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <>
                     <Typography.Title level={5}>Duplicate</Typography.Title>
 
-                    <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+                    <Typography.Text style={{ marginTop: '5px', display: 'block' }}>
                       This will create a draft copy of this version of the job profile.{' '}
                     </Typography.Text>
                     <Button type="primary" style={{ marginTop: 10 }} onClick={duplicate}>
@@ -5250,7 +5252,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               </Link>
             </>
           }
-          style={{ marginLeft: '-1rem', marginRight: '-1rem' }}
+          style={{ marginLeft: '-1rem', marginRight: '-1rem', marginTop: '-16px' }}
         ></Alert>
       )}
     </StickyBox>
