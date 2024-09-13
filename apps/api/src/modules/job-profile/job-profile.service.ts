@@ -63,21 +63,23 @@ export class JobProfileService {
         ...(searchConditions != null && searchConditions),
         state,
         ...where,
-        classifications: excludedDepartment && {
-          some: excludedDepartment
-            ? {
-                classification: {
-                  employee_group_id: 'OEX',
-                },
-              }
-            : {
-                NOT: {
-                  classification: {
-                    employee_group_id: 'OEX',
-                  },
-                },
-              }, // include all classifications if excludedDepartment is false
-        },
+        classifications: excludedDepartment
+          ? {
+              some: excludedDepartment
+                ? {
+                    classification: {
+                      employee_group_id: 'OEX',
+                    },
+                  }
+                : {
+                    NOT: {
+                      classification: {
+                        employee_group_id: 'OEX',
+                      },
+                    },
+                  }, // include all classifications if excludedDepartment is false
+            }
+          : undefined,
       },
       ...args,
       orderBy: [...(args.orderBy || []), { title: 'asc' }],
@@ -698,21 +700,23 @@ export class JobProfileService {
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
         ...this.transofrmWhereForAllOrgs(where),
-        classifications: excludedDepartment && {
-          some: excludedDepartment
-            ? {
-                classification: {
-                  employee_group_id: 'OEX',
-                },
-              }
-            : {
-                NOT: {
-                  classification: {
-                    employee_group_id: 'OEX',
-                  },
-                },
-              }, // include all classifications if excludedDepartment is false
-        },
+        classifications: excludedDepartment
+          ? {
+              some: excludedDepartment
+                ? {
+                    classification: {
+                      employee_group_id: 'OEX',
+                    },
+                  }
+                : {
+                    NOT: {
+                      classification: {
+                        employee_group_id: 'OEX',
+                      },
+                    },
+                  }, // include all classifications if excludedDepartment is false
+            }
+          : undefined,
       },
     });
   }
