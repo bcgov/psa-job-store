@@ -36,19 +36,19 @@ export class JobProfileService {
             where: { ...(searchResultIds != null && { id: { in: searchResultIds } }) },
           })
         : undefined;
-    const a = await this.prisma.jobProfile.findMany({
-      where: {
-        is_archived: false,
+    // const a = await this.prisma.jobProfile.findMany({
+    //   where: {
+    //     is_archived: false,
 
-        id: 47,
-        version: 2,
+    //     id: 47,
+    //     version: 2,
 
-        ...(searchConditions != null && searchConditions),
-        state,
-      },
-      orderBy: [...(args.orderBy || []), { title: 'asc' }],
-    });
-    console.log(a);
+    //     ...(searchConditions != null && searchConditions),
+    //     state,
+    //   },
+    //   orderBy: [...(args.orderBy || []), { title: 'asc' }],
+    // });
+    // console.log(a);
     return this.prisma.jobProfile.findMany({
       where: {
         is_archived: include_archived,
@@ -63,23 +63,24 @@ export class JobProfileService {
         ...(searchConditions != null && searchConditions),
         state,
         ...where,
-        classifications: excludedDepartment
-          ? {
-              some: excludedDepartment
-                ? {
-                    classification: {
-                      employee_group_id: 'OEX',
-                    },
-                  }
-                : {
-                    NOT: {
+        classifications:
+          excludedDepartment !== undefined
+            ? {
+                some: excludedDepartment
+                  ? {
                       classification: {
                         employee_group_id: 'OEX',
                       },
+                    }
+                  : {
+                      classification: {
+                        NOT: {
+                          employee_group_id: 'OEX',
+                        },
+                      },
                     },
-                  }, // include all classifications if excludedDepartment is false
-            }
-          : undefined,
+              }
+            : undefined,
       },
       ...args,
       orderBy: [...(args.orderBy || []), { title: 'asc' }],
@@ -89,19 +90,22 @@ export class JobProfileService {
         updated_by: true,
         behavioural_competencies: true,
         classifications: {
-          where: excludedDepartment
-            ? {
-                classification: {
-                  employee_group_id: 'OEX',
-                },
-              }
-            : {
-                NOT: {
-                  classification: {
-                    employee_group_id: 'OEX',
-                  },
-                },
-              }, // include all classifications if excludedDepartment is false
+          where:
+            excludedDepartment !== undefined
+              ? excludedDepartment
+                ? {
+                    classification: {
+                      employee_group_id: 'OEX',
+                    },
+                  }
+                : {
+                    classification: {
+                      NOT: {
+                        employee_group_id: 'OEX',
+                      },
+                    },
+                  }
+              : undefined, // include all classifications if excludedDepartment is undefined
           include: {
             classification: true,
           },
@@ -251,15 +255,36 @@ export class JobProfileService {
     sortByOrganization,
     sortOrder,
     selectProfile,
+    departmentId,
     ...args
   }: FindManyJobProfileWithSearch) {
+    const department =
+      departmentId != null
+        ? await this.prisma.department.findUnique({
+            where: { id: departmentId },
+            include: {
+              metadata: true,
+            },
+          })
+        : undefined;
+
     if (selectProfile) {
       // Fetch all job profiles based on the search and where conditions
-      const allJobProfiles = await this.getJobProfilesWithSearch(search, this.transofrmWhereForAllOrgs(where), {
-        ...args,
-        take: undefined,
-        skip: undefined,
-      });
+
+      // Fetch all job profiles based on the search and where conditions
+      const allJobProfiles = await this.getJobProfilesWithSearch(
+        search,
+        this.transofrmWhereForAllOrgs(where),
+        {
+          ...args,
+          take: undefined,
+          skip: undefined,
+        },
+        undefined,
+        undefined,
+        undefined,
+        department?.metadata.is_statutorily_excluded,
+      );
 
       // Sort the job profiles based on the provided sorting parameters
       const sortedJobProfiles = this.sortJobProfiles(
@@ -700,23 +725,24 @@ export class JobProfileService {
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
         ...this.transofrmWhereForAllOrgs(where),
-        classifications: excludedDepartment
-          ? {
-              some: excludedDepartment
-                ? {
-                    classification: {
-                      employee_group_id: 'OEX',
-                    },
-                  }
-                : {
-                    NOT: {
+        classifications:
+          excludedDepartment !== undefined
+            ? {
+                some: excludedDepartment
+                  ? {
                       classification: {
                         employee_group_id: 'OEX',
                       },
-                    },
-                  }, // include all classifications if excludedDepartment is false
-            }
-          : undefined,
+                    }
+                  : {
+                      classification: {
+                        NOT: {
+                          employee_group_id: 'OEX',
+                        },
+                      },
+                    }, // include all classifications if excludedDepartment is false
+              }
+            : undefined,
       },
     });
   }
