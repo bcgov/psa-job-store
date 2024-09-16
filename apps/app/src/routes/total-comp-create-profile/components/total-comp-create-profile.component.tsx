@@ -580,11 +580,80 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     fields: employeeClassificationGroupsFields,
     append: appendEmployeeGroup,
     remove: removeEmployeeGroup,
+    update: updateEmployeeGroup,
   } = useFieldArray({
     control,
     name: 'employeeClassificationGroups',
   });
   // State to hold filtered classifications
+
+  const findFilterClassifications = (index: number) => {
+    const otherIndex = index ? 0 : 1;
+    const [other_id, other_employee_group_id, other_peoplesoft_id] = (
+      selectedEmployeeClassificationGroups.at(otherIndex)?.classification ?? ''
+    ).split('.');
+    const selectedClassification = selectedEmployeeClassificationGroups.at(index)?.classification;
+    const [id, employee_group_id, peoplesoft_id] = (selectedClassification ?? '').split('.');
+
+    const otherClassificationGroup = classificationsData?.classifications.find(
+      (cl) =>
+        other_id == cl.id && other_employee_group_id == cl.employee_group_id && other_peoplesoft_id == cl.peoplesoft_id,
+    );
+    const classificationGroup = classificationsData?.classifications.find(
+      (cl) => id == cl.id && employee_group_id == cl.employee_group_id && peoplesoft_id == cl.peoplesoft_id,
+    );
+
+    const otherClassifications = otherClassificationGroup
+      ? classificationsData?.classifications.filter(
+          (cl) =>
+            otherClassificationGroup?.employee_group_id != cl.employee_group_id &&
+            otherClassificationGroup?.code == cl.code,
+        )
+      : employee_group_id != null
+        ? classificationsData?.classifications.filter(
+            (cl) => employee_group_id != cl.employee_group_id && classificationGroup?.code == cl.code,
+          )
+        : classificationsData?.classifications.filter(
+            (cl) =>
+              selectedEmployeeClassificationGroups.at(index)?.employeeGroup != cl.employee_group_id &&
+              classificationGroup?.code == cl.code,
+          );
+    return otherClassifications;
+  };
+  const addGeneralEmployeeGroup = () => {
+    const index = selectedEmployeeClassificationGroups.length ? 1 : 0;
+    if (
+      selectedEmployeeClassificationGroups.length == 0 ||
+      selectedEmployeeClassificationGroups.at(0)?.classification == null
+    ) {
+      appendEmployeeGroup({
+        employeeGroup: null,
+        classification: null,
+      });
+      return;
+    }
+    const otherClassifications = findFilterClassifications(index);
+    switch (otherClassifications?.length) {
+      case 0:
+        message.warning(
+          `No classification found in a general classification group for the corresponding Schedule A Classification.`,
+        );
+        break;
+      case 1:
+        appendEmployeeGroup({
+          employeeGroup: otherClassifications[0].employee_group_id,
+          classification: `${otherClassifications[0].id}.${otherClassifications[0].employee_group_id}.${otherClassifications[0].peoplesoft_id}`,
+        });
+        break;
+      default: {
+        appendEmployeeGroup({
+          employeeGroup: null,
+          classification: null,
+        });
+      }
+    }
+  };
+
   const addScheduleA = () => {
     const selectedClassification = selectedEmployeeClassificationGroups.at(0)?.classification;
     const classification = classificationsData?.classifications.find(
@@ -989,13 +1058,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             selectedEmployeeClassificationGroups.at(0)?.classification?.split('.')[2] == cl.peoplesoft_id,
         );
         list =
-          selected?.employeeGroup == 'OEX'
-            ? classificationsData?.classifications.filter(
-                (c) => c.employee_group_id == classification?.employee_group_id && classification.code == c.code,
-              )
-            : classificationsData?.classifications.filter(
-                (c) => c.employee_group_id == selected?.employeeGroup && otherClassification?.code == c.code,
-              );
+          otherClassification == undefined
+            ? classificationsData?.classifications.filter((c) => c.employee_group_id == selected?.employeeGroup)
+            : selected?.employeeGroup == 'OEX'
+              ? classificationsData?.classifications.filter(
+                  (c) => c.employee_group_id == classification?.employee_group_id && classification.code == c.code,
+                )
+              : classificationsData?.classifications.filter(
+                  (c) => c.employee_group_id == selected?.employeeGroup && otherClassification?.code == c.code,
+                );
       } else {
         list = classificationsData?.classifications.filter((c) => c.employee_group_id == selected?.employeeGroup);
       }
@@ -1534,14 +1605,38 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   };
 
   // Handler for classification change
-  const handleClassificationChange = (newValue: string | null) => {
+  const handleClassificationChange = (newValue: string | null, index: number) => {
     // if this classification exists in reportToRelationship, remove it
     const [id, employee_group_id, peoplesoft_id] = (newValue ?? '').split('.');
     const classification = `${id}.${employee_group_id}.${peoplesoft_id}`;
     const currentReportToRelationship = getBasicDetailsValues('reportToRelationship');
     const filteredReportToRelationship = currentReportToRelationship.filter((r: string) => r !== classification);
     setValue('reportToRelationship', filteredReportToRelationship);
-    removeEmployeeGroup(1);
+    if (newValue != null && selectedEmployeeClassificationGroups.length > 1) {
+      const otherIndex = index ? 0 : 1;
+
+      const otherClassifications = findFilterClassifications(otherIndex);
+      switch (otherClassifications?.length) {
+        case 0:
+          removeEmployeeGroup(otherIndex);
+          break;
+        case 1:
+          updateEmployeeGroup(otherIndex, {
+            employeeGroup: otherClassifications[0].employee_group_id,
+            classification: `${otherClassifications[0].id}.${otherClassifications[0].employee_group_id}.${otherClassifications[0].peoplesoft_id}`,
+          });
+          break;
+        default: {
+          otherClassifications &&
+            otherClassifications?.length > 1 &&
+            updateEmployeeGroup(otherIndex, {
+              employeeGroup: otherClassifications[0].employee_group_id,
+              classification: null,
+            });
+        }
+      }
+      !findFilterClassifications(otherIndex)?.length && removeEmployeeGroup(otherIndex);
+    }
 
     // if (selectedClassificationId) {
     //   setIsModalVisible(true);
@@ -2403,6 +2498,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                               .filter((group) => {
                                                 if (
                                                   selectedEmployeeClassificationGroups.at(0)?.employeeGroup == 'OEX' &&
+                                                  selectedEmployeeClassificationGroups.at(0)?.classification &&
                                                   index == 1
                                                 ) {
                                                   const selectedOEX = selectedEmployeeClassificationGroups.at(0);
@@ -2441,7 +2537,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                                 onOk: () => {
                                                   removeEmployeeGroup(index);
 
-                                                  handleClassificationChange(null);
+                                                  handleClassificationChange(null, index);
                                                   triggerBasicDetailsValidation();
                                                 },
                                               });
@@ -2482,7 +2578,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                             showWarningModal(
                                               () => {
                                                 onChange(newValue);
-                                                handleClassificationChange(newValue);
+                                                handleClassificationChange(newValue, index);
                                               },
                                               () => {
                                                 // User canceled the change
@@ -2551,10 +2647,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           <Button
                             type="link"
                             onClick={() => {
-                              appendEmployeeGroup({
-                                employeeGroup: null,
-                                classification: null,
-                              });
+                              addGeneralEmployeeGroup();
                             }}
                             icon={<PlusOutlined />}
                             disabled={
