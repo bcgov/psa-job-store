@@ -426,16 +426,16 @@ export const TotalCompApprovedRequestPage = () => {
                         </Descriptions.Item>
                         <Descriptions.Item label="Reporting Manager" span={3}>
                           <PositionProfile
-                            positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
-                            positionProfile={data?.positionRequest?.excluded_manager_position}
+                            positionNumber={data?.positionRequest?.reports_to_position_id}
+                            positionProfile={data?.positionRequest?.reports_to_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
                           ></PositionProfile>
                         </Descriptions.Item>
                         <Descriptions.Item label="First Band Manager" span={3}>
                           <PositionProfile
-                            positionNumber={data?.positionRequest?.reports_to_position_id}
-                            positionProfile={data?.positionRequest?.reports_to_position}
+                            positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+                            positionProfile={data?.positionRequest?.excluded_manager_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
                           ></PositionProfile>
