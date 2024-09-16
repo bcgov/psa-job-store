@@ -127,35 +127,9 @@ export class UserService {
 
   async syncUsers() {
     const users = await this.keycloakService.getUsers();
-    const matches = await this.prisma.user.findMany({ where: { id: { in: users.map((u) => u.id) } } });
 
     for await (const user of users) {
-      // Get CRM Metadata
-      const crmMetadata = await this.getCrmMetadata(user.username);
-
-      // Get PeopleSoft Metadata
-      const { employee, metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
-
-      const match: User | undefined = matches.find((m) => m.id === user.id);
-      const orgChartMetadata = {
-        department_ids: match?.metadata?.org_chart?.department_ids
-          ? match?.metadata?.org_chart?.department_ids
-          : employee
-            ? [employee.DEPTID]
-            : [],
-      };
-
-      const metadata = {
-        crm: crmMetadata,
-        org_chart: orgChartMetadata,
-        peoplesoft: peoplesoftMetadata,
-      };
-
-      await this.upsertUser({
-        ...user,
-        deleted_at: null, // Undelete user if it is returned from Keycloak
-        metadata,
-      });
+      this.syncUser(user.id);
     }
 
     // Delete active users which do not appear in the list of keycloak users
