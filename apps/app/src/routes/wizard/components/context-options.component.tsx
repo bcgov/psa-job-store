@@ -60,10 +60,16 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
   const doAction = (key: string) => {
     switch (key) {
       case 'reset':
+        // todo: if the modal hasn't been shown, it will get shown on focus,
+        // (for example when user came back to edit form next session)
+        // this may be confusing
         handleReset(index);
         focusOnInput();
         break;
       case 'add':
+        // todo: if the modal hasn't been shown, it will get shown on focus,
+        // (for example when user came back to edit form next session)
+        // this may be confusing
         handleAddBack(index);
         focusOnInput();
         break;

@@ -33,8 +33,8 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'Submitted at',
       children: (
         <div>
-          {positionRequestData?.positionRequest?.approved_at &&
-            formatDateTime(positionRequestData?.positionRequest?.approved_at)}
+          {positionRequestData?.positionRequest?.submitted_at &&
+            formatDateTime(positionRequestData?.positionRequest?.submitted_at)}
         </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },

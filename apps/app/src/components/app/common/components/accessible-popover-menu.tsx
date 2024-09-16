@@ -85,6 +85,7 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
         role="button"
         aria-label={ariaLabel}
         data-testid="popover-trigger"
+        className="popover-trigger"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();

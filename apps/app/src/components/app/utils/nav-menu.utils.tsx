@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Typography } from 'antd';
 import { MenuItemGroupType, MenuItemType, SubMenuType } from 'antd/es/menu/hooks/useItems';
 import { Link } from 'react-router-dom';
@@ -9,23 +10,28 @@ type NavMenuGroupProps = {
   children: MenuItemType[];
   collapsed: boolean;
   icon?: React.ReactNode;
-  label: string;
+  label: any;
+  style?: React.CSSProperties;
+  className?: string;
 };
 type NavMenuItemProps = {
   key: string;
   icon?: React.ReactNode;
-  label: string;
+  label: any;
   style?: React.CSSProperties;
+  className?: string;
   title?: string;
 };
 type NavSubMenuProps = {
   key: string;
   children?: (MenuItemGroupType<MenuItemType> | MenuItemType)[];
   icon?: React.ReactNode;
-  label: string;
+  label: any;
+  style?: React.CSSProperties;
+  className?: string;
 };
 
-export const createMenuGroup = ({ key, children, collapsed, icon, label }: NavMenuGroupProps) => {
+export const createMenuGroup = ({ key, children, collapsed, icon, label, style, className }: NavMenuGroupProps) => {
   // When collapsed, render the menu items in a dropdown menu
   // When expanded, render the grouped menu items
 
@@ -34,6 +40,8 @@ export const createMenuGroup = ({ key, children, collapsed, icon, label }: NavMe
         key,
         icon,
         label,
+        style,
+        className,
         children: [
           {
             key: key,
@@ -44,6 +52,8 @@ export const createMenuGroup = ({ key, children, collapsed, icon, label }: NavMe
         ],
       })
     : {
+        style: style,
+        className: className,
         key: key,
         type: 'group' as const,
         label: <span style={{ userSelect: 'none' }}>{collapsed ? label : <Text strong>{label}</Text>}</span>,
@@ -63,9 +73,18 @@ export const createMenuItem = ({ key, icon, label, style, title }: NavMenuItemPr
   title,
 });
 
-export const createSubMenu = ({ key, children, icon, label }: NavSubMenuProps): SubMenuType<MenuItemType> => ({
+export const createSubMenu = ({
+  key,
+  children,
+  icon,
+  label,
+  style,
+  className,
+}: NavSubMenuProps): SubMenuType<MenuItemType> => ({
   key,
   children: children ?? [],
   icon,
   label,
+  style,
+  className,
 });
