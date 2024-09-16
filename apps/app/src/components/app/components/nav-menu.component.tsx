@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  FileAddOutlined,
   FileDoneOutlined,
   FileOutlined,
   FileProtectOutlined,
@@ -63,22 +64,67 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
 
   const menuItems = useMemo(
     () => [
-      ...(userCanAccess(auth.user, ['hiring-manager', 'total-compensation'])
-        ? [
-            {
-              key: 'create-button',
-              className: 'create-button',
-              icon: <></>,
-              label: <CreateButton collapsed={collapsed} />,
-              style: {
-                backgroundColor: '#0057ad',
-                color: 'white',
+      ...(userCanAccess(auth.user, ['hiring-manager']) || userCanAccess(auth.user, ['total-compensation'])
+        ? userCanAccess(auth.user, ['hiring-manager']) && userCanAccess(auth.user, ['total-compensation']) && collapsed
+          ? [
+              createMenuGroup({
+                className: 'create-menu-button',
+                key: 'create-menu',
+                collapsed,
+                icon: <FileAddOutlined />,
+                style: {
+                  backgroundColor: '#0057ad',
+                  color: 'white',
+                  margin: '0 5px',
+                },
+                label: 'Create',
+                children: [
+                  ...(userCanAccess(auth.user, ['hiring-manager'])
+                    ? [
+                        createMenuItem({
+                          key: '/requests/positions/create',
+                          icon: <PositionRequestOutlined aria-hidden />,
+                          label: 'New position',
+                        }),
+                      ]
+                    : []),
+                  ...(userCanAccess(auth.user, ['total-compensation'])
+                    ? [
+                        createMenuItem({
+                          key: '/job-profiles/manage/create',
+                          icon: <FileOutlined aria-hidden />,
+                          label: 'Job profile',
+                        }),
+                      ]
+                    : []),
+                ],
+              }),
+            ]
+          : [
+              // this is used to render create button only when one option is available
+              // (total-comp OR hiring-manager)
+              {
+                key: 'create-button',
+                className: 'create-button',
+                icon: <></>,
+                label: <CreateButton collapsed={collapsed} />,
+                title: userCanAccess(auth.user, ['hiring-manager']) ? 'Create new position' : 'Create job profile',
+                onFocus: () => {
+                  // redirect focus on the trigger, otherwise won't open the popover
+                  // get .popover-trigger that's inside .create-button and focus on it
+                  const popoverTrigger = document.querySelector('.create-button .popover-trigger');
+                  // focus on it
+                  (popoverTrigger as HTMLElement)?.focus();
+                },
+                style: {
+                  backgroundColor: '#0057ad',
+                  color: 'white',
+                },
               },
-            },
-          ]
+            ]
         : []),
       ...(userCanAccess(auth.user, ['user'])
-        ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden className="" />, label: 'Home' })]
+        ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden className="" />, label: 'Home', title: 'Home' })]
         : []),
       ...(userCanAccess(auth.user, ['user'])
         ? [
@@ -86,6 +132,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
               key: '/my-departments',
               icon: <PartitionOutlined aria-hidden />,
               label: 'My departments',
+              title: 'My departments',
             }),
           ]
         : []),
@@ -94,7 +141,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
             createMenuGroup({
               key: 'job-profiles',
               collapsed,
-              icon: <FileOutlined />,
+              icon: <FileOutlined aria-hidden />,
               label: 'Job Profiles',
               children: [
                 ...(userCanAccess(auth.user, ['user'])
@@ -119,7 +166,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                   ? [
                       createSubMenu({
                         key: '/job-profiles/manage',
-                        icon: <FileSettingOutlined />,
+                        icon: <FileSettingOutlined aria-hidden />,
                         label: 'Manage profiles',
                         children: [
                           createMenuItem({
@@ -324,7 +371,13 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         rootClassName="jobstore-side-menu-popup"
         inlineIndent={16}
         mode="inline"
-        selectedKeys={[location.pathname]}
+        // Do not highlight active state of these two menu items
+        // as they are action buttons
+        selectedKeys={
+          location.pathname == '/requests/positions/create' || location.pathname == '/job-profiles/manage/create'
+            ? []
+            : [location.pathname]
+        }
         theme="light"
         items={menuItems}
         openKeys={openKeys}

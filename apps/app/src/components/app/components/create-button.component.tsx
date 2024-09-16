@@ -1,10 +1,11 @@
 import { FileAddOutlined, FileOutlined } from '@ant-design/icons';
-import { Dropdown, Flex } from 'antd';
+import { Button, Flex, Menu } from 'antd';
 import { MenuItemType } from 'antd/es/menu/hooks/useItems';
 import { useMemo } from 'react';
 import { useAuth } from 'react-oidc-context';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { PositionRequestOutlined } from '../../icons/position-request-outlined';
+import AccessiblePopoverMenu from '../common/components/accessible-popover-menu';
 import { createMenuItem } from '../utils/nav-menu.utils';
 import { userCanAccess } from '../utils/user-has-roles.util';
 
@@ -63,34 +64,41 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
       ) : (
         <>
           {/* If current solution is found to lack accessibility, implement something like below */}
-          {/* <AccessiblePopoverMenu
+          <AccessiblePopoverMenu
             compact
             triggerButton={
-              // <Button tabIndex={-1} style={{}} icon={<FileAddOutlined aria-hidden />} type="primary">
-              //   Create
-              // </Button>
-              renderButton
+              <Button
+                tabIndex={-1}
+                style={{ width: '100%', height: '100%' }}
+                icon={<FileAddOutlined aria-hidden />}
+                type="primary"
+                title="Create"
+              >
+                {!collapsed ? 'Create' : ''}
+              </Button>
+              // renderButton
             }
+            placement={collapsed ? 'right' : 'bottom'}
             ariaLabel="Create new request"
             content={
-              <Menu selectedKeys={[]}>
+              <Menu selectedKeys={[]} className="create-menu" rootClassName="create-menu-root" inlineCollapsed={false}>
                 {userCanAccess(auth.user, ['hiring-manager']) && (
-                  <Menu.Item key="/requests/positions/create" icon={<PositionRequestOutlined />}>
+                  <Menu.Item key="/requests/positions/create" icon={<PositionRequestOutlined aria-hidden />} title="">
                     <Link to="/requests/positions/create">New position</Link>
                   </Menu.Item>
                 )}
                 {userCanAccess(auth.user, ['total-compensation']) && (
-                  <Menu.Item key="/job-profiles/manage/create" icon={<FileOutlined />}>
+                  <Menu.Item key="/job-profiles/manage/create" icon={<FileOutlined aria-hidden />} title="">
                     <Link to="/job-profiles/manage/create">Job profile</Link>
                   </Menu.Item>
                 )}
               </Menu>
             }
-          ></AccessiblePopoverMenu> */}
+          ></AccessiblePopoverMenu>
 
-          <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+          {/* <Dropdown menu={{ items: menuItems }} trigger={['click']}>
             {renderButton(menuItems)}
-          </Dropdown>
+          </Dropdown> */}
         </>
       )}
     </div>
