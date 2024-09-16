@@ -19,8 +19,6 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     { skip: !positionRequestData?.positionRequest?.additional_info?.work_location_id },
   );
 
-  // console.log('locationInfo: ', locationInfo);
-
   const submissionDetailsItems = [
     {
       key: 'submittedBy',
@@ -132,7 +130,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       children: (
         <PositionProfile
           positionNumber={positionRequestData?.positionRequest?.additional_info?.excluded_mgr_position_number}
-          positionProfile={positionRequestData?.positionRequest?.reports_to_position}
+          positionProfile={positionRequestData?.positionRequest?.excluded_manager_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>

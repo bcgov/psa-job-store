@@ -17,12 +17,12 @@ interface PositionProfileProps {
 
 const PositionProfile: React.FC<PositionProfileProps> = ({
   positionNumber,
-  positionProfile,
+  positionProfile = null,
   prefix,
   mode = 'full',
   loadingStyle = 'spinner',
   unOccupiedText,
-  orgChartData,
+  orgChartData = null,
 }) => {
   const {
     data: positionProfileData,
@@ -32,7 +32,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
     {
       positionNumber: positionNumber?.toString() ?? '',
     },
-    { skip: (positionNumber?.toString() ?? '') == '' },
+    { skip: (positionNumber?.toString() ?? '') == '' || orgChartData != null || positionProfile != null },
   );
   // const [getPositionProfile, { data: positionProfileData, isFetching, error: positionProfileError }] =
   //   useLazyGetPositionProfileQuery();
@@ -84,7 +84,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
     }
   }, [positionProfileData]);
 
-  const ministryName = organizationData?.organization?.name || '';
+  const ministryName = organizationData?.organization?.name || positionProfile?.ministry || '';
 
   if (positionProfileError || organizationError) {
     return <span>Could not get position information, please reload the page.</span>;
