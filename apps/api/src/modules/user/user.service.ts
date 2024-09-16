@@ -11,6 +11,16 @@ import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.input';
 
+enum PeoplesoftMetadataChanged {
+  POSITION = 'POSITION',
+  DEPARTMENT = 'DEPARTMENT',
+  ORGANIZATION = 'ORGANIZATION',
+}
+
+type PeoplesoftMetadataChangedType = PeoplesoftMetadataChanged[];
+
+const { POSITION, DEPARTMENT, ORGANIZATION } = PeoplesoftMetadataChanged;
+
 @Injectable()
 export class UserService {
   constructor(
@@ -42,6 +52,69 @@ export class UserService {
         position_id: employee ? employee.POSITION_NBR : null,
       },
     };
+  }
+
+  private getPeoplesoftMetadataChanges(
+    existingUser?: User,
+    peoplesoftMetadata?: Record<string, string>,
+  ): PeoplesoftMetadataChangedType {
+    const delta: PeoplesoftMetadataChangedType = [];
+
+    const { department_id: psDeptId, organization_id: psOrgId, position_id: psPosId } = peoplesoftMetadata ?? {};
+
+    if (existingUser == null) {
+      delta.push(POSITION, DEPARTMENT, ORGANIZATION);
+    } else {
+      {
+        const { metadata } = existingUser;
+        const { peoplesoft } = metadata ?? {};
+
+        const {
+          department_id: existingDeptId,
+          organization_id: existingOrgId,
+          position_id: existingPosId,
+        } = peoplesoft ?? {};
+
+        if (psPosId !== existingPosId) delta.push(POSITION);
+        if (psDeptId !== existingDeptId) delta.push(DEPARTMENT);
+        if (psOrgId !== existingOrgId) delta.push(ORGANIZATION);
+      }
+    }
+
+    return delta;
+  }
+
+  private getOrgChartAssignmentsForUser(existingUser?: User, peoplesoftMetadata?: Record<string, string>): string[] {
+    const {
+      department_id: psDeptId,
+      // organization_id: psOrgId,
+      // position_id: psPosId,
+    } = peoplesoftMetadata ?? {};
+
+    if (existingUser != null) {
+      const { metadata } = existingUser;
+      const { org_chart } = metadata ?? {};
+      const { department_ids } = org_chart ?? { department_ids: [] };
+
+      const delta = this.getPeoplesoftMetadataChanges(existingUser, peoplesoftMetadata);
+
+      // If ORGANIZATION or POSITION changes, reset assignments
+      if (delta.includes(ORGANIZATION) || delta.includes(POSITION)) {
+        return [psDeptId];
+      }
+
+      // If ORGANIZATION stays the same, department changes, position stays the same
+      if (!delta.includes(ORGANIZATION) && delta.includes(DEPARTMENT) && !delta.includes(POSITION)) {
+        // Return existing department_ids, and add the new department if necessary
+        return Array.from(new Set(department_ids as string[]).add(psDeptId));
+      }
+
+      // All other cases, continue
+      return department_ids;
+    }
+
+    // All users can access their base department
+    return psDeptId != null ? [psDeptId] : [];
   }
 
   async assignUserRoles(id: string, roles: string[]) {
@@ -100,16 +173,12 @@ export class UserService {
     const crmMetadata = await this.getCrmMetadata(user.username);
 
     // Get Peoplesoft Metadata
-    const { employee, metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
+    const { metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
 
     const existingUser: User | undefined = await this.getUser({ where: { id } });
 
     const orgChartMetadata = {
-      department_ids: existingUser?.metadata?.org_chart?.department_ids
-        ? existingUser?.metadata?.org_chart?.department_ids
-        : employee
-          ? [employee.DEPTID]
-          : [],
+      department_ids: this.getOrgChartAssignmentsForUser(existingUser, peoplesoftMetadata),
     };
 
     const metadata = {
