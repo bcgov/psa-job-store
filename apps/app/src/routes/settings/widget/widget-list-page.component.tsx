@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
 import ContentWrapper from '../../../components/content-wrapper.component';
 import { DataList } from '../../../components/shared/data-list/data-list.component';
+import { FilterOperator } from '../../../components/shared/data-list/lib/prisma-filter/common/filter-operator.enum';
 import { useLazyGetDepartmentsForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
 
 export const WidgetListPage = () => {
@@ -15,6 +16,20 @@ export const WidgetListPage = () => {
       <ContentWrapper>
         <DataList
           trigger={trigger}
+          filterProps={{
+            searchProps: {
+              fields: [
+                {
+                  field: 'id',
+                  operator: FilterOperator.StringIContains,
+                },
+                {
+                  field: 'name',
+                  operator: FilterOperator.StringIContains,
+                },
+              ],
+            },
+          }}
           tableProps={{
             columns: [
               {
