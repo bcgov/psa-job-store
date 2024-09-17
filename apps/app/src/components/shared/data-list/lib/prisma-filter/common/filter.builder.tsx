@@ -25,12 +25,10 @@ export class FilterBuilder<T = Record<string, unknown>> {
     if (filter != null) {
       const parts = filter.split(',');
 
-      console.log('parts: ', parts);
       parts.forEach((part) => {
         const [field, operator, encodedValue] = part.split(/__|=/);
         const value = decodeURIComponent(encodedValue);
 
-        console.log('value: ', value);
         this.addFilter({ field: field as keyof T & string, operator: operator as FilterOperator, value });
       });
     }
@@ -68,12 +66,6 @@ export class FilterBuilder<T = Record<string, unknown>> {
 
     const normalizedValue = this.normalizeFilterValue(operator, value);
 
-    console.log('normalizedValue: ', normalizedValue);
-
-    // If filter exists (field, operator match)
-    //  Update existing value
-    // else
-    //  Add new filter
     const matchIndex = this.filter.filter.findIndex((f) => f.field === field && f.operator === operator);
     if (matchIndex != -1) {
       this.filter.filter[matchIndex].value = normalizedValue;
@@ -84,13 +76,36 @@ export class FilterBuilder<T = Record<string, unknown>> {
     return this;
   }
 
-  public removeFilter({ field, operator }: FieldOperator<T>): this {
+  public removeFilter({ field, operator, value }: FieldOperator<T> & { value?: unknown }): this {
     if (this.filter.filter != null) {
-      // Remove filter matching the provided field, operator
-      this.filter.filter = this.filter.filter.filter((f) => f.field !== field && f.operator !== operator);
+      const filterIndex = this.filter.filter.findIndex(
+        (filter) => filter.field === field && filter.operator === operator,
+      );
+
+      if (filterIndex >= 0) {
+        if (Array.isArray(this.filter.filter[filterIndex].value) && value != null) {
+          const filteredData = (this.filter.filter[filterIndex].value as []).filter((v) => v !== value);
+
+          if ((filteredData ?? []).length > 0) {
+            // If filteredData.length > 0, update filter value
+            this.addFilter({
+              field,
+              operator,
+              value: (this.filter.filter[filterIndex].value as []).filter((v) => v !== value),
+            });
+          } else {
+            // If filteredData.length === 0, remove filter completely
+            this.removeFilter({ field, operator });
+          }
+        } else {
+          this.filter.filter = this.filter.filter.filter(
+            (filter) => filter.field !== field && filter.operator !== operator,
+          );
+        }
+      }
 
       // If the filter array is empty, remove it
-      if (this.filter.filter.length === 0) {
+      if ((this.filter.filter ?? []).length === 0) {
         this.clearFilters();
       }
     }
@@ -259,7 +274,6 @@ export class FilterBuilder<T = Record<string, unknown>> {
     }
 
     if ([FilterOperator.StringIn, FilterOperator.StringIIn].includes(operator as FilterOperator)) {
-      console.log('zzValue: ', value);
       return (value as string).split(',');
     }
 

@@ -1,4 +1,5 @@
-import { Card, Col, Input, Row } from 'antd';
+import { SyncOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Input, Row, Tag } from 'antd';
 import { useMemo } from 'react';
 import { FieldOperator } from '../../lib/prisma-filter/common/field-operator.type';
 import { FilterBuilder } from '../../lib/prisma-filter/common/filter.builder';
@@ -29,6 +30,11 @@ export const DataFilter = ({ filterBuilder, filterProps, searchProps }: DataFilt
       filterBuilder.clearSearchTerm();
     }
 
+    filterBuilder.apply();
+  };
+
+  const handleClearFilters = () => {
+    filterBuilder.clearFilters();
     filterBuilder.apply();
   };
 
@@ -63,6 +69,67 @@ export const DataFilter = ({ filterBuilder, filterProps, searchProps }: DataFilt
           })}
         </Col>
       </Row>
+      {/* Applied Filters */}
+      {(filter.filter ?? []).length > 0 && (
+        <Row>
+          <Col span={24}>
+            <span
+              style={{
+                fontWeight: 500,
+                margin: '8px',
+                marginLeft: 0,
+                paddingRight: '8px',
+                borderRight: '2px solid rgba(0, 0, 0, 0.06)',
+                marginRight: '10px',
+              }}
+            >
+              Applied filters
+            </span>
+            <Button
+              onClick={handleClearFilters}
+              type="link"
+              style={{ padding: '0', fontWeight: 400 }}
+              data-cy="clear-filters-button"
+            >
+              Clear all filters
+            </Button>
+          </Col>
+          <Col span={24}>
+            {/* Tags */}
+            {(filter.filter ?? []).map((filterData) => {
+              const match = filterProps?.find((filter) => filter.field === filterData.field);
+
+              return (
+                <>
+                  {[
+                    ...(Array.isArray(filterData.value)
+                      ? filterData.value
+                      : filterData.value != null
+                        ? [filterData.value]
+                        : []),
+                  ].map((v) => {
+                    return (
+                      <Tag
+                        onClose={() => {
+                          const { field, operator } = filterData;
+
+                          filterBuilder.removeFilter({ field, operator, value: v });
+                          filterBuilder.apply();
+                        }}
+                        key={v}
+                        closable
+                        icon={match?.loading === true && <SyncOutlined spin />}
+                      >
+                        {match?.options.find((option) => option.value === v)?.label ?? ''}
+                      </Tag>
+                    );
+                  })}
+                </>
+              );
+            })}
+          </Col>
+        </Row>
+      )}
     </Card>
   );
 };
