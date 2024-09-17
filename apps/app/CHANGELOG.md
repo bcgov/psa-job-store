@@ -1,5 +1,11 @@
 # app
 
+## 0.11.1
+
+### Patch Changes
+
+- [#775](https://github.com/bcgov/psa-job-store/pull/775) [`6e8433b835a9b2ecffaef13f49dad9e5620d4a63`](https://github.com/bcgov/psa-job-store/commit/6e8433b835a9b2ecffaef13f49dad9e5620d4a63) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-968 Create button is not keyboard accessible
+
 ## 0.11.0
 
 ### Minor Changes
