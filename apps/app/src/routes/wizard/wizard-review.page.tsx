@@ -200,13 +200,15 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
         ></WizardSteps>
 
         <WizardContentWrapper>
-          <JobProfileWithDiff
-            positionRequestData={{ positionRequest: positionRequestData }}
-            showBasicInfo={false}
-            controlBarStyle={{ background: 'white' }}
-            rowProps={{ justify: 'center' }}
-            colProps={{ sm: 24, md: 24, lg: 24, xxl: 18 }}
-          />
+          <div style={{ paddingTop: '24px' }}>
+            <JobProfileWithDiff
+              positionRequestData={{ positionRequest: positionRequestData }}
+              showBasicInfo={false}
+              controlBarStyle={{ background: 'white' }}
+              rowProps={{ justify: 'center' }}
+              colProps={{ sm: 24, md: 24, lg: 24, xxl: 18 }}
+            />
+          </div>
           <Row {...{ justify: 'center' }}>
             <Col {...{ sm: 24, md: 24, lg: 24, xxl: 18 }}>
               <OtherDetails
