@@ -49,8 +49,11 @@ class RequirementWithoutReadOnly {
   @Field(() => [JobProfileStream])
   streams: JobProfileStream[];
 
-  @Field(() => [Classification], { nullable: true })
-  classification?: Classification[];
+  @Field(() => Classification, { nullable: true })
+  classification?: {
+    id: string;
+    employee_group_id: string;
+  };
 
   @Field(() => Organization, { nullable: true })
   organization?: {

@@ -2284,7 +2284,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
     // NEW
 
-    // console.log('NEW - adding automatically');
+    // console.log('NEW - adding professional registrations automatically');
 
     // Find items with non-null classification - these should be added automatically based on classification selection
     const itemsWithClassification =
@@ -2292,7 +2292,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         (comp: any) => comp.classification !== null,
       );
 
-    // console.log('data.requirementsWithoutReadOnly: ', useProfessionalRequirementsPickerData.requirementsWithoutReadOnly);
+    // console.log(
+    //   'data.requirementsWithoutReadOnly: ',
+    //   useProfessionalRequirementsPickerData.requirementsWithoutReadOnly,
+    // );
     // console.log('itemsWithClassification: ', itemsWithClassification);
 
     // Add items with non-null classification to the fields array
@@ -3548,7 +3551,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                                   <Col flex="none">
                                     <ContextOptionsReadonly
-                                      isReadonly={field.tc_is_readonly ?? false}
+                                      isReadonly={
+                                        (field.tc_is_readonly &&
+                                          itemInPickerData(
+                                            field.text?.toString() ?? '',
+                                            'jobProfileMinimumRequirements',
+                                          )) ??
+                                        false
+                                      }
                                       onEdit={() => {
                                         updateEducationAndWorkExperience(index, {
                                           ...educationAndWorkExperienceFields[index],
@@ -4030,7 +4040,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                                   <Col flex="none">
                                     <ContextOptionsReadonly
-                                      isReadonly={field.tc_is_readonly ?? false}
+                                      isReadonly={
+                                        (field.tc_is_readonly &&
+                                          itemInPickerData(
+                                            field.text?.toString() ?? '',
+                                            'professionalRegistrationRequirements',
+                                          )) ??
+                                        false
+                                      }
                                       onEdit={() => {
                                         updateProfessionalRegistrationRequirement(index, {
                                           ...professionalRegistrationRequirementsFields[index],
@@ -4160,7 +4177,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                                   <Col flex="none">
                                     <ContextOptionsReadonly
-                                      isReadonly={field.tc_is_readonly ?? false}
+                                      isReadonly={
+                                        (field.tc_is_readonly &&
+                                          itemInPickerData(field.text?.toString() ?? '', 'preferences')) ??
+                                        false
+                                      }
                                       onEdit={() => {
                                         updatePreference(index, {
                                           ...preferencesFields[index],
@@ -4285,7 +4306,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                                   <Col flex="none">
                                     <ContextOptionsReadonly
-                                      isReadonly={field.tc_is_readonly ?? false}
+                                      isReadonly={
+                                        (field.tc_is_readonly &&
+                                          itemInPickerData(field.text?.toString() ?? '', 'knowledgeSkillsAbilities')) ??
+                                        false
+                                      }
                                       onEdit={() => {
                                         updateKnowledgeSkillAbility(index, {
                                           ...knowledgeSkillsAbilitiesFields[index],

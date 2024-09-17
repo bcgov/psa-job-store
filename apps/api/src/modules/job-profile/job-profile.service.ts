@@ -2133,8 +2133,8 @@ export class JobProfileService {
         streams: [],
         classification:
           classifications[0].id && classifications[0].employee_group_id
-            ? [{ id: classifications[0].id, employee_group_id: classifications[0].employee_group_id }]
-            : [],
+            ? { id: classifications[0].id, employee_group_id: classifications[0].employee_group_id }
+            : null,
         organization: null,
         tc_is_readonly: true, // Assuming these are read-only
       }));
