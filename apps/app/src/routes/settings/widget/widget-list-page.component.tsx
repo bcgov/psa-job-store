@@ -5,9 +5,15 @@ import { PageHeader } from '../../../components/app/page-header.component';
 import ContentWrapper from '../../../components/content-wrapper.component';
 import { DataList } from '../../../components/shared/data-list/data-list.component';
 import { FilterOperator } from '../../../components/shared/data-list/lib/prisma-filter/common/filter-operator.enum';
-import { useLazyGetDepartmentsForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
+import {
+  useGetOrganizationsPicklistForSettingsQuery,
+  useLazyGetDepartmentsForSettingsQuery,
+} from '../../../redux/services/graphql-api/settings/settings.api';
 
 export const WidgetListPage = () => {
+  const { data: organizationsData, isFetching: organizationsDataIsLoading } =
+    useGetOrganizationsPicklistForSettingsQuery();
+
   const [trigger, { data: departmentData, isFetching: departmentDataIsLoading }] =
     useLazyGetDepartmentsForSettingsQuery();
   return (
@@ -17,6 +23,34 @@ export const WidgetListPage = () => {
         <DataList
           trigger={trigger}
           filterProps={{
+            filterProps: [
+              {
+                type: 'select',
+                mode: 'multi-value',
+                field: 'organization_id',
+                loading: organizationsDataIsLoading,
+                operator: FilterOperator.StringIn,
+                options: (organizationsData?.organizations ?? []).map((o) => ({ label: o.name, value: o.id })),
+                placeholder: 'Ministries',
+              },
+              {
+                type: 'select',
+                mode: 'single-value',
+                field: 'effective_status',
+                operator: FilterOperator.StringEquals,
+                options: [
+                  {
+                    label: 'Active',
+                    value: 'Active',
+                  },
+                  {
+                    label: 'Inactive',
+                    value: 'Inactive',
+                  },
+                ],
+                placeholder: 'Status',
+              },
+            ],
             searchProps: {
               fields: [
                 {

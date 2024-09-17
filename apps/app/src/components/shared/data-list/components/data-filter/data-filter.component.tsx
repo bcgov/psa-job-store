@@ -2,6 +2,8 @@ import { Card, Col, Input, Row } from 'antd';
 import { useMemo } from 'react';
 import { FieldOperator } from '../../lib/prisma-filter/common/field-operator.type';
 import { FilterBuilder } from '../../lib/prisma-filter/common/filter.builder';
+import { Filter } from './components';
+import { SelectFilter } from './components/select-filter.component';
 
 const { Search } = Input;
 
@@ -11,10 +13,11 @@ export interface DataFilterSearchProps {
 
 export interface DataFilterProps {
   filterBuilder: FilterBuilder;
+  filterProps?: Filter[];
   searchProps?: DataFilterSearchProps;
 }
 
-export const DataFilter = ({ filterBuilder, searchProps }: DataFilterProps) => {
+export const DataFilter = ({ filterBuilder, filterProps, searchProps }: DataFilterProps) => {
   const filter = useMemo(() => filterBuilder.toFilter(), [filterBuilder]);
 
   const handleSearch = (term: string) => {
@@ -44,7 +47,21 @@ export const DataFilter = ({ filterBuilder, searchProps }: DataFilterProps) => {
             />
           )}
         </Col>
-        <Col xs={24} md={12} style={{ display: 'flex', justifyContent: 'end' }}></Col>
+        <Col xs={24} md={12} style={{ display: 'flex', justifyContent: 'end' }}>
+          {filterProps?.map(({ type, field, ...props }) => {
+            if (type === 'select') {
+              const { mode, ...rest } = props;
+              return (
+                <Col key={field}>
+                  {type === 'select' && (
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    <SelectFilter {...rest} field={field} filterBuilder={filterBuilder} mode={mode as any} />
+                  )}
+                </Col>
+              );
+            }
+          })}
+        </Col>
       </Row>
     </Card>
   );
