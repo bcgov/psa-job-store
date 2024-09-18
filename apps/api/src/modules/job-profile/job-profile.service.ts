@@ -29,6 +29,7 @@ export class JobProfileService {
     // if searchConditions were provided, do a "dumb" search instead of elastic search
     let searchResultIds = null;
     if (!searchConditions) searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+
     const currentJobProfiles =
       state == 'PUBLISHED'
         ? await this.prisma.currentJobProfile.findMany({
@@ -36,19 +37,16 @@ export class JobProfileService {
             where: { ...(searchResultIds != null && { id: { in: searchResultIds } }) },
           })
         : undefined;
-    // const a = await this.prisma.jobProfile.findMany({
-    //   where: {
-    //     is_archived: false,
 
-    //     id: 47,
-    //     version: 2,
+    // console.log(
+    //   'currentJobProfiles: ',
+    //   JSON.stringify(
+    //     currentJobProfiles.map((profile) => {
+    //       return profile.id;
+    //     }),
+    //   ),
+    // );
 
-    //     ...(searchConditions != null && searchConditions),
-    //     state,
-    //   },
-    //   orderBy: [...(args.orderBy || []), { title: 'asc' }],
-    // });
-    // console.log(a);
     return this.prisma.jobProfile.findMany({
       where: {
         is_archived: include_archived,
@@ -393,8 +391,11 @@ export class JobProfileService {
         department?.metadata.is_statutorily_excluded,
       );
 
+      // output all profiles ids:
+      // allJobProfiles is an array
+
       // Sort the job profiles based on the provided sorting parameters
-      const sortedJobProfiles = this.sortJobProfiles(
+      const sortedJobProfiles = await this.sortJobProfiles(
         allJobProfiles,
         sortByClassificationName,
         sortByJobFamily,
@@ -415,7 +416,15 @@ export class JobProfileService {
         const newSkip = (pageNumber - 1) * args.take;
 
         // Fetch the job profiles for the calculated page
-        jobProfiles = await this.getJobProfilesWithSearch(search, where, { ...args, skip: newSkip });
+        jobProfiles = await this.getJobProfilesWithSearch(
+          search,
+          where,
+          { ...args, skip: newSkip },
+          undefined,
+          undefined,
+          undefined,
+          department?.metadata.is_statutorily_excluded,
+        );
       } else {
         // If the selected profile is not found, return an empty array
         jobProfiles = [];
