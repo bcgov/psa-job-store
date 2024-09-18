@@ -655,25 +655,21 @@ export class JobProfileService {
       where: { id: currentJobProfile.id },
       include: {
         classifications: {
-          where: includesWhere1,
           include: {
             classification: true,
           },
         },
         jobFamilies: {
-          where: includesWhere2,
           include: {
             jobFamily: true,
           },
         },
         organizations: {
-          where: includesWhere1,
           include: {
             organization: true,
           },
         },
         scopes: {
-          where: includesWhere1,
           include: {
             scope: true,
           },
@@ -681,14 +677,12 @@ export class JobProfileService {
         role: true,
         role_type: true,
         streams: {
-          where: includesWhere2,
           include: {
             stream: true,
           },
         },
 
         behavioural_competencies: {
-          where: includesWhere1,
           include: {
             behavioural_competency: true,
           },

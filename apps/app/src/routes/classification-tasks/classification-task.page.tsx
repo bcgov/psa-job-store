@@ -2,12 +2,27 @@
 import {
   CheckCircleFilled,
   CloseSquareFilled,
+  CloseSquareOutlined,
   CopyOutlined,
   EllipsisOutlined,
   ExclamationCircleFilled,
   LinkOutlined,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Divider, Dropdown, Result, Row, Space, Tabs, Typography, message } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Divider,
+  Dropdown,
+  Result,
+  Row,
+  Space,
+  Tabs,
+  Typography,
+  message,
+} from 'antd';
 import { MenuProps } from 'antd/es/menu';
 import copy from 'copy-to-clipboard';
 import { cloneElement, useState } from 'react';
@@ -60,6 +75,7 @@ export const ClassificationTaskPage = () => {
     ACTION_REQUIRED: { icon: <CloseSquareFilled />, color: '#FF4D4F', text: 'Action Required' },
     COMPLETED: { icon: <CheckCircleFilled />, color: '#237804', text: 'Completed' },
     VERIFICATION: { icon: <CheckCircleFilled />, color: '#722ED1', text: 'Review' },
+    CANCELLED: { icon: <CloseSquareOutlined />, color: '#444', text: 'Cancelled' },
   };
 
   const StatusIcon = ({ status }: any) => {
@@ -126,7 +142,7 @@ export const ClassificationTaskPage = () => {
               <div className="result-extra-content">
                 <Row justify="center">
                   <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-                    {currentStatus != 'COMPLETED' && <NextSteps />}
+                    {!['COMPLETED', 'CANCELLED'].includes(currentStatus ?? '') && <NextSteps />}
                     {currentStatus == 'REVIEW' && (
                       <Alert
                         style={{ marginBottom: '1rem' }}
@@ -160,22 +176,57 @@ export const ClassificationTaskPage = () => {
                         showIcon
                       />
                     )}
-                    <Card title="Actions" style={{ marginBottom: '1rem' }}>
-                      <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                        <div>
-                          <strong>Download job profile</strong>
-                          <p>Attached copy of the job profile that needs review.</p>
-                          {/* <Button onClick={handleDownload}>Download job profile</Button> */}
-                          <DownloadJobProfileComponent
-                            positionRequest={data?.positionRequest}
-                            jobProfile={data?.positionRequest?.profile_json}
+                    <Card style={{ marginBottom: '1rem' }} title="Contact" bordered={false}>
+                      <p>Reach out to the hiring manager or reporting managers for feedback.</p>
+                      <Descriptions bordered column={2}>
+                        <Descriptions.Item label="Hiring Manager" span={3}>
+                          {data?.positionRequest?.user?.name} -{' '}
+                          <a href={`mailto:${data?.positionRequest?.user?.email}`}>
+                            {data?.positionRequest?.user?.email}
+                          </a>
+                          <CopyOutlined
+                            onClick={() => {
+                              navigator.clipboard.writeText(data?.positionRequest?.user?.email || '');
+                              message.success('Email copied to clipboard');
+                            }}
+                            style={{ cursor: 'pointer' }}
                           />
-                          <Button type="link" onClick={() => setActiveTabKey('3')}>
-                            View job profile
-                          </Button>
-                        </div>
-                        <Divider />
-                        {/* <div>
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Reporting Manager" span={3}>
+                          <PositionProfile
+                            positionNumber={data?.positionRequest?.reports_to_position_id}
+                            positionProfile={data?.positionRequest?.reports_to_position}
+                            orgChartData={data?.positionRequest?.orgchart_json}
+                            mode="compact"
+                          ></PositionProfile>
+                        </Descriptions.Item>
+                        <Descriptions.Item label="First Band Manager" span={3}>
+                          <PositionProfile
+                            positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+                            positionProfile={data?.positionRequest?.excluded_manager_position}
+                            orgChartData={data?.positionRequest?.orgchart_json}
+                            mode="compact"
+                          ></PositionProfile>
+                        </Descriptions.Item>
+                      </Descriptions>
+                    </Card>
+                    {currentStatus == 'COMPLETED' && (
+                      <Card title="Actions" style={{ marginBottom: '1rem' }}>
+                        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                          <div>
+                            <strong>Download job profile</strong>
+                            <p>Attached copy of the job profile that needs review.</p>
+                            {/* <Button onClick={handleDownload}>Download job profile</Button> */}
+                            <DownloadJobProfileComponent
+                              positionRequest={data?.positionRequest}
+                              jobProfile={data?.positionRequest?.profile_json}
+                            />
+                            <Button type="link" onClick={() => setActiveTabKey('3')}>
+                              View job profile
+                            </Button>
+                          </div>
+                          <Divider />
+                          {/* <div>
                           <strong>Download organization chart</strong>
                           <p>
                             Attached copy of the org chart that shows the topic position and the job titles, position
@@ -185,26 +236,27 @@ export const ClassificationTaskPage = () => {
                           <Button type="link">View org chart</Button>
                         </div>
                         <Divider /> */}
-                        <div>
-                          <strong>Invite others to review</strong>
-                          <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
-                          <Space>
-                            <Text>{`${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`}</Text>
-                            <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
-                              Copy URL
-                            </Button>
-                          </Space>
-                        </div>
-                        <Divider />
-                        <div>
-                          <Text strong>View all tasks</Text>
-                          <p>View all tasks that you have been assigned to.</p>
-                          <Link to="/">
-                            <Button>Go to My tasks</Button>
-                          </Link>
-                        </div>
-                      </Space>
-                    </Card>
+                          <div>
+                            <strong>Invite others to review</strong>
+                            <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
+                            <Space>
+                              <Text>{`${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`}</Text>
+                              <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
+                                Copy URL
+                              </Button>
+                            </Space>
+                          </div>
+                          <Divider />
+                          <div>
+                            <Text strong>View all tasks</Text>
+                            <p>View all tasks that you have been assigned to.</p>
+                            <Link to="/">
+                              <Button>Go to My tasks</Button>
+                            </Link>
+                          </div>
+                        </Space>
+                      </Card>
+                    )}
                   </Col>
                 </Row>
               </div>,
