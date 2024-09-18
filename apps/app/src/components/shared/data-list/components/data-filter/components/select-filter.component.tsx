@@ -18,7 +18,7 @@ type SingleSelectFilterProps = {
 type MultiSelectFilterProps = {
   mode: 'multi-value';
   field: string;
-  operator: FilterOperator.StringIn;
+  operator: FilterOperator.StringIn | FilterOperator.StringListHasSome;
   filterBuilder: FilterBuilder;
   loading?: boolean;
   options: SelectFilterOption[];

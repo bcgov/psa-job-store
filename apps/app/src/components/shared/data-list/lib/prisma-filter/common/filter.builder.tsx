@@ -252,6 +252,10 @@ export class FilterBuilder<T = Record<string, unknown>> {
           [this.normalizeFilterOperator(operator)]: normalizedValue,
           mode: operator.endsWith('.i') ? 'insensitive' : 'default',
         };
+      case FilterOperator.StringListHasSome:
+        return {
+          [this.normalizeFilterOperator(operator)]: normalizedValue,
+        };
       default:
         throw new Error(`generateWhereValue: ${operator} is not a valid filter operator`);
     }
@@ -268,6 +272,8 @@ export class FilterBuilder<T = Record<string, unknown>> {
       case FilterOperator.StringIn:
       case FilterOperator.StringIIn:
         return 'in';
+      case FilterOperator.StringListHasSome:
+        return 'hasSome';
       default:
         throw new Error(`normalizeFilterOperator: ${operator} is not a valid filter operator`);
     }
@@ -279,7 +285,11 @@ export class FilterBuilder<T = Record<string, unknown>> {
     value: any,
   ): string | number | boolean | string[] | number[] | boolean[] | (string | number | boolean)[] | null {
     if (Array.isArray(value)) {
-      if ([FilterOperator.StringIn, FilterOperator.StringIIn].includes(operator as FilterOperator)) {
+      if (
+        [FilterOperator.StringIn, FilterOperator.StringIIn, FilterOperator.StringListHasSome].includes(
+          operator as FilterOperator,
+        )
+      ) {
         return value;
       }
     }
@@ -292,7 +302,11 @@ export class FilterBuilder<T = Record<string, unknown>> {
       return value;
     }
 
-    if ([FilterOperator.StringIn, FilterOperator.StringIIn].includes(operator as FilterOperator)) {
+    if (
+      [FilterOperator.StringIn, FilterOperator.StringIIn, FilterOperator.StringListHasSome].includes(
+        operator as FilterOperator,
+      )
+    ) {
       return (value as string).split(',');
     }
 
