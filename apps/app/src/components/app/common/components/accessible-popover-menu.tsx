@@ -100,7 +100,8 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
   );
 
   const ContentWrapper = forwardRef<HTMLDivElement, { children: ReactNode }>(({ children, ...props }, ref) => (
-    <div {...props} ref={ref}>
+    // onClick prevents menu from staying open when clicking on the menu items
+    <div {...props} ref={ref} onClick={() => setVisible(false)}>
       {children}
     </div>
   ));

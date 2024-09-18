@@ -460,25 +460,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   }));
   const prevProfessionsData = useRef(professionsData);
 
-  // const employeeClassificationGroupsData = [
-  //   { employeeGroup: 'GEU', classification: '621126.GEU.BCSET' },
-  //   { employeeGroup: 'GEU', classification: '621128.GEU.BCSET' },
-  // ];
-
-  const employeeClassificationGroupsData = jobProfileData?.jobProfile.classifications?.map((c) => ({
-    employeeGroup: c.classification.employee_group_id,
-    classification: `${c.classification.id}.${c.classification.employee_group_id}.${c.classification.peoplesoft_id}`,
-  }));
   const basicUseFormReturn = useForm<BasicDetailsValidationModel>({
     resolver: classValidatorResolver(BasicDetailsValidationModel),
     defaultValues: {
       title: { text: '' } as TitleField,
       jobStoreNumber: '',
       originalJobStoreNumber: '',
-      employeeClassificationGroups:
-        !employeeClassificationGroupsData || employeeClassificationGroupsData?.length == 0
-          ? [{ employeeGroup: null, classification: null }]
-          : employeeClassificationGroupsData,
+      employeeClassificationGroups: [{ employeeGroup: null, classification: null }],
       jobRole: null as number | null,
       professions:
         !professionsData || professionsData?.length == 0
@@ -1650,21 +1638,34 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // if all reports-to is checked, this maintains a correct list of all values in response to changes in classifications
     if (allReportsTo) handleSelectAllReportTo(allReportsTo);
 
+    // This block handles the logic when a new classification value is selected and there are multiple classification groups
     if (newValue != null && selectedEmployeeClassificationGroups.length > 1) {
+      // Determine the index of the other classification group
+      // This assumes there are only two groups (index 0 and 1)
       const otherIndex = index ? 0 : 1;
 
+      // Find classifications for the other group that match the current filter criteria
+      // This likely uses a function that filters classifications based on some criteria
       const otherClassifications = findFilterClassifications(otherIndex);
+
+      // Handle different scenarios based on the number of matching classifications found
       switch (otherClassifications?.length) {
         case 0:
+          // If no matching classifications, remove the other employee group
+          // This helps maintain consistency when no valid classifications are available
           removeEmployeeGroup(otherIndex);
           break;
         case 1:
+          // If exactly one matching classification, update the other group with this classification
+          // This ensures that when there's only one valid option, it's automatically selected
           updateEmployeeGroup(otherIndex, {
             employeeGroup: otherClassifications[0].employee_group_id,
             classification: `${otherClassifications[0].id}.${otherClassifications[0].employee_group_id}.${otherClassifications[0].peoplesoft_id}`,
           });
           break;
         default: {
+          // If multiple matching classifications, update the other group with the first matching employee group and null classification
+          // This keeps the employee group but clears the specific classification when multiple options are available
           otherClassifications &&
             otherClassifications?.length > 1 &&
             updateEmployeeGroup(otherIndex, {
@@ -1673,6 +1674,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             });
         }
       }
+
+      // If no matching classifications are found after the update, remove the other employee group
+      // This is a final check to ensure consistency, possibly redundant with the case 0 above
       !findFilterClassifications(otherIndex)?.length && removeEmployeeGroup(otherIndex);
     }
 
