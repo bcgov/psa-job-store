@@ -40,7 +40,7 @@ import { JobProfileService } from '../job-profile/job-profile.service';
 import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
-import { PositionRequestCreateInputWithoutUser } from './position-request.resolver';
+import { PositionRequestCreateInputWithoutUser, RequestingFeature } from './position-request.resolver';
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -406,7 +406,7 @@ export class PositionRequestApiService {
     { search, where, ...args }: ExtendedFindManyPositionRequestWithSearch,
     userId: string,
     userRoles: string[] = [],
-    requestingFeature?: string | null,
+    requestingFeature?: RequestingFeature | null,
   ) {
     let searchConditions = {};
     if (search) {
@@ -448,7 +448,7 @@ export class PositionRequestApiService {
         ...whereConditions,
         status: { not: { equals: 'DRAFT' } },
       };
-    } else if (requestingFeature === 'myPositions') {
+    } else if (requestingFeature === 'myPositions' || !requestingFeature) {
       // Default behavior for other users - get position requests for the current user only
       whereConditions = {
         ...whereConditions,
@@ -591,7 +591,7 @@ export class PositionRequestApiService {
     { search, where }: ExtendedFindManyPositionRequestWithSearch,
     userId: string,
     userRoles: string[] = [],
-    requestingFeature?: string | null,
+    requestingFeature?: RequestingFeature | null,
   ): Promise<PositionRequestStatusCounts> {
     let searchConditions = {};
     if (search) {
@@ -613,7 +613,7 @@ export class PositionRequestApiService {
       whereConditions.status = { equals: 'COMPLETED' };
     } else if (userRoles.includes('classification') && requestingFeature === 'classificationTasks') {
       whereConditions.status = { not: { equals: 'DRAFT' } };
-    } else if (requestingFeature === 'myPositions') {
+    } else if (requestingFeature === 'myPositions' || !requestingFeature) {
       whereConditions.user_id = { equals: userId };
     }
 
@@ -681,7 +681,7 @@ export class PositionRequestApiService {
     return states;
   }
 
-  async getPositionRequestSubmittedBy(userRoles: string[] = [], requestingFeature: string) {
+  async getPositionRequestSubmittedBy(userRoles: string[] = [], requestingFeature: RequestingFeature) {
     const whereConditions: any = {
       PositionRequest: {
         some: {}, // This ensures we only get users who have submitted position requests

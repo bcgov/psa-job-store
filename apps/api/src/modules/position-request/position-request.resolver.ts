@@ -1,4 +1,15 @@
-import { Args, Field, InputType, Int, Mutation, ObjectType, OmitType, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Field,
+  InputType,
+  Int,
+  Mutation,
+  ObjectType,
+  OmitType,
+  Query,
+  Resolver,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { UUID } from 'crypto';
 import {
   PositionRequest,
@@ -66,6 +77,16 @@ export class PositionRequestCreateInputWithoutUser extends OmitType(PositionRequ
   user?: UserCreateNestedOneWithoutPositionRequestInput;
 }
 
+export enum RequestingFeature {
+  totalCompApprovedRequests = 'totalCompApprovedRequests',
+  classificationTasks = 'classificationTasks',
+  myPositions = 'myPositions',
+}
+
+registerEnumType(RequestingFeature, {
+  name: 'RequestingFeature',
+});
+
 @Resolver()
 export class PositionRequestApiResolver {
   constructor(private positionRequestService: PositionRequestApiService) {}
@@ -115,7 +136,7 @@ export class PositionRequestApiResolver {
   async positionRequestsCount(
     @CurrentUser() user: Express.User,
     @Args() args?: ExtendedFindManyPositionRequestWithSearch,
-    @Args('requestingFeature', { type: () => String, nullable: true }) requestingFeature?: string,
+    @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
   ) {
     return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles, requestingFeature);
   }
@@ -125,7 +146,7 @@ export class PositionRequestApiResolver {
   async getPositionRequests(
     @CurrentUser() user: Express.User,
     @Args() args?: ExtendedFindManyPositionRequestWithSearch,
-    @Args('requestingFeature', { type: () => String, nullable: true }) requestingFeature?: string,
+    @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
   ) {
     return this.positionRequestService.getPositionRequests(args, user.id, user.roles, requestingFeature);
   }
@@ -184,7 +205,7 @@ export class PositionRequestApiResolver {
   @Query(() => [UserBasicInfo], { name: 'positionRequestSubmittedBy' })
   async getpositionRequestSubmittedBy(
     @CurrentUser() user: Express.User,
-    @Args('requestingFeature', { type: () => String, nullable: true }) requestingFeature?: string,
+    @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
   ) {
     return this.positionRequestService.getPositionRequestSubmittedBy(user.roles, requestingFeature);
   }
