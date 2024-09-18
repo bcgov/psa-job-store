@@ -3,16 +3,24 @@ import { DataFilterSearchProps } from '../../../components/data-filter/data-filt
 import { FieldOperator, FieldOperatorValue } from './field-operator.type';
 import { FilterOperator } from './filter-operator.enum';
 import { IFilter, ISingleFilter, ISingleOrder } from './filter.interface';
+import { OrderByTransformType, OrderByTransformers } from './order-by-transformer.type';
 
 export class FilterBuilder<T = Record<string, unknown>> {
   private setSearchParams: SetURLSearchParams;
+  private orderByTransformers: OrderByTransformers;
   private searchParams: URLSearchParams;
   private searchProps?: DataFilterSearchProps;
 
   private readonly filter: IFilter<T> = Object.create(null);
 
-  constructor(setSearchParams: SetURLSearchParams, searchParams: URLSearchParams, searchProps?: DataFilterSearchProps) {
+  constructor(
+    setSearchParams: SetURLSearchParams,
+    orderByTransformers: OrderByTransformers,
+    searchParams: URLSearchParams,
+    searchProps?: DataFilterSearchProps,
+  ) {
     this.setSearchParams = setSearchParams;
+    this.orderByTransformers = orderByTransformers;
     this.searchParams = searchParams;
     this.searchProps = searchProps;
 
@@ -172,6 +180,14 @@ export class FilterBuilder<T = Record<string, unknown>> {
    * Parsing Methods
    *
    */
+  private generateSortOrder = (sort: 'asc' | 'desc') => sort;
+
+  private generateSortOrderInput = (sort: 'asc' | 'desc', nulls: 'first' | 'last' = 'first') => ({ sort, nulls });
+
+  private transformSortOrder = (key: string, sort: 'asc' | 'desc') => {
+    const transformType: OrderByTransformType = this.orderByTransformers[key] ?? 'SortOrder';
+    return transformType === 'SortOrder' ? this.generateSortOrder(sort) : this.generateSortOrderInput(sort);
+  };
 
   private generateOrder(order?: ISingleOrder[]) {
     return order?.flatMap((o) =>
@@ -181,7 +197,10 @@ export class FilterBuilder<T = Record<string, unknown>> {
         const keyParts = key.split('.');
         keyParts.reduce(
           (prev, curr, i) => (
-            Object.assign(prev, { [curr]: i === keyParts.length - 1 ? value : Object(prev[curr]) }), prev[curr]
+            Object.assign(prev, {
+              [curr]: i === keyParts.length - 1 ? this.transformSortOrder(key, value) : Object(prev[curr]),
+            }),
+            prev[curr]
           ),
           transformedFilter,
         );

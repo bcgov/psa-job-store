@@ -106,6 +106,7 @@ export const DepartmentListPage = () => {
             ],
             data: departmentData?.departmentsWithCount,
             loading: departmentDataIsLoading,
+            orderByTransformers: {},
           }}
         />
       </ContentWrapper>

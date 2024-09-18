@@ -105,6 +105,7 @@ export const WidgetListPage = () => {
             ],
             data: departmentData?.departmentsWithCount,
             loading: departmentDataIsLoading,
+            orderByTransformers: {},
           }}
         />
       </ContentWrapper>
