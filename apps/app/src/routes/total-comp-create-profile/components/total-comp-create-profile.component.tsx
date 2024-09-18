@@ -46,6 +46,7 @@ import {
   IsNotEmpty,
   NotEquals,
   ValidateNested,
+  ValidationArguments,
   ValidationOptions,
   registerDecorator,
 } from 'class-validator';
@@ -222,6 +223,7 @@ export class BasicDetailsValidationModel {
 
   jobStoreNumber: string;
 
+  @EmployeeClassificationGroupValidator()
   employeeClassificationGroups: EmployeeGroupClassificationsModel[];
 
   // @IsNotNull({ message: 'Classification must be selected' })
@@ -253,6 +255,25 @@ export class BasicDetailsValidationModel {
   all_organizations: boolean;
   overview: OverviewField | string;
   program_overview: ProgramOverviewField | string;
+}
+
+export function EmployeeClassificationGroupValidator(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'employeeClassificationGroupValidator',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any[]) {
+          return value && value.length != 0 && value.every((item) => item.employeeGroup && item.classification);
+        },
+        defaultMessage(_args: ValidationArguments): string {
+          return `At least one classification must be added and all fields filled.`;
+        },
+      },
+    });
+  };
 }
 
 export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileComponentProps> = ({
@@ -1792,21 +1813,24 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
           })),
         },
 
-        ...(formData.employeeClassificationGroups && {
-          classifications: {
-            create: formData.employeeClassificationGroups.map((ecg: any) => ({
-              classification: {
-                connect: {
-                  id_employee_group_id_peoplesoft_id: {
-                    id: ecg.classification.split('.')[0],
-                    employee_group_id: ecg.classification.split('.')[1],
-                    peoplesoft_id: ecg.classification.split('.')[2],
+        ...(formData.employeeClassificationGroups &&
+          formData.employeeClassificationGroups.length > 0 &&
+          formData.employeeClassificationGroups[0].classification &&
+          formData.employeeClassificationGroups[0].classification !== '' && {
+            classifications: {
+              create: formData.employeeClassificationGroups.map((ecg: any) => ({
+                classification: {
+                  connect: {
+                    id_employee_group_id_peoplesoft_id: {
+                      id: ecg.classification.split('.')[0],
+                      employee_group_id: ecg.classification.split('.')[1],
+                      peoplesoft_id: ecg.classification.split('.')[2],
+                    },
                   },
                 },
-              },
-            })),
-          },
-        }),
+              })),
+            },
+          }),
         organizations: formData.all_organizations
           ? { create: [] as OrganizationConnectInput[] }
           : {
@@ -2536,7 +2560,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                               Modal.confirm({
                                                 title: 'Confirmation',
                                                 content:
-                                                  'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
+                                                  "Removing classification may result in updates to some of the system generated fields in the 'Job Profile' page. Are you sure you want to continue?",
                                                 onOk: () => {
                                                   removeEmployeeGroup(index);
 
@@ -2552,7 +2576,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                     );
                                   }}
                                 />
-                                <WizardValidationError formErrors={basicFormErrors} fieldName="employeeGroup" />
                               </>
                             </Form.Item>
                           </div>
@@ -2582,6 +2605,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                               () => {
                                                 onChange(newValue);
                                                 handleClassificationChange(newValue, index);
+                                                triggerBasicDetailsValidation();
                                               },
                                               () => {
                                                 // User canceled the change
@@ -2635,7 +2659,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                   );
                                 }}
                               />
-                              <WizardValidationError formErrors={basicFormErrors} fieldName="classification" />
                             </>
                           </Form.Item>
                         </Col>
@@ -2644,42 +2667,47 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     </div>
                   ))}
                   {isCurrentVersion && (
-                    <Row>
-                      <Col>
-                        <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() => {
-                              addGeneralEmployeeGroup();
-                            }}
-                            icon={<PlusOutlined />}
-                            disabled={
-                              selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup != 'OEX') !=
-                              undefined
-                            }
-                          >
-                            Add a general classification
-                          </Button>
-                        </Form.Item>
-                      </Col>
-                      <Col>
-                        <Form.Item>
-                          <Button
-                            type="link"
-                            onClick={() => {
-                              addScheduleA();
-                            }}
-                            icon={<PlusOutlined />}
-                            disabled={
-                              selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup == 'OEX') !=
-                              undefined
-                            }
-                          >
-                            Add a Schedule A classification
-                          </Button>
-                        </Form.Item>
-                      </Col>
-                    </Row>
+                    <>
+                      <WizardValidationError formErrors={basicFormErrors} fieldName="employeeClassificationGroups" />
+                      <Row>
+                        <Col>
+                          <Form.Item>
+                            <Button
+                              type="link"
+                              onClick={() => {
+                                addGeneralEmployeeGroup();
+                                triggerBasicDetailsValidation();
+                              }}
+                              icon={<PlusOutlined />}
+                              disabled={
+                                selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup != 'OEX') !=
+                                undefined
+                              }
+                            >
+                              Add a general classification
+                            </Button>
+                          </Form.Item>
+                        </Col>
+                        <Col>
+                          <Form.Item>
+                            <Button
+                              type="link"
+                              onClick={() => {
+                                addScheduleA();
+                                triggerBasicDetailsValidation();
+                              }}
+                              icon={<PlusOutlined />}
+                              disabled={
+                                selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup == 'OEX') !=
+                                undefined
+                              }
+                            >
+                              Add a Schedule A classification
+                            </Button>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </>
                   )}
                 </Card>
 
@@ -4661,7 +4689,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
                                   <Col flex="none">
                                     <ContextOptionsReadonly
-                                      isReadonly={field.tc_is_readonly ?? false}
+                                      isReadonly={
+                                        (field.tc_is_readonly &&
+                                          itemInPickerData(field.text?.toString() ?? '', 'securityScreenings')) ??
+                                        false
+                                      }
                                       onEdit={() => {
                                         updateSecurityScreeining(index, {
                                           ...securityScreeningsFields[index],
