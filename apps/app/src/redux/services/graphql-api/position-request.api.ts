@@ -227,7 +227,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               $take: Int
               $skip: Int
               $orderBy: [PositionRequestOrderByWithRelationAndSearchRelevanceInput!]
-              $requestingFeature: String
+              $requestingFeature: RequestingFeature
             ) {
               positionRequests(
                 search: $search
@@ -581,7 +581,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (args: GetPositionRequestsArgs = {}) => {
         return {
           document: gql`
-            query PositionRequestSubmittedBy($requestingFeature: String) {
+            query PositionRequestSubmittedBy($requestingFeature: RequestingFeature) {
               positionRequestSubmittedBy(requestingFeature: $requestingFeature) {
                 id
                 name
