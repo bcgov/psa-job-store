@@ -675,27 +675,39 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     }
   };
 
+  // Function to add a Schedule A (OEX) classification based on the currently selected classification
   const addScheduleA = () => {
+    // Get the first selected classification from the array
     const selectedClassification = selectedEmployeeClassificationGroups.at(0)?.classification;
+
+    // Find the full classification object in the classificationsData
     const classification = classificationsData?.classifications.find(
       (c) =>
         c.id == selectedClassification?.split('.')[0] &&
         c.employee_group_id == selectedClassification?.split('.')[1] &&
         c.peoplesoft_id == selectedClassification?.split('.')[2],
     );
+
     if (classification) {
+      // If a classification is found, look for a corresponding OEX classification
       const oexClassification = classificationsData?.classifications.find(
         (c) => c.employee_group_id == 'OEX' && c.grade == classification.grade && c.code == classification.code,
       );
+
       if (oexClassification) {
+        // If a corresponding OEX classification is found, append it to the employee groups
+        const classificationString = `${oexClassification.id}.${oexClassification.employee_group_id}.${oexClassification.peoplesoft_id}`;
         appendEmployeeGroup({
           employeeGroup: 'OEX',
-          classification: `${oexClassification.id}.${oexClassification.employee_group_id}.${oexClassification.peoplesoft_id}`,
+          classification: classificationString,
         });
+        handleClassificationChange(classificationString, 1);
       } else {
+        // If no corresponding OEX classification is found, show a warning message
         message.warning('No Schedule A classification found for the corresponding general employee group.');
       }
     } else {
+      // If no classification is found (or none selected), append an OEX group with null classification
       appendEmployeeGroup({
         employeeGroup: 'OEX',
         classification: null,
@@ -1112,8 +1124,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   }, [handleSelectAllReportTo, allReportsTo]);
 
   const [isCurrentVersion, setIsCurrentVersion] = useState(true);
-  // classifications selector data
 
+  // set initial data
   useEffect(() => {
     // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
@@ -1627,12 +1639,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   // Handler for classification change
   const handleClassificationChange = (newValue: string | null, index: number) => {
+    // console.log('handleClassificationChange newValue: ', newValue, ', index: ', index);
     // if this classification exists in reportToRelationship, remove it
     const [id, employee_group_id, peoplesoft_id] = (newValue ?? '').split('.');
     const classification = `${id}.${employee_group_id}.${peoplesoft_id}`;
     const currentReportToRelationship = getBasicDetailsValues('reportToRelationship');
     const filteredReportToRelationship = currentReportToRelationship.filter((r: string) => r !== classification);
     setValue('reportToRelationship', filteredReportToRelationship);
+
+    // if all reports-to is checked, this maintains a correct list of all values in response to changes in classifications
+    if (allReportsTo) handleSelectAllReportTo(allReportsTo);
+
     if (newValue != null && selectedEmployeeClassificationGroups.length > 1) {
       const otherIndex = index ? 0 : 1;
 
@@ -2064,19 +2081,24 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   };
 
   const filterTreeData = (data: any) => {
-    // Filter out the selected classification from the tree data
+    // Filter out the selected classifications from the tree data
     const ret = data
       .filter((item: any) => {
-        const compareResult =
+        // for every selected classification check if this reports-to item matches
+        const foundResult = selectedEmployeeClassificationGroups.find((c) => {
+          const classificationFound = `${c.classification?.split('.')[0]}.${c.classification?.split(
+            '.',
+          )[1]}.${c.classification?.split('.')[2]}`;
+          return classificationFound == item.id;
+        });
+
+        const include =
           item.id == null ||
-          selectedEmployeeClassificationGroups.find(
-            (c) =>
-              `${c.classification?.split('.')[0]}.${c.classification?.split('.')[1]}.${c.classification?.split(
-                '.',
-              )[2]}` !== item.id,
-          );
-        // if (!compareResult) console.log('filtering: ', item.id, selectedId, item);
-        return compareResult;
+          !foundResult ||
+          // if there are no classification selected, make sure we don't filter anything (otherwise filters everything)
+          selectedEmployeeClassificationGroups.length === 0;
+
+        return include;
       })
       .map((item: any) => ({
         ...item,
