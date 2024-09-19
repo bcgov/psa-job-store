@@ -97,7 +97,7 @@ export const DepartmentListPage = () => {
                 title: 'Actions',
                 render: (_, record) => (
                   <Link to={`${record.id}`}>
-                    <Tooltip title="Manage widget">
+                    <Tooltip title="Manage department">
                       <Button icon={<SettingOutlined />} />
                     </Tooltip>
                   </Link>

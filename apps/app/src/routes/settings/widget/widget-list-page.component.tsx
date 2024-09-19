@@ -8,7 +8,7 @@ import { FilterOperator } from '../../../components/shared/data-list/lib/prisma-
 import {
   useGetOrganizationsPicklistForSettingsQuery,
   useGetRolesForSettingsQuery,
-  useLazyGetUsersForSettings2Query,
+  useLazyGetUsersForSettingsQuery,
 } from '../../../redux/services/graphql-api/settings/settings.api';
 import { useSettingsContext } from '../hooks/use-settings-context.hook';
 
@@ -20,7 +20,7 @@ export const WidgetListPage = () => {
 
   const { data: rolesData, isFetching: rolesDataIsLoading } = useGetRolesForSettingsQuery();
 
-  const [trigger, { data: userData, isFetching: userDataIsLoading }] = useLazyGetUsersForSettings2Query();
+  const [trigger, { data: userData, isFetching: userDataIsLoading }] = useLazyGetUsersForSettingsQuery();
   return (
     <>
       <PageHeader title="Widgets" subTitle="Manage widgets..." />
