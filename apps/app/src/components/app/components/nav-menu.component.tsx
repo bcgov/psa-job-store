@@ -121,6 +121,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                 style: {
                   backgroundColor: '#0057ad',
                   color: 'white',
+                  ...(!collapsed ? { paddingLeft: '0' } : {}),
                 },
               },
             ]

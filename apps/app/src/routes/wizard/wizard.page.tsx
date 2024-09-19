@@ -229,7 +229,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               returnFullObject: true,
             };
 
-            console.log('updatingPositionRequest args: ', updateArgs);
+            // console.log('updatingPositionRequest args: ', updateArgs);
             const resp = await updatePositionRequest(updateArgs).unwrap();
 
             setPositionRequestData(resp.updatePositionRequest ?? null);
@@ -266,7 +266,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   }, [searchParams]); // picks up profile id from search params
 
   useEffect(() => {
-    console.log('SET SET');
+    // console.log('SET SET');
     setMinReqAlertShown(false);
     setReqAlertShown(false);
     setOriginalValuesSet(false); // ensures original values get re-set once user navigates to edit page
@@ -365,7 +365,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   };
 
   const switchStep = async (step: number) => {
-    console.log('switchStep: ', step);
+    // console.log('switchStep: ', step);
     const code = await onSubmit('next', false, false, step);
     if (code == 'NO_CHANGE') {
       updatePositionRequestAndSetStep(step);
