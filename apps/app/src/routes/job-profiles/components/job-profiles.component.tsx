@@ -30,6 +30,7 @@ interface JobProfilesContentProps {
   positionRequestId?: number;
   loadProfileIds?: number[];
   prData?: GetPositionRequestResponseContent | null;
+  showVersions?: boolean;
 }
 
 interface JobProfilesRef {
@@ -47,6 +48,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       loadProfileIds,
       prData,
       page_size = 10,
+      showVersions = false,
     },
     ref,
   ) => {
@@ -428,7 +430,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     const renderJobProfile = () => {
       return params.number || searchParams.get('selectedProfile') ? (
-        <JobProfile />
+        <JobProfile showVersions={showVersions} />
       ) : (
         <div style={{ marginTop: '16rem' }} data-testid="job-profile-empty">
           <Empty

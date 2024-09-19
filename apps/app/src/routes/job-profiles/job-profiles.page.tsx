@@ -22,6 +22,7 @@ export const JobProfilesPage = () => {
           searchParams={searchParams}
           page_size={page_size}
           selectProfileNumber={number}
+          showVersions={true}
         />
       </ContentWrapper>
       {/* </div> */}
