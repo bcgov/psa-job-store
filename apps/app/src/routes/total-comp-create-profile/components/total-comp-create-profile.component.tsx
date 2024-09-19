@@ -2504,235 +2504,261 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 </Card>
 
                 <Card title="Classification" style={{ marginTop: 16 }} bordered={false}>
-                  <Form.Item label="Employee groups" labelCol={{ className: 'card-label' }} className="label-only" />
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    You must assign this profile to at least one classification.
-                  </div>
-                  {employeeClassificationGroupsFields.map((field, index: number) => (
-                    <div key={field.id}>
-                      <Row justify="start">
-                        <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                          <div key={field.id}>
-                            <Form.Item
-                              label={
-                                selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX'
-                                  ? 'Schedule A group '
-                                  : 'General employee group'
-                              }
-                              style={{ marginBottom: '0.5rem' }}
-                            >
-                              <>
-                                <Controller
-                                  name={`employeeClassificationGroups.${index}.employeeGroup`}
-                                  control={control}
-                                  render={({ field: { onChange, onBlur, value } }) => {
-                                    return (
-                                      <Row gutter={8} wrap={false}>
-                                        <Col flex="auto">
-                                          <Select
-                                            placeholder="Choose an employee group"
-                                            disabled={
-                                              selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX'
-                                            }
-                                            onChange={(arg) => {
-                                              setValue(`employeeClassificationGroups.${index}.employeeGroup`, arg);
-                                              setValue(
-                                                `employeeClassificationGroups.${index}.classification`,
+                  {isCurrentVersion ? (
+                    <>
+                      <Form.Item
+                        label="Employee groups"
+                        labelCol={{ className: 'card-label' }}
+                        className="label-only"
+                      />
+                      <div style={{ marginBottom: '1.5rem' }}>
+                        You must assign this profile to at least one classification.
+                      </div>
+                      {employeeClassificationGroupsFields.map((field, index: number) => (
+                        <div key={field.id}>
+                          <Row justify="start">
+                            <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+                              <div key={field.id}>
+                                <Form.Item
+                                  label={
+                                    selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX'
+                                      ? 'Schedule A group '
+                                      : 'General employee group'
+                                  }
+                                  style={{ marginBottom: '0.5rem' }}
+                                >
+                                  <>
+                                    <Controller
+                                      name={`employeeClassificationGroups.${index}.employeeGroup`}
+                                      control={control}
+                                      render={({ field: { onChange, onBlur, value } }) => {
+                                        return (
+                                          <Row gutter={8} wrap={false}>
+                                            <Col flex="auto">
+                                              <Select
+                                                placeholder="Choose an employee group"
+                                                disabled={
+                                                  selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX'
+                                                }
+                                                onChange={(arg) => {
+                                                  setValue(`employeeClassificationGroups.${index}.employeeGroup`, arg);
+                                                  setValue(
+                                                    `employeeClassificationGroups.${index}.classification`,
 
-                                                null,
-                                              );
-                                              onChange(arg);
+                                                    null,
+                                                  );
+                                                  onChange(arg);
+                                                  triggerBasicDetailsValidation();
+                                                }}
+                                                onBlur={onBlur}
+                                                value={value}
+                                                style={{ width: '100%' }}
+                                                options={employeeGroupData?.employeeGroups
+                                                  .filter((group) => {
+                                                    if (
+                                                      selectedEmployeeClassificationGroups.at(0)?.employeeGroup ==
+                                                        'OEX' &&
+                                                      selectedEmployeeClassificationGroups.at(0)?.classification &&
+                                                      index == 1
+                                                    ) {
+                                                      const selectedOEX = selectedEmployeeClassificationGroups.at(0);
+
+                                                      const oexClassification =
+                                                        classificationsData?.classifications.find(
+                                                          (cl) =>
+                                                            selectedOEX?.classification?.split('.')[0] == cl.id &&
+                                                            selectedOEX?.classification?.split('.')[1] ==
+                                                              cl.employee_group_id &&
+                                                            selectedOEX?.classification?.split('.')[2] ==
+                                                              cl.peoplesoft_id,
+                                                        );
+                                                      return (
+                                                        group.id != 'OEX' &&
+                                                        classificationsData?.classifications.find(
+                                                          (c) =>
+                                                            c.employee_group_id == group.id &&
+                                                            c.code == oexClassification?.code,
+                                                        )
+                                                      );
+                                                    }
+                                                    return group.id != 'OEX';
+                                                  })
+                                                  .map((group) => ({
+                                                    label: group.id,
+                                                    value: group.id,
+                                                  }))}
+                                              />
+                                            </Col>
+                                            <Col>
+                                              <Button
+                                                onClick={() => {
+                                                  Modal.confirm({
+                                                    title: 'Confirmation',
+                                                    content:
+                                                      "Removing classification may result in updates to some of the system generated fields in the 'Job Profile' page. Are you sure you want to continue?",
+                                                    onOk: () => {
+                                                      removeEmployeeGroup(index);
+
+                                                      handleClassificationChange(null, index);
+                                                      triggerBasicDetailsValidation();
+                                                    },
+                                                  });
+                                                }}
+                                                icon={<DeleteOutlined />}
+                                              ></Button>
+                                            </Col>
+                                          </Row>
+                                        );
+                                      }}
+                                    />
+                                  </>
+                                </Form.Item>
+                              </div>
+                            </Col>
+                          </Row>
+                          <Row justify="start">
+                            <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+                              <Form.Item
+                                label="Classification"
+                                style={{
+                                  borderLeft: '2px solid rgba(5, 5, 5, 0.06)',
+                                  paddingLeft: '1rem',
+                                }}
+                              >
+                                <>
+                                  <Controller
+                                    name={`employeeClassificationGroups.${index}.classification`}
+                                    control={control}
+                                    render={({ field: { onChange, onBlur, value } }) => {
+                                      return (
+                                        <>
+                                          <Select
+                                            placeholder="Choose a classification"
+                                            onChange={(newValue) => {
+                                              if (selectedEmployeeClassificationGroups) {
+                                                showWarningModal(
+                                                  () => {
+                                                    onChange(newValue);
+                                                    handleClassificationChange(newValue, index);
+                                                    triggerBasicDetailsValidation();
+                                                  },
+                                                  () => {
+                                                    // User canceled the change
+                                                  },
+                                                );
+                                              } else {
+                                                onChange(newValue);
+                                                // handleClassificationChange(newValue);
+                                              }
                                               triggerBasicDetailsValidation();
                                             }}
                                             onBlur={onBlur}
                                             value={value}
                                             style={{ width: '100%' }}
-                                            options={employeeGroupData?.employeeGroups
-                                              .filter((group) => {
-                                                if (
-                                                  selectedEmployeeClassificationGroups.at(0)?.employeeGroup == 'OEX' &&
-                                                  selectedEmployeeClassificationGroups.at(0)?.classification &&
-                                                  index == 1
-                                                ) {
-                                                  const selectedOEX = selectedEmployeeClassificationGroups.at(0);
+                                            showSearch
+                                            filterOption={(input, option) => {
+                                              if (!option) return false;
+                                              const { name, id } = option;
 
-                                                  const oexClassification = classificationsData?.classifications.find(
-                                                    (cl) =>
-                                                      selectedOEX?.classification?.split('.')[0] == cl.id &&
-                                                      selectedOEX?.classification?.split('.')[1] ==
-                                                        cl.employee_group_id &&
-                                                      selectedOEX?.classification?.split('.')[2] == cl.peoplesoft_id,
-                                                  );
-                                                  return (
-                                                    group.id != 'OEX' &&
-                                                    classificationsData?.classifications.find(
-                                                      (c) =>
-                                                        c.employee_group_id == group.id &&
-                                                        c.code == oexClassification?.code,
-                                                    )
-                                                  );
-                                                }
-                                                return group.id != 'OEX';
-                                              })
-                                              .map((group) => ({
-                                                label: group.id,
-                                                value: group.id,
-                                              }))}
-                                          />
-                                        </Col>
-                                        <Col>
-                                          <Button
-                                            onClick={() => {
-                                              Modal.confirm({
-                                                title: 'Confirmation',
-                                                content:
-                                                  "Removing classification may result in updates to some of the system generated fields in the 'Job Profile' page. Are you sure you want to continue?",
-                                                onOk: () => {
-                                                  removeEmployeeGroup(index);
-
-                                                  handleClassificationChange(null, index);
-                                                  triggerBasicDetailsValidation();
-                                                },
-                                              });
+                                              return (
+                                                name.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                                                id.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                              );
                                             }}
-                                            icon={<DeleteOutlined />}
-                                          ></Button>
-                                        </Col>
-                                      </Row>
-                                    );
-                                  }}
-                                />
-                              </>
-                            </Form.Item>
-                          </div>
-                        </Col>
-                      </Row>
-                      <Row justify="start">
-                        <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                          <Form.Item
-                            label="Classification"
-                            style={{
-                              borderLeft: '2px solid rgba(5, 5, 5, 0.06)',
-                              paddingLeft: '1rem',
-                            }}
-                          >
-                            <>
-                              <Controller
-                                name={`employeeClassificationGroups.${index}.classification`}
-                                control={control}
-                                render={({ field: { onChange, onBlur, value } }) => {
-                                  return (
-                                    <>
-                                      <Select
-                                        placeholder="Choose a classification"
-                                        onChange={(newValue) => {
-                                          if (selectedEmployeeClassificationGroups) {
-                                            showWarningModal(
-                                              () => {
-                                                onChange(newValue);
-                                                handleClassificationChange(newValue, index);
-                                                triggerBasicDetailsValidation();
-                                              },
-                                              () => {
-                                                // User canceled the change
-                                              },
-                                            );
-                                          } else {
-                                            onChange(newValue);
-                                            // handleClassificationChange(newValue);
-                                          }
-                                          triggerBasicDetailsValidation();
-                                        }}
-                                        onBlur={onBlur}
-                                        value={value}
-                                        style={{ width: '100%' }}
-                                        showSearch
-                                        filterOption={(input, option) => {
-                                          if (!option) return false;
-                                          const { name, id } = option;
+                                            options={getClassificationsForEmployeeGroup(index)?.map(
+                                              // ({ id, employee_group_id, peoplesoft_id, name }) => ({
+                                              //   label: name,
+                                              //   value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+                                              // }),
+                                              ({ id, employee_group_id, peoplesoft_id, name }) => ({
+                                                label: (
+                                                  <div>
+                                                    {' '}
+                                                    {employee_group_id != 'OEX' ? name : name + ' '}{' '}
+                                                    <span style={{ color: '#9F9D9C' }}>{'(' + id + ')'}</span>
+                                                  </div>
+                                                ),
+                                                value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+                                                name,
+                                                id,
+                                              }),
+                                            )}
+                                          />
 
-                                          return (
-                                            name.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
-                                            id.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                                          );
-                                        }}
-                                        options={getClassificationsForEmployeeGroup(index)?.map(
-                                          // ({ id, employee_group_id, peoplesoft_id, name }) => ({
-                                          //   label: name,
-                                          //   value: `${id}.${employee_group_id}.${peoplesoft_id}`,
-                                          // }),
-                                          ({ id, employee_group_id, peoplesoft_id, name }) => ({
-                                            label: (
-                                              <div>
-                                                {' '}
-                                                {employee_group_id != 'OEX' ? name : name + ' '}{' '}
-                                                <span style={{ color: '#9F9D9C' }}>{'(' + id + ')'}</span>
-                                              </div>
-                                            ),
-                                            value: `${id}.${employee_group_id}.${peoplesoft_id}`,
-                                            name,
-                                            id,
-                                          }),
-                                        )}
-                                      />
+                                          {selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX' && (
+                                            <div style={{ color: '#9F9D9C' }}>
+                                              Please make sure you select the Schedule A job code (denoted in brackets)
+                                            </div>
+                                          )}
+                                        </>
+                                      );
+                                    }}
+                                  />
+                                </>
+                              </Form.Item>
+                            </Col>
+                          </Row>{' '}
+                          <Divider className="hr-reduced-margin" />
+                        </div>
+                      ))}
 
-                                      {selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX' && (
-                                        <div style={{ color: '#9F9D9C' }}>
-                                          Please make sure you select the Schedule A job code (denoted in brackets)
-                                        </div>
-                                      )}
-                                    </>
-                                  );
+                      <>
+                        <WizardValidationError formErrors={basicFormErrors} fieldName="employeeClassificationGroups" />
+                        <Row>
+                          <Col>
+                            <Form.Item>
+                              <Button
+                                type="link"
+                                onClick={() => {
+                                  addGeneralEmployeeGroup();
+                                  triggerBasicDetailsValidation();
                                 }}
-                              />
-                            </>
-                          </Form.Item>
-                        </Col>
-                      </Row>{' '}
-                      <Divider className="hr-reduced-margin" />
-                    </div>
-                  ))}
-                  {isCurrentVersion && (
+                                icon={<PlusOutlined />}
+                                disabled={
+                                  selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup != 'OEX') !=
+                                  undefined
+                                }
+                              >
+                                Add a general classification
+                              </Button>
+                            </Form.Item>
+                          </Col>
+                          <Col>
+                            <Form.Item>
+                              <Button
+                                type="link"
+                                onClick={() => {
+                                  addScheduleA();
+                                  triggerBasicDetailsValidation();
+                                }}
+                                icon={<PlusOutlined />}
+                                disabled={
+                                  selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup == 'OEX') !=
+                                  undefined
+                                }
+                              >
+                                Add a Schedule A classification
+                              </Button>
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      </>
+                    </>
+                  ) : (
                     <>
-                      <WizardValidationError formErrors={basicFormErrors} fieldName="employeeClassificationGroups" />
-                      <Row>
-                        <Col>
-                          <Form.Item>
-                            <Button
-                              type="link"
-                              onClick={() => {
-                                addGeneralEmployeeGroup();
-                                triggerBasicDetailsValidation();
-                              }}
-                              icon={<PlusOutlined />}
-                              disabled={
-                                selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup != 'OEX') !=
-                                undefined
-                              }
-                            >
-                              Add a general classification
-                            </Button>
-                          </Form.Item>
-                        </Col>
-                        <Col>
-                          <Form.Item>
-                            <Button
-                              type="link"
-                              onClick={() => {
-                                addScheduleA();
-                                triggerBasicDetailsValidation();
-                              }}
-                              icon={<PlusOutlined />}
-                              disabled={
-                                selectedEmployeeClassificationGroups.find((sec) => sec.employeeGroup == 'OEX') !=
-                                undefined
-                              }
-                            >
-                              Add a Schedule A classification
-                            </Button>
-                          </Form.Item>
-                        </Col>
-                      </Row>
+                      {employeeClassificationGroupsFields.map((item) => {
+                        const [id, group_id, peoplesoft_id] = item?.classification?.split('.') ?? [null, null, null];
+                        if (!id) return null;
+                        const classificationName =
+                          classificationsData?.classifications.find(
+                            (c) => c.id === id && c.peoplesoft_id === peoplesoft_id && c.employee_group_id === group_id,
+                          )?.name || 'Not found';
+                        return (
+                          <div key={item.id}>
+                            {classificationName} ({item.employeeGroup})
+                          </div>
+                        );
+                      })}
                     </>
                   )}
                 </Card>
@@ -2862,18 +2888,22 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                         ) : (
                           <>
                             <Typography.Text style={{ marginBottom: '5px', display: 'block' }}>
-                              {jobProfileData?.jobProfile.jobFamilies[index].jobFamily.name}
+                              <b>{jobProfileData?.jobProfile.jobFamilies[index].jobFamily.name}</b>
                             </Typography.Text>
-
                             {/*
                             
                             fix this to display all
                             
                             
                             */}
-                            <Typography.Text style={{ marginBottom: '5px', display: 'block' }}>
-                              {jobProfileData?.jobProfile.streams[index].stream?.name}
-                            </Typography.Text>
+                            {jobProfileData?.jobProfile.streams.map((streamItem) => (
+                              <Typography.Text
+                                key={streamItem.stream.id}
+                                style={{ marginBottom: '5px', display: 'block' }}
+                              >
+                                {streamItem.stream.name}
+                              </Typography.Text>
+                            ))}
                           </>
                         ),
                       )}
