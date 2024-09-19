@@ -995,6 +995,7 @@ export const {
 
   useGetJobProfileByNumberQuery,
   useLazyGetJobProfileByNumberQuery,
+  useGetJobProfileMetaQuery,
   useLazyGetJobProfileMetaQuery,
   useUpdateJobProfileViewCountMutation,
 

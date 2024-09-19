@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined, ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
-import { Alert, Button, Descriptions, DescriptionsProps, Divider, Grid, Tooltip, Typography } from 'antd';
+import { Alert, Button, Col, Descriptions, DescriptionsProps, Divider, Grid, Row, Tooltip, Typography } from 'antd';
 import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -16,11 +16,14 @@ import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
+import { useAuth } from 'react-oidc-context';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
+import { VersionSelect } from '../../../components/app/version-select.component';
 import {
   AccountabilitiesModel,
+  IdVersion,
   JobProfileModel,
   ProfessionsModel,
   TrackedFieldArrayItem,
@@ -45,6 +48,7 @@ interface JobProfileProps {
   style?: CSSProperties;
   // onUseProfile?: () => void;
   showBasicInfo?: boolean;
+  showVersions?: boolean;
 }
 
 class BehaviouralCompetency {
@@ -403,11 +407,15 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   style,
   // onUseProfile,
   showBasicInfo = true,
+  showVersions = false,
 }) => {
+  const auth = useAuth();
+  const roles = auth.user?.profile['client_roles'];
   const [searchParams] = useSearchParams();
   const params = useParams();
   const jobNumber = params.number ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
-
+  const id = searchParams.get('id');
+  const version = searchParams.get('version');
   // console.log('resolvedId: ', resolvedId);
   const screens = useBreakpoint();
 
@@ -420,6 +428,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   // (not dispatching if profileData was already provided)
   const [triggerGetJobProfileByNumber, { data: profileByNumber, isLoading }] = useLazyGetJobProfileByNumberQuery();
   const [triggerGetJobProfile, { data: diffProfileData, isLoading: isLoadingDiff }] = useLazyGetJobProfileQuery();
+  const [triggerGetJobProfileById, { data: versionedProfileData, isLoading: isLoadingVersioned }] =
+    useLazyGetJobProfileQuery();
 
   // State to hold the effectiveData which can be from profileData prop or fetched from API
   const initialData = profileData ?? null;
@@ -428,10 +438,22 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
   useEffect(() => {
     // If profileData exists, use it to set the form state
+    if (versionedProfileData) {
+      setEffectiveData(versionedProfileData.jobProfile);
+      setEffectiveDataExtra(versionedProfileData.jobProfile);
+    } else if (id && version && !isLoadingVersioned) {
+      // If no profileData is provided and an id exists, fetch the data
+      // OR profileData was provided, but we also want to run a diff
+      triggerGetJobProfileById({ id: parseInt(id ?? '-1'), version: parseInt(version ?? '-1') });
+    }
+  }, [searchParams, versionedProfileData, triggerGetJobProfileById, isLoadingVersioned, id, version]);
+
+  useEffect(() => {
+    // If profileData exists, use it to set the form state
     if (profileData && !showDiff) {
       setEffectiveData(profileData);
       setEffectiveDataExtra(profileData);
-    } else if (!profileData && jobNumber) {
+    } else if (!profileData && jobNumber && !(id && version)) {
       triggerGetJobProfileByNumber({ number: +jobNumber });
     } else if (profileData && showDiff && parentJobProfileId) {
       // If no profileData is provided and an id exists, fetch the data
@@ -446,6 +468,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     triggerGetJobProfileByNumber,
     parentJobProfileId,
     parentJobProfileVersion,
+    id,
+    version,
   ]);
 
   // useEffect to set effectiveData when data is fetched from the API
@@ -1288,13 +1312,38 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
       <div className="sr-only">
         <h2 style={{ margin: '0' }}>Job profile</h2>
+
         <AccessibleDocumentFromDescriptions items={items} />
       </div>
 
       <Descriptions
         aria-hidden
         className="customDescriptions"
-        title={<h2 style={{ margin: '0' }}>Job profile</h2>}
+        title={
+          <div>
+            <Row>
+              <Col>
+                <h2 style={{ margin: '0' }}>Job profile</h2>
+              </Col>{' '}
+              <Col style={{ marginLeft: '10px' }}>
+                {showVersions &&
+                roles &&
+                ((roles as string[]).includes('total-compensation') ||
+                  (roles as string[]).includes('classification')) ? (
+                  <VersionSelect
+                    id={id ?? effectiveData?.id.toString() ?? '-1'}
+                    version={version}
+                    selectVersionCallback={(selectedVersion: IdVersion) => {
+                      triggerGetJobProfileById({ id: selectedVersion.id, version: selectedVersion.version });
+                    }}
+                  />
+                ) : (
+                  <></>
+                )}
+              </Col>
+            </Row>
+          </div>
+        }
         bordered
         column={24}
         items={items}
