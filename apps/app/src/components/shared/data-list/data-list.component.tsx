@@ -34,7 +34,7 @@ export const DataList = ({
 
   return (
     <Space direction="vertical" size="middle">
-      <DataFilter filterBuilder={filterBuilder} {...filterProps} />
+      {filterProps && <DataFilter filterBuilder={filterBuilder} {...filterProps} />}
       <DataTable filterBuilder={filterBuilder} {...tableProps} />
     </Space>
   );
