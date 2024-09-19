@@ -2136,6 +2136,7 @@ export class JobProfileService {
       });
 
       //we are only using the first classification as a basis for min requirements for now.
+      // todo: this may result in incorrect updating on the front end when user changes classification when multiple options are used
       jobProfileMinimumRequirements = minimumRequirements.map((req) => ({
         text: req.requirement,
         jobFamilies: [],
