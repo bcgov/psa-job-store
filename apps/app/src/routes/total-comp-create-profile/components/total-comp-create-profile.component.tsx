@@ -1047,10 +1047,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
       // filter out the selected classification
       let filteredReportToRelationship = allValues;
-      if (selectedEmployeeClassificationGroups)
+      if (selectedEmployeeClassificationGroups) {
         filteredReportToRelationship = allValues.filter(
           (r: string) => !selectedEmployeeClassificationGroups.find((ecg) => ecg.classification == r),
         );
+      }
       // Update the 'reportToRelationship' form variable
 
       setValue('reportToRelationship', filteredReportToRelationship);
@@ -2986,11 +2987,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                       const allValues = getAllTreeValues(treeDataConverted);
 
                                       // filter out the selected classification
+
                                       let filteredReportToRelationship = allValues;
-                                      if (selectedEmployeeClassificationGroups)
-                                        filteredReportToRelationship = allValues.filter((r: string) =>
-                                          selectedEmployeeClassificationGroups.find((ecg) => ecg.classification == r),
+                                      if (selectedEmployeeClassificationGroups) {
+                                        filteredReportToRelationship = allValues.filter(
+                                          (r: string) =>
+                                            !selectedEmployeeClassificationGroups.find(
+                                              (ecg) => ecg.classification == r,
+                                            ),
                                         );
+                                      }
 
                                       if (filteredReportToRelationship.length === selectedItems.length)
                                         setValue('all_reports_to', true);

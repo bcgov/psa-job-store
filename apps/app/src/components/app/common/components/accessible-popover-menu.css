@@ -22,6 +22,6 @@
     outline-color:  #66a8d4;
 }
 
-.accessible-popover a:focus{
+.accessible-popover a:focus-visible{
     outline: 4px solid #66a8d4;
 }
