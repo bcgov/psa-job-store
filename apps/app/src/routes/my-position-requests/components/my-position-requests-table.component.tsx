@@ -26,7 +26,7 @@ import {
   useDeletePositionRequestMutation,
   useLazyGetPositionRequestsQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
-import { formatDateTime } from '../../../utils/Utils';
+import { formatDateTime, formatDuration } from '../../../utils/Utils';
 import StatusIndicator from '../../wizard/components/wizard-position-request-status-indicator';
 import NoResultsView from './no-results.component';
 
@@ -66,7 +66,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   style,
   itemsPerPage = 10,
   topRightComponent,
-  tableTitle = 'My Position Requests',
+  tableTitle = 'Requests',
   mode = null,
   onDataAvailable,
   clearFilters,
@@ -80,8 +80,14 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   // Get initial values from URL parameters for table properties
   const initialPage = parseInt(searchParams.get('page') || '1');
   const initialPageSize = parseInt(searchParams.get('pageSize') || itemsPerPage.toString());
-  const initialSortField = searchParams.get('sortField');
-  const initialSortOrder = searchParams.get('sortOrder');
+  let initialSortField = searchParams.get('sortField');
+  let initialSortOrder = searchParams.get('sortOrder');
+
+  // for classification mode, initial sorting order is by updated_at
+  if (mode === 'classification' && !initialSortField) {
+    initialSortField = 'updated_at';
+    initialSortOrder = 'descend';
+  }
 
   const [selectedRowKeys] = useState([]);
 
@@ -409,20 +415,49 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
         ]
       : []),
 
-    ...(mode == 'total-compensation'
+    ...(mode == 'classification' || mode == 'total-compensation'
       ? [
           {
             sorter: allowSorting,
             defaultSortOrder: getSortOrder('approved_at'),
-            title: <span data-testid="approved-at-header">Approved at</span>,
+            title: <span data-testid="submitted-at-header">Approved at</span>,
             dataIndex: 'approved_at',
             key: 'approved_at',
-            render: (text: string) => formatDateTime(text),
+            // display only if in COMPLETED status
+            render: (text: string, record: any) => {
+              return record.status === 'COMPLETED' ? formatDateTime(text) : '';
+            },
+          },
+
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('time_to_approve'),
+            title: <span data-testid="submitted-at-header">Time to approve</span>,
+            dataIndex: 'time_to_approve',
+            key: 'time_to_approve',
+            // display only if in COMPLETED status
+            render: (text: string, record: any) => {
+              return record.status === 'COMPLETED' && record.approval_type == 'VERIFIED'
+                ? formatDuration(parseInt(text))
+                : '';
+            },
+          },
+
+          {
+            sorter: allowSorting,
+            defaultSortOrder: getSortOrder('approval_type'),
+            title: <span data-testid="submitted-at-header">Approval type</span>,
+            dataIndex: 'approval_type',
+            key: 'approval_type',
+            // display only if in COMPLETED status
+            render: (text: string, record: any) => {
+              return record.status === 'COMPLETED' ? (text == 'AUTOMATIC' ? 'Automatic' : 'Verified') : '';
+            },
           },
         ]
       : []),
 
-    ...(mode == null
+    ...(mode == null || mode === 'classification'
       ? [
           {
             sorter: allowSorting,
@@ -472,15 +507,15 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
           },
         ]
       : []),
-    {
-      sorter: allowSorting,
-      defaultSortOrder: getSortOrder('submission_id'),
-      title: <span data-testid="submission-id-header">Submission ID</span>,
-      dataIndex: 'submission_id',
-      key: 'submission_id',
-      render: (text) => <div data-testid="submission-id">{text}</div>,
-    },
-    ...(mode == null
+    // {
+    //   sorter: allowSorting,
+    //   defaultSortOrder: getSortOrder('submission_id'),
+    //   title: <span data-testid="submission-id-header">Submission ID</span>,
+    //   dataIndex: 'submission_id',
+    //   key: 'submission_id',
+    //   render: (text) => <div data-testid="submission-id">{text}</div>,
+    // },
+    ...(mode == null || mode === 'classification'
       ? [
           {
             sorter: allowSorting,
@@ -605,7 +640,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                         name: { sort: sortOrder === 'ascend' ? 'asc' : 'desc' },
                       },
                     }
-                  : ['approved_at', 'submitted_at', 'updated_at'].includes(sortField)
+                  : ['submitted_at', 'updated_at'].includes(sortField)
                     ? {
                         [sortField]: sortOrder === 'ascend' ? 'asc' : 'desc',
                       }
@@ -617,10 +652,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                         }
                       : sortField === 'title'
                         ? {
-                            [sortField]: { sort: sortOrder === 'ascend' ? 'asc' : 'desc' },
+                            [sortField]: { sort: sortOrder === 'ascend' ? 'asc' : 'desc', nulls: 'last' },
                           }
                         : {
-                            [sortField]: { sort: sortOrder === 'ascend' ? 'asc' : 'desc' },
+                            [sortField]: { sort: sortOrder === 'ascend' ? 'asc' : 'desc', nulls: 'last' },
                           }),
             },
           ],

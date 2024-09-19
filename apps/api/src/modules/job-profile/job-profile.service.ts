@@ -8,6 +8,7 @@ import { PrismaService } from '../../modules/prisma/prisma.service';
 import { AlexandriaError } from '../../utils/alexandria-error';
 import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
+import { ClassificationInput } from './inputs/classification-requirements.inputs';
 @Injectable()
 export class JobProfileService {
   constructor(
@@ -23,10 +24,12 @@ export class JobProfileService {
     state: string = 'PUBLISHED',
     searchConditions?: any,
     include_archived = false,
+    excludedDepartment?: boolean,
   ) {
     // if searchConditions were provided, do a "dumb" search instead of elastic search
     let searchResultIds = null;
     if (!searchConditions) searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+
     const currentJobProfiles =
       state == 'PUBLISHED'
         ? await this.prisma.currentJobProfile.findMany({
@@ -34,6 +37,16 @@ export class JobProfileService {
             where: { ...(searchResultIds != null && { id: { in: searchResultIds } }) },
           })
         : undefined;
+
+    // console.log(
+    //   'currentJobProfiles: ',
+    //   JSON.stringify(
+    //     currentJobProfiles.map((profile) => {
+    //       return profile.id;
+    //     }),
+    //   ),
+    // );
+
     return this.prisma.jobProfile.findMany({
       where: {
         is_archived: include_archived,
@@ -48,6 +61,24 @@ export class JobProfileService {
         ...(searchConditions != null && searchConditions),
         state,
         ...where,
+        classifications:
+          excludedDepartment !== undefined
+            ? {
+                some: excludedDepartment
+                  ? {
+                      classification: {
+                        employee_group_id: 'OEX',
+                      },
+                    }
+                  : {
+                      classification: {
+                        NOT: {
+                          employee_group_id: 'OEX',
+                        },
+                      },
+                    },
+              }
+            : undefined,
       },
       ...args,
       orderBy: [...(args.orderBy || []), { title: 'asc' }],
@@ -57,6 +88,22 @@ export class JobProfileService {
         updated_by: true,
         behavioural_competencies: true,
         classifications: {
+          where:
+            excludedDepartment !== undefined
+              ? excludedDepartment
+                ? {
+                    classification: {
+                      employee_group_id: 'OEX',
+                    },
+                  }
+                : {
+                    classification: {
+                      NOT: {
+                        employee_group_id: 'OEX',
+                      },
+                    },
+                  }
+              : undefined, // include all classifications if excludedDepartment is undefined
           include: {
             classification: true,
           },
@@ -206,15 +253,36 @@ export class JobProfileService {
     sortByOrganization,
     sortOrder,
     selectProfile,
+    departmentId,
     ...args
   }: FindManyJobProfileWithSearch) {
+    const department =
+      departmentId != null
+        ? await this.prisma.department.findUnique({
+            where: { id: departmentId },
+            include: {
+              metadata: true,
+            },
+          })
+        : undefined;
+
     if (selectProfile) {
       // Fetch all job profiles based on the search and where conditions
-      const allJobProfiles = await this.getJobProfilesWithSearch(search, this.transofrmWhereForAllOrgs(where), {
-        ...args,
-        take: undefined,
-        skip: undefined,
-      });
+
+      // Fetch all job profiles based on the search and where conditions
+      const allJobProfiles = await this.getJobProfilesWithSearch(
+        search,
+        this.transformWhereForAllOrgs(where),
+        {
+          ...args,
+          take: undefined,
+          skip: undefined,
+        },
+        undefined,
+        undefined,
+        undefined,
+        department?.metadata.is_statutorily_excluded,
+      );
 
       // Sort the job profiles based on the provided sorting parameters
       const sortedJobProfiles = this.sortJobProfiles(
@@ -240,7 +308,7 @@ export class JobProfileService {
     return -1;
   }
 
-  private transofrmWhereForAllOrgs(where: any) {
+  private transformWhereForAllOrgs(where: any) {
     // example of where:
     // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"organizations":{"some":{"organization_id":{"in":["BC026","ALL"]}}}}]}
     // Check if "ALL" is present in the organization_id array
@@ -288,25 +356,46 @@ export class JobProfileService {
     sortByOrganization,
     sortOrder,
     selectProfile,
+    departmentId,
     ...args
   }: FindManyJobProfileWithSearch) {
     let jobProfiles: any[];
 
-    where = this.transofrmWhereForAllOrgs(where);
+    where = this.transformWhereForAllOrgs(where);
 
     // if we are selecting a specific profile, we need to adjust page
     // used for when user presses back from the edit page and we need to select previously selected profile
     // on correct page
+    const department =
+      departmentId != null
+        ? await this.prisma.department.findUnique({
+            where: { id: departmentId },
+            include: {
+              metadata: true,
+            },
+          })
+        : undefined;
     if (selectProfile) {
       // Fetch all job profiles based on the search and where conditions
-      const allJobProfiles = await this.getJobProfilesWithSearch(search, where, {
-        ...args,
-        take: undefined,
-        skip: undefined,
-      });
+      const allJobProfiles = await this.getJobProfilesWithSearch(
+        search,
+        where,
+        {
+          ...args,
+          take: undefined,
+          skip: undefined,
+        },
+        undefined,
+        undefined,
+        undefined,
+        department?.metadata.is_statutorily_excluded,
+      );
+
+      // output all profiles ids:
+      // allJobProfiles is an array
 
       // Sort the job profiles based on the provided sorting parameters
-      const sortedJobProfiles = this.sortJobProfiles(
+      const sortedJobProfiles = await this.sortJobProfiles(
         allJobProfiles,
         sortByClassificationName,
         sortByJobFamily,
@@ -327,14 +416,30 @@ export class JobProfileService {
         const newSkip = (pageNumber - 1) * args.take;
 
         // Fetch the job profiles for the calculated page
-        jobProfiles = await this.getJobProfilesWithSearch(search, where, { ...args, skip: newSkip });
+        jobProfiles = await this.getJobProfilesWithSearch(
+          search,
+          where,
+          { ...args, skip: newSkip },
+          undefined,
+          undefined,
+          undefined,
+          department?.metadata.is_statutorily_excluded,
+        );
       } else {
         // If the selected profile is not found, return an empty array
         jobProfiles = [];
       }
     } else {
       // If selectProfile is not provided, fetch profiles based on the search and where conditions
-      jobProfiles = await this.getJobProfilesWithSearch(search, where, args);
+      jobProfiles = await this.getJobProfilesWithSearch(
+        search,
+        where,
+        args,
+        undefined,
+        undefined,
+        undefined,
+        department?.metadata.is_statutorily_excluded,
+      );
     }
 
     return jobProfiles;
@@ -360,17 +465,6 @@ export class JobProfileService {
     }
 
     return jobProfiles;
-  }
-
-  private async getJobProfilesCount(search: string, where: any) {
-    const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
-
-    return this.prisma.currentJobProfile.count({
-      where: {
-        ...(searchResultIds != null && { id: { in: searchResultIds } }),
-        ...where,
-      },
-    });
   }
 
   private async sortJobProfilesByClassification(jobProfiles: JobProfile[], sortOrder: string): Promise<JobProfile[]> {
@@ -621,7 +715,17 @@ export class JobProfileService {
     return jobProfile;
   }
 
-  async getJobProfileCount({ search, where }: FindManyJobProfileWithSearch) {
+  async getJobProfileCount({ search, where, departmentId }: FindManyJobProfileWithSearch) {
+    const department =
+      departmentId != null
+        ? await this.prisma.department.findUnique({
+            where: { id: departmentId },
+            include: {
+              metadata: true,
+            },
+          })
+        : undefined;
+    const excludedDepartment = department?.metadata?.is_statutorily_excluded;
     const searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
     return await this.prisma.currentJobProfile.count({
@@ -629,7 +733,25 @@ export class JobProfileService {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
-        ...this.transofrmWhereForAllOrgs(where),
+        ...this.transformWhereForAllOrgs(where),
+        classifications:
+          excludedDepartment !== undefined
+            ? {
+                some: excludedDepartment
+                  ? {
+                      classification: {
+                        employee_group_id: 'OEX',
+                      },
+                    }
+                  : {
+                      classification: {
+                        NOT: {
+                          employee_group_id: 'OEX',
+                        },
+                      },
+                    }, // include all classifications if excludedDepartment is false
+              }
+            : undefined,
       },
     });
   }
@@ -1594,13 +1716,11 @@ export class JobProfileService {
   async getRequirementsWithoutReadOnly(
     jobFamilyIds: number[],
     jobFamilyStreamIds: number[],
-    classificationId?: string,
-    classificationEmployeeGroupId?: string,
+    classifications: ClassificationInput[],
     ministryIds?: string[],
     jobFamilyWithNoStream?: number[],
     excludeProfileId?: number,
     excludeProfileVersion?: number,
-    classificationPeoplesoftId?: string,
   ) {
     // get job profiles from which to draw the requirements from based on job family and stream
     let jobProfiles = await this.prisma.currentJobProfile.findMany({
@@ -1717,30 +1837,30 @@ export class JobProfileService {
     let professionalRegistrationRequirements = await this.prisma.professionalRegistrationRequirement.findMany({
       where: {
         OR: [
-          {
-            // select based on classification only
+          // Classification only (multiple)
+          ...classifications.map((classification) => ({
             AND: [
               {
-                classification_id: classificationId,
-                classification_employee_group_id: classificationEmployeeGroupId,
+                classification_id: classification.id,
+                classification_employee_group_id: classification.employee_group_id,
               },
               {
                 job_family_id: null,
               },
             ],
-          },
-          // select by classification and job family
-          {
+          })),
+          // Classification and job family (multiple)
+          ...classifications.map((classification) => ({
             AND: [
               {
-                classification_id: classificationId,
-                classification_employee_group_id: classificationEmployeeGroupId,
+                classification_id: classification.id,
+                classification_employee_group_id: classification.employee_group_id,
               },
               {
                 job_family_id: { in: jobFamilyIds },
               },
             ],
-          },
+          })),
         ],
       },
       include: {
@@ -1753,11 +1873,11 @@ export class JobProfileService {
       const professionalRegistrationRequirements2 = await this.prisma.professionalRegistrationRequirement.findMany({
         where: {
           OR: [
-            {
+            ...classifications.map((classification) => ({
               AND: [
                 {
-                  classification_id: classificationId,
-                  classification_employee_group_id: classificationEmployeeGroupId,
+                  classification_id: classification.id,
+                  classification_employee_group_id: classification.employee_group_id,
                 },
                 {
                   job_family_id: null,
@@ -1766,12 +1886,12 @@ export class JobProfileService {
                   organization_id: { in: ministryIds },
                 },
               ],
-            },
-            {
+            })),
+            ...classifications.map((classification) => ({
               AND: [
                 {
-                  classification_id: classificationId,
-                  classification_employee_group_id: classificationEmployeeGroupId,
+                  classification_id: classification.id,
+                  classification_employee_group_id: classification.employee_group_id,
                 },
                 {
                   job_family_id: { in: jobFamilyIds },
@@ -1780,7 +1900,7 @@ export class JobProfileService {
                   organization_id: { in: ministryIds },
                 },
               ],
-            },
+            })),
           ],
         },
         include: {
@@ -1988,22 +2108,22 @@ export class JobProfileService {
 
     // fetch minimum requirements based on classification
     // New code to fetch classification grade
-    let classificationGrade: string | null = null;
-    if (classificationId && classificationEmployeeGroupId) {
-      const classification = await this.prisma.classification.findUnique({
-        where: {
-          id_employee_group_id_peoplesoft_id: {
-            id: classificationId,
-            employee_group_id: classificationEmployeeGroupId,
-            peoplesoft_id: classificationPeoplesoftId,
-          },
-        },
-        select: {
-          grade: true,
-        },
-      });
-      classificationGrade = classification?.grade ?? null;
-    }
+    // let classificationGrade: string | null = null;
+    // if (classificationId && classificationEmployeeGroupId) {
+    //   const classification = await this.prisma.classification.findUnique({
+    //     where: {
+    //       id_employee_group_id_peoplesoft_id: {
+    //         id: classificationId,
+    //         employee_group_id: classificationEmployeeGroupId,
+    //         peoplesoft_id: classificationPeoplesoftId,
+    //       },
+    //     },
+    //     select: {
+    //       grade: true,
+    //     },
+    //   });
+    // }
+    const classificationGrade = classifications.map((classification) => classification.grade) ?? null;
 
     // Fetch job profile minimum requirements
     let jobProfileMinimumRequirements = [];
@@ -2011,17 +2131,19 @@ export class JobProfileService {
     if (classificationGrade) {
       const minimumRequirements = await this.prisma.jobProfileMinimumRequirements.findMany({
         where: {
-          grade: classificationGrade,
+          grade: { in: classificationGrade },
         },
       });
 
+      //we are only using the first classification as a basis for min requirements for now.
+      // todo: this may result in incorrect updating on the front end when user changes classification when multiple options are used
       jobProfileMinimumRequirements = minimumRequirements.map((req) => ({
         text: req.requirement,
         jobFamilies: [],
         streams: [],
         classification:
-          classificationId && classificationEmployeeGroupId
-            ? { id: classificationId, employee_group_id: classificationEmployeeGroupId }
+          classifications[0].id && classifications[0].employee_group_id
+            ? { id: classifications[0].id, employee_group_id: classifications[0].employee_group_id }
             : null,
         organization: null,
         tc_is_readonly: true, // Assuming these are read-only

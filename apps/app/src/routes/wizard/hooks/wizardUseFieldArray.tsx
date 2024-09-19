@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // useAccountabilityFields.ts
 import { Modal } from 'antd';
-import { useFieldArray, UseFormReturn } from 'react-hook-form';
+import { useRef } from 'react';
+import { UseFormReturn, useFieldArray } from 'react-hook-form';
 import { AccountabilitiesModel, TrackedFieldArrayItem } from '../../../redux/services/graphql-api/job-profile-types';
 
 interface UseFormFieldsProps {
@@ -25,17 +26,11 @@ const useFormFields = ({
   significant,
   significant_add = true,
 }: UseFormFieldsProps) => {
-  const {
-    // fields: fields_fromUseFieldArray,
-    append,
-    remove,
-    update,
-  } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray({
     control: useFormReturn.control,
     name: fieldName,
   });
-
-  const fields = useFormReturn.watch(fieldName);
+  const newFieldIndexRef = useRef<number | null>(null);
 
   const handleRemove = (index: number) => {
     const currentValues = useFormReturn.getValues(fieldName);
@@ -79,25 +74,40 @@ const useFormFields = ({
       disabled: false,
       ...(significant && significant_add ? { is_significant: true } : {}),
     });
+    newFieldIndexRef.current = fields.length;
     useFormReturn.trigger();
+    setTimeout(function () {
+      setFocusOnNewField();
+    }, 0);
+  };
+
+  const setFocusOnNewField = () => {
+    if (newFieldIndexRef.current !== null) {
+      const inputElement = document.querySelector(`[name="${fieldName}.${newFieldIndexRef.current}.text"]`);
+      if (inputElement) {
+        (inputElement as HTMLInputElement).focus();
+        newFieldIndexRef.current = null;
+      }
+    }
   };
 
   const handleReset = (index: number) => {
+    // console.log('wizardUseFiledArray: handleReset: ', index, originalFields?.[index]);
     setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: false }));
     const currentValues: TrackedFieldArrayItem[] = useFormReturn.getValues(fieldName) as TrackedFieldArrayItem[];
     currentValues[index].text = originalFields?.[index]?.text;
     // console.log('handle reset: ', index, originalFields?.[index]?.text);
     // update for some reason doesn't update the value in the text box
-    // update(index, {
-    //   text: originalFields?.[index]?.text,
-    //   disabled: false,
-    //   is_readonly: originalFields?.[index]?.is_readonly,
-    //   is_significant: originalFields?.[index]?.is_significant,
-    // });
-    useFormReturn.setValue(`${fieldName}.${index}.text`, originalFields?.[index]?.text);
-    useFormReturn.setValue(`${fieldName}.${index}.disabled`, false);
-    useFormReturn.setValue(`${fieldName}.${index}.is_readonly`, originalFields?.[index]?.is_readonly);
-    useFormReturn.setValue(`${fieldName}.${index}.is_significant`, originalFields?.[index]?.is_significant);
+    update(index, {
+      text: originalFields?.[index]?.text,
+      disabled: false,
+      is_readonly: originalFields?.[index]?.is_readonly,
+      is_significant: originalFields?.[index]?.is_significant,
+    });
+    // useFormReturn.setValue(`${fieldName}.${index}.text`, originalFields?.[index]?.text);
+    // useFormReturn.setValue(`${fieldName}.${index}.disabled`, false);
+    // useFormReturn.setValue(`${fieldName}.${index}.is_readonly`, originalFields?.[index]?.is_readonly);
+    // useFormReturn.setValue(`${fieldName}.${index}.is_significant`, originalFields?.[index]?.is_significant);
   };
 
   return {

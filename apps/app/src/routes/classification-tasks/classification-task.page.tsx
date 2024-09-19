@@ -126,7 +126,7 @@ export const ClassificationTaskPage = () => {
               <div className="result-extra-content">
                 <Row justify="center">
                   <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-                    {currentStatus == 'VERIFICATION' && <NextSteps />}
+                    {currentStatus != 'COMPLETED' && <NextSteps />}
                     {currentStatus == 'REVIEW' && (
                       <Alert
                         style={{ marginBottom: '1rem' }}
@@ -279,6 +279,7 @@ export const ClassificationTaskPage = () => {
               prefix="Reporting to"
               mode="compact"
               positionNumber={data?.positionRequest?.reports_to_position_id}
+              positionProfile={data.positionRequest?.reports_to_position}
               orgChartData={data?.positionRequest?.orgchart_json}
             />
           </div>

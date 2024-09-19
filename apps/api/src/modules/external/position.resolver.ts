@@ -27,7 +27,10 @@ export class PositionResolver {
   }
 
   @Query(() => [PositionProfile], { name: 'positionProfile' })
-  async getPositionProfile(@Args('positionNumber') positionNumber: string) {
-    return await this.positionService.getPositionProfile(positionNumber);
+  async getPositionProfile(
+    @Args('positionNumber') positionNumber: string,
+    @Args({ name: 'extraInfo', nullable: true }) extraInfo?: boolean,
+  ) {
+    return await this.positionService.getPositionProfile(positionNumber, extraInfo);
   }
 }

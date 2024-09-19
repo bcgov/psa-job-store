@@ -95,6 +95,7 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
         const messageParts = errorMessage.split(':');
         const errorDescription = messageParts[1];
         notification.error({
+          placement: 'bottomRight',
           duration: 0,
           message: 'Error',
           description: errorDescription,
@@ -115,6 +116,7 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     if (!errorToastShown && !isToastShown && !suppressErrorToast) {
       isToastShown = true;
       notification.error({
+        placement: 'bottomRight',
         duration: 0,
         message: 'Unknown Error',
         description: 'Unknown error has occurred. We are investigating the issue. Please try again later.',

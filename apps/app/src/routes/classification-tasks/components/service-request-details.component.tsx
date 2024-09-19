@@ -19,8 +19,6 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     { skip: !positionRequestData?.positionRequest?.additional_info?.work_location_id },
   );
 
-  // console.log('locationInfo: ', locationInfo);
-
   const submissionDetailsItems = [
     {
       key: 'submittedBy',
@@ -33,8 +31,8 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'Submitted at',
       children: (
         <div>
-          {positionRequestData?.positionRequest?.approved_at &&
-            formatDateTime(positionRequestData?.positionRequest?.approved_at)}
+          {positionRequestData?.positionRequest?.submitted_at &&
+            formatDateTime(positionRequestData?.positionRequest?.submitted_at)}
         </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
@@ -97,6 +95,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       children: (
         <PositionProfile
           positionNumber={positionRequestData?.positionRequest?.reports_to_position_id}
+          positionProfile={positionRequestData?.positionRequest?.reports_to_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
 
@@ -131,6 +130,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       children: (
         <PositionProfile
           positionNumber={positionRequestData?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          positionProfile={positionRequestData?.positionRequest?.excluded_manager_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>
@@ -199,7 +199,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       children: (
         <div>
           {locationLoading && <LoadingComponent mode="small" />}
-          {locationInfo?.location?.name}
+          {positionRequestData.positionRequest?.additional_info?.work_location_name ?? locationInfo?.location.name}
         </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },

@@ -200,6 +200,11 @@ export interface ProfessionsModel {
   jobStreams: number[];
 }
 
+export interface EmployeeGroupClassificationsModel {
+  employeeGroup: string | null;
+  classification: string | null;
+}
+
 export interface OrganizationsModelWrapped {
   organization: {
     id: string;
@@ -437,6 +442,7 @@ export interface GetJobProfilesArgs {
   sortByOrganization?: boolean;
   sortOrder?: string;
   selectProfile?: string | null | undefined;
+  departmentId?: string;
 }
 
 export interface GetJobProfilesResponse {

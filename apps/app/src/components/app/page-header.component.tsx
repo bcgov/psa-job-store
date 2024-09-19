@@ -98,40 +98,7 @@ export const PageHeader = ({
       path: additionalBreadcrumb.path,
     });
   }
-  // const breadcrumbItemRender = (
-  //   route: {
-  //     breadcrumbName?:
-  //       | string
-  //       | number
-  //       | boolean
-  //       | ReactElement<any, string | JSXElementConstructor<any>>
-  //       | Iterable<ReactNode>
-  //       | null
-  //       | undefined;
-  //   },
-  //   params: any,
-  //   routes: any[],
-  //   paths: any[],
-  // ) => {
-  //   console.log(route);
-  //   console.log(params);
-  //   console.log(routes);
-  //   console.log(paths);
-  //   const last = routes.indexOf(route) === routes.length - 1;
-  //   return last ? <span>{route.breadcrumbName}</span> : <Link to={`#${paths.join('/')}`}>{route.breadcrumbName}</Link>;
-  // };
-  // const itemRender = (item: BreadcrumbItem, any[]) => {
-  //     const { path, title } = item;
 
-  //     const isLast = breadcrumbs.indexOf(item) === segmentsLength; //routes.indexOf(route) === routes.length - 1;
-  //     return isLast ? (
-  //       <span className="breadcrumb-current">{title}</span>
-  //     ) : (
-  //       <Link className="breadcrumb-link" to={path}>
-  //         {title}
-  //       </Link>
-  //     );
-  //   };
   const itemRender = (
     route: Partial<BreadcrumbItem>, // The current route info
     _params: any, // Params (not used in this case)

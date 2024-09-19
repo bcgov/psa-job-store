@@ -2,7 +2,8 @@
 import { Input, List, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import debounce from 'lodash.debounce';
-import { Controller, UseFieldArrayRemove, UseFormReturn, UseFormTrigger } from 'react-hook-form';
+import { useRef } from 'react';
+import { Controller, UseFieldArrayRemove, UseFieldArrayUpdate, UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { ContextOptions } from './context-options.component';
@@ -30,12 +31,13 @@ interface FieldItemProps {
   validateVerification?: () => void;
   fieldName: AllowedFieldNames;
   testId: string;
-  label?: string;
+  label: string;
   handleReset: (index: number) => void;
   handleAddBack: (index: number) => void;
   handleRemove: (index: number) => void;
   confirmRemoveModal?: () => void;
-  onFocus?: () => void;
+  update: UseFieldArrayUpdate<any, string>;
+  onFocus?: (inputRef: any) => void;
   originalFields?: any[];
   isAdmin?: boolean | undefined;
   remove?: UseFieldArrayRemove;
@@ -58,12 +60,16 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
   handleRemove,
   confirmRemoveModal,
   onFocus,
+  update,
   originalFields,
   isAdmin = undefined,
 }) => {
-  const ariaLabel = field.disabled
-    ? `Undo remove ${label ?? fieldName} ${index + 1}`
-    : `Remove ${label ?? fieldName} ${index + 1}`;
+  const inputRef = useRef(null);
+  const removeAriaLabel = field.is_readonly
+    ? `Cannot remove ${label ?? fieldName} ${index + 1} because field is required`
+    : field.disabled
+      ? `Undo remove ${label ?? fieldName} ${index + 1}`
+      : `Remove ${label ?? fieldName} ${index + 1}`;
 
   let isEdited = false;
   if (isAdmin === undefined) isEdited = editedFields ? editedFields[index] || field.isCustom : false;
@@ -81,9 +87,12 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
   //   debug = true;
   // }
 
+  // if (!field.id) {
+  //   console.log('field does not have id', field);
+  // }
+
   return (
     <List.Item
-      key={field.id}
       style={{
         textDecoration: field.disabled ? 'line-through' : 'none',
         display: 'flex',
@@ -104,11 +113,6 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
       <FormItem name={`${fieldName}.${index}.is_readonly`} control={useFormReturn.control} hidden>
         <Input />
       </FormItem>
-      {/* <FormItem name={`${fieldName}.${index}.tc_is_readonly`} control={useFormReturn.control} hidden>
-        <Input />
-      </FormItem> */}
-
-      {/* || field.tc_is_readonly */}
       {field.is_readonly && (
         <Typography.Text data-testid={`readonly-${testId}-${index}`} style={{ flex: 1, marginRight: '10px' }}>
           {field['text']}
@@ -127,7 +131,7 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
           return (
             <>
               <label className="sr-only" htmlFor={field.id}>
-                {ariaLabel} {index + 1}
+                {label ?? fieldName} {index + 1}
               </label>
               <div
                 className={`${isEdited && field.is_significant ? 'edited-field-container' : ''} input-container`}
@@ -135,6 +139,8 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                 // || field.tc_is_readonly
               >
                 <TextArea
+                  name={`${fieldName}.${index}.text`}
+                  ref={inputRef}
                   id={field.id}
                   data-testid={`${testId}-input-${index}`}
                   autoSize
@@ -148,6 +154,8 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                     handleFieldChange(index, updatedValue);
                   }}
                   onBlur={() => {
+                    // console.log('text area onBlur: ', inputRef);
+
                     // If this is not a custom field and it's now empty,
                     // when user leaves the field, restore the text to original
                     // and mark as disabled. This prevents the issue where
@@ -155,71 +163,54 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                     // shifts the order of items, causing diff view corruption.
 
                     if (!field.isCustom && !value) {
-                      // set the value from originalFields?.[index]?.['text']
-                      // onChange(originalFields?.[index]?.['text']);
                       setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: true }));
-                      // set disabled to true
 
-                      // update for some reason doesn't update the value in the text box
-                      // update?.(index, {
-                      //   ...field,
-                      //   text: originalFields?.[index]?.['text'],
-                      //   disabled: true,
-                      // });
+                      update(index, {
+                        ...field,
+                        text: originalFields?.[index]?.text,
+                        disabled: true,
+                      });
 
-                      useFormReturn.setValue(`${fieldName}.${index}.text`, originalFields?.[index]?.['text']);
-                      useFormReturn.setValue(`${fieldName}.${index}.disabled`, true);
                       useFormReturn.trigger();
                     }
 
+                    // setTimeout(() => {
                     if (isAdmin === undefined) validateVerification?.();
                     else if (!isAdmin) validateVerification?.();
+                    // }, 100);
+
                     onBlur();
                   }}
                   onFocus={() => {
-                    if (isAdmin === undefined) onFocus?.();
-                    else if (!isAdmin) onFocus?.();
+                    console.log('onFocus, inputRef: ', inputRef);
+                    if (isAdmin === undefined) onFocus?.(inputRef);
+                    else if (!isAdmin) onFocus?.(inputRef);
                   }}
                   value={value ? (typeof value === 'string' ? value : value.text) : ''}
                 />
               </div>
+              <ContextOptions
+                index={index}
+                isReadonly={field.is_readonly}
+                isDisabled={field.disabled}
+                isCustom={field.isCustom}
+                isEdited={(() => {
+                  // return editedFields?.[index] ?? false;
+                  return value !== originalFields?.[index]?.text;
+                })()}
+                isSignificant={field.is_significant && !isAdmin}
+                removeAriaLabel={removeAriaLabel}
+                id={label}
+                handleReset={handleReset}
+                handleAddBack={handleAddBack}
+                handleRemove={handleRemove}
+                confirmRemoveModal={confirmRemoveModal}
+                focusFallback={`${fieldName}.${index}.text`}
+              />
             </>
           );
         }}
       />
-
-      {/* {field.tc_is_readonly ? (
-        <ContextOptionsReadonly
-          isReadonly={field.tc_is_readonly ?? false}
-          onEdit={() => {
-            update?.(index, {
-              ...fields?.[index],
-              tc_is_readonly: false,
-              // isCustom: true,
-            });
-          }}
-          onRemove={() => {
-            remove?.(index);
-            trigger?.();
-          }}
-        />
-      ) : ( */}
-      <ContextOptions
-        index={index}
-        isReadonly={field.is_readonly}
-        isDisabled={field.disabled}
-        isCustom={field.isCustom}
-        isEdited={(() => {
-          return editedFields?.[index] ?? false;
-        })()}
-        ariaLabel={ariaLabel}
-        testId={testId}
-        handleReset={handleReset}
-        handleAddBack={handleAddBack}
-        handleRemove={handleRemove}
-        confirmRemoveModal={confirmRemoveModal}
-      />
-      {/* )} */}
     </List.Item>
   );
 };

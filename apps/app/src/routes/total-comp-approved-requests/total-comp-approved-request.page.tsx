@@ -36,12 +36,20 @@ export const TotalCompApprovedRequestPage = () => {
     {
       id: data?.positionRequest?.additional_info?.work_location_id,
     },
-    { skip: !data?.positionRequest?.additional_info?.work_location_id },
+    {
+      skip:
+        data?.positionRequest?.additional_info?.work_location_name != null ||
+        !data?.positionRequest?.additional_info?.work_location_id,
+    },
   );
 
+  // fetch positionInfo to find effective date
+  // this endpoint gets position info regardless if it's encumbered or not
+  // useGetPositionProfileQuery on the other hand will only return the result if position is encumbered
+  // together with employee info
   const { data: positionInfo, isLoading: positionLoading } = useGetPositionQuery(
     { where: { id: `${data?.positionRequest?.position_number?.toString().padStart(8, '0')}` } },
-    { skip: !data?.positionRequest?.position_number },
+    { skip: data?.positionRequest?.reports_to_position != null || !data?.positionRequest?.position_number },
   );
 
   const submissionDetailsItems = [
@@ -102,6 +110,7 @@ export const TotalCompApprovedRequestPage = () => {
       children: (
         <PositionProfile
           positionNumber={data?.positionRequest?.reports_to_position_id}
+          positionProfile={data?.positionRequest?.reports_to_position}
           orgChartData={data?.positionRequest?.orgchart_json}
         ></PositionProfile>
 
@@ -119,6 +128,7 @@ export const TotalCompApprovedRequestPage = () => {
       children: (
         <PositionProfile
           positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          positionProfile={data?.positionRequest?.excluded_manager_position}
           orgChartData={data?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>
@@ -189,7 +199,7 @@ export const TotalCompApprovedRequestPage = () => {
       children: (
         <div>
           {locationLoading && <LoadingComponent mode="small" />}
-          {locationInfo?.location?.name}
+          {data?.positionRequest?.additional_info?.work_location_name ?? locationInfo?.location.name}
         </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
@@ -200,7 +210,10 @@ export const TotalCompApprovedRequestPage = () => {
       children: (
         <div>
           {positionLoading && <LoadingComponent mode="small" />}
-          {formatDateTime(positionInfo?.position.effective_date, true)}
+          {formatDateTime(
+            data?.positionRequest?.reports_to_position?.effectiveDate ?? positionInfo?.position?.effective_date,
+            true,
+          )}
         </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
@@ -417,14 +430,16 @@ export const TotalCompApprovedRequestPage = () => {
                         </Descriptions.Item>
                         <Descriptions.Item label="Reporting Manager" span={3}>
                           <PositionProfile
-                            positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+                            positionNumber={data?.positionRequest?.reports_to_position_id}
+                            positionProfile={data?.positionRequest?.reports_to_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
                           ></PositionProfile>
                         </Descriptions.Item>
                         <Descriptions.Item label="First Band Manager" span={3}>
                           <PositionProfile
-                            positionNumber={data?.positionRequest?.reports_to_position_id}
+                            positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+                            positionProfile={data?.positionRequest?.excluded_manager_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
                           ></PositionProfile>
@@ -508,6 +523,7 @@ export const TotalCompApprovedRequestPage = () => {
               prefix="Reporting to"
               mode="compact"
               positionNumber={data?.positionRequest?.reports_to_position_id}
+              positionProfile={data?.positionRequest?.reports_to_position}
               orgChartData={data?.positionRequest?.orgchart_json}
             ></PositionProfile>
           </div>

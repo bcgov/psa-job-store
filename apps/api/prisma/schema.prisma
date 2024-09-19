@@ -45,6 +45,11 @@ enum PositionRequestStatus {
   CANCELLED
 }
 
+enum ApprovalType {
+  AUTOMATIC
+  VERIFIED
+}
+
 model PositionRequest {
   id                               Int                    @id @default(autoincrement())
   crm_id                           Int?                   @unique
@@ -53,6 +58,8 @@ model PositionRequest {
   step                             Int // Keeps track of the current step in the wizard
   max_step_completed               Int? // Keeps track of the highest step completed in the wizard
   reports_to_position_id           String
+  reports_to_position              Json? // position data as it was submitted
+  excluded_manager_position        Json? // position data as it was submitted
   department_id                    String // this is department id that user selected in org chart
   parent_job_profile_id            Int?
   parent_job_profile_version       Int?
@@ -67,7 +74,9 @@ model PositionRequest {
   classification_peoplesoft_id     String?
   submission_id                    String?
   submitted_at                     DateTime               @default(now())
-  approved_at                      DateTime               @default(now())
+  approved_at                      DateTime?
+  time_to_approve                  Int?
+  approval_type                    ApprovalType?
   status                           PositionRequestStatus?
   updated_at                       DateTime               @default(now()) @updatedAt
   shareUUID                        String?                @default(uuid()) @db.Uuid
@@ -78,7 +87,7 @@ model PositionRequest {
   classification     Classification?    @relation(fields: [classification_id, classification_employee_group_id, classification_peoplesoft_id], references: [id, employee_group_id, peoplesoft_id])
   parent_job_profile JobProfile?        @relation(fields: [parent_job_profile_id, parent_job_profile_version], references: [id, version])
   department         Department         @relation(fields: [department_id], references: [id])
-  CurrentJobProfile  CurrentJobProfile? @relation(fields: [parent_job_profile_id], references: [id])
+  CurrentJobProfile  CurrentJobProfile? @relation("currentJobProfilePositionRequests", fields: [parent_job_profile_id, parent_job_profile_version], references: [id, version], map: "current_job_profile_position_requests_fk")
 
   @@map("position_request")
 }
@@ -215,9 +224,9 @@ model JobProfile {
 view CurrentJobProfile {
   id                                     Int                               @unique
   version                                Int
-  behavioural_competencies               JobProfileBehaviouralCompetency[]
-  classifications                        JobProfileClassification[]
-  organizations                          JobProfileOrganization[]
+  behavioural_competencies               JobProfileBehaviouralCompetency[] @relation("currentJobProfileBehaviouralCompetencies")
+  classifications                        JobProfileClassification[]        @relation("currentJobProfileClassifications")
+  organizations                          JobProfileOrganization[]          @relation("currentJobProfileOrganizations")
   all_organizations                      Boolean
   all_reports_to                         Boolean
   context                                String?
@@ -225,7 +234,7 @@ view CurrentJobProfile {
   role_id                                Int?
   role_type                              JobProfileRoleType?               @relation(fields: [role_type_id], references: [id])
   role_type_id                           Int?
-  scopes                                 JobProfileScopeLink[]
+  scopes                                 JobProfileScopeLink[]             @relation("currentJobProfileScopes")
   state                                  JobProfileState
   type                                   JobProfileType
   created_at                             DateTime?
@@ -237,8 +246,8 @@ view CurrentJobProfile {
   updated_by                             User?                             @relation(name: "currentDraftedByRelation", fields: [updated_by_id], references: [id])
   published_by_id                        String?                           @db.Uuid
   published_by                           User?                             @relation(name: "currentPublishedByRelation", fields: [published_by_id], references: [id])
-  jobFamilies                            JobProfileJobFamilyLink[]
-  streams                                JobProfileStreamLink[]
+  jobFamilies                            JobProfileJobFamilyLink[]         @relation("currentJobProfileFamilyLinks")
+  streams                                JobProfileStreamLink[]            @relation("currentJobProfileStreamLinks")
   program_overview                       String?
   review_required                        Boolean?
   title                                  String
@@ -253,8 +262,8 @@ view CurrentJobProfile {
   willingness_statements                 Json?                             @db.JsonB
   optional_requirements                  String[]
   security_screenings                    Json?                             @db.JsonB
-  reports_to                             JobProfileReportsTo[]
-  position_request                       PositionRequest[]
+  reports_to                             JobProfileReportsTo[]             @relation("currentJobProfileReportsTo")
+  position_request                       PositionRequest[]                 @relation("currentJobProfilePositionRequests")
   total_comp_create_form_misc            Json?                             @db.JsonB
   is_archived                            Boolean
   SavedJobProfile                        SavedJobProfile[]
@@ -284,7 +293,7 @@ model JobProfileScopeLink {
   job_profile_version Int
   scope               JobProfileScope    @relation(fields: [scope_id], references: [id])
   scope_id            Int
-  CurrentJobProfile   CurrentJobProfile? @relation(fields: [job_profile_id], references: [id])
+  CurrentJobProfile   CurrentJobProfile? @relation("currentJobProfileScopes", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_scopes_fk")
 
   @@map("job_profile_scope_link")
 }
@@ -295,7 +304,7 @@ model JobProfileJobFamilyLink {
   jobFamilyId       Int
   jobProfile        JobProfile          @relation(fields: [jobProfileId, jobProfileVersion], references: [id, version])
   jobFamily         JobProfileJobFamily @relation(fields: [jobFamilyId], references: [id])
-  CurrentJobProfile CurrentJobProfile?  @relation(fields: [jobProfileId], references: [id])
+  CurrentJobProfile CurrentJobProfile?  @relation("currentJobProfileFamilyLinks", fields: [jobProfileId, jobProfileVersion], references: [id, version], map: "current_job_profile_family_links_fk")
 
   @@id([jobProfileId, jobProfileVersion, jobFamilyId])
   @@map("job_profile_job_family_link")
@@ -307,7 +316,7 @@ model JobProfileStreamLink {
   streamId          Int
   jobProfile        JobProfile         @relation(fields: [jobProfileId, jobProfileVersion], references: [id, version])
   stream            JobProfileStream   @relation(fields: [streamId], references: [id])
-  CurrentJobProfile CurrentJobProfile? @relation(fields: [jobProfileId], references: [id])
+  CurrentJobProfile CurrentJobProfile? @relation("currentJobProfileStreamLinks", fields: [jobProfileId, jobProfileVersion], references: [id, version], map: "current_job_profile_stream_links_fk")
 
   @@id([jobProfileId, jobProfileVersion, streamId])
   @@map("job_profile_stream_link")
@@ -319,21 +328,22 @@ model JobProfileBehaviouralCompetency {
   job_profile               JobProfile            @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
   job_profile_id            Int
   job_profile_version       Int
-  CurrentJobProfile         CurrentJobProfile?    @relation(fields: [job_profile_id], references: [id])
+  CurrentJobProfile         CurrentJobProfile?    @relation("currentJobProfileBehaviouralCompetencies", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_behavioural_competencies_fk")
 
   @@id([behavioural_competency_id, job_profile_id, job_profile_version])
   @@map("job_profile_behavioural_competency")
 }
 
 model JobProfileClassification {
-  job_profile                      JobProfile         @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
+  job_profile                      JobProfile     @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
   job_profile_id                   Int
   job_profile_version              Int
-  classification                   Classification     @relation(fields: [classification_id, classification_employee_group_id, classification_peoplesoft_id], references: [id, employee_group_id, peoplesoft_id])
+  classification                   Classification @relation(fields: [classification_id, classification_employee_group_id, classification_peoplesoft_id], references: [id, employee_group_id, peoplesoft_id])
   classification_id                String
-  classification_employee_group_id String             @default("-1")
-  classification_peoplesoft_id     String             @default("-1")
-  CurrentJobProfile                CurrentJobProfile? @relation(fields: [job_profile_id], references: [id])
+  classification_employee_group_id String         @default("-1")
+  classification_peoplesoft_id     String         @default("-1")
+
+  CurrentJobProfile CurrentJobProfile? @relation("currentJobProfileClassifications", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_classifications_fk")
 
   @@id([job_profile_id, job_profile_version, classification_id, classification_employee_group_id, classification_peoplesoft_id])
   @@map("job_profile_classification")
@@ -399,7 +409,7 @@ model JobProfileOrganization {
   job_profile         JobProfile         @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
   job_profile_id      Int
   job_profile_version Int
-  CurrentJobProfile   CurrentJobProfile? @relation(fields: [job_profile_id], references: [id])
+  CurrentJobProfile   CurrentJobProfile? @relation("currentJobProfileOrganizations", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_organizations_fk")
 
   @@id([organization_id, job_profile_id, job_profile_version])
   @@map("job_profile_organization")
@@ -425,7 +435,7 @@ model JobProfileReportsTo {
   classification_id                String
   classification_employee_group_id String             @default("-1")
   classification_peoplesoft_id     String             @default("-1")
-  CurrentJobProfile                CurrentJobProfile? @relation(fields: [job_profile_id], references: [id])
+  CurrentJobProfile                CurrentJobProfile? @relation("currentJobProfileReportsTo", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_reports_to_fk")
 
   @@id([job_profile_id, job_profile_version, classification_id, classification_employee_group_id, classification_peoplesoft_id])
   @@map("job_profile_reports_to")

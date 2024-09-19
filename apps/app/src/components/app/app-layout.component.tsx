@@ -25,9 +25,9 @@ export const AppLayout = () => {
   const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', false);
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh' }} id="layout">
       <AppHeader />
-      <Layout hasSider style={{ height: '100%' }}>
+      <Layout hasSider style={{ flex: '1' }} id="layout2">
         {auth.isAuthenticated && (
           <Sider
             onCollapse={setCollapsed}
@@ -42,7 +42,7 @@ export const AppLayout = () => {
           </Sider>
         )}
         <Layout>
-          <Content style={{ display: 'flex', flexDirection: 'column' }}>
+          <Content style={{ display: 'flex', flexDirection: 'column' }} id="content">
             <RenderOutlet />
           </Content>
         </Layout>

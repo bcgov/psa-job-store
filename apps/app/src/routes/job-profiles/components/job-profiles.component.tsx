@@ -9,7 +9,8 @@ import { graphqlApi } from '../../../redux/services/graphql-api';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { useLazyGetJobProfilesQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { OrganizationModel } from '../../../redux/services/graphql-api/organization';
-import { useLazyGetPositionQuery } from '../../../redux/services/graphql-api/position.api';
+import { GetPositionRequestResponseContent } from '../../../redux/services/graphql-api/position-request.api';
+import { useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import { JobProfileSearchResults } from './job-profile-search-results.component';
 import { JobProfileSearch } from './job-profile-search.component';
 import JobProfileViewCounter from './job-profile-view-counter.component';
@@ -28,7 +29,7 @@ interface JobProfilesContentProps {
   organizationFilterExtra?: OrganizationModel;
   positionRequestId?: number;
   loadProfileIds?: number[];
-  prData?: any;
+  prData?: GetPositionRequestResponseContent | null;
 }
 
 interface JobProfilesRef {
@@ -78,7 +79,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     // todo: this should not be needed, get this info from the wizard context
     // const [prTrigger, { data: prData }] = useLazyGetPositionRequestQuery();
-    const [pTrigger, { data: pData }] = useLazyGetPositionQuery();
+    const [pTrigger, { data: pData }] = useLazyGetPositionProfileQuery();
     const [positionFilteringProcessActive, setPositionFilteringProcessActive] = useState<boolean>(true);
     // TODO: Add useLazyGetPositionQuery(<id>)
 
@@ -96,24 +97,25 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       // If we have a positionRequestId and prData, get the position data
       const reportsToPositionId = prData?.reports_to_position_id;
 
-      if (reportsToPositionId != null && pData == null) {
+      // only need to fetch if reports_to_position is not recorded - for backwards compatibility.
+      if (reportsToPositionId != null && pData == null && prData?.reports_to_position == null) {
         dispatch(graphqlApi.util.invalidateTags(['jobProfiles']));
-        pTrigger({ where: { id: `${reportsToPositionId}` } });
+        pTrigger({ positionNumber: `${reportsToPositionId}`, extraInfo: true });
       }
 
       // If we have a positionRequestId, position request data, and position data, get the classification ID for the position
-      const { classification_id, classification_employee_group_id, classification_peoplesoft_id } =
-        pData?.position ?? {};
+      const { classificationId, classificationEmployeeGroupId, classificationPeoplesoftId } =
+        prData?.reports_to_position ?? pData?.positionProfile[0] ?? {};
       // const classificationId = pData?.position?.classification_id;
-      const classificationId =
-        classification_id != null
-          ? `${classification_id}.${classification_employee_group_id}.${classification_peoplesoft_id}`
+      const classification =
+        classificationId != null
+          ? `${classificationId}.${classificationEmployeeGroupId}.${classificationPeoplesoftId}`
           : null;
 
-      if (classificationId != null && classificationIdFilter == null) {
+      if (classification != null && classificationIdFilter == null) {
         setPositionFilteringProcessActive(false);
         // set classificationIdFilter from the position data to filter job profiles by classification
-        setClassificationIdFilter(classificationId);
+        setClassificationIdFilter(classification);
       }
     }, [positionRequestId, prData, pData, classificationIdFilter, dispatch, pTrigger]);
 
@@ -314,6 +316,8 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         // if we need to have a specific profile selected, the server will ignore take and skip to get correct frame
         // it will also ignore filters and search query
         selectProfile: !selectProfileIdRan.current ? selectProfileNumber : null,
+        //pass departmentid to only return included/excluded profiles
+        departmentId: prData?.department_id,
       });
 
       // Fetch job profiles based on other filters and search query
@@ -332,6 +336,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       organizationFilterExtra,
       loadProfileIds,
       number,
+      prData?.department_id,
     ]);
 
     // Update totalResults based on the response (if applicable)

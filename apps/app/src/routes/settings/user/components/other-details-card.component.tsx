@@ -34,7 +34,7 @@ export const OtherDetailsCard = ({ user }: OtherDetailsCardProps) => {
     if (positionData?.position?.supervisor_id != null) {
       supervisorPositionDataTrigger({ positionNumber: positionData.position.supervisor_id });
     }
-  }, [positionData, user]);
+  }, [positionData, positionDataTrigger, supervisorPositionDataTrigger, user]);
 
   // console.log('user: ', user);
   // console.log('positionData: ', positionData);

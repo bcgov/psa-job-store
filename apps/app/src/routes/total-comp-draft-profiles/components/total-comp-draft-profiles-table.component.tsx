@@ -137,6 +137,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       link = '/job-profiles/manage/archived/';
     }
   } else {
+    // TC user is viewing published job profiles
     // eslint-disable-next-line react-hooks/rules-of-hooks
     [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesQuery();
     link = '/job-profiles/manage/published/';
@@ -199,7 +200,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       title: 'Class',
       dataIndex: 'classifications',
       key: 'classifications',
-      render: (classifications: any[]) => classifications?.map((c) => c.classification.name).join(', '),
+      render: (classifications: any[]) => classifications?.map((c) => c.classification.name)[0],
     },
     {
       sorter: allowSorting,

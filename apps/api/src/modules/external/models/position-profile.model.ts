@@ -42,4 +42,13 @@ export class PositionProfile {
 
   @Field({ nullable: true })
   classificationCode?: string;
+
+  @Field(() => String, { nullable: false })
+  classificationPeoplesoftId!: string;
+
+  @Field(() => String, { nullable: false })
+  classificationEmployeeGroupId!: string;
+
+  @Field(() => String, { nullable: true })
+  effectiveDate!: string;
 }

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Popover } from 'antd';
+import { TooltipPlacement } from 'antd/es/tooltip';
 import React, { ReactNode, forwardRef, useEffect, useRef, useState } from 'react';
 import './accessible-popover-menu.css';
 
@@ -10,6 +11,10 @@ interface AccessiblePopoverMenuProps {
   padding?: string;
   buttonId?: string;
   compact?: boolean;
+  placement?: TooltipPlacement;
+  arrow?: boolean;
+  focusable?: boolean;
+  borderFocus?: boolean;
 }
 
 const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
@@ -19,6 +24,10 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
   padding,
   buttonId,
   compact,
+  placement,
+  arrow,
+  focusable = true,
+  borderFocus = false,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -30,9 +39,11 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
     // Update the visibility based on user interaction
     setVisible(isVisible);
 
-    if (!isVisible && ellipsisRef.current) {
-      ellipsisRef.current.focus();
-    }
+    // only focus back on the button in response to escape key
+    // on click it should focus on whatever the user is clicking (for example input box)
+    // if (!isVisible && ellipsisRef.current) {
+    //   ellipsisRef.current.focus();
+    // }
   };
 
   const handlePopoverOpen = (visible: any) => {
@@ -74,10 +85,11 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
         id={buttonId}
         ref={ref}
         style={{ cursor: 'pointer', display: 'inline-flex' }}
-        tabIndex={0}
+        tabIndex={focusable ? 0 : -1}
         role="button"
         aria-label={ariaLabel}
         data-testid="popover-trigger"
+        className={`popover-trigger ${borderFocus ? 'border-focus' : ''}`}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -92,12 +104,14 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
   );
 
   const ContentWrapper = forwardRef<HTMLDivElement, { children: ReactNode }>(({ children, ...props }, ref) => (
-    <div {...props} ref={ref}>
+    // onClick prevents menu from staying open when clicking on the menu items
+    <div {...props} ref={ref} onClick={() => setVisible(false)}>
       {children}
     </div>
   ));
 
-  // console.log('open: ', visible);
+  // console.log('placement: ', placement);
+
   return (
     <Popover
       open={visible}
@@ -108,9 +122,10 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
       }}
       content={<ContentWrapper ref={contentRef}>{content}</ContentWrapper>}
       trigger="click"
-      placement="bottom"
+      placement={placement ?? 'bottom'}
       overlayInnerStyle={{ padding: padding }}
-      overlayClassName={compact ? 'compact-popover' : ''}
+      overlayClassName={compact ? 'compact-popover accessible-popover' : 'accessible-popover'}
+      arrow={arrow ?? true}
     >
       {/* add ref to triggerButton, e.g. ref={(el) => (ellipsisRef.current = el)} */}
       <TriggerButtonWrapper ref={ellipsisRef} buttonId={buttonId}>

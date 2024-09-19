@@ -83,12 +83,15 @@ export const DownloadJobProfileComponent = ({
       } else {
         console.log('generaring with profile: ', profile);
       }
+
+      // console.log('prData?.positionRequest: ', prData?.positionRequest);
       const document =
         profile != null
           ? generateJobProfile({
               jobProfile: profile,
               positionRequest: positionRequest ?? prData?.positionRequest,
-              supervisorProfile: positionProfileData?.positionProfile[0],
+              supervisorProfile:
+                prData?.positionRequest?.reports_to_position ?? positionProfileData?.positionProfile[0],
             })
           : null;
 
@@ -126,8 +129,17 @@ export const DownloadJobProfileComponent = ({
           : `Job Profile ${profileTitle} ${date}.docx`,
       );
 
-      const supervisorPosition = prData.positionRequest?.additional_info?.excluded_mgr_position_number;
+      const supervisorPosition = prData.positionRequest?.reports_to_position_id;
       console.log('supervisorPosition for profileTrigger: ', supervisorPosition);
+      console.log('prData.positionRequest: ', prData.positionRequest);
+
+      // no need to fetch profile, since it's now embedded
+      if (prData.positionRequest?.reports_to_position) {
+        console.log('embedded, skipping');
+        return Promise.resolve();
+      } else {
+        console.log('not embedded, fetching');
+      }
 
       if (supervisorPosition) {
         try {
@@ -183,11 +195,12 @@ export const DownloadJobProfileComponent = ({
 
       console.log(
         'positionProfileData does not exist (profileTrigger): ',
-        positionRequest.additional_info.excluded_mgr_position_number.toString(),
+        positionRequest.reports_to_position_id.toString(),
       );
+      console.log(' positionRequest: ', positionRequest);
       const [positionProfileData, originalProfile] = await Promise.all([
         profileTrigger({
-          positionNumber: positionRequest.additional_info.excluded_mgr_position_number.toString(),
+          positionNumber: positionRequest.reports_to_position_id.toString(),
         }).unwrap(),
         triggerGetJobProfile({
           id: positionRequest?.parent_job_profile_id,

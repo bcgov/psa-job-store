@@ -666,16 +666,18 @@ export const PositionRequestPage = () => {
                   prefix="Reporting to"
                   mode="compact"
                   positionNumber={wizardContextPositionRequestData?.reports_to_position_id}
+                  positionProfile={wizardContextPositionRequestData?.reports_to_position}
                   orgChartData={wizardContextPositionRequestData?.orgchart_json}
                 ></PositionProfile>
               </div>
             }
             pageHeaderExtra={[
-              <div style={{ marginRight: '1rem' }}>
+              <div style={{ marginRight: '1rem' }} key="statusIndicator">
                 <StatusIndicator status={wizardContextPositionRequestData?.status ?? ''} />
               </div>,
               (readonlyMode === 'completed' || readonlyMode === 'inQueue') && (
                 <DownloadJobProfileComponent
+                  key="downloadJobProfile"
                   positionRequest={wizardContextPositionRequestData}
                   jobProfile={wizardContextPositionRequestData?.profile_json}
                   useModal={readonlyMode === 'completed'}

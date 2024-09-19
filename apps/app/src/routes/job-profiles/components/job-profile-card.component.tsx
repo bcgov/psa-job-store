@@ -87,7 +87,7 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       <div>
         <Text type="secondary" data-cy="card-classification">
           <b style={{ marginTop: '-0.8rem', marginBottom: '0.7rem', display: 'block' }}>
-            {data.classifications?.map((c) => c.classification.name).join(', ')}
+            {data.classifications?.map((c) => c.classification.name)[0]}
           </b>
         </Text>
         <Text type="secondary" data-cy="card-info">

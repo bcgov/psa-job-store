@@ -5,7 +5,6 @@ import { UseFormReturn } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
-import useFormFields from '../hooks/wizardUseFieldArray';
 import { AllowedFieldNames } from './wizard-edit-profile-list-item';
 import './wizard-edit-profile-optional-list.css';
 
@@ -14,15 +13,14 @@ interface OptionalListProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
   label: string;
   fieldName: AllowedFieldNames;
+  fields: Record<'id', string>[];
+  handleRemove: (index: number) => void;
 }
 
-const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, fieldName }) => {
+const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, fieldName, fields, handleRemove }) => {
   // const { optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown } = useWizardContext();
 
-  const { fields, handleRemove } = useFormFields({
-    useFormReturn,
-    fieldName: fieldName,
-  });
+  if (!fields) return null;
 
   const anyEnabled = fields.some((field: any) => !field.disabled);
 
@@ -81,7 +79,11 @@ const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, field
             className="optionalList"
           >
             <Form.Item
-              label={<span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>{label}</span>}
+              label={
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                  <h4>{label}</h4>
+                </span>
+              }
               labelCol={{ className: 'card-label' }}
               className="label-only"
               colon={false}

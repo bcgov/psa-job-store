@@ -378,7 +378,7 @@ export class JobProfileValidationModel {
   markAllNonEditableSec: boolean;
   jobStoreNumber: string;
   originalJobStoreNumber: string;
-  employeeGroup: string | null;
+  employeeGroups: string[];
   classification: string | null;
 
   jobRole: number | null;
@@ -627,7 +627,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return <LoadingSpinnerWithMessage />;
   }
 
-  console.log('effectiveData: ', effectiveData);
+  // console.log('effectiveData: ', effectiveData);
 
   const basicInfoItems: DescriptionsProps['items'] = [
     {
@@ -751,11 +751,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: <h3 tabIndex={0}>Classification</h3>,
       children: (
         <div tabIndex={0}>
-          {originalData?.classifications
-            ? originalData?.classifications?.map((c) => c.classification?.code).join(', ')
-            : effectiveData?.classifications?.map((c) => c.classification?.code).join(', ')}
+          {
+            // currently, there are a maximum of 2 classifications (to accomadate schedule A) - both of which should be the same code.
+            originalData
+              ? originalData?.classifications?.map((c) => c.classification?.code)[0]
+              : effectiveData?.classifications?.map((c) => c.classification?.code)[0]
+          }
         </div>
       ),
+
+      // children: <div tabIndex={0}>{originalData?.classifications?.map((c) => c.classification?.code).join(', ')}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     ...(effectiveData?.program_overview &&

@@ -89,9 +89,9 @@ export class PositionRequestStatusCounts {
 
 interface AdditionalInfo {
   work_location_id?: string;
+  work_location_name?: string;
   department_id?: string;
   excluded_mgr_position_number?: string;
-  comments?: string;
   branch?: string;
   division?: string;
 }
@@ -184,17 +184,17 @@ export class PositionRequestApiService {
       // there is no position number associated with this position request - create position in peoplesoft
       if (positionRequest.position_number == null) {
         // in testmode, we can skip the peoplesoft call to create position
-        let position;
+        let position, positionRequestNeedsReview;
         try {
           if (process.env.TEST_ENV === 'true') {
-            const positionRequestNeedsReview = await this.positionRequestNeedsReview(id);
+            positionRequestNeedsReview = (await this.positionRequestNeedsReview(id)).result;
 
-            if (positionRequestNeedsReview.result === true)
+            if (positionRequestNeedsReview === true)
               position = { positionNbr: '00142558' }; // 00142558 is proposed (for verification required test)
             else position = { positionNbr: '00132136' }; // this position needs to be in approved status in order to have valid final state
           } else {
             // note this returns data with this format (string with leading zeros): { positionNbr: '00132136', errMessage: '' }
-            position = await this.createPositionForPositionRequest(id);
+            [position, positionRequestNeedsReview] = await this.createPositionForPositionRequest(id);
           }
         } catch (error) {
           this.logger.error(error);
@@ -207,6 +207,7 @@ export class PositionRequestApiService {
           positionRequest = await this.prisma.positionRequest.update({
             where: { id },
             data: {
+              approval_type: positionRequestNeedsReview ? 'VERIFIED' : 'AUTOMATIC',
               position_number: +position.positionNbr,
               submitted_at: dayjs().toDate(),
             },
@@ -231,8 +232,7 @@ export class PositionRequestApiService {
       } else {
         // we already have a position number assigned to this position request
         // this happens if something went wrong previously and we did not get to changing the status of this position request
-        // this should not be a common occurrence
-        this.logger.warn('Position request already has a position number assigned: ' + positionRequest.position_number);
+        // or if user is re-submitting after CS requested HM to make changes
 
         // check crm status etc
 
@@ -299,6 +299,18 @@ export class PositionRequestApiService {
       throw AlexandriaError('Failed to update org chart');
     }
 
+    const reportsTo = (await this.positionService.getPositionProfile(positionRequest.reports_to_position_id, true))[0];
+    const excludedMgr = (
+      await this.positionService.getPositionProfile(positionRequest.additional_info.excluded_mgr_position_number, true)
+    )[0];
+
+    await this.prisma.positionRequest.update({
+      where: { id },
+      data: {
+        reports_to_position: reportsTo,
+        excluded_manager_position: excludedMgr,
+      },
+    });
     // CRM Incident Managements
     let crm_id;
     let crm_lookup_name;
@@ -486,6 +498,8 @@ export class PositionRequestApiService {
         parent_job_profile: true,
         approved_at: true,
         submitted_at: true,
+        approval_type: true,
+        time_to_approve: true,
         crm_id: true,
         crm_lookup_name: true,
         shareUUID: true,
@@ -763,10 +777,10 @@ export class PositionRequestApiService {
     return isDifferent;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
+  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput, user_id: string) {
     // todo: AL-146 - tried to do this with a spread operator, but getting an error (todo: this can now be fixed)
     let updatingAdditionalInfo = false;
+    const currentData = await this.getPositionRequest(id, user_id);
     const updatePayload: Prisma.PositionRequestUpdateInput = {
       additional_info: {} as Prisma.JsonValue,
     };
@@ -822,9 +836,29 @@ export class PositionRequestApiService {
           updateData.parent_job_profile.connect.id_version.id,
           updateData.parent_job_profile.connect.id_version.version,
         );
+        // if we have a department, try to filter for multiple classifications
+        if (parentJobProfile.classifications.length > 1) {
+          const getClassification = async (parentJobProfile: any, department_id: string) => {
+            const isExcluded = (await this.departmentService.getDepartment({ where: { id: department_id } })).metadata
+              .is_statutorily_excluded;
 
-        // Set Classification on positionRequest
-        if (parentJobProfile.classifications && parentJobProfile.classifications.length > 0) {
+            const classifications = parentJobProfile.classifications;
+            return isExcluded
+              ? classifications.filter((cl) => cl.classification_employee_group_id == 'OEX')
+              : classifications.filter((cl) => cl.classification_employee_group_id != 'OEX');
+          };
+          const classifications = await getClassification(parentJobProfile, currentData.department_id);
+          // Set Classification IDs on positionRequest
+          updatePayload.classification = {
+            connect: {
+              id_employee_group_id_peoplesoft_id: {
+                id: classifications[0].classification.id,
+                employee_group_id: classifications[0].classification.employee_group_id,
+                peoplesoft_id: classifications[0].classification.peoplesoft_id,
+              },
+            },
+          };
+        } else if (parentJobProfile.classifications && parentJobProfile.classifications.length > 0) {
           const classification = parentJobProfile.classifications[0].classification;
           updatePayload.classification = {
             connect: {
@@ -873,6 +907,11 @@ export class PositionRequestApiService {
       if (additionalInfo.work_location_id !== undefined) {
         (updatePayload.additional_info as Record<string, Prisma.JsonValue>).work_location_id =
           additionalInfo.work_location_id;
+      }
+
+      if (additionalInfo.work_location_name !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).work_location_name =
+          additionalInfo.work_location_name;
       }
 
       if (
@@ -981,10 +1020,6 @@ export class PositionRequestApiService {
             updatePayload.orgchart_json = updatedOrgChart;
           }
         }
-      }
-
-      if (additionalInfo.comments !== undefined) {
-        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).comments = additionalInfo.comments;
       }
     } else if (additionalInfo === null) {
       updatingAdditionalInfo = true;
@@ -1535,7 +1570,7 @@ export class PositionRequestApiService {
 
     const position = await this.peoplesoftService.createPosition(data);
 
-    return position;
+    return [position, positionRequestNeedsReview];
   }
 
   //deprecated

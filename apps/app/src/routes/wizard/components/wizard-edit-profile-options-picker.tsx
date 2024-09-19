@@ -149,6 +149,19 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
     onAdd(selectedItems);
   };
 
+  useEffect(() => {
+    if (visible) {
+      // Focus on the first focusable element in the drawer
+      const firstFocusableElement = document.querySelector('#optionsPickerUpdateButton');
+
+      if (firstFocusableElement) {
+        setTimeout(() => {
+          (firstFocusableElement as HTMLElement).focus();
+        }, 100);
+      }
+    }
+  }, [visible]);
+
   return (
     <div>
       <Form.Item style={{ marginBottom: 0 }}>
@@ -157,13 +170,16 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
             style={{ paddingLeft: 0 }}
             type="link"
             onClick={showDrawer}
-            icon={<CheckSquareOutlined />}
+            icon={<CheckSquareOutlined aria-hidden />}
             disabled={filteredOptions.length == 0}
+            aria-haspopup="dialog"
+            aria-expanded={visible}
           >
             {buttonText}
           </Button>
         </Tooltip>
         <Drawer
+          aria-label={title}
           title={title}
           placement="right"
           width="50%"
@@ -172,10 +188,15 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
           style={{ backgroundColor: 'rgb(240, 242, 245)' }}
           extra={
             <>
-              <Button type="primary" style={{ marginRight: '16px' }} onClick={onAddAction}>
-                Add
+              <Button
+                type="primary"
+                style={{ marginRight: '16px' }}
+                onClick={onAddAction}
+                id="optionsPickerUpdateButton"
+              >
+                Update list
               </Button>
-              <Button type="text" icon={<CloseOutlined />} onClick={onClose} />
+              <Button type="text" icon={<CloseOutlined aria-hidden />} aria-label="close dialog" onClick={onClose} />
             </>
           }
         >
@@ -187,13 +208,16 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
             justify="center"
             gutter={8}
             style={{ zIndex: 2, position: 'relative' }}
-            role="search"
             data-testid="job-profile-search"
           >
             <Col sm={24} md={24} lg={24} xl={24} xxl={24}>
               {/* Search block */}
               {filterOptions && (
-                <Card style={{ marginTop: '1rem', marginBottom: '1rem', borderColor: '#D9D9D9' }} bordered={true}>
+                <Card
+                  style={{ marginTop: '1rem', marginBottom: '1rem', borderColor: '#D9D9D9' }}
+                  bordered={true}
+                  role="search"
+                >
                   <Row gutter={24}>
                     <Col xl={12} lg={12} md={12} sm={24}>
                       <Search
@@ -266,6 +290,16 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
                               selectedJobRoleType.forEach((val) => {
                                 if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
                               });
+                            }}
+                            onKeyDown={(event) => {
+                              // Close the select menu when the user presses the Escape key
+                              // otherwise closes the sider, trapping the user inside the select
+                              if (event.key === 'Escape') {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                // Close the select menu
+                                (event.target as HTMLElement).blur();
+                              }
                             }}
                           ></Select>
                         </Col>

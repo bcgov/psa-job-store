@@ -1,8 +1,7 @@
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
-import { DepartmentModel } from './department.api';
 import { ClassificationModel } from './job-profile-types';
-import { OrganizationModel } from './organization';
+import { DepartmentModel, OrganizationModel } from './organization';
 
 export interface PositionModel {
   id: string;
@@ -29,6 +28,11 @@ export interface PositionProfileModel {
   classification: string;
   ministry: string;
   status: string;
+  // former PositionModel data that is optionally included here
+  classificationId?: string;
+  classificationPeoplesoftId?: string;
+  classificationEmployeeGroupId?: string;
+  effectiveDate?: string;
 }
 
 export interface PositionProfileModelResponse {
@@ -45,6 +49,7 @@ export interface GetPositionArgs {
 
 export interface GetPositionResponseArgs {
   positionNumber: string;
+  extraInfo?: boolean;
   uniqueKey?: string;
   suppressGlobalError?: boolean;
 }
@@ -76,8 +81,8 @@ export const positionApi = graphqlApi.injectEndpoints({
       query: (args: GetPositionResponseArgs) => {
         return {
           document: gql`
-            query PositionProfile($positionNumber: String!) {
-              positionProfile(positionNumber: $positionNumber) {
+            query PositionProfile($positionNumber: String!, $extraInfo: Boolean) {
+              positionProfile(positionNumber: $positionNumber, extraInfo: $extraInfo) {
                 positionNumber
                 positionDescription
                 departmentName
@@ -85,11 +90,16 @@ export const positionApi = graphqlApi.injectEndpoints({
                 classification
                 ministry
                 status
+                classificationId
+                classificationPeoplesoftId
+                classificationEmployeeGroupId
+                effectiveDate
               }
             }
           `,
           variables: {
             positionNumber: args.positionNumber,
+            extraInfo: args.extraInfo,
             uniqueKey: args.uniqueKey,
             suppressGlobalError: args.suppressGlobalError,
           },

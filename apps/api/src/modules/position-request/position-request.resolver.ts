@@ -123,7 +123,7 @@ export class PositionRequestApiResolver {
     @Args('returnFullObject', { type: () => Boolean, defaultValue: false }) returnFullObject: boolean,
     @CurrentUser() user: Express.User,
   ) {
-    const updatedPositionRequest = await this.positionRequestService.updatePositionRequest(id, updateInput);
+    const updatedPositionRequest = await this.positionRequestService.updatePositionRequest(id, updateInput, user.id);
 
     if (returnFullObject) {
       return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
