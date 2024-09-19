@@ -13,3 +13,15 @@
 .compact-popover ul{
     background: transparent !important;
 }
+
+.popover-trigger.border-focus:focus{
+    border: 4px solid #66a8d4;
+}
+
+.popover-trigger.border-focus:focus-visible{
+    outline-color:  #66a8d4;
+}
+
+.accessible-popover a:focus{
+    outline: 4px solid #66a8d4;
+}

@@ -16,7 +16,7 @@ export const OrgChartHelpButton = () => {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href="https://chips.gov.bc.ca:7002/psp/CHIPSBC/EMPLOYEE/HRMS/c/TGB_SECURITY_ACCESS.TGB_POS_MGT_DUMMY.GBL"
+                  href="https://chips.gov.bc.ca/psp/CHIPSBC/EMPLOYEE/HRMS/c/TGB_SECURITY_ACCESS.TGB_POS_MGT_DUMMY.GBL"
                 >
                   Visit the Position Management form
                 </a>

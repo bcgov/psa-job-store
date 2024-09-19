@@ -65,6 +65,9 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
         <>
           {/* If current solution is found to lack accessibility, implement something like below */}
           <AccessiblePopoverMenu
+            // Menu is intended to be navigated with arrow keys, disable tabbing onto the button
+            focusable={false}
+            borderFocus={true}
             compact
             triggerButton={
               <Button
@@ -84,21 +87,29 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
               <Menu selectedKeys={[]} className="create-menu" rootClassName="create-menu-root" inlineCollapsed={false}>
                 {userCanAccess(auth.user, ['hiring-manager']) && (
                   <Menu.Item key="/requests/positions/create" icon={<PositionRequestOutlined aria-hidden />} title="">
-                    <Link to="/requests/positions/create">New position</Link>
+                    <Link aria-label={'Create new position'} to="/requests/positions/create">
+                      New position
+                    </Link>
                   </Menu.Item>
                 )}
                 {userCanAccess(auth.user, ['total-compensation']) && (
                   <Menu.Item key="/job-profiles/manage/create" icon={<FileOutlined aria-hidden />} title="">
-                    <Link to="/job-profiles/manage/create">Job profile</Link>
+                    <Link aria-label={'Create job profile'} to="/job-profiles/manage/create">
+                      Job profile
+                    </Link>
                   </Menu.Item>
                 )}
               </Menu>
+              // <Menu className="wizard-menu">
+              //   <Menu.Item key="save">
+              //     <div style={{ padding: '5px 0' }}>Save and quit</div>
+              //   </Menu.Item>
+              //   <Menu.Item key="delete">
+              //     <div style={{ padding: '5px 0' }}>Delete</div>
+              //   </Menu.Item>
+              // </Menu>
             }
           ></AccessiblePopoverMenu>
-
-          {/* <Dropdown menu={{ items: menuItems }} trigger={['click']}>
-            {renderButton(menuItems)}
-          </Dropdown> */}
         </>
       )}
     </div>
