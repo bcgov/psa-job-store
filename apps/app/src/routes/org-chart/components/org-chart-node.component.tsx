@@ -41,6 +41,8 @@ const renderPositionNumber = (roles: string[], positionData: Record<string, any>
   } else if (roles.includes('hiring-manager') || roles.includes('user')) {
     // Approved is the PeopleSoft status, for positions which were created outside the Job Store
     // COMPLETED is the Job Store status, for positions which were created inside the Job Store (PS === Active, CRM === Completed)
+    // todo - currently the status is always "Approved" - need to do more complex logic involving PR
+    // e.g. if PS status is approved, but PR is in review, then don't show the position number
     if (['Approved', 'COMPLETED'].includes(positionData.position_status)) {
       return positionData.id;
     } else {
