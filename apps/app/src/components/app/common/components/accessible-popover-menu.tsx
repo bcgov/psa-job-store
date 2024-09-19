@@ -13,6 +13,8 @@ interface AccessiblePopoverMenuProps {
   compact?: boolean;
   placement?: TooltipPlacement;
   arrow?: boolean;
+  focusable?: boolean;
+  borderFocus?: boolean;
 }
 
 const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
@@ -24,6 +26,8 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
   compact,
   placement,
   arrow,
+  focusable = true,
+  borderFocus = false,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -81,11 +85,11 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
         id={buttonId}
         ref={ref}
         style={{ cursor: 'pointer', display: 'inline-flex' }}
-        tabIndex={0}
+        tabIndex={focusable ? 0 : -1}
         role="button"
         aria-label={ariaLabel}
         data-testid="popover-trigger"
-        className="popover-trigger"
+        className={`popover-trigger ${borderFocus ? 'border-focus' : ''}`}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -120,7 +124,7 @@ const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
       trigger="click"
       placement={placement ?? 'bottom'}
       overlayInnerStyle={{ padding: padding }}
-      overlayClassName={compact ? 'compact-popover' : ''}
+      overlayClassName={compact ? 'compact-popover accessible-popover' : 'accessible-popover'}
       arrow={arrow ?? true}
     >
       {/* add ref to triggerButton, e.g. ref={(el) => (ellipsisRef.current = el)} */}

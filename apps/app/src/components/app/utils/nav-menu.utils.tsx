@@ -65,7 +65,7 @@ export const createMenuItem = ({ key, icon, label, style, title }: NavMenuItemPr
   key,
   // icon, // include menu in the link, since it focuses on the link when using keyboard, this way outline encompasses the whole menu item
   label: (
-    <Link to={key} style={{}}>
+    <Link to={key} style={{}} tabIndex={-1} aria-label={label}>
       {icon} <span className="link-label">{label}</span>
     </Link>
   ),
