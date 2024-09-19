@@ -433,7 +433,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
       <WizardContentWrapper>
         <Row justify="center" gutter={16}>
-          <Col>
+          <Col style={{ paddingTop: '24px' }}>
             <WizardEditProfile
               onVerificationRequiredChange={setRequiresVerification}
               ref={wizardEditProfileRef}

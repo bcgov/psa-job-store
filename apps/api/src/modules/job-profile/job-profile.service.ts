@@ -29,6 +29,7 @@ export class JobProfileService {
     // if searchConditions were provided, do a "dumb" search instead of elastic search
     let searchResultIds = null;
     if (!searchConditions) searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
+
     const currentJobProfiles =
       state == 'PUBLISHED'
         ? await this.prisma.currentJobProfile.findMany({
@@ -36,19 +37,16 @@ export class JobProfileService {
             where: { ...(searchResultIds != null && { id: { in: searchResultIds } }) },
           })
         : undefined;
-    // const a = await this.prisma.jobProfile.findMany({
-    //   where: {
-    //     is_archived: false,
 
-    //     id: 47,
-    //     version: 2,
+    // console.log(
+    //   'currentJobProfiles: ',
+    //   JSON.stringify(
+    //     currentJobProfiles.map((profile) => {
+    //       return profile.id;
+    //     }),
+    //   ),
+    // );
 
-    //     ...(searchConditions != null && searchConditions),
-    //     state,
-    //   },
-    //   orderBy: [...(args.orderBy || []), { title: 'asc' }],
-    // });
-    // console.log(a);
     return this.prisma.jobProfile.findMany({
       where: {
         is_archived: include_archived,
@@ -274,7 +272,7 @@ export class JobProfileService {
       // Fetch all job profiles based on the search and where conditions
       const allJobProfiles = await this.getJobProfilesWithSearch(
         search,
-        this.transofrmWhereForAllOrgs(where),
+        this.transformWhereForAllOrgs(where),
         {
           ...args,
           take: undefined,
@@ -310,7 +308,7 @@ export class JobProfileService {
     return -1;
   }
 
-  private transofrmWhereForAllOrgs(where: any) {
+  private transformWhereForAllOrgs(where: any) {
     // example of where:
     // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"organizations":{"some":{"organization_id":{"in":["BC026","ALL"]}}}}]}
     // Check if "ALL" is present in the organization_id array
@@ -363,7 +361,7 @@ export class JobProfileService {
   }: FindManyJobProfileWithSearch) {
     let jobProfiles: any[];
 
-    where = this.transofrmWhereForAllOrgs(where);
+    where = this.transformWhereForAllOrgs(where);
 
     // if we are selecting a specific profile, we need to adjust page
     // used for when user presses back from the edit page and we need to select previously selected profile
@@ -393,8 +391,11 @@ export class JobProfileService {
         department?.metadata.is_statutorily_excluded,
       );
 
+      // output all profiles ids:
+      // allJobProfiles is an array
+
       // Sort the job profiles based on the provided sorting parameters
-      const sortedJobProfiles = this.sortJobProfiles(
+      const sortedJobProfiles = await this.sortJobProfiles(
         allJobProfiles,
         sortByClassificationName,
         sortByJobFamily,
@@ -415,7 +416,15 @@ export class JobProfileService {
         const newSkip = (pageNumber - 1) * args.take;
 
         // Fetch the job profiles for the calculated page
-        jobProfiles = await this.getJobProfilesWithSearch(search, where, { ...args, skip: newSkip });
+        jobProfiles = await this.getJobProfilesWithSearch(
+          search,
+          where,
+          { ...args, skip: newSkip },
+          undefined,
+          undefined,
+          undefined,
+          department?.metadata.is_statutorily_excluded,
+        );
       } else {
         // If the selected profile is not found, return an empty array
         jobProfiles = [];
@@ -724,7 +733,7 @@ export class JobProfileService {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
-        ...this.transofrmWhereForAllOrgs(where),
+        ...this.transformWhereForAllOrgs(where),
         classifications:
           excludedDepartment !== undefined
             ? {
@@ -2133,8 +2142,8 @@ export class JobProfileService {
         streams: [],
         classification:
           classifications[0].id && classifications[0].employee_group_id
-            ? [{ id: classifications[0].id, employee_group_id: classifications[0].employee_group_id }]
-            : [],
+            ? { id: classifications[0].id, employee_group_id: classifications[0].employee_group_id }
+            : null,
         organization: null,
         tc_is_readonly: true, // Assuming these are read-only
       }));

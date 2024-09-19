@@ -1,6 +1,7 @@
 .jobstore-side-menu.expanded .create-button{
     margin: 0.8rem auto 0.8rem auto;
     width: 90%;
+    padding: 0;
 }
 
 .jobstore-side-menu .create-menu-button .ant-menu-submenu-title:active{
@@ -11,6 +12,13 @@
     margin-top: 0.8rem;
     padding:0 !important;
 } */
+
+.jobstore-side-menu.expanded .create-button .popover-trigger{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height:100%;
+}
 
 .jobstore-side-menu .create-button .popover-trigger{
     width:100%;

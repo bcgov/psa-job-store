@@ -137,6 +137,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       link = '/job-profiles/manage/archived/';
     }
   } else {
+    // TC user is viewing published job profiles
     // eslint-disable-next-line react-hooks/rules-of-hooks
     [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesQuery();
     link = '/job-profiles/manage/published/';

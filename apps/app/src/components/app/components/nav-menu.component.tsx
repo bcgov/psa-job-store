@@ -71,7 +71,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                 className: 'create-menu-button',
                 key: 'create-menu',
                 collapsed,
-                icon: <FileAddOutlined />,
+                icon: <FileAddOutlined aria-hidden />,
                 style: {
                   backgroundColor: '#0057ad',
                   color: 'white',
@@ -109,12 +109,14 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                 icon: <></>,
                 label: <CreateButton collapsed={collapsed} />,
                 title: userCanAccess(auth.user, ['hiring-manager']) ? 'Create new position' : 'Create job profile',
-                onFocus: () => {
-                  // redirect focus on the trigger, otherwise won't open the popover
-                  // get .popover-trigger that's inside .create-button and focus on it
-                  const popoverTrigger = document.querySelector('.create-button .popover-trigger');
-                  // focus on it
-                  (popoverTrigger as HTMLElement)?.focus();
+                onFocus: (e: any) => {
+                  if (e.nativeEvent.target.classList.contains('create-button')) {
+                    // redirect focus on the trigger, otherwise won't open the popover
+                    // get .popover-trigger that's inside .create-button and focus on it
+                    const popoverTrigger = document.querySelector('.create-button .popover-trigger');
+                    // focus on it
+                    (popoverTrigger as HTMLElement)?.focus();
+                  }
                 },
                 style: {
                   backgroundColor: '#0057ad',
@@ -368,6 +370,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
     >
       {/* {userCanAccess(auth.user, ['hiring-manager', 'total-compensation']) && <CreateButton collapsed={collapsed} />} */}
       <Menu
+        aria-label="Main menu - use arrow keys to navigate"
         rootClassName="jobstore-side-menu-popup"
         inlineIndent={16}
         mode="inline"
@@ -382,6 +385,14 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         items={menuItems}
         openKeys={openKeys}
         onOpenChange={onOpenChange}
+        // onFocus={(e) => {
+        //   console.log('onFocus menu: ', e);
+        //   // if the focused element is not a menu item, focus on the first menu item
+        //   // if (!e.target.classList.contains('ant-menu-item')) {
+        //   //   const firstMenuItem = document.querySelector('.ant-menu-item');
+        //   //   (firstMenuItem as HTMLElement)?.focus();
+        //   // }
+        // }}
       />
     </Flex>
   );
