@@ -36,7 +36,11 @@ export const TotalCompApprovedRequestPage = () => {
     {
       id: data?.positionRequest?.additional_info?.work_location_id,
     },
-    { skip: data?.positionRequest?.additional_info?.work_location_id == null },
+    {
+      skip:
+        data?.positionRequest?.additional_info?.work_location_name != null ||
+        !data?.positionRequest?.additional_info?.work_location_id,
+    },
   );
 
   // fetch positionInfo to find effective date
