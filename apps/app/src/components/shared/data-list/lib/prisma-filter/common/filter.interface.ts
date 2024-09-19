@@ -1,4 +1,4 @@
-import { FieldOperatorValue } from './field-operator.type';
+import { FieldPathOperatorValue } from './field-operator.type';
 
 export interface IFilter<T = Record<string, unknown>> {
   search?: string;
@@ -8,6 +8,6 @@ export interface IFilter<T = Record<string, unknown>> {
   pageSize?: number;
 }
 
-export type ISingleFilter<T = Record<string, unknown>> = FieldOperatorValue<T>;
+export type ISingleFilter<T = Record<string, unknown>> = FieldPathOperatorValue<T>;
 
 export type ISingleOrder<T = Record<string, unknown>> = Record<keyof T & string, 'asc' | 'desc'>;

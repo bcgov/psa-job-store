@@ -1,7 +1,7 @@
 import { SyncOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Input, Row, Tag } from 'antd';
 import { useMemo } from 'react';
-import { FieldOperator } from '../../lib/prisma-filter/common/field-operator.type';
+import { FieldPathOperatorValue } from '../../lib/prisma-filter/common/field-operator.type';
 import { FilterBuilder } from '../../lib/prisma-filter/common/filter.builder';
 import { Filter } from './components';
 import { SelectFilter } from './components/select-filter.component';
@@ -9,7 +9,7 @@ import { SelectFilter } from './components/select-filter.component';
 const { Search } = Input;
 
 export interface DataFilterSearchProps {
-  fields: FieldOperator[];
+  fields: FieldPathOperatorValue[];
 }
 
 export interface DataFilterProps {

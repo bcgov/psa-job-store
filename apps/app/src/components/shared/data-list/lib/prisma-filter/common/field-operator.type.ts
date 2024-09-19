@@ -1,8 +1,8 @@
 import { FilterOperator } from './filter-operator.enum';
 
-export type FieldOperator<T = Record<string, unknown>> = {
+export type FieldPathOperatorValue<T = Record<string, unknown>> = {
   field: keyof T & string;
+  path?: string[];
   operator: FilterOperator;
+  value?: unknown;
 };
-
-export type FieldOperatorValue<T = Record<string, unknown>> = FieldOperator<T> & { value: unknown };

@@ -6,6 +6,7 @@ import ContentWrapper from '../../../components/content-wrapper.component';
 import { DataList } from '../../../components/shared/data-list/data-list.component';
 import { FilterOperator } from '../../../components/shared/data-list/lib/prisma-filter/common/filter-operator.enum';
 import {
+  useGetOrganizationsPicklistForSettingsQuery,
   useGetRolesForSettingsQuery,
   useLazyGetUsersForSettings2Query,
 } from '../../../redux/services/graphql-api/settings/settings.api';
@@ -13,6 +14,9 @@ import { useSettingsContext } from '../hooks/use-settings-context.hook';
 
 export const WidgetListPage = () => {
   const { organizations } = useSettingsContext();
+
+  const { data: organizationsPicklistData, isFetching: organizationsPicklistDataIsLoading } =
+    useGetOrganizationsPicklistForSettingsQuery();
 
   const { data: rolesData, isFetching: rolesDataIsLoading } = useGetRolesForSettingsQuery();
 
@@ -41,21 +45,19 @@ export const WidgetListPage = () => {
                 }),
                 placeholder: 'Roles',
               },
-              // {
-              //   type: 'select',
-              //   mode: 'single-value',
-              //   field: 'metadata.peoplesoft->organization_id',
-              //   operator: FilterOperator.StringEquals,
-              //   options: [{ label: 'Citz', value: 'BC112' }],
-              //   placeholder: 'Ministry',
-              // },
+              {
+                type: 'select',
+                mode: 'single-value',
+                field: 'metadata',
+                path: ['peoplesoft', 'organization_id'],
+                loading: organizationsPicklistDataIsLoading,
+                operator: FilterOperator.JsonEquals,
+                options: (organizationsPicklistData?.organizations ?? []).map((o) => ({ label: o.name, value: o.id })),
+                placeholder: 'Ministry',
+              },
             ],
             searchProps: {
               fields: [
-                {
-                  field: 'id',
-                  operator: FilterOperator.StringIContains,
-                },
                 {
                   field: 'name',
                   operator: FilterOperator.StringIContains,
@@ -90,6 +92,17 @@ export const WidgetListPage = () => {
                 },
                 sorter: false,
                 title: 'Roles',
+              },
+              {
+                key: 'metadata.peoplesoft.organization_id',
+                dataIndex: ['metadata', 'peoplesoft', 'organization_id'],
+                render: (value: string) => {
+                  const ministryName =
+                    organizationsPicklistData?.organizations?.find((o) => o.id === value)?.name ?? '';
+                  return <span>{ministryName}</span>;
+                },
+                sorter: false,
+                title: 'Home  ministry',
               },
               {
                 key: 'email',

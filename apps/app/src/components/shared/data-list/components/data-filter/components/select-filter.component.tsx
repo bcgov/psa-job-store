@@ -8,7 +8,8 @@ export type SelectFilterOption = { label: string; value: string };
 type SingleSelectFilterProps = {
   mode: 'single-value';
   field: string;
-  operator: FilterOperator.StringEquals;
+  path?: string[];
+  operator: FilterOperator.StringEquals | FilterOperator.JsonEquals;
   filterBuilder: FilterBuilder;
   loading?: boolean;
   options: SelectFilterOption[];
@@ -18,6 +19,7 @@ type SingleSelectFilterProps = {
 type MultiSelectFilterProps = {
   mode: 'multi-value';
   field: string;
+  path?: string[];
   operator: FilterOperator.StringIn | FilterOperator.StringListHasSome;
   filterBuilder: FilterBuilder;
   loading?: boolean;
@@ -30,6 +32,7 @@ export type SelectFilterProps = SingleSelectFilterProps | MultiSelectFilterProps
 export const SelectFilter = ({
   mode,
   field,
+  path,
   operator,
   filterBuilder,
   loading,
@@ -48,7 +51,7 @@ export const SelectFilter = ({
           const typed = newValue as SingleValue<SelectFilterOption>;
 
           if (typed != null) {
-            filterBuilder.addFilter({ field, operator, value: typed.value });
+            filterBuilder.addFilter({ field, path, operator, value: typed.value });
           } else {
             filterBuilder.removeFilter({ field, operator });
           }
@@ -58,6 +61,7 @@ export const SelectFilter = ({
               if (action === 'select-option') {
                 filterBuilder.addFilter({
                   field,
+                  path,
                   operator,
                   value: newValue.map((v) => v.value).join(','),
                 });
@@ -73,11 +77,12 @@ export const SelectFilter = ({
                   if (filteredValues.length > 0) {
                     filterBuilder.addFilter({
                       field,
+                      path,
                       operator,
                       value: filteredValues,
                     });
                   } else {
-                    filterBuilder.removeFilter({ field: field, operator });
+                    filterBuilder.removeFilter({ field, path, operator });
                   }
                 }
               }
@@ -88,7 +93,7 @@ export const SelectFilter = ({
         filterBuilder.apply();
       }}
       backspaceRemovesValue={false}
-      closeMenuOnSelect={false}
+      closeMenuOnSelect={mode === 'single-value'}
       controlShouldRenderValue={false}
       hideSelectedOptions={false}
       isClearable={false}

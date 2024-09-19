@@ -1,6 +1,6 @@
 import { SetURLSearchParams } from 'react-router-dom';
 import { DataFilterSearchProps } from '../../../components/data-filter/data-filter.component';
-import { FieldOperator, FieldOperatorValue } from './field-operator.type';
+import { FieldPathOperatorValue } from './field-operator.type';
 import { FilterOperator } from './filter-operator.enum';
 import { IFilter, ISingleFilter, ISingleOrder } from './filter.interface';
 import { OrderByTransformType, OrderByTransformers } from './order-by-transformer.type';
@@ -33,11 +33,21 @@ export class FilterBuilder<T = Record<string, unknown>> {
     if (filter != null) {
       const parts = filter.split(',');
 
-      parts.forEach((part) => {
-        const [field, operator, encodedValue] = part.split(/__|=/);
-        const value = decodeURIComponent(encodedValue);
+      const re = new RegExp(
+        /^(?<field>.*)(?:(?=(?=\[)\[)|(?=(?<!\])__))\[?(?<path>.*)(?=(?<!\]))]?__(?<=__)(?<operator>.*)(?==)=(?<==)(?<value>.*)/,
+      );
 
-        this.addFilter({ field: field as keyof T & string, operator: operator as FilterOperator, value });
+      parts.forEach((part) => {
+        const { field, path, operator, value: rawValue } = re.exec(part)?.groups ?? Object.create(null);
+
+        const value = decodeURIComponent(rawValue);
+
+        this.addFilter({
+          field: field as keyof T & string,
+          path: typeof path === 'string' && path.length > 0 ? path.split('.') : undefined,
+          operator: operator as FilterOperator,
+          value,
+        });
       });
     }
 
@@ -67,27 +77,36 @@ export class FilterBuilder<T = Record<string, unknown>> {
     return this;
   }
 
-  public addFilter({ field, operator, value }: FieldOperatorValue<T>): this {
+  public addFilter({ field, path, operator, value }: FieldPathOperatorValue<T>): this {
     if (this.filter.filter == null) {
       this.filter.filter = [];
     }
 
     const normalizedValue = this.normalizeFilterValue(operator, value);
 
-    const matchIndex = this.filter.filter.findIndex((f) => f.field === field && f.operator === operator);
+    const matchIndex = this.filter.filter.findIndex(
+      (f) =>
+        f.field === field &&
+        (path != null ? JSON.stringify(f.path) === JSON.stringify(path) : 1 === 1) &&
+        f.operator === operator,
+    );
+
     if (matchIndex != -1) {
       this.filter.filter[matchIndex].value = normalizedValue;
     } else {
-      this.filter.filter.push({ field, operator, value: normalizedValue });
+      this.filter.filter.push({ field, path, operator, value: normalizedValue });
     }
 
     return this;
   }
 
-  public removeFilter({ field, operator, value }: FieldOperator<T> & { value?: unknown }): this {
+  public removeFilter({ field, path, operator, value }: FieldPathOperatorValue<T> & { value?: unknown }): this {
     if (this.filter.filter != null) {
       const filterIndex = this.filter.filter.findIndex(
-        (filter) => filter.field === field && filter.operator === operator,
+        (filter) =>
+          filter.field === field &&
+          (path != null ? JSON.stringify(filter.path) === JSON.stringify(path) : 1 === 1) &&
+          filter.operator === operator,
       );
 
       if (filterIndex >= 0) {
@@ -98,12 +117,13 @@ export class FilterBuilder<T = Record<string, unknown>> {
             // If filteredData.length > 0, update filter value
             this.addFilter({
               field,
+              path,
               operator,
               value: (this.filter.filter[filterIndex].value as []).filter((v) => v !== value),
             });
           } else {
             // If filteredData.length === 0, remove filter completely
-            this.removeFilter({ field, operator });
+            this.removeFilter({ field, path, operator });
           }
         } else {
           this.filter.filter = this.filter.filter.filter(
@@ -152,7 +172,14 @@ export class FilterBuilder<T = Record<string, unknown>> {
       this.filter.filter != null
         ? params.set(
             'filter',
-            this.filter.filter.map((f) => `${f.field}__${f.operator}=${encodeURIComponent(`${f.value}`)}`).join(','),
+            this.filter.filter
+              .map(
+                (f) =>
+                  `${f.field}${f.path != null && f.path.length > 0 ? `[${f.path.join('.')}]` : ''}__${
+                    f.operator
+                  }=${encodeURIComponent(`${f.value}`)}`,
+              )
+              .join(','),
           )
         : params.delete('filter');
 
@@ -210,7 +237,7 @@ export class FilterBuilder<T = Record<string, unknown>> {
     );
   }
 
-  private generateWhere(filter: ISingleFilter[]) {
+  private generateWhere<T = Record<string, unknown>>(filter: ISingleFilter<T>[]) {
     const where = Object.create(null);
 
     for (const f of filter) {
@@ -228,7 +255,7 @@ export class FilterBuilder<T = Record<string, unknown>> {
         currentWhere = currentWhere[fieldPart];
       }
 
-      Object.assign(currentWhere, this.generateWhereValue(f.operator, f.value));
+      Object.assign(currentWhere, this.generateWhereValue(f.operator, f.path, f.value));
     }
 
     return where;
@@ -236,12 +263,18 @@ export class FilterBuilder<T = Record<string, unknown>> {
 
   private generateWhereValue(
     operator: FilterOperator,
+    path: string[] | undefined = undefined,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any,
   ) {
     const normalizedValue = this.normalizeFilterValue(operator, value);
 
     switch (operator) {
+      case FilterOperator.JsonEquals:
+        return {
+          path,
+          [this.normalizeFilterOperator(operator)]: value,
+        };
       case FilterOperator.StringContains:
       case FilterOperator.StringIContains:
       case FilterOperator.StringEquals:
@@ -266,6 +299,7 @@ export class FilterBuilder<T = Record<string, unknown>> {
       case FilterOperator.StringContains:
       case FilterOperator.StringIContains:
         return 'contains';
+      case FilterOperator.JsonEquals:
       case FilterOperator.StringEquals:
       case FilterOperator.StringIEquals:
         return 'equals';
