@@ -42,6 +42,7 @@ export class UserService {
     const profile = await this.peoplesoftService.getProfile(username);
     const employee = profile ? await this.peoplesoftService.getEmployee(profile.EMPLID) : undefined;
 
+    // todo: how will potential null values here have downstream effects?
     return {
       profile,
       employee,
@@ -60,7 +61,7 @@ export class UserService {
    */
   private getPeoplesoftMetadataChanges(
     existingUser?: User,
-    peoplesoftMetadata?: Record<string, string>,
+    peoplesoftMetadata?: Record<string, string | null>,
   ): PeoplesoftMetadataChangedType {
     const delta: PeoplesoftMetadataChangedType = [];
 
@@ -96,7 +97,11 @@ export class UserService {
    * Used in user synchronization to update org chart access when Peoplesoft data changes.
    * Handles various scenarios of organization, department, and position changes.
    */
-  private getOrgChartAssignmentsForUser(existingUser?: User, peoplesoftMetadata?: Record<string, string>): string[] {
+  private getOrgChartAssignmentsForUser(
+    existingUser?: User | null,
+    // todo: these can be nulls
+    peoplesoftMetadata?: Record<string, string | null>,
+  ): (string | null)[] {
     // Extract the department ID from the new Peoplesoft metadata
     const {
       department_id: psDeptId,
@@ -121,7 +126,7 @@ export class UserService {
       // If ORGANIZATION stays the same, department changes, position stays the same
       if (!delta.includes(ORGANIZATION) && delta.includes(DEPARTMENT) && !delta.includes(POSITION)) {
         // Return existing department_ids, and add the new department if necessary
-        return Array.from(new Set(department_ids as string[]).add(psDeptId));
+        return Array.from(new Set(department_ids as (string | null)[]).add(psDeptId));
       }
 
       // All other cases, continue
@@ -133,8 +138,13 @@ export class UserService {
   }
 
   async assignUserRoles(id: string, roles: string[]) {
-    const existing = await this.getUser({ where: { id } });
-    if (!existing) await this.syncUser(id);
+    let existing = await this.getUser({ where: { id } });
+    if (!existing) {
+      await this.syncUser(id);
+      existing = await this.getUser({ where: { id } });
+    }
+
+    if (!existing) throw new Error('User not found');
 
     const { removed } = diff(existing.roles, roles);
 
@@ -195,7 +205,7 @@ export class UserService {
     const { metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
 
     // Get the existing user data from the local database, if any
-    const existingUser: User | undefined = await this.getUser({ where: { id } });
+    const existingUser: User | null = await this.getUser({ where: { id } });
 
     // Determine the user's org chart assignments based on Peoplesoft metadata changes
     const orgChartMetadata = {
@@ -212,6 +222,7 @@ export class UserService {
     // Update or create the user in the local database
     await this.upsertUser({
       ...user,
+      // Todo:should this be "undefined"? Since: UserUpdateInput.deleted_at?: string | Date | undefined
       deleted_at: null, // Undelete user if it is returned from Keycloak
       metadata,
     });
@@ -220,8 +231,9 @@ export class UserService {
   async syncUsers() {
     const users = await this.keycloakService.getUsers();
 
-    for await (const user of users) {
-      this.syncUser(user.id);
+    for (const user of users) {
+      // todo: use Promise.all(users.map(user => this.syncUser(user.id)))?
+      await this.syncUser(user.id);
     }
 
     // Delete active users which do not appear in the list of keycloak users
