@@ -652,14 +652,7 @@ export class JobProfileService {
       orderBy: { published_at: 'desc' },
     });
     const currentJobProfile = currentJobProfiles[0];
-    const includesWhere1 = {
-      job_profile_id: currentJobProfile.id,
-      job_profile_version: currentJobProfile.version,
-    };
-    const includesWhere2 = {
-      jobProfileId: currentJobProfile.id,
-      jobProfileVersion: currentJobProfile.version,
-    };
+
     const jobProfiles = await this.prisma.currentJobProfile.findMany({
       where: { id: currentJobProfile.id },
       include: {
