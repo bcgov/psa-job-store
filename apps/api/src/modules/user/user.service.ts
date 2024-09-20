@@ -54,37 +54,50 @@ export class UserService {
     };
   }
 
+  /**
+   * Identifies changes in a user's Peoplesoft metadata (position, department, organization).
+   * Used in user synchronization to determine necessary updates in the system.
+   */
   private getPeoplesoftMetadataChanges(
     existingUser?: User,
     peoplesoftMetadata?: Record<string, string>,
   ): PeoplesoftMetadataChangedType {
     const delta: PeoplesoftMetadataChangedType = [];
 
+    // Destructure Peoplesoft metadata, defaulting to undefined if not provided
     const { department_id: psDeptId, organization_id: psOrgId, position_id: psPosId } = peoplesoftMetadata ?? {};
 
+    // If no existing user, consider all fields as changed
     if (existingUser == null) {
       delta.push(POSITION, DEPARTMENT, ORGANIZATION);
     } else {
-      {
-        const { metadata } = existingUser;
-        const { peoplesoft } = metadata ?? {};
+      // Compare existing user's Peoplesoft metadata with new metadata
+      const { metadata } = existingUser;
+      const { peoplesoft } = metadata ?? {};
 
-        const {
-          department_id: existingDeptId,
-          organization_id: existingOrgId,
-          position_id: existingPosId,
-        } = peoplesoft ?? {};
+      const {
+        department_id: existingDeptId,
+        organization_id: existingOrgId,
+        position_id: existingPosId,
+      } = peoplesoft ?? {};
 
-        if (psPosId !== existingPosId) delta.push(POSITION);
-        if (psDeptId !== existingDeptId) delta.push(DEPARTMENT);
-        if (psOrgId !== existingOrgId) delta.push(ORGANIZATION);
-      }
+      // Check each field and add to delta if changed
+      if (psPosId !== existingPosId) delta.push(POSITION);
+      if (psDeptId !== existingDeptId) delta.push(DEPARTMENT);
+      if (psOrgId !== existingOrgId) delta.push(ORGANIZATION);
     }
 
+    // Return array of changed fields
     return delta;
   }
 
+  /**
+   * Determines org chart department assignments for a user based on Peoplesoft metadata changes.
+   * Used in user synchronization to update org chart access when Peoplesoft data changes.
+   * Handles various scenarios of organization, department, and position changes.
+   */
   private getOrgChartAssignmentsForUser(existingUser?: User, peoplesoftMetadata?: Record<string, string>): string[] {
+    // Extract the department ID from the new Peoplesoft metadata
     const {
       department_id: psDeptId,
       // organization_id: psOrgId,
@@ -92,10 +105,12 @@ export class UserService {
     } = peoplesoftMetadata ?? {};
 
     if (existingUser != null) {
+      // Extract existing org chart metadata for the user
       const { metadata } = existingUser;
       const { org_chart } = metadata ?? {};
       const { department_ids } = org_chart ?? { department_ids: [] };
 
+      // Determine what Peoplesoft metadata has changed
       const delta = this.getPeoplesoftMetadataChanges(existingUser, peoplesoftMetadata);
 
       // If ORGANIZATION or POSITION changes, reset assignments
@@ -166,27 +181,35 @@ export class UserService {
     return await this.getUser({ where: { id } });
   }
 
+  /**
+   * Synchronizes a user's data from various sources and updates the local database.
+   */
   async syncUser(id: string) {
+    // Fetch the latest user data from Keycloak
     const user = await this.keycloakService.getUser(id);
 
-    // Get CRM Metadata
+    // Retrieve CRM metadata for the user
     const crmMetadata = await this.getCrmMetadata(user.username);
 
-    // Get Peoplesoft Metadata
+    // Fetch and extract Peoplesoft metadata for the user
     const { metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
 
+    // Get the existing user data from the local database, if any
     const existingUser: User | undefined = await this.getUser({ where: { id } });
 
+    // Determine the user's org chart assignments based on Peoplesoft metadata changes
     const orgChartMetadata = {
       department_ids: this.getOrgChartAssignmentsForUser(existingUser, peoplesoftMetadata),
     };
 
+    // Combine all metadata into a single object
     const metadata = {
       crm: crmMetadata,
       org_chart: orgChartMetadata,
       peoplesoft: peoplesoftMetadata,
     };
 
+    // Update or create the user in the local database
     await this.upsertUser({
       ...user,
       deleted_at: null, // Undelete user if it is returned from Keycloak
