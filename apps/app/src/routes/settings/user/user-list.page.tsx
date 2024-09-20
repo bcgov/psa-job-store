@@ -25,7 +25,7 @@ export const UserListPage = () => {
 
   return (
     <>
-      <PageHeader title="Widgets" subTitle="Manage widgets..." extra={[<ImportUserModal />]} />
+      <PageHeader title="Users" subTitle="Manage users" extra={[<ImportUserModal />]} />
       <ContentWrapper>
         <DataList
           trigger={trigger}
