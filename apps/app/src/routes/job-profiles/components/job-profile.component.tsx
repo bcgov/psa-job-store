@@ -1322,10 +1322,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         title={
           <div>
             <Row>
-              <Col>
+              <Col flex="auto">
                 <h2 style={{ margin: '0' }}>Job profile</h2>
               </Col>{' '}
-              <Col style={{ marginLeft: '10px' }}>
+              <Col>
                 {showVersions &&
                 roles &&
                 ((roles as string[]).includes('total-compensation') ||
