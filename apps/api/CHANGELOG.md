@@ -1,5 +1,11 @@
 # api
 
+## 0.10.0
+
+### Minor Changes
+
+- [#792](https://github.com/bcgov/psa-job-store/pull/792) [`348048ed475d37f43d4bb33003eeb8499f6afc56`](https://github.com/bcgov/psa-job-store/commit/348048ed475d37f43d4bb33003eeb8499f6afc56) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-811 add versioning to approved requests and explore pages
+
 ## 0.9.0
 
 ### Minor Changes
