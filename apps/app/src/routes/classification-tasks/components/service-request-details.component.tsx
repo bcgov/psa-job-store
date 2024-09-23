@@ -106,7 +106,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
             to={`/job-profiles/${positionRequestData?.positionRequest?.parent_job_profile?.number}?id=${positionRequestData?.positionRequest?.parent_job_profile_id}&version=${positionRequestData?.positionRequest?.parent_job_profile_version}`}
           >
             <Typography.Text type="secondary">
-              Version {positionRequestData?.positionRequest?.parent_job_profile_version} {!currentVersion && '(Latest)'}
+              Version {positionRequestData?.positionRequest?.parent_job_profile_version} {currentVersion && '(Latest) '}
             </Typography.Text>
             <ExportOutlined />
           </Link>
