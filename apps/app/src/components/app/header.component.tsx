@@ -53,7 +53,6 @@ export const AppHeader = () => {
 
   return (
     <>
-      <div>{JSON.stringify(import.meta.env)}</div>
       {import.meta.env.VITE_ENV != 'production' && (
         <Alert
           banner
