@@ -319,6 +319,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const pageFromURL = parseInt(searchParams.get('page') || '1', 10);
     const searchFromURL = searchParams.get('search');
     const selectedProfileFromUrl = searchParams.get('selectedProfile');
+    const idFromUrl = searchParams.get('id');
+    const versionFromUrl = searchParams.get('version');
     const pageSizeFromURL = searchParams.get('pageSize');
     const sortFieldFromURL = searchParams.get('sortField');
     const sortOrderFromURL = searchParams.get('sortOrder');
@@ -326,6 +328,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     // construct new url params
     // Update URL parameters if needed
     if (selectedProfileFromUrl) newSearchParams.set('selectedProfile', selectedProfileFromUrl);
+    if (idFromUrl) newSearchParams.set('id', idFromUrl);
+    if (versionFromUrl) newSearchParams.set('version', versionFromUrl);
     if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
     if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
     if (pageSizeFromURL) newSearchParams.set('pageSize', pageSizeFromURL.toString());

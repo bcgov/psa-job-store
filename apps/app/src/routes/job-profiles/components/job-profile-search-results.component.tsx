@@ -61,6 +61,9 @@ export const JobProfileSearchResults = ({
     }
 
     // Check if we're on the /requests/positions route
+    searchParams.delete('id');
+    searchParams.delete('version');
+    searchParams.delete('selectedProfile');
     const newSearchParams = new URLSearchParams(searchParams.toString());
     if (positionRequestId) {
       newSearchParams.set('selectedProfile', profileNumber.toString());

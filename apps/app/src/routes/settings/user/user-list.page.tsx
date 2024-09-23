@@ -1,9 +1,15 @@
 import { InfoCircleOutlined, SettingOutlined } from '@ant-design/icons';
-import { Button, Space, Spin, Table, Tag, Tooltip, Typography } from 'antd';
+import { Button, Space, Spin, Tag, Tooltip, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
 import ContentWrapper from '../../../components/content-wrapper.component';
-import { useGetUsersForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
+import { DataList } from '../../../components/shared/data-list/data-list.component';
+import { FilterOperator } from '../../../components/shared/data-list/lib/prisma-filter/common/filter-operator.enum';
+import {
+  useGetOrganizationsPicklistForSettingsQuery,
+  useGetRolesForSettingsQuery,
+  useLazyGetUsersForSettingsQuery,
+} from '../../../redux/services/graphql-api/settings/settings.api';
 import { useSettingsContext } from '../hooks/use-settings-context.hook';
 import { ImportUserModal } from './components/import-user-modal.component';
 
@@ -12,28 +18,67 @@ const { Text } = Typography;
 export const UserListPage = () => {
   const { organizations } = useSettingsContext();
 
-  const { data, isFetching } = useGetUsersForSettingsQuery();
+  const { data: organizationsPicklistData, isFetching: organizationsPicklistDataIsLoading } =
+    useGetOrganizationsPicklistForSettingsQuery();
+  const { data: rolesData, isFetching: rolesDataIsLoading } = useGetRolesForSettingsQuery();
+  const [trigger, { data: userData, isFetching: userDataIsLoading }] = useLazyGetUsersForSettingsQuery();
 
   return (
     <>
-      <PageHeader title="Users" subTitle={'Manage user details'} extra={[<ImportUserModal />]} />
+      <PageHeader title="Users" subTitle="Manage users" extra={[<ImportUserModal />]} />
       <ContentWrapper>
-        <Space direction="vertical" style={{ marginTop: '1rem', width: '100%' }}>
-          <Table
-            columns={[
+        <DataList
+          trigger={trigger}
+          filterProps={{
+            filterProps: [
+              {
+                type: 'select',
+                mode: 'multi-value',
+                field: 'roles',
+                loading: rolesDataIsLoading,
+                operator: FilterOperator.StringListHasSome,
+                options: (rolesData ?? []).map((role) => {
+                  const label = role
+                    .split('-')
+                    .map((part) => `${part[0].toUpperCase()}${part.slice(1)}`)
+                    .join(' ');
+
+                  return { label: label, value: role };
+                }),
+                placeholder: 'Roles',
+              },
+              {
+                type: 'select',
+                mode: 'single-value',
+                field: 'metadata',
+                path: ['peoplesoft', 'organization_id'],
+                loading: organizationsPicklistDataIsLoading,
+                operator: FilterOperator.JsonEquals,
+                options: (organizationsPicklistData?.organizations ?? []).map((o) => ({ label: o.name, value: o.id })),
+                placeholder: 'Ministry',
+              },
+            ],
+            searchProps: {
+              fields: [
+                {
+                  field: 'name',
+                  operator: FilterOperator.StringIContains,
+                },
+              ],
+            },
+          }}
+          tableProps={{
+            columns: [
               {
                 key: 'name',
-                title: 'Name',
                 dataIndex: 'name',
-                sorter: false,
-                render: (text) => <Text strong>{text}</Text>,
-                width: '50%',
+                render: (value: string) => <Text strong>{value}</Text>,
+                sorter: true,
+                title: 'Name',
               },
               {
                 key: 'roles',
-                title: 'Roles',
                 dataIndex: 'roles',
-                sorter: false,
                 render: (values: string[]) => {
                   return (
                     <div style={{ rowGap: '1rem', wordWrap: 'break-word', wordBreak: 'break-word' }}>
@@ -48,21 +93,32 @@ export const UserListPage = () => {
                     </div>
                   );
                 },
-                width: '25%',
+                sorter: false,
+                title: 'Roles',
+              },
+              {
+                key: 'metadata.peoplesoft.organization_id',
+                dataIndex: ['metadata', 'peoplesoft', 'organization_id'],
+                render: (value: string) => {
+                  const ministryName =
+                    organizationsPicklistData?.organizations?.find((o) => o.id === value)?.name ?? '';
+                  return <span>{ministryName}</span>;
+                },
+                sorter: false,
+                title: 'Home  ministry',
               },
               {
                 key: 'email',
-                title: 'Email',
                 dataIndex: 'email',
-                sorter: false,
-                render: (value) => <div style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>{value}</div>,
-                width: '25%',
+                render: (value: string) => (
+                  <div style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>{value}</div>
+                ),
+                sorter: true,
+                title: 'Email',
               },
               {
                 key: 'metadata.org_chart.department_ids',
-                title: 'Departments',
                 dataIndex: ['metadata', 'org_chart', 'department_ids'],
-                sorter: false,
                 render: (value: string[]) => {
                   if (organizations.isLoading) {
                     return <Spin size="small" spinning />;
@@ -103,24 +159,13 @@ export const UserListPage = () => {
                       </Tooltip>
                     </span>
                   );
-
-                  //       <span>
-                  //   {jobFamilies.length}{' '}
-                  //   <Tooltip title={jobFamilyNames}>
-                  //     <InfoCircleOutlined />
-                  //   </Tooltip>
-                  // </span>
-
-                  // return organizations.isLoading ? (
-                  //   <Spin size="small" spinning />
-                  // ) : (
-                  //   <div>
-                  //     {(value ?? []).map((v) => organizations.departments?.find((d) => d.id === v)?.name).join(', ')}
-                  //   </div>
-                  // );
                 },
+                sorter: false,
+                title: 'Departments',
               },
               {
+                key: 'actions',
+                align: 'center',
                 title: 'Actions',
                 render: (_, record) => (
                   <Link to={`${record.id}`}>
@@ -129,15 +174,16 @@ export const UserListPage = () => {
                     </Tooltip>
                   </Link>
                 ),
-                align: 'center',
               },
-            ]}
-            dataSource={data?.users}
-            loading={isFetching}
-            rowKey="id"
-            size="small"
-          />
-        </Space>
+            ],
+            data: userData?.usersWithCount,
+            loading: userDataIsLoading,
+            orderByTransformers: {
+              name: 'SortOrderInput',
+              email: 'SortOrderInput',
+            },
+          }}
+        />
       </ContentWrapper>
     </>
   );

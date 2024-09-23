@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ExportOutlined } from '@ant-design/icons';
 import { Card, Col, Descriptions, Row, Typography } from 'antd';
+import { Link } from 'react-router-dom';
 import LoadingComponent from '../../../components/app/common/components/loading.component';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
+import { useGetJobProfileMetaQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { useGetLocationQuery } from '../../../redux/services/graphql-api/location.api';
 import { GetPositionRequestResponse } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
@@ -18,6 +21,15 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     },
     { skip: !positionRequestData?.positionRequest?.additional_info?.work_location_id },
   );
+  const { data: jobProfileMeta } = useGetJobProfileMetaQuery(
+    positionRequestData?.positionRequest?.parent_job_profile_id ?? -1,
+
+    { skip: !positionRequestData?.positionRequest?.additional_info?.work_location_id },
+  );
+  const currentVersion =
+    positionRequestData?.positionRequest?.parent_job_profile_version ==
+    jobProfileMeta?.jobProfileMeta.versions.map((v) => v.version).sort((a, b: number) => b - a)[0];
+  // console.log('locationInfo: ', locationInfo);
 
   const submissionDetailsItems = [
     {
@@ -86,7 +98,20 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'jobStoreProfileNumber',
       label: 'Job Store profile number',
-      children: <div>{positionRequestData?.positionRequest?.parent_job_profile?.number}</div>,
+      children: (
+        <div>
+          <div>{positionRequestData?.positionRequest?.parent_job_profile?.number}</div>
+
+          <Link
+            to={`/job-profiles/${positionRequestData?.positionRequest?.parent_job_profile?.number}?id=${positionRequestData?.positionRequest?.parent_job_profile_id}&version=${positionRequestData?.positionRequest?.parent_job_profile_version}`}
+          >
+            <Typography.Text type="secondary">
+              Version {positionRequestData?.positionRequest?.parent_job_profile_version} {!currentVersion && '(Latest)'}
+            </Typography.Text>
+            <ExportOutlined />
+          </Link>
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
