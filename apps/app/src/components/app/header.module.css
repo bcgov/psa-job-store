@@ -175,3 +175,41 @@
     flex-grow: 0; 
     white-space: nowrap;
 }
+
+/* Dev warning banner */
+
+.stripedAlert {
+    background: repeating-linear-gradient(
+      45deg,
+      #ffdb58,
+      #ffdb58 10px,
+      #000000 10px,
+      #000000 20px
+    );
+    border: none !important;
+    padding: 0 !important;
+    overflow: hidden;
+    position: sticky;
+    top: 0;
+    z-index: 99999;
+  }
+  
+  .stripedAlert :global(.ant-alert-content) {
+    width: 100%;
+    text-align: center;
+    margin: 8px 0;
+  }
+  
+  .stripedAlert :global(.ant-alert-message) {
+    color: #000000;
+  }
+
+  .stripedAlert :global(.ant-alert-message>span) {
+    background: #ffdb58;
+    padding: 10px;
+    border: 5px solid black;
+  }
+  
+  .stripedAlert :global(.ant-alert-icon) {
+    display: none;
+  }
