@@ -439,11 +439,11 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   useEffect(() => {
     // If profileData exists, use it to set the form state
     if (versionedProfileData) {
+      // once data by id and version loads, set that data
       setEffectiveData(versionedProfileData.jobProfile);
       setEffectiveDataExtra(versionedProfileData.jobProfile);
     } else if (id && version && !isLoadingVersioned) {
-      // If no profileData is provided and an id exists, fetch the data
-      // OR profileData was provided, but we also want to run a diff
+      // fetch by id and version when present in search query
       triggerGetJobProfileById({ id: parseInt(id ?? '-1'), version: parseInt(version ?? '-1') });
     }
   }, [searchParams, versionedProfileData, triggerGetJobProfileById, isLoadingVersioned, id, version]);
@@ -456,8 +456,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     } else if (!profileData && jobNumber && !(id && version)) {
       triggerGetJobProfileByNumber({ number: +jobNumber });
     } else if (profileData && showDiff && parentJobProfileId) {
-      // If no profileData is provided and an id exists, fetch the data
-      // OR profileData was provided, but we also want to run a diff
+      // we're in diff mode - load parent profile to compare to
       triggerGetJobProfile({ id: parentJobProfileId, version: parentJobProfileVersion });
     }
   }, [

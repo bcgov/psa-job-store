@@ -100,7 +100,11 @@ export const VersionSelect = ({ id, version, selectVersionCallback }: VersionSel
         }
         options={jobProfileVersions}
         onChange={onChange}
-        value={id + '-' + (version ?? (versions ? [...versions].sort((v) => v.version)[0].version : undefined))}
+        value={
+          id +
+          '-' +
+          (version ?? (versions ? [...versions].sort((a, b) => b.version - a.version)[0].version : undefined))
+        }
       >
         <Button>
           Select Version

@@ -15,7 +15,6 @@ const { Title, Text, Paragraph } = Typography;
 
 export interface JobProfileCardProps {
   data: JobProfileModel;
-  link: string;
 }
 
 export const JobProfileCard = ({ data }: JobProfileCardProps) => {

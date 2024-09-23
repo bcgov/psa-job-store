@@ -118,7 +118,7 @@ export const TotalCompApprovedRequestPage = () => {
             to={`/job-profiles/${data?.positionRequest?.parent_job_profile?.number}?id=${data?.positionRequest?.parent_job_profile_id}&version=${data?.positionRequest?.parent_job_profile_version}`}
           >
             <Typography.Text type="secondary">
-              Version {data?.positionRequest?.parent_job_profile_version} {!currentVersion && '(Latest)'}
+              Version {data?.positionRequest?.parent_job_profile_version} {currentVersion && '(Latest) '}
             </Typography.Text>
             <ExportOutlined />
           </Link>
