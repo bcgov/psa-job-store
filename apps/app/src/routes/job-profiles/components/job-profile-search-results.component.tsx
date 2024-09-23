@@ -36,19 +36,7 @@ export const JobProfileSearchResults = ({
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
-  const isPositionRequestRoute = location.pathname.includes('/requests/positions/');
   const { positionRequestId } = useParams<{ positionRequestId?: string }>();
-
-  const getBasePath = (path: string) => {
-    if (isPositionRequestRoute) return location.pathname.split('/').slice(0, 4).join('/');
-
-    const pathParts = path.split('/');
-    // Check if the last part is a number (ID), if so, remove it
-    if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
-      pathParts.pop(); // Remove the last part (job profile ID)
-    }
-    return pathParts.join('/');
-  };
 
   const getLinkPath = (profileNumber: number) => {
     // `${getBasePath(location.pathname)}/${d.id}${
@@ -62,6 +50,12 @@ export const JobProfileSearchResults = ({
 
     // Check if we're on the /requests/positions route
     const newSearchParams = new URLSearchParams(searchParams.toString());
+
+    // do not change searchParams directly as other parts of code may use it
+    newSearchParams.delete('id');
+    newSearchParams.delete('version');
+    newSearchParams.delete('selectedProfile');
+
     if (positionRequestId) {
       newSearchParams.set('selectedProfile', profileNumber.toString());
       return `/requests/positions/${positionRequestId}?${newSearchParams.toString()}`;
@@ -116,12 +110,7 @@ export const JobProfileSearchResults = ({
           {(data?.jobProfiles ?? []).map((d) => (
             <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d)}>
               <Link to={getLinkPath(d.number)} replace tabIndex={-1}>
-                <JobProfileCard
-                  data={d}
-                  link={`${getBasePath(location.pathname)}/${d.number}${
-                    searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
-                  }`}
-                />
+                <JobProfileCard data={d} />
               </Link>
             </li>
           ))}

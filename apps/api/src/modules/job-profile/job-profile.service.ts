@@ -647,14 +647,10 @@ export class JobProfileService {
   async getJobProfileByNumber(number: number, userRoles: string[] = []) {
     // since number is not necessarily unique on the job profiles model,
     // we get the latest
+
     const currentJobProfiles = await this.prisma.currentJobProfile.findMany({
       where: { number },
       orderBy: { published_at: 'desc' },
-    });
-    const currentJobProfile = currentJobProfiles[0];
-
-    const jobProfiles = await this.prisma.currentJobProfile.findMany({
-      where: { id: currentJobProfile.id },
       include: {
         classifications: {
           include: {
@@ -691,10 +687,10 @@ export class JobProfileService {
         },
       },
     });
-    if (jobProfiles.length > 1) {
+    if (currentJobProfiles.length > 1) {
       throw AlexandriaError('More than one job profile found for job number ' + number + '. Please contact support.');
     }
-    const jobProfile = jobProfiles[0];
+    const jobProfile = currentJobProfiles[0];
     // if profile is not published and user is not total compensation, deny access
     if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
       throw AlexandriaError('You do not have permission to view this job profile');

@@ -19,7 +19,8 @@ import { GetOrganizationsResponse } from './dtos/get-organizations-response.dto'
 import { GetRolesResponse } from './dtos/get-roles-response.dto';
 import { GetUserPositionResponse } from './dtos/get-user-position-response.dto';
 import { GetUserResponse } from './dtos/get-user-response.dto';
-import { GetUsersResponse } from './dtos/get-users-response.dto';
+import { GetUsersForSettingsArgs } from './dtos/get-users-for-settings-args.dto';
+import { GetUsersForSettingsResponse } from './dtos/get-users-for-settings-response.dto';
 import { ImportUserInput } from './dtos/import-user-input.dto';
 import { ImportUserResponse } from './dtos/import-user-response.dto';
 import { ImportUserSearchInput } from './dtos/import-user-search-input.dto';
@@ -135,20 +136,38 @@ export const settingsApi = graphqlApi.injectEndpoints({
       }),
       transformResponse: (response: GetRolesResponse) => response.getRoles,
     }),
-    getUsersForSettings: build.query<GetUsersResponse, void>({
-      query: () => ({
+    getUsersForSettings: build.query<GetUsersForSettingsResponse, GetUsersForSettingsArgs | undefined>({
+      query: (args: GetUsersForSettingsArgs) => ({
         document: gql`
-          query Users {
-            users {
-              id
-              name
-              username
-              email
-              roles
-              metadata
+          query GetUsersForSettings(
+            $where: UserWhereInput
+            $orderBy: [UserOrderByWithRelationAndSearchRelevanceInput!]
+            $take: Int
+            $skip: Int
+          ) {
+            usersWithCount(where: $where, orderBy: $orderBy, take: $take, skip: $skip) {
+              data {
+                id
+                name
+                email
+                roles
+                metadata
+              }
+              pageInfo {
+                page
+                pageCount
+                pageSize
+                totalCount
+              }
             }
           }
         `,
+        variables: {
+          where: args.where,
+          orderBy: args.orderBy,
+          take: args.take,
+          skip: args.skip,
+        },
       }),
     }),
     getUserForSettings: build.query<GetUserResponse, string>({

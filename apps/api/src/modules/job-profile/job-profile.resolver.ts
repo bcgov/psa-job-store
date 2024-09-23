@@ -83,7 +83,7 @@ class Version {
   @Field(() => Number)
   id: number;
 
-  @Field(() => String)
+  @Field(() => Number)
   version: number;
 }
 

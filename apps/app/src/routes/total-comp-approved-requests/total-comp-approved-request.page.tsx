@@ -1,4 +1,4 @@
-import { CopyOutlined } from '@ant-design/icons';
+import { CopyOutlined, ExportOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typography, message } from 'antd';
 import copy from 'copy-to-clipboard';
 import { Link, useParams } from 'react-router-dom';
@@ -10,6 +10,7 @@ import PositionProfile from '../../components/app/common/components/positionProf
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
+import { useGetJobProfileMetaQuery } from '../../redux/services/graphql-api/job-profile.api';
 import { useGetLocationQuery } from '../../redux/services/graphql-api/location.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
@@ -42,6 +43,14 @@ export const TotalCompApprovedRequestPage = () => {
         !data?.positionRequest?.additional_info?.work_location_id,
     },
   );
+  const { data: jobProfileMeta } = useGetJobProfileMetaQuery(
+    data?.positionRequest?.parent_job_profile_id ?? -1,
+
+    { skip: !data?.positionRequest?.additional_info?.work_location_id },
+  );
+  const currentVersion =
+    data?.positionRequest?.parent_job_profile_version ==
+    jobProfileMeta?.jobProfileMeta.versions.map((v) => v.version).sort((a, b: number) => b - a)[0];
 
   // fetch positionInfo to find effective date
   // this endpoint gets position info regardless if it's encumbered or not
@@ -101,7 +110,20 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'jobStoreProfileNumber',
       label: 'Job Store profile number',
-      children: <div>{data?.positionRequest?.parent_job_profile?.number}</div>,
+      children: (
+        <div>
+          <div>{data?.positionRequest?.parent_job_profile?.number}</div>
+
+          <Link
+            to={`/job-profiles/${data?.positionRequest?.parent_job_profile?.number}?id=${data?.positionRequest?.parent_job_profile_id}&version=${data?.positionRequest?.parent_job_profile_version}`}
+          >
+            <Typography.Text type="secondary">
+              Version {data?.positionRequest?.parent_job_profile_version} {currentVersion && '(Latest) '}
+            </Typography.Text>
+            <ExportOutlined />
+          </Link>
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {

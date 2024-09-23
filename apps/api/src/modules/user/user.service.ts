@@ -10,6 +10,7 @@ import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.input';
+import { PaginatedUsersResponse } from './outputs/paginated-users-response.output';
 
 enum PeoplesoftMetadataChanged {
   POSITION = 'POSITION',
@@ -176,6 +177,18 @@ export class UserService {
     });
 
     return users;
+  }
+
+  async getUsersWithCount({ skip = 0, take = 10, ...args }: FindManyUserArgs): Promise<PaginatedUsersResponse> {
+    const result = await this.prisma.user.findManyAndCount({
+      ...args,
+      take,
+      skip,
+    });
+
+    const [data, page, pageCount, pageSize, totalCount] = result;
+
+    return new PaginatedUsersResponse(data, { page, pageCount, pageSize, totalCount });
   }
 
   async setUserOrgChartAccess({ id, department_ids }: SetUserOrgChartAccessInput) {

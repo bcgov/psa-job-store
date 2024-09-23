@@ -319,6 +319,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const pageFromURL = parseInt(searchParams.get('page') || '1', 10);
     const searchFromURL = searchParams.get('search');
     const selectedProfileFromUrl = searchParams.get('selectedProfile');
+    const idFromUrl = searchParams.get('id');
+    const versionFromUrl = searchParams.get('version');
     const pageSizeFromURL = searchParams.get('pageSize');
     const sortFieldFromURL = searchParams.get('sortField');
     const sortOrderFromURL = searchParams.get('sortOrder');
@@ -326,6 +328,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     // construct new url params
     // Update URL parameters if needed
     if (selectedProfileFromUrl) newSearchParams.set('selectedProfile', selectedProfileFromUrl);
+
     if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
     if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
     if (pageSizeFromURL) newSearchParams.set('pageSize', pageSizeFromURL.toString());
@@ -338,6 +341,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     if (classificationValues) newSearchParams.set('classification_id__in', classificationValues);
     // if (careerGroupValues) newSearchParams.set('career_group_id__in', careerGroupValues);
     if (ministryValues) newSearchParams.set('ministry_id__in', ministryValues);
+    if (idFromUrl) newSearchParams.set('id', idFromUrl);
+    if (versionFromUrl) newSearchParams.set('version', versionFromUrl);
 
     const jobFamilyChanged = newSearchParams.get('job_family_id__in') != searchParams.get('job_family_id__in');
     const jobStreamChanged = newSearchParams.get('job_stream_id__in') != searchParams.get('job_stream_id__in');
@@ -361,6 +366,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
         { replace: true },
       );
     } else {
+      // filters did not change, but some other parameters did
       // Only update search params if there's a change
       if (searchParams.toString() !== newSearchParams.toString()) {
         // console.log('navigating.. A', getBasePath(location.pathname));

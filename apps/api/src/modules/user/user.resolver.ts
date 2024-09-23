@@ -4,14 +4,15 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { AssignUserRolesInput } from './inputs/assign-user-roles.input';
 import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.input';
 import { UnassignUserRoleInput } from './inputs/unassign-user-role.input';
+import { PaginatedUsersResponse } from './outputs/paginated-users-response.output';
 import { UserService } from './user.service';
 
 @Resolver()
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => User, { name: 'assignUserRoles' })
   @Roles('super-admin')
+  @Query(() => User, { name: 'assignUserRoles' })
   async assignUserRoles(@Args('data') data: AssignUserRolesInput) {
     const { id, roles } = data;
 
@@ -20,28 +21,34 @@ export class UserResolver {
     return result;
   }
 
-  @Query(() => [User], { name: 'users' })
   @Roles('super-admin')
+  @Query(() => [User], { name: 'users' })
   getUsers(@Args() args?: FindManyUserArgs) {
     return this.userService.getUsers(args);
   }
 
-  @Query(() => User, { name: 'user' })
   @Roles('super-admin')
+  @Query(() => PaginatedUsersResponse, { name: 'usersWithCount' })
+  getUsersWithCount(@Args() args?: FindManyUserArgs) {
+    return this.userService.getUsersWithCount(args);
+  }
+
+  @Roles('super-admin')
+  @Query(() => User, { name: 'user' })
   getUser(@Args() args?: FindUniqueUserArgs) {
     return this.userService.getUser(args);
   }
 
-  @Mutation(() => User)
   @Roles('super-admin')
+  @Mutation(() => User)
   async setUserOrgChartAccess(@Args('data') data: SetUserOrgChartAccessInput) {
     const user = await this.userService.setUserOrgChartAccess(data);
 
     return user;
   }
 
-  @Query(() => [User], { name: 'unassignUserRole' })
   @Roles('super-admin')
+  @Query(() => [User], { name: 'unassignUserRole' })
   unassignUserRole(@Args('data') data: UnassignUserRoleInput) {
     const { id, role } = data;
 
