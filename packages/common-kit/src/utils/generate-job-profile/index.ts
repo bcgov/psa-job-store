@@ -897,7 +897,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                                 size: '8pt',
                                 text:
                                   transformedJobProfile != null
-                                    ? `${dayjs(transformedJobProfile.updated_at).format('MMM d, YYYY')}`
+                                    ? `${dayjs(transformedJobProfile.updated_at).format('MMM D, YYYY')}`
                                     : '',
                               }),
                             ],
