@@ -652,37 +652,26 @@ export class JobProfileService {
       orderBy: { published_at: 'desc' },
     });
     const currentJobProfile = currentJobProfiles[0];
-    const includesWhere1 = {
-      job_profile_id: currentJobProfile.id,
-      job_profile_version: currentJobProfile.version,
-    };
-    const includesWhere2 = {
-      jobProfileId: currentJobProfile.id,
-      jobProfileVersion: currentJobProfile.version,
-    };
+
     const jobProfiles = await this.prisma.currentJobProfile.findMany({
       where: { id: currentJobProfile.id },
       include: {
         classifications: {
-          where: includesWhere1,
           include: {
             classification: true,
           },
         },
         jobFamilies: {
-          where: includesWhere2,
           include: {
             jobFamily: true,
           },
         },
         organizations: {
-          where: includesWhere1,
           include: {
             organization: true,
           },
         },
         scopes: {
-          where: includesWhere1,
           include: {
             scope: true,
           },
@@ -690,14 +679,12 @@ export class JobProfileService {
         role: true,
         role_type: true,
         streams: {
-          where: includesWhere2,
           include: {
             stream: true,
           },
         },
 
         behavioural_competencies: {
-          where: includesWhere1,
           include: {
             behavioural_competency: true,
           },

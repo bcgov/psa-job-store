@@ -400,7 +400,7 @@ export const PositionRequestPage = () => {
                       title="Sent for verification"
                       subTitle={`The profile was submitted for review on: ${dayjs(
                         wizardContextPositionRequestData?.updated_at,
-                      ).format('MMM d, YYYY')}`}
+                      ).format('MMM D, YYYY')}`}
                     />
 
                     <Row justify="center" style={{ padding: '0 1rem' }} data-testid="verification-success-message">
