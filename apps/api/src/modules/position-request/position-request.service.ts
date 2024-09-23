@@ -1570,7 +1570,7 @@ export class PositionRequestApiService {
 
     const position = await this.peoplesoftService.createPosition(data);
 
-    return [position, positionRequestNeedsReview];
+    return [position, positionRequestNeedsReview.result];
   }
 
   //deprecated
