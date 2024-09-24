@@ -76,16 +76,14 @@ export const updateSupervisorAndAddNewPositionNode = (
   department: any,
 ) => {
   // Update supervisor, excluded manager nodes
-
   nodes.forEach((node) => {
     node.data = {
       ...node.data,
-      isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
-      isExcludedManager: node.id === excludedManagerId,
+      isExcludedManager: node.id === excludedManagerId, // mark node as excluded manager, if matches
       isNewPosition: false, // Clear previous positions marked as new
-      isSelected: false,
-      isSupervisor: node.id === supervisorId,
+      isSupervisor: node.id === supervisorId, // mark node as supervisor, if matches
     };
+    node.selected = false; // mark all nodes as deselected
   });
 
   // Add edge & node for new position
@@ -111,13 +109,12 @@ export const updateSupervisorAndAddNewPositionNode = (
       type: 'org-chart-card',
       data: {
         id: nodeId,
-        isAdjacent: true,
         isNewPosition: true,
         title: positionTitle,
         classification: {
-          id: classification.id,
-          code: classification.code,
-          name: classification.name,
+          id: classification?.id,
+          code: classification?.code,
+          name: classification?.name,
         },
         department: {
           id: department.id,

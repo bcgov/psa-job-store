@@ -94,7 +94,6 @@ export const DynamicOrgChart = ({
       nodes.forEach((node: Node) => {
         node.data = {
           ...node.data,
-          isAdjacent: false,
           isSearchResult: false,
         };
         node.selected = false;
@@ -171,7 +170,6 @@ export const DynamicOrgChart = ({
       nodes.forEach((node: Node) => {
         node.data = {
           ...node.data,
-          isAdjacent: focusedElementIds.includes(node.id),
           isSearchResult: false,
         };
         if (sNodeIds.includes(node.id)) console.log('renderSelectedNodes setting node to selected: ', node.id);
@@ -261,7 +259,6 @@ export const DynamicOrgChart = ({
     console.log('== useEffect nodes: ', JSON.parse(JSON.stringify(nodes)));
     const searchResultNodes = nodes.filter((node) => node.data.isSearchResult === true);
     const selectedNodes = nodes.filter((node) => node.selected === true);
-    // const adjacentNodes = selectedNodes.length > 0 ? nodes.filter((node) => node.data.isAdjacent === true) : [];
 
     if (selectedNodes.length > 0) {
       // console.log('fitView A: ', selectedNodes, adjacentNodes);
@@ -323,13 +320,16 @@ export const DynamicOrgChart = ({
         <OrgChartNode
           {...nodeProps}
           isConnectable={false}
-          orgChartData={{ edges: elements.edges, nodes: elements.nodes }}
+          // pass in current state of edges and nodes (elements.edges and elements.nodes is the initial state)
+          // this way the data for orgchart_json contains the current state of the org chart
+          // with selected nodes and edges
+          orgChartData={{ edges: edges, nodes: nodes }}
           orgChartContext={props.context}
           orgChartType={type}
         />
       ),
     };
-  }, [props.context, elements, type]);
+  }, [props.context, edges, nodes, type]);
 
   // action to perform when user searches
   const onSearch = (term: string, source?: { source?: 'input' | 'clear' }) => {
@@ -371,7 +371,6 @@ export const DynamicOrgChart = ({
         nodes.forEach((node: Node) => {
           node.data = {
             ...node.data,
-            isAdjacent: false,
             isSearchResult: searchResultIds.includes(node.id),
           };
           node.selected = false;
