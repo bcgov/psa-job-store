@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Modal } from 'antd';
+import { autolayout, updateSupervisorAndAddNewPositionNode } from 'common-kit';
 import React, { ReactNode, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -55,6 +56,19 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
       // svg,
     } = params;
 
+    // As soon as we create position request, ensure that orgchart already has the new position node with empty data
+    let orgChartDataModified = JSON.parse(JSON.stringify(orgChartData));
+    orgChartDataModified = updateSupervisorAndAddNewPositionNode(
+      orgChartDataModified.edges,
+      orgChartDataModified.nodes,
+      '', // no excluded manager yet
+      reportingPositionId,
+      '000000', // no position number yet
+      'Untitled', // no title yet
+      null, // no classification yet
+      { id: 'unknown', organization_id: '', name: '' }, // no department yet
+    );
+
     // we are not editing a draft position request (creatign position from dashboard or from org chart page)
     // we can create a new position from the requests/positions org chart view, or directly from the org chart, or from home page
     if (
@@ -73,7 +87,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
         title: 'Untitled',
         reports_to_position_id: reportingPositionId,
         department: { connect: { id: selectedDepartment ?? '' } },
-        orgchart_json: orgChartData,
+        orgchart_json: autolayout(orgChartDataModified),
         // orgchart_png: svg,
       };
 
@@ -116,7 +130,7 @@ export const PositionProvider: React.FC<PositionProviderProps> = ({ children }) 
                   max_step_completed: 1, // reset max step
                   reports_to_position_id: reportingPositionId,
                   department: { connect: { id: selectedDepartment } },
-                  orgchart_json: orgChartData,
+                  orgchart_json: autolayout(orgChartDataModified),
                   // clear previous data
                   profile_json: null,
                   parent_job_profile: { connect: { id_version: null } },

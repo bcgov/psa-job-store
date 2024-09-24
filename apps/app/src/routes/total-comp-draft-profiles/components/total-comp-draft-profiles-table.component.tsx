@@ -462,8 +462,12 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const renderTableFooter = () => {
     return (
       <div>
-        Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
-        results
+        {totalResults === 0
+          ? '0 results'
+          : `Showing ${(currentPage - 1) * pageSize + 1}-${Math.min(
+              currentPage * pageSize,
+              totalResults,
+            )} of ${totalResults} results`}
       </div>
     );
   };
