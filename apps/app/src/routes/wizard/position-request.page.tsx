@@ -194,7 +194,8 @@ export const PositionRequestPage = () => {
       // - goes back to dashboard, navigates to request B
       // - context still contains data from request A
       // - resetWizardContext fires, but this useEffect fires while data is still stale
-      wizardContextPositionRequestData?.id == parseInt(positionRequestId ?? '-1')
+      // fix does not apply for shared routes (no position request id in the URL)
+      (wizardContextPositionRequestData?.id == parseInt(positionRequestId ?? '-1') || isSharedRoute)
     ) {
       const step = wizardContextPositionRequestData?.step;
 

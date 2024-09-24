@@ -538,6 +538,7 @@ export class PositionRequestApiService {
           },
           user: {
             select: {
+              id: true,
               name: true,
               email: true,
             },
