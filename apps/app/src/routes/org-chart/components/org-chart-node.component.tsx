@@ -36,6 +36,12 @@ const applyDoubleBunkingStyles = (employees: unknown[]): CSSProperties => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderPositionNumber = (roles: string[], positionData: Record<string, any>) => {
+  // For new positions that are created manually in org chart for display purposes
+  // show as "proposed". These don't actually exist in PS.
+  if (positionData.id === '000000') {
+    return <em>Proposed</em>;
+  }
+
   if (roles.includes('classification') || roles.includes('total-compensation')) {
     return positionData.id;
   } else if (roles.includes('hiring-manager') || roles.includes('user')) {
