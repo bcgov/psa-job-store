@@ -818,6 +818,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
 
           {hasPositionRequests ? (
             <Table
+              scroll={{ x: 'max-content' }}
               loading={isFetching || isLoading}
               // rowSelection={rowSelection}
               onRow={(record) => {

@@ -694,12 +694,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
       {!isLoading && hasPositionRequests && !error && (
         <Table
-          // onRow={(record) => {
-          //   return {
-          //     onMouseEnter: () => handleMouseEnter(record.id),
-          //     onMouseLeave: handleMouseLeave,
-          //   };
-          // }}
+          scroll={{ x: 'max-content' }}
           className="tableWithHeader"
           columns={columns}
           dataSource={
