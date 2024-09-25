@@ -1,13 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  CheckCircleFilled,
-  CloseSquareFilled,
-  CloseSquareOutlined,
-  CopyOutlined,
-  EllipsisOutlined,
-  ExclamationCircleFilled,
-  LinkOutlined,
-} from '@ant-design/icons';
+import { CopyOutlined, EllipsisOutlined, LinkOutlined } from '@ant-design/icons';
 import {
   Alert,
   Button,
@@ -31,10 +23,12 @@ import LoadingSpinnerWithMessage from '../../components/app/common/components/lo
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
+import StatusIndicator from '../wizard/components/wizard-position-request-status-indicator';
 import './classification-tasks.page.css';
 import { JobProfileWithDiff } from './components/job-profile-with-diff.component';
 import { NextSteps } from './components/next-steps';
@@ -70,24 +64,15 @@ export const ClassificationTaskPage = () => {
     message.success('Link copied to clipboard!');
   };
 
-  const statusIconColorMap: any = {
-    REVIEW: { icon: <ExclamationCircleFilled />, color: '#FA8C16', text: 'Classification Review' },
-    ACTION_REQUIRED: { icon: <CloseSquareFilled />, color: '#FF4D4F', text: 'Action Required' },
-    COMPLETED: { icon: <CheckCircleFilled />, color: '#237804', text: 'Completed' },
-    VERIFICATION: { icon: <CheckCircleFilled />, color: '#722ED1', text: 'Review' },
-    CANCELLED: { icon: <CloseSquareOutlined />, color: '#444', text: 'Cancelled' },
-  };
-
   const StatusIcon = ({ status }: any) => {
-    const statusInfo = statusIconColorMap[status];
-    return statusInfo?.icon ? (
-      <span style={{ color: statusInfo.color }}>
-        <Space>
-          {statusInfo.icon}
-          {statusInfo.text}
-        </Space>
-      </span>
-    ) : null;
+    // const statusInfo = statusIconColorMap[status];
+    // return statusInfo?.icon ? (
+    //   <Space>
+    //     <span style={{ color: statusInfo.color }}>{statusInfo.icon}</span>
+    //     <span style={{ color: statusInfo.textColor }}>{statusInfo.text}</span>
+    //   </Space>
+    // ) : null;
+    return <StatusIndicator status={status} />;
   };
 
   const currentStatus = data?.positionRequest?.status;

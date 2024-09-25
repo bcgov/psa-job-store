@@ -220,7 +220,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               </>
             )}
 
-            {record.status === 'VERIFICATION' && (
+            {(record.status === 'VERIFICATION' || record.status === 'REVIEW') && (
               <>
                 <Menu.Item
                   data-testid="menu-option-view"
