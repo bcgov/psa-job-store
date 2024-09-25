@@ -108,6 +108,7 @@ export const OrgChartAccessCard = ({ user }: OrgChartAccessCardProps) => {
             additional departments below.
           </Paragraph>
           <Table
+            scroll={{ x: 'max-content' }}
             bordered
             columns={[
               {

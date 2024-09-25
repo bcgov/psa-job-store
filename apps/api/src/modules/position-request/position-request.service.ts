@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
+import { PositionRequest, Prisma } from '@prisma/client';
 import {
   Elements,
   autolayout,
@@ -270,7 +270,7 @@ export class PositionRequestApiService {
   private async submitPositionRequest_afterCreatePosition(
     positionNumber: string,
     id,
-    positionRequest,
+    positionRequest: PositionRequest,
     orgchart_png,
     comment,
   ) {
@@ -301,7 +301,10 @@ export class PositionRequestApiService {
 
     const reportsTo = (await this.positionService.getPositionProfile(positionRequest.reports_to_position_id, true))[0];
     const excludedMgr = (
-      await this.positionService.getPositionProfile(positionRequest.additional_info.excluded_mgr_position_number, true)
+      await this.positionService.getPositionProfile(
+        (positionRequest.additional_info as Record<string, any>).excluded_mgr_position_number,
+        true,
+      )
     )[0];
 
     await this.prisma.positionRequest.update({
@@ -372,7 +375,7 @@ export class PositionRequestApiService {
     }
   }
 
-  private async submitPositionRequest_updateOrgChart(positionObj, positionRequest, id) {
+  private async submitPositionRequest_updateOrgChart(positionObj, positionRequest: PositionRequest, id) {
     // get classification for this new position
     const classification = await this.classificationService.getClassificationForPeoplesoftPosition(positionObj);
 
@@ -385,9 +388,17 @@ export class PositionRequestApiService {
     const positionNumber = positionObj['A.POSITION_NBR'];
     const positionTitle = positionObj['A.DESCR'];
 
+    // remove node with isNewPosition = true (exists on new position requests, doesn't on older ones)
+    // updateSupervisorAndAddNewPositionNode will re-add it with updated data
+    const nodesWithNoNewPosition = nodes.filter((node) => !node.data.isNewPosition);
+
+    // remove edge related to the new position, if exists
+    const newEdgeId = `${positionRequest.reports_to_position_id}-000000`;
+    const edgesWithNoNewPosition = edges.filter((edge) => edge.id !== newEdgeId);
+
     const { edges: newEdges, nodes: newNodes } = updateSupervisorAndAddNewPositionNode(
-      edges,
-      nodes,
+      edgesWithNoNewPosition,
+      nodesWithNoNewPosition,
       excludedManagerId,
       supervisorId,
       positionNumber,
@@ -538,6 +549,7 @@ export class PositionRequestApiService {
           },
           user: {
             select: {
+              id: true,
               name: true,
               email: true,
             },
@@ -817,6 +829,25 @@ export class PositionRequestApiService {
 
     if (updateData.title !== undefined) {
       updatePayload.title = updateData.title;
+
+      // update the title of the isNewPosition node in the org chart
+      // this allows display of correct title on the node on the org chart when viewed via share link
+
+      const positionRequest = await this.prisma.positionRequest.findUnique({
+        where: { id: id },
+        select: { orgchart_json: true },
+      });
+
+      const orgChart = positionRequest.orgchart_json;
+
+      if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
+        const nodes = orgChart.nodes as any[];
+        const isNewPositionNode = nodes.find((node) => node.data?.isNewPosition === true);
+        if (isNewPositionNode) {
+          isNewPositionNode.data.title = updateData.title;
+        }
+        updatePayload.orgchart_json = orgChart;
+      }
     }
 
     if (updateData.parent_job_profile !== undefined) {
@@ -942,14 +973,24 @@ export class PositionRequestApiService {
         const orgChart = positionRequest.orgchart_json;
 
         if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
+          // const excludedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.externalDepartment === true);
+          // console.log('Excluded nodes:', excludedNodes);
+
           // Remove existing node with isExcludedManager = true
           // isExcludedManager indicates it's a custom added node
-          const updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.isExcludedManager !== true);
+          let updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.externalDepartment !== true);
+
+          // const excludedEdges = (orgChart.edges as any[]).filter((edge) => {
+          //   const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
+          //   const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
+          //   return sourceNode?.data?.externalDepartment === true || targetNode?.data?.externalDepartment === true;
+          // });
+          // console.log('Excluded edges:', excludedEdges);
 
           const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
             const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
             const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
-            return sourceNode?.data?.isExcludedManager !== true && targetNode?.data?.isExcludedManager !== true;
+            return sourceNode?.data?.externalDepartment !== true && targetNode?.data?.externalDepartment !== true;
           });
 
           const isExcludedManagerInOrgChart = (orgChart.nodes as any[]).some(
@@ -958,6 +999,11 @@ export class PositionRequestApiService {
 
           // console.log('isExcludedManagerInOrgChart: ', isExcludedManagerInOrgChart);
 
+          // excluded manager is not in the org chart, add it
+          let updatedOrgChart: {
+            edges: any[];
+            nodes: any[];
+          } = { edges: [], nodes: [] };
           if (!isExcludedManagerInOrgChart) {
             // console.log('isExcludedManagerInOrgChart false');
 
@@ -972,7 +1018,7 @@ export class PositionRequestApiService {
 
             // console.log('topLevelPositionId: ', topLevelPositionId);
 
-            const updatedOrgChart = {
+            updatedOrgChart = {
               ...orgChart,
               nodes: [
                 ...updatedNodes,
@@ -981,7 +1027,8 @@ export class PositionRequestApiService {
                   data: {
                     id: additionalInfo.excluded_mgr_position_number,
                     title: employeeInfo[0].positionDescription,
-                    isExcludedManager: true, // isExcludedManager indicates it's a custom added node
+                    isExcludedManager: true, // mark node as excluded manager
+                    externalDepartment: true, // indicate this excluded manager is not part of the department
                     employees: employeeInfo.map((employee) => ({
                       id: employee.employeeId,
                       name: employee.employeeName,
@@ -1015,10 +1062,74 @@ export class PositionRequestApiService {
                 },
               ],
             };
+          } else {
+            // excluded manager is in the org chart
+            // we may still need to update the org chart in case user changed excluded manager from
+            // excluded manager that was outside of the department to one being inside the department
+            // so we need to remove that from org chart
 
-            // console.log('new org chart: ', JSON.stringify(updatedOrgChart));
-            updatePayload.orgchart_json = updatedOrgChart;
+            updatedOrgChart = {
+              ...orgChart,
+              nodes: [...updatedNodes],
+              edges: [...updatedEdges],
+            };
           }
+
+          // find the excluded manager node and mark it as excluded manager
+          // unmark any other node that was previously marked as excluded manager
+          updatedNodes = updatedOrgChart.nodes.map((node) => {
+            if (node.id === additionalInfo.excluded_mgr_position_number) {
+              // console.log('found excluded manager, marking..');
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  isExcludedManager: true,
+                },
+              };
+            } else {
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  isExcludedManager: false,
+                },
+              };
+            }
+          });
+
+          // if updatePayload.additional_info.department_id is provided, update department_id on the node with isNewPosition == true
+          // this way new position node will have correct department id when viewed in shared mode
+          if (additionalInfo.department_id !== undefined) {
+            updatedNodes = updatedNodes.map((node) => {
+              if (node.data?.isNewPosition === true) {
+                return {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    department: {
+                      id: additionalInfo.department_id,
+                      organization_id: additionalInfo.work_location_id,
+                      name: additionalInfo.work_location_name,
+                    },
+                  },
+                };
+              } else {
+                return node;
+              }
+            });
+          }
+
+          updatedOrgChart = {
+            ...orgChart,
+            nodes: [...updatedNodes],
+            edges: [...updatedOrgChart.edges],
+          };
+
+          updatePayload.orgchart_json = autolayout(updatedOrgChart) as {
+            edges: any[];
+            nodes: any[];
+          };
         }
       }
     } else if (additionalInfo === null) {
@@ -1327,9 +1438,6 @@ export class PositionRequestApiService {
             })
           : null;
       const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
-
-      // const orgChartBase64 =
-      //   positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
 
       const zeroFilledPositionNumber =
         positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
