@@ -462,8 +462,12 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const renderTableFooter = () => {
     return (
       <div>
-        Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
-        results
+        {totalResults === 0
+          ? '0 results'
+          : `Showing ${(currentPage - 1) * pageSize + 1}-${Math.min(
+              currentPage * pageSize,
+              totalResults,
+            )} of ${totalResults} results`}
       </div>
     );
   };
@@ -690,12 +694,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
       {!isLoading && hasPositionRequests && !error && (
         <Table
-          // onRow={(record) => {
-          //   return {
-          //     onMouseEnter: () => handleMouseEnter(record.id),
-          //     onMouseLeave: handleMouseLeave,
-          //   };
-          // }}
+          scroll={{ x: 'max-content' }}
           className="tableWithHeader"
           columns={columns}
           dataSource={

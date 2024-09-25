@@ -185,7 +185,18 @@ export const PositionRequestPage = () => {
   ]);
 
   useEffect(() => {
-    if (wizardContextPositionRequestData) {
+    if (
+      wizardContextPositionRequestData &&
+      // AL-980 Navigating between position requests may display an error
+      // check that the id from useParams is the same as the one in the context
+      // fixes a bug where the context still contains stale data when switching between requests
+      // - user navigates to request A
+      // - goes back to dashboard, navigates to request B
+      // - context still contains data from request A
+      // - resetWizardContext fires, but this useEffect fires while data is still stale
+      // fix does not apply for shared routes (no position request id in the URL)
+      (wizardContextPositionRequestData?.id == parseInt(positionRequestId ?? '-1') || isSharedRoute)
+    ) {
       const step = wizardContextPositionRequestData?.step;
 
       if (step != null) {
@@ -214,6 +225,7 @@ export const PositionRequestPage = () => {
     }
   }, [
     wizardContextPositionRequestData,
+    positionRequestId,
     setPositionRequestId,
     setWizardData,
     setPositionRequestProfileId,

@@ -25,6 +25,7 @@ export const ListTable = ({
 }: ListTableProps) => {
   return (
     <Table
+      scroll={{ x: 'max-content' }}
       onChange={(pagination, _filters, sorter) => {
         const { current, pageSize } = pagination;
 

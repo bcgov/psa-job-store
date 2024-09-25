@@ -12,7 +12,6 @@ import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Switch
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { Divider } from 'antd/lib';
-import { autolayout, updateSupervisorAndAddNewPositionNode } from 'common-kit';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
@@ -354,19 +353,22 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       if (!classification) return;
       // console.log('classification: ', classification);
 
-      // const { data: departmentData } = useGetDepartmentQuery(positionRequest?.department_id);
-      let orgChartDataForPng = JSON.parse(JSON.stringify(positionRequest?.orgchart_json));
-      orgChartDataForPng = updateSupervisorAndAddNewPositionNode(
-        orgChartDataForPng.edges,
-        orgChartDataForPng.nodes,
-        positionRequest?.additional_info?.excluded_mgr_position_number ?? '',
-        positionRequest?.reports_to_position_id,
-        '000000',
-        positionRequest?.title,
-        classification,
-        { id: positionRequest?.department_id, organization_id: '', name: '' },
-      );
-      setOrgChartDataForPng(autolayout(orgChartDataForPng));
+      // no longer need to do this since org chart will now contain new position and all other relevant info
+      // let orgChartDataForPng = JSON.parse(JSON.stringify(positionRequest?.orgchart_json));
+      // orgChartDataForPng = updateSupervisorAndAddNewPositionNode(
+      //   orgChartDataForPng.edges,
+      //   orgChartDataForPng.nodes,
+      //   positionRequest?.additional_info?.excluded_mgr_position_number ?? '',
+      //   positionRequest?.reports_to_position_id,
+      //   '000000',
+      //   positionRequest?.title,
+      //   classification,
+      //   { id: positionRequest?.department_id, organization_id: '', name: '' },
+      // );
+      // setOrgChartDataForPng(autolayout(orgChartDataForPng));
+
+      const orgChartDataForPng = positionRequest?.orgchart_json;
+      setOrgChartDataForPng(orgChartDataForPng);
     }
   }, [positionRequest, setOrgChartDataForPng, originalProfileData]);
 

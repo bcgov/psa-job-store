@@ -89,8 +89,12 @@ export const JobProfileSearchResults = ({
       </div>
       <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0.5rem 1rem' }}>
         <Text style={{ fontSize: '14px', display: 'block', padding: '10px 0' }}>
-          Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
-          results
+          {totalResults === 0
+            ? '0 results'
+            : `Showing ${(currentPage - 1) * pageSize + 1}-${Math.min(
+                currentPage * pageSize,
+                totalResults,
+              )} of ${totalResults} results`}
         </Text>
       </div>
 
@@ -99,7 +103,7 @@ export const JobProfileSearchResults = ({
           <Skeleton loading={isLoading} active></Skeleton>
         </div>
       ) : data?.jobProfiles.length === 0 ? (
-        <Empty data-testid="empty-state" style={{ margin: '1rem' }} />
+        <Empty data-testid="empty-state" style={{ margin: '1rem' }} description="No profiles found" />
       ) : (
         <ul
           aria-label="list"
