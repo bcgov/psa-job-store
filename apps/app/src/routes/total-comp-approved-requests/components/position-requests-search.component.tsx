@@ -140,7 +140,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
       });
       setStatusOptions(newOptions);
     }
-  }, [statusData]);
+  }, [statusData, statusFilterDataMap]);
 
   useEffect(() => {
     if (submittedByData) {
