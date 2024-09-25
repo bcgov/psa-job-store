@@ -15,7 +15,7 @@ import { validateAppConfig } from '../utils/validate-app-config.util';
   imports: [
     CacheModule.register({ isGlobal: true }),
     ConfigModule.forRoot({ isGlobal: true, validate: validateAppConfig }),
-    /*^^^ REQUIRED TO*/
+    /*^^^ REQUIRED ^^^*/
     PositionRequestModule,
     ExternalModule,
     OrganizationModule,
