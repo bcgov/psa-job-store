@@ -13,7 +13,7 @@ export interface DepartmentModel {
 export interface DepartmentWithLocationModel {
   id: string;
   name: string;
-  location_id: string;
+  location: { id: string; name: string };
 }
 
 export interface DepartmentWithOrganizationModel {
@@ -84,7 +84,10 @@ export const departmentApi = graphqlApi.injectEndpoints({
               departments {
                 id
                 name
-                location_id
+                location {
+                  id
+                  name
+                }
               }
             }
           `,
