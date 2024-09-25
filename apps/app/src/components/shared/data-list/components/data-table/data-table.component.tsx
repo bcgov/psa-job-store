@@ -18,6 +18,7 @@ export const DataTable = ({ columns, data, filterBuilder, loading }: DataTablePr
 
   return (
     <Table
+      scroll={{ x: 'max-content' }}
       onChange={(pagination, _filters, sorter) => {
         const { current, pageSize } = pagination;
 
