@@ -67,14 +67,14 @@ async function runScript() {
       // !additional_info.work_location_name
       //   ? console.log('no location name found for ' + additional_info?.work_location_id + ' ' + pr.department_id)
       //   : console.log(' new work_location_name: ' + JSON.stringify(additional_info?.work_location_name));
-      // await prisma.positionRequest.update({
-      //   where: { id: pr.id },
-      //   data: {
-      //     reports_to_position: reportsTo,
-      //     excluded_manager_position: excludedMgr,
-      //     additional_info: additional_info ?? undefined,
-      //   },
-      // });
+      await prisma.positionRequest.update({
+        where: { id: pr.id },
+        data: {
+          reports_to_position: reportsTo,
+          excluded_manager_position: excludedMgr,
+          additional_info: additional_info ?? undefined,
+        },
+      });
       console.log(' new additional_info: ' + JSON.stringify(additional_info));
       console.log(' old EXCL:  ' + additional_info?.excluded_mgr_position_number);
       console.log(' new EXCL:  ' + excludedMgr?.positionNumber + ' ' + excludedMgr?.employeeName);
