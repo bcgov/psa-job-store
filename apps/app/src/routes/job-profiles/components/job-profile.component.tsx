@@ -890,42 +890,46 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                   </ul>
                   {/* Optional Accountabilities - is_significant == false */}
                   {(effectiveData?.accountabilities.filter((acc) => !acc.is_significant && !acc.disabled)?.length ??
-                    0) > 0 && (
-                    <div
-                      style={{
-                        borderLeft: '1px solid #D8D8D8',
-                        paddingLeft: '12px',
-                        marginBottom: '12px',
-                        marginLeft: '23px',
-                      }}
-                      className="optionalList"
-                    >
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
-                        <h4>Optional accountabilities</h4>
-                      </span>
+                    0) > 0 &&
+                    (showDiff && originalData ? (
+                      <div
+                        style={{
+                          borderLeft: '1px solid #D8D8D8',
+                          paddingLeft: '12px',
+                          marginBottom: '12px',
+                          marginLeft: '23px',
+                        }}
+                        className="optionalList"
+                      >
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                          <h4>Optional accountabilities</h4>
+                        </span>
 
-                      <ul data-testid="optional-accountabilities" style={{ paddingInlineStart: '27px' }}>
-                        {showDiff && originalData
-                          ? compareLists(
-                              originalData.accountabilities.filter((acc) => !acc.is_significant),
-                              effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
-                              true,
-                            )
-                          : effectiveData?.accountabilities
-                              .filter((acc) => !acc.is_significant)
-                              .map((accountability, index) => {
-                                if (typeof accountability === 'string' || accountability.disabled) {
-                                  return null;
-                                }
-                                if (accountability.text instanceof TrackedFieldArrayItem) {
-                                  return <li key={index}>{accountability.text.text}</li>;
-                                } else if (typeof accountability.text === 'string') {
-                                  return <li key={index}>{accountability.text}</li>;
-                                }
-                              })}
+                        <ul data-testid="optional-accountabilities" style={{ paddingInlineStart: '27px' }}>
+                          {compareLists(
+                            originalData.accountabilities.filter((acc) => !acc.is_significant && acc.disabled),
+                            effectiveData?.accountabilities.filter((acc) => !acc.is_significant),
+                            true,
+                          )}
+                        </ul>
+                      </div>
+                    ) : (
+                      //marginTop resets the applied marginButtom by antd
+                      <ul data-testid="optional-accountabilities" style={{ marginTop: '-14px' }}>
+                        {effectiveData?.accountabilities
+                          .filter((acc) => !acc.is_significant)
+                          .map((accountability, index) => {
+                            if (typeof accountability === 'string' || accountability.disabled) {
+                              return null;
+                            }
+                            if (accountability.text instanceof TrackedFieldArrayItem) {
+                              return <li key={index}>{accountability.text.text}</li>;
+                            } else if (typeof accountability.text === 'string') {
+                              return <li key={index}>{accountability.text}</li>;
+                            }
+                          })}
                       </ul>
-                    </div>
-                  )}
+                    ))}
                 </span>
               </>
             ),
@@ -1024,44 +1028,46 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     (acc) => !acc.is_significant && !acc.disabled,
                   )?.length ?? 0) > 0 && (
                     <>
-                      <div
-                        style={{
-                          borderLeft: '1px solid #D8D8D8',
-                          paddingLeft: '12px',
-                          marginBottom: '12px',
-                          marginLeft: '23px',
-                        }}
-                        className="optionalList"
-                      >
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
-                          <h4>Optional requirements</h4>
-                        </span>
-                        <ul data-testid="optional-prof-regs" style={{ paddingInlineStart: '27px' }}>
-                          {showDiff && originalData
-                            ? compareLists(
-                                originalData.professional_registration_requirements.filter(
-                                  (acc) => !acc.is_significant,
-                                ),
-                                effectiveData?.professional_registration_requirements.filter(
-                                  (acc) => !acc.is_significant,
-                                ),
-                                true,
-                              )
-                            : effectiveData?.professional_registration_requirements
-                                .filter((acc) => !acc.is_significant)
-                                .map((professional_registration_requirement, index) => {
-                                  if (
-                                    typeof professional_registration_requirement === 'string' ||
-                                    professional_registration_requirement.disabled
-                                  ) {
-                                    return null;
-                                  }
-                                  if (typeof professional_registration_requirement.text === 'string') {
-                                    return <li key={index}>{professional_registration_requirement.text}</li>;
-                                  }
-                                })}
-                        </ul>
-                      </div>
+                      {showDiff && originalData ? (
+                        <div
+                          style={{
+                            borderLeft: '1px solid #D8D8D8',
+                            paddingLeft: '12px',
+                            marginBottom: '12px',
+                            marginLeft: '23px',
+                          }}
+                          className="optionalList"
+                        >
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                            <h4>Optional requirements</h4>
+                          </span>
+                          <ul data-testid="optional-prof-regs" style={{ paddingInlineStart: '27px' }}>
+                            {compareLists(
+                              originalData.professional_registration_requirements.filter(
+                                (acc) => !acc.is_significant && acc.disabled,
+                              ),
+                              effectiveData?.professional_registration_requirements.filter(
+                                (acc) => !acc.is_significant,
+                              ),
+                              true,
+                            )}
+                          </ul>
+                        </div>
+                      ) : (
+                        effectiveData?.professional_registration_requirements
+                          .filter((acc) => !acc.is_significant)
+                          .map((professional_registration_requirement, index) => {
+                            if (
+                              typeof professional_registration_requirement === 'string' ||
+                              professional_registration_requirement.disabled
+                            ) {
+                              return null;
+                            }
+                            if (typeof professional_registration_requirement.text === 'string') {
+                              return <li key={index}>{professional_registration_requirement.text}</li>;
+                            }
+                          })
+                      )}
                     </>
                   )}
                 </>
@@ -1161,37 +1167,42 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                   {(effectiveData?.security_screenings.filter((acc) => !acc.is_significant && !acc.disabled)?.length ??
                     0) > 0 && (
                     <>
-                      <div
-                        style={{
-                          borderLeft: '1px solid #D8D8D8',
-                          paddingLeft: '12px',
-                          marginBottom: '12px',
-                          marginLeft: '23px',
-                        }}
-                        className="optionalList"
-                      >
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
-                          <h4>Optional requirements</h4>
-                        </span>
-                        <ul data-testid="optional-security-screenings" style={{ paddingInlineStart: '27px' }}>
-                          {showDiff && originalData
-                            ? compareLists(
-                                originalData.security_screenings.filter((acc) => !acc.is_significant),
-                                effectiveData?.security_screenings.filter((acc) => !acc.is_significant),
-                                true,
-                              )
-                            : effectiveData?.security_screenings
-                                .filter((acc) => !acc.is_significant)
-                                .map((security_screening, index) => {
-                                  if (typeof security_screening === 'string' || security_screening.disabled) {
-                                    return null;
-                                  }
-                                  if (typeof security_screening.text === 'string') {
-                                    return <li key={index}>{security_screening.text}</li>;
-                                  }
-                                })}
+                      {showDiff && originalData ? (
+                        <div
+                          style={{
+                            borderLeft: '1px solid #D8D8D8',
+                            paddingLeft: '12px',
+                            marginBottom: '12px',
+                            marginLeft: '23px',
+                          }}
+                          className="optionalList"
+                        >
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                            <h4>Optional requirements</h4>
+                          </span>
+                          <ul data-testid="optional-security-screenings" style={{ paddingInlineStart: '27px' }}>
+                            {compareLists(
+                              originalData.security_screenings.filter((acc) => !acc.is_significant && acc.disabled),
+                              effectiveData?.security_screenings.filter((acc) => !acc.is_significant),
+                              true,
+                            )}
+                          </ul>
+                        </div>
+                      ) : (
+                        //marginTop resets the applied marginButtom by antd
+                        <ul data-testid="optional-accountabilities" style={{ marginTop: '-14px' }}>
+                          {effectiveData?.security_screenings
+                            .filter((acc) => !acc.is_significant)
+                            .map((security_screening, index) => {
+                              if (typeof security_screening === 'string' || security_screening.disabled) {
+                                return null;
+                              }
+                              if (typeof security_screening.text === 'string') {
+                                return <li key={index}>{security_screening.text}</li>;
+                              }
+                            })}
                         </ul>
-                      </div>
+                      )}
                     </>
                   )}
                 </>
