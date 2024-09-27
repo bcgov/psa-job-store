@@ -35,3 +35,9 @@ spec:
                                 key: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
                   ports:
                       - containerPort: 5601
+                  securityContext:
+                      allowPrivilegeEscalation: false
+                      runAsNonRoot: true
+                      capabilities:
+                        drop:
+                          - ALL
