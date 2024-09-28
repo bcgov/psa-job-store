@@ -1,4 +1,4 @@
-FROM node:20.13.1-alpine AS base
+FROM node:20.17.0-alpine AS base
 # Create and change to the app directory.
 FROM base AS builder
 WORKDIR /tmp/build
