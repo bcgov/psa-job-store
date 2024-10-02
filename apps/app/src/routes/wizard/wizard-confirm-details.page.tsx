@@ -346,7 +346,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         setValue('workLocation', work_location_id + '|' + work_location_name);
       } else {
         const dept = departmentsData?.find((dept) => dept.id === positionRequestData?.department_id);
-        setValue('workLocation', dept?.location_id + '|' + dept?.name);
+        setValue('workLocation', dept?.location.id + '|' + dept?.location.name);
       }
       setValue('payListDepartmentId', department_id || positionRequestData?.department_id || null);
 
@@ -542,7 +542,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                   // setSelectedDepartment(selectedDept?.name || ''); // Update selected department name
                                   setValue(
                                     'workLocation',
-                                    selectedDept?.location_id + '|' + selectedDept?.name || null,
+                                    selectedDept?.location.id + '|' + selectedDept?.location.name || null,
                                   );
                                   // setSelectedLocation(newValue);
                                   onChange(newValue); // Update the form state

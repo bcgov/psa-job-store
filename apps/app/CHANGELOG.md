@@ -1,5 +1,28 @@
 # app
 
+## 0.13.0
+
+### Minor Changes
+
+- [#813](https://github.com/bcgov/psa-job-store/pull/813) [`da32c5d0e43980df220d7027c54fa76017c1a5ef`](https://github.com/bcgov/psa-job-store/commit/da32c5d0e43980df220d7027c54fa76017c1a5ef) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-934 Unrelated card highlighted in the org chart
+
+### Patch Changes
+
+- [#813](https://github.com/bcgov/psa-job-store/pull/813) [`d314fcd6a02d96ef25ff1b262a414cae85897007`](https://github.com/bcgov/psa-job-store/commit/d314fcd6a02d96ef25ff1b262a414cae85897007) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-930 Empty search results showing the wrong count
+
+- [#813](https://github.com/bcgov/psa-job-store/pull/813) [`6b8aa6bf75d4d6af158ebdd8a19114285d5e587e`](https://github.com/bcgov/psa-job-store/commit/6b8aa6bf75d4d6af158ebdd8a19114285d5e587e) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-980 Navigating between position requests may display an error
+
+- [#814](https://github.com/bcgov/psa-job-store/pull/814) [`07a80d92bd3fe00d83aece9d0bb69687dc5d0321`](https://github.com/bcgov/psa-job-store/commit/07a80d92bd3fe00d83aece9d0bb69687dc5d0321) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-935 Responsiveness of tables on narrow screens
+
+- Updated dependencies [[`da32c5d0e43980df220d7027c54fa76017c1a5ef`](https://github.com/bcgov/psa-job-store/commit/da32c5d0e43980df220d7027c54fa76017c1a5ef)]:
+  - common-kit@0.1.0
+
+## 0.12.0
+
+### Minor Changes
+
+- [#792](https://github.com/bcgov/psa-job-store/pull/792) [`348048ed475d37f43d4bb33003eeb8499f6afc56`](https://github.com/bcgov/psa-job-store/commit/348048ed475d37f43d4bb33003eeb8499f6afc56) Thanks [@kmandryk](https://github.com/kmandryk)! - AL-811 add versioning to approved requests and explore pages
+
 ## 0.11.1
 
 ### Patch Changes

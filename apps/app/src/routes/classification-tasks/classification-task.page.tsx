@@ -179,7 +179,7 @@ export const ClassificationTaskPage = () => {
                         </Descriptions.Item>
                         <Descriptions.Item label="Reporting Manager" span={3}>
                           <PositionProfile
-                            positionNumber={data?.positionRequest?.reports_to_position_id}
+                            positionNumber={null}
                             positionProfile={data?.positionRequest?.reports_to_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
@@ -187,7 +187,7 @@ export const ClassificationTaskPage = () => {
                         </Descriptions.Item>
                         <Descriptions.Item label="First Band Manager" span={3}>
                           <PositionProfile
-                            positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+                            positionNumber={null}
                             positionProfile={data?.positionRequest?.excluded_manager_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
