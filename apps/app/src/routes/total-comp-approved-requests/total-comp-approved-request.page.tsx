@@ -11,7 +11,6 @@ import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetJobProfileMetaQuery } from '../../redux/services/graphql-api/job-profile.api';
-import { useGetLocationQuery } from '../../redux/services/graphql-api/location.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
 import { formatDateTime } from '../../utils/Utils';
@@ -33,16 +32,6 @@ export const TotalCompApprovedRequestPage = () => {
     id: parseInt(positionRequestId),
   });
 
-  const { data: locationInfo, isLoading: locationLoading } = useGetLocationQuery(
-    {
-      id: data?.positionRequest?.additional_info?.work_location_id,
-    },
-    {
-      skip:
-        data?.positionRequest?.additional_info?.work_location_name != null ||
-        !data?.positionRequest?.additional_info?.work_location_id,
-    },
-  );
   const { data: jobProfileMeta } = useGetJobProfileMetaQuery(
     data?.positionRequest?.parent_job_profile_id ?? -1,
 
@@ -131,7 +120,7 @@ export const TotalCompApprovedRequestPage = () => {
       label: 'Reports to',
       children: (
         <PositionProfile
-          positionNumber={data?.positionRequest?.reports_to_position_id}
+          positionNumber={null}
           positionProfile={data?.positionRequest?.reports_to_position}
           orgChartData={data?.positionRequest?.orgchart_json}
         ></PositionProfile>
@@ -149,7 +138,7 @@ export const TotalCompApprovedRequestPage = () => {
       label: 'First level excluded manager for this position',
       children: (
         <PositionProfile
-          positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          positionNumber={null}
           positionProfile={data?.positionRequest?.excluded_manager_position}
           orgChartData={data?.positionRequest?.orgchart_json}
         ></PositionProfile>
@@ -218,12 +207,7 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'positionLocation',
       label: 'Position location',
-      children: (
-        <div>
-          {locationLoading && <LoadingComponent mode="small" />}
-          {data?.positionRequest?.additional_info?.work_location_name ?? locationInfo?.location.name}
-        </div>
-      ),
+      children: <div>{data?.positionRequest?.additional_info?.work_location_name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -452,7 +436,7 @@ export const TotalCompApprovedRequestPage = () => {
                         </Descriptions.Item>
                         <Descriptions.Item label="Reporting Manager" span={3}>
                           <PositionProfile
-                            positionNumber={data?.positionRequest?.reports_to_position_id}
+                            positionNumber={null}
                             positionProfile={data?.positionRequest?.reports_to_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
@@ -460,7 +444,7 @@ export const TotalCompApprovedRequestPage = () => {
                         </Descriptions.Item>
                         <Descriptions.Item label="First Band Manager" span={3}>
                           <PositionProfile
-                            positionNumber={data?.positionRequest?.additional_info?.excluded_mgr_position_number}
+                            positionNumber={null}
                             positionProfile={data?.positionRequest?.excluded_manager_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
                             mode="compact"
@@ -544,7 +528,7 @@ export const TotalCompApprovedRequestPage = () => {
             <PositionProfile
               prefix="Reporting to"
               mode="compact"
-              positionNumber={data?.positionRequest?.reports_to_position_id}
+              positionNumber={null}
               positionProfile={data?.positionRequest?.reports_to_position}
               orgChartData={data?.positionRequest?.orgchart_json}
             ></PositionProfile>

@@ -2,10 +2,8 @@
 import { ExportOutlined } from '@ant-design/icons';
 import { Card, Col, Descriptions, Row, Typography } from 'antd';
 import { Link } from 'react-router-dom';
-import LoadingComponent from '../../../components/app/common/components/loading.component';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
 import { useGetJobProfileMetaQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import { useGetLocationQuery } from '../../../redux/services/graphql-api/location.api';
 import { GetPositionRequestResponse } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
 import CommentsList from '../../wizard/components/comments-list.component';
@@ -15,12 +13,6 @@ type ServiceRequestDetailsProps = {
 };
 
 export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ positionRequestData }) => {
-  const { data: locationInfo, isLoading: locationLoading } = useGetLocationQuery(
-    {
-      id: positionRequestData?.positionRequest?.additional_info?.work_location_id,
-    },
-    { skip: !positionRequestData?.positionRequest?.additional_info?.work_location_id },
-  );
   const { data: jobProfileMeta } = useGetJobProfileMetaQuery(
     positionRequestData?.positionRequest?.parent_job_profile_id ?? -1,
 
@@ -119,7 +111,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'Reports to',
       children: (
         <PositionProfile
-          positionNumber={positionRequestData?.positionRequest?.reports_to_position_id}
+          positionNumber={null}
           positionProfile={positionRequestData?.positionRequest?.reports_to_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
@@ -154,7 +146,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'First level excluded manager for this position',
       children: (
         <PositionProfile
-          positionNumber={positionRequestData?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          positionNumber={null}
           positionProfile={positionRequestData?.positionRequest?.excluded_manager_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
@@ -221,12 +213,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'positionLocation',
       label: 'Position location',
-      children: (
-        <div>
-          {locationLoading && <LoadingComponent mode="small" />}
-          {positionRequestData.positionRequest?.additional_info?.work_location_name ?? locationInfo?.location.name}
-        </div>
-      ),
+      children: <div>{positionRequestData.positionRequest?.additional_info?.work_location_name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
 
