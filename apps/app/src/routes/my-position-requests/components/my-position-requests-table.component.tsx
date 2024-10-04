@@ -10,7 +10,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Modal, Row, Table, Tooltip, message } from 'antd';
+import { Button, Card, Col, Menu, Modal, Row, Table, Tag, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
 import copy from 'copy-to-clipboard';
 import React, { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
@@ -220,7 +220,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               </>
             )}
 
-            {record.status === 'VERIFICATION' && (
+            {(record.status === 'VERIFICATION' || record.status === 'REVIEW') && (
               <>
                 <Menu.Item
                   data-testid="menu-option-view"
@@ -439,7 +439,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             render: (text: string, record: any) => {
               return record.status === 'COMPLETED' && record.approval_type == 'VERIFIED'
                 ? formatDuration(parseInt(text))
-                : '';
+                : '-';
             },
           },
 
@@ -451,7 +451,24 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             key: 'approval_type',
             // display only if in COMPLETED status
             render: (text: string, record: any) => {
-              return record.status === 'COMPLETED' ? (text == 'AUTOMATIC' ? 'Automatic' : 'Verified') : '';
+              if (record.status !== 'COMPLETED') return '-';
+
+              const camelCaseText = text.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+              let color = '';
+              switch (camelCaseText) {
+                case 'AutoApproved':
+                  color = 'default';
+                  break;
+                case 'Verified':
+                  color = 'blue';
+                  break;
+                case 'Reviewed':
+                  color = 'orange';
+                  break;
+                default:
+                  color = 'default';
+              }
+              return <Tag color={color}>{camelCaseText}</Tag>;
             },
           },
         ]

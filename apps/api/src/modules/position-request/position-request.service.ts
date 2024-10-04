@@ -299,21 +299,29 @@ export class PositionRequestApiService {
       throw AlexandriaError('Failed to update org chart');
     }
 
-    const reportsTo = (await this.positionService.getPositionProfile(positionRequest.reports_to_position_id, true))[0];
-    const excludedMgr = (
-      await this.positionService.getPositionProfile(
-        (positionRequest.additional_info as Record<string, any>).excluded_mgr_position_number,
-        true,
-      )
-    )[0];
+    try {
+      const reportsTo = (
+        await this.positionService.getPositionProfile(positionRequest.reports_to_position_id, true)
+      )[0];
+      const excludedMgr = (
+        await this.positionService.getPositionProfile(
+          (positionRequest.additional_info as Record<string, any>).excluded_mgr_position_number,
+          true,
+        )
+      )[0];
 
-    await this.prisma.positionRequest.update({
-      where: { id },
-      data: {
-        reports_to_position: reportsTo,
-        excluded_manager_position: excludedMgr,
-      },
-    });
+      await this.prisma.positionRequest.update({
+        where: { id },
+        data: {
+          reports_to_position: reportsTo,
+          excluded_manager_position: excludedMgr,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to update manager information.');
+    }
+
     // CRM Incident Managements
     let crm_id;
     let crm_lookup_name;

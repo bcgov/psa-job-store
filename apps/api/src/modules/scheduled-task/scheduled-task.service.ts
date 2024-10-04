@@ -124,6 +124,8 @@ export class ScheduledTaskService {
                 const status = incomingPositionRequestStatus as PositionRequestStatus;
                 // if status is completed, update approved_at date
                 const approved_at = status === 'COMPLETED' ? dayjs().toDate() : null;
+                // if status is review, set approved type to "REVIEWED"
+                const reviewed = status === 'REVIEW' ? 'REVIEWED' : null;
                 await this.prisma.positionRequest.update({
                   where: { crm_id: +crm_id },
                   data: {
@@ -131,6 +133,7 @@ export class ScheduledTaskService {
                     ...(approved_at === null
                       ? {}
                       : { approved_at, time_to_approve: dayjs().diff(positionRequest.submitted_at, 'second') }),
+                    ...(reviewed === null ? {} : { approval_type: 'REVIEWED' }),
                   },
                 });
               }

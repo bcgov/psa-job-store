@@ -3,7 +3,6 @@ import {
   Classification,
   JobProfile,
   JobProfileBehaviouralCompetency,
-  JobProfileCreateInput,
   JobProfileJobFamily,
   JobProfileReportsTo,
   JobProfileStream,
@@ -15,6 +14,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JobFamilyService } from '../job-family/job-family.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 import { ClassificationInput } from './inputs/classification-requirements.inputs';
+import { ExtendedJobProfileCreateInput } from './inputs/extended-job-profile-create.input';
 import { JobProfileService } from './job-profile.service';
 
 @ObjectType()
@@ -228,7 +228,7 @@ export class JobProfileResolver {
   async createOrUpdateJobProfile(
     @CurrentUser() { id: userId }: Express.User,
     @Args('id', { type: () => Int, nullable: true }) id: number | null,
-    @Args({ name: 'data', type: () => JobProfileCreateInput }) data: JobProfileCreateInput,
+    @Args({ name: 'data', type: () => ExtendedJobProfileCreateInput }) data: ExtendedJobProfileCreateInput,
   ) {
     try {
       const newJobProfile = await this.jobProfileService.createOrUpdateJobProfile(data, userId);

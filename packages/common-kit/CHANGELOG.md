@@ -1,5 +1,11 @@
 # common-kit
 
+## 0.1.0
+
+### Minor Changes
+
+- [#813](https://github.com/bcgov/psa-job-store/pull/813) [`da32c5d0e43980df220d7027c54fa76017c1a5ef`](https://github.com/bcgov/psa-job-store/commit/da32c5d0e43980df220d7027c54fa76017c1a5ef) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-934 Unrelated card highlighted in the org chart
+
 ## 0.0.2
 
 ### Patch Changes

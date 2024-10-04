@@ -607,7 +607,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
       query: (input: CreateJobProfileInput) => {
         return {
           document: gql`
-            mutation CreateOrUpdateJobProfile($data: JobProfileCreateInput!, $id: Int) {
+            mutation CreateOrUpdateJobProfile($data: ExtendedJobProfileCreateInput!, $id: Int) {
               createOrUpdateJobProfile(data: $data, id: $id)
             }
           `,
