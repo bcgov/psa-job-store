@@ -48,6 +48,7 @@ enum PositionRequestStatus {
 enum ApprovalType {
   AUTOMATIC
   VERIFIED
+  REVIEWED
 }
 
 model PositionRequest {

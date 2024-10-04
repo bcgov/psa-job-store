@@ -42,9 +42,7 @@ async function runScript() {
   const locationService = app.get(LocationService);
   const prisma = app.get(PrismaService);
   try {
-    const positionRequests = await prisma.positionRequest.findMany({
-      where: { status: { not: 'CANCELLED' } },
-    });
+    const positionRequests = await prisma.positionRequest.findMany({});
 
     for (const pr of positionRequests) {
       const additional_info = pr.additional_info as AdditionalInfo | null;
