@@ -70,7 +70,7 @@ export const DownloadJobProfileComponent = ({
         console.log('generaring with profile: ', profile);
       }
 
-      // console.log('prData?.positionRequest: ', prData?.positionRequest);
+      // console.log('positionRequest: ', positionRequest);
       const document =
         profile != null
           ? generateJobProfile({
@@ -267,7 +267,7 @@ export const DownloadJobProfileComponent = ({
   }
 
   return children != null ? (
-    <div
+    <span
       style={{ position: 'relative' }}
       onClick={async () => {
         console.log('do download');
@@ -293,7 +293,7 @@ export const DownloadJobProfileComponent = ({
           <LoadingComponent mode={'small'} />
         </span>
       )}
-    </div>
+    </span>
   ) : (
     <Button
       style={style}

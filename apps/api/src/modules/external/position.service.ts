@@ -68,6 +68,9 @@ export class PositionService {
     return position;
   }
 
+  /* This end point is used to get the position profile for a given position number. 
+     It returns the position details along with the employee details if the position has an employee. 
+  */
   async getPositionProfile(positionNumber: string, extraInfo = false): Promise<PositionProfile[]> {
     if (!positionNumber) throw AlexandriaError('Position number is required');
     const positionDetails = await this.getPosition({ where: { id: positionNumber } });

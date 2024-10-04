@@ -2,7 +2,7 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Card, Col, DatePicker, Input, Row, Tag } from 'antd';
 import dayjs from 'dayjs';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
 import { statusIconColorMap } from '../../../components/app/utils/statusIconColorMap.utils';
@@ -64,10 +64,12 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   allSelections,
   setAllSelections,
 }) => {
-  const statusFilterDataMap = Object.entries(statusIconColorMap).map(([value, data]) => ({
-    label: data.text,
-    value,
-  }));
+  const statusFilterDataMap = useMemo(() => {
+    return Object.entries(statusIconColorMap).map(([value, data]) => ({
+      label: data.text,
+      value,
+    }));
+  }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();

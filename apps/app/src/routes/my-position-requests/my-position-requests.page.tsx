@@ -3,7 +3,7 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Row, Select, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import '../../components/app/common/css/filtered-table.page.css';
 import '../../components/app/common/css/select-external-tags.css';
@@ -14,10 +14,12 @@ import { useGetPositionRequestUserClassificationsQuery } from '../../redux/servi
 import MyPositionsTable from './components/my-position-requests-table.component';
 
 export const MyPositionsPage = () => {
-  const statusFilterDataMap = Object.entries(statusIconColorMap).map(([value, data]) => ({
-    label: data.text,
-    value,
-  }));
+  const statusFilterDataMap = useMemo(() => {
+    return Object.entries(statusIconColorMap).map(([value, data]) => ({
+      label: data.text,
+      value,
+    }));
+  }, []);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
