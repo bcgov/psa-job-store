@@ -11,11 +11,11 @@ then
 fi
 
 # check for secret and env var usage
-#sh  "$(dirname -- "$0")/check_secrets.sh"
+sh  "$(dirname -- "$0")/check_secrets.sh"
 
 if [ $? -ne 0 ]; then
     echo "\n🚫 Secrets detected in the code. Please remove or secure them before committing.\n"
     exit 1
 fi
 
-#npx lint-staged
+npx lint-staged
