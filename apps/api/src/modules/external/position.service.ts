@@ -68,6 +68,9 @@ export class PositionService {
     return position;
   }
 
+  /* This end point is used to get the position profile for a given position number. 
+     It returns the position details along with the employee details if the position has an employee. 
+  */
   async getPositionProfile(positionNumber: string, extraInfo = false): Promise<PositionProfile[]> {
     if (!positionNumber) throw AlexandriaError('Position number is required');
     const positionDetails = await this.getPosition({ where: { id: positionNumber } });
@@ -78,7 +81,26 @@ export class PositionService {
     employeesForPositions = await this.peoplesoftService.getEmployeesForPositions([positionNumber]);
 
     const employeesInPosition = employeesForPositions.get(positionNumber) ?? [];
-
+    if (employeesInPosition.length === 0) {
+      return [
+        {
+          positionNumber: positionNumber,
+          positionDescription: positionDetails.title,
+          departmentName: positionDetails.department.name,
+          classification: positionDetails.classification.name,
+          ministry: positionDetails.organization.name,
+          employeeName: '', // No employee
+          status: '', // No employee status
+          employeeId: '',
+          departmentId: extraInfo ? positionDetails.department_id : '',
+          organizationId: extraInfo ? positionDetails.organization_id : '',
+          classificationId: extraInfo ? positionDetails.classification_id : '',
+          classificationPeoplesoftId: extraInfo ? positionDetails.classification_peoplesoft_id : '',
+          classificationEmployeeGroupId: extraInfo ? positionDetails.classification_employee_group_id : '',
+          effectiveDate: positionDetails.effective_date,
+        },
+      ];
+    }
     const positionProfiles = await Promise.all(
       employeesInPosition.map(async (employee) => {
         const employeeResponse = await this.peoplesoftService.getEmployee(employee.id);

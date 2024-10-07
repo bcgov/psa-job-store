@@ -1,19 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  ArrowLeftOutlined,
-  ClockCircleFilled,
-  CloseSquareOutlined,
-  ExclamationCircleFilled,
-  FundFilled,
-} from '@ant-design/icons';
+import { ArrowLeftOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography, message } from 'antd';
 import Title from 'antd/es/typography/Title';
 import copy from 'copy-to-clipboard';
 import dayjs from 'dayjs';
-import { useEffect, useRef, useState } from 'react';
+import { cloneElement, useEffect, useRef, useState } from 'react';
 import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
+import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useLazyGetClassificationsQuery } from '../../redux/services/graphql-api/classification.api';
 import {
@@ -232,6 +227,7 @@ export const PositionRequestPage = () => {
     setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
     triggerPositionNeedsReviewQuery,
+    isSharedRoute,
   ]);
 
   const onNext = async () => {
@@ -408,7 +404,9 @@ export const PositionRequestPage = () => {
                 {readonlyMode === 'sentForVerification' && (
                   <>
                     <Result
-                      icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
+                      icon={cloneElement(statusIconColorMap['VERIFICATION'].icon, {
+                        style: { color: statusIconColorMap['VERIFICATION'].color },
+                      })}
                       title="Sent for verification"
                       subTitle={`The profile was submitted for review on: ${dayjs(
                         wizardContextPositionRequestData?.updated_at,
@@ -456,7 +454,9 @@ export const PositionRequestPage = () => {
                 {readonlyMode === 'reSubmittedForVerification' && (
                   <>
                     <Result
-                      icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
+                      icon={cloneElement(statusIconColorMap['VERIFICATION'].icon, {
+                        style: { color: statusIconColorMap['VERIFICATION'].color },
+                      })}
                       title="Sent for verification"
                       subTitle="The profile was re-submitted for verification on:" // todo: add date
                     />
@@ -512,7 +512,7 @@ export const PositionRequestPage = () => {
                   <>
                     <Result
                       status="error"
-                      icon={<FundFilled></FundFilled>}
+                      icon={statusIconColorMap['REVIEW'].icon}
                       title="Your classification review is in the queue"
                       subTitle="Thank you for your submission. A Classification specialist will reach out to you via email shortly."
                       extra={[
@@ -525,7 +525,7 @@ export const PositionRequestPage = () => {
                       <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
                         <Card title="Information" bordered={false}>
                           <Descriptions bordered layout="horizontal" column={1}>
-                            <Descriptions.Item label="Position number">
+                            {/* <Descriptions.Item label="Position number">
                               <span data-testid="position-number">
                                 {wizardContextPositionRequestData?.position_number != null
                                   ? `${wizardContextPositionRequestData?.position_number}`.padStart(8, '0')
@@ -543,7 +543,7 @@ export const PositionRequestPage = () => {
                               >
                                 Copy
                               </Button>
-                            </Descriptions.Item>
+                            </Descriptions.Item> */}
                             {/* <Descriptions.Item label="Job Details">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item>
@@ -636,7 +636,9 @@ export const PositionRequestPage = () => {
                   <>
                     <Result
                       status="error"
-                      icon={<CloseSquareOutlined style={{ color: '#444' }} />}
+                      icon={cloneElement(statusIconColorMap['CANCELLED'].icon, {
+                        style: { color: statusIconColorMap['CANCELLED'].color },
+                      })}
                       title="Your position request has been cancelled."
                       subTitle="Contact classifications for more details"
                       extra={[

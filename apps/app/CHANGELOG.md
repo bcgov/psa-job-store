@@ -1,5 +1,15 @@
 # app
 
+## 0.14.0
+
+### Minor Changes
+
+- [#821](https://github.com/bcgov/psa-job-store/pull/821) [`3b75f8c4f81ce3e69386d6db074c9d7eff21048f`](https://github.com/bcgov/psa-job-store/commit/3b75f8c4f81ce3e69386d6db074c9d7eff21048f) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-981 Add "Reviewed" approval flow state
+
+### Patch Changes
+
+- [#821](https://github.com/bcgov/psa-job-store/pull/821) [`495e97aef7569408e3c9675843d6cc980320412d`](https://github.com/bcgov/psa-job-store/commit/495e97aef7569408e3c9675843d6cc980320412d) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-936 Inconsistent 'New position requests' statuses
+
 ## 0.13.0
 
 ### Minor Changes

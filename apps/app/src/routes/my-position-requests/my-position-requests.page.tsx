@@ -3,26 +3,24 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Row, Select, Tag } from 'antd';
 import Search from 'antd/es/input/Search';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import '../../components/app/common/css/filtered-table.page.css';
 import '../../components/app/common/css/select-external-tags.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
 import ContentWrapper from '../../components/content-wrapper.component';
 import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
 import MyPositionsTable from './components/my-position-requests-table.component';
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const statusFilterDataMap = [
-  { label: 'Draft', value: 'DRAFT' },
-  { label: 'In Review', value: 'VERIFICATION' },
-  { label: 'Completed', value: 'COMPLETED' },
-  { label: 'Escalated', value: 'REVIEW' },
-  { label: 'Action required', value: 'ACTION_REQUIRED' },
-  { label: 'Cancelled', value: 'CANCELLED' },
-];
-
 export const MyPositionsPage = () => {
+  const statusFilterDataMap = useMemo(() => {
+    return Object.entries(statusIconColorMap).map(([value, data]) => ({
+      label: data.text,
+      value,
+    }));
+  }, []);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<null | string>(null);

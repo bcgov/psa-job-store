@@ -1,5 +1,11 @@
 # api
 
+## 0.12.0
+
+### Minor Changes
+
+- [#821](https://github.com/bcgov/psa-job-store/pull/821) [`3b75f8c4f81ce3e69386d6db074c9d7eff21048f`](https://github.com/bcgov/psa-job-store/commit/3b75f8c4f81ce3e69386d6db074c9d7eff21048f) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-981 Add "Reviewed" approval flow state
+
 ## 0.11.0
 
 ### Minor Changes

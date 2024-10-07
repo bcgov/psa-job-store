@@ -2,9 +2,10 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Card, Col, DatePicker, Input, Row, Tag } from 'antd';
 import dayjs from 'dayjs';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
+import { statusIconColorMap } from '../../../components/app/utils/statusIconColorMap.utils';
 import {
   GetPositionRequestSubmittedByResponseItem,
   useGetPositionRequestClassificationsQuery,
@@ -12,7 +13,6 @@ import {
   useGetPositionRequestStatusesQuery,
   useGetPositionRequestSubmittedByQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
-import { statusFilterDataMap } from '../../my-position-requests/my-position-requests.page';
 // import './job-profile-search.component.css'; // todo: add as necessary
 
 const { RangePicker } = DatePicker;
@@ -64,6 +64,13 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   allSelections,
   setAllSelections,
 }) => {
+  const statusFilterDataMap = useMemo(() => {
+    return Object.entries(statusIconColorMap).map(([value, data]) => ({
+      label: data.text,
+      value,
+    }));
+  }, []);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -135,7 +142,7 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
       });
       setStatusOptions(newOptions);
     }
-  }, [statusData]);
+  }, [statusData, statusFilterDataMap]);
 
   useEffect(() => {
     if (submittedByData) {
