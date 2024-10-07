@@ -1,22 +1,22 @@
--- -- ensure that step is never greater than max_step_completed
--- -- check that there no records that fit this criteria first:
--- -- select * from position_request where step > max_step_completed;
--- ALTER TABLE position_request
--- ADD CONSTRAINT check_current_step 
--- CHECK (step <= max_step_completed);
+-- ensure that step is never greater than max_step_completed
+-- check that there no records that fit this criteria first:
+-- select * from position_request where step > max_step_completed;
+ALTER TABLE position_request
+ADD CONSTRAINT check_current_step 
+CHECK (step <= max_step_completed);
 
--- -- Ensure additional_info is present for steps greater than 1:
--- -- check that there no records that fit this criteria first:
--- -- select * from position_request where step > 1 and additional_info is null;
--- ALTER TABLE position_request
--- ADD CONSTRAINT check_additional_info
--- CHECK (
---   (step = 0) OR (step = 1) OR 
---   (step > 1 AND additional_info IS NOT NULL)
--- );
+-- Ensure additional_info is present for steps greater than 1:
+-- check that there no records that fit this criteria first:
+-- select * from position_request where step > 1 and additional_info is null;
+ALTER TABLE position_request
+ADD CONSTRAINT check_additional_info
+CHECK (
+  (step = 0) OR (step = 1) OR 
+  (step > 1 AND additional_info IS NOT NULL)
+);
 
--- -- set 'null' additional_info to actual db null
--- -- todo: check code for instances where this happens
+-- set 'null' additional_info to actual db null
+-- todo: check code for instances where this happens
 
 -- UPDATE position_request
 -- SET additional_info = NULL
@@ -83,30 +83,30 @@
 --   ud.original_additional_info AS old_value,
 --   position_request.additional_info AS new_value;
 
--- --  ensure the structure of additional_info or additional_info can be null
--- -- check that there no records that fit this criteria first:
--- -- SELECT *
--- -- FROM position_request
--- -- WHERE additional_info IS NOT NULL
--- --   AND (
--- --     NOT (additional_info ? 'branch') OR
--- --     NOT (additional_info ? 'division') OR
--- --     NOT (additional_info ? 'department_id') OR
--- --     NOT (additional_info ? 'work_location_id') OR
--- --     NOT (additional_info ? 'work_location_name') OR
--- --     NOT (additional_info ? 'excluded_mgr_position_number')
--- --   );
+--  ensure the structure of additional_info or additional_info can be null
+-- check that there no records that fit this criteria first:
+-- SELECT *
+-- FROM position_request
+-- WHERE additional_info IS NOT NULL
+--   AND (
+--     NOT (additional_info ? 'branch') OR
+--     NOT (additional_info ? 'division') OR
+--     NOT (additional_info ? 'department_id') OR
+--     NOT (additional_info ? 'work_location_id') OR
+--     NOT (additional_info ? 'work_location_name') OR
+--     NOT (additional_info ? 'excluded_mgr_position_number')
+--   );
 
--- ALTER TABLE position_request
--- ADD CONSTRAINT check_additional_info_structure
--- CHECK (
---   additional_info IS NULL OR
---   (
---     additional_info ? 'branch' AND
---     additional_info ? 'division' AND
---     additional_info ? 'department_id' AND
---     additional_info ? 'work_location_id' AND
---     additional_info ? 'work_location_name' AND
---     additional_info ? 'excluded_mgr_position_number'
---   )
--- );
+ALTER TABLE position_request
+ADD CONSTRAINT check_additional_info_structure
+CHECK (
+  additional_info IS NULL OR
+  (
+    additional_info ? 'branch' AND
+    additional_info ? 'division' AND
+    additional_info ? 'department_id' AND
+    additional_info ? 'work_location_id' AND
+    additional_info ? 'work_location_name' AND
+    additional_info ? 'excluded_mgr_position_number'
+  )
+);
