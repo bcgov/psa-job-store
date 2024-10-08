@@ -1178,7 +1178,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                           className="optionalList"
                         >
                           <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
-                            <h4>Optional requirements</h4>
+                            <h4>Optional security screenings</h4>
                           </span>
                           <ul data-testid="optional-security-screenings" style={{ paddingInlineStart: '27px' }}>
                             {compareLists(
