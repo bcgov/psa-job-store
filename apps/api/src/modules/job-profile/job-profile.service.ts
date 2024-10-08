@@ -9,6 +9,7 @@ import { AlexandriaError } from '../../utils/alexandria-error';
 import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 import { ClassificationInput } from './inputs/classification-requirements.inputs';
+import { ExtendedJobProfileCreateInput } from './inputs/extended-job-profile-create.input';
 @Injectable()
 export class JobProfileService {
   constructor(
@@ -868,7 +869,7 @@ export class JobProfileService {
     });
   }
 
-  async createOrUpdateJobProfile(data: JobProfileCreateInput, userId: string) {
+  async createOrUpdateJobProfile(data: ExtendedJobProfileCreateInput, userId: string) {
     // todo: catch the "number" constraint failure and process the error on the client appropriately
     const jobProfileState = data.state ? data.state : JobProfileState.DRAFT;
 

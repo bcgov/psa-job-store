@@ -469,6 +469,8 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 step
                 max_step_completed
                 reports_to_position_id
+                reports_to_position
+                excluded_manager_position
                 parent_job_profile_id
                 parent_job_profile_version
                 profile_json

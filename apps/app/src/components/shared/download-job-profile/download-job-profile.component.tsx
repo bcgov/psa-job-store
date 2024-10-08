@@ -10,7 +10,6 @@ import React, { useCallback, useRef, useState } from 'react';
 
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { useLazyGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
-import { useLazyGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
 import LoadingComponent from '../../app/common/components/loading.component';
 
 export interface DownloadJobProfileComponentProps {
@@ -36,7 +35,6 @@ export const DownloadJobProfileComponent = ({
   buttonType = 'default',
 }: DownloadJobProfileComponentProps & React.PropsWithChildren & any) => {
   const [prTrigger, { isFetching: isLoadingPositionRequest }] = useLazyGetPositionRequestQuery();
-  const [profileTrigger, { isFetching: profileIsLoading }] = useLazyGetPositionProfileQuery();
   const [triggerGetJobProfile, { isFetching }] = useLazyGetJobProfileQuery();
 
   // const [title, setTitle] = useState<string>();
@@ -50,25 +48,13 @@ export const DownloadJobProfileComponent = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const downloadDocument = useCallback(
-    ({
-      prData,
-      positionProfileData,
-      parentProfileData,
-    }: {
-      prData: any;
-      positionProfileData: any;
-      parentProfileData: any;
-    }) => {
-      let profile = jobProfile
-        ? jobProfile
-        : positionRequest
-          ? positionRequest?.profile_json
-          : prData?.positionRequest?.profile_json;
+    ({ prData, parentProfileData }: { prData: any; parentProfileData: any }) => {
+      let profile = jobProfile ? jobProfile : positionRequest ? positionRequest?.profile_json : prData?.profile_json;
 
       console.log('downloadDocument(), profile: ', profile);
       if (!profile) return;
       // if profile is being sourced from a position request, we need to merge in the parent profile data to get missing data
-      const isPositionRequestProfile = positionRequest != null || prData?.positionRequest?.profile_json;
+      const isPositionRequestProfile = positionRequest != null || prData?.profile_json;
       if (isPositionRequestProfile) {
         console.log('isPositionRequestProfile');
         if (!parentProfileData) {
@@ -84,14 +70,13 @@ export const DownloadJobProfileComponent = ({
         console.log('generaring with profile: ', profile);
       }
 
-      // console.log('prData?.positionRequest: ', prData?.positionRequest);
+      // console.log('positionRequest: ', positionRequest);
       const document =
         profile != null
           ? generateJobProfile({
               jobProfile: profile,
-              positionRequest: positionRequest ?? prData?.positionRequest,
-              supervisorProfile:
-                prData?.positionRequest?.reports_to_position ?? positionProfileData?.positionProfile[0],
+              positionRequest: positionRequest ?? prData,
+              supervisorProfile: positionRequest?.reports_to_position ?? prData?.reports_to_position,
             })
           : null;
 
@@ -103,56 +88,6 @@ export const DownloadJobProfileComponent = ({
       }
     },
     [jobProfile, positionRequest, title],
-  );
-
-  const loadProfile = useCallback(
-    (prData: any) => {
-      console.log('prData loaded hook');
-      if (!prData) {
-        return Promise.resolve(); // Return a resolved promise if prData is not available
-      }
-
-      const submittedAt = prData.positionRequest?.submitted_at ?? new Date().toLocaleDateString();
-      const positionNumber = prData.positionRequest?.position_number;
-      const profileTitle = prData.positionRequest?.profile_json.title.text;
-      const date = new Date(submittedAt).toLocaleDateString('en-CA');
-      setTitle(
-        positionNumber
-          ? `Job Profile ${positionNumber} ${profileTitle} ${date}.docx`
-          : `Job Profile ${profileTitle} ${date}.docx`,
-      );
-
-      console.log(
-        'set title: ',
-        positionNumber
-          ? `Job Profile ${positionNumber} ${profileTitle} ${date}.docx`
-          : `Job Profile ${profileTitle} ${date}.docx`,
-      );
-
-      const supervisorPosition = prData.positionRequest?.reports_to_position_id;
-      console.log('supervisorPosition for profileTrigger: ', supervisorPosition);
-      console.log('prData.positionRequest: ', prData.positionRequest);
-
-      // no need to fetch profile, since it's now embedded
-      if (prData.positionRequest?.reports_to_position) {
-        console.log('embedded, skipping');
-        return Promise.resolve();
-      } else {
-        console.log('not embedded, fetching');
-      }
-
-      if (supervisorPosition) {
-        try {
-          const res = profileTrigger({ positionNumber: supervisorPosition.toString() }).unwrap();
-          return Promise.resolve(res); // Return a resolved promise after profileTrigger completes
-        } catch (error) {
-          return Promise.reject(error); // Return a rejected promise if an error occurs
-        }
-      } else {
-        return Promise.resolve(); // Return a resolved promise if supervisorPosition is not available
-      }
-    },
-    [profileTrigger],
   );
 
   /*
@@ -171,15 +106,22 @@ export const DownloadJobProfileComponent = ({
       console.log('fetchData prTrigger, positionRequestId: ', positionRequestId);
 
       const prData = await prTrigger({ id: +positionRequestId }).unwrap();
-      const [positionProfileData, originalProfile] = await Promise.all([
-        loadProfile(prData),
+      const [originalProfile] = await Promise.all([
         triggerGetJobProfile({
           id: prData.positionRequest?.parent_job_profile_id,
           version: prData.positionRequest?.parent_job_profile_version,
         }).unwrap(),
       ]);
-
-      downloadDocument({ prData, positionProfileData, parentProfileData: originalProfile });
+      const submittedAt = prData.positionRequest?.submitted_at;
+      const positionNumber = prData.positionRequest?.position_number;
+      const profileTitle = prData.positionRequest?.title;
+      const date = submittedAt ? new Date(submittedAt).toLocaleDateString('en-CA') : null;
+      setTitle(
+        positionNumber
+          ? `Job Profile ${positionNumber} ${profileTitle} ${date}.docx`
+          : `Job Profile ${profileTitle} ${date}.docx`,
+      );
+      downloadDocument({ prData: prData.positionRequest, parentProfileData: originalProfile });
     } else if (positionRequest) {
       console.log('fetchData positionRequest exists: ', positionRequest);
       const submittedAt = positionRequest.submitted_at;
@@ -198,39 +140,25 @@ export const DownloadJobProfileComponent = ({
         positionRequest.reports_to_position_id.toString(),
       );
       console.log(' positionRequest: ', positionRequest);
-      const [positionProfileData, originalProfile] = await Promise.all([
-        profileTrigger({
-          positionNumber: positionRequest.reports_to_position_id.toString(),
-        }).unwrap(),
+      const [originalProfile] = await Promise.all([
         triggerGetJobProfile({
           id: positionRequest?.parent_job_profile_id,
           version: positionRequest?.parent_job_profile_version,
         }).unwrap(),
       ]);
 
-      console.log('positoinProfileData: ', positionProfileData);
       downloadDocument({
         prData: positionRequest,
-        positionProfileData: positionProfileData,
         parentProfileData: originalProfile,
       });
     } else if (jobProfile && !jobProfile.is_archived) {
       setTitle(`Job Profile ${jobProfile.title} ${jobProfile.number}.docx`);
-      downloadDocument({ prData: null, positionProfileData: null, parentProfileData: null });
+      downloadDocument({ prData: null, parentProfileData: null });
     } else if (jobProfile && jobProfile.is_archived) {
       setTitle(`Job Profile ${jobProfile.title} ${jobProfile.number} Archived.docx`);
-      downloadDocument({ prData: null, positionProfileData: null, parentProfileData: null });
+      downloadDocument({ prData: null, parentProfileData: null });
     }
-  }, [
-    positionRequest,
-    positionRequestId,
-    prTrigger,
-    profileTrigger,
-    loadProfile,
-    jobProfile,
-    downloadDocument,
-    triggerGetJobProfile,
-  ]);
+  }, [positionRequest, positionRequestId, prTrigger, jobProfile, downloadDocument, triggerGetJobProfile]);
 
   // console.log('positionProfileData?.positionProfile: ', positionProfileData?.positionProfile);
 
@@ -256,7 +184,7 @@ export const DownloadJobProfileComponent = ({
 
   // Custom trigger rendering
   if (renderTrigger) {
-    return <>{renderTrigger(fetchData, isLoadingPositionRequest || profileIsLoading)}</>;
+    return <>{renderTrigger(fetchData, isLoadingPositionRequest)}</>;
   }
 
   if (useModal) {
@@ -264,7 +192,7 @@ export const DownloadJobProfileComponent = ({
       <>
         <span onClick={() => setIsModalVisible(true)} style={{ position: 'relative' }}>
           {children}{' '}
-          {(isLoadingPositionRequest || profileIsLoading || isFetching) && (
+          {(isLoadingPositionRequest || isFetching) && (
             <span
               className="alignIconTop"
               style={{
@@ -308,7 +236,7 @@ export const DownloadJobProfileComponent = ({
         <Button
           style={style}
           icon={<DownloadOutlined />}
-          loading={isLoadingPositionRequest || profileIsLoading || isFetching}
+          loading={isLoadingPositionRequest || isFetching}
           disabled={jobProfile == null && !ignoreAbsentParent}
           onClick={() => setIsModalVisible(true)}
           type={buttonType}
@@ -347,7 +275,7 @@ export const DownloadJobProfileComponent = ({
       }}
     >
       {children}
-      {(isLoadingPositionRequest || profileIsLoading || isFetching) && (
+      {(isLoadingPositionRequest || isFetching) && (
         <span
           className="alignIconTop"
           style={{
@@ -370,7 +298,7 @@ export const DownloadJobProfileComponent = ({
     <Button
       style={style}
       icon={<DownloadOutlined />}
-      loading={isLoadingPositionRequest || profileIsLoading || isFetching}
+      loading={isLoadingPositionRequest || isFetching}
       onClick={fetchData}
     >
       Download Job Profile
