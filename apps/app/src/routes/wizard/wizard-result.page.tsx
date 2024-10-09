@@ -195,8 +195,9 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   // const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [submitPositionRequest, { isLoading: submitPositionRequestIsLoading }] = useSubmitPositionRequestMutation();
 
-  const showVerificationModal = async () => {
-    setIsVerificationModalVisible(true);
+  // if the status is action required, it means that this come back from review. We do not need to show this message again
+  const doSubmit = async () => {
+    mode === 'verificationRequired_retry' ? handleOk() : setIsVerificationModalVisible(true);
   };
 
   const handleVerificationCancel = () => {
@@ -429,7 +430,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 <Button
                   key="back"
                   type="primary"
-                  onClick={showVerificationModal}
+                  onClick={doSubmit}
                   loading={submitPositionRequestIsLoading || isLoading}
                 >
                   Submit for verification
@@ -634,7 +635,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       </Form.Item>
                       <Button
                         type="primary"
-                        onClick={showVerificationModal}
+                        onClick={doSubmit}
                         loading={submitPositionRequestIsLoading || isLoading}
                         data-testid="submit-for-verification-button"
                       >
