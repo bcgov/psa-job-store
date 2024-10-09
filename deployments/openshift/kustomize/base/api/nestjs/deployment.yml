@@ -1,42 +1,39 @@
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: nestjs-app
+  name: api
 spec:
-  strategy:
-    type: Rolling
-  triggers:
-      - type: ConfigChange
-      - imageChangeParams:
-          automatic: true
-          containerNames:
-            - nestjs-app
-          from:
-            kind: ImageStreamTag
-            name: api:develop-latest
-            namespace: f3c07a-tools
-        type: ImageChange
-  replicas: 1
+  replicas: 2
   selector:
-    name: nestjs-app
+    matchLabels:
+      name: api
+  strategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        name: nestjs-app
+        name: api
     spec:
       automountServiceAccountToken: false
       containers:
-      - name: nestjs-app
-        image: api:develop-latest
+      - name: api
+        image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/api:develop-latest
+        imagePullPolicy: Always 
+        readinessProbe:
+          httpGet:
+            path: /health/check
+            port: 4000
+          initialDelaySeconds: 15
+          periodSeconds: 10
         ports:
-        - containerPort: 3000
+        - containerPort: 4000
           protocol: TCP
         volumeMounts:
-            - name: seed-volume
-              mountPath: /usr/src/apps/api/prisma/seed.ts
-              subPath: seed.ts
-            - name: log-volume
-              mountPath: /tmp/log
+        - name: seed-volume
+          mountPath: /usr/src/apps/api/prisma/seed.ts
+          subPath: seed.ts
+        - name: log-volume
+          mountPath: /tmp/log
         envFrom:
         # - configMapRef:
         #     name: api-configmap
@@ -66,11 +63,11 @@ spec:
             cpu: 20m 
             memory: 100Mi
       - name: logrotate
-        image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/logrotate:develop-latest  # Specify your logrotate image
+        image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/logrotate:develop-latest
         volumeMounts:
-          - name: log-volume
-            mountPath: /tmp/log  # Ensure this is the same path as in the nestjs-app
-        command: ["/usr/local/bin/logrotate-script.sh"]  # Command to run logrotate
+        - name: log-volume
+          mountPath: /tmp/log
+        command: ["/usr/local/bin/logrotate-script.sh"]
         resources:
           requests:
             cpu: 10m 
