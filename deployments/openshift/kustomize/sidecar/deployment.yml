@@ -1,13 +1,14 @@
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: sidecar
 spec:
-  strategy:
-    type: Rolling
   replicas: 1
   selector:
-    name: sidecar
+    matchLabels:
+      name: sidecar
+  strategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -30,8 +31,8 @@ spec:
             name: secrets
         resources:
           requests:
-            cpu: 100m 
-            memory: 200Mi 
+            cpu: 100m
+            memory: 200Mi
           limits:
-            cpu: 200m 
-            memory: 400Mi 
+            cpu: 200m
+            memory: 400Mi

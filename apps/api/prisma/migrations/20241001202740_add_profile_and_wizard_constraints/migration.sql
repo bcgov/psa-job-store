@@ -18,70 +18,70 @@
 -- -- set 'null' additional_info to actual db null
 -- -- todo: check code for instances where this happens
 
--- UPDATE position_request
--- SET additional_info = NULL
--- WHERE additional_info = 'null';
+-- -- UPDATE position_request
+-- -- SET additional_info = NULL
+-- -- WHERE additional_info = 'null';
 
--- -- add missing branch and division to additional_info (likely older records before we asked for this info)
+-- -- -- add missing branch and division to additional_info (likely older records before we asked for this info)
 
--- WITH nullify_fields AS (
---   SELECT id, 
---          CASE 
---            WHEN additional_info::text = '"null"' THEN NULL
---            ELSE additional_info
---          END AS updated_additional_info
---   FROM position_request
---   WHERE additional_info IS NOT NULL
--- ),
--- ensure_object AS (
---   SELECT 
---     id,
---     CASE 
---       WHEN jsonb_typeof(updated_additional_info) = 'object' THEN updated_additional_info
---       ELSE '{}'::jsonb
---     END AS additional_info
---   FROM nullify_fields
---   WHERE updated_additional_info IS NOT NULL
--- ),
--- missing_fields AS (
---   SELECT 
---     id,
---     additional_info,
---     jsonb_set(
---       jsonb_set(
---         jsonb_set(
---           additional_info,
---           '{branch}', COALESCE(additional_info->'branch', '""'::jsonb),
---           true
---         ),
---         '{division}', COALESCE(additional_info->'division', '""'::jsonb),
---         true
---       ),
---       '{excluded_mgr_position_number}', COALESCE(additional_info->'excluded_mgr_position_number', '""'::jsonb),
---       true
---     ) AS updated_additional_info
---   FROM ensure_object
--- ),
--- update_data AS (
---   SELECT 
---     pr.id,
---     pr.additional_info AS original_additional_info,
---     COALESCE(mf.updated_additional_info, nf.updated_additional_info) AS updated_additional_info
---   FROM position_request pr
---   LEFT JOIN missing_fields mf ON pr.id = mf.id
---   LEFT JOIN nullify_fields nf ON pr.id = nf.id
---   WHERE pr.additional_info IS NOT NULL
---     AND (pr.additional_info <> COALESCE(mf.updated_additional_info, nf.updated_additional_info) 
---          OR (pr.additional_info IS NOT NULL AND nf.updated_additional_info IS NULL))
--- )
--- UPDATE position_request
--- SET additional_info = ud.updated_additional_info
--- FROM update_data ud
--- WHERE position_request.id = ud.id
--- RETURNING 
---   position_request.id,
---   ud.original_additional_info AS old_value,
---   position_request.additional_info AS new_value;
+-- -- WITH nullify_fields AS (
+-- --   SELECT id, 
+-- --          CASE 
+-- --            WHEN additional_info::text = '"null"' THEN NULL
+-- --            ELSE additional_info
+-- --          END AS updated_additional_info
+-- --   FROM position_request
+-- --   WHERE additional_info IS NOT NULL
+-- -- ),
+-- -- ensure_object AS (
+-- --   SELECT 
+-- --     id,
+-- --     CASE 
+-- --       WHEN jsonb_typeof(updated_additional_info) = 'object' THEN updated_additional_info
+-- --       ELSE '{}'::jsonb
+-- --     END AS additional_info
+-- --   FROM nullify_fields
+-- --   WHERE updated_additional_info IS NOT NULL
+-- -- ),
+-- -- missing_fields AS (
+-- --   SELECT 
+-- --     id,
+-- --     additional_info,
+-- --     jsonb_set(
+-- --       jsonb_set(
+-- --         jsonb_set(
+-- --           additional_info,
+-- --           '{branch}', COALESCE(additional_info->'branch', '""'::jsonb),
+-- --           true
+-- --         ),
+-- --         '{division}', COALESCE(additional_info->'division', '""'::jsonb),
+-- --         true
+-- --       ),
+-- --       '{excluded_mgr_position_number}', COALESCE(additional_info->'excluded_mgr_position_number', '""'::jsonb),
+-- --       true
+-- --     ) AS updated_additional_info
+-- --   FROM ensure_object
+-- -- ),
+-- -- update_data AS (
+-- --   SELECT 
+-- --     pr.id,
+-- --     pr.additional_info AS original_additional_info,
+-- --     COALESCE(mf.updated_additional_info, nf.updated_additional_info) AS updated_additional_info
+-- --   FROM position_request pr
+-- --   LEFT JOIN missing_fields mf ON pr.id = mf.id
+-- --   LEFT JOIN nullify_fields nf ON pr.id = nf.id
+-- --   WHERE pr.additional_info IS NOT NULL
+-- --     AND (pr.additional_info <> COALESCE(mf.updated_additional_info, nf.updated_additional_info) 
+-- --          OR (pr.additional_info IS NOT NULL AND nf.updated_additional_info IS NULL))
+-- -- )
+-- -- UPDATE position_request
+-- -- SET additional_info = ud.updated_additional_info
+-- -- FROM update_data ud
+-- -- WHERE position_request.id = ud.id
+-- -- RETURNING 
+-- --   position_request.id,
+-- --   ud.original_additional_info AS old_value,
+-- --   position_request.additional_info AS new_value;
 
 -- --  ensure the structure of additional_info or additional_info can be null
 -- -- check that there no records that fit this criteria first:
