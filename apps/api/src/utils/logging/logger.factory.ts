@@ -3,38 +3,22 @@ import pino from 'pino';
 import { v4 as uuidv4 } from 'uuid';
 import { guidToUuid } from '../guid-to-uuid.util';
 
+interface DecodedToken {
+  idir_user_guid: string;
+}
+
 export const loggerFactory = () => {
   const NODE_ENV = process.env.NODE_ENV;
-  let transports;
 
-  if (NODE_ENV !== 'production') {
-    // In development, log to the console
-    // In development, log to the console
-    transports = [
-      {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-        },
-      },
-    ];
-  } else {
-    // In production, log to both console and file
-    transports = [
-      {
-        target: 'pino/file',
-        options: { destination: '/tmp/log/api.log' },
-      },
-      {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          destination: pino.destination(1), // 1 is stdout
-        },
-      },
-    ];
-  }
   return {
+    // formatters doesn't work when using multiple transport targets,
+    // so we'll use mixin instead. Note that it does cause duplication of the "time" field
+    mixin(_context, level) {
+      return {
+        severity: pino.levels.labels[level],
+        time: new Date().toISOString(),
+      };
+    },
     genReqId: (req, res) => {
       const existingId = req.id ?? req.headers['x-request-id'];
       if (existingId) return existingId;
@@ -45,19 +29,38 @@ export const loggerFactory = () => {
     },
     level: NODE_ENV !== 'production' ? 'debug' : 'info',
     useLevelLabels: true,
-    transports: transports,
-    formatters: {
-      level(label) {
-        return { severity: label };
-      },
-      log: (obj) => {
-        // return null;
-        return {
-          ...obj,
-          time: new Date().toISOString(), // Add timestamp in ISO format
-          msg: obj.msg,
-        };
-      },
+    // formatters: {
+    //   level(label) {
+    //     return { severity: label };
+    //   },
+    //   log: (obj) => {
+    //     // return null;
+    //     return {
+    //       ...obj,
+    //       time: new Date().toISOString(), // Add timestamp in ISO format
+    //       msg: obj.msg,
+    //     };
+    //   },
+    // },
+    transport: {
+      targets: [
+        {
+          target: 'pino-pretty', // For console output
+          options: {
+            colorize: true,
+          },
+          level: NODE_ENV !== 'production' ? 'debug' : 'info',
+        },
+        ...(NODE_ENV == 'production'
+          ? [
+              {
+                target: 'pino/file',
+                options: { destination: '/tmp/log/api.log' },
+                level: 'info',
+              },
+            ]
+          : []),
+      ],
     },
     serializers: {
       req: (req) => {
@@ -74,10 +77,33 @@ export const loggerFactory = () => {
 
         try {
           const authHeader = req.headers.authorization;
-          const payload = authHeader.split(' ')[1];
-          const decodedToken = jwt.decode(payload);
-          uuid = guidToUuid((decodedToken as any).idir_user_guid);
-        } catch (error) {}
+          if (authHeader && typeof authHeader === 'string') {
+            const token = authHeader.split(' ')[1];
+            if (token && typeof token === 'string') {
+              const decoded = jwt.decode(token);
+
+              if (decoded && typeof decoded === 'object') {
+                const decodedToken = decoded as DecodedToken;
+
+                if (decodedToken.idir_user_guid && typeof decodedToken.idir_user_guid === 'string') {
+                  // Validate the GUID format before conversion
+                  const guidPattern = /^[a-fA-F0-9]{32}$/;
+                  if (guidPattern.test(decodedToken.idir_user_guid)) {
+                    const convertedUuid = guidToUuid(decodedToken.idir_user_guid);
+                    const formatPattern =
+                      /^([a-f0-9]{8})-?([a-f0-9]{4})-?([a-f0-9]{4})-?([a-f0-9]{4})-?([a-f0-9]{12})$/i;
+                    uuid = formatPattern.test(convertedUuid) ? convertedUuid : 'invalid-guid-format-1';
+                  } else {
+                    // Log invalid GUID format
+                    uuid = 'invalid-guid-format-2';
+                  }
+                }
+              }
+            }
+          }
+        } catch (error) {
+          uuid = null;
+        }
 
         // Verification code if needed
 
