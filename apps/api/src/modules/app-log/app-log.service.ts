@@ -22,7 +22,7 @@ export class AppLogService {
       // In production, log to a file
       transport = {
         target: 'pino/file',
-        options: { destination: 'tmp/log/app.log' },
+        options: { destination: '/tmp/log/app.log' },
       };
     }
 
