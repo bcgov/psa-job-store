@@ -19,6 +19,7 @@ interface LogMessage {
   message: string;
   stack?: string;
   timestamp: string;
+  path: string;
 }
 
 export const sendLogToServer = async (error: Error): Promise<void> => {
@@ -27,6 +28,7 @@ export const sendLogToServer = async (error: Error): Promise<void> => {
     message: error.message,
     stack: error.stack,
     timestamp: new Date().toISOString(),
+    path: window.location.pathname,
   };
   // console.log(logMessage);
   const storageString =
@@ -40,7 +42,7 @@ export const sendLogToServer = async (error: Error): Promise<void> => {
     },
   };
   try {
-    const result = await axios.post(VITE_BACKEND_URL + '/logs', logMessage, config);
+    const result = await axios.post(VITE_BACKEND_URL + '/logs/log', logMessage, config);
     const isSessionExpired = checkForExpiredSessionError(result);
 
     if (isSessionExpired) {

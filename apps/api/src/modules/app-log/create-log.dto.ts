@@ -3,4 +3,5 @@ export class CreateLogDto {
   message: string;
   stack?: string;
   timestamp: string;
+  path: string;
 }
