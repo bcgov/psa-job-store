@@ -22,7 +22,7 @@ export class AppLogService {
       // In production, log to a file
       transport = {
         target: 'pino/file',
-        options: { destination: '/tmp/log/app.log' },
+        options: { destination: 'tmp/log/app.log' },
       };
     }
 
@@ -31,8 +31,13 @@ export class AppLogService {
     });
   }
 
-  async log(createLogDto: CreateLogDto): Promise<void> {
+  async log(createLogDto: CreateLogDto, user: Express.User): Promise<void> {
     const logMessage = `${createLogDto.level}: ${createLogDto.message}`;
-    this.logger.info(logMessage);
+    this.logger.info({
+      message: logMessage,
+      stack: createLogDto.stack,
+      path: createLogDto.path,
+      userId: user.id,
+    });
   }
 }
