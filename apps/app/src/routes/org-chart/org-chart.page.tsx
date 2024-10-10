@@ -80,7 +80,7 @@ export const OrgChartPage = () => {
           //   </Row>
           // }
         />
-        <Row justify="center" style={{ backgroundColor: '#F0F2F5', flex: 'auto' }}>
+        <Row justify="center" style={{ backgroundColor: '#f5f5f5', flex: 'auto' }}>
           <Col style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
             <div style={{ display: currentView !== 'chart' ? 'none' : 'block', height: '100%' }}>
               <OrgChart
