@@ -2987,10 +2987,6 @@ async function seed() {
         updated_at: new Date(),
         classification_employee_group_id: 'GEU',
         classification_peoplesoft_id: 'BCSET',
-        // additional_info_work_location_id: 'LOC01',
-        // additional_info_department_id: 'DEPT01',
-        // additional_info_excluded_mgr_position_number: 'MG1001',
-        // additional_info_comments: 'Urgent requirement due to project needs.',
       },
       {
         crm_id: 54322,
@@ -3403,10 +3399,6 @@ async function seed() {
         updated_at: new Date(),
         classification_employee_group_id: 'GEU',
         classification_peoplesoft_id: 'BCSET',
-        // additional_info_work_location_id: null,
-        // additional_info_department_id: null,
-        // additional_info_excluded_mgr_position_number: null,
-        // additional_info_comments: null,
       },
       {
         crm_id: 54321,
@@ -3805,10 +3797,6 @@ async function seed() {
         updated_at: new Date(),
         classification_employee_group_id: 'GEU',
         classification_peoplesoft_id: 'BCSET',
-        // additional_info_work_location_id: 'LOC02',
-        // additional_info_department_id: 'DEPT02',
-        // additional_info_excluded_mgr_position_number: 'MG2002',
-        // additional_info_comments: 'Needs experienced individual for leadership.',
       },
       {
         crm_id: 67890,
@@ -4207,10 +4195,6 @@ async function seed() {
         updated_at: new Date(),
         classification_employee_group_id: 'GEU',
         classification_peoplesoft_id: 'BCSET',
-        // additional_info_work_location_id: 'LOC03',
-        // additional_info_department_id: 'DEPT03',
-        // additional_info_excluded_mgr_position_number: 'MG3003',
-        // additional_info_comments: 'Looking for a specialist in machine learning.',
       },
     ],
   });

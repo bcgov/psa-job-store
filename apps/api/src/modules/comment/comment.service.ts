@@ -5,9 +5,9 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CommentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getComments(record_id: number) {
+  async getComments(record_id: number, record_type: string) {
     return this.prisma.comment.findMany({
-      where: { record_id },
+      where: { record_id, record_type },
       include: {
         author: true,
       },

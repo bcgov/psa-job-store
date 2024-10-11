@@ -72,8 +72,6 @@ export class WizardConfirmDetailsModel {
   @IsNotEmpty({ message: 'First level excluded manager position number is required' })
   excludedManagerPositionNumber: string;
 
-  comments: string; // Optional, no validation rules needed
-
   noPositions: boolean;
 }
 
@@ -286,7 +284,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
               !noPositions && formData.excludedManagerPositionNumber != ''
                 ? formData.excludedManagerPositionNumber
                 : undefined,
-            comments: formData.comments,
             branch: formData.branch,
             division: formData.division,
           },
@@ -321,7 +318,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       workLocation: null as string | null,
       excludedManagerPositionNumber: '',
       payListDepartmentId: null as string | null,
-      comments: '',
       branch: '',
       division: '',
     },
@@ -329,15 +325,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
   useEffect(() => {
     if (positionRequestData) {
-      const {
-        work_location_id,
-        work_location_name,
-        department_id,
-        excluded_mgr_position_number,
-        comments,
-        branch,
-        division,
-      } = positionRequestData.additional_info ?? {};
+      const { work_location_id, work_location_name, department_id, excluded_mgr_position_number, branch, division } =
+        positionRequestData.additional_info ?? {};
 
       setValue('branch', branch || '');
       setValue('division', division || '');
@@ -368,8 +357,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         // fetch only if excluded manager wasn't previously set,  otherwise causes a double fetch because of the uniqueKey = true
         debouncedFetchPositionProfile(useExcludedMngr);
       }
-
-      setValue('comments', comments || '');
     }
   }, [departmentsData, positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
 
@@ -695,41 +682,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                       </Col>
                     </Row>
                   </Card>
-
-                  {/* <Card title="Comments" bordered={false} className="custom-card" style={{ marginTop: 16 }}>
-                      <Row justify="start">
-                        <Col xs={24} sm={24} md={24} lg={18} xl={12}>
-                          <Form.Item name="comments">
-                            <label style={srOnlyStyle} htmlFor="comments">
-                              Comments
-                            </label>
-                            <Controller
-                              name="comments"
-                              control={control}
-                              render={({ field }) => {
-                                return (
-                                  <>
-                                    <Input.TextArea
-                                      data-testid="comments-input"
-                                      {...field}
-                                      autoSize
-                                      disabled={!confirmation}
-                                      maxLength={1000}
-                                    />
-                                    <Typography.Paragraph
-                                      type="secondary"
-                                      style={{ textAlign: 'right', width: '100%', margin: '0' }}
-                                    >
-                                      {(field.value as string).length} / 1000
-                                    </Typography.Paragraph>
-                                  </>
-                                );
-                              }}
-                            />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                    </Card> */}
                 </Form>
               </Col>
             </Row>
