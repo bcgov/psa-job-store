@@ -2541,14 +2541,39 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                                 disabled={
                                                   selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX'
                                                 }
-                                                onChange={(arg) => {
-                                                  setValue(`employeeClassificationGroups.${index}.employeeGroup`, arg);
-                                                  setValue(
-                                                    `employeeClassificationGroups.${index}.classification`,
+                                                onChange={(newValue) => {
+                                                  if (selectedEmployeeClassificationGroups[index].employeeGroup) {
+                                                    showWarningModal(
+                                                      () => {
+                                                        setValue(
+                                                          `employeeClassificationGroups.${index}.employeeGroup`,
+                                                          newValue,
+                                                        );
+                                                        setValue(
+                                                          `employeeClassificationGroups.${index}.classification`,
 
-                                                    null,
-                                                  );
-                                                  onChange(arg);
+                                                          null,
+                                                        );
+                                                        onChange(newValue);
+                                                      },
+                                                      () => {
+                                                        // User canceled the change
+                                                      },
+                                                    );
+                                                  } else {
+                                                    {
+                                                      setValue(
+                                                        `employeeClassificationGroups.${index}.employeeGroup`,
+                                                        newValue,
+                                                      );
+                                                      setValue(
+                                                        `employeeClassificationGroups.${index}.classification`,
+
+                                                        null,
+                                                      );
+                                                      onChange(newValue);
+                                                    }
+                                                  }
                                                   triggerBasicDetailsValidation();
                                                 }}
                                                 onBlur={onBlur}
@@ -2636,7 +2661,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           <Select
                                             placeholder="Choose a classification"
                                             onChange={(newValue) => {
-                                              if (selectedEmployeeClassificationGroups) {
+                                              if (
+                                                selectedEmployeeClassificationGroups[index].classification &&
+                                                selectedEmployeeClassificationGroups[index].classification != newValue
+                                              ) {
                                                 showWarningModal(
                                                   () => {
                                                     onChange(newValue);
