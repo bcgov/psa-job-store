@@ -32,6 +32,7 @@ import { useReactFlow } from 'reactflow';
 import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { useGetCommentsQuery } from '../../redux/services/graphql-api/comment.api';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
@@ -91,6 +92,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData } = useWizardContext();
   const { getNodes } = useReactFlow();
 
+  const { data: commentData, isLoading: commentDataIsLoading } = useGetCommentsQuery({
+    record_id: positionRequestId ?? -1,
+    record_type: 'PositionRequest',
+  });
+
   useEffect(() => {
     triggerGetJobProfile({
       id: positionRequestData?.parent_job_profile_id,
@@ -125,6 +131,14 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   useEffect(() => {
     // Fetch position request and needs review data when positionRequestId changes
+    // load comment if prevsiously entered
+    if (commentData && commentData.comments.length && !commentDataIsLoading) {
+      setComment(commentData.comments[0].text);
+    }
+  }, [positionRequestId, refetchPositionNeedsRivew]);
+
+  useEffect(() => {
+    // Fetch position request and needs review data when positionRequestId changes
     if (positionRequestId) {
       // refetchPositionRequest();
       refetchPositionNeedsRivew();
@@ -134,11 +148,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   useEffect(() => {
     // if loading
     if (positionNeedsRivewLoading) return;
-
-    // load comment if prevsiously entered
-    if (positionRequestData?.additional_info?.comments) {
-      setComment(positionRequestData?.additional_info.comments);
-    }
 
     // if state is draft and position doesn't need review, set mode to readyToCreatePositionNumber
     if (positionRequestData?.status === 'DRAFT' && !positionNeedsRivew?.positionNeedsRivew.result) {

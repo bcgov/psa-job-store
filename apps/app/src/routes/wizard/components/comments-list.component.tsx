@@ -103,7 +103,10 @@ const CommentsList: React.FC<{ positionRequestId: number; showCollapse?: boolean
   positionRequestId,
   showCollapse,
 }) => {
-  const { data, error, isLoading } = useGetCommentsQuery(positionRequestId);
+  const { data, error, isLoading } = useGetCommentsQuery({
+    record_id: positionRequestId,
+    record_type: 'PositionRequest',
+  });
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading comments</div>;
