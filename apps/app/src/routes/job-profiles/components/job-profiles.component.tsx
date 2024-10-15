@@ -71,6 +71,9 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     // useref to keep track of whether we fetched with selectProfileId
     const selectProfileIdRan = useRef(false);
 
+    // useref to keep track of the profile number that ran with the pageNumberForSelectProfile query
+    const selectProfileForPageNumber = useRef('');
+
     /*
     AL-85 Code
     // Get Position Request
@@ -147,6 +150,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       const classificationFilter = searchParams.get('classification_id__in');
       const jobFamilyFilter = searchParams.get('job_family_id__in');
       const jobStreamFilter = searchParams.get('job_stream_id__in');
+      const clearingFilters = searchParams.get('clearFilters') != null;
 
       // if it's a change in selectedProfile then do not refetch, just return
 
@@ -156,9 +160,12 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         return;
       }
 
+      // console.log('CURRENT searchParams: ', searchParams.toString());
+
       // this prevents fetching of job profiles when user selects a different profile
       if ((searchParams.get('selectedProfile') || number != null) && initialFetchDone && !searchParams.get('fetch')) {
-        return;
+        // if we're clearing filters, then we need to fetch again
+        if (!clearingFilters) return;
       }
 
       // console.log('setUseData to null');
@@ -175,21 +182,26 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       }
       // use reloaded the page while having fitlers or search applied
       // however we need to select the profile that was originally selected for this position request
-      // (for case where user pressed "back" from edit page)
+      // (for case where user pressed "back" from edit page, selects filters, selects a different profile and then reloads)
       // - clear filters and search, this will trigger re-run of this function with no filters or search
       if (!selectProfileIdRan.current && filtersOrSearchApplied && selectProfileNumber) {
-        const basePath = getBasePath(location.pathname);
-        const searchParams = new URLSearchParams();
-        if (searchParams.get('search')) searchParams.delete('search');
-        searchParams.set('clearFilters', 'true');
-        navigate(
-          {
-            pathname: basePath,
-            search: searchParams.toString(),
-          },
-          { replace: true },
-        );
-        return;
+        // do this only if user is on the wizard page, e.g. /requests/positions/707
+        // otherwise reloading on explore page with filters clears them
+        if (positionRequestId) {
+          // console.log('clearing A');
+          const basePath = getBasePath(location.pathname);
+          const searchParams = new URLSearchParams();
+          if (searchParams.get('search')) searchParams.delete('search');
+          searchParams.set('clearFilters', 'true');
+          navigate(
+            {
+              pathname: basePath,
+              search: searchParams.toString(),
+            },
+            { replace: true },
+          );
+          return;
+        }
       }
 
       // if we are doing organization filtering because user is creating a new position request
@@ -216,6 +228,18 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       //     take: pageSize,
       //   });
       // } else {
+
+      // if user is clearing filters, and is on position request page,
+      // then ensure we select the profile that is currently selected
+      // instead of selecting the profile associated with the position request
+
+      let toSelectProfileNumber = selectProfileNumber;
+
+      if (clearingFilters && positionRequestId) {
+        toSelectProfileNumber = searchParams.get('selectedProfile') ?? selectProfileNumber;
+      }
+
+      selectProfileForPageNumber.current = toSelectProfileNumber ?? '';
 
       trigger({
         ...(search != null && { search }),
@@ -317,7 +341,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         take: pageSize,
         // if we need to have a specific profile selected, the server will ignore take and skip to get correct frame
         // it will also ignore filters and search query
-        selectProfile: !selectProfileIdRan.current ? selectProfileNumber : null,
+        selectProfile: !selectProfileIdRan.current || clearingFilters ? toSelectProfileNumber : null,
         //pass departmentid to only return included/excluded profiles
         departmentId: prData?.department_id,
       });
@@ -339,6 +363,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       loadProfileIds,
       number,
       prData?.department_id,
+      positionRequestId,
     ]);
 
     // Update totalResults based on the response (if applicable)
@@ -379,7 +404,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           searchParams.set('page', newPage.toString());
           // if we are on /job-profiles route, don't set "selectedProfile"
           // if (!location.pathname.startsWith('/job-profiles')) {
-          searchParams.set('selectedProfile', selectProfileNumber ?? '');
+          searchParams.set('selectedProfile', selectProfileForPageNumber.current ?? '');
           // }
 
           const basePath = location.pathname.startsWith('/job-profiles')
@@ -393,6 +418,12 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
           // memorize the search state used to display previously selected profile
           if (previousSearchState) previousSearchState.current = searchParams.toString();
+        } else {
+          // if it's not present and we are on /job-profiles/saved, it could mean user linked to a profile that is not in the
+          // other's users list. In this case, redirect to /job-profiles/:number
+          if (location.pathname.startsWith('/job-profiles/saved') && selectProfileNumber) {
+            navigate(`/job-profiles/${selectProfileNumber}`);
+          }
         }
 
         selectProfileIdRan.current = true;

@@ -43,10 +43,7 @@ export const JobProfileSearchResults = ({
     //   searchParams.toString().length > 0 ? `?${searchParams.toString()}` : ''
     // }`
 
-    // Check if we're on /job-profiles/saved route
-    if (location.pathname.includes('/job-profiles/saved')) {
-      return `/job-profiles/saved/${profileNumber}`;
-    }
+    const routePrefix = location.pathname.includes('/job-profiles/saved') ? '/job-profiles/saved' : '/job-profiles';
 
     // Check if we're on the /requests/positions route
     const newSearchParams = new URLSearchParams(searchParams.toString());
@@ -61,7 +58,7 @@ export const JobProfileSearchResults = ({
       return `/requests/positions/${positionRequestId}?${newSearchParams.toString()}`;
     } else {
       // If not on the /requests/positions route, use the standard job-profiles path
-      return `/job-profiles/${profileNumber}?${newSearchParams.toString()}`;
+      return `${routePrefix}/${profileNumber}?${newSearchParams.toString()}`;
     }
   };
 
