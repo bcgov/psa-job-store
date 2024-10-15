@@ -8,21 +8,7 @@ import {
   MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
-import {
-  Alert,
-  Button,
-  Card,
-  Col,
-  Form,
-  Input,
-  Menu,
-  Modal,
-  Result,
-  Row,
-  Switch,
-  Typography,
-  notification,
-} from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Typography, notification } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { Divider } from 'antd/lib';
@@ -45,6 +31,7 @@ import { OrgChart } from '../org-chart/components/org-chart';
 import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import ConfirmationApproval from './components/approval-confirmation.component';
 import CommentsList from './components/comments-list.component';
 import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -925,28 +912,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
               ]}
             >
               <Divider></Divider>
-              <b>Confirmation</b>
-              <div style={{ paddingBottom: '10px' }}>
-                <Row>
-                  <Col span={2}>
-                    <Switch
-                      size="small"
-                      aria-labelledby="confirmation-label-id"
-                      data-testid="confirmation-switch"
-                      checked={confirmation}
-                      onChange={(newValue: boolean | ((prevState: boolean) => boolean)) => {
-                        setConfirmation(newValue);
-                      }}
-                    />
-                  </Col>
-                  <Col span={22}>
-                    <span id="confirmation-label-id">
-                      I confirm that I have received executive approval (Deputy Minister or delegate) for this new
-                      position.
-                    </span>
-                  </Col>
-                </Row>
-              </div>
+              <ConfirmationApproval confirmation={confirmation} setConfirmation={setConfirmation} />
               <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                 <div>
                   <b>By clicking “Generate position number” I affirm that:</b>
@@ -998,6 +964,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 <Button
                   key="submit"
                   type="primary"
+                  disabled={!confirmation}
                   onClick={() => {
                     setIsVerificationModalVisible(false);
                     handleOk();
@@ -1015,6 +982,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   proceed?
                 </div>
               </div>
+              <ConfirmationApproval confirmation={confirmation} setConfirmation={setConfirmation} />
             </Modal>
           </WizardContentWrapper>
         </WizardPageWrapper>
