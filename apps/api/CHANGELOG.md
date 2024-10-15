@@ -1,5 +1,11 @@
 # api
 
+## 0.12.1
+
+### Patch Changes
+
+- [#834](https://github.com/bcgov/psa-job-store/pull/834) [`5e24589f39ccfc573bc4b03bc923727cfc1e823d`](https://github.com/bcgov/psa-job-store/commit/5e24589f39ccfc573bc4b03bc923727cfc1e823d) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-897 Review logging
+
 ## 0.12.0
 
 ### Minor Changes
