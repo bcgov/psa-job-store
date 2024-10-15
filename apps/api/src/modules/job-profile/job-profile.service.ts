@@ -82,7 +82,10 @@ export class JobProfileService {
             : undefined,
       },
       ...args,
-      orderBy: [...(args.orderBy || []), { title: 'asc' }],
+      // profiles may have same titles, so we need to sort by title and id
+      // otherwise, the order of profiles may change between requests
+      // when paginating
+      orderBy: [...(args.orderBy || []), { title: 'asc' }, { id: 'asc' }],
       include: {
         owner: true,
         published_by: true,

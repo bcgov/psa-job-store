@@ -10,7 +10,7 @@ const WizardContentWrapper: React.FC<WizardContentWrapperProps> = ({ children })
       style={{
         overflow: 'hidden',
         position: 'relative',
-        background: 'rgb(240, 242, 245)',
+        background: '#f5f5f5',
         marginLeft: '-1rem',
         marginRight: '-1rem',
         marginTop: '-1px',
