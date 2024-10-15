@@ -305,7 +305,6 @@ export const router = createBrowserRouter([
                             index: true,
                             element: <PositionRequestPage />,
                             handle: {
-                              breadcrumb: () => 'My position requests',
                               icon: <FileTextOutlined />,
                             },
                           },

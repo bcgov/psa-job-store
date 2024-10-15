@@ -5132,7 +5132,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 <Card
                   bodyStyle={{
                     padding: '0',
-                    backgroundColor: '#F0F2F5',
+                    backgroundColor: '#f5f5f5',
                     borderRadius: '8px',
                     border: '1px solid #D9D9D9',
                   }}
@@ -5270,7 +5270,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               }}
               bodyStyle={{
                 padding: '0',
-                backgroundColor: '#F0F2F5',
+                backgroundColor: '#f5f5f5',
                 borderRadius: '8px',
                 border: '1px solid #D9D9D9',
               }}

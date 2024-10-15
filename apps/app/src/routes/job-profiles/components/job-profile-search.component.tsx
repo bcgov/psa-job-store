@@ -355,9 +355,14 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
     // If the job family or classification filters have changed, de-select the selected profile
     if (jobFamilyChanged || classificationChanged || ministryChanged || jobRoleTypeChanged || jobStreamChanged) {
+      // do not run this if we're clearing filters - in that case we want to have the profile still selected
+      if (searchParams.get('clearFilters')) {
+        return;
+      }
       newSearchParams.set('page', '1');
       newSearchParams.delete('selectedProfile');
-      // console.log('navigating.. B', getBasePath(location.pathname));
+      // console.log('navigating.. B', getBasePath(location.pathname), 'searchParams: ', searchParams.toString());
+
       navigate(
         {
           pathname: getBasePath(location.pathname),
@@ -443,8 +448,9 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     // Update the URL parameters
     const newSearchParams = new URLSearchParams();
 
-    const pageFromUrl = searchParams.get('page');
-    if (pageFromUrl) newSearchParams.set('page', pageFromUrl);
+    // do not preserve the page when resetting filters - go to page 1
+    // const pageFromUrl = searchParams.get('page');
+    // if (pageFromUrl) newSearchParams.set('page', pageFromUrl);
 
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
@@ -454,9 +460,32 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
     const basePath = getBasePath(location.pathname);
 
+    // if profile is currently selected, leave it selected (depending if either selectedProfileFromUrl or selectedProfileFromPath is set)
+    // if it's selectedProfileFromUrl, then navigate to ?selectedProfile=selectedProfileFromUrl
+    // if it's selectedProfileFromPath, then navigate to basePath/selectedProfileFromPath
+
+    const selectedProfileFromUrl = searchParams.get('selectedProfile');
+    const selectedProfileFromPath = !isNaN(Number(location.pathname.split('/').pop()))
+      ? location.pathname.split('/').pop()
+      : null;
+
+    // console.log('selectedProfileFromUrl: ', selectedProfileFromUrl, selectedProfileFromPath);
+
+    let navigateToPath = selectedProfileFromPath ? `${basePath}/${selectedProfileFromPath}` : basePath;
+
+    if (selectedProfileFromUrl)
+      if (isPositionRequestRoute) {
+        navigateToPath = `${basePath}`;
+        newSearchParams.set('selectedProfile', selectedProfileFromUrl);
+      } else navigateToPath = `${basePath}/${selectedProfileFromUrl}`;
+
+    // console.log('navigateToPath: ', navigateToPath);
+    // console.log('basePath: ', basePath);
+    // console.log('newSearchParams: ', newSearchParams.toString());
+
     navigate(
       {
-        pathname: basePath,
+        pathname: navigateToPath,
         search: newSearchParams.toString(),
       },
       { replace: true },
