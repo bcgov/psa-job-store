@@ -185,7 +185,7 @@ const EditFormOptionsPicker: React.FC<EditFormOptionsPickerProps> = ({
           width="50%"
           onClose={onClose}
           open={visible}
-          style={{ backgroundColor: 'rgb(240, 242, 245)' }}
+          style={{ backgroundColor: 'r#f5f5f5' }}
           extra={
             <>
               <Button

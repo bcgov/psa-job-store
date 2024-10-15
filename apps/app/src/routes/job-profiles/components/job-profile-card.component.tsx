@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TagFilled, TagOutlined } from '@ant-design/icons';
-import { Button, Col, Row, Space, Tooltip, Typography } from 'antd';
+import { LinkOutlined, TagFilled, TagOutlined } from '@ant-design/icons';
+import { Button, Col, Row, Space, Tooltip, Typography, message } from 'antd';
 import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -135,9 +135,30 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
       </Button>
 
       <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
-        {initIsSaved && (
-          <div>
-            {isSaved ? (
+        <Space size={0}>
+          {/* Button to copy link to profile */}
+          <Tooltip title="Copy link to profile">
+            <Button
+              aria-label="Copy link to profile"
+              type="link"
+              icon={<LinkOutlined aria-hidden />}
+              onClick={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+
+                // copy full path, including host, always link to explore profiles page, e.g.
+                // http://localhost:5173/job-profiles/123514, use data.number for the number
+                const baseUrl = window.location.origin;
+                const fullUrl = `${baseUrl}/job-profiles/${data.number}`;
+
+                navigator.clipboard.writeText(fullUrl).then(() => {
+                  message.success('Link copied to clipboard!');
+                });
+              }}
+            ></Button>
+          </Tooltip>
+          {initIsSaved &&
+            (isSaved ? (
               <Tooltip title="Remove from saved profiles">
                 <Button
                   aria-label="Remove from saved profiles"
@@ -155,9 +176,8 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
                   onClick={handleSaveJobProfile}
                 ></Button>
               </Tooltip>
-            )}
-          </div>
-        )}
+            ))}
+        </Space>
       </div>
     </Space>
   );

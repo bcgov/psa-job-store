@@ -8,7 +8,7 @@ import {
   MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Typography, notification } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { Divider } from 'antd/lib';
@@ -248,6 +248,32 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
         // console.log('submitPositionRequest result: ', result);
         // todo - change check for position_number
         if (!result?.submitPositionRequest.id) throw new Error('API failure');
+
+        // show feedback notification
+        notification.success({
+          placement: 'bottomRight',
+          duration: 0,
+          message: 'Congratulations on creating a new position! 🎉',
+          description: 'Would you like to share some feedback?',
+          icon: <></>,
+          style: {
+            backgroundColor: 'white',
+            width: '450px',
+          },
+          btn: (
+            <Button
+              style={{ background: '#0057ad' }}
+              type="primary"
+              size="small"
+              onClick={() => {
+                window.open('https://forms.office.com/r/R46ALagQzH', '_blank');
+              }}
+            >
+              Share feedback
+            </Button>
+          ),
+          key: 'success-notification',
+        });
 
         // if successfull, switch parent to readonly mode and show success message
         // switchParentMode, switchParentReadonlyMode
