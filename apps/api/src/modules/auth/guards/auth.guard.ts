@@ -13,11 +13,11 @@ export class AuthGuard extends PassportAuthGuard('keycloak') {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     // const isPublicRoute = this.reflector.get<boolean>(PUBLIC_ROUTE, context.getHandler());
     // if (isPublicRoute) return true;
-    const request = this.getRequest(context);
-    // Bypass auth for the health check endpoint
-    if (request.url === '/health/check') {
-      return true;
-    }
+    // const request = this.getRequest(context);
+    // // Bypass auth for the health check endpoint
+    // if (request.url === '/health/check') {
+    //   return true;
+    // }
     return super.canActivate(context);
   }
 
