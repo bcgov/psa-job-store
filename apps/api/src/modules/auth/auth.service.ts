@@ -7,8 +7,6 @@ import { JwtPayload } from 'jsonwebtoken';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { guidToUuid } from '../../utils/guid-to-uuid.util';
-import { CrmService } from '../external/crm.service';
-import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { CACHE_USER_PREFIX, KEYCLOAK_PUBLIC_KEY } from './auth.constants';
@@ -18,9 +16,7 @@ export class AuthService {
   constructor(
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly configService: ConfigService<AppConfigDto, true>,
-    private readonly crmService: CrmService,
     private readonly httpService: HttpService,
-    private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
   ) {}
