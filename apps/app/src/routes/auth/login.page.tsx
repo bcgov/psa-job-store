@@ -12,7 +12,7 @@ export const LoginPage = () => {
   const isLoginPage = useMatch('/auth/login') != null;
 
   return (
-    <Row justify="center" align="middle" style={{ height: '100%', justifyContent: 'center', background: '#f0f2f5' }}>
+    <Row justify="center" align="middle" style={{ height: '100%', justifyContent: 'center', background: '#f5f5f5' }}>
       <Col span={12}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <div>

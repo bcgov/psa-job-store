@@ -1681,26 +1681,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       !findFilterClassifications(otherIndex)?.length && removeEmployeeGroup(otherIndex);
     }
 
-    // if (selectedClassificationId) {
-    //   setIsModalVisible(true);
-    // } else {
+    updateMinimumRequirementsAndProfRegs(classification);
+  };
+
+  const updateMinimumRequirementsAndProfRegs = (classification: string) => {
     updateMinimumRequirementsFromClassification(classification);
 
     setTimeout(() => {
-      // console.log(
-      //   'refetching with: ',
-      //   selectedProfession.map((p) => p.jobFamily),
-      // );
       refetchPickerData().then((r) => {
-        // console.log(
-        //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
-        //   professionalRequirementsPickerData,
-        //   r,
-        // );
         updateProfessionalRegistrationrequirements(r.data);
       });
     }, 0);
-    // }
   };
 
   const handleJobFamilyChange = async () => {
@@ -2352,7 +2343,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // Add items with non-null classification to the fields array
     const newFields = itemsWithClassification.map((item: any) => ({
       tc_is_readonly: true,
-      is_readonly: true,
+      // ensure newly added items are set as non-editable and significant
+      // ('nonEditable' gets converted to is_readonly when sent to the server)
+      nonEditable: true,
+      is_significant: true,
       text: item.text,
     }));
 
@@ -2541,14 +2535,39 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                                 disabled={
                                                   selectedEmployeeClassificationGroups.at(index)?.employeeGroup == 'OEX'
                                                 }
-                                                onChange={(arg) => {
-                                                  setValue(`employeeClassificationGroups.${index}.employeeGroup`, arg);
-                                                  setValue(
-                                                    `employeeClassificationGroups.${index}.classification`,
+                                                onChange={(newValue) => {
+                                                  if (selectedEmployeeClassificationGroups[index].employeeGroup) {
+                                                    showWarningModal(
+                                                      () => {
+                                                        setValue(
+                                                          `employeeClassificationGroups.${index}.employeeGroup`,
+                                                          newValue,
+                                                        );
+                                                        setValue(
+                                                          `employeeClassificationGroups.${index}.classification`,
 
-                                                    null,
-                                                  );
-                                                  onChange(arg);
+                                                          null,
+                                                        );
+                                                        onChange(newValue);
+                                                      },
+                                                      () => {
+                                                        // User canceled the change
+                                                      },
+                                                    );
+                                                  } else {
+                                                    {
+                                                      setValue(
+                                                        `employeeClassificationGroups.${index}.employeeGroup`,
+                                                        newValue,
+                                                      );
+                                                      setValue(
+                                                        `employeeClassificationGroups.${index}.classification`,
+
+                                                        null,
+                                                      );
+                                                      onChange(newValue);
+                                                    }
+                                                  }
                                                   triggerBasicDetailsValidation();
                                                 }}
                                                 onBlur={onBlur}
@@ -2636,7 +2655,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                           <Select
                                             placeholder="Choose a classification"
                                             onChange={(newValue) => {
-                                              if (selectedEmployeeClassificationGroups) {
+                                              if (
+                                                selectedEmployeeClassificationGroups[index].classification &&
+                                                selectedEmployeeClassificationGroups[index].classification != newValue
+                                              ) {
                                                 showWarningModal(
                                                   () => {
                                                     onChange(newValue);
@@ -2648,8 +2670,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                                   },
                                                 );
                                               } else {
+                                                // selecting classification for the first time
+                                                // - ensure that the minimum requirements and professional registrations are updated
                                                 onChange(newValue);
-                                                // handleClassificationChange(newValue);
+                                                const [id, employee_group_id, peoplesoft_id] = (newValue ?? '').split(
+                                                  '.',
+                                                );
+                                                const classification = `${id}.${employee_group_id}.${peoplesoft_id}`;
+                                                updateMinimumRequirementsAndProfRegs(classification);
                                               }
                                               triggerBasicDetailsValidation();
                                             }}
@@ -5132,7 +5160,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                 <Card
                   bodyStyle={{
                     padding: '0',
-                    backgroundColor: '#F0F2F5',
+                    backgroundColor: '#f5f5f5',
                     borderRadius: '8px',
                     border: '1px solid #D9D9D9',
                   }}
@@ -5270,7 +5298,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
               }}
               bodyStyle={{
                 padding: '0',
-                backgroundColor: '#F0F2F5',
+                backgroundColor: '#f5f5f5',
                 borderRadius: '8px',
                 border: '1px solid #D9D9D9',
               }}

@@ -329,7 +329,7 @@ export const ClassificationTaskPage = () => {
         defaultActiveKey="1"
         items={tabItems}
         tabBarStyle={{ backgroundColor: '#fff', padding: '0 1rem 0px 1rem' }}
-        style={{ backgroundColor: '#F0F2F5' }}
+        style={{ backgroundColor: '#f5f5f5' }}
       />
     </>
   );

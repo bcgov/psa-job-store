@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeftOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { ArrowLeftOutlined, BulbOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography, message } from 'antd';
 import Title from 'antd/es/typography/Title';
 import copy from 'copy-to-clipboard';
@@ -585,7 +585,7 @@ export const PositionRequestPage = () => {
                         </Button>,
                       ]}
                     />
-                    <Row justify="center" style={{ padding: '0 1rem', marginBottom: '5rem' }}>
+                    <Row justify="center" style={{ padding: '0 1rem', marginBottom: '2rem' }}>
                       <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
                         <Card title="Information" bordered={false}>
                           <Descriptions bordered layout="horizontal" column={1}>
@@ -627,6 +627,31 @@ export const PositionRequestPage = () => {
                               </DownloadJobProfileComponent>
                             </Descriptions.Item>
                           </Descriptions>
+                        </Card>
+                      </Col>
+                    </Row>
+
+                    <Row justify="center" style={{ padding: '0 1rem', marginBottom: '5rem' }}>
+                      <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
+                        <Card bordered={false}>
+                          <Row align="middle" gutter={16}>
+                            <Col>
+                              <BulbOutlined />
+                            </Col>
+                            <Col flex="auto">
+                              <Row justify="space-between" align="middle">
+                                <Col>
+                                  <Typography.Text strong>Help us make it better</Typography.Text>
+                                  <Typography.Text style={{ marginLeft: '1rem' }}>
+                                    How was your experience creating a position number?{' '}
+                                    <Typography.Link href="https://forms.office.com/r/R46ALagQzH" target="_blank">
+                                      Please share your feedback here
+                                    </Typography.Link>
+                                  </Typography.Text>
+                                </Col>
+                              </Row>
+                            </Col>
+                          </Row>
                         </Card>
                       </Col>
                     </Row>
@@ -715,7 +740,7 @@ export const PositionRequestPage = () => {
                 overflow: 'hidden',
                 position: 'relative',
                 height: '100%',
-                background: 'rgb(240, 242, 245)',
+                background: '#f5f5f5',
                 marginLeft: '-1rem',
                 marginRight: '-1rem',
                 marginTop: '-1px',

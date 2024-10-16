@@ -31,7 +31,7 @@ export const WizardPageWrapper: React.FC<WizardPageWrapperProps> = ({
     <PageHeader title={title} subTitle={subTitle} extra={pageHeaderExtra} additionalBreadcrumb={additionalBreadcrumb} />
     <Row
       justify="center"
-      style={{ padding: '0 1rem', backgroundColor: grayBg ? 'rgb(240, 242, 245)' : 'white', flex: '1' }}
+      style={{ padding: '0 1rem', backgroundColor: grayBg ? '#f5f5f5' : 'white', flex: '1' }}
       id="wrapper-row"
     >
       <Col xs={24} md={24} lg={lg} xl={xl} xxl={xxl} style={{ display: 'flex', flexDirection: 'column' }}>

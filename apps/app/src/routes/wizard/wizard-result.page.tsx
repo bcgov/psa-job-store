@@ -8,7 +8,7 @@ import {
   MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Switch, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Typography, notification } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { Divider } from 'antd/lib';
@@ -18,6 +18,7 @@ import { useReactFlow } from 'reactflow';
 import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { useGetCommentsQuery } from '../../redux/services/graphql-api/comment.api';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
@@ -30,6 +31,7 @@ import { OrgChart } from '../org-chart/components/org-chart';
 import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import ConfirmationApproval from './components/approval-confirmation.component';
 import CommentsList from './components/comments-list.component';
 import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -77,6 +79,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData } = useWizardContext();
   const { getNodes } = useReactFlow();
 
+  const { data: commentData, isLoading: commentDataIsLoading } = useGetCommentsQuery({
+    record_id: positionRequestId ?? -1,
+    record_type: 'PositionRequest',
+  });
+
   useEffect(() => {
     triggerGetJobProfile({
       id: positionRequestData?.parent_job_profile_id,
@@ -111,6 +118,14 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   useEffect(() => {
     // Fetch position request and needs review data when positionRequestId changes
+    // load comment if prevsiously entered
+    if (commentData && commentData.comments.length && !commentDataIsLoading) {
+      setComment(commentData.comments[0].text);
+    }
+  }, [positionRequestId, refetchPositionNeedsRivew]);
+
+  useEffect(() => {
+    // Fetch position request and needs review data when positionRequestId changes
     if (positionRequestId) {
       // refetchPositionRequest();
       refetchPositionNeedsRivew();
@@ -120,11 +135,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   useEffect(() => {
     // if loading
     if (positionNeedsRivewLoading) return;
-
-    // load comment if prevsiously entered
-    if (positionRequestData?.additional_info?.comments) {
-      setComment(positionRequestData?.additional_info.comments);
-    }
 
     // if state is draft and position doesn't need review, set mode to readyToCreatePositionNumber
     if (positionRequestData?.status === 'DRAFT' && !positionNeedsRivew?.positionNeedsRivew.result) {
@@ -247,6 +257,32 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
         // console.log('submitPositionRequest result: ', result);
         // todo - change check for position_number
         if (!result?.submitPositionRequest.id) throw new Error('API failure');
+
+        // show feedback notification
+        notification.success({
+          placement: 'bottomRight',
+          duration: 0,
+          message: 'Congratulations on creating a new position! 🎉',
+          description: 'Would you like to share some feedback?',
+          icon: <></>,
+          style: {
+            backgroundColor: 'white',
+            width: '450px',
+          },
+          btn: (
+            <Button
+              style={{ background: '#0057ad' }}
+              type="primary"
+              size="small"
+              onClick={() => {
+                window.open('https://forms.office.com/r/R46ALagQzH', '_blank');
+              }}
+            >
+              Share feedback
+            </Button>
+          ),
+          key: 'success-notification',
+        });
 
         // if successfull, switch parent to readonly mode and show success message
         // switchParentMode, switchParentReadonlyMode
@@ -876,28 +912,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
               ]}
             >
               <Divider></Divider>
-              <b>Confirmation</b>
-              <div style={{ paddingBottom: '10px' }}>
-                <Row>
-                  <Col span={2}>
-                    <Switch
-                      size="small"
-                      aria-labelledby="confirmation-label-id"
-                      data-testid="confirmation-switch"
-                      checked={confirmation}
-                      onChange={(newValue: boolean | ((prevState: boolean) => boolean)) => {
-                        setConfirmation(newValue);
-                      }}
-                    />
-                  </Col>
-                  <Col span={22}>
-                    <span id="confirmation-label-id">
-                      I confirm that I have received executive approval (Deputy Minister or delegate) for this new
-                      position.
-                    </span>
-                  </Col>
-                </Row>
-              </div>
+              <ConfirmationApproval confirmation={confirmation} setConfirmation={setConfirmation} />
               <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                 <div>
                   <b>By clicking “Generate position number” I affirm that:</b>
@@ -949,6 +964,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 <Button
                   key="submit"
                   type="primary"
+                  disabled={!confirmation}
                   onClick={() => {
                     setIsVerificationModalVisible(false);
                     handleOk();
@@ -966,6 +982,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   proceed?
                 </div>
               </div>
+              <ConfirmationApproval confirmation={confirmation} setConfirmation={setConfirmation} />
             </Modal>
           </WizardContentWrapper>
         </WizardPageWrapper>

@@ -183,8 +183,8 @@ model JobProfile {
   created_at      DateTime?             @default(now())
   updated_at      DateTime?             @default(now()) @updatedAt
   published_at    DateTime?
-  owner_id        String?               @db.Uuid
-  owner           User?                 @relation(fields: [owner_id], references: [id]) //  @relation(name: "OwnerRelation", fields: [owner_id], references: [id])
+  owner_id        String                @db.Uuid
+  owner           User                  @relation(fields: [owner_id], references: [id]) //  @relation(name: "OwnerRelation", fields: [owner_id], references: [id])
   updated_by_id   String?               @db.Uuid
   updated_by      User?                 @relation(name: "updatedByRelation", fields: [updated_by_id], references: [id])
   published_by_id String?               @db.Uuid

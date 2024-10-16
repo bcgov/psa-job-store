@@ -8,6 +8,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from 'nestjs-pino';
 import { AppResolver } from './app.resolver';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
+import { AppLogModule } from './modules/app-log/app-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
@@ -16,6 +17,7 @@ import { ClassificationModule } from './modules/classification/classification.mo
 import { CommentModule } from './modules/comment/comment.module';
 import { EmployeeGroupModule } from './modules/employee-group/employee-group.module';
 import { ExternalModule } from './modules/external/external.module';
+import { HealthCheckModule } from './modules/health-check/health-check.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileMinimumRequirementsModule } from './modules/job-profile-minimum-requirements/job-profile-minimum-requirements.module';
 import { JobProfileScopeModule } from './modules/job-profile-scope/job-profile-scope.module';
@@ -52,7 +54,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
         pinoHttp: loggerOptions,
       }),
     }),
-
+    HealthCheckModule,
     ScheduleModule.forRoot(),
     AuthModule,
     PositionRequestModule,
@@ -68,7 +70,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobProfileStreamModule,
     JobProfileScopeModule,
     JobProfileMinimumRequirementsModule,
-    // AppLogModule,
+    AppLogModule,
     ScheduledTaskModule,
     SavedJobProfileModule,
     UserModule,

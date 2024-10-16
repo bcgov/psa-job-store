@@ -1,5 +1,21 @@
 # app
 
+## 0.14.2
+
+### Patch Changes
+
+- [#842](https://github.com/bcgov/psa-job-store/pull/842) [`4a32e1973b09e294bf0a304ad4fa4c412e3b7bc7`](https://github.com/bcgov/psa-job-store/commit/4a32e1973b09e294bf0a304ad4fa4c412e3b7bc7) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-920 Profiles have owner as null
+
+## 0.14.1
+
+### Patch Changes
+
+- [#833](https://github.com/bcgov/psa-job-store/pull/833) [`ed93f6712f11c5bb670064c750ee0e3b13e8b418`](https://github.com/bcgov/psa-job-store/commit/ed93f6712f11c5bb670064c750ee0e3b13e8b418) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-879 Onboarding: HM - Provide feedback after creating a PN
+
+- [#834](https://github.com/bcgov/psa-job-store/pull/834) [`5e24589f39ccfc573bc4b03bc923727cfc1e823d`](https://github.com/bcgov/psa-job-store/commit/5e24589f39ccfc573bc4b03bc923727cfc1e823d) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-897 Review logging
+
+- [#838](https://github.com/bcgov/psa-job-store/pull/838) [`fea5fd02b199546745c628c220c72ff55c2a3335`](https://github.com/bcgov/psa-job-store/commit/fea5fd02b199546745c628c220c72ff55c2a3335) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-916 Share link bugs
+
 ## 0.14.0
 
 ### Minor Changes
