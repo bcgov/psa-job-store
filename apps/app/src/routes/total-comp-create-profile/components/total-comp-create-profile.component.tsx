@@ -1681,26 +1681,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       !findFilterClassifications(otherIndex)?.length && removeEmployeeGroup(otherIndex);
     }
 
-    // if (selectedClassificationId) {
-    //   setIsModalVisible(true);
-    // } else {
+    updateMinimumRequirementsAndProfRegs(classification);
+  };
+
+  const updateMinimumRequirementsAndProfRegs = (classification: string) => {
     updateMinimumRequirementsFromClassification(classification);
 
     setTimeout(() => {
-      // console.log(
-      //   'refetching with: ',
-      //   selectedProfession.map((p) => p.jobFamily),
-      // );
       refetchPickerData().then((r) => {
-        // console.log(
-        //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
-        //   professionalRequirementsPickerData,
-        //   r,
-        // );
         updateProfessionalRegistrationrequirements(r.data);
       });
     }, 0);
-    // }
   };
 
   const handleJobFamilyChange = async () => {
@@ -2352,7 +2343,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // Add items with non-null classification to the fields array
     const newFields = itemsWithClassification.map((item: any) => ({
       tc_is_readonly: true,
-      is_readonly: true,
+      // ensure newly added items are set as non-editable and significant
+      // ('nonEditable' gets converted to is_readonly when sent to the server)
+      nonEditable: true,
+      is_significant: true,
       text: item.text,
     }));
 
@@ -2676,8 +2670,14 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                                   },
                                                 );
                                               } else {
+                                                // selecting classification for the first time
+                                                // - ensure that the minimum requirements and professional registrations are updated
                                                 onChange(newValue);
-                                                // handleClassificationChange(newValue);
+                                                const [id, employee_group_id, peoplesoft_id] = (newValue ?? '').split(
+                                                  '.',
+                                                );
+                                                const classification = `${id}.${employee_group_id}.${peoplesoft_id}`;
+                                                updateMinimumRequirementsAndProfRegs(classification);
                                               }
                                               triggerBasicDetailsValidation();
                                             }}
