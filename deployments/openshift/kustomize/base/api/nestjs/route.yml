@@ -1,11 +1,11 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: nestjs-app
+  name: api
 spec:
   to:
     kind: Service
-    name: nestjs-app
+    name: api
   port:
     targetPort: 4000
   tls:
