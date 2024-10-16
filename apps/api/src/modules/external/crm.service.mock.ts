@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as mockData from '../../../test/mock-crm-data.json';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { IncidentCreateUpdateInput } from './models/incident-create.input';
@@ -19,19 +20,18 @@ export class MockCrmService {
   }
 
   async getAccountId(idir: string): Promise<number | null> {
-    console.log('Mock getAccountId called with idir:', idir);
-    return Math.random() > 0.5 ? Math.floor(Math.random() * 1000) : null;
+    return mockData.accounts.find((prof) => prof.idir === idir).id || -1;
   }
 
   async getContactId(idir: string): Promise<number | null> {
     console.log('Mock getContactId called with idir:', idir);
-    return Math.random() > 0.5 ? Math.floor(Math.random() * 1000) : null;
+    return mockData.contacts.find((prof) => prof.idir === idir).id || -1;
   }
 
   async createIncident(data: IncidentCreateUpdateInput) {
     console.log('Mock createIncident called with data:', data);
     return {
-      id: Math.floor(Math.random() * 1000),
+      id: '123',
       lookupName: '241007-000713',
       statusWithType: { status: { lookupName: 'Solved' } },
       category: { lookupName: 'New Position' },
