@@ -2,6 +2,7 @@ import pino from 'pino';
 import { v4 as uuidv4 } from 'uuid';
 
 export const loggerFactory = () => {
+  console.log('Creating logger with options');
   const NODE_ENV = process.env.NODE_ENV;
   let transport;
 
