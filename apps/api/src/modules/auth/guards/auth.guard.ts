@@ -11,7 +11,7 @@ export class AuthGuard extends PassportAuthGuard('keycloak') {
   }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'AuthGuard.canActivate');
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'AuthGuard.canActivate');
     // const isPublicRoute = this.reflector.get<boolean>(PUBLIC_ROUTE, context.getHandler());
     // if (isPublicRoute) return true;
     const request = this.getRequest(context);
@@ -20,15 +20,15 @@ export class AuthGuard extends PassportAuthGuard('keycloak') {
       return true;
     }
     const res = super.canActivate(context);
-    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'AuthGuard.canActivate done');
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'AuthGuard.canActivate done');
     return res;
   }
 
   getRequest(context: ExecutionContext) {
-    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'AuthGuard.getRequest');
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'AuthGuard.getRequest');
     const gqlContext = GqlExecutionContext.create(context);
     const res = gqlContext.getContext().req;
-    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'AuthGuard.getRequest done');
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'AuthGuard.getRequest done');
     return res;
   }
 }

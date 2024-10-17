@@ -21,9 +21,9 @@ export class DepartmentResolver {
 
   @Query(() => [Department], { name: 'departments' })
   getDepartments(@Args() args?: FindManyDepartmentArgs) {
-    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'getting departments..');
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'getting departments..');
     const res = this.departmentService.getDepartments(args);
-    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'got departments');
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'got departments');
     return res;
   }
 
