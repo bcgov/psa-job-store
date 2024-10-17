@@ -11,6 +11,7 @@ export class AuthGuard extends PassportAuthGuard('keycloak') {
   }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    console.log('AuthGuard.canActivate');
     // const isPublicRoute = this.reflector.get<boolean>(PUBLIC_ROUTE, context.getHandler());
     // if (isPublicRoute) return true;
     const request = this.getRequest(context);
@@ -18,11 +19,16 @@ export class AuthGuard extends PassportAuthGuard('keycloak') {
     if (request.url === '/health/check') {
       return true;
     }
-    return super.canActivate(context);
+    const res = super.canActivate(context);
+    console.log('AuthGuard.canActivate done');
+    return res;
   }
 
   getRequest(context: ExecutionContext) {
+    console.log('AuthGuard.getRequest');
     const gqlContext = GqlExecutionContext.create(context);
-    return gqlContext.getContext().req;
+    const res = gqlContext.getContext().req;
+    console.log('AuthGuard.getRequest done');
+    return res;
   }
 }
