@@ -21,7 +21,10 @@ export class DepartmentResolver {
 
   @Query(() => [Department], { name: 'departments' })
   getDepartments(@Args() args?: FindManyDepartmentArgs) {
-    return this.departmentService.getDepartments(args);
+    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'getting departments..');
+    const res = this.departmentService.getDepartments(args);
+    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'got departments');
+    return res;
   }
 
   @Query(() => PaginatedDepartmentsResponse, { name: 'departmentsWithCount' })
