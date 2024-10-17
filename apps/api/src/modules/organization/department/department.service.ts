@@ -9,7 +9,7 @@ export class DepartmentService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getDepartments(args?: FindManyDepartmentArgs) {
-    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'service.getDeps');
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'service.getDeps');
     const res = this.prisma.department.findMany({
       ...args,
       include: {
@@ -17,7 +17,7 @@ export class DepartmentService {
         organization: true,
       },
     });
-    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'service.getDeps done');
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'service.getDeps done');
     return res;
   }
 
