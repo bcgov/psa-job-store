@@ -16,16 +16,22 @@ export class RoleGuard extends PassportAuthGuard('keycloak') {
   }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'RoleGuard.canActivate');
     // for local development only - allows postman access
     if (process.env.TEST_ENV === 'true') return true;
 
     const roles = this.reflector.get<string[]>(ROLES, context.getHandler());
-    if (!roles) return true;
+    if (!roles) {
+      // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'RoleGuard.canActivate done2');
+      return true;
+    }
 
     const gqlContext = GqlExecutionContext.create(context);
     const request = gqlContext.getContext().req;
     const { user } = request;
 
-    return this.userHasRoles(user, roles);
+    const res = this.userHasRoles(user, roles);
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'RoleGuard.canActivate done');
+    return res;
   }
 }

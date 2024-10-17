@@ -9,13 +9,16 @@ export class DepartmentService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getDepartments(args?: FindManyDepartmentArgs) {
-    return this.prisma.department.findMany({
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'service.getDeps');
+    const res = this.prisma.department.findMany({
       ...args,
       include: {
         metadata: true,
         organization: true,
       },
     });
+    // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'service.getDeps done');
+    return res;
   }
 
   async getDepartmentsWithCount({
