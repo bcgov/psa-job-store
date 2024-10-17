@@ -16,13 +16,20 @@ export const loggerFactory = () => {
     };
   } else {
     // In production, log to a file
+    // transport = {
+    //   target: 'pino/file',
+    //   options: { destination: '/tmp/log/api.log' },
+    // };
     transport = {
-      target: 'pino/file',
-      options: { destination: '/tmp/log/api.log' },
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+      },
     };
   }
   return {
     genReqId: (req, res) => {
+      console.log('genReqId');
       const existingId = req.id ?? req.headers['x-request-id'];
       if (existingId) return existingId;
 
@@ -38,6 +45,7 @@ export const loggerFactory = () => {
         return { severity: label };
       },
       log: (obj) => {
+        console.log('formatters.log');
         // return null;
         return {
           ...obj,
@@ -48,6 +56,7 @@ export const loggerFactory = () => {
     },
     serializers: {
       req: (req) => {
+        console.log('serializers.req');
         return {
           id: req.id,
           // user, auth.user
@@ -60,6 +69,7 @@ export const loggerFactory = () => {
         };
       },
       res: (res) => {
+        console.log('serializers.res');
         return {
           statusCode: res.statusCode,
           // Add any other response-related information you need

@@ -11,6 +11,7 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
   }
 
   async validate(payload: string, done: (err, user) => void) {
+    console.log('KeycloakStrategy.validate');
     // Check if JWT verification should be skipped - this is for e2e tests
     // todo: make this work with validation
     // if (process.env.TEST_ENV === 'true') {
@@ -36,6 +37,7 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
       }) as JwtPayload;
       const user = await this.authService.getUserFromPayload(data);
       done(null, user);
+      console.log('KeycloakStrategy.validate done');
     } catch (error) {
       if (error instanceof TokenExpiredError)
         throw new UnauthorizedException('Your session has expired. Please log in again.');
