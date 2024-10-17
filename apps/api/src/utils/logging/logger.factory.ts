@@ -2,7 +2,7 @@ import pino from 'pino';
 import { v4 as uuidv4 } from 'uuid';
 
 export const loggerFactory = () => {
-  console.log('Creating logger with options');
+  console.log(new Date().toISOString().slice(11, -1) + ' ' + 'Creating logger with options');
   const NODE_ENV = process.env.NODE_ENV;
   let transport;
 
@@ -29,7 +29,7 @@ export const loggerFactory = () => {
   }
   return {
     genReqId: (req, res) => {
-      console.log('genReqId');
+      console.log(new Date().toISOString().slice(11, -1) + ' ' + 'genReqId');
       const existingId = req.id ?? req.headers['x-request-id'];
       if (existingId) return existingId;
 
@@ -45,7 +45,7 @@ export const loggerFactory = () => {
         return { severity: label };
       },
       log: (obj) => {
-        console.log('formatters.log');
+        console.log(new Date().toISOString().slice(11, -1) + ' ' + 'formatters.log');
         // return null;
         return {
           ...obj,
@@ -56,7 +56,7 @@ export const loggerFactory = () => {
     },
     serializers: {
       req: (req) => {
-        console.log('serializers.req');
+        console.log(new Date().toISOString().slice(11, -1) + ' ' + 'serializers.req');
         return {
           id: req.id,
           // user, auth.user
@@ -69,7 +69,7 @@ export const loggerFactory = () => {
         };
       },
       res: (res) => {
-        console.log('serializers.res');
+        console.log(new Date().toISOString().slice(11, -1) + ' ' + 'serializers.res');
         return {
           statusCode: res.statusCode,
           // Add any other response-related information you need
