@@ -21,7 +21,10 @@ export class RoleGuard extends PassportAuthGuard('keycloak') {
     if (process.env.TEST_ENV === 'true') return true;
 
     const roles = this.reflector.get<string[]>(ROLES, context.getHandler());
-    if (!roles) return true;
+    if (!roles) {
+      console.log(new Date().toISOString().slice(11, -1) + ' ' + 'RoleGuard.canActivate done2');
+      return true;
+    }
 
     const gqlContext = GqlExecutionContext.create(context);
     const request = gqlContext.getContext().req;
