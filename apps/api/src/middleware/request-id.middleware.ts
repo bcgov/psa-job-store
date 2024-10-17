@@ -7,14 +7,14 @@ export const X_REQUEST_ID_HEADER = 'x-request-id';
 @Injectable()
 export class RequestIdMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    console.log('Setting request ID');
+    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'Setting request ID');
     const requestId = uuidv4();
 
     req.headers[X_REQUEST_ID_HEADER] = requestId;
     res.setHeader(X_REQUEST_ID_HEADER, requestId);
 
-    console.log('Setting request ID done');
+    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'Setting request ID done');
     next();
-    console.log('Setting request ID done 2');
+    console.log(new Date().toISOString().slice(11, -1) + ' ' + 'Setting request ID done 2');
   }
 }
