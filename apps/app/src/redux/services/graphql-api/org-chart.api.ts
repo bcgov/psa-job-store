@@ -83,6 +83,8 @@ export const orgChartApi = graphqlApi.injectEndpoints({
                   label
                   value
                   filterString
+                  location_id
+                  location_name
                 }
               }
             }

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Button, Card, Col, Empty, Form, Input, Menu, Modal, Row, Select, Typography } from 'antd';
+import { Button, Card, Col, Form, Input, Menu, Modal, Row, Typography } from 'antd';
 import { IsNotEmpty } from 'class-validator';
 import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
@@ -11,13 +11,13 @@ import { Link } from 'react-router-dom';
 import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
-import { useGetDepartmentsWithLocationQuery } from '../../redux/services/graphql-api/department.api';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
+import { DepartmentFilter } from '../org-chart/components/department-filter.component';
 import { findExcludedManager } from '../org-chart/utils/find-excluded-manager.util';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardContentWrapper from './components/wizard-content-wrapper';
@@ -100,7 +100,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     { data: positionProfileData, isFetching: isFetchingPositionProfile, isError: isFetchingPositionProfileError },
   ] = useLazyGetPositionProfileQuery();
 
-  const departmentsData = useGetDepartmentsWithLocationQuery().data?.departments;
+  // const departmentsData = useGetDepartmentsWithLocationQuery().data?.departments;
 
   // State to track selected location
   // const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
@@ -189,6 +189,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
     // Check if noPositions is true and excludedManagerPositionNumber should be filled
     const formValues = getValues();
+    // console.log('form values: ', formValues);
     // skipValidation = true;
     if (
       !skipValidation &&
@@ -331,11 +332,14 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       setValue('branch', branch || '');
       setValue('division', division || '');
 
+      // work location and name are already present
       if (work_location_id && work_location_name) {
         setValue('workLocation', work_location_id + '|' + work_location_name);
       } else {
-        const dept = departmentsData?.find((dept) => dept.id === positionRequestData?.department_id);
-        setValue('workLocation', dept?.location.id + '|' + dept?.location.name);
+        // now handled by department filter inital onSelect callback
+        // work location and name are absent, try to find it from the department
+        // const dept = departmentsData?.find((dept) => dept.id === positionRequestData?.department_id);
+        // setValue('workLocation', dept?.location.id + '|' + dept?.location.name);
       }
       setValue('payListDepartmentId', department_id || positionRequestData?.department_id || null);
 
@@ -358,7 +362,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         debouncedFetchPositionProfile(useExcludedMngr);
       }
     }
-  }, [departmentsData, positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
+  }, [positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
 
   const [deletePositionRequest] = useDeletePositionRequestMutation();
   const deleteRequest = async () => {
@@ -517,7 +521,25 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                           validateStatus={errors.payListDepartmentId ? 'error' : ''}
                           help={errors.payListDepartmentId?.message}
                         >
-                          <Controller
+                          <DepartmentFilter
+                            setDepartmentId={() => {}}
+                            onSelect={(dept) => {
+                              if (dept?.metadata?.value) {
+                                const deptId = dept.metadata.value.toString();
+                                setValue('payListDepartmentId', deptId === undefined ? null : String(deptId));
+                                setValue(
+                                  'workLocation',
+                                  dept.metadata?.location_id + '|' + dept.metadata?.location_name || null,
+                                );
+                              }
+                            }}
+                            departmentId={(() => {
+                              const ret = getValues('payListDepartmentId') ?? '';
+                              return ret;
+                            })()}
+                            // loading={profileDataIsFetching}
+                          />
+                          {/* <Controller
                             name="payListDepartmentId"
                             control={control}
                             render={({ field: { onChange, onBlur, value } }) => (
@@ -558,7 +580,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                 }
                               ></Select>
                             )}
-                          />
+                          /> */}
                           {/* {errors.payListDepartmentId && <p style={{ color: 'red' }}>{errors.payListDepartmentId.message}</p>} */}
                         </Form.Item>
                       </Col>
