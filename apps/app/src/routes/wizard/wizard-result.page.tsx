@@ -18,7 +18,6 @@ import { useReactFlow } from 'reactflow';
 import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import ContentWrapper from '../../components/content-wrapper.component';
-import { useGetCommentsQuery } from '../../redux/services/graphql-api/comment.api';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
@@ -79,10 +78,10 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   const { positionRequestId, setCurrentSection, positionRequestData, setPositionRequestData } = useWizardContext();
   const { getNodes } = useReactFlow();
 
-  const { data: commentData, isLoading: commentDataIsLoading } = useGetCommentsQuery({
-    record_id: positionRequestId ?? -1,
-    record_type: 'PositionRequest',
-  });
+  // const { data: commentData, isLoading: commentDataIsLoading } = useGetCommentsQuery({
+  //   record_id: positionRequestId ?? -1,
+  //   record_type: 'PositionRequest',
+  // });
 
   useEffect(() => {
     triggerGetJobProfile({
@@ -116,13 +115,15 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     },
   );
 
-  useEffect(() => {
-    // Fetch position request and needs review data when positionRequestId changes
-    // load comment if prevsiously entered
-    if (commentData && commentData.comments.length && !commentDataIsLoading) {
-      setComment(commentData.comments[0].text);
-    }
-  }, [positionRequestId, refetchPositionNeedsRivew]);
+  //  we don't need to load previously entered comment
+  // just show an empty box
+  // useEffect(() => {
+  //   // Fetch position request and needs review data when positionRequestId changes
+  //   // load comment if prevsiously entered
+  //   if (commentData && commentData.comments.length && !commentDataIsLoading) {
+  //     setComment(commentData.comments[0].text);
+  //   }
+  // }, [positionRequestId, refetchPositionNeedsRivew]);
 
   useEffect(() => {
     // Fetch position request and needs review data when positionRequestId changes
@@ -243,11 +244,15 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
         let png = '';
 
-        try {
-          png = await generatePNGBase64(getNodes);
-        } catch (error) {
-          console.error('Error generating PNG: ', error);
-        }
+        const isActionRequiredState = positionRequestData?.status == 'ACTION_REQUIRED';
+        // we don't need to re-submit org chart if we are in action required state
+
+        if (!isActionRequiredState)
+          try {
+            png = await generatePNGBase64(getNodes);
+          } catch (error) {
+            console.error('Error generating PNG: ', error);
+          }
 
         const result = await submitPositionRequest({
           id: positionRequestId,
@@ -381,28 +386,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   useEffect(() => {
     if (positionRequest) {
-      // console.log(
-      //   'positionRequest?.classification_id for getClassificationById : ',
-      //   positionRequest?.classification_id,
-      //   positionRequest,
-      // );
       const classification = originalProfileData?.jobProfile?.classifications?.[0].classification; //getClassificationById(positionRequest?.classification_id ?? '');
       if (!classification) return;
-      // console.log('classification: ', classification);
-
-      // no longer need to do this since org chart will now contain new position and all other relevant info
-      // let orgChartDataForPng = JSON.parse(JSON.stringify(positionRequest?.orgchart_json));
-      // orgChartDataForPng = updateSupervisorAndAddNewPositionNode(
-      //   orgChartDataForPng.edges,
-      //   orgChartDataForPng.nodes,
-      //   positionRequest?.additional_info?.excluded_mgr_position_number ?? '',
-      //   positionRequest?.reports_to_position_id,
-      //   '000000',
-      //   positionRequest?.title,
-      //   classification,
-      //   { id: positionRequest?.department_id, organization_id: '', name: '' },
-      // );
-      // setOrgChartDataForPng(autolayout(orgChartDataForPng));
 
       const orgChartDataForPng = positionRequest?.orgchart_json;
       setOrgChartDataForPng(orgChartDataForPng);

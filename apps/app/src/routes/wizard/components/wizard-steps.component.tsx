@@ -24,7 +24,13 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
   const [stepsDirection, setStepsDirection] = useState<'horizontal' | 'vertical'>('horizontal');
 
   // get requiresVerification from useWizardContext
-  const { requiresVerification } = useWizardContext();
+  const { requiresVerification, positionRequestData } = useWizardContext();
+
+  // if position request is in "action required" state, this means user is re-submitting the request
+  // in this case, disable the org chart step since they should not be able to change the reporting relationship
+  // since the position number was already created
+  // todo: once update api is available, allow users to make this change
+  const isActionRequiredState = positionRequestData?.status == 'ACTION_REQUIRED';
 
   const handleResize = () => {
     setScreenWidth(window.innerWidth);
@@ -93,23 +99,35 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
           current={current}
           items={[
             {
-              title:
-                current == 0 ? (
-                  <h2 className={current == 0 ? 'current' : ''}>Organization chart</h2>
-                ) : current != 0 ? (
-                  <span
-                    aria-label="Go to step 1 of the wizard - organization chart - select supervisor"
-                    tabIndex={0}
-                    role="button"
-                  >
-                    Organization chart
-                  </span>
-                ) : (
-                  'Organization chart'
-                ),
-              description: 'Choose the supervisor',
-              onClick: () => (current != 0 ? handleStepClick(0) : {}),
-              className: maxStepCompleted >= 0 && current != 0 ? 'clickable' : 'waiting',
+              title: (
+                <Tooltip
+                  title={
+                    isActionRequiredState
+                      ? "Reporting relationship can't be changed once position request has been submitted"
+                      : ''
+                  }
+                >
+                  {current == 0 ? (
+                    <h2 className={current == 0 ? 'current' : ''}>Organization chart</h2>
+                  ) : current != 0 ? (
+                    <span
+                      aria-label="Go to step 1 of the wizard - organization chart - select supervisor"
+                      tabIndex={0}
+                      role="button"
+                    >
+                      Organization chart
+                    </span>
+                  ) : (
+                    'Organization chart'
+                  )}
+                  <div className="ant-steps-item-description">Choose the supervisor</div>
+                </Tooltip>
+              ),
+              // description: 'Choose the supervisor',
+              onClick: () => (current != 0 && !isActionRequiredState ? handleStepClick(0) : {}),
+              className: `${maxStepCompleted >= 0 && current != 0 ? 'clickable' : 'waiting'} ${
+                isActionRequiredState ? 'no-click' : ''
+              }`,
             },
             {
               title: (

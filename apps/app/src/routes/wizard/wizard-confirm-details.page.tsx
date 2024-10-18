@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Button, Card, Col, Form, Input, Menu, Modal, Row, Typography } from 'antd';
+import { Button, Card, Col, Form, Input, Menu, Modal, Row, Tooltip, Typography } from 'antd';
 import { IsNotEmpty } from 'class-validator';
 import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useState } from 'react';
@@ -89,6 +89,12 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [isFormModified, setIsFormModified] = useState(false);
   const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
+
+  // if position request is in "action required" state, this means user is re-submitting the request
+  // in this case, disable the org chart step since they should not be able to change the reporting relationship
+  // since the position number was already created
+  // todo: once update api is available, allow users to make this change
+  const isActionRequiredState = positionRequestData?.status == 'ACTION_REQUIRED';
 
   const handleFormChange = () => {
     setIsFormModified(true);
@@ -463,13 +469,22 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           content={getMenuContent()}
           ariaLabel="Open position request menu"
         ></AccessiblePopoverMenu>,
-        <Button
-          onClick={() => showModal({ skipValidation: true, action: 'back' })}
-          key="back"
-          data-testid="back-button"
+        <Tooltip
+          title={
+            isActionRequiredState
+              ? "Reporting relationship can't be changed once position request has been submitted"
+              : ''
+          }
         >
-          Back
-        </Button>,
+          <Button
+            onClick={() => showModal({ skipValidation: true, action: 'back' })}
+            key="back"
+            data-testid="back-button"
+            disabled={isActionRequiredState}
+          >
+            Back
+          </Button>
+        </Tooltip>,
         <Button
           key="next"
           type="primary"
