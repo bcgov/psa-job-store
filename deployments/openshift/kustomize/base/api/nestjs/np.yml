@@ -5,7 +5,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      name: nestjs-app
+      name: api
   ingress:
     - {}
   policyTypes:

@@ -1,5 +1,11 @@
 # app
 
+## 0.14.2
+
+### Patch Changes
+
+- [#842](https://github.com/bcgov/psa-job-store/pull/842) [`4a32e1973b09e294bf0a304ad4fa4c412e3b7bc7`](https://github.com/bcgov/psa-job-store/commit/4a32e1973b09e294bf0a304ad4fa4c412e3b7bc7) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-920 Profiles have owner as null
+
 ## 0.14.1
 
 ### Patch Changes

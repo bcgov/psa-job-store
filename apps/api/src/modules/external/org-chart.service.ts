@@ -133,6 +133,14 @@ export class OrgChartService {
     const departments = await this.prisma.department.findMany({
       where: { id: { in: department_ids } },
       orderBy: [{ name: 'asc' }],
+      include: {
+        location: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     const ministryIds = new Set(departments.map((department) => department.organization_id));
@@ -140,9 +148,6 @@ export class OrgChartService {
       where: { id: { in: Array.from(ministryIds) } },
       select: { id: true, name: true },
     });
-
-    // console.log('departments: ', departments);
-    // console.log('ministries: ', ministries);
 
     return ministries.map((ministry) => {
       return {
@@ -155,6 +160,8 @@ export class OrgChartService {
             label: department.name,
             value: department.id,
             filterString: `${department.id} ${department.name}`,
+            location_id: department.location.id,
+            location_name: department.location.name,
           })),
       };
     });

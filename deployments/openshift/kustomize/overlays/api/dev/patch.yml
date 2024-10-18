@@ -1,6 +1,6 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-    name: nestjs-app
+    name: api
 spec:
   host: pjs-api.apps.silver.devops.gov.bc.ca
