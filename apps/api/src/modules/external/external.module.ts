@@ -73,7 +73,7 @@ import { PositionService } from './position.service';
         prisma: PrismaService,
       ) => {
         if (configService.get('USE_MOCKS') === 'true') {
-          return new MockCrmService(configService, httpService, prisma);
+          return new MockCrmService(configService);
         } else {
           return new CrmService(configService, httpService, prisma);
         }

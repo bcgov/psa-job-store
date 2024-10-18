@@ -1,18 +1,18 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as mockData from '../../../test/mock-crm-data.json';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { AppConfigDto } from '../../dtos/app-config.dto';
-import { PrismaService } from '../prisma/prisma.service';
 import { IncidentCreateUpdateInput } from './models/incident-create.input';
 
 @Injectable()
 export class MockCrmService {
-  constructor(
-    private readonly configService: ConfigService<AppConfigDto, true>,
-    private readonly httpService: HttpService,
-    private readonly prisma: PrismaService,
-  ) {}
+  private mockData: any;
+
+  constructor(private readonly configService: ConfigService<AppConfigDto, true>) {
+    const mockDataPath = join(__dirname, '../../../test/mock-crm-data.json');
+    this.mockData = JSON.parse(readFileSync(mockDataPath, 'utf8'));
+  }
 
   async syncIncidentStatus() {
     console.log('Mock syncIncidentStatus called');
@@ -20,12 +20,14 @@ export class MockCrmService {
   }
 
   async getAccountId(idir: string): Promise<number | null> {
-    return mockData.accounts.find((prof) => prof.idir === idir).id || -1;
+    const account = this.mockData.accounts.find((prof) => prof.idir === idir);
+    return account ? account.id : -1;
   }
 
   async getContactId(idir: string): Promise<number | null> {
     console.log('Mock getContactId called with idir:', idir);
-    return mockData.contacts.find((prof) => prof.idir === idir).id || -1;
+    const contact = this.mockData.contacts.find((prof) => prof.idir === idir);
+    return contact ? contact.id : -1;
   }
 
   async createIncident(data: IncidentCreateUpdateInput) {
