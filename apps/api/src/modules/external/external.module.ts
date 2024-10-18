@@ -1,6 +1,8 @@
-import { HttpModule } from '@nestjs/axios';
+import { HttpModule, HttpService } from '@nestjs/axios';
 import { Module, forwardRef } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import qs from 'qs';
+import { AppConfigDto } from '../../dtos/app-config.dto';
 import { KeycloakModule } from '../keycloak/keycloak.module';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { DepartmentResolver } from '../organization/department/department.resolver';
@@ -15,12 +17,14 @@ import { SearchService } from '../search/search.service';
 import { ClassificationResolver } from './classification.resolver';
 import { ClassificationService } from './classification.service';
 import { CrmService } from './crm.service';
+import { MockCrmService } from './crm.service.mock';
 import { LocationResolver } from './location.resolver';
 import { LocationService } from './location.service';
 import { OrgChartResolver } from './org-chart.resolver';
 import { OrgChartService } from './org-chart.service';
 import { PeoplesoftV2Service } from './peoplesoft-v2.service';
 import { PeoplesoftService } from './peoplesoft.service';
+import { MockPeoplesoftService } from './peoplesoft.service.mock';
 import { PositionResolver } from './position.resolver';
 import { PositionService } from './position.service';
 
@@ -45,8 +49,37 @@ import { PositionService } from './position.service';
     PrismaService,
     OrgChartResolver,
     OrgChartService,
-    PeoplesoftService,
-    CrmService,
+    {
+      provide: PeoplesoftService,
+      useFactory: (
+        configService: ConfigService<AppConfigDto, true>,
+        httpService: HttpService,
+        prisma: PrismaService,
+        searchService: SearchService,
+      ) => {
+        if (configService.get('USE_MOCKS') === 'true') {
+          return new MockPeoplesoftService(configService);
+        } else {
+          return new PeoplesoftService(configService, httpService, prisma, searchService);
+        }
+      },
+      inject: [ConfigService, HttpService, PrismaService, SearchService],
+    },
+    {
+      provide: CrmService,
+      useFactory: (
+        configService: ConfigService<AppConfigDto, true>,
+        httpService: HttpService,
+        prisma: PrismaService,
+      ) => {
+        if (configService.get('USE_MOCKS') === 'true') {
+          return new MockCrmService(configService);
+        } else {
+          return new CrmService(configService, httpService, prisma);
+        }
+      },
+      inject: [ConfigService, HttpService, PrismaService],
+    },
     LocationService,
     LocationResolver,
     PositionService,
@@ -54,6 +87,6 @@ import { PositionService } from './position.service';
     PeoplesoftV2Service,
     SearchService,
   ],
-  exports: [SearchService],
+  exports: [SearchService, PeoplesoftService, CrmService], // Export PeoplesoftService and CrmService
 })
 export class ExternalModule {}

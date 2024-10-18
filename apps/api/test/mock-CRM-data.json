@@ -1,0 +1,349 @@
+{
+  "employees": [
+    { "id": "00123456", "name": "Alice Johnson", "status": "Active" },
+    { "id": "00765432", "name": "Bob Smith", "status": "Active" },
+    { "id": "00234567", "name": "Charlie Brown", "status": "Active" },
+    { "id": "00876543", "name": "Dana White", "status": "Active" },
+    { "id": "00567891", "name": "Eve Black", "status": "Active" },
+    { "id": "00345678", "name": "Frank Green", "status": "Active" },
+    { "id": "00987654", "name": "Grace Lee", "status": "Active" },
+    { "id": "00654321", "name": "Hank Miller", "status": "Active" },
+    { "id": "00456789", "name": "Ivy Scott", "status": "Active" },
+    { "id": "00234589", "name": "Jack Wilson", "status": "Active" },
+    { "id": "00543218", "name": "Jane Doe", "status": "Active" },
+    { "id": "00812345", "name": "Sam Carter", "status": "Active" },
+    { "id": "00678901", "name": "Laura Wright", "status": "Active" },
+    { "id": "00329871", "name": "Nick Anderson", "status": "Active" },
+    { "id": "00432178", "name": "Olivia Brown", "status": "Active" },
+    { "id": "00219876", "name": "Mark Johnson", "status": "Active" },
+    { "id": "00912345", "name": "Emily Davis", "status": "Active" },
+    { "id": "00367812", "name": "Paul Martin", "status": "Active" },
+    { "id": "00789102", "name": "Ruby Taylor", "status": "Active" },
+    { "id": "00634528", "name": "Scott Miller", "status": "Active" },
+    { "id": "00256789", "name": "Sarah Evans", "status": "Active" },
+    { "id": "00823456", "name": "Liam Adams", "status": "Active" },
+    { "id": "00712389", "name": "Nina Wallace", "status": "Active" },
+    { "id": "00967823", "name": "Owen Roberts", "status": "Active" },
+    { "id": "00543278", "name": "Grace Thompson", "status": "Active" },
+    { "id": "00987623", "name": "Mia Harris", "status": "Active" },
+    { "id": "00654982", "name": "Ethan Cooper", "status": "Active" },
+    { "id": "00561234", "name": "Zara Lewis", "status": "Active" },
+    { "id": "00345612", "name": "Connor Price", "status": "Active" },
+    { "id": "00732109", "name": "Chloe Brooks", "status": "Active" },
+    { "id": "00210987", "name": "Isaac Phillips", "status": "Active" }
+  ],
+  "accounts": [
+    {
+      "idir": "AJOHNSON",
+      "name": "Alice Johnson",
+      "id": 4827
+    },
+    {
+      "idir": "BSMITH",
+      "name": "Bob Smith",
+      "id": 1934
+    },
+    {
+      "idir": "CBROWN",
+      "name": "Charlie Brown",
+      "id": 2541
+    },
+    {
+      "idir": "DWHITE",
+      "name": "Dana White",
+      "id": 8792
+    },
+    {
+      "idir": "EBLACK",
+      "name": "Eve Black",
+      "id": 6719
+    },
+    {
+      "idir": "FGREEN",
+      "name": "Frank Green",
+      "id": 5284
+    },
+    {
+      "idir": "GLEE",
+      "name": "Grace Lee",
+      "id": 1603
+    },
+    {
+      "idir": "HMILLER",
+      "name": "Hank Miller",
+      "id": 7231
+    },
+    {
+      "idir": "ISCOTT",
+      "name": "Ivy Scott",
+      "id": 4912
+    },
+    {
+      "idir": "JWILSON",
+      "name": "Jack Wilson",
+      "id": 8462
+    },
+    {
+      "idir": "JDOE",
+      "name": "Jane Doe",
+      "id": 2387
+    },
+    {
+      "idir": "SCARTER",
+      "name": "Sam Carter",
+      "id": 4916
+    },
+    {
+      "idir": "LWRIGHT",
+      "name": "Laura Wright",
+      "id": 7104
+    },
+    {
+      "idir": "NANDERSON",
+      "name": "Nick Anderson",
+      "id": 6029
+    },
+    {
+      "idir": "OBROWN",
+      "name": "Olivia Brown",
+      "id": 1759
+    },
+    {
+      "idir": "MJOHNSON",
+      "name": "Mark Johnson",
+      "id": 4823
+    },
+    {
+      "idir": "EDAVIS",
+      "name": "Emily Davis",
+      "id": 2081
+    },
+    {
+      "idir": "PMARTIN",
+      "name": "Paul Martin",
+      "id": 4790
+    },
+    {
+      "idir": "RTAYLOR",
+      "name": "Ruby Taylor",
+      "id": 9137
+    },
+    {
+      "idir": "SMILLER",
+      "name": "Scott Miller",
+      "id": 1429
+    },
+    {
+      "idir": "SEVANS",
+      "name": "Sarah Evans",
+      "id": 4052
+    },
+    {
+      "idir": "LADAMS",
+      "name": "Liam Adams",
+      "id": 1098
+    },
+    {
+      "idir": "NWALLACE",
+      "name": "Nina Wallace",
+      "id": 3289
+    },
+    {
+      "idir": "OROBERTS",
+      "name": "Owen Roberts",
+      "id": 5973
+    },
+    {
+      "idir": "GTHOMPSON",
+      "name": "Grace Thompson",
+      "id": 1049
+    },
+    {
+      "idir": "MHARRIS",
+      "name": "Mia Harris",
+      "id": 8190
+    },
+    {
+      "idir": "ECOOPER",
+      "name": "Ethan Cooper",
+      "id": 3716
+    },
+    {
+      "idir": "ZLEWIS",
+      "name": "Zara Lewis",
+      "id": 5328
+    },
+    {
+      "idir": "CPRICE",
+      "name": "Connor Price",
+      "id": 1509
+    },
+    {
+      "idir": "CBROOKS",
+      "name": "Chloe Brooks",
+      "id": 4182
+    },
+    {
+      "idir": "IPHILLIPS",
+      "name": "Isaac Phillips",
+      "id": 9451
+    }
+  ],
+  "contacts": [
+    {
+      "idir": "AJOHNSON",
+      "name": "Alice Johnson",
+      "id": 395827
+    },
+    {
+      "idir": "BSMITH",
+      "name": "Bob Smith",
+      "id": 428190
+    },
+    {
+      "idir": "CBROWN",
+      "name": "Charlie Brown",
+      "id": 152634
+    },
+    {
+      "idir": "DWHITE",
+      "name": "Dana White",
+      "id": 784256
+    },
+    {
+      "idir": "EBLACK",
+      "name": "Eve Black",
+      "id": 673918
+    },
+    {
+      "idir": "FGREEN",
+      "name": "Frank Green",
+      "id": 519284
+    },
+    {
+      "idir": "GLEE",
+      "name": "Grace Lee",
+      "id": 803647
+    },
+    {
+      "idir": "HMILLER",
+      "name": "Hank Miller",
+      "id": 294731
+    },
+    {
+      "idir": "ISCOTT",
+      "name": "Ivy Scott",
+      "id": 481239
+    },
+    {
+      "idir": "JWILSON",
+      "name": "Jack Wilson",
+      "id": 958462
+    },
+    {
+      "idir": "JDOE",
+      "name": "Jane Doe",
+      "id": 267481
+    },
+    {
+      "idir": "SCARTER",
+      "name": "Sam Carter",
+      "id": 731946
+    },
+    {
+      "idir": "LWRIGHT",
+      "name": "Laura Wright",
+      "id": 852014
+    },
+    {
+      "idir": "NANDERSON",
+      "name": "Nick Anderson",
+      "id": 610293
+    },
+    {
+      "idir": "OBROWN",
+      "name": "Olivia Brown",
+      "id": 175904
+    },
+    {
+      "idir": "MJOHNSON",
+      "name": "Mark Johnson",
+      "id": 489230
+    },
+    {
+      "idir": "EDAVIS",
+      "name": "Emily Davis",
+      "id": 204861
+    },
+    {
+      "idir": "PMARTIN",
+      "name": "Paul Martin",
+      "id": 347920
+    },
+    {
+      "idir": "RTAYLOR",
+      "name": "Ruby Taylor",
+      "id": 952137
+    },
+    {
+      "idir": "SMILLER",
+      "name": "Scott Miller",
+      "id": 618429
+    },
+    {
+      "idir": "SEVANS",
+      "name": "Sarah Evans",
+      "id": 804521
+    },
+    {
+      "idir": "LADAMS",
+      "name": "Liam Adams",
+      "id": 120987
+    },
+    {
+      "idir": "NWALLACE",
+      "name": "Nina Wallace",
+      "id": 453829
+    },
+    {
+      "idir": "OROBERTS",
+      "name": "Owen Roberts",
+      "id": 596731
+    },
+    {
+      "idir": "GTHOMPSON",
+      "name": "Grace Thompson",
+      "id": 310498
+    },
+    {
+      "idir": "MHARRIS",
+      "name": "Mia Harris",
+      "id": 728190
+    },
+    {
+      "idir": "ECOOPER",
+      "name": "Ethan Cooper",
+      "id": 493716
+    },
+    {
+      "idir": "ZLEWIS",
+      "name": "Zara Lewis",
+      "id": 105328
+    },
+    {
+      "idir": "CPRICE",
+      "name": "Connor Price",
+      "id": 614509
+    },
+    {
+      "idir": "CBROOKS",
+      "name": "Chloe Brooks",
+      "id": 931842
+    },
+    {
+      "idir": "IPHILLIPS",
+      "name": "Isaac Phillips",
+      "id": 289451
+    }
+  ]
+}
