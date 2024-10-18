@@ -1,23 +1,23 @@
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: nestjs-app
+  name: api
 spec:
-  triggers:
-      - type: ConfigChange
-      - imageChangeParams:
-          automatic: true
-          containerNames:
-            - nestjs-app
-          from:
-            kind: ImageStreamTag
-            name: api:latest
-            namespace: f3c07a-tools
-        type: ImageChange
+  selector:
+    matchLabels:
+      name: api
+  template:
+    metadata:
+      labels:
+        name: api
+    spec:
+      containers:
+      - name: api
+        image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/api:latest
 ---         
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-    name: nestjs-app
+    name: api
 spec:
   host: jobstore-api.apps.silver.devops.gov.bc.ca

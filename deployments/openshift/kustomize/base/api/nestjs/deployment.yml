@@ -41,11 +41,11 @@ spec:
             name: secrets
         resources:
           requests:
-            cpu: 100m 
-            memory: 500Mi 
-          limits:
             cpu: 300m 
-            memory: 750Mi
+            memory: 600Mi 
+          limits:
+            cpu: 1000m 
+            memory: 1000Mi
       - name: filebeat
         image: docker.elastic.co/beats/filebeat:7.10.0
         args: ["-c", "/usr/share/filebeat/filebeat.yml", "-e"]
