@@ -10,6 +10,12 @@ export class OrgChartDepartmentFilterItemChild {
 
   @Field(() => String)
   filterString: string;
+
+  @Field(() => String)
+  location_id: string;
+
+  @Field(() => String)
+  location_name: string;
 }
 
 @ObjectType()

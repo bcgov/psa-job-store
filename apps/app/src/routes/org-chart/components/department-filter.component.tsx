@@ -7,6 +7,8 @@ const { Text } = Typography;
 
 interface DepartmentFilterProps {
   setDepartmentId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSelect?: (value: any) => void;
   departmentId: string | null | undefined;
   loading?: boolean;
   // focusable?: boolean;
@@ -16,8 +18,8 @@ export const DepartmentFilter = ({
   setDepartmentId,
   departmentId,
   loading, // eslint-disable-next-line @typescript-eslint/no-unused-vars
-} // focusable = true,
-: DepartmentFilterProps) => {
+  onSelect, // focusable = true,
+}: DepartmentFilterProps) => {
   const { data: filterData, isFetching: filterDataIsFetching } = useGetOrgChartDepartmentFilterQuery();
   const [treeData, setTreeData] = useState<React.ComponentProps<typeof TreeSelect>['treeData']>([]);
 
@@ -28,25 +30,29 @@ export const DepartmentFilter = ({
       label: ministry.label,
       value: ministry.value,
       selectable: ministry.selectable,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      children: ministry.children.map(({ label, value, filterString }: Record<string, any>) => ({
-        // label: (
-        //   <span title={`${label} (${value})`}>
-        //     {label}{' '}
-        //     <Text style={{ whiteSpace: 'nowrap' }} type="secondary">
-        //       ({value})
-        //     </Text>
-        //   </span>
-        // ),
-        value: value,
-        filterString: filterString,
-        metadata: {
-          filterString: filterString,
-          label: label,
+      children: ministry.children.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ({ label, value, filterString, location_id, location_name }: Record<string, any>) => ({
+          // label: (
+          //   <span title={`${label} (${value})`}>
+          //     {label}{' '}
+          //     <Text style={{ whiteSpace: 'nowrap' }} type="secondary">
+          //       ({value})
+          //     </Text>
+          //   </span>
+          // ),
           value: value,
-          ministry: false,
-        },
-      })),
+          filterString: filterString,
+          metadata: {
+            filterString: filterString,
+            label: label,
+            value: value,
+            location_id: location_id,
+            location_name: location_name,
+            ministry: false,
+          },
+        }),
+      ),
       metadata: {
         label: ministry.label,
         value: ministry.value,
@@ -56,7 +62,18 @@ export const DepartmentFilter = ({
     }));
 
     setTreeData(treeData);
-  }, [filterData]);
+
+    // Call onSelect with the initially selected value
+    if (departmentId && onSelect && treeData) {
+      const selectedNode = treeData
+        .flatMap((ministry) => ministry.children)
+        .find((child) => child.value === departmentId);
+      if (selectedNode) {
+        onSelect(selectedNode);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterData, departmentId]);
 
   // console.log('original treeData', treeData);
   // console.log('departmentId', departmentId);
@@ -97,7 +114,7 @@ export const DepartmentFilter = ({
         allowClear
         width={'100%'}
         onSelect={(value) => {
-          // console.log('onSelect:', value);
+          onSelect?.(value);
           if (value?.metadata?.value) setDepartmentId(value.metadata.value.toString());
         }}
         renderNode={(node) => {
