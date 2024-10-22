@@ -73,7 +73,7 @@ export const DepartmentFilter = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterData]);
+  }, [filterData, departmentId]);
 
   // console.log('original treeData', treeData);
   // console.log('departmentId', departmentId);
