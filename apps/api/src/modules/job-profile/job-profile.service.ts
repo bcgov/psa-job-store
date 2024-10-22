@@ -71,7 +71,11 @@ export class JobProfileService {
                         NOT: { employee_group_id: 'GEU' },
                       },
                     }
-                  : undefined,
+                  : {
+                      classification: {
+                        NOT: { employee_group_id: 'OEX' },
+                      },
+                    },
               }
             : undefined,
       },
@@ -708,7 +712,11 @@ export class JobProfileService {
                         NOT: { employee_group_id: 'GEU' },
                       },
                     }
-                  : undefined,
+                  : {
+                      classification: {
+                        NOT: { employee_group_id: 'OEX' },
+                      },
+                    },
               }
             : undefined,
       },
