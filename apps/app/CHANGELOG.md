@@ -1,5 +1,13 @@
 # app
 
+## 0.14.3
+
+### Patch Changes
+
+- [#862](https://github.com/bcgov/psa-job-store/pull/862) [`0333c31f45d018d9861921984558d4396df1c735`](https://github.com/bcgov/psa-job-store/commit/0333c31f45d018d9861921984558d4396df1c735) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-946 Re-submission org chart is incorrect
+
+- [#862](https://github.com/bcgov/psa-job-store/pull/862) [`ce76d3bc6699c63987019e54b2b742c73341a15c`](https://github.com/bcgov/psa-job-store/commit/ce76d3bc6699c63987019e54b2b742c73341a15c) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-947 Edge case - changing org chart structure when re-submitting
+
 ## 0.14.2
 
 ### Patch Changes
