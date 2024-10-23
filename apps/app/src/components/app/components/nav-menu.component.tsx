@@ -368,6 +368,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
       vertical
       style={{ paddingTop: 0, width: '100%' }}
       className={`${collapsed ? 'collapsed' : 'expanded'} jobstore-side-menu`}
+      data-testid="menu-options"
     >
       {/* {userCanAccess(auth.user, ['hiring-manager', 'total-compensation']) && <CreateButton collapsed={collapsed} />} */}
       <Menu

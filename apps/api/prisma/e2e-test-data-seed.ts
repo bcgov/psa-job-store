@@ -23,6 +23,21 @@ async function seed() {
     create: {
       id: TEST_USER_ID,
       name: 'xxxx',
+      metadata: {
+        crm: {
+          account_id: null,
+          contact_id: 231166,
+        },
+        org_chart: {
+          department_ids: ['112-0072'],
+        },
+        peoplesoft: {
+          employee_id: '188146',
+          position_id: '00132136',
+          department_id: '112-0072',
+          organization_id: 'BC112',
+        },
+      },
     },
     update: {
       name: 'xxxx',
@@ -2634,6 +2649,14 @@ async function seed() {
       EFF_STATUS: 'Active',
       EFFDT: '2024-01-01',
     },
+    {
+      BUSINESS_UNIT: 'BC112',
+      SETID: 'ST113',
+      DESCRSHORT: 'CITZ',
+      DESCR: "Citizens' Services",
+      EFF_STATUS: 'Active',
+      EFFDT: '2024-01-01',
+    },
   ];
 
   for await (const row of organizations) {
@@ -2987,6 +3010,14 @@ async function seed() {
         updated_at: new Date(),
         classification_employee_group_id: 'GEU',
         classification_peoplesoft_id: 'BCSET',
+        additional_info: {
+          branch: 'branch1',
+          division: 'division1',
+          department_id: '019-1960',
+          work_location_id: 'V8V4W803',
+          work_location_name: '3-835 Humboldt St.',
+          excluded_mgr_position_number: '00054971',
+        },
       },
       {
         crm_id: 54322,
@@ -3399,6 +3430,14 @@ async function seed() {
         updated_at: new Date(),
         classification_employee_group_id: 'GEU',
         classification_peoplesoft_id: 'BCSET',
+        additional_info: {
+          branch: 'branch2',
+          division: 'division2',
+          department_id: '039-7025',
+          work_location_id: 'V8W1E302',
+          work_location_name: '2nd-777 BROUGHTON',
+          excluded_mgr_position_number: '00129934',
+        },
       },
       {
         crm_id: 54321,
@@ -3797,6 +3836,14 @@ async function seed() {
         updated_at: new Date(),
         classification_employee_group_id: 'GEU',
         classification_peoplesoft_id: 'BCSET',
+        additional_info: {
+          branch: 'branch3',
+          division: 'division3',
+          department_id: '004-0042',
+          work_location_id: 'V8W9V1',
+          work_location_name: '049-617 GOVERNMENT ST',
+          excluded_mgr_position_number: '00129934',
+        },
       },
       {
         crm_id: 67890,
@@ -4195,6 +4242,14 @@ async function seed() {
         updated_at: new Date(),
         classification_employee_group_id: 'GEU',
         classification_peoplesoft_id: 'BCSET',
+        additional_info: {
+          branch: 'branch4',
+          division: 'division4',
+          department_id: '039-3961',
+          work_location_id: 'V5G3H302',
+          work_location_name: '100 -3705 Willingdon Avenue',
+          excluded_mgr_position_number: '00125168',
+        },
       },
     ],
   });

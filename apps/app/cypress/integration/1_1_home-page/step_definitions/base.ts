@@ -22,8 +22,8 @@ When('the user should see correct counts for position requests', () => {
   cy.get('[data-testid="completed-positions"]').should('contain', '1');
 });
 
-When('the user should see create new position button', () => {
-  cy.get('[data-testid="create-new-position-btn-collapsed"]').should('be.visible');
+When('the user should see create new button', () => {
+  cy.get('[data-testid="create-new-btn"]').should('be.visible');
 });
 
 When('the user should see other menu options', () => {

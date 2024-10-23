@@ -24,7 +24,7 @@ async function startServer() {
       session_state: 'xxx', // Session state
       scope: 'xxx', // Scopes
       sid: 'xxxx', // Session ID
-      idir_user_guid: '6405580ec713411db9c66bfab4f512cd', // User GUID
+      idir_user_guid: '88bd8bb6c4494c138204d91539f548d4', // User GUID
       client_roles: ['hiring-manager'],
       identity_provider: 'xxx', // Identity provider
       idir_username: 'test', // Username
