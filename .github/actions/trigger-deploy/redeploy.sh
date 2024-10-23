@@ -13,5 +13,5 @@ NAMESPACE="f3c07a-$ENVIRONMENT"
 oc login $OPENSHIFT_SERVER --token=$TOKEN --insecure-skip-tls-verify=true
 
 for PROJECT in $(echo "$PROJECTS" | jq -r '.[]'); do
-    oc rollout restart deployment/$PROJECT -n $NAMESPACE
+    oc rollout restart deployment/$PROJECT
 done
