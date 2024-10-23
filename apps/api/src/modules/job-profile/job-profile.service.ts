@@ -68,16 +68,10 @@ export class JobProfileService {
                 some: excludedDepartment
                   ? {
                       classification: {
-                        employee_group_id: 'OEX',
+                        NOT: { employee_group_id: 'GEU' },
                       },
                     }
-                  : {
-                      classification: {
-                        NOT: {
-                          employee_group_id: 'OEX',
-                        },
-                      },
-                    },
+                  : undefined,
               }
             : undefined,
       },
@@ -92,22 +86,6 @@ export class JobProfileService {
         updated_by: true,
         behavioural_competencies: true,
         classifications: {
-          where:
-            excludedDepartment !== undefined
-              ? excludedDepartment
-                ? {
-                    classification: {
-                      employee_group_id: 'OEX',
-                    },
-                  }
-                : {
-                    classification: {
-                      NOT: {
-                        employee_group_id: 'OEX',
-                      },
-                    },
-                  }
-              : undefined, // include all classifications if excludedDepartment is undefined
           include: {
             classification: true,
           },
@@ -727,16 +705,10 @@ export class JobProfileService {
                 some: excludedDepartment
                   ? {
                       classification: {
-                        employee_group_id: 'OEX',
+                        NOT: { employee_group_id: 'GEU' },
                       },
                     }
-                  : {
-                      classification: {
-                        NOT: {
-                          employee_group_id: 'OEX',
-                        },
-                      },
-                    }, // include all classifications if excludedDepartment is false
+                  : undefined,
               }
             : undefined,
       },

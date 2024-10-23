@@ -77,6 +77,7 @@ export const AppHeader = () => {
         />
       )}
       <Header className={styles.appHeader}>
+        <span dangerouslySetInnerHTML={{ __html: `<!-- reduced dept version -->` }} />
         <Row align="middle" justify="space-between" style={{ width: '100%' }} role="navigation">
           <Col className={styles.left}>
             <Link to="/" style={{ display: 'flex', alignItems: 'center' }} aria-label="Navigate to homepage">
