@@ -1,0 +1,9 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PGUpgrade
+metadata:
+  name: api-postgres-alpha-upgrade
+spec:
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-upgrade:ubi8-5.7.0-0
+  postgresClusterName: api-postgres-alpha
+  fromPostgresVersion: 15
+  toPostgresVersion: 16
