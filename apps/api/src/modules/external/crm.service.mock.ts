@@ -10,7 +10,7 @@ export class MockCrmService {
   private mockData: any;
 
   constructor(private readonly configService: ConfigService<AppConfigDto, true>) {
-    const mockDataPath = join(__dirname, '../../../test/mock-crm-data.json');
+    const mockDataPath = join(process.cwd(), 'test/mock-crm-data.json');
     this.mockData = JSON.parse(readFileSync(mockDataPath, 'utf8'));
   }
 

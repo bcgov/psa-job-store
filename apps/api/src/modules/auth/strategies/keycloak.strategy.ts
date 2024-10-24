@@ -30,13 +30,25 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
     try {
       let data;
       if (process.env.E2E_TESTING === 'true') {
-        data = verifyJwt(payload, process.env.E2E_JWT_SECRET, {
-          complete: false,
-          ignoreExpiration: false,
-          algorithms: ['HS256'],
-          audience: 'e2e-testing',
-          issuer: 'e2e-testing',
-        }) as JwtPayload;
+        try {
+          data = verifyJwt(payload, process.env.E2E_JWT_SECRET, {
+            complete: false,
+            ignoreExpiration: false,
+            algorithms: ['HS256'],
+            audience: 'e2e-testing',
+            issuer: 'e2e-testing',
+          }) as JwtPayload;
+        } catch (error) {
+          // support both e2e token and a regular keycloak token
+          // this falls back to trying to verify regular keycloak token
+          data = verifyJwt(payload, publicKey, {
+            complete: false,
+            ignoreExpiration: false,
+            audience: expectedAudiences,
+            issuer: expectedIssuer,
+            algorithms: ['RS256'],
+          }) as JwtPayload;
+        }
       } else {
         data = verifyJwt(payload, publicKey, {
           complete: false,
