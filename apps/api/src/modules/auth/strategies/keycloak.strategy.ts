@@ -14,7 +14,7 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
     // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'KeycloakStrategy.validate');
     // Check if JWT verification should be skipped - this is for e2e tests
     // todo: make this work with validation
-    // if (process.env.TEST_ENV === 'true') {
+    // if (process.env.TEST_ENV === 'true' && process.env.NODE_ENV === 'development') {
     //   // Assuming payload is a valid JWT, decode it without verification
     //   const decoded = decodeJwt(payload) as JwtPayload;
     //   // console.log('decoded: ', decoded);
@@ -28,13 +28,36 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
     const expectedIssuer = this.authService.getExpectedKeyCloakIssuer();
 
     try {
-      const data = verifyJwt(payload, publicKey, {
-        complete: false,
-        ignoreExpiration: false,
-        audience: expectedAudiences,
-        issuer: expectedIssuer,
-        algorithms: ['RS256'],
-      }) as JwtPayload;
+      let data;
+      if (process.env.E2E_TESTING === 'true') {
+        try {
+          data = verifyJwt(payload, process.env.E2E_JWT_SECRET, {
+            complete: false,
+            ignoreExpiration: false,
+            algorithms: ['HS256'],
+            audience: 'e2e-testing',
+            issuer: 'e2e-testing',
+          }) as JwtPayload;
+        } catch (error) {
+          // support both e2e token and a regular keycloak token
+          // this falls back to trying to verify regular keycloak token
+          data = verifyJwt(payload, publicKey, {
+            complete: false,
+            ignoreExpiration: false,
+            audience: expectedAudiences,
+            issuer: expectedIssuer,
+            algorithms: ['RS256'],
+          }) as JwtPayload;
+        }
+      } else {
+        data = verifyJwt(payload, publicKey, {
+          complete: false,
+          ignoreExpiration: false,
+          audience: expectedAudiences,
+          issuer: expectedIssuer,
+          algorithms: ['RS256'],
+        }) as JwtPayload;
+      }
       const user = await this.authService.getUserFromPayload(data);
       done(null, user);
       // console.log(new Date().toISOString().slice(11, -1) + ' ' + 'KeycloakStrategy.validate done');

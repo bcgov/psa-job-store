@@ -11,7 +11,7 @@ export class MockPeoplesoftService {
   private mockData: any;
 
   constructor(private readonly configService: ConfigService<AppConfigDto, true>) {
-    const mockDataPath = join(__dirname, '../../../test/mock-peoplesoft-data.json');
+    const mockDataPath = join(process.cwd(), 'test/mock-peoplesoft-data.json');
     this.mockData = JSON.parse(readFileSync(mockDataPath, 'utf8'));
   }
 

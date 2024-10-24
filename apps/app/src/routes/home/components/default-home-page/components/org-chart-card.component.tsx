@@ -61,7 +61,6 @@ export const OrgChartCard = () => {
           // tabIndex={-1}
         >
           <OrgChart
-            data-testid="org-chart"
             type={OrgChartType.DYNAMIC}
             context={OrgChartContext.DEFAULT}
             setDepartmentId={setDepartmentId}

@@ -52,7 +52,7 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
   }, [edges, nodes, type]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }} data-testid="org-chart">
       <Row gutter={[8, 8]} justify="space-between" style={{ margin: '0.5rem 1rem' }}>
         <Col xs={24} md={12}>
           <DownloadButton />

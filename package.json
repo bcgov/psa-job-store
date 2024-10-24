@@ -13,6 +13,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@nestjs/jwt": "^10.2.0",
     "react-accessible-treeview": "^2.9.1"
   },
   "devDependencies": {

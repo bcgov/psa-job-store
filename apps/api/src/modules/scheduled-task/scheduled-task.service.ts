@@ -59,6 +59,9 @@ export class ScheduledTaskService {
 
   @Cron('*/5 * * * * *')
   async syncPeoplesoftData() {
+    if (process.env.E2E_TESTING === 'true') {
+      return;
+    }
     const needsUpdate = await this.isMetadataOutdated(ScheduledTask.PeoplesoftSync);
 
     if (needsUpdate === true) {
@@ -147,6 +150,9 @@ export class ScheduledTaskService {
 
   @Cron('*/5 * * * * *')
   async syncUsers() {
+    if (process.env.E2E_TESTING === 'true') {
+      return;
+    }
     const needsUpdate = await this.isMetadataOutdated(ScheduledTask.UserSync);
 
     if (needsUpdate === true) {

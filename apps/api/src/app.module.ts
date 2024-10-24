@@ -10,6 +10,7 @@ import { AppResolver } from './app.resolver';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { AppLogModule } from './modules/app-log/app-log.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { E2EAuthModule } from './modules/auth/e2e-auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
@@ -77,6 +78,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     KeycloakModule,
     SettingsModule,
     OrganizationModule,
+    E2EAuthModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
