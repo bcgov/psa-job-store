@@ -62,6 +62,7 @@ type ColumnTypes = {
   defaultSortOrder?: SortOrder;
   render?: (text: any, record: any) => React.ReactNode;
   align?: 'left' | 'center' | 'right'; // AlignType is typically one of these string literals
+  fixed?: boolean | 'right' | 'left';
 };
 
 // Declare the MyPositionsTable component with TypeScript
@@ -293,6 +294,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     {
       title: <SettingOutlined />,
       align: 'center',
+      fixed: 'right',
       key: 'action',
       render: (_text: any, record: any) => (
         // <Popover content={getMenuContent(record)} trigger="click" placement="bottomRight">
