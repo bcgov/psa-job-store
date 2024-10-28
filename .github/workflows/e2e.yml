@@ -1,0 +1,43 @@
+name: E2E Tests
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1' # Match your engine specification
+          cache: 'npm'
+
+      # Install only workspace root dependencies
+      - name: Install Root Dependencies
+        run: npm ci --ignore-scripts
+        env:
+          # Skip installing dependencies of other workspaces
+          HUSKY: 0
+
+      # Install only cypress app dependencies
+      - name: Install Cypress Dependencies
+        run: npm ci
+        working-directory: ./apps/cypress
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./apps/cypress
+          browser: chrome
+          headless: true
+          # Skip installing as we've already done it
+          install: false
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+          CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.VITE_KEYCLOAK_REALM_URL }}
+          CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.VITE_KEYCLOAK_CLIENT_ID }}
+          VITE_E2E_AUTH_SECRET: ${{ secrets.VITE_E2E_AUTH_SECRET }}
