@@ -52,6 +52,7 @@ export interface GetPositionRequestResponseContent {
     email?: string;
   };
   classification?: {
+    employee_group_id?: string;
     code?: string;
     id?: string;
   };
@@ -313,6 +314,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                     email
                   }
                   classification {
+                    employee_group_id
                     code
                     id
                   }

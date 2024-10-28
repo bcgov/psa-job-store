@@ -1547,7 +1547,11 @@ export class PositionRequestApiService {
               <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
               <li>What is the pay list/department ID number?    ${paylist_department.id}</li>
               <li>What is the expected classification level?    ${classification.code} (${classification.name})</li>
-              <li>Is this position included or excluded?    Included</li>
+              <li>Is this position included or excluded?    ${
+                classification.employee_group_id === 'MGT' || classification.employee_group_id === 'OEX'
+                  ? 'Excluded'
+                  : 'Included'
+              }</li>
               <li>Is the position full-time or part-time?    Full-time</li>
               <li>What is the job title?    ${positionRequest.title}</li>
               <li>Is this a regular or temporary position?    Regular</li>
@@ -1628,63 +1632,40 @@ export class PositionRequestApiService {
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
     const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
 
-    const classification = await this.prisma.classification.findUnique({
-      where: {
-        id_employee_group_id_peoplesoft_id: {
-          id: positionRequest.classification_id,
-          employee_group_id: positionRequest.classification_employee_group_id,
-          peoplesoft_id: positionRequest.classification_peoplesoft_id,
-        },
-      },
-    });
     const paylist_department = await this.prisma.department.findUnique({
       select: { id: true, organization: { select: { id: true } } },
       where: { id: additionalInfo.department_id },
     });
 
-    let data: PositionCreateInput;
+    const employees = (
+      await this.peoplesoftService.getEmployeesForPositions([additionalInfo.excluded_mgr_position_number])
+    ).get(additionalInfo.excluded_mgr_position_number);
+    const employeeId = employees.length > 0 ? employees[0].id : null;
 
-    switch (classification.employee_group_id) {
-      case 'GEU':
-      case 'OEX':
-      case 'PEA':
-      case 'LGL': {
-        const employees = (
-          await this.peoplesoftService.getEmployeesForPositions([additionalInfo.excluded_mgr_position_number])
-        ).get(additionalInfo.excluded_mgr_position_number);
-        const employeeId = employees.length > 0 ? employees[0].id : null;
+    const data = {
+      BUSINESS_UNIT: paylist_department.organization.id,
+      DEPTID: paylist_department.id,
+      JOBCODE: positionRequest.classification_id,
+      REPORTS_TO: positionRequest.reports_to_position_id,
+      POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
+      DESCR: positionRequest.title,
+      REG_TEMP: PositionDuration.Regular,
+      FULL_PART_TIME: PositionType.FullTime,
+      TGB_E_CLASS: `P${(positionRequest.profile_json as Record<string, any>).number}`,
+      TGB_APPRV_MGR: employeeId,
+    };
 
-        data = {
-          BUSINESS_UNIT: paylist_department.organization.id,
-          DEPTID: paylist_department.id,
-          JOBCODE: positionRequest.classification_id,
-          REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
-          DESCR: positionRequest.title,
-          REG_TEMP: PositionDuration.Regular,
-          FULL_PART_TIME: PositionType.FullTime,
-          TGB_E_CLASS: `P${(positionRequest.profile_json as Record<string, any>).number}`,
-          TGB_APPRV_MGR: employeeId,
-        };
-
-        break;
+    let position;
+    try {
+      position = await this.peoplesoftService.createPosition(data as PositionCreateInput);
+      if (position.positionNbr == null || position.positionNbr === '') {
+        this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage ?? '');
+        throw AlexandriaError('Failed to create position in PeopleSoft');
       }
-      default: {
-        data = {
-          BUSINESS_UNIT: paylist_department.organization.id,
-          DEPTID: paylist_department.id,
-          JOBCODE: positionRequest.classification_id,
-          REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
-          DESCR: positionRequest.title,
-          REG_TEMP: PositionDuration.Regular,
-          FULL_PART_TIME: PositionType.FullTime,
-        };
-        break;
-      }
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to create position in PeopleSoft');
     }
-
-    const position = await this.peoplesoftService.createPosition(data);
 
     return [position, positionRequestNeedsReview.result];
   }
