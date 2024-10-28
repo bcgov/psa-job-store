@@ -355,3 +355,34 @@ husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bi
 - Reinstall GitHub desktop
 - Check that system PATH variable contains `C:\Program Files\Git\bin` (path containing sh.exe) AND that it's first in the list
 ```
+
+## Upgrade psql on CrunchyDB
+
+Modify pgupgrade to include your desired upgrade then run:
+
+`oc apply -f base\crunchy\pgupgrade.yml`
+
+annotate cluster to enable the upgrade to proceed:
+
+`oc annotate postgrescluster api-postgres-clone postgres-operator.crunchydata.com/allow-upgrade="api-postgres-clone-upgrade"`
+
+Shutdown the cluster with the flag in `postgrescluster.yml`:
+
+```
+spec:
+  shutdown: true
+```
+
+`oc apply -k overlays/crunchy/test`
+
+Monitor for upgrade:
+
+`oc describe pgupgrade.postgres-operator.crunchydata.com/api-postgres-clone-upgrade`
+
+Cleanup. Remove the pgupgrade object:
+
+`oc delete -f base\crunchy\pgupgrade.yml`
+
+Remove annotation:
+
+`oc annotate postgrescluster api-postgres-clone postgres-operator.crunchydata.com/allow-upgrade-`

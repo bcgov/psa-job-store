@@ -76,4 +76,7 @@ export class AppConfigDto {
   @IsNotEmpty()
   @IsString()
   PEOPLESOFT_PASSWORD: string;
+
+  @IsString()
+  USE_MOCKS: string;
 }
