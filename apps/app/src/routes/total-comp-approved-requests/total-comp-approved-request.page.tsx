@@ -189,7 +189,14 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'includedOrExcluded',
       label: 'Included or excluded?',
-      children: <div>Included</div>,
+      children: (
+        <div>
+          {data?.positionRequest?.classification?.employee_group_id === 'MGT' ||
+          data?.positionRequest?.classification?.employee_group_id === 'OEX'
+            ? 'Excluded'
+            : 'Included'}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
