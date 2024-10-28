@@ -7,8 +7,7 @@
     "build": "tsc && vite build",
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "test-e2e": "node cypress/setupOAuth2Server.cjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
@@ -59,9 +58,6 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@badeball/cypress-cucumber-preprocessor": "^19.0.1",
-    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.0",
-    "@cypress/webpack-preprocessor": "^6.0.0",
     "@svgr/plugin-jsx": "^8.1.0",
     "@svgr/plugin-svgo": "^8.1.0",
     "@testing-library/jest-dom": "^6.1.4",
@@ -75,7 +71,6 @@
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
-    "cypress": "^13.15.0",
     "eslint": "^8.53.0",
     "eslint-plugin-jest-dom": "^5.1.0",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -95,9 +90,5 @@
   },
   "engines": {
     "node": ">=20.11.1 <21.0.0"
-  },
-  "cypress-cucumber-preprocessor": {
-    "nonGlobalStepDefinitions": true,
-    "step_definitions": "cypress/integration/**/*.ts"
   }
 }
