@@ -15,19 +15,27 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.1' # Match your engine specification
+          node-version: '20.11.1'
           cache: 'npm'
+
+      # Cache Cypress binary
+      - name: Cache Cypress Binary
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-cypress-${{ hashFiles('package-lock.json') }}
 
       # Install only workspace root dependencies
       - name: Install Root Dependencies
         run: npm ci --ignore-scripts
         env:
-          # Skip installing dependencies of other workspaces
           HUSKY: 0
 
-      # Install only cypress app dependencies
+      # Install cypress app dependencies and binary
       - name: Install Cypress Dependencies
-        run: npm ci --ignore-scripts
+        run: |
+          npm ci
+          npx cypress install
         working-directory: ./apps/jobstore-cypress
         env:
           HUSKY: 0
@@ -38,7 +46,6 @@ jobs:
           working-directory: ./apps/jobstore-cypress
           browser: chrome
           headless: true
-          # Skip installing as we've already done it
           install: false
         env:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
