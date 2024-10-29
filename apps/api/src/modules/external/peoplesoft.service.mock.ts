@@ -40,7 +40,7 @@ export class MockPeoplesoftService {
     const employeeMap: Map<string, Employee[]> = new Map();
     positions.forEach((position) => {
       const mockEmployee = this.mockData.employees.find((emp) => {
-        emp.id == position;
+        return emp.id == position;
       });
       employeeMap.set(position, [mockEmployee]);
     });

@@ -23,18 +23,19 @@ async function seed() {
     create: {
       id: TEST_USER_ID,
       name: 'xxxx',
+      roles: ['hiring-manager'],
       metadata: {
         crm: {
           account_id: null,
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0072'],
+          department_ids: ['112-0074'],
         },
         peoplesoft: {
           employee_id: '188146',
           position_id: '00132136',
-          department_id: '112-0072',
+          department_id: '112-0074',
           organization_id: 'BC112',
         },
       },
@@ -2724,7 +2725,7 @@ async function seed() {
   await prisma.department.createMany({
     data: [
       {
-        id: '112-0072',
+        id: '112-0074',
         location_id: 'LOC01', // Ensure these IDs match existing records in your database
         organization_id: 'BC000',
         peoplesoft_id: 'PSFT04',
@@ -2808,7 +2809,7 @@ async function seed() {
         crm_assigned_to_account_id: 67890,
         step: 2,
         reports_to_position_id: '00121521',
-        department_id: '112-0072',
+        department_id: '112-0074',
         parent_job_profile_id: profile212.id,
         parent_job_profile_version: 1,
         crm_json: null,
@@ -3024,7 +3025,7 @@ async function seed() {
         crm_assigned_to_account_id: 98765,
         step: 4,
         reports_to_position_id: '00121521',
-        department_id: '112-0072',
+        department_id: '112-0074',
         parent_job_profile_id: profile200.id,
         parent_job_profile_version: 1,
         crm_json: null,
