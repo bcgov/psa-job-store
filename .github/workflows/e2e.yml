@@ -62,7 +62,13 @@ jobs:
           browser: chrome
           headless: true
           install: false
-          config: "chromeWebSecurity=false,browser.args=['--disable-dev-shm-usage']"
+          config: >-
+            {
+              "chromeWebSecurity": false,
+              "browser": { "args": ["--disable-dev-shm-usage"] },
+              "experimentalMemoryManagement": true,
+              "numTestsKeptInMemory": 0
+            }
         env:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
           CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
