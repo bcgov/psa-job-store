@@ -49,6 +49,7 @@ jobs:
           install: false
         env:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-          CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.VITE_KEYCLOAK_REALM_URL }}
-          CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.VITE_KEYCLOAK_CLIENT_ID }}
-          VITE_E2E_AUTH_SECRET: ${{ secrets.VITE_E2E_AUTH_SECRET }}
+          VITE_KEYCLOAK_REALM_URL: ${{ secrets.VITE_KEYCLOAK_REALM_URL }}
+          VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.VITE_KEYCLOAK_CLIENT_ID }}
+          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+          VITE_E2E_AUTH_KEY: ${{ secrets.VITE_E2E_AUTH_SECRET }}
