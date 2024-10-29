@@ -28,12 +28,12 @@ jobs:
       # Install only cypress app dependencies
       - name: Install Cypress Dependencies
         run: npm ci
-        working-directory: ./apps/cypress
+        working-directory: ./apps/jobstore-cypress
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          working-directory: ./apps/cypress
+          working-directory: ./apps/jobstore-cypress
           browser: chrome
           headless: true
           # Skip installing as we've already done it
