@@ -18,6 +18,10 @@ jobs:
           node-version: '20.11.1'
           cache: 'npm'
 
+      # Clear npm cache
+      - name: Clear npm cache
+        run: npm cache clean --force
+
       # Cache Cypress binary
       - name: Cache Cypress Binary
         uses: actions/cache@v3
@@ -49,7 +53,7 @@ jobs:
           install: false
         env:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-          VITE_KEYCLOAK_REALM_URL: ${{ secrets.VITE_KEYCLOAK_REALM_URL }}
-          VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.VITE_KEYCLOAK_CLIENT_ID }}
-          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
-          VITE_E2E_AUTH_KEY: ${{ secrets.VITE_E2E_AUTH_SECRET }}
+          CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
+          CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.CYPRESS_VITE_KEYCLOAK_CLIENT_ID }}
+          CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
+          CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}
