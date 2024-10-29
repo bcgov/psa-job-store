@@ -27,8 +27,10 @@ jobs:
 
       # Install only cypress app dependencies
       - name: Install Cypress Dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
         working-directory: ./apps/jobstore-cypress
+        env:
+          HUSKY: 0
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
