@@ -39,6 +39,7 @@ jobs:
       - name: Install Cypress Dependencies
         run: |
           npm ci --ignore-scripts
+          npm install cypress-terminal-report@5.3.2
           npx cypress install
         working-directory: ./apps/jobstore-cypress
         env:

@@ -115,7 +115,7 @@ export class PositionService {
           ministry: positionDetails.organization.name,
           status: employee.status,
 
-          employeeId: extraInfo ? employeeDetail?.EMPLID ?? '' : '',
+          employeeId: extraInfo ? (employeeDetail?.EMPLID ?? '') : '',
           departmentId: extraInfo ? positionDetails.department_id : '',
           organizationId: extraInfo ? positionDetails.organization_id : '',
           classificationId: extraInfo ? positionDetails.classification_id : '',
