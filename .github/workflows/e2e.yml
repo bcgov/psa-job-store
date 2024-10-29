@@ -18,6 +18,15 @@ jobs:
           node-version: '20.11.1'
           cache: 'npm'
 
+      # Login to OpenShift and reset database
+      - name: Reset Database
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+          oc project f3c07a-dev
+          API_POD=$(oc get pod -l app=api -o jsonpath="{.items[0].metadata.name}")
+          echo "Found API pod: $API_POD"
+          # oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset --skip-generate"
+
       # Clear npm cache
       - name: Clear npm cache
         run: npm cache clean --force
