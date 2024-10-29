@@ -26,7 +26,7 @@ jobs:
           oc project f3c07a-dev
           API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
           echo "Found API pod: $API_POD"
-          # oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset --skip-generate"
+          oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset --skip-generate"
 
       # Clear npm cache
       - name: Clear npm cache
