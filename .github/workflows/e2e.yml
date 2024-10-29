@@ -34,7 +34,7 @@ jobs:
       # Install cypress app dependencies and binary
       - name: Install Cypress Dependencies
         run: |
-          npm ci
+          npm ci --ignore-scripts
           npx cypress install
         working-directory: ./apps/jobstore-cypress
         env:
