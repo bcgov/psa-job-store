@@ -19,8 +19,6 @@ jobs:
           df -h
           echo "🏃 Runner Environment:"
           env | grep ^RUNNER
-          echo "📦 Available Space:"
-          du -sh /
 
       - name: Checkout
         uses: actions/checkout@v4
