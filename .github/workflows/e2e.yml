@@ -18,17 +18,6 @@ jobs:
           node-version: '20.11.1'
           cache: 'npm'
 
-      # Clear npm cache
-      - name: Clear npm cache
-        run: npm cache clean --force
-
-      # Cache Cypress binary
-      - name: Cache Cypress Binary
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-cypress-${{ hashFiles('package-lock.json') }}
-
       # Install only workspace root dependencies
       - name: Install Root Dependencies
         run: npm ci --ignore-scripts
