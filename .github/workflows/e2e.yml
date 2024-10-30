@@ -7,7 +7,7 @@ on:
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
-    environment: dev
+    # environment: dev
 
     steps:
       - name: Checkout
@@ -20,13 +20,13 @@ jobs:
           cache: 'npm'
 
       # Login to OpenShift and reset database
-      - name: Reset Database
-        run: |
-          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
-          oc project f3c07a-dev
-          API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
-          echo "Found API pod: $API_POD"
-          oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
+      # - name: Reset Database
+      #   run: |
+      #     oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+      #     oc project f3c07a-dev
+      #     API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
+      #     echo "Found API pod: $API_POD"
+      #     oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
 
       # Clear npm cache
       - name: Clear npm cache
