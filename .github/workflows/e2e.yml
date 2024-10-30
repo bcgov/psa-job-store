@@ -65,7 +65,6 @@ jobs:
           config: >-
             {
               "chromeWebSecurity": false,
-              "browser": { "args": ["--disable-dev-shm-usage"] },
               "experimentalMemoryManagement": true,
               "numTestsKeptInMemory": 0
             }
