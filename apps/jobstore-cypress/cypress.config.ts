@@ -18,10 +18,10 @@ async function setupNodeEvents(on, config) {
     config.baseUrl = process.env.CYPRESS_BASE_URL;
   }
 
-  // require('cypress-terminal-report/src/installLogsPrinter')(on, {
-  //   printLogsToConsole: 'always',
-  //   printLogsToFile: 'always',
-  // });
+  require('cypress-terminal-report/src/installLogsPrinter')(on, {
+    printLogsToConsole: 'always',
+    printLogsToFile: 'always',
+  });
 
   return config;
 }
