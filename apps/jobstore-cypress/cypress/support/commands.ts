@@ -119,8 +119,10 @@
 // });
 
 Cypress.Commands.add('login', () => {
+  cy.log('Logging in...');
   cy.session('auth', () => {
     // Call your NestJS endpoint
+    cy.log('Logging in 2...');
     cy.request({
       method: 'POST',
       url: `${Cypress.env('VITE_BACKEND_URL')}/e2e-auth/token`,
@@ -128,6 +130,7 @@ Cypress.Commands.add('login', () => {
         'X-E2E-Key': Cypress.env('VITE_E2E_AUTH_KEY'),
       },
     }).then(({ body }) => {
+      cy.log('Logging in 3...');
       // Store token in the same format as your current setup
       window.localStorage.setItem(
         `oidc.user:${Cypress.env('VITE_KEYCLOAK_REALM_URL')}:${Cypress.env('VITE_KEYCLOAK_CLIENT_ID')}`,
