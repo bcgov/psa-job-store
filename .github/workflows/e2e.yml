@@ -38,7 +38,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: ./apps/jobstore-cypress
-          browser: chrome
+          browser: firefox
           headless: true
           install: false
         env:
