@@ -12,7 +12,7 @@ const setupEnvironment = () => {
 };
 
 function startCypress() {
-  exec('cypress open', (err, stdout, stderr) => {
+  exec('cypress open', { maxBuffer: 1024 * 1024 * 10 }, (err, stdout, stderr) => {
     if (err) {
       console.error(`exec error: ${err}`);
       return;

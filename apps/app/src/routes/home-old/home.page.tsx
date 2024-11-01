@@ -175,7 +175,7 @@ export const HomePage = () => {
             </div> */}
             <div
               style={{ display: currentView !== 'chart' ? 'none' : 'block', height: '100%' }}
-              aria-hidden={true}
+              // aria-hidden={true}
               // tabIndex={-1}
             >
               <OrgChart

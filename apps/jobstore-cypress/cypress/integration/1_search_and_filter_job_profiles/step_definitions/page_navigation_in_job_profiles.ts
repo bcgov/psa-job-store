@@ -25,5 +25,5 @@ Then('the job profiles for that page are displayed', () => {
   // Check if the job profiles corresponding to that page are displayed
   // This might involve checking if certain profiles are present or not
   // Example:
-  cy.get('[data-testid="job-profile-search-results"]').should('contain', 'Senior Software Engineer');
+  cy.get('[data-testid="job-profile-search-results"]').should('contain', 'Environmental Scientist');
 });

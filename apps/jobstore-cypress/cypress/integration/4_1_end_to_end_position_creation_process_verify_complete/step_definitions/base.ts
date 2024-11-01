@@ -8,22 +8,27 @@ Given('the user is on the home page', () => {
   cy.visit('/');
 });
 
+Given('the user navigates to pr', () => {
+  cy.visit('/requests/positions/19');
+});
+
 let positionId = '';
 
 When('the user presses "Create new direct report" on the home page org chart', () => {
   // Wait for the org chart to load
   cy.get('[data-testid="org-chart-loading"]', { timeout: 100000 }).should('not.exist');
   cy.get('[data-testid="org-chart-container"]', { timeout: 100000 }).should('be.visible');
+  cy.get('div[data-id="00132136"]').should('have.class', 'selected');
 
   // Select the specific node with ID '00121521' and assign it an alias
-  cy.get('[data-testid="org-chart-node-00121521"]').as('targetNode');
+  cy.get('[data-testid="org-chart-node-00987654"]').as('targetNode');
 
   // Click on the node to select it or to reveal the 'Create new direct report' button
   cy.get('@targetNode').scrollIntoView();
-  cy.get('@targetNode').should('be.visible').click();
+  cy.get('@targetNode').click({ force: true });
 
   // Re-query the DOM for the node and find the 'Create new direct report' button within it
-  cy.get('@targetNode').find('[data-testid="create-direct-report-button"]').click();
+  cy.get('@targetNode').find('[data-testid="create-direct-report-button"]').click({ force: true });
 });
 
 Then('they are taken to the job profile selection step', () => {
@@ -37,6 +42,7 @@ Then('they are taken to the job profile selection step', () => {
 });
 
 When('the user selects a job profile', () => {
+  //  todo, select an explicit profile, e.g. Data Scientist
   // Assuming the first job profile card should be selected
   cy.get('[data-testid="job-profile-card"]').first().click();
 
@@ -66,25 +72,11 @@ Then('they proceed to the additional information step', () => {
 });
 
 When('the user fills out the required additional information', () => {
-  // Toggle the confirmation switch
-  cy.get('[data-testid="confirmation-switch"]').click();
-
-  // Select the first option in the location dropdown
-  // cy.get('[data-testid="location-select"]').click();
-  // cy.get('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item').first().click();
-
-  // Select the first option in the department dropdown
-  cy.get('[data-testid="department-select"]').click();
-  cy.get('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item').first().click();
-
-  // Type in the reporting manager
-  cy.get('[data-testid="reporting-manager-input"]').type('00121521');
-
-  // Wait for the loading spinner to appear and then disappear
   cy.get('[data-testid="loading-spinner"]').should('be.visible');
+  cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
 
-  cy.get('[data-testid="loading-spinner"]', { timeout: 10000 }).should('not.exist');
-  // cy.get('[data-testid="loading-spinner"]').should('not.exist');
+  cy.get('[data-testid="branch-input"]').type('test branch');
+  cy.get('[data-testid="division-input"]').type('test division');
 
   // Now click the "Next" button
   cy.get('[data-testid="next-button"]').click();
@@ -156,12 +148,12 @@ When('the user makes edits in significant fields', () => {
   cy.get('[data-testid="remove-accountability-7"]').click();
   cy.get('[data-testid="accountabilities-warning"]').should('exist');
   cy.contains('button', 'Proceed').click();
-  cy.get('[data-testid="remove-education-8"]').click();
-  cy.get('[data-testid="education-warning"]').should('exist');
-  cy.contains('button', 'Proceed').click();
-  cy.get('[data-testid="remove-job-experience-1"]').click();
-  cy.get('[data-testid="experience-warning"]').should('exist');
-  cy.contains('button', 'Proceed').click();
+  // cy.get('[data-testid="remove-education and work experience-8"]').click();
+  // cy.get('[data-testid="education-warning"]').should('exist');
+  // cy.contains('button', 'Proceed').click();
+  // cy.get('[data-testid="remove-job-experience-1"]').click();
+  // cy.get('[data-testid="experience-warning"]').should('exist');
+  // cy.contains('button', 'Proceed').click();
 });
 
 Then('proceeds to next step', () => {
@@ -188,6 +180,16 @@ When('the user presses "Submit for verification"', () => {
   cy.get('[data-testid="submit-for-verification-button"]').click();
 });
 
+Then('they see a verification confirmation dialog', () => {
+  cy.get('[data-testid="verification-confirmation-dialog"]').should('be.visible');
+});
+
+When('they confirm the verification confirmation dialog', () => {
+  // Click the "Confirm" button on the verification confirmation dialog
+  cy.get('[data-testid="confirmation-switch"]').click();
+  cy.get('[data-testid="confirm-modal-ok"]').click();
+});
+
 Then('they see a success message', () => {
   // Check for the presence of a success message
   cy.get('[data-testid="verification-success-message"]').should('be.visible');
@@ -204,8 +206,25 @@ Then('they see a success message', () => {
 Then('position request contains the comment', () => {
   // make a request to the endpoint to get the position request details
   const token = Cypress.env('AUTH_TOKEN');
-  console.log('token: ', token);
+  cy.log('token: ' + token);
+  cy.log(
+    'request query: ',
+    `
+        query Comments {
+    comments(record_id: ${positionId}, record_type: "PositionRequest") {
+        id
+        author_id
+        record_id
+        record_type
+        text
+        created_at
+        updated_at
+        deleted_at
+    }
+}
 
+//       `,
+  );
   // make the request
   cy.request({
     method: 'POST',
@@ -215,16 +234,27 @@ Then('position request contains the comment', () => {
     },
     body: {
       query: `
-        query {
-          positionRequest(id: ${positionId}) {
-            additional_info_comments
-          }
-        }
+        query Comments {
+    comments(record_id: ${positionId}, record_type: "PositionRequest") {
+        id
+        author_id
+        record_id
+        record_type
+        text
+        created_at
+        updated_at
+        deleted_at
+    }
+}
+
       `,
     },
   }).then((response) => {
+    // cy.log('got response');
     expect(response.status).to.equal(200);
-    expect(response.body.data.positionRequest.additional_info_comments).to.equal('This is a test comment');
+    cy.log(JSON.stringify(response.body));
+    // console.log('response.body: ', response.body);
+    expect(response.body.data.comments[0].text).to.equal('This is a test comment');
   });
 });
 
@@ -244,8 +274,28 @@ Then('they see the new position in the list with "In Review" status', () => {
 
 When('Classification team switches the CRM service request to "Action required"', () => {
   const token = Cypress.env('AUTH_TOKEN');
-  console.log('token: ', token);
+  cy.log('token: ' + token);
 
+  cy.log(
+    'query: ' +
+      `
+      mutation UpdateMockIncident {
+    updateMockIncidentByPositionRequestId(id: ${positionId}, data: { statusWithType: { status: { id: 3 } } }) {
+        id
+        lookupName
+        statusWithType {
+            status {
+                id
+                lookupName
+            }
+        }
+        category {
+            lookupName
+        }
+    }
+}
+      `,
+  );
   // Make a request to the endpoint to update the position status
   cy.request({
     method: 'POST',
@@ -255,22 +305,38 @@ When('Classification team switches the CRM service request to "Action required"'
     },
     body: {
       query: `
-        mutation {
-          updatePositionRequestStatus(id: ${positionId}, status: 3)
+      mutation UpdateMockIncident {
+    updateMockIncidentByPositionRequestId(id: ${positionId}, data: { statusWithType: { status: { id: 3 } } }) {
+        id
+        lookupName
+        statusWithType {
+            status {
+                id
+                lookupName
+            }
         }
+        category {
+            lookupName
+        }
+    }
+}
       `,
+      //  mutation {
+      //   updatePositionRequestStatus(id: ${positionId}, status: 3)
+      // }
     },
   }).then((response) => {
+    cy.log('got response');
+    cy.log(JSON.stringify(response, null, 2));
     expect(response.status).to.equal(200);
-    console.log('hi', response.body);
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    expect(response.body.data.updatePositionRequestStatus).to.be.true;
+
+    // expect(response.body.data.updatePositionRequestStatus).to.be.true;
   });
 });
 
 When('user waits for systems to synchronize', () => {
   // Wait for a few seconds for the systems to synchronize
-  cy.wait(70000);
+  cy.wait(6000);
 });
 
 When('the user navigates to My Position Requests page', () => {

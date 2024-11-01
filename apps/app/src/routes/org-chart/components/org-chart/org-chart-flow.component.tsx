@@ -392,6 +392,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
       <PositionProvider>
         {/* role application allows for arrow keys to work with screen readers, otherwise it gets overriden */}
         <div
+          data-testid="org-chart-container"
           id="org-chart-container"
           role="application"
           aria-label="Organization chart - use arrow keys or tab to navigate. Press enter to create a new position."

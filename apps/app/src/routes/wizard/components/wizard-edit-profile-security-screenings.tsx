@@ -60,7 +60,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
     title: 'Do you want to make changes to security screenings?',
     alertShown: secAlertShown,
     setAlertShown: setSecAlertShown,
-    dataTestId: 'prof-reg-warning',
+    dataTestId: 'security-warning',
     trigger,
     isSignificant: true,
   });
@@ -138,7 +138,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
             />
           </Col>
           <Col>
-            <WizardEditAddButton testId="add-job-experience-button" onClick={() => handleAddModal(handleAddNew)}>
+            <WizardEditAddButton testId="add-security-screening-button" onClick={() => handleAddModal(handleAddNew)}>
               Add a custom requirement
             </WizardEditAddButton>
           </Col>

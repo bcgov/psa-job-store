@@ -257,7 +257,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
         const result = await submitPositionRequest({
           id: positionRequestId,
           comment: comment,
-          orgchart_png: png,
+          orgchart_png: import.meta.env.VITE_TEST_ENV !== 'true' ? png : '',
         }).unwrap();
 
         // console.log('submitPositionRequest result: ', result);
@@ -429,7 +429,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             </div>,
             <AccessiblePopoverMenu
               key="menu"
-              triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+              triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
               content={getMenuContent()}
               ariaLabel="Open position request menu"
             ></AccessiblePopoverMenu>,
@@ -962,7 +962,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 </Button>,
               ]}
             >
-              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start' }} data-testid="verification-confirmation-dialog">
                 <div>
                   Once submitted, you won’t be able to cancel the request from the job store. Are you sure you wish to
                   proceed?

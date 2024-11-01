@@ -74,23 +74,39 @@ export class ScheduledTaskService {
 
   @Cron('*/5 * * * * *')
   async syncPositionStatuses() {
-    const needsUpdate = await this.isMetadataOutdated(ScheduledTask.CrmSync);
+    // if (process.env.E2E_TESTING === 'true') {
+    //   return;
+    // }
+    const needsUpdate =
+      process.env.E2E_TESTING === 'true' ? true : await this.isMetadataOutdated(ScheduledTask.CrmSync);
+    // console.log('syncPositionStatuses, needsUpdate:', needsUpdate);
 
     if (needsUpdate === true) {
       await this.updateMetadata(ScheduledTask.CrmSync, 60);
-      this.logger.log(`Start syncPositionStatus @ ${new Date()}`);
+
+      if (process.env.E2E_TESTING !== 'true') this.logger.log(`Start syncPositionStatus @ ${new Date()}`);
+
       await this.crmService.syncIncidentStatus().then(async (rows) => {
+        // console.log('this.crmService.syncIncidentStatus rows: ', rows);
         for (const row of rows) {
           const [crm_id, crm_lookup_name, crm_status, crm_category] = row as [string, string, string, string];
           const positionRequest = await this.prisma.positionRequest.findUnique({ where: { crm_id: +crm_id } });
           const positionNumber = positionRequest.position_number?.toString();
 
+          // console.log('syncing positionNumber: ', positionNumber);
           if (positionNumber) {
             const result = await this.peoplesoftService.getPosition(positionNumber.padStart(8, '0'));
             const rows = result?.data?.query?.rows;
             const positionObj: Record<string, any> | null = (rows ?? []).length > 0 ? rows[0] : null;
 
+            // console.log('positionObj: ', positionObj);
             if (positionObj) {
+              // console.log('calculating status from: ', {
+              //   category: crm_category,
+              //   crm_status: crm_status,
+              //   ps_status: positionObj['A.POSN_STATUS'],
+              //   ps_effective_status: positionObj['A.EFF_STATUS'],
+              // });
               const incomingPositionRequestStatus = getALStatus({
                 category: crm_category,
                 crm_status: crm_status,
@@ -144,7 +160,7 @@ export class ScheduledTaskService {
           }
         }
       });
-      this.logger.log(`End syncPositionStatus @ ${new Date()}`);
+      if (process.env.E2E_TESTING !== 'true') this.logger.log(`End syncPositionStatus @ ${new Date()}`);
     }
   }
 

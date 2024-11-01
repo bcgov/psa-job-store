@@ -11,20 +11,31 @@ When('the user selects a job family from the job family filter', () => {
   cy.get('.ant-select-dropdown').should('be.visible');
 
   // Click on the expand arrow beside the 'Finance' group
+  // Click on the Finance group to expand it
   cy.get('.ant-select-dropdown')
-    .contains('.ant-select-tree-title', group)
-    .parents('.ant-select-tree-treenode')
-    .find('.ant-select-tree-switcher')
+    .contains('.antd-text-copy', group)
+    .closest('.tree-branch-wrapper')
+    .find('.antd-icon-container-copy')
     .click();
 
-  // Now select 'Budgeting' from the 'Finance' group
-  cy.get('.ant-select-dropdown').contains('.ant-select-tree-title', jobFamily).click();
+  // Select Budgeting from the expanded list
+  cy.get('.ant-select-dropdown')
+    .contains('.antd-text-copy', jobFamily)
+    .parent()
+    .find('.ant-select-tree-checkbox')
+    .click();
 });
 
 Then('only job profiles classified under that selected job family should be displayed', () => {
   cy.get('[data-cy="search-results-list"]')
     .find('li')
-    .eq(1)
+    .eq(0)
     .find('[data-cy="card-title"]')
     .contains('Senior Software Engineer');
+
+  cy.get('[data-cy="search-results-list"]')
+    .find('li')
+    .eq(1)
+    .find('[data-cy="card-title"]')
+    .contains('Strategic HR Analyst Manager');
 });

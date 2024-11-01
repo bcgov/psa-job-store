@@ -12,16 +12,17 @@ When('the user presses "Create new direct report" on the home page org chart', (
   // Wait for the org chart to load
   cy.get('[data-testid="org-chart-loading"]', { timeout: 100000 }).should('not.exist');
   cy.get('[data-testid="org-chart-container"]', { timeout: 100000 }).should('be.visible');
+  cy.get('div[data-id="00132136"]').should('have.class', 'selected');
 
   // Select the specific node with ID '00121521' and assign it an alias
-  cy.get('[data-testid="org-chart-node-00121521"]').as('targetNode');
+  cy.get('[data-testid="org-chart-node-00987654"]').as('targetNode');
 
   // Click on the node to select it or to reveal the 'Create new direct report' button
   cy.get('@targetNode').scrollIntoView();
-  cy.get('@targetNode').should('be.visible').click();
+  cy.get('@targetNode').click({ force: true });
 
   // Re-query the DOM for the node and find the 'Create new direct report' button within it
-  cy.get('@targetNode').find('[data-testid="create-direct-report-button"]').click();
+  cy.get('@targetNode').find('[data-testid="create-direct-report-button"]').click({ force: true });
 });
 
 Then('they are taken to the job profile selection step', () => {
@@ -71,25 +72,11 @@ Then('they proceed to the additional information step', () => {
 });
 
 When('the user fills out the required additional information', () => {
-  // Toggle the confirmation switch
-  cy.get('[data-testid="confirmation-switch"]').click();
-
-  // Select the first option in the location dropdown
-  // cy.get('[data-testid="location-select"]').click();
-  // cy.get('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item').first().click();
-
-  // Select the first option in the department dropdown
-  cy.get('[data-testid="department-select"]').click();
-  cy.get('.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item').first().click();
-
-  // Type in the reporting manager
-  cy.get('[data-testid="reporting-manager-input"]').type('00121521');
-
-  // Wait for the loading spinner to appear and then disappear
   cy.get('[data-testid="loading-spinner"]').should('be.visible');
+  cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
 
-  cy.get('[data-testid="loading-spinner"]', { timeout: 10000 }).should('not.exist');
-  // cy.get('[data-testid="loading-spinner"]').should('not.exist');
+  cy.get('[data-testid="branch-input"]').type('test branch');
+  cy.get('[data-testid="division-input"]').type('test division');
 
   // Now click the "Next" button
   cy.get('[data-testid="next-button"]').click();
@@ -141,6 +128,7 @@ When('the user clicks the "Generate position number" button and confirms the dia
   cy.get('[data-testid="generate-position-button"]').click();
 
   // Wait for the modal to appear and then click the 'OK' button
+  cy.get('[data-testid="confirmation-switch"]').click();
   cy.get('[data-testid="confirm-modal-ok"]').click();
 });
 

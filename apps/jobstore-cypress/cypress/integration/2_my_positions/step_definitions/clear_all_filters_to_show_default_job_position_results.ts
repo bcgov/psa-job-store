@@ -12,7 +12,7 @@ Given('the user has applied filters for status and classification', () => {
   cy.get('[data-testid="classification-filter-dropdown"]').click();
   cy.get('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
     .find('.ant-select-item-option-content')
-    .contains('ENG')
+    .contains('SPV 15R')
     .click();
 
   // should exist

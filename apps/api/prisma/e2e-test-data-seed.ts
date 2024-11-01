@@ -1,5 +1,11 @@
 // import { Client as ElasticsearchClient } from '@elastic/elasticsearch';
-import { BehaviouralCompetencyCategory, BehaviouralCompetencyType, JobProfile, PrismaClient } from '@prisma/client';
+import {
+  BehaviouralCompetencyCategory,
+  BehaviouralCompetencyType,
+  JobProfile,
+  Prisma,
+  PrismaClient,
+} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -30,7 +36,7 @@ async function seed() {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074'],
+          department_ids: ['112-0074', 'DEPT02'],
         },
         peoplesoft: {
           employee_id: '188146',
@@ -1821,7 +1827,7 @@ async function seed() {
   };
 
   const profile247: JobProfile = {
-    id: 6,
+    id: 7,
     review_required: false,
     program_overview: '',
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
@@ -1967,14 +1973,17 @@ async function seed() {
       {
         text: 'Security Screening 1',
         is_readonly: true,
+        is_significant: true,
       },
       {
         text: 'Security Screening 2',
         is_readonly: false,
+        is_significant: true,
       },
       {
         text: 'Security Screening 3',
         is_readonly: false,
+        is_significant: true,
       },
     ],
     preferences: ['Preference 1', 'Preference 2'],
@@ -1982,14 +1991,14 @@ async function seed() {
     willingness_statements: ['Proviso 1', 'Proviso 2'],
     knowledge_skills_abilities: ['Knowledge, Skills, and Abilities 1', 'Knowledge, Skills, and Abilities 2'],
     professional_registration_requirements: [
-      { text: 'Professional registration requirement 1' },
-      { text: 'Professional registration requirement 2' },
+      { text: 'Professional registration requirement 1', is_readonly: false, is_significant: true },
+      { text: 'Professional registration requirement 2', is_readonly: false, is_significant: true },
     ],
     updated_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
     published_by_id: '88bd8bb6-c449-4c13-8204-d91539f548d4',
     valid_from: undefined,
     valid_to: undefined,
-    version: 2,
+    version: 1,
     views: 0,
   };
 
@@ -2067,22 +2076,68 @@ async function seed() {
       job_profile_version: profile210.version,
     },
     {
-      classification_id: '621252',
+      classification_id: '508011',
       classification_employee_group_id: 'GEU',
-      classification_peoplesoft_id: 'STTSS',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile212.id,
       job_profile_version: profile212.version,
     },
     {
-      classification_id: '551409',
-      classification_employee_group_id: '805G',
-      classification_peoplesoft_id: 'ST805',
+      classification_id: '508010',
+      classification_employee_group_id: 'GEU',
+      classification_peoplesoft_id: 'BCSET',
       job_profile_id: profile247.id,
       job_profile_version: profile247.version,
     },
   ];
 
+  const classificationData = {
+    '752203': {
+      code: 'SPV 15R',
+      name: 'Supervisor R15',
+      grade: '15A',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+    '508013': {
+      code: 'ISL 30R',
+      name: 'Information Systems R30',
+      grade: '30A',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+    '508011': {
+      code: 'ISL 27R',
+      name: 'Information Systems R27',
+      grade: '27A',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+    '508010': {
+      code: 'ISL 24R',
+      name: 'Information Systems R24',
+      grade: '24A',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+    '501537': {
+      code: 'COMM O 30R',
+      name: 'Communications Officer R30',
+      grade: '30A',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+  };
+
   for await (const jobProfileClassification of jobProfileClassifications) {
+    const data = classificationData[jobProfileClassification.classification_id] || {
+      code: '',
+      name: '',
+      grade: '',
+      effective_status: '',
+      effective_date: new Date('1900-01-01'),
+    };
+
     await prisma.classification.upsert({
       where: {
         id_employee_group_id_peoplesoft_id: {
@@ -2094,12 +2149,8 @@ async function seed() {
       create: {
         id: jobProfileClassification.classification_id,
         peoplesoft_id: jobProfileClassification.classification_peoplesoft_id,
-        code: '',
-        name: '',
+        ...data,
         employee_group_id: jobProfileClassification.classification_employee_group_id,
-        grade: '',
-        effective_status: '',
-        effective_date: new Date('1900-01-01'),
       },
       update: {},
     });
@@ -2111,12 +2162,13 @@ async function seed() {
 
   await prisma.jobProfileJobFamilyLink.createMany({
     data: [
-      { jobProfileId: profile189.id, jobProfileVersion: profile189.version, jobFamilyId: 1 },
+      { jobProfileId: profile189.id, jobProfileVersion: profile189.version, jobFamilyId: 7 },
       { jobProfileId: profile194.id, jobProfileVersion: profile194.version, jobFamilyId: 1 },
       { jobProfileId: profile200.id, jobProfileVersion: profile200.version, jobFamilyId: 1 },
       { jobProfileId: profile208.id, jobProfileVersion: profile208.version, jobFamilyId: 1 },
       { jobProfileId: profile210.id, jobProfileVersion: profile210.version, jobFamilyId: 7 },
-      { jobProfileId: profile212.id, jobProfileVersion: profile212.version, jobFamilyId: 7 },
+      { jobProfileId: profile212.id, jobProfileVersion: profile212.version, jobFamilyId: 1 },
+      // there's a mismatch with the stream, it's ok (if it's 1 it will be in admin and education verification won't trigger)
       { jobProfileId: profile247.id, jobProfileVersion: profile247.version, jobFamilyId: 7 },
     ],
   });
@@ -2565,6 +2617,51 @@ async function seed() {
     },
   ];
 
+  const classificationData2 = {
+    '185001': {
+      code: 'Band 1',
+      name: 'Band 1',
+      grade: 'B1',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+    '185002': {
+      code: 'Band 2',
+      name: 'Band 2',
+      grade: 'B2',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+    '185003': {
+      code: 'Band 3',
+      name: 'Band 3',
+      grade: 'B3',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+    '185004': {
+      code: 'Band 4',
+      name: 'Band 4',
+      grade: 'B4',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+    '185005': {
+      code: 'Band 5',
+      name: 'Band 5',
+      grade: 'B5',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+    '185006': {
+      code: 'Band 6',
+      name: 'Band 6',
+      grade: 'B6',
+      effective_status: 'Active',
+      effective_date: new Date('2024-07-20'),
+    },
+  };
+
   for await (const reportsTo of jobProfileReportsTo) {
     const {
       classification_id,
@@ -2573,6 +2670,14 @@ async function seed() {
       job_profile_id,
       job_profile_version,
     } = reportsTo;
+
+    const data = classificationData2[classification_id] || {
+      code: '',
+      name: '',
+      grade: '',
+      effective_status: '',
+      effective_date: new Date('1900-01-01'),
+    };
 
     await prisma.classification.upsert({
       where: {
@@ -2585,12 +2690,8 @@ async function seed() {
       create: {
         id: classification_id,
         peoplesoft_id: classification_peoplesoft_id,
-        code: '',
-        name: '',
+        ...data,
         employee_group_id: classification_employee_group_id,
-        grade: '',
-        effective_status: '',
-        effective_date: new Date('1900-01-01'),
       },
       update: {},
     });
@@ -2767,6 +2868,27 @@ async function seed() {
     ],
   });
 
+  await prisma.departmentMetadata.createMany({
+    data: [
+      {
+        department_id: '112-0074',
+        is_statutorily_excluded: false,
+      },
+      {
+        department_id: 'DEPT01',
+        is_statutorily_excluded: false,
+      },
+      {
+        department_id: 'DEPT02',
+        is_statutorily_excluded: false,
+      },
+      {
+        department_id: 'DEPT03',
+        is_statutorily_excluded: false,
+      },
+    ],
+  });
+
   await prisma.classification.createMany({
     data: [
       {
@@ -2807,10 +2929,10 @@ async function seed() {
       {
         crm_id: 12345,
         crm_assigned_to_account_id: 67890,
-        step: 2,
+        step: 3,
         reports_to_position_id: '00121521',
         department_id: '112-0074',
-        parent_job_profile_id: profile212.id,
+        parent_job_profile_id: profile247.id,
         parent_job_profile_version: 1,
         crm_json: null,
         profile_json: null,
@@ -3023,203 +3145,204 @@ async function seed() {
       {
         crm_id: 54322,
         crm_assigned_to_account_id: 98765,
-        step: 4,
+        step: 1,
         reports_to_position_id: '00121521',
         department_id: '112-0074',
         parent_job_profile_id: profile200.id,
         parent_job_profile_version: 1,
         crm_json: null,
-        profile_json: {
-          id: profile200.id,
-          role: { id: null },
-          type: 'USER',
-          scope: { id: null },
-          title: { value: 'Financial Analyst - Additional info step', disabled: false, isCustom: false },
-          number: 247,
-          context:
-            'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
-          streams: [],
-          overview: {
-            value:
-              'Detail-oriented Financial Analyst to provide analysis of financial data, forecast future trends, and advise on investment decisions.',
-            disabled: false,
-            isCustom: false,
-          },
-          education: [
-            {
-              is_significant: true,
-              is_readonly: true,
-              text: 'Bachelor’s degree in Finance, Economics, Accounting, Mathematics, Statistics, or related field.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: "Master's degree in Finance, Business Administration (MBA), or related field preferred.",
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Certifications such as Chartered Financial Analyst (CFA) or Certified Public Accountant (CPA) are advantageous.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Proven work experience as a Financial Analyst, Financial Consultant, or similar role.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Strong working knowledge of financial forecasting, corporate finance, information analysis, and financial modeling techniques.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Experience with statistical analysis and financial forecasting.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Attention to detail and the ability to identify data patterns.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Good verbal and written communication skills.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Advanced knowledge of Excel, including pivot tables, formulas, and charts.',
-            },
-          ],
-          role_type: { id: null },
-          reports_to: [],
-          jobFamilies: [],
-          preferences: [],
-          professions: [],
-          organizations: [],
-          all_reports_to: false,
-          job_experience: [],
-          classifications: [
-            {
-              classification: {
-                id: '551404',
-                code: 'FO 21R',
-                name: 'Financial Officer R21',
-                grade: '21A',
-                employee_group_id: 'GEU',
-              },
-            },
-          ],
-          organization_id: '-1',
-          review_required: false,
-          accountabilities: [
-            {
-              text: 'Analyze financial data and create financial models for decision support.',
-              is_significant: true,
-              is_readonly: true,
-            },
-            {
-              text: 'Report on financial performance and prepare for regular leadership reviews.',
-              is_significant: false,
-              is_readonly: false,
-            },
-            {
-              text: 'Analyze past results, perform variance analysis, identify trends, and make recommendations for improvements.',
-              is_significant: false,
-              is_readonly: false,
-            },
-            {
-              text: 'Work closely with the accounting team to ensure accurate financial reporting.',
-              is_significant: false,
-              is_readonly: false,
-            },
-            {
-              text: 'Evaluate financial performance by comparing and analyzing actual results with plans and forecasts.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Guide the cost analysis process by establishing and enforcing policies and procedures.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Provide analysis of trends and forecasts and recommend actions for optimization.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Recommend actions by analyzing and interpreting data and making comparative analyses; study proposed changes in methods and materials.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Identify and drive process improvements, including the creation of standard and ad-hoc reports, tools, and Excel dashboards.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Increase productivity by developing automated reporting/forecasting tools.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Market research, data mining, business intelligence, and valuation comps.',
-              is_significant: true,
-              is_readonly: false,
-            },
-          ],
-          program_overview: { value: '', disabled: false, isCustom: false },
-          all_organizations: true,
-          security_screenings: [],
-          optional_requirements: [],
-          willingness_statements: [],
-          behavioural_competencies: [
-            {
-              behavioural_competency: {
-                id: 17,
-                name: 'Business acumen',
-                description:
-                  'is the ability to understand the business implications of decisions and the ability to strive to improve organizational performance. It requires an awareness of business issues, processes and outcomes as they impact the client’s and the organization’s business needs.',
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 21,
-                name: 'Managing organizational resources',
-                description:
-                  'is the ability to understand and effectively manage organizational resources (for example: people, materials, assets, budgets). This is demonstrated through measurement, planning and control of resources to maximize results. It requires an evaluation of qualitative (for example: client satisfaction) and quantitative (for example: service costs) needs.',
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 23,
-                name: 'Problem solving and judgement',
-                description:
-                  'is the ability to analyze problems systematically, organize information, identify key factors, identify underlying causes and generate solutions.',
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 22,
-                name: 'Planning, organizing and coordinating',
-                description:
-                  "involves proactively planning, establishing priorities and allocating resources. It's expressed by developing and implementing increasingly complex plans. It also involves monitoring and adjusting work to accomplish goals and deliver to the organization’s mandate.",
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 42,
-                name: 'Leadership',
-                description:
-                  "implies a desire to lead others, including diverse teams. Leadership is generally, but not always, demonstrated from a position of formal authority. The 'team' here should be understood broadly as any group with which the person interacts regularly.",
-              },
-            },
-          ],
-          knowledge_skills_abilities: [],
-          professional_registration_requirements: [],
-        },
+        profile_json: null,
+        // {
+        //   id: profile200.id,
+        //   role: { id: null },
+        //   type: 'USER',
+        //   scope: { id: null },
+        //   title: { value: 'Financial Analyst - Additional info step', disabled: false, isCustom: false },
+        //   number: 247,
+        //   context:
+        //     'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
+        //   streams: [],
+        //   overview: {
+        //     value:
+        //       'Detail-oriented Financial Analyst to provide analysis of financial data, forecast future trends, and advise on investment decisions.',
+        //     disabled: false,
+        //     isCustom: false,
+        //   },
+        //   education: [
+        //     {
+        //       is_significant: true,
+        //       is_readonly: true,
+        //       text: 'Bachelor’s degree in Finance, Economics, Accounting, Mathematics, Statistics, or related field.',
+        //     },
+        //     {
+        //       is_significant: true,
+        //       is_readonly: false,
+        //       text: "Master's degree in Finance, Business Administration (MBA), or related field preferred.",
+        //     },
+        //     {
+        //       is_significant: true,
+        //       is_readonly: false,
+        //       text: 'Certifications such as Chartered Financial Analyst (CFA) or Certified Public Accountant (CPA) are advantageous.',
+        //     },
+        //     {
+        //       is_significant: true,
+        //       is_readonly: false,
+        //       text: 'Proven work experience as a Financial Analyst, Financial Consultant, or similar role.',
+        //     },
+        //     {
+        //       is_significant: true,
+        //       is_readonly: false,
+        //       text: 'Strong working knowledge of financial forecasting, corporate finance, information analysis, and financial modeling techniques.',
+        //     },
+        //     {
+        //       is_significant: true,
+        //       is_readonly: false,
+        //       text: 'Experience with statistical analysis and financial forecasting.',
+        //     },
+        //     {
+        //       is_significant: true,
+        //       is_readonly: false,
+        //       text: 'Attention to detail and the ability to identify data patterns.',
+        //     },
+        //     {
+        //       is_significant: true,
+        //       is_readonly: false,
+        //       text: 'Good verbal and written communication skills.',
+        //     },
+        //     {
+        //       is_significant: true,
+        //       is_readonly: false,
+        //       text: 'Advanced knowledge of Excel, including pivot tables, formulas, and charts.',
+        //     },
+        //   ],
+        //   role_type: { id: null },
+        //   reports_to: [],
+        //   jobFamilies: [],
+        //   preferences: [],
+        //   professions: [],
+        //   organizations: [],
+        //   all_reports_to: false,
+        //   job_experience: [],
+        //   classifications: [
+        //     {
+        //       classification: {
+        //         id: '551404',
+        //         code: 'FO 21R',
+        //         name: 'Financial Officer R21',
+        //         grade: '21A',
+        //         employee_group_id: 'GEU',
+        //       },
+        //     },
+        //   ],
+        //   organization_id: '-1',
+        //   review_required: false,
+        //   accountabilities: [
+        //     {
+        //       text: 'Analyze financial data and create financial models for decision support.',
+        //       is_significant: true,
+        //       is_readonly: true,
+        //     },
+        //     {
+        //       text: 'Report on financial performance and prepare for regular leadership reviews.',
+        //       is_significant: false,
+        //       is_readonly: false,
+        //     },
+        //     {
+        //       text: 'Analyze past results, perform variance analysis, identify trends, and make recommendations for improvements.',
+        //       is_significant: false,
+        //       is_readonly: false,
+        //     },
+        //     {
+        //       text: 'Work closely with the accounting team to ensure accurate financial reporting.',
+        //       is_significant: false,
+        //       is_readonly: false,
+        //     },
+        //     {
+        //       text: 'Evaluate financial performance by comparing and analyzing actual results with plans and forecasts.',
+        //       is_significant: true,
+        //       is_readonly: false,
+        //     },
+        //     {
+        //       text: 'Guide the cost analysis process by establishing and enforcing policies and procedures.',
+        //       is_significant: true,
+        //       is_readonly: false,
+        //     },
+        //     {
+        //       text: 'Provide analysis of trends and forecasts and recommend actions for optimization.',
+        //       is_significant: true,
+        //       is_readonly: false,
+        //     },
+        //     {
+        //       text: 'Recommend actions by analyzing and interpreting data and making comparative analyses; study proposed changes in methods and materials.',
+        //       is_significant: true,
+        //       is_readonly: false,
+        //     },
+        //     {
+        //       text: 'Identify and drive process improvements, including the creation of standard and ad-hoc reports, tools, and Excel dashboards.',
+        //       is_significant: true,
+        //       is_readonly: false,
+        //     },
+        //     {
+        //       text: 'Increase productivity by developing automated reporting/forecasting tools.',
+        //       is_significant: true,
+        //       is_readonly: false,
+        //     },
+        //     {
+        //       text: 'Market research, data mining, business intelligence, and valuation comps.',
+        //       is_significant: true,
+        //       is_readonly: false,
+        //     },
+        //   ],
+        //   program_overview: { value: '', disabled: false, isCustom: false },
+        //   all_organizations: true,
+        //   security_screenings: [],
+        //   optional_requirements: [],
+        //   willingness_statements: [],
+        //   behavioural_competencies: [
+        //     {
+        //       behavioural_competency: {
+        //         id: 17,
+        //         name: 'Business acumen',
+        //         description:
+        //           'is the ability to understand the business implications of decisions and the ability to strive to improve organizational performance. It requires an awareness of business issues, processes and outcomes as they impact the client’s and the organization’s business needs.',
+        //       },
+        //     },
+        //     {
+        //       behavioural_competency: {
+        //         id: 21,
+        //         name: 'Managing organizational resources',
+        //         description:
+        //           'is the ability to understand and effectively manage organizational resources (for example: people, materials, assets, budgets). This is demonstrated through measurement, planning and control of resources to maximize results. It requires an evaluation of qualitative (for example: client satisfaction) and quantitative (for example: service costs) needs.',
+        //       },
+        //     },
+        //     {
+        //       behavioural_competency: {
+        //         id: 23,
+        //         name: 'Problem solving and judgement',
+        //         description:
+        //           'is the ability to analyze problems systematically, organize information, identify key factors, identify underlying causes and generate solutions.',
+        //       },
+        //     },
+        //     {
+        //       behavioural_competency: {
+        //         id: 22,
+        //         name: 'Planning, organizing and coordinating',
+        //         description:
+        //           "involves proactively planning, establishing priorities and allocating resources. It's expressed by developing and implementing increasingly complex plans. It also involves monitoring and adjusting work to accomplish goals and deliver to the organization’s mandate.",
+        //       },
+        //     },
+        //     {
+        //       behavioural_competency: {
+        //         id: 42,
+        //         name: 'Leadership',
+        //         description:
+        //           "implies a desire to lead others, including diverse teams. Leadership is generally, but not always, demonstrated from a position of formal authority. The 'team' here should be understood broadly as any group with which the person interacts regularly.",
+        //       },
+        //     },
+        //   ],
+        //   knowledge_skills_abilities: [],
+        //   professional_registration_requirements: [],
+        // },
         orgchart_json: {
           edges: [
             { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
@@ -3431,14 +3554,7 @@ async function seed() {
         updated_at: new Date(),
         classification_employee_group_id: 'GEU',
         classification_peoplesoft_id: 'BCSET',
-        additional_info: {
-          branch: 'branch2',
-          division: 'division2',
-          department_id: '039-7025',
-          work_location_id: 'V8W1E302',
-          work_location_name: '2nd-777 BROUGHTON',
-          excluded_mgr_position_number: '00129934',
-        },
+        additional_info: Prisma.DbNull,
       },
       {
         crm_id: 54321,
@@ -3849,7 +3965,7 @@ async function seed() {
       {
         crm_id: 67890,
         crm_assigned_to_account_id: 12345,
-        step: 3,
+        step: 4,
         reports_to_position_id: 'POS789',
         department_id: 'DEPT03',
         parent_job_profile_id: profile208.id,
