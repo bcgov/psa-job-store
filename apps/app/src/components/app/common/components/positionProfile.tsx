@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Skeleton, Typography } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
+import { message, Skeleton, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useGetOrganizationQuery } from '../../../../redux/services/graphql-api/organization';
 import { PositionProfileModel, useGetPositionProfileQuery } from '../../../../redux/services/graphql-api/position.api';
@@ -9,7 +10,7 @@ interface PositionProfileProps {
   positionNumber?: number | string | null | undefined;
   positionProfile?: PositionProfileModel;
   prefix?: string;
-  mode?: 'compact' | 'compact2' | 'full';
+  mode?: 'compact' | 'compact2' | 'contact' | 'full';
   unOccupiedText?: string;
   loadingStyle?: 'spinner' | 'skeleton';
   orgChartData?: any;
@@ -32,7 +33,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
     {
       positionNumber: positionNumber?.toString() ?? '',
     },
-    { skip: (positionNumber?.toString() ?? '') == '' || orgChartData != null || positionProfile != null },
+    { skip: (positionNumber?.toString() ?? '') == '' },
   );
   // const [getPositionProfile, { data: positionProfileData, isFetching, error: positionProfileError }] =
   //   useLazyGetPositionProfileQuery();
@@ -62,6 +63,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
         if (firstActiveEmployee) {
           setFirstActivePosition({
             employeeName: firstActiveEmployee.name,
+            employeeEmail: firstActiveEmployee.email,
             ministry: node.data.department.organization_id || '',
             positionDescription: node.data.title,
             departmentName: node.data.department.name,
@@ -114,6 +116,21 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
                 {`${firstActivePosition.positionDescription} · ${firstActivePosition.departmentName}`}
               </Typography.Text>
             </h1>
+          ) : mode === 'contact' ? (
+            <div>
+              {/* {JSON.stringify(firstActivePosition)} */}
+              {firstActivePosition.employeeName}, {firstActivePosition.ministry}
+              <a href={`mailto:${firstActivePosition.employeeEmail}`}>{firstActivePosition.employeeEmail}</a>
+              {firstActivePosition.employeeEmail && (
+                <CopyOutlined
+                  onClick={() => {
+                    navigator.clipboard.writeText(firstActivePosition.employeeEmail || '');
+                    message.success('Email copied to clipboard');
+                  }}
+                  style={{ cursor: 'pointer' }}
+                />
+              )}
+            </div>
           ) : (
             <div>
               <p style={{ margin: 0 }}>{`${firstActivePosition.employeeName}, ${ministryName}`}</p>
