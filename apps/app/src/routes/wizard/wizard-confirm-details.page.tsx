@@ -86,6 +86,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   // const [createJobProfile] = useCreateJobProfileMutation();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(null);
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [isFormModified, setIsFormModified] = useState(false);
   const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
@@ -347,7 +348,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         // const dept = departmentsData?.find((dept) => dept.id === positionRequestData?.department_id);
         // setValue('workLocation', dept?.location.id + '|' + dept?.location.name);
       }
-      setValue('payListDepartmentId', department_id || positionRequestData?.department_id || null);
+      const setDeptIdVal = department_id || positionRequestData?.department_id || null;
+      setValue('payListDepartmentId', setDeptIdVal);
 
       const { orgchart_json, reports_to_position_id } = positionRequest ?? {
         orgchart_json: undefined,
@@ -367,6 +369,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         // fetch only if excluded manager wasn't previously set,  otherwise causes a double fetch because of the uniqueKey = true
         debouncedFetchPositionProfile(useExcludedMngr);
       }
+
+      setSelectedDepartmentId(setDeptIdVal);
     }
   }, [positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
 
@@ -465,7 +469,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
           <StatusIndicator status={positionRequest?.status ?? ''} />
         </div>,
         <AccessiblePopoverMenu
-          triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+          triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
           content={getMenuContent()}
           ariaLabel="Open position request menu"
         ></AccessiblePopoverMenu>,
@@ -505,7 +509,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       ></WizardSteps>
 
       <WizardContentWrapper>
-        <Row justify="center" gutter={16} role="form" aria-label="additional information">
+        <Row
+          justify="center"
+          gutter={16}
+          role="form"
+          aria-label="additional information"
+          data-testid="additional-information-form"
+        >
           <Col sm={24} md={24} lg={24} xxl={18}>
             <Row justify="center">
               <Col xs={24} sm={24} md={24} lg={24} xl={24}>
@@ -535,6 +545,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                           // labelCol={{ className: 'card-label' }}
                           validateStatus={errors.payListDepartmentId ? 'error' : ''}
                           help={errors.payListDepartmentId?.message}
+                          data-testid="department-select"
                         >
                           <DepartmentFilter
                             setDepartmentId={() => {}}
@@ -546,12 +557,10 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                   'workLocation',
                                   dept.metadata?.location_id + '|' + dept.metadata?.location_name || null,
                                 );
+                                setSelectedDepartmentId(deptId);
                               }
                             }}
-                            departmentId={(() => {
-                              const ret = getValues('payListDepartmentId') ?? '';
-                              return ret;
-                            })()}
+                            departmentId={selectedDepartmentId}
                             // loading={profileDataIsFetching}
                           />
                           {/* <Controller
@@ -705,7 +714,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                           validateStatus={errors.branch ? 'error' : ''}
                           help={errors.branch?.message}
                         >
-                          <Controller name="branch" control={control} render={({ field }) => <Input {...field} />} />
+                          <Controller
+                            name="branch"
+                            control={control}
+                            render={({ field }) => <Input data-testid="branch-input" {...field} />}
+                          />
                         </Form.Item>
 
                         <Form.Item
@@ -714,7 +727,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                           validateStatus={errors.division ? 'error' : ''}
                           help={errors.division?.message}
                         >
-                          <Controller name="division" control={control} render={({ field }) => <Input {...field} />} />
+                          <Controller
+                            name="division"
+                            control={control}
+                            render={({ field }) => <Input data-testid="division-input" {...field} />}
+                          />
                         </Form.Item>
                       </Col>
                     </Row>

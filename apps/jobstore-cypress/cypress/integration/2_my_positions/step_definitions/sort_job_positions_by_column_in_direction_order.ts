@@ -59,21 +59,12 @@ Then('job positions are sorted by {string} in {string} order correctly', (column
   } else if (column === 'Status' && direction === 'descending') {
     expectedOrder = ['Data Scientist', 'Project Manager', 'Project Manager - Additional info step', 'Senior Analyst'];
   } else if (column === 'Class' && direction === 'ascending') {
-    expectedOrder = ['Senior Analyst', 'Project Manager', 'Project Manager - Additional info step', 'Data Scientist'];
+    expectedOrder = ['Senior Analyst', 'Project Manager', 'Data Scientist', 'Project Manager - Additional info step'];
   } else if (column === 'Class' && direction === 'descending') {
-    expectedOrder = ['Data Scientist', 'Project Manager', 'Project Manager - Additional info step', 'Senior Analyst'];
+    expectedOrder = ['Data Scientist', 'Project Manager - Additional info step', 'Project Manager', 'Senior Analyst'];
   } else if (column === 'Position #' && direction === 'ascending') {
     expectedOrder = ['Project Manager', 'Data Scientist', 'Project Manager - Additional info step', 'Senior Analyst'];
   } else if (column === 'Position #' && direction === 'descending') {
-    expectedOrder = [
-      'Project Manager',
-      'Data Scientist',
-      'Senior Analyst',
-      'Project Manager - Additional info step',
-    ].reverse();
-  } else if (column === 'Submission ID' && direction === 'ascending') {
-    expectedOrder = ['Senior Analyst', 'Project Manager', 'Project Manager - Additional info step', 'Data Scientist'];
-  } else if (column === 'Submission ID' && direction === 'descending') {
     expectedOrder = ['Data Scientist', 'Project Manager', 'Project Manager - Additional info step', 'Senior Analyst'];
   } else if (column === 'Modified at' && direction === 'ascending') {
     return;

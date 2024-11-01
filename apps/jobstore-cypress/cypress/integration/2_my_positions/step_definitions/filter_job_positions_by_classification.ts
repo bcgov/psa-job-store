@@ -7,12 +7,12 @@ When('the user selects a classification from the classification filter dropdown'
   // Then, select the option. Given the HTML structure, use the correct selector.
   cy.get('.ant-select-dropdown:not(.ant-select-dropdown-hidden)') // Ensure the dropdown is not hidden
     .find('.ant-select-item-option-content') // Find the option by its content container
-    .contains('ENG') // Match the option text
+    .contains('SPV 15R') // Match the option text
     .click(); // Click the option
 });
 
 Then('only job positions with the selected classification should be displayed', () => {
   // Use a more specific selector if possible to narrow down the search and improve test reliability
   cy.get('[data-testid^="classification-"]', { timeout: 10000 }) // Extend timeout to wait for the UI update
-    .should('contain', 'ENG'); // Ensure the element contains the text 'Draft'
+    .should('contain', 'SPV 15R'); // Ensure the element contains the text 'Draft'
 });

@@ -97,7 +97,7 @@ const Preferences: React.FC<PreferencesProps> = ({
         <Row>
           <Col>
             <WizardEditAddButton
-              testId="add-prof-reg-button"
+              testId="add-preference-button"
               onClick={() => {
                 handleAddNew();
               }}

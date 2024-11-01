@@ -149,8 +149,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const linkToCopy = `${window.location.origin}/requests/positions/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    // if (import.meta.env.VITE_TEST_ENV !== 'true')
-    copy(linkToCopy);
+    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
     message.success('Link copied to clipboard!');
     setSelectedKeys([]);
   };
@@ -203,7 +202,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                     View
                   </Link>
                 </Menu.Item>
-                <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
+                <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />} data-testid="menu-option-download">
                   <DownloadJobProfileComponent positionRequestId={record.id}>Download</DownloadJobProfileComponent>
                 </Menu.Item>
                 <Menu.Item
@@ -256,7 +255,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             >
               View
             </Menu.Item>
-            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
+            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />} data-testid="menu-option-download">
               <DownloadJobProfileComponent positionRequestId={record.id}>Download</DownloadJobProfileComponent>
             </Menu.Item>
             <Menu.Item
@@ -280,7 +279,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             >
               View
             </Menu.Item>
-            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />}>
+            <Menu.Item key="download" icon={<DownloadOutlined aria-hidden />} data-testid="menu-option-download">
               <DownloadJobProfileComponent positionRequestId={record.id}>Download</DownloadJobProfileComponent>
             </Menu.Item>
           </>
@@ -512,8 +511,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                         background: 'transparent',
                       }}
                       onClick={() => {
-                        // if (import.meta.env.VITE_TEST_ENV !== 'true')
-                        copy(valueString);
+                        if (import.meta.env.VITE_TEST_ENV !== 'true') copy(valueString);
                         message.success('Position number copied!');
                       }}
                     />

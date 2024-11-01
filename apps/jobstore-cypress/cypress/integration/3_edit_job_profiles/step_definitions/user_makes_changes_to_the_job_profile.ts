@@ -121,20 +121,20 @@ Then('the first job education should not be editable', () => {
   cy.get('[data-testid="readonly-education-0"]').should('exist');
 
   // Check if the delete button for the first job education is present and disabled
-  cy.get('[data-testid="remove-education-0"]').should('be.disabled');
+  cy.get('[data-testid="remove-education and work experience-0"]').should('be.disabled');
 });
 
 // Removes the last two default job educations
 When('the user removes the last two default job educations', () => {
-  cy.get('[data-testid="remove-education-7"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-education and work experience-7"]').click(); // Adjust index as needed
   cy.get('[data-testid="education-warning"]').should('exist');
   cy.contains('button', 'Proceed').click();
-  cy.get('[data-testid="remove-education-8"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-education and work experience-8"]').click(); // Adjust index as needed
 });
 
 // Undoes removal of the last job education
 When('the user undoes the removal of the last job education', () => {
-  cy.get('[data-testid="undo-remove-education-8"]').click();
+  cy.get('[data-testid="undo-remove-education and work experience-8"]').click();
 });
 
 // Adds a new required job education "Ensure compliance with financial regulations"
@@ -145,7 +145,7 @@ When('the user adds a new required job education "Ensure compliance with financi
 
 // Deletes the newly added job education "Ensure compliance with financial regulations"
 When('the user deletes the newly added job education "Ensure compliance with financial regulations"', () => {
-  cy.get('[data-testid="remove-education-9"]').click(); // Adjust identifier as needed
+  cy.get('[data-testid="remove-education and work experience-9"]').click(); // Adjust identifier as needed
   // Now, click the OK button in the confirmation dialog
   cy.contains('button', 'OK').click();
   cy.wait(200);
@@ -163,20 +163,20 @@ When('the user adds a new required job education "Oversee financial auditing pro
 // Check if the first related experience is not editable
 Then('the first related experience should not be editable', () => {
   cy.get('[data-testid="readonly-job-experience-0"]').should('exist');
-  cy.get('[data-testid="remove-job-experience-0"]').should('be.disabled');
+  cy.get('[data-testid="remove-job experience-0"]').should('be.disabled');
 });
 
 // Removes the last two default related experiences
 When('the user removes the last two default related experiences', () => {
-  cy.get('[data-testid="remove-job-experience-1"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-job experience-1"]').click(); // Adjust index as needed
   cy.get('[data-testid="experience-warning"]').should('exist');
   cy.contains('button', 'Proceed').click();
-  cy.get('[data-testid="remove-job-experience-2"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-job experience-2"]').click(); // Adjust index as needed
 });
 
 // Undoes removal of the last related experience
 When('the user undoes the removal of the last related experience', () => {
-  cy.get('[data-testid="undo-remove-job-experience-2"]').click();
+  cy.get('[data-testid="undo-remove-job experience-2"]').click();
 });
 
 // Adds a new required related experience "Coordinate cross-departmental projects"
@@ -187,7 +187,7 @@ When('the user adds a new required related experience "Coordinate cross-departme
 
 // Deletes the newly added related experience "Coordinate cross-departmental projects"
 When('the user deletes the newly added related experience "Coordinate cross-departmental projects"', () => {
-  cy.get('[data-testid="remove-job-experience-3"]').click(); // Adjust identifier as needed
+  cy.get('[data-testid="remove-job experience-3"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
   cy.wait(200);
 });
@@ -203,21 +203,23 @@ When('the user adds a new required related experience "Implement strategic plann
 
 // Removes the last two default professional registration requirements
 When('the user removes the last two default professional registration requirements', () => {
-  cy.get('[data-testid="remove-professional-registration-0"]').click(); // Adjust index as needed
-  cy.get('[data-testid="remove-professional-registration-1"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-professional registration and certification requirements-0"]').click(); // Adjust index as needed
+  cy.get('[data-testid="prof-reg-warning"]').should('exist');
+  cy.contains('button', 'Proceed').click();
+  cy.get('[data-testid="remove-professional registration and certification requirements-1"]').click(); // Adjust index as needed
 });
 
 // Undoes removal of the last professional registration requirement
 When('the user undoes the removal of the last professional registration requirement', () => {
-  cy.get('[data-testid="undo-remove-professional-registration-1"]').click();
+  cy.get('[data-testid="undo-remove-professional registration and certification requirements-1"]').click();
 });
 
 // Adds a new required professional registration requirement "Maintain annual membership with the national engineering association"
 When(
   'the user adds a new required professional registration requirement "Maintain annual membership with the national engineering association"',
   () => {
-    cy.get('[data-testid="add-professional-registration-button"]').click();
-    cy.get('[data-testid="professional-registration-input-2"]').type(
+    cy.get('[data-testid="add-prof-reg-button"]').click();
+    cy.get('[data-testid="professional_registration_requirements-input-2"]').type(
       'Maintain annual membership with the national engineering association',
     );
   },
@@ -227,7 +229,7 @@ When(
 When(
   'the user deletes the newly added professional registration requirement "Maintain annual membership with the national engineering association"',
   () => {
-    cy.get('[data-testid="remove-professional-registration-2"]').click(); // Adjust identifier as needed
+    cy.get('[data-testid="remove-professional registration and certification requirements-2"]').click(); // Adjust identifier as needed
     cy.contains('button', 'OK').click();
     cy.wait(200);
   },
@@ -237,9 +239,9 @@ When(
 When(
   'the user adds a new required professional registration requirement "Achieve certification in project management within two years"',
   () => {
-    cy.get('[data-testid="add-professional-registration-button"]').click();
-    cy.get('[data-testid="professional-registration-input-2"]').click(); // Assuming this click is to focus before typing
-    cy.get('[data-testid="professional-registration-input-2"]').type(
+    cy.get('[data-testid="add-prof-reg-button"]').click();
+    cy.get('[data-testid="professional_registration_requirements-input-2"]').click(); // Assuming this click is to focus before typing
+    cy.get('[data-testid="professional_registration_requirements-input-2"]').type(
       'Achieve certification in project management within two years',
     );
   },
@@ -249,24 +251,24 @@ When(
 
 // Removes the last two default preferences
 When('the user removes the last two default preferences', () => {
-  cy.get('[data-testid="remove-preference-0"]').click(); // Adjust index as needed
-  cy.get('[data-testid="remove-preference-1"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-preferences-0"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-preferences-1"]').click(); // Adjust index as needed
 });
 
 // Undoes removal of the last preference
 When('the user undoes the removal of the last preference', () => {
-  cy.get('[data-testid="undo-remove-preference-1"]').click();
+  cy.get('[data-testid="undo-remove-preferences-1"]').click();
 });
 
 // Adds a new required preference "Remote work flexibility"
 When('the user adds a new required preference "Remote work flexibility"', () => {
   cy.get('[data-testid="add-preference-button"]').click();
-  cy.get('[data-testid="preference-input-2"]').type('Remote work flexibility');
+  cy.get('[data-testid="preferences-input-2"]').type('Remote work flexibility');
 });
 
 // Deletes the newly added preference "Remote work flexibility"
 When('the user deletes the newly added preference "Remote work flexibility"', () => {
-  cy.get('[data-testid="remove-preference-2"]').click(); // Adjust identifier as needed
+  cy.get('[data-testid="remove-preferences-2"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
   cy.wait(200);
 });
@@ -274,32 +276,32 @@ When('the user deletes the newly added preference "Remote work flexibility"', ()
 // Adds a new required preference "Access to continuous learning resources"
 When('the user adds a new required preference "Access to continuous learning resources"', () => {
   cy.get('[data-testid="add-preference-button"]').click();
-  cy.get('[data-testid="preference-input-2"]').click(); // Assuming this click is to focus before typing
-  cy.get('[data-testid="preference-input-2"]').type('Access to continuous learning resources');
+  cy.get('[data-testid="preferences-input-2"]').click(); // Assuming this click is to focus before typing
+  cy.get('[data-testid="preferences-input-2"]').type('Access to continuous learning resources');
 });
 
 // KNOWLEDGE, SKILLS AND ABILITIES
 
 // Removes the last two default knowledge, skills, or abilities
 When('the user removes the last two default knowledge, skills, or abilities', () => {
-  cy.get('[data-testid="remove-knowledge-skills-ability-0"]').click(); // Adjust index as needed
-  cy.get('[data-testid="remove-knowledge-skills-ability-1"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-knowledge skills and abilities-0"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-knowledge skills and abilities-1"]').click(); // Adjust index as needed
 });
 
 // Undoes removal of the last knowledge, skill, or ability
 When('the user undoes the removal of the last knowledge, skill, or ability', () => {
-  cy.get('[data-testid="undo-remove-knowledge-skills-ability-1"]').click();
+  cy.get('[data-testid="undo-remove-knowledge skills and abilities-1"]').click();
 });
 
 // Adds a new required knowledge, skill, or ability "Advanced data analysis proficiency"
 When('the user adds a new required knowledge, skill, or ability "Advanced data analysis proficiency"', () => {
   cy.get('[data-testid="add-knowledge-skills-ability-button"]').click();
-  cy.get('[data-testid="knowledge-skills-ability-input-2"]').type('Advanced data analysis proficiency');
+  cy.get('[data-testid="knowledge_skills_abilities-input-2"]').type('Advanced data analysis proficiency');
 });
 
 // Deletes the newly added knowledge, skill, or ability "Advanced data analysis proficiency"
 When('the user deletes the newly added knowledge, skill, or ability "Advanced data analysis proficiency"', () => {
-  cy.get('[data-testid="remove-knowledge-skills-ability-2"]').click(); // Adjust identifier as needed
+  cy.get('[data-testid="remove-knowledge skills and abilities-2"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
   cy.wait(200);
 });
@@ -307,21 +309,21 @@ When('the user deletes the newly added knowledge, skill, or ability "Advanced da
 // Adds a new required knowledge, skill, or ability "Expertise in cloud computing technologies"
 When('the user adds a new required knowledge, skill, or ability "Expertise in cloud computing technologies"', () => {
   cy.get('[data-testid="add-knowledge-skills-ability-button"]').click();
-  cy.get('[data-testid="knowledge-skills-ability-input-2"]').click(); // Assuming this click is to focus before typing
-  cy.get('[data-testid="knowledge-skills-ability-input-2"]').type('Expertise in cloud computing technologies');
+  cy.get('[data-testid="knowledge_skills_abilities-input-2"]').click(); // Assuming this click is to focus before typing
+  cy.get('[data-testid="knowledge_skills_abilities-input-2"]').type('Expertise in cloud computing technologies');
 });
 
 // PROVISOS
 
 // Removes the last two default willingness statements or provisos
 When('the user removes the last two default willingness statements or provisos', () => {
-  cy.get('[data-testid="remove-proviso-0"]').click(); // Adjust index as needed
-  cy.get('[data-testid="remove-proviso-1"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-provisos-0"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-provisos-1"]').click(); // Adjust index as needed
 });
 
 // Undoes removal of the last willingness statement or proviso
 When('the user undoes the removal of the last willingness statement or proviso', () => {
-  cy.get('[data-testid="undo-remove-proviso-1"]').click();
+  cy.get('[data-testid="undo-remove-provisos-1"]').click();
 });
 
 // Adds a new required willingness statement or proviso "Willing to relocate to different offices as needed"
@@ -329,7 +331,7 @@ When(
   'the user adds a new required willingness statement or proviso "Willing to relocate to different offices as needed"',
   () => {
     cy.get('[data-testid="add-proviso-button"]').click();
-    cy.get('[data-testid="proviso-input-2"]').type('Willing to relocate to different offices as needed');
+    cy.get('[data-testid="provisos-input-2"]').type('Willing to relocate to different offices as needed');
   },
 );
 
@@ -337,7 +339,7 @@ When(
 When(
   'the user deletes the newly added willingness statement or proviso "Willing to relocate to different offices as needed"',
   () => {
-    cy.get('[data-testid="remove-proviso-2"]').click(); // Adjust identifier as needed
+    cy.get('[data-testid="remove-provisos-2"]').click(); // Adjust identifier as needed
     cy.contains('button', 'OK').click();
     cy.wait(200);
   },
@@ -348,8 +350,8 @@ When(
   'the user adds a new required willingness statement or proviso "Available for on-call duties during weekends"',
   () => {
     cy.get('[data-testid="add-proviso-button"]').click();
-    cy.get('[data-testid="proviso-input-2"]').click(); // Assuming this click is to focus before typing
-    cy.get('[data-testid="proviso-input-2"]').type('Available for on-call duties during weekends');
+    cy.get('[data-testid="provisos-input-2"]').click(); // Assuming this click is to focus before typing
+    cy.get('[data-testid="provisos-input-2"]').type('Available for on-call duties during weekends');
   },
 );
 
@@ -357,32 +359,32 @@ When(
 
 // Check if the first security screening is not editable
 Then('the first security screening should not be editable', () => {
-  cy.get('[data-testid="readonly-security-screening-0"]').should('exist');
-  cy.get('[data-testid="remove-security-screening-0"]').should('be.disabled');
+  cy.get('[data-testid="readonly-security_screenings-0"]').should('exist');
+  cy.get('[data-testid="remove-security screening-0"]').should('be.disabled');
 });
 
 // Removes the last two default security screenings
 When('the user removes the last two default security screenings', () => {
-  cy.get('[data-testid="remove-security-screening-1"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-security screening-1"]').click(); // Adjust index as needed
   cy.get('[data-testid="security-warning"]').should('exist');
   cy.contains('button', 'Proceed').click();
-  cy.get('[data-testid="remove-security-screening-2"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-security screening-2"]').click(); // Adjust index as needed
 });
 
 // Undoes removal of the last security screening
 When('the user undoes the removal of the last security screening', () => {
-  cy.get('[data-testid="undo-remove-security-screening-2"]').click();
+  cy.get('[data-testid="undo-remove-security screening-2"]').click();
 });
 
 // Adds a new required security screening "Must pass a comprehensive background check"
 When('the user adds a new required security screening "Must pass a comprehensive background check"', () => {
   cy.get('[data-testid="add-security-screening-button"]').click();
-  cy.get('[data-testid="security-screening-input-3"]').type('Must pass a comprehensive background check');
+  cy.get('[data-testid="security_screenings-input-3"]').type('Must pass a comprehensive background check');
 });
 
 // Deletes the newly added security screening "Must pass a comprehensive background check"
 When('the user deletes the newly added security screening "Must pass a comprehensive background check"', () => {
-  cy.get('[data-testid="remove-security-screening-3"]').click(); // Adjust identifier as needed
+  cy.get('[data-testid="remove-security screening-3"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
   cy.wait(200);
 });
@@ -390,21 +392,21 @@ When('the user deletes the newly added security screening "Must pass a comprehen
 // Adds a new required security screening "Requires clearance at the top-secret level"
 When('the user adds a new required security screening "Requires clearance at the top-secret level"', () => {
   cy.get('[data-testid="add-security-screening-button"]').click();
-  cy.get('[data-testid="security-screening-input-3"]').click(); // Assuming this click is to focus before typing
-  cy.get('[data-testid="security-screening-input-3"]').type('Requires clearance at the top-secret level');
+  cy.get('[data-testid="security_screenings-input-3"]').click(); // Assuming this click is to focus before typing
+  cy.get('[data-testid="security_screenings-input-3"]').type('Requires clearance at the top-secret level');
 });
 
 // OPTIONAL REQUIREMENTS
 
 // Removes the last two default optional requirements
 When('the user removes the last two default optional requirements', () => {
-  cy.get('[data-testid="remove-optional-requirement-0"]').click(); // Adjust index as needed
-  cy.get('[data-testid="remove-optional-requirement-1"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-Other requirements-0"]').click(); // Adjust index as needed
+  cy.get('[data-testid="remove-Other requirements-1"]').click(); // Adjust index as needed
 });
 
 // Undoes removal of the last optional requirement
 When('the user undoes the removal of the last optional requirement', () => {
-  cy.get('[data-testid="undo-remove-optional-requirement-1"]').click();
+  cy.get('[data-testid="undo-remove-Other requirements-1"]').click();
 });
 
 // Adds a new required optional requirement "Familiarity with agile methodologies"
@@ -415,7 +417,7 @@ When('the user adds a new required optional requirement "Familiarity with agile 
 
 // Deletes the newly added optional requirement "Familiarity with agile methodologies"
 When('the user deletes the newly added optional requirement "Familiarity with agile methodologies"', () => {
-  cy.get('[data-testid="remove-optional-requirement-2"]').click(); // Adjust identifier as needed
+  cy.get('[data-testid="remove-Other requirements-2"]').click(); // Adjust identifier as needed
   cy.contains('button', 'OK').click();
   cy.wait(200);
 });

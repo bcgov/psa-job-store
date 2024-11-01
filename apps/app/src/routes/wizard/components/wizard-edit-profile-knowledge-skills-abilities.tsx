@@ -112,7 +112,7 @@ const KnowledgeSkillsAbilities: React.FC<KnowledgeSkillsAbilitiesProps> = ({
           </Col> */}
           <Col>
             <WizardEditAddButton
-              testId="add-prof-reg-button"
+              testId="add-knowledge-skills-ability-button"
               onClick={() => {
                 handleAddNew();
               }}

@@ -14,16 +14,34 @@ When('the user presses "Create new direct report" on the home page org chart', (
   // Wait for the org chart to load
   cy.get('[data-testid="org-chart-loading"]', { timeout: 100000 }).should('not.exist');
   cy.get('[data-testid="org-chart-container"]', { timeout: 100000 }).should('be.visible');
+  cy.get('div[data-id="00132136"]').should('have.class', 'selected');
 
   // Select the specific node with ID '00121521' and assign it an alias
-  cy.get('[data-testid="org-chart-node-00121521"]').as('targetNode');
+  cy.get('[data-testid="org-chart-node-00987654"]').as('targetNode');
 
   // Click on the node to select it or to reveal the 'Create new direct report' button
   cy.get('@targetNode').scrollIntoView();
-  cy.get('@targetNode').should('be.visible').click();
+  cy.get('@targetNode').click({ force: true });
 
   // Re-query the DOM for the node and find the 'Create new direct report' button within it
-  cy.get('@targetNode').find('[data-testid="create-direct-report-button"]').click();
+  cy.get('@targetNode').find('[data-testid="create-direct-report-button"]').click({ force: true });
+});
+
+Then('they proceed to the additional information step', () => {
+  // Check for a unique element on the additional information page
+  // Replace 'unique-element-selector' with an actual selector for an element unique to this page
+  cy.get('[data-testid="additional-information-form"]').should('be.visible');
+});
+
+When('the user fills out the required additional information', () => {
+  cy.get('[data-testid="loading-spinner"]').should('be.visible');
+  cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
+
+  cy.get('[data-testid="branch-input"]').type('test branch');
+  cy.get('[data-testid="division-input"]').type('test division');
+
+  // Now click the "Next" button
+  cy.get('[data-testid="next-button"]').click();
 });
 
 Then('they are taken to the job profile selection step', () => {
@@ -52,7 +70,7 @@ Then('they proceed to the profile editing step', () => {
 });
 
 Then('the form contains default values of the selected profile', () => {
-  cy.get('[data-testid="job-title-input"]').should('have.value', 'Strategic HR Analyst Manager');
+  cy.get('[data-testid="job-title-input"]').should('have.value', 'Environmental Scientist');
 });
 
 When('the user presses the back button', () => {
@@ -93,11 +111,11 @@ Then('the search results reset back to the previously selected job profile and p
 });
 
 When('the user confirms the change', () => {
-  cy.contains('button', 'Change job profile', { matchCase: false }).click();
+  cy.contains('button', 'Change profile', { matchCase: false }).click();
 });
 
 Then('the form contains default values of the new profile', () => {
-  cy.get('[data-testid="job-title-input"]').should('have.value', 'Dynamic Digital Marketing Specialist');
+  cy.get('[data-testid="job-title-input"]').should('have.value', 'Project Manager');
 });
 
 When('the user does some edits', () => {

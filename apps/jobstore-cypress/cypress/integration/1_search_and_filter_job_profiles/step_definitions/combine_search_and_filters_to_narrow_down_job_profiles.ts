@@ -1,7 +1,7 @@
 import { Then, When } from '@badeball/cypress-cucumber-preprocessor';
 
-When('the user selects "Financial Officer R15" from the classification filter dropdown', () => {
-  const classification = 'Financial Officer R15';
+When('the user selects "Communications Officer R30" from the classification filter dropdown', () => {
+  const classification = 'Communications Officer R30';
 
   // Click the dropdown to open it
   cy.get('[data-cy="Classification-filter"]').find('.react-select__input-container').click();

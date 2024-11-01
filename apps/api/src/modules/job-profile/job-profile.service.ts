@@ -29,6 +29,7 @@ export class JobProfileService {
   ) {
     // if searchConditions were provided, do a "dumb" search instead of elastic search
     let searchResultIds = null;
+    // console.log('searchConditions: ', searchConditions, search);
     if (!searchConditions) searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
     const currentJobProfiles =
@@ -47,6 +48,9 @@ export class JobProfileService {
     //     }),
     //   ),
     // );
+
+    // console.log('where arg: ', where);
+    // console.log('args: ', args);
 
     return this.prisma.jobProfile.findMany({
       where: {

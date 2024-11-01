@@ -457,7 +457,10 @@ export const DynamicOrgChart = ({
         </Col>
       </Row>
       {orgChartDataIsFetching || !initialized ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
+        <div
+          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}
+          data-testid="org-chart-loading"
+        >
           <Spin spinning style={{ margin: 'auto' }} />
         </div>
       ) : (

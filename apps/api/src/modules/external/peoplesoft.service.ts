@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SearchIndex, SearchService } from '../search/search.service';
 import { Employee } from './models/employee.model';
 import { PositionCreateInput } from './models/position-create.input';
+import { UpdateMockPositionInput } from './peoplesoft.mock.resolver';
 
 enum Endpoint {
   Classifications = 'PJS_TGB_REST_JOB_CODE',
@@ -443,6 +444,9 @@ export class PeoplesoftService {
 
     return response;
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async updateMockPosition(positionNbr: string, data: UpdateMockPositionInput) {}
 
   async createPosition(data: PositionCreateInput) {
     const response = await firstValueFrom(

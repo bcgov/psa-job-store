@@ -9,7 +9,7 @@ Given('the user navigates to the job search page', () => {
 });
 
 When('the user selects a classification from the classification filter dropdown', () => {
-  const classification = 'Clerk R9';
+  const classification = 'Information Systems R30';
 
   // Click the dropdown to open it
   cy.get('[data-cy="Classification-filter"]').find('.react-select__input-container').click();
@@ -34,7 +34,7 @@ When('the user selects a classification from the classification filter dropdown'
 });
 
 Then('only job profiles classified under that selected classification should be displayed', () => {
-  const classification = 'Clerk R9';
+  const classification = 'Information Systems R30';
 
   cy.get('[data-cy="search-results-list"]').find('li').should('have.length', 1);
   cy.get('[data-cy="search-results-list"]')

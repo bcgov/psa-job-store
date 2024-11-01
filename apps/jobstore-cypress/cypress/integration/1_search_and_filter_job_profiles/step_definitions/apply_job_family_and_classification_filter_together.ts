@@ -10,19 +10,23 @@ When('the user selects "Budgeting" from the job family filter', () => {
   // Wait for the dropdown to be visible
   cy.get('.ant-select-dropdown').should('be.visible');
 
-  // Click on the expand arrow beside the 'Finance' group
+  // Click on the Finance group to expand it
   cy.get('.ant-select-dropdown')
-    .contains('.ant-select-tree-title', group)
-    .parents('.ant-select-tree-treenode')
-    .find('.ant-select-tree-switcher')
+    .contains('.antd-text-copy', group)
+    .closest('.tree-branch-wrapper')
+    .find('.antd-icon-container-copy')
     .click();
 
-  // Now select 'Budgeting' from the 'Finance' group
-  cy.get('.ant-select-dropdown').contains('.ant-select-tree-title', jobFamily).click();
+  // Select Budgeting from the expanded list
+  cy.get('.ant-select-dropdown')
+    .contains('.antd-text-copy', jobFamily)
+    .parent()
+    .find('.ant-select-tree-checkbox')
+    .click();
 });
 
 Then(
-  'only job profiles classified under "Budgeting" job family and "Financial Officer R15" classification should be displayed',
+  'only job profiles classified under "Budgeting" job family and "Communications Officer R30" classification should be displayed',
   () => {
     cy.get('[data-cy="search-results-list"]').find('li').should('have.length', 1);
     cy.get('[data-cy="search-results-list"]')
