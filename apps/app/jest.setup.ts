@@ -11,6 +11,7 @@ const {
   VITE_KEYCLOAK_REDIRECT_URL,
   VITE_SUPPORT_EMAIL,
   VITE_ENV,
+  VITE_TEST_ENV,
 } = process.env;
 
 jest.mock('./envConfig', () => ({
@@ -20,6 +21,7 @@ jest.mock('./envConfig', () => ({
   VITE_KEYCLOAK_REDIRECT_URL: VITE_KEYCLOAK_REDIRECT_URL,
   VITE_SUPPORT_EMAIL: VITE_SUPPORT_EMAIL,
   VITE_ENV: VITE_ENV,
+  VITE_TEST_ENV: VITE_TEST_ENV,
 }));
 
 // jest.mock('../../redux/services/graphql-api', () => ({
