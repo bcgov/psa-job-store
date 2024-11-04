@@ -60,4 +60,14 @@ jobs:
           api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
           project: ${{ needs.metadata.outputs.changed-apps }}
           environment: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
-
+      - name: Trigger E2E Tests
+        if: success() && github.event.client_payload.ref_name == 'dev'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'e2e.yml',
+              ref: '${{ github.event.client_payload.ref }}'
+            })
