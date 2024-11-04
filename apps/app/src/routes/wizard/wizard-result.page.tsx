@@ -251,7 +251,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           try {
             png = await generatePNGBase64(getNodes);
           } catch (error) {
-            console.error('Error generating PNG: ', error);
+            console.error('Error generating PNG..: ', error);
           }
 
         const result = await submitPositionRequest({
