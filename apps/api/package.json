@@ -8,7 +8,7 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "lint-generated": "eslint \"src/@generated/**/*.ts\" --fix",
     "migrate:reset:e2e-test": "cross-env SEED_FILE=prisma/e2e-test-data-seed.ts npx prisma migrate reset",
-    "run:script": "node dist/src/migrations/add-email.js",
+    "run:script": "node dist/migrations/add-email.js",
     "start": "nest start",
     "start:debug": "nest start --debug --watch",
     "start:dev": "nest start --watch",
