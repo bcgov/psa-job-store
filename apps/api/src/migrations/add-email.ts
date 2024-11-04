@@ -2,6 +2,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { Prisma } from '@prisma/client';
 import { ExternalModule } from '../modules/external/external.module';
 import { PositionService } from '../modules/external/position.service';
 import { OrganizationModule } from '../modules/organization/organization.module';
@@ -64,7 +65,7 @@ interface PositionProfile {
 }
 
 async function runScript() {
-  console.log('start script');
+  console.log('start script 3');
   const app = await NestFactory.createApplicationContext(ScriptModule);
   // Use the services from the app
   const positionService = app.get(PositionService);
@@ -76,27 +77,32 @@ async function runScript() {
       console.log(pr.id + ' ' + pr.status);
       //
       const reportsTo = pr.reports_to_position as PositionProfile | null;
-      const exclMgr = pr.excluded_manager_position as PositionProfile | null;
-      const reportsToData = (await positionService.getPositionProfile(reportsTo?.positionNumber, true))[0];
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const excludedMgrData = (await positionService.getPositionProfile(exclMgr?.positionNumber, true))[0];
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (reportsTo?.positionNumber) {
+        const reportsToData = (await positionService.getPositionProfile(reportsTo?.positionNumber, true))[0];
+        // await new Promise((resolve) => setTimeout(resolve, 500));
+        reportsTo.employeeEmail = reportsToData?.employeeEmail;
+      }
 
-      reportsTo.employeeEmail = reportsToData?.employeeEmail;
-      exclMgr.employeeEmail = excludedMgrData?.employeeEmail;
+      const exclMgr = pr.excluded_manager_position as PositionProfile | null;
+      if (exclMgr?.positionNumber) {
+        const excludedMgrData = (await positionService.getPositionProfile(exclMgr?.positionNumber, true))[0];
+        // await new Promise((resolve) => setTimeout(resolve, 500));
+        exclMgr.employeeEmail = excludedMgrData?.employeeEmail;
+      }
+
       // !additional_info.work_location_name
       //   ? console.log('no location name found for ' + additional_info?.work_location_id + ' ' + pr.department_id)
       //   : console.log(' new work_location_name: ' + JSON.stringify(additional_info?.work_location_name));
-      // await prisma.positionRequest.update({
-      //   where: { id: pr.id },
-      //   data: {
-      //     reports_to_position: reportsTo,
-      //     excluded_manager_position: exclMgr,
-      //   },
-      // });
-      console.log(' old EXCL:  ' + exclMgr.employeeName);
-      console.log(' new email:  ' + exclMgr.employeeEmail);
-      console.log(' old reportsTo: ' + reportsTo.employeeName);
+      await prisma.positionRequest.update({
+        where: { id: pr.id },
+        data: {
+          reports_to_position: reportsTo ?? Prisma.DbNull,
+          excluded_manager_position: exclMgr ?? Prisma.DbNull,
+        },
+      });
+      console.log(' old EXCL:  ' + exclMgr?.employeeName);
+      console.log(' new email:  ' + exclMgr?.employeeEmail);
+      console.log(' old reportsTo: ' + reportsTo?.employeeName);
       console.log(' new email: ' + reportsTo?.employeeEmail);
     }
 
