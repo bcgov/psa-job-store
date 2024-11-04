@@ -209,6 +209,34 @@ finalizers:
 
 In the event that the postgrescluster is totally lost and a restore process is not possible, it is still possible to recover the backup files as they are stored in netapp-file-backup storage. You can contact the platforms team and ask them to restore it to another PVC by referencing the PV name, as listed above.
 
+### Creating a sql dump from a restore
+
+Restore to a folder:
+
+```pgbackrest restore \
+--stanza=db \
+--type=time \
+--target="2024-11-04 09:40:00-08:00" \
+--pg1-path=/pgdata/restore \
+--delta
+```
+
+Start a temp psql server with restored data:
+
+`pg_ctl -D /pgdata/restore start -o "-p 5533"`
+
+View the actual restore timestamp:
+
+`psql -p 5533 -c "SELECT pg_last_xact_replay_timestamp();"`
+
+Dump data to .sql:
+
+`pg_dump -p 5533 -d api --create -F plain > /pgdata/restore.sql`
+
+Shut down temporary sql instance:
+
+`pg_ctl -D /pgdata/restore stop`
+
 ## Notes:
 
 For the api project, stateful sets are contained within the overlays instead of the base. This is due to a kubernetes/kustomize limitation that prevents the storage amount for a volumeclaimtemplate from being changed. If we use the same storage amount in every enviroment, this can be moved back to the base.
