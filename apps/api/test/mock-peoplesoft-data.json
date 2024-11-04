@@ -36,127 +36,158 @@
   "profiles": [
     {
       "idir": "AJOHNSON",
-      "name": "Alice Johnson"
+      "name": "Alice Johnson",
+      "email": "ajohnson@gov.bc.ca"
     },
     {
       "idir": "BSMITH",
-      "name": "Bob Smith"
+      "name": "Bob Smith",
+      "email": "bsmith@gov.bc.ca"
     },
     {
       "idir": "CBROWN",
-      "name": "Charlie Brown"
+      "name": "Charlie Brown",
+      "email": "cbrown@gov.bc.ca"
     },
     {
       "idir": "DWHITE",
-      "name": "Dana White"
+      "name": "Dana White",
+      "email": "dwhite@gov.bc.ca"
     },
     {
       "idir": "EBLACK",
-      "name": "Eve Black"
+      "name": "Eve Black",
+      "email": "eblack@gov.bc.ca"
     },
     {
       "idir": "FGREEN",
-      "name": "Frank Green"
+      "name": "Frank Green",
+      "email": "fgreen@gov.bc.ca"
     },
     {
       "idir": "GLEE",
-      "name": "Grace Lee"
+      "name": "Grace Lee",
+      "email": "glee@gov.bc.ca"
     },
     {
       "idir": "HMILLER",
-      "name": "Hank Miller"
+      "name": "Hank Miller",
+      "email": "hmiller@gov.bc.ca"
     },
     {
       "idir": "ISCOTT",
-      "name": "Ivy Scott"
+      "name": "Ivy Scott",
+      "email": "iscott@gov.bc.ca"
     },
     {
       "idir": "JWILSON",
-      "name": "Jack Wilson"
+      "name": "Jack Wilson",
+      "email": "jwilson@gov.bc.ca"
     },
     {
       "idir": "JDOE",
-      "name": "Jane Doe"
+      "name": "Jane Doe",
+      "email": "jdoe@gov.bc.ca"
     },
     {
       "idir": "SCARTER",
-      "name": "Sam Carter"
+      "name": "Sam Carter",
+      "email": "scarter@gov.bc.ca"
     },
     {
       "idir": "LWRIGHT",
-      "name": "Laura Wright"
+      "name": "Laura Wright",
+      "email": "lwright@gov.bc.ca"
     },
     {
       "idir": "NANDERSON",
-      "name": "Nick Anderson"
+      "name": "Nick Anderson",
+      "email": "nanderson@gov.bc.ca"
     },
     {
       "idir": "OBROWN",
-      "name": "Olivia Brown"
+      "name": "Olivia Brown",
+      "email": "obrown@gov.bc.ca"
     },
     {
       "idir": "MJOHNSON",
-      "name": "Mark Johnson"
+      "name": "Mark Johnson",
+      "email": "mjohnson@gov.bc.ca"
     },
     {
       "idir": "EDAVIS",
-      "name": "Emily Davis"
+      "name": "Emily Davis",
+      "email": "edavis@gov.bc.ca"
     },
     {
       "idir": "PMARTIN",
-      "name": "Paul Martin"
+      "name": "Paul Martin",
+      "email": "pmartin@gov.bc.ca"
     },
     {
       "idir": "RTAYLOR",
-      "name": "Ruby Taylor"
+      "name": "Ruby Taylor",
+      "email": "rtaylor@gov.bc.ca"
     },
     {
       "idir": "SMILLER",
-      "name": "Scott Miller"
+      "name": "Scott Miller",
+      "email": "smiller@gov.bc.ca"
     },
     {
       "idir": "SEVANS",
-      "name": "Sarah Evans"
+      "name": "Sarah Evans",
+      "email": "sevans@gov.bc.ca"
     },
     {
       "idir": "LADAMS",
-      "name": "Liam Adams"
+      "name": "Liam Adams",
+      "email": "ladams@gov.bc.ca"
     },
     {
       "idir": "NWALLACE",
-      "name": "Nina Wallace"
+      "name": "Nina Wallace",
+      "email": "nwallace@gov.bc.ca"
     },
     {
       "idir": "OROBERTS",
-      "name": "Owen Roberts"
+      "name": "Owen Roberts",
+      "email": "oroberts@gov.bc.ca"
     },
     {
       "idir": "GTHOMPSON",
-      "name": "Grace Thompson"
+      "name": "Grace Thompson",
+      "email": "gthompson@gov.bc.ca"
     },
     {
       "idir": "MHARRIS",
-      "name": "Mia Harris"
+      "name": "Mia Harris",
+      "email": "mharris@gov.bc.ca"
     },
     {
       "idir": "ECOOPER",
-      "name": "Ethan Cooper"
+      "name": "Ethan Cooper",
+      "email": "ecooper@gov.bc.ca"
     },
     {
       "idir": "ZLEWIS",
-      "name": "Zara Lewis"
+      "name": "Zara Lewis",
+      "email": "zlewis@gov.bc.ca"
     },
     {
       "idir": "CPRICE",
-      "name": "Connor Price"
+      "name": "Connor Price",
+      "email": "cprice@gov.bc.ca"
     },
     {
       "idir": "CBROOKS",
-      "name": "Chloe Brooks"
+      "name": "Chloe Brooks",
+      "email": "cbrooks@gov.bc.ca"
     },
     {
       "idir": "IPHILLIPS",
-      "name": "Isaac Phillips"
+      "name": "Isaac Phillips",
+      "email": "iphillips@gov.bc.ca"
     }
   ],
   "positions": [

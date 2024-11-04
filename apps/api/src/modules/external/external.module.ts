@@ -91,6 +91,6 @@ import { PositionService } from './position.service';
     PeoplesoftV2Service,
     SearchService,
   ],
-  exports: [SearchService, PeoplesoftService, CrmService], // Export PeoplesoftService and CrmService
+  exports: [SearchService, PeoplesoftService, PeoplesoftV2Service, CrmService], // Export PeoplesoftService and CrmService
 })
 export class ExternalModule {}

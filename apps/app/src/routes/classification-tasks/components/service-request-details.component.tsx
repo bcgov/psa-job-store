@@ -195,7 +195,14 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'includedOrExcluded',
       label: 'Included or excluded?',
-      children: <div>Included</div>,
+      children: (
+        <div>
+          {positionRequestData?.positionRequest?.classification?.employee_group_id === 'MGT' ||
+          positionRequestData?.positionRequest?.classification?.employee_group_id === 'OEX'
+            ? 'Excluded'
+            : 'Included'}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {

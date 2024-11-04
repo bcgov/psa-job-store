@@ -19,6 +19,9 @@ export class PositionProfile {
   @Field({ nullable: true })
   employeeName?: string;
 
+  @Field({ nullable: true })
+  employeeEmail?: string;
+
   @Field()
   classification: string;
 

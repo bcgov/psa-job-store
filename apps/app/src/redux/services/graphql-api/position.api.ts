@@ -25,6 +25,7 @@ export interface PositionProfileModel {
   positionDescription: string;
   departmentName: string;
   employeeName: string;
+  employeeEmail: string;
   classification: string;
   ministry: string;
   status: string;
@@ -87,6 +88,7 @@ export const positionApi = graphqlApi.injectEndpoints({
                 positionDescription
                 departmentName
                 employeeName
+                employeeEmail
                 classification
                 ministry
                 status

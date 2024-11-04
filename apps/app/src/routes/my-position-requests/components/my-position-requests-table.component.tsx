@@ -54,6 +54,7 @@ type ColumnTypes = {
   defaultSortOrder?: SortOrder;
   render?: (text: any, record: any) => React.ReactNode;
   align?: 'left' | 'center' | 'right'; // AlignType is typically one of these string literals
+  fixed?: boolean | 'right' | 'left';
   requestingFeature?: 'classificationTasks' | 'myPositions' | 'totalCompApprovedRequests';
 };
 
@@ -545,6 +546,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     {
       title: <SettingOutlined aria-label="actions" />,
       align: 'center',
+      fixed: 'right',
       key: 'action',
       render: (_text: any, record: any) =>
         record.status === 'CANCELLED' ? (
