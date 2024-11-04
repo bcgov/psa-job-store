@@ -9,6 +9,7 @@ import { FindUniquePositionArgs } from './models/find-unique-position.args';
 import { PeoplesoftPosition } from './models/peoplesoft-position.model';
 import { PositionProfile } from './models/position-profile.model';
 import { Position } from './models/position.model';
+import { PeoplesoftV2Service } from './peoplesoft-v2.service';
 import { PeoplesoftService } from './peoplesoft.service';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class PositionService {
     private readonly classificationService: ClassificationService,
     private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
+    private readonly peoplesoftV2Service: PeoplesoftV2Service,
     private readonly organizationService: OrganizationService,
   ) {
     (async () => {
@@ -90,6 +92,7 @@ export class PositionService {
           classification: positionDetails.classification.name,
           ministry: positionDetails.organization.name,
           employeeName: '', // No employee
+          employeeEmail: '',
           status: '', // No employee status
           employeeId: '',
           departmentId: extraInfo ? positionDetails.department_id : '',
@@ -105,12 +108,13 @@ export class PositionService {
       employeesInPosition.map(async (employee) => {
         const employeeResponse = await this.peoplesoftService.getEmployee(employee.id);
         const employeeDetail = employeeResponse?.data?.query?.rows?.[0];
-
+        const profile = await this.peoplesoftV2Service.getProfile(null, employeeDetail?.EMPLID ?? '');
         return {
           positionNumber: positionNumber,
           positionDescription: positionDetails.title,
           departmentName: positionDetails.department.name,
           employeeName: employeeDetail?.NAME_DISPLAY,
+          employeeEmail: profile?.EMAILID,
           classification: positionDetails.classification.name,
           ministry: positionDetails.organization.name,
           status: employee.status,
