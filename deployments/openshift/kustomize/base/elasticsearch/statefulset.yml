@@ -20,10 +20,10 @@ spec:
                   image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
                   resources:
                       limits:
-                          cpu: 600m
+                          cpu: 500m
                           memory: 3Gi
                       requests:
-                          cpu: 300m
+                          cpu: 200m
                           memory: 1.5Gi
                   ports:
                       - name: rest
