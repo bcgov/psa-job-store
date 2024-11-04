@@ -101,7 +101,10 @@ export class PeoplesoftV2Service {
     return response;
   }
 
-  async getProfile(idir: string): Promise<
+  async getProfile(
+    idir?: string,
+    emplid?: string,
+  ): Promise<
     | {
         OPRID: string;
         OPRDEFNDESC: string;
@@ -121,8 +124,8 @@ export class PeoplesoftV2Service {
               [
                 'isconnectedquery=n',
                 'maxrows=1',
-                'prompt_uniquepromptname=USERID',
-                `prompt_fieldvalue=${idir}`,
+                'prompt_uniquepromptname=USERID,EMPLID',
+                `prompt_fieldvalue=${idir ? idir + ',' : ',' + emplid}`,
                 'json_resp=true',
               ].join('&'),
             ].join('?'),
