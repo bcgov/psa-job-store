@@ -1,7 +1,7 @@
 import { Card, Col, Divider, Row, Typography } from 'antd';
 import { Component, ReactNode } from 'react';
-import { sendLogToServer } from '../../utils/logger-service.util';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { sendLogToServer } from '../../utils/logger-service.util';
 const { Title, Text } = Typography;
 
 interface ErrorBoundaryProps {
@@ -14,15 +14,20 @@ interface ErrorBoundaryState {
 
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
+    console.log('ErrorBoundary constructor');
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(): ErrorBoundaryState {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static getDerivedStateFromError(error: any): ErrorBoundaryState {
+    console.log('getDerivedStateFromError: ', error);
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  componentDidCatch(error: Error, _info: any): void {
+    console.log('componentDidCatch: ', error);
     sendLogToServer(error);
   }
 
@@ -30,6 +35,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     if (this.state.hasError) {
       return (
         <>
+          ERROR
           <ContentWrapper>
             <Row
               justify="center"
@@ -71,9 +77,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           </ContentWrapper>
         </>
       );
+    } else {
+      return <>no error</>;
+      // return this.props.children;
     }
-
-    return this.props.children;
   }
 }
 

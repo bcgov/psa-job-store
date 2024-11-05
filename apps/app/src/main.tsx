@@ -12,7 +12,6 @@ import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../envConfig';
 import './global.css';
 import { store } from './redux/redux.store';
 import { router } from './router/index';
-import ErrorBoundary from './routes/error-boundary/ErrorBoundary';
 import { WizardProvider } from './routes/wizard/components/wizard.provider';
 import { sendLogToServer } from './utils/logger-service.util';
 
@@ -31,9 +30,14 @@ export const oidcConfig: AuthProviderProps = {
   redirect_uri: origin + '/auth/login', //,VITE_KEYCLOAK_REDIRECT_URL
 };
 
+window.onerror = function (_message, _source, _lineno, _colno, error) {
+  console.error('Caught by window.onerror:', error);
+  if (error) sendLogToServer(error);
+};
+
 window.addEventListener('error', function (event) {
   console.error('Caught by global error listener:', event.error);
-  sendLogToServer(event.error);
+  // sendLogToServer(event.error);
 });
 
 window.addEventListener('unhandledrejection', function (event) {
@@ -82,9 +86,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <App>
               <Helmet defaultTitle="Job Store" titleTemplate="%s | Job Store" />
               <WizardProvider>
-                <ErrorBoundary>
-                  <RouterProvider router={router} />
-                </ErrorBoundary>
+                {/* <ErrorBoundary > */}
+                <RouterProvider router={router} />
+                {/* </ErrorBoundary> */}
               </WizardProvider>
             </App>
           </HelmetProvider>
