@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
+      needs-migration: ${{ steps.get-migrations.outputs.changes }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -21,16 +22,23 @@ jobs:
           base: ${{ github.event.client_payload.ref }}
           ref: ${{ github.event.client_payload.ref }}
           filters: |
-            migration:
-              - 'apps/api/prisma/migrations/**'
             api:
               - 'apps/api/**'
             app:
               - 'apps/app/**'
+      - name: Get Migrations
+        id: get-migrations
+        uses: dorny/paths-filter@v2
+        with:
+          base: ${{ github.event.client_payload.ref }}
+          ref: ${{ github.event.client_payload.ref }}
+          filters: |
+            migration:
+              - 'apps/api/prisma/migrations/**'
   migrate:
     name: Migrate DB Schema
     needs: metadata
-    if: ${{ contains(needs.metadata.outputs.changed-apps, 'migration') }}
+    if: ${{ contains(needs.metadata.outputs.needs-migration, 'migration') }}
     runs-on: ubuntu-20.04
     environment:
       name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
@@ -57,13 +65,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   deploy:
-    name: Migrate DB Schema
+    name: Deploy
     needs: metadata
-    if: ${{ contains(needs.metadata.outputs.changed-apps, 'app') || contains(needs.metadata.outputs.changed-apps, 'api') }}
+    if: ${{needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != ''}}
     runs-on: ubuntu-20.04
     environment:
       name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.client_payload.ref }}
       - name: Trigger Deployments
         uses: ./.github/actions/trigger-deploy
         with:
