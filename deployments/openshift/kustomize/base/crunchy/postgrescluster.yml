@@ -1,17 +1,17 @@
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
-  name: api-postgres-clone
+  name: api-postgres-alpha
 spec:
   shutdown: false
   instances:
     - replicas: 2
       resources:
         requests:
-          cpu: '200m'
+          cpu: '250m'
           memory: '256Mi'
         limits:
-          cpu: '500m'
+          cpu: '550m'
           memory: '512Mi'
       dataVolumeClaimSpec:
         accessModes:
