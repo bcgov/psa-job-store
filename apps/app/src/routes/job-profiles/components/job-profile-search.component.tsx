@@ -458,29 +458,52 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     newSearchParams.set('clearFilters', 'true');
     // setSearchParams(newSearchParams);
 
+    // console.log('location.pathname: ', location.pathname);
+    // const basePath = getBasePath(location.pathname);
+
+    // search is used on saved profiles, explore profiles, wizard profiles, draft profiles and published profiles
+    // saved:
+    // - /job-profiles/saved?selectedProfile=304
+    // - /job-profiles/saved/101
+    // wizard:
+    // - /requests/positions/360?selectedProfile=304
+    // explore:
+    // /job-profiles/saved/304
+
+    const selectedProfileFromUrl = searchParams.get('selectedProfile');
+
+    const selectedProfileFromPath =
+      !isPositionRequestRoute && !isNaN(Number(location.pathname.split('/').pop()))
+        ? location.pathname.split('/').pop()
+        : null;
+
     const basePath = getBasePath(location.pathname);
+    // console.log('basePath: ', basePath);
 
     // if profile is currently selected, leave it selected (depending if either selectedProfileFromUrl or selectedProfileFromPath is set)
     // if it's selectedProfileFromUrl, then navigate to ?selectedProfile=selectedProfileFromUrl
     // if it's selectedProfileFromPath, then navigate to basePath/selectedProfileFromPath
 
-    const selectedProfileFromUrl = searchParams.get('selectedProfile');
-    const selectedProfileFromPath = !isNaN(Number(location.pathname.split('/').pop()))
-      ? location.pathname.split('/').pop()
-      : null;
-
     // console.log('selectedProfileFromUrl: ', selectedProfileFromUrl, selectedProfileFromPath);
 
+    // console.log('selectedProfileFromPath: ', selectedProfileFromPath);
     let navigateToPath = selectedProfileFromPath ? `${basePath}/${selectedProfileFromPath}` : basePath;
 
-    if (selectedProfileFromUrl)
+    if (selectedProfileFromUrl) {
+      // console.log('selectedProfileFromUrl')
       if (isPositionRequestRoute) {
+        // console.log('isPositionRequestRoute')
         navigateToPath = `${basePath}`;
         newSearchParams.set('selectedProfile', selectedProfileFromUrl);
-      } else navigateToPath = `${basePath}/${selectedProfileFromUrl}`;
+      } else {
+        // console.log('not isPositionRequestRoute')
+        navigateToPath = `${basePath}/${selectedProfileFromUrl}`;
+      }
+    } else {
+      // console.log('not selectedProfileFromUrl')
+    }
 
     // console.log('navigateToPath: ', navigateToPath);
-    // console.log('basePath: ', basePath);
     // console.log('newSearchParams: ', newSearchParams.toString());
 
     navigate(
