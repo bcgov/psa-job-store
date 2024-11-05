@@ -16,6 +16,7 @@ import { WizardProvider } from './routes/wizard/components/wizard.provider';
 import { sendLogToServer } from './utils/logger-service.util';
 
 const origin = window.location.origin;
+console.log('debuging app log');
 // console.log('window.location: ', window.location.toString());
 
 //  on login is http://localhost:5173/?state=123...
