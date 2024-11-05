@@ -9,6 +9,7 @@ import { LoginPage } from '../routes/auth/login.page';
 import { ClassificationTasksRoute } from '../routes/classification-tasks';
 import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
 import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
+import ErrorBoundary from '../routes/error-boundary/ErrorBoundary';
 import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
@@ -42,7 +43,11 @@ import { WizardOrgChartPage } from '../routes/wizard/wizard-org-chart.page';
 export const router = createBrowserRouter([
   {
     path: 'auth',
-    element: <AuthRoute />,
+    element: (
+      <ErrorBoundary>
+        <AuthRoute />
+      </ErrorBoundary>
+    ),
     children: [
       {
         element: <AppLayout />,
@@ -60,7 +65,11 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    element: <RouteGuard />,
+    element: (
+      <ErrorBoundary>
+        <RouteGuard />
+      </ErrorBoundary>
+    ),
     children: [
       {
         element: <AppLayout />,

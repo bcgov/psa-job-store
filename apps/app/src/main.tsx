@@ -31,15 +31,15 @@ export const oidcConfig: AuthProviderProps = {
   redirect_uri: origin + '/auth/login', //,VITE_KEYCLOAK_REDIRECT_URL
 };
 
+// window.addEventListener('error', function (event) {
+//   console.error('Caught by global error listener:', event.error);
+//   sendLogToServer(event.error);
+// });
+
 window.onerror = function (_message, _source, _lineno, _colno, error) {
   console.error('Caught by window.onerror:', error);
   if (error) sendLogToServer(error);
 };
-
-window.addEventListener('error', function (event) {
-  console.error('Caught by global error listener:', event.error);
-  // sendLogToServer(event.error);
-});
 
 window.addEventListener('unhandledrejection', function (event) {
   console.error('Unhandled promise rejection:', event.reason);
@@ -48,6 +48,7 @@ window.addEventListener('unhandledrejection', function (event) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    {/* <ErrorBoundary > */}
     <AuthProvider {...oidcConfig} automaticSilentRenew>
       <ReduxProvider store={store}>
         <ConfigProvider
@@ -87,14 +88,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <App>
               <Helmet defaultTitle="Job Store" titleTemplate="%s | Job Store" />
               <WizardProvider>
-                {/* <ErrorBoundary > */}
                 <RouterProvider router={router} />
-                {/* </ErrorBoundary> */}
               </WizardProvider>
             </App>
           </HelmetProvider>
         </ConfigProvider>
       </ReduxProvider>
     </AuthProvider>
+    {/* </ErrorBoundary> */}
   </React.StrictMode>,
 );
