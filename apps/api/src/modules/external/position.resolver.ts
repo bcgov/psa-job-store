@@ -6,21 +6,8 @@ import { PositionService } from './position.service';
 
 @Resolver(() => Position)
 export class PositionResolver {
-  // private classifications: Classification[];
-  // private departments: Department[];
+  constructor(private readonly positionService: PositionService) {}
 
-  constructor(
-    // private readonly classificationService: ClassificationService,
-    // private readonly departmentService: DepartmentService,
-    // private readonly peoplesoftService: PeoplesoftService,
-    // private readonly organizationService: OrganizationService,
-    private readonly positionService: PositionService,
-  ) {
-    // (async () => {
-    //   this.classifications = await this.classificationService.getClassifications({});
-    //   this.departments = await this.departmentService.getDepartments();
-    // })();
-  }
   @Query(() => Position, { name: 'position' })
   async getPosition(@Args() args?: FindUniquePositionArgs) {
     return await this.positionService.getPosition(args);
