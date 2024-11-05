@@ -23,6 +23,7 @@ interface LogMessage {
 }
 
 export const sendLogToServer = async (error: Error): Promise<void> => {
+  console.log('sendLogToServer!');
   const logMessage: LogMessage = {
     level: 'error',
     message: error.message,
