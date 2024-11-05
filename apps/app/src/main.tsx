@@ -32,7 +32,7 @@ export const oidcConfig: AuthProviderProps = {
 
 window.onerror = function (message, source, lineno, colno, error) {
   console.error('Caught by window.onerror:', error);
-  sendLogToServer(error);
+  if (error) sendLogToServer(error);
 };
 
 window.addEventListener('error', function (event) {
