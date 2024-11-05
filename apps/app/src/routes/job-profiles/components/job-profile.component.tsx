@@ -1006,8 +1006,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                   <ul data-testid="professional-registration">
                     {showDiff && originalData
                       ? compareLists(
-                          originalData.professional_registration_requirements.filter((acc) => acc.is_significant),
-                          effectiveData?.professional_registration_requirements.filter((acc) => acc.is_significant),
+                          originalData.professional_registration_requirements?.filter((acc) => acc.is_significant),
+                          effectiveData?.professional_registration_requirements?.filter((acc) => acc.is_significant),
                         )
                       : effectiveData?.professional_registration_requirements
                           .filter((acc) => acc.is_significant)

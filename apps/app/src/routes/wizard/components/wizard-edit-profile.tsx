@@ -342,6 +342,7 @@ const WizardEditProfile = forwardRef(
         // check for undefined and treat it as significant, since significant flag was added later
         // initially all security screenings were treated as significant
 
+        if (!originalItem) return item === true;
         return item === true && originalItem && originalItem.is_significant;
       });
 
@@ -352,6 +353,9 @@ const WizardEditProfile = forwardRef(
       anySsecurityScreeningsTrue && verificationReasons.push(reasons.SECURITY_SCREENINGS);
       anyProfRegTrue && verificationReasons.push(reasons.PROFESSIONAL_REGISTRATIONS);
       const verificationRequired = verificationReasons.length > 0;
+
+      // console.log('validating verification, verificationReasons: ', verificationReasons);
+      // console.log('editedSecurityScreeningsFields: ', editedSecurityScreeningsFields)
 
       // check if same to preven re-render unnecessarily (causes an issue where clicking directly from input to menu doesn't open menu on first click)
       if (JSON.stringify(verificationReasons) !== JSON.stringify(verificationNeededReasons))
@@ -541,10 +545,10 @@ const WizardEditProfile = forwardRef(
 
           const initialEditStatus: { [key: number]: boolean } = {};
           initialFieldValue?.forEach((item, index) => {
-            // console.log('initial item/original: ', item, originalFieldValue[index]);
+            // console.log('initial item/original: ', item, originalFieldValue, originalFieldValue?.[index]);
             const isEdited =
               isSignificant !== undefined
-                ? (item.text !== originalFieldValue[index]?.text && item.is_significant === isSignificant) ||
+                ? (item.text !== originalFieldValue?.[index]?.text && item.is_significant === isSignificant) ||
                   (item.disabled === true && item.is_significant === isSignificant)
                 : item.text !== originalFieldValue?.[index]?.text || item.disabled === true;
             initialEditStatus[index] = isEdited;
