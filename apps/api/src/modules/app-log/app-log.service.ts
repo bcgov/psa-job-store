@@ -33,7 +33,7 @@ export class AppLogService {
 
   async log(createLogDto: CreateLogDto, user: Express.User): Promise<void> {
     const logMessage = `${createLogDto.level}: ${createLogDto.message}`;
-    this.logger.info({
+    this.logger.error({
       message: logMessage,
       stack: createLogDto.stack,
       path: createLogDto.path,

@@ -9,6 +9,7 @@ export class AppLogController {
 
   @Post('log')
   handleLog(@Body() createLogDto: CreateLogDto, @CurrentUser() user: Express.User) {
+    console.log('logging app log..');
     this.appLogService.log(createLogDto, user);
   }
 }
