@@ -18,6 +18,14 @@ export default defineConfig({
     }),
   ],
   base: '/',
+  build: {
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        sourcemapExcludeSources: true,
+      },
+    },
+  },
   server: {
     host: true,
     port: 5173, // This is the port which we will use in docker
