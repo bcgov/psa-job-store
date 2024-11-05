@@ -21,12 +21,16 @@ jobs:
           base: ${{ github.event.client_payload.ref }}
           ref: ${{ github.event.client_payload.ref }}
           filters: |
-            api:
+            migration:
               - 'apps/api/prisma/migrations/**'
+            api:
+              - 'apps/api/**'
+            app:
+              - 'apps/app/**'
   migrate:
     name: Migrate DB Schema
     needs: metadata
-    if: ${{ needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != '' }}
+    if: ${{ contains(needs.metadata.outputs.changed-apps, 'migration') }}
     runs-on: ubuntu-20.04
     environment:
       name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
@@ -44,8 +48,7 @@ jobs:
       - name: Create Version Changeset
         run: npm install @changesets/cli && npx changeset version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       - name: Commit Version
         if: ${{ github.event.client_payload.ref_name == 'stage' }}
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -53,6 +56,14 @@ jobs:
           commit_message: 'Update version [skip ci]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  deploy:
+    name: Migrate DB Schema
+    needs: metadata
+    if: ${{ contains(needs.metadata.outputs.changed-apps, 'app') || contains(needs.metadata.outputs.changed-apps, 'api') }}
+    runs-on: ubuntu-20.04
+    environment:
+      name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
+    steps:
       - name: Trigger Deployments
         uses: ./.github/actions/trigger-deploy
         with:
@@ -60,4 +71,3 @@ jobs:
           api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
           project: ${{ needs.metadata.outputs.changed-apps }}
           environment: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
-
