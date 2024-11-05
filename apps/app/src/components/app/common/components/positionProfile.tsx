@@ -119,7 +119,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
           ) : mode === 'contact' ? (
             <div>
               {/* {JSON.stringify(firstActivePosition)} */}
-              {firstActivePosition.employeeName}, {firstActivePosition.ministry}
+              {firstActivePosition.employeeName}, {firstActivePosition.ministry} {' - '}
               <a href={`mailto:${firstActivePosition.employeeEmail}`}>{firstActivePosition.employeeEmail}</a>
               {firstActivePosition.employeeEmail && (
                 <CopyOutlined
