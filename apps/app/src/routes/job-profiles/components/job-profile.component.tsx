@@ -531,7 +531,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     if (!modified) return comparisonResult;
 
     // Add this check to handle null original
-    if (original === null) {
+    if (!original) {
       // If original is null, treat all modified items as additions
       return modified.map((item) => {
         const itemValue = getItemValue(item);
@@ -1006,8 +1006,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                   <ul data-testid="professional-registration">
                     {showDiff && originalData
                       ? compareLists(
-                          originalData.professional_registration_requirements.filter((acc) => acc.is_significant),
-                          effectiveData?.professional_registration_requirements.filter((acc) => acc.is_significant),
+                          originalData.professional_registration_requirements?.filter((acc) => acc.is_significant),
+                          effectiveData?.professional_registration_requirements?.filter((acc) => acc.is_significant),
                         )
                       : effectiveData?.professional_registration_requirements
                           .filter((acc) => acc.is_significant)
