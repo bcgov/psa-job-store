@@ -30,7 +30,7 @@ export const oidcConfig: AuthProviderProps = {
   redirect_uri: origin + '/auth/login', //,VITE_KEYCLOAK_REDIRECT_URL
 };
 
-window.onerror = function (message, source, lineno, colno, error) {
+window.onerror = function (_message, _source, _lineno, _colno, error) {
   console.error('Caught by window.onerror:', error);
   if (error) sendLogToServer(error);
 };
