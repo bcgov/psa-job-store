@@ -176,21 +176,28 @@ export const ClassificationTaskPage = () => {
                             }}
                             style={{ cursor: 'pointer' }}
                           />
+                          {/* <div>{JSON.stringify(data?.positionRequest?.user)}</div> */}
+                          {/* <PositionProfile
+                            positionNumber={data?.positionRequest?.reports_to_position.positionNumber}
+                            // positionProfile={data?.positionRequest?.reports_to_position}
+                            orgChartData={data?.positionRequest?.orgchart_json}
+                            mode="contact"
+                          ></PositionProfile> */}
                         </Descriptions.Item>
                         <Descriptions.Item label="Reporting Manager" span={3}>
                           <PositionProfile
-                            positionNumber={null}
-                            positionProfile={data?.positionRequest?.reports_to_position}
+                            positionNumber={data?.positionRequest?.reports_to_position.positionNumber}
+                            // positionProfile={data?.positionRequest?.reports_to_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
-                            mode="compact"
+                            mode="contact"
                           ></PositionProfile>
                         </Descriptions.Item>
                         <Descriptions.Item label="First Band Manager" span={3}>
                           <PositionProfile
-                            positionNumber={null}
-                            positionProfile={data?.positionRequest?.excluded_manager_position}
+                            positionNumber={data?.positionRequest?.excluded_manager_position.positionNumber}
+                            // positionProfile={data?.positionRequest?.excluded_manager_position}
                             orgChartData={data?.positionRequest?.orgchart_json}
-                            mode="compact"
+                            mode="contact"
                           ></PositionProfile>
                         </Descriptions.Item>
                       </Descriptions>
