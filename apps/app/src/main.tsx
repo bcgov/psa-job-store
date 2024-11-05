@@ -16,7 +16,7 @@ import { WizardProvider } from './routes/wizard/components/wizard.provider';
 import { sendLogToServer } from './utils/logger-service.util';
 
 const origin = window.location.origin;
-console.log('debuging app log');
+// console.log('debuging app log');
 // console.log('window.location: ', window.location.toString());
 
 //  on login is http://localhost:5173/?state=123...
@@ -31,15 +31,15 @@ export const oidcConfig: AuthProviderProps = {
   redirect_uri: origin + '/auth/login', //,VITE_KEYCLOAK_REDIRECT_URL
 };
 
+// window.addEventListener('error', function (event) {
+//   console.error('Caught by global error listener:', event.error);
+//   sendLogToServer(event.error);
+// });
+
 window.onerror = function (_message, _source, _lineno, _colno, error) {
   console.error('Caught by window.onerror:', error);
   if (error) sendLogToServer(error);
 };
-
-window.addEventListener('error', function (event) {
-  console.error('Caught by global error listener:', event.error);
-  // sendLogToServer(event.error);
-});
 
 window.addEventListener('unhandledrejection', function (event) {
   console.error('Unhandled promise rejection:', event.reason);
