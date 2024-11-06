@@ -249,7 +249,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
         if (!isActionRequiredState)
           try {
-            png = await generatePNGBase64(getNodes);
+            png = import.meta.env.VITE_TEST_ENV !== 'true' ? await generatePNGBase64(getNodes): '';
           } catch (error) {
             console.error('Error generating PNG..: ', error);
           }
@@ -257,7 +257,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
         const result = await submitPositionRequest({
           id: positionRequestId,
           comment: comment,
-          orgchart_png: import.meta.env.VITE_TEST_ENV !== 'true' ? png : '',
+          orgchart_png: png,
         }).unwrap();
 
         // console.log('submitPositionRequest result: ', result);
