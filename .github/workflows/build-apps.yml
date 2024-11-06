@@ -113,7 +113,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'migrate-db.yml',
-              ref: '${{ github.ref_name }}',
+              ref: '${{ github.ref }}',
               inputs: {
                 sha: '${{ github.sha }}'
               }
