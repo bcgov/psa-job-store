@@ -167,13 +167,7 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                     {current == 2 ? (
                       <h2 className={current == 2 ? 'current' : ''}>Choose profile</h2>
                     ) : maxStepCompleted >= 2 && current != 2 && !disabledTooltip ? (
-                      <span
-                        aria-label={`Go to step 3 of the wizard - edit profile - ${
-                          requiresVerification ? 'Changes will need to be verified' : 'Make changes if needed'
-                        }`}
-                        tabIndex={0}
-                        role="button"
-                      >
+                      <span aria-label={`Go to step 3 of the wizard - choose profile`} tabIndex={0} role="button">
                         Choose profile
                       </span>
                     ) : (
@@ -198,7 +192,7 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                       <h2 className={current == 3 ? 'current' : ''}>Edit</h2>
                     ) : maxStepCompleted >= 3 && current != 3 && !disabledTooltip ? (
                       <span
-                        aria-label={`Go to step 3 of the wizard - edit profile - ${
+                        aria-label={`Go to step 4 of the wizard - edit profile - ${
                           requiresVerification ? 'Changes will need to be verified' : 'Make changes if needed'
                         }`}
                         tabIndex={0}
@@ -227,7 +221,7 @@ export const WizardSteps: React.FC<WizardStepsProps> = ({
                     {current == 4 ? (
                       <h2 className={current == 4 ? 'current' : ''}>Review</h2>
                     ) : maxStepCompleted >= 4 && current != 4 && !disabledTooltip ? (
-                      <span aria-label="Go to step 4 of the wizard - review the job profile" tabIndex={0} role="button">
+                      <span aria-label="Go to step 5 of the wizard - review the job profile" tabIndex={0} role="button">
                         Review
                       </span>
                     ) : (
