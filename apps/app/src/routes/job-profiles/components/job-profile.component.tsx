@@ -528,7 +528,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     hideDisabled?: boolean,
   ): JSX.Element[] => {
     const comparisonResult: JSX.Element[] = [];
-    // console.log('original/modified: ', original, modified);
+    console.log('original/modified: ', original, modified);
     if (!modified) return comparisonResult;
 
     // Add this check to handle null original
