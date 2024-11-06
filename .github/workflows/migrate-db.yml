@@ -79,7 +79,7 @@ jobs:
       name: Trigger E2E Tests
       needs: [metadata, migrate]
       runs-on: ubuntu-20.04
-      if: github.ref_name == 'dev'
+      if: github.ref_name == 'develop'
       steps:
         - name: Debug Info
           run: |
