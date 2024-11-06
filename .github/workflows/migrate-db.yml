@@ -77,7 +77,7 @@ jobs:
 
   trigger-e2e:
       name: Trigger E2E Tests
-      needs: [metadata, migrate]
+      needs: [metadata]
       runs-on: ubuntu-20.04
       if: github.ref_name == 'develop'
       steps:
