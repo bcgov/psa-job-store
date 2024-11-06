@@ -11,25 +11,31 @@ jobs:
     environment: dev
 
     steps:
-      # - name: Check System Specifications
-      #   run: |
-      #     echo "🖥️ CPU Information:"
-      #     lscpu
-      #     echo "💾 Memory Information:"
-      #     free -h
-      #     echo "💿 Disk Information:"
-      #     df -h
-      #     echo "🏃 Runner Environment:"
-      #     env | grep ^RUNNER
-
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js with NPM Cache
         uses: actions/setup-node@v4
         with:
           node-version: '20.11.1'
           cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Cache Node Modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Cache Cypress Binary
+        id: cache-cypress-binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
 
       # Login to OpenShift and reset database
       - name: Reset Database
@@ -40,17 +46,18 @@ jobs:
           echo "Found API pod: $API_POD"
           oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
 
-      # Install only workspace root dependencies
+      # Install only workspace root dependencies if cache miss
       - name: Install Root Dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
         env:
           HUSKY: 0
 
-      # Install cypress app dependencies and binary
+      # Install cypress app dependencies and binary if cache miss
       - name: Install Cypress Dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: |
           npm ci --ignore-scripts
-          # npm install cypress-terminal-report@7.0.4
           npx cypress install
         working-directory: ./apps/jobstore-cypress
         env:
