@@ -228,7 +228,7 @@ Then('position request contains the comment', () => {
   // make the request
   cy.request({
     method: 'POST',
-    url: 'http://localhost:4000/graphql',
+    url: `${Cypress.env('VITE_BACKEND_URL')}/graphql`,
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -299,7 +299,7 @@ When('Classification team switches the CRM service request to "Action required"'
   // Make a request to the endpoint to update the position status
   cy.request({
     method: 'POST',
-    url: 'http://localhost:4000/graphql',
+    url: `${Cypress.env('VITE_BACKEND_URL')}/graphql`,
     headers: {
       Authorization: `Bearer ${token}`, // Include the JWT token in the Authorization header
     },
