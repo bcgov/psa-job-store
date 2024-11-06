@@ -20,6 +20,8 @@ When('the user presses "Create new direct report" on the home page org chart', (
   cy.get('[data-testid="org-chart-container"]', { timeout: 100000 }).should('be.visible');
   cy.get('div[data-id="00132136"]').should('have.class', 'selected');
 
+  cy.wait(300); // todo - eliminate this. It appears selection logic may still fire again even if the above node is selected
+
   // Select the specific node with ID '00121521' and assign it an alias
   cy.get('[data-testid="org-chart-node-00987654"]').as('targetNode');
 
