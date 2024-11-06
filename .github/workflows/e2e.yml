@@ -46,22 +46,56 @@ jobs:
           echo "Found API pod: $API_POD"
           oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
 
-      # Install only workspace root dependencies if cache miss
+       # Cache restore steps
+      - name: Restore Node Modules Cache
+        id: cache-node-modules-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Restore Cypress Binary Cache
+        id: cache-cypress-binary-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
+
+      # Install dependencies if cache miss
       - name: Install Root Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
         env:
           HUSKY: 0
 
-      # Install cypress app dependencies and binary if cache miss
+      # Install cypress dependencies if cache miss
       - name: Install Cypress Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
         run: |
           npm ci --ignore-scripts
           npx cypress install
         working-directory: ./apps/jobstore-cypress
         env:
           HUSKY: 0
+
+      # Save caches immediately after installation
+      - name: Save Node Modules Cache
+        if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Save Cypress Binary Cache
+        if: steps.cache-cypress-binary-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
