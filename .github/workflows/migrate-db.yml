@@ -17,17 +17,18 @@ jobs:
           echo "Ref: ${{ github.event.client_payload.ref }}"
           echo "Ref Name: ${{ github.event.client_payload.ref_name }}"
           echo "SHA: ${{ github.event.client_payload.sha }}"
-          git rev-parse HEAD
+          echo "Full Ref: refs/heads/${{ github.event.client_payload.ref_name }}"
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: refs/heads/${{ github.event.client_payload.ref_name }}
+          fetch-depth: 0
       - name: Get Changed Apps
         id: get-changed-apps
         uses: dorny/paths-filter@v2
         with:
-          base: ${{ github.event.client_payload.ref }}
-          ref: ${{ github.event.client_payload.ref }}
+          base: refs/heads/${{ github.event.client_payload.ref_name }}
+          ref: refs/heads/${{ github.event.client_payload.ref_name }}
           filters: |
             api:
               - 'apps/api/prisma/migrations/**'
@@ -42,7 +43,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: refs/heads/${{ github.event.client_payload.ref_name }}
+          fetch-depth: 0
       - name: 'migrate db'
         uses: ./.github/actions/migrate-db
         with:
@@ -68,14 +70,26 @@ jobs:
           api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
           project: ${{ needs.metadata.outputs.changed-apps }}
           environment: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
+      - name: Debug E2E Trigger Conditions
+        run: |
+          echo "Previous step success: ${{ success() }}"
+          echo "Branch name: ${{ github.event.client_payload.ref_name }}"
+          echo "Should trigger: ${{ success() && github.event.client_payload.ref_name == 'dev' }}"
       - name: Trigger E2E Tests
         if: success() && github.event.client_payload.ref_name == 'dev'
         uses: actions/github-script@v6
         with:
           script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'e2e.yml',
-              ref: '${{ github.event.client_payload.ref }}'
-            })
+            try {
+              console.log('Attempting to trigger E2E tests');
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'e2e.yml',
+                ref: 'refs/heads/${{ github.event.client_payload.ref_name }}'
+              });
+              console.log('E2E tests triggered successfully');
+            } catch (error) {
+              console.log('Error triggering E2E tests:', error);
+              throw error;
+            }
