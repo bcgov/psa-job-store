@@ -73,26 +73,33 @@ jobs:
           api-token: ${{ secrets.OPENSHIFT_API_TOKEN }}
           project: ${{ needs.metadata.outputs.changed-apps }}
           environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-      - name: Debug E2E Trigger Conditions
-        run: |
-          echo "Previous step status: ${{ job.status }}"
-          echo "Branch name: ${{ github.ref_name }}"
-          echo "Should trigger: ${{ job.status == 'success' && github.ref_name == 'dev' }}"
-      - name: Trigger E2E Tests
-        if: ${{ success() }} && github.ref_name == 'dev'
-        uses: actions/github-script@v6
-        with:
-          script: |
-            try {
-              console.log('Attempting to trigger E2E tests');
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'e2e.yml',
-                ref: '${{ github.ref }}'
-              });
-              console.log('E2E tests triggered successfully');
-            } catch (error) {
-              console.log('Error triggering E2E tests:', error);
-              throw error;
-            }
+
+
+  trigger-e2e:
+      name: Trigger E2E Tests
+      needs: [metadata, migrate]
+      runs-on: ubuntu-20.04
+      if: github.ref_name == 'dev'
+      steps:
+        - name: Debug Info
+          run: |
+            echo "Branch name: ${{ github.ref_name }}"
+            echo "Migration needed: ${{ needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != '' }}"
+
+        - name: Trigger E2E Tests
+          uses: actions/github-script@v6
+          with:
+            script: |
+              try {
+                console.log('Attempting to trigger E2E tests');
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'e2e.yml',
+                  ref: '${{ github.ref }}'
+                });
+                console.log('E2E tests triggered successfully');
+              } catch (error) {
+                console.log('Error triggering E2E tests:', error);
+                throw error;
+              }
