@@ -100,11 +100,11 @@ jobs:
             KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
             KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
 
-  trigger_migration:
-    needs: build-apps
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Migration Workflow
+trigger_migration:
+  needs: build-apps
+  runs-on: ubuntu-latest
+  steps:
+    - name: Trigger Migration Workflow
       uses: actions/github-script@v6
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -113,7 +113,7 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             workflow_id: 'migrate-db.yml',
-            ref: '${{ github.ref_name }}',  # This ensures it uses the workflow file from the current branch
+            ref: '${{ github.ref_name }}',
             inputs: {
               sha: '${{ github.sha }}'
             }
