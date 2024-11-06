@@ -532,7 +532,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     if (!modified) return comparisonResult;
 
     // Add this check to handle null original
-    if (original === null) {
+    if (!original) {
       // If original is null, treat all modified items as additions
       return modified.map((item) => {
         const itemValue = getItemValue(item);
