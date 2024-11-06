@@ -79,7 +79,7 @@ jobs:
           echo "Branch name: ${{ github.ref_name }}"
           echo "Should trigger: ${{ success() && github.ref_name == 'dev' }}"
       - name: Trigger E2E Tests
-        if: success() && github.ref_name == 'dev'
+        if: ${{ success() }} && github.ref_name == 'dev'
         uses: actions/github-script@v6
         with:
           script: |
