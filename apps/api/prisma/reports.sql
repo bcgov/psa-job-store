@@ -1,3 +1,18 @@
+-- Current families and streams:
+
+SELECT 
+    j.id AS job_family_id,
+    j.name AS job_family_name,
+    s.id AS stream_id,
+    s.name AS stream_name
+FROM 
+    job_profile_job_family j
+LEFT JOIN 
+    job_profile_stream s ON j.id = s.job_family_id
+ORDER BY 
+    j.name, s.name;
+
+    
 -- GET KSA's by job family and stream:
 
 SELECT

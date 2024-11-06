@@ -75,9 +75,9 @@ jobs:
           environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
       - name: Debug E2E Trigger Conditions
         run: |
-          echo "Previous step success: ${{ success() }}"
+          echo "Previous step status: ${{ job.status }}"
           echo "Branch name: ${{ github.ref_name }}"
-          echo "Should trigger: ${{ success() && github.ref_name == 'dev' }}"
+          echo "Should trigger: ${{ job.status == 'success' && github.ref_name == 'dev' }}"
       - name: Trigger E2E Tests
         if: ${{ success() }} && github.ref_name == 'dev'
         uses: actions/github-script@v6
