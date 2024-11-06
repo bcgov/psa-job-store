@@ -12,7 +12,7 @@ LEFT JOIN
 ORDER BY 
     j.name, s.name;
 
-    
+
 -- GET KSA's by job family and stream:
 
 SELECT
@@ -411,8 +411,7 @@ ORDER BY
 
 -- REPORT FOR USERS - NAME, MINISTRY, ROLES
 
-COPY (SELECT u.name, o.name AS ministry, array_to_string(u.roles, ', ') AS roles FROM "user" u LEFT JOIN LATERAL (SELECT org.name FROM organization org WHERE org.id = (u.metadata->'peoplesoft'->>'organization_id')::text LIMIT 1) o ON true ORDER BY u.name) TO '/tmp/user_report.csv' WITH CSV HEADER;
-
+COPY (SELECT u.name, o.name AS ministry, array_to_string(u.roles, ', ') AS roles, jsonb_array_length(u.metadata->'org_chart'->'department_ids') AS number_of_departments FROM "user" u LEFT JOIN LATERAL (SELECT org.name FROM organization org WHERE org.id = (u.metadata->'peoplesoft'->>'organization_id')::text LIMIT 1) o ON true ORDER BY u.name) TO '/pgdata/user_report.csv' WITH CSV HEADER;
 
 -- COMPLETED POSITION REQUESTS REPORT
 

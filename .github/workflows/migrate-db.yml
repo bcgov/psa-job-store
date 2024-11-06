@@ -77,9 +77,12 @@ jobs:
 
   trigger-e2e:
       name: Trigger E2E Tests
-      needs: [metadata]
+      needs: [metadata, migrate]
       runs-on: ubuntu-20.04
-      if: github.ref_name == 'develop'
+      if: |
+        always() &&
+        github.ref_name == 'develop' &&
+        (needs.migrate.result == 'success' || needs.migrate.result == 'skipped')
       steps:
         - name: Debug Info
           run: |
