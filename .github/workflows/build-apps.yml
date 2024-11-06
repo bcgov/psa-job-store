@@ -8,6 +8,8 @@ jobs:
   metadata:
     name: Get Metadata
     runs-on: ubuntu-20.04
+    environment: dev
+
     outputs:
       changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
       short-sha: ${{ steps.get-short-sha.outputs.sha }}
