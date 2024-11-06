@@ -14,12 +14,6 @@ jobs:
       changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
       short-sha: ${{ steps.get-short-sha.outputs.sha }}
     steps:
-      - name: Debug Info build-apps
-        run: |
-          echo "Ref: ${{ github.event.client_payload.ref }}"
-          echo "Ref Name: ${{ github.event.client_payload.ref_name }}"
-          echo "SHA: ${{ github.event.client_payload.sha }}"
-          git rev-parse HEAD
       - name: Checkout
         uses: actions/checkout@v3
         with:
