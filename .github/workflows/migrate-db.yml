@@ -10,7 +10,6 @@ jobs:
   metadata:
     name: Get Metadata
     runs-on: ubuntu-20.04
-    environment: dev
 
     outputs:
       changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
@@ -26,7 +25,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
-          fetch-depth: 0
       - name: Get Changed Apps
         id: get-changed-apps
         uses: dorny/paths-filter@v2
@@ -45,7 +43,7 @@ jobs:
           base: ${{ github.ref }}
           ref: ${{ github.ref }}
           filters: |
-            api:
+            migration:
               - 'apps/api/prisma/migrations/**'
   migrate:
     name: Migrate DB Schema
@@ -59,7 +57,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
-          fetch-depth: 0
       - name: 'migrate db'
         uses: ./.github/actions/migrate-db
         with:
