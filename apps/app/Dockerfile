@@ -70,13 +70,6 @@ ENV VITE_ENV $VITE_ENV
 COPY --from=builder /tmp/build/apps/app/dist /usr/share/nginx/html
 COPY /apps/app/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Add version configuration to nginx.conf
-RUN echo "location /version.json { \
-    alias /usr/share/nginx/html/version.json; \
-    add_header Cache-Control no-cache; \
-    add_header Content-Type application/json; \
-    }" >> /etc/nginx/conf.d/default.conf
-
 # Set up permissions for OpenShift
 RUN set -x \
     && sed -i -e 's/^\(nginx:[^:]\):[0-9]*:[0-9]*:/\1:1001:0:/' /etc/passwd \
