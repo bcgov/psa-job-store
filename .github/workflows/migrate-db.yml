@@ -1,10 +1,6 @@
 name: Migrate DB Schema
 on:
   workflow_dispatch:
-    inputs:
-      sha:
-        description: 'Commit SHA'
-        required: true
 
 jobs:
   metadata:
