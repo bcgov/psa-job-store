@@ -1,9 +1,15 @@
 name: E2E Tests
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - develop
+    inputs:
+      sha:
+        description: 'Git SHA to verify'
+        required: true
+        type: string
+      changed_apps:
+        description: 'JSON array of changed apps'
+        required: true
+        type: string
 
 jobs:
 
