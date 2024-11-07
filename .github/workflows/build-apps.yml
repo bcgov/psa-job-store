@@ -113,33 +113,40 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'migrate-db.yml',
-              ref: '${{ github.ref }}'
-            })
-
-
-  trigger-e2e:
-      name: Trigger E2E Tests
-      needs: [trigger_migration]
-      runs-on: ubuntu-20.04
-      if: |
-        always() &&
-        github.ref_name == 'develop' &&
-        (needs.trigger_migration.result == 'skipped')
-      steps:
-        - name: Trigger E2E Tests
-          uses: actions/github-script@v6
-          with:
-            script: |
-              try {
-                console.log('Attempting to trigger E2E tests');
-                await github.rest.actions.createWorkflowDispatch({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  workflow_id: 'e2e.yml',
-                  ref: '${{ github.ref }}'
-                });
-                console.log('E2E tests triggered successfully');
-              } catch (error) {
-                console.log('Error triggering E2E tests:', error);
-                throw error;
+              ref: '${{ github.ref }}',
+              inputs: {
+                sha: '${{ github.sha }}',
+                changed_apps: '${{ needs.metadata.outputs.changed-apps }}'
               }
+            });
+
+
+  # trigger-e2e:
+  #     name: Trigger E2E Tests
+  #     needs: [metadata, trigger_migration]
+  #     runs-on: ubuntu-20.04
+  #     if: |
+  #       always() &&
+  #       github.ref_name == 'develop'
+  #     steps:
+  #       - name: Trigger E2E Tests
+  #         uses: actions/github-script@v6
+  #         with:
+  #           script: |
+  #             try {
+  #               console.log('Attempting to trigger E2E tests');
+  #               await github.rest.actions.createWorkflowDispatch({
+  #                 owner: context.repo.owner,
+  #                 repo: context.repo.repo,
+  #                 workflow_id: 'e2e.yml',
+  #                 ref: '${{ github.ref }}',
+  #                 inputs: {
+  #                   sha: '${{ github.sha }}',
+  #                   changed_apps: '${{ needs.metadata.outputs.changed-apps }}'
+  #                 }
+  #               });
+  #               console.log('E2E tests triggered successfully');
+  #             } catch (error) {
+  #               console.log('Error triggering E2E tests:', error);
+  #               throw error;
+  #             }
