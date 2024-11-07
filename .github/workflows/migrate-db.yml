@@ -4,11 +4,11 @@ on:
     inputs:
       sha:
         description: 'Git SHA'
-        required: false
+        required: true
         type: string
       changed_apps:
         description: 'Changed apps'
-        required: false
+        required: true
         type: string
 
 jobs:
@@ -122,8 +122,8 @@ jobs:
                   workflow_id: 'e2e.yml',
                   ref: '${{ github.ref }}',
                   inputs: {
-                    sha: '${{ needs.metadata.outputs.sha }}',
-                    changed_apps: '${{ inputs.changed_apps || needs.metadata.outputs.changed-apps }}'
+                    sha: '${{ inputs.sha }}',
+                    changed_apps: '${{ inputs.changed_apps }}'
                   }
                 });
                 console.log('E2E tests triggered successfully');
