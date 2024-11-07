@@ -210,6 +210,11 @@ export class MockIncidentResolver {
     return this.mockIncidentService.updateMockIncident(pr.crm_id, data as IncidentCreateUpdateInput);
   }
 
+  @Mutation(() => Boolean)
+  async resetMockCRMData() {
+    return this.mockIncidentService.resetMockData();
+  }
+
   // @Query(() => [MockIncident], { name: 'mockIncidents' })
   // async getMockIncidents(@Args('filter', { nullable: true }) filter?: MockIncidentFilterInput) {
   //   return this.mockIncidentService.getAllIncidents(filter);

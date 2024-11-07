@@ -30,6 +30,7 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
     try {
       let data;
       if (process.env.E2E_TESTING === 'true') {
+        // console.log('validating payload: ', payload);
         try {
           data = verifyJwt(payload, process.env.E2E_JWT_SECRET, {
             complete: false,
