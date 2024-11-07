@@ -17,17 +17,34 @@ jobs:
         run: |
           MAX_RETRIES=30
           COUNTER=0
+          CHANGED_APPS='${{ inputs.changed_apps }}'
           
           check_versions() {
-            API_VERSION=$(curl -s ${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/gitsha | jq -r .version)
-            APP_VERSION=$(curl -s ${{ secrets.CYPRESS_BASE_URL }}/version.json | jq -r .gitSha)
+            ALL_MATCH=true
             
-            echo "API Version: $API_VERSION"
-            echo "APP Version: $APP_VERSION"
-            echo "Expected Version: ${{ github.sha }}"
+            if echo "$CHANGED_APPS" | jq -e 'contains(["api"])' > /dev/null; then
+              API_VERSION=$(curl -s ${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/gitsha | jq -r .version)
+              echo "API Version: $API_VERSION"
+              if [ "$API_VERSION" != "${{ inputs.sha }}" ]; then
+                ALL_MATCH=false
+              fi
+            else
+              echo "API was not changed, skipping version check"
+            fi
             
-            if [ "$API_VERSION" = "${{ github.sha }}" ] && [ "$APP_VERSION" = "${{ github.sha }}" ]; then
-              echo "ready=true" >> $GITHUB_OUTPUT
+            if echo "$CHANGED_APPS" | jq -e 'contains(["app"])' > /dev/null; then
+              APP_VERSION=$(curl -s ${{ secrets.CYPRESS_BASE_URL }}/version.json | jq -r .gitSha)
+              echo "APP Version: $APP_VERSION"
+              if [ "$APP_VERSION" != "${{ inputs.sha }}" ]; then
+                ALL_MATCH=false
+              fi
+            else
+              echo "APP was not changed, skipping version check"
+            fi
+            
+            echo "Expected Version: ${{ inputs.sha }}"
+            
+            if [ "$ALL_MATCH" = "true" ]; then
               return 0
             fi
             return 1
@@ -44,6 +61,8 @@ jobs:
             sleep 10
             COUNTER=$((COUNTER+1))
           done
+          
+          echo "ready=true" >> $GITHUB_OUTPUT
 
 
   e2e-tests:
