@@ -89,4 +89,9 @@ export class MockPeopleSoftResolver {
     console.log('updatePosition called with positionNbr:', positionNbr, 'data:', data);
     return this.mockPeoplesoftService.updateMockPosition(positionNbr, data);
   }
+
+  @Mutation(() => Boolean)
+  async resetMockPSData() {
+    return this.mockPeoplesoftService.resetMockData();
+  }
 }

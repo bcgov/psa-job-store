@@ -31,8 +31,10 @@ export class E2EAuthController {
       email: 'test.user@gov.bc.ca', // Email
     };
 
-    return {
+    const ret = {
       access_token: this.jwtService.sign(payload),
     };
+    // console.log('returning token: ', ret);
+    return ret;
   }
 }

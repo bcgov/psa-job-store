@@ -10,10 +10,24 @@ import { UpdateMockPositionInput } from './peoplesoft.mock.resolver';
 @Injectable()
 export class MockPeoplesoftService {
   private mockData: any;
+  private initialMockData: any;
 
   constructor(private readonly configService: ConfigService<AppConfigDto, true>) {
     const mockDataPath = join(process.cwd(), 'test/mock-peoplesoft-data.json');
     this.mockData = JSON.parse(readFileSync(mockDataPath, 'utf8'));
+
+    this.initialMockData = JSON.parse(JSON.stringify(this.mockData));
+  }
+
+  async resetMockData(): Promise<boolean> {
+    try {
+      console.log('resetting peoplesoft mock data');
+      this.mockData = JSON.parse(JSON.stringify(this.initialMockData));
+      return true;
+    } catch (error) {
+      console.error('Error resetting mock data:', error);
+      return false;
+    }
   }
 
   async syncClassifications() {

@@ -13,12 +13,34 @@ export class MockCrmService {
     incidents: any[];
   };
 
+  private initialMockData: {
+    accounts: any[];
+    contacts: any[];
+    incidents: any[];
+  };
+
   constructor(private readonly configService: ConfigService<AppConfigDto, true>) {
     const mockDataPath = join(process.cwd(), 'test/mock-crm-data.json');
     this.mockData = JSON.parse(readFileSync(mockDataPath, 'utf8'));
+
+    // Store initial state
+    this.initialMockData = JSON.parse(JSON.stringify(this.mockData));
+
     // Initialize incidents array if it doesn't exist
     if (!this.mockData.incidents) {
       this.mockData.incidents = [];
+      this.initialMockData.incidents = [];
+    }
+  }
+
+  async resetMockData(): Promise<boolean> {
+    try {
+      console.log('resetting crm mock data');
+      this.mockData = JSON.parse(JSON.stringify(this.initialMockData));
+      return true;
+    } catch (error) {
+      console.error('Error resetting mock data:', error);
+      return false;
     }
   }
 

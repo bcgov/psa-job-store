@@ -447,6 +447,7 @@ export class PeoplesoftService {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async updateMockPosition(positionNbr: string, data: UpdateMockPositionInput) {}
+  async resetMockData() {}
 
   async createPosition(data: PositionCreateInput) {
     const response = await firstValueFrom(
