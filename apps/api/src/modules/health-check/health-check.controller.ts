@@ -12,7 +12,7 @@ export class HealthCheckController {
   async gitsha() {
     // Perform any necessary checks here
     return {
-      status: 'ok',
+      status: 'okk',
       version: process.env.GIT_SHA || 'development',
       timestamp: new Date().toISOString(),
     };
