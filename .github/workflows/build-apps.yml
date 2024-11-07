@@ -101,7 +101,7 @@ jobs:
             KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
 
   trigger_migration:
-    needs: build-apps
+    needs: [metadata, build-apps]  # Add metadata to needs
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Migration Workflow
