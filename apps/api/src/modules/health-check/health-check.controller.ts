@@ -7,4 +7,14 @@ export class HealthCheckController {
     // Perform any necessary checks here
     return { status: 'ok' };
   }
+
+  @Get('gitsha')
+  async gitsha() {
+    // Perform any necessary checks here
+    return {
+      status: 'ok',
+      version: process.env.GIT_SHA || 'development',
+      timestamp: new Date().toISOString(),
+    };
+  }
 }

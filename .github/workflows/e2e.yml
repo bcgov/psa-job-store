@@ -6,10 +6,50 @@ on:
   #     - develop
 
 jobs:
-  e2e-tests:
-    runs-on: ubuntu-latest
-    environment: dev
 
+  wait-for-deployment:
+    runs-on: ubuntu-latest
+    outputs:
+      deployment-ready: ${{ steps.check-deployment.outputs.ready }}
+    steps:
+      - name: Wait for Deployment
+        id: check-deployment
+        run: |
+          MAX_RETRIES=30
+          COUNTER=0
+          
+          check_versions() {
+            API_VERSION=$(curl -s ${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/gitsha | jq -r .version)
+            APP_VERSION=$(curl -s ${{ secrets.CYPRESS_BASE_URL }}/version.json | jq -r .gitSha)
+            
+            echo "API Version: $API_VERSION"
+            echo "APP Version: $APP_VERSION"
+            echo "Expected Version: ${{ github.sha }}"
+            
+            if [ "$API_VERSION" = "${{ github.sha }}" ] && [ "$APP_VERSION" = "${{ github.sha }}" ]; then
+              echo "ready=true" >> $GITHUB_OUTPUT
+              return 0
+            fi
+            return 1
+          }
+          
+          until check_versions
+          do
+            if [ $COUNTER -eq $MAX_RETRIES ]; then
+              echo "Timeout waiting for deployment"
+              echo "ready=false" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+            echo "Waiting for deployment... Attempt $COUNTER of $MAX_RETRIES"
+            sleep 10
+            COUNTER=$((COUNTER+1))
+          done
+
+
+  e2e-tests:
+    needs: wait-for-deployment
+    if: needs.wait-for-deployment.outputs.deployment-ready == 'true'
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4

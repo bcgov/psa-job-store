@@ -8,7 +8,6 @@ jobs:
   metadata:
     name: Get Metadata
     runs-on: ubuntu-20.04
-    environment: dev
 
     outputs:
       changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
@@ -83,6 +82,7 @@ jobs:
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
           build-args: |
+            GITHUB_SHA=${{ github.sha }}
             VITE_KEYCLOAK_REDIRECT_URL=${{ secrets.KEYCLOAK_REDIRECT_URL }}
             VITE_KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
             VITE_KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
@@ -113,10 +113,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'migrate-db.yml',
-              ref: '${{ github.ref }}',
-              inputs: {
-                sha: '${{ github.sha }}'
-              }
+              ref: '${{ github.ref }}'
             })
 
 
