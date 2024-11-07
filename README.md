@@ -90,7 +90,9 @@ Ensure that database has been reset to defaults with the special seed for e2e te
 
 `npx -w api npm run migrate:reset:e2e-test`
 
-Run `npm -w cypress-tests run test-e2e`
+Run `npx -w jobstore-cypress cypress open`
+
+To run in same environment as GitHub actions: `npx cypress run --browser edge --headless`
 
 ## Running component tests
 
