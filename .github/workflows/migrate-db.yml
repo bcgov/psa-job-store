@@ -14,6 +14,7 @@ jobs:
 
     outputs:
       changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
+      needs-migration: ${{ steps.get-migrations.outputs.changes }}
     steps:
       - name: Debug Info
         run: |
@@ -34,11 +35,22 @@ jobs:
           ref: ${{ github.ref }}
           filters: |
             api:
+              - 'apps/api/**'
+            app:
+              - 'apps/app/**'
+      - name: Get Migrations
+        id: get-migrations
+        uses: dorny/paths-filter@v2
+        with:
+          base: ${{ github.ref }}
+          ref: ${{ github.ref }}
+          filters: |
+            api:
               - 'apps/api/prisma/migrations/**'
   migrate:
     name: Migrate DB Schema
     needs: metadata
-    if: ${{ needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != '' }}
+    if: ${{ contains(needs.metadata.outputs.needs-migration, 'migration') }}
     runs-on: ubuntu-20.04
     environment:
       name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
@@ -57,8 +69,7 @@ jobs:
       - name: Create Version Changeset
         run: npm install @changesets/cli && npx changeset version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       - name: Commit Version
         if: ${{ github.ref_name == 'stage' }}
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -66,6 +77,18 @@ jobs:
           commit_message: 'Update version [skip ci]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  deploy:
+    name: Deploy
+    needs: metadata
+    if: ${{needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != ''}}
+    runs-on: ubuntu-20.04
+    environment:
+      name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.client_payload.ref }}
       - name: Trigger Deployments
         uses: ./.github/actions/trigger-deploy
         with:
