@@ -75,6 +75,8 @@ jobs:
     needs: wait-for-deployment
     if: needs.wait-for-deployment.outputs.deployment-ready == 'true'
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
