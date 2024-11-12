@@ -8,7 +8,11 @@ export class E2EAuthController {
   constructor(private jwtService: JwtService) {}
 
   @Post('token')
-  @UseGuards(TestEnvironmentGuard, E2EAuthGuard) // Add both guards
+  @UseGuards(TestEnvironmentGuard, E2EAuthGuard)
+  // to access this endpoint, the request must have the correct E2E_AUTH_KEY key in the header and the environment must be set to E2E_TESTING
+
+  // TestEnvironmentGuard is used to check if the environment is set to E2E_TESTING
+  // E2EAuthGuard is used to check if the request has the correct E2E_AUTH_KEY key in the header
   async generateE2EToken() {
     const payload = {
       jti: 'xxxx', // Unique identifier for the token

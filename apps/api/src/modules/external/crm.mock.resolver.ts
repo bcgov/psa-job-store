@@ -1,4 +1,6 @@
-// mock-incident.resolver.ts
+// this resolver is a mock resolver for the CRM service,
+// used to simulate the CRM service in a local environment
+// for example simualtes changing the status of an incident in the CRM
 import { Args, Field, ID, InputType, Int, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrmService } from './crm.service';
