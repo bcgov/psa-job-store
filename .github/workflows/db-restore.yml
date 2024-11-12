@@ -102,7 +102,7 @@ jobs:
           echo "Database pod: $DB_POD"
           oc logs $DB_POD -n ${{ env.NAMESPACE }} --tail=100
 
-       - name: Remove restore configuration
+      - name: Remove restore configuration
         run: |
           yq eval -i 'del(.spec.backups.pgbackrest.restore)' \
             deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml
