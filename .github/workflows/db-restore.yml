@@ -74,11 +74,24 @@ jobs:
           oc apply -k deployments/openshift/kustomize/overlays/crunchy/dev \
             -n ${{ env.NAMESPACE }}
 
+      - name: Trigger restore with annotation
+        run: |
+          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+            --overwrite \
+            postgres-operator.crunchydata.com/pgbackrest-restore="restore-$(date +%Y%m%d-%H%M%S)" \
+            -n ${{ env.NAMESPACE }}
+
       - name: Wait for restore completion
         run: |
           oc wait --for=condition=Ready \
             postgrescluster/${{ env.CLUSTER_NAME }} \
             -n ${{ env.NAMESPACE }} --timeout=30m
+
+      - name: Remove restore annotation
+        run: |
+          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+            postgres-operator.crunchydata.com/pgbackrest-restore- \
+            -n ${{ env.NAMESPACE }}
 
       - name: Verify database status
         run: |
@@ -89,19 +102,11 @@ jobs:
           echo "Database pod: $DB_POD"
           oc logs $DB_POD -n ${{ env.NAMESPACE }} --tail=100
 
-      - name: Disable restore mode
+       - name: Remove restore configuration
         run: |
-          cat << EOF > deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml
-          apiVersion: postgres-operator.crunchydata.com/v1beta1
-          kind: PostgresCluster
-          metadata:
-            name: ${{ env.CLUSTER_NAME }}
-          spec:
-            backups:
-              pgbackrest:
-                restore:
-                  enabled: false
-          EOF
+          yq eval -i 'del(.spec.backups.pgbackrest.restore)' \
+            deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml
+          
           oc apply -k deployments/openshift/kustomize/overlays/crunchy/dev \
             -n ${{ env.NAMESPACE }}
 
