@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - develop
-    paths:
-      - 'deployments/openshift/kustomize/**'
 
 jobs:
   restore:
