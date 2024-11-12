@@ -46,8 +46,8 @@ jobs:
 
       - name: Update cluster names
         run: |
-          # Update base postgrescluster.yml name
-          sed -i "s/name: .*/name: ${{ env.CLUSTER_NAME }}/" \
+          # Update only metadata.name in base postgrescluster.yml
+          sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' \
             deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
           
           # Create patch with matching name and restore configuration
