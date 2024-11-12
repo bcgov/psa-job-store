@@ -21,12 +21,28 @@ jobs:
           echo "RESTORE_TIMESTAMP=2024-11-11 08:00:00 PST" >> $GITHUB_ENV
           echo "CLUSTER_NAME=api-postgres-beta" >> $GITHUB_ENV
 
+      - name: Debug - Show Environment Variables
+        run: |
+          echo "Current environment variables:"
+          echo "NAMESPACE: ${{ env.NAMESPACE }}"
+          echo "RESTORE_TIMESTAMP: ${{ env.RESTORE_TIMESTAMP }}"
+          echo "CLUSTER_NAME: ${{ env.CLUSTER_NAME }}"
+
       - name: Login to OpenShift
         run: |
           oc login ${{ secrets.OPENSHIFT_SERVER }} \
             --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
             --insecure-skip-tls-verify=true
           oc project ${{ env.NAMESPACE }}
+
+      - name: Debug - Show Current Cluster Configuration
+        run: |
+          echo "Current base postgrescluster.yml content:"
+          cat deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+          echo "\nCurrent patch.yml content (if exists):"
+          cat deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml || echo "patch.yml doesn't exist yet"
+          echo "\nCurrent kustomization.yml content:"
+          cat deployments/openshift/kustomize/overlays/crunchy/dev/kustomization.yml
 
       - name: Update cluster names
         run: |
@@ -50,6 +66,15 @@ jobs:
                     - --type=time
                     - --target="${{ env.RESTORE_TIMESTAMP }}"
           EOF
+
+      - name: Debug - Show Updated Configuration
+        run: |
+          echo "Updated base postgrescluster.yml content:"
+          cat deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+          echo "\nUpdated patch.yml content:"
+          cat deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml
+          echo "\nDebug kustomize build output:"
+          oc kustomize deployments/openshift/kustomize/overlays/crunchy/dev
 
       - name: Apply restore configuration
         run: |
