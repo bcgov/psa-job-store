@@ -21,8 +21,6 @@ RUN test -n "$KEYCLOAK_REALM_URL"
 RUN test -n "$KEYCLOAK_CLIENT_ID_PRIVATE"
 RUN test -n "$KEYCLOAK_CLIENT_ID_PUBLIC"
 
-RUN printenv | sort
-
 # Copy application dependency manifests to the container image.
 COPY package*.json ./
 COPY packages ./packages

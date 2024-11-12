@@ -30,6 +30,9 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
     try {
       let data;
       if (process.env.E2E_TESTING === 'true') {
+        // during e2e testing, we use a different secret to sign the token
+        // as well as a different audience, issuer and algorithm
+
         // console.log('validating payload: ', payload);
         try {
           data = verifyJwt(payload, process.env.E2E_JWT_SECRET, {
@@ -41,6 +44,8 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
           }) as JwtPayload;
         } catch (error) {
           // support both e2e token and a regular keycloak token
+          // so user can still login with keycloak token
+
           // this falls back to trying to verify regular keycloak token
           data = verifyJwt(payload, publicKey, {
             complete: false,
@@ -51,6 +56,7 @@ export class KeycloakStrategy extends PassportStrategy(Strategy, 'keycloak') {
           }) as JwtPayload;
         }
       } else {
+        // not e2e testing, so we use the regular keycloak token
         data = verifyJwt(payload, publicKey, {
           complete: false,
           ignoreExpiration: false,
