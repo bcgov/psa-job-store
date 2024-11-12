@@ -18,7 +18,7 @@ jobs:
       - name: Set environment variables
         run: |
           echo "NAMESPACE=f3c07a-dev" >> $GITHUB_ENV
-          echo "RESTORE_TIMESTAMP=2024-11-11 08:00:00 PST" >> $GITHUB_ENV
+          echo "RESTORE_TIMESTAMP=2024-11-11 10:00:00-07" >> $GITHUB_ENV
           echo "CLUSTER_NAME=api-postgres-beta" >> $GITHUB_ENV
 
       - name: Debug - Show Environment Variables
