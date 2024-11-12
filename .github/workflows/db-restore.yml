@@ -50,18 +50,15 @@ jobs:
           sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' \
             deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
           
-          # Update the existing patch.yml with restore configuration while preserving other settings
-          PATCH_FILE="deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml"
-          
-          # Read existing content and update metadata.name
-          sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' $PATCH_FILE
-          
-          # Add restore configuration to existing spec.backups.pgbackrest section
+          # Use yq to append only the restore section
           yq eval -i '.spec.backups.pgbackrest.restore = {
             "enabled": true,
             "repoName": "repo1",
-            "options": ["--type=time", "--target=\"'"${{ env.RESTORE_TIMESTAMP }}"'\""]
-          }' $PATCH_FILE
+            "options": [
+              "--type=time",
+              "--target=\"${{ env.RESTORE_TIMESTAMP }}\""
+            ]
+          }' deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml
 
       - name: Debug - Show Updated Configuration
         run: |
