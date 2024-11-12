@@ -83,7 +83,7 @@ jobs:
 
       - name: Wait for restore completion
         run: |
-          oc wait --for=condition=Ready \
+          oc wait --for=condition=PostgresDataInitialized=true \
             postgrescluster/${{ env.CLUSTER_NAME }} \
             -n ${{ env.NAMESPACE }} --timeout=30m
 
