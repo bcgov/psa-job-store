@@ -1,15 +1,22 @@
 name: Database In-Place PITR
 on:
-  push:
-    branches:
-      - develop
+  workflow_call:
+    inputs:
+      restore_timestamp:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      cluster_name:
+        required: true
+        type: string
 
 jobs:
   restore:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
     environment:
-      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+      name: ${{ inputs.environment }}
 
     steps:
       - name: Checkout repository
@@ -17,9 +24,9 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "NAMESPACE=f3c07a-dev" >> $GITHUB_ENV
-          echo "RESTORE_TIMESTAMP=2024-11-11 10:00:00-07" >> $GITHUB_ENV
-          echo "CLUSTER_NAME=api-postgres-beta" >> $GITHUB_ENV
+          echo "NAMESPACE=f3c07a-${{ inputs.environment }}" >> $GITHUB_ENV
+          echo "RESTORE_TIMESTAMP=${{ inputs.restore_timestamp }}" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=${{ inputs.cluster_name }}" >> $GITHUB_ENV
 
       - name: Debug - Show Environment Variables
         run: |
@@ -40,9 +47,9 @@ jobs:
           echo "Current base postgrescluster.yml content:"
           cat deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
           echo "\nCurrent patch.yml content (if exists):"
-          cat deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml || echo "patch.yml doesn't exist yet"
+          cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml || echo "patch.yml doesn't exist yet"
           echo "\nCurrent kustomization.yml content:"
-          cat deployments/openshift/kustomize/overlays/crunchy/dev/kustomization.yml
+          cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/kustomization.yml
 
       - name: Update cluster names and patch
         run: |
@@ -58,20 +65,20 @@ jobs:
               "--type=time",
               "--target=\"${{ env.RESTORE_TIMESTAMP }}\""
             ]
-          }' deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml
+          }' deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
 
       - name: Debug - Show Updated Configuration
         run: |
           echo "Updated base postgrescluster.yml content:"
           cat deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
           echo "\nUpdated patch.yml content:"
-          cat deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml
+          cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
           echo "\nDebug kustomize build output:"
-          oc kustomize deployments/openshift/kustomize/overlays/crunchy/dev
+          oc kustomize deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}
 
       - name: Apply restore configuration
         run: |
-          oc apply -k deployments/openshift/kustomize/overlays/crunchy/dev \
+          oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
             -n ${{ env.NAMESPACE }}
 
       - name: Trigger restore with annotation
@@ -90,6 +97,8 @@ jobs:
   cleanup:
     needs: restore
     if: always()
+    environment:
+      name: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -97,8 +106,8 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "NAMESPACE=f3c07a-dev" >> $GITHUB_ENV
-          echo "CLUSTER_NAME=api-postgres-beta" >> $GITHUB_ENV
+          echo "NAMESPACE=f3c07a-${{ inputs.environment }}" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=${{ inputs.cluster_name }}" >> $GITHUB_ENV
 
       - name: Login to OpenShift
         run: |
@@ -118,9 +127,9 @@ jobs:
         continue-on-error: true
         run: |
           yq eval -i 'del(.spec.backups.pgbackrest.restore)' \
-            deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml
+            deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
           
-          oc apply -k deployments/openshift/kustomize/overlays/crunchy/dev \
+          oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
             -n ${{ env.NAMESPACE }}
 
 # TO CONVERT TO MANUAL TRIGGER LATER:

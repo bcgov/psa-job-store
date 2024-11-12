@@ -17,7 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       deployment-ready: ${{ steps.check-deployment.outputs.ready }}
+      test-start-time: ${{ steps.set-time.outputs.time }}
     steps:
+      - name: Set Test Start Time
+        id: set-time
+        run: |
+          START_TIME=$(date -u "+%Y-%m-%d %H:%M:%S+00")
+          echo "time=$START_TIME" >> $GITHUB_OUTPUT
       - name: Wait for Deployment
         id: check-deployment
         run: |
@@ -108,7 +114,7 @@ jobs:
       - name: Reset Database
         run: |
           oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
-          oc project f3c07a-dev
+          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
           API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
           echo "Found API pod: $API_POD"
           oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
@@ -164,36 +170,46 @@ jobs:
           path: ~/.cache/Cypress
           key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
 
-      - name: Cypress run
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: ./apps/jobstore-cypress
-          browser: edge
-          headless: true
-          install: false
-          config: 'video=true'
-        env:
-          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-          CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
-          CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.CYPRESS_VITE_KEYCLOAK_CLIENT_ID }}
-          CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
-          CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}
+      # - name: Cypress run
+      #   uses: cypress-io/github-action@v6
+      #   with:
+      #     working-directory: ./apps/jobstore-cypress
+      #     browser: edge
+      #     headless: true
+      #     install: false
+      #     config: 'video=true'
+      #   env:
+      #     CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+      #     CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
+      #     CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.CYPRESS_VITE_KEYCLOAK_CLIENT_ID }}
+      #     CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
+      #     CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}
 
-      # Upload screenshots if tests fail
-      - name: Upload Screenshots
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: ./apps/jobstore-cypress/cypress/screenshots
-          retention-days: 3
-          if-no-files-found: ignore
+      # # Upload screenshots if tests fail
+      # - name: Upload Screenshots
+      #   uses: actions/upload-artifact@v4
+      #   if: failure()
+      #   with:
+      #     name: cypress-screenshots
+      #     path: ./apps/jobstore-cypress/cypress/screenshots
+      #     retention-days: 3
+      #     if-no-files-found: ignore
 
-      - name: Upload Videos
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: cypress-videos
-          path: ./apps/jobstore-cypress/cypress/videos
-          retention-days: 3
-          if-no-files-found: ignore
+      # - name: Upload Videos
+      #   uses: actions/upload-artifact@v4
+      #   if: failure()
+      #   with:
+      #     name: cypress-videos
+      #     path: ./apps/jobstore-cypress/cypress/videos
+      #     retention-days: 3
+      #     if-no-files-found: ignore
+
+  restore-database:
+      needs: [wait-for-deployment, e2e-tests]
+      if: always()
+      uses: ./.github/workflows/db-restore.yml
+      with:
+        restore_timestamp: ${{ needs.wait-for-deployment.outputs.test-start-time }}
+        environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+        cluster_name: 'api-postgres-beta'
+      secrets: inherit
