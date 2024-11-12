@@ -87,22 +87,35 @@ jobs:
             postgrescluster/${{ env.CLUSTER_NAME }} \
             -n ${{ env.NAMESPACE }} --timeout=30m
 
+  cleanup:
+    needs: restore
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        run: |
+          echo "NAMESPACE=f3c07a-dev" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=api-postgres-beta" >> $GITHUB_ENV
+
+      - name: Login to OpenShift
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} \
+            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
+            --insecure-skip-tls-verify=true
+          oc project ${{ env.NAMESPACE }}
+
       - name: Remove restore annotation
+        continue-on-error: true
         run: |
           oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
             postgres-operator.crunchydata.com/pgbackrest-restore- \
             -n ${{ env.NAMESPACE }}
-
-      - name: Verify database status
-        run: |
-          DB_POD=$(oc get pod -l postgres-operator.crunchydata.com/role=master \
-            -n ${{ env.NAMESPACE }} \
-            -l postgres-operator.crunchydata.com/cluster=${{ env.CLUSTER_NAME }} \
-            -o jsonpath="{.items[0].metadata.name}")
-          echo "Database pod: $DB_POD"
-          oc logs $DB_POD -n ${{ env.NAMESPACE }} --tail=100
-
+            
       - name: Remove restore configuration
+        continue-on-error: true
         run: |
           yq eval -i 'del(.spec.backups.pgbackrest.restore)' \
             deployments/openshift/kustomize/overlays/crunchy/dev/patch.yml
