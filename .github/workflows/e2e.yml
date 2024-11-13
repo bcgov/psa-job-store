@@ -75,6 +75,19 @@ jobs:
           done
           
           echo "ready=true" >> $GITHUB_OUTPUT
+      - name: Setup E2E Environment
+        if: steps.check-deployment.outputs.ready == 'true'
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+          
+          # Set environment variables for deployments
+          oc set env deployment/api E2E_TESTING=true USE_MOCKS=true
+          oc set env deployment/app VITE_TEST_ENV=true
+          
+          # Wait for rollouts to complete
+          oc rollout status deployment/api
+          oc rollout status deployment/app
 
 
   e2e-tests:
@@ -170,39 +183,60 @@ jobs:
           path: ~/.cache/Cypress
           key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
 
-      # - name: Cypress run
-      #   uses: cypress-io/github-action@v6
-      #   with:
-      #     working-directory: ./apps/jobstore-cypress
-      #     browser: edge
-      #     headless: true
-      #     install: false
-      #     config: 'video=true'
-      #   env:
-      #     CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-      #     CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
-      #     CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.CYPRESS_VITE_KEYCLOAK_CLIENT_ID }}
-      #     CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
-      #     CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./apps/jobstore-cypress
+          browser: edge
+          headless: true
+          install: false
+          config: 'video=true'
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+          CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
+          CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.CYPRESS_VITE_KEYCLOAK_CLIENT_ID }}
+          CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
+          CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}
 
-      # # Upload screenshots if tests fail
-      # - name: Upload Screenshots
-      #   uses: actions/upload-artifact@v4
-      #   if: failure()
-      #   with:
-      #     name: cypress-screenshots
-      #     path: ./apps/jobstore-cypress/cypress/screenshots
-      #     retention-days: 3
-      #     if-no-files-found: ignore
+      # Upload screenshots if tests fail
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ./apps/jobstore-cypress/cypress/screenshots
+          retention-days: 3
+          if-no-files-found: ignore
 
-      # - name: Upload Videos
-      #   uses: actions/upload-artifact@v4
-      #   if: failure()
-      #   with:
-      #     name: cypress-videos
-      #     path: ./apps/jobstore-cypress/cypress/videos
-      #     retention-days: 3
-      #     if-no-files-found: ignore
+      - name: Upload Videos
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-videos
+          path: ./apps/jobstore-cypress/cypress/videos
+          retention-days: 3
+          if-no-files-found: ignore
+
+
+  cleanup-e2e:
+    needs: [wait-for-deployment, e2e-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+    steps:
+      - name: Cleanup E2E Environment
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+          
+          # Remove environment variables
+          oc set env deployment/api E2E_TESTING- USE_MOCKS-
+          oc set env deployment/app VITE_TEST_ENV-
+          
+          # Wait for rollouts to complete
+          oc rollout status deployment/api
+          oc rollout status deployment/app
 
   restore-database:
       needs: [wait-for-deployment, e2e-tests]
