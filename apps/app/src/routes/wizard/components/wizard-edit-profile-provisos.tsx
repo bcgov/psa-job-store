@@ -93,7 +93,7 @@ const Provisos: React.FC<ProvisosProps> = ({
         <Row>
           <Col>
             <WizardEditAddButton
-              testId="add-prof-reg-button"
+              testId="add-proviso-button"
               onClick={() => {
                 handleAddNew();
               }}

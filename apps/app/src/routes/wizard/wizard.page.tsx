@@ -12,6 +12,7 @@ import {
   useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
+import { useTestUser } from '../../utils/useTestUser';
 import JobProfiles from '../job-profiles/components/job-profiles.component';
 import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -38,7 +39,8 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   setCurrentStep,
 }) => {
   // const { id } = useParams();
-  const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
+  const isTestUser = useTestUser();
+  const page_size = isTestUser ? 2 : 10;
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedProfileVersion, setSelectedProfileVersion] = useState<string | null>(null);
   const [selectedProfileNumber, setSelectedProfileNumber] = useState<string | null>(null);
@@ -404,7 +406,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       grayBg={false}
       pageHeaderExtra={[
         <AccessiblePopoverMenu
-          triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+          triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
           content={getMenuContent()}
           ariaLabel="Open position request menu"
           key="menu"

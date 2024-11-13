@@ -1,0 +1,250 @@
+name: E2E Tests
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Git SHA to verify'
+        required: true
+        type: string
+      changed_apps:
+        description: 'JSON array of changed apps'
+        required: true
+        type: string
+
+jobs:
+
+  wait-for-deployment:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+    outputs:
+      deployment-ready: ${{ steps.check-deployment.outputs.ready }}
+      test-start-time: ${{ steps.set-time.outputs.time }}
+    steps:
+      - name: Set Test Start Time
+        id: set-time
+        run: |
+          START_TIME=$(date -u -d '5 minutes ago' "+%Y-%m-%d %H:%M:%S+00")
+          echo "time=$START_TIME" >> $GITHUB_OUTPUT
+      - name: Login to OpenShift
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+      - name: Wait for deployments
+        run: |
+          # Wait for rollouts to complete
+          oc rollout status deployment/api
+          oc rollout status deployment/app
+      - name: Configure environments for deployments
+        id: check-deployment
+        run: |
+          MAX_RETRIES=30
+          COUNTER=0
+          CHANGED_APPS='${{ inputs.changed_apps }}'
+          
+          check_versions() {
+            ALL_MATCH=true
+            
+            if echo "$CHANGED_APPS" | jq -e 'contains(["api"])' > /dev/null; then
+              API_VERSION=$(curl -s ${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/gitsha | jq -r .version)
+              echo "API Version: $API_VERSION"
+              if [ "$API_VERSION" != "${{ inputs.sha }}" ]; then
+                ALL_MATCH=false
+              fi
+            else
+              echo "API was not changed, skipping version check"
+            fi
+            
+            if echo "$CHANGED_APPS" | jq -e 'contains(["app"])' > /dev/null; then
+              APP_VERSION=$(curl -s ${{ secrets.CYPRESS_BASE_URL }}/version.json | jq -r .gitSha)
+              echo "APP Version: $APP_VERSION"
+              if [ "$APP_VERSION" != "${{ inputs.sha }}" ]; then
+                ALL_MATCH=false
+              fi
+            else
+              echo "APP was not changed, skipping version check"
+            fi
+            
+            echo "Expected Version: ${{ inputs.sha }}"
+            
+            if [ "$ALL_MATCH" = "true" ]; then
+              return 0
+            fi
+            return 1
+          }
+          
+          until check_versions
+          do
+            if [ $COUNTER -eq $MAX_RETRIES ]; then
+              echo "Timeout waiting for deployment"
+              echo "ready=false" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+            echo "Waiting for deployment... Attempt $COUNTER of $MAX_RETRIES"
+            sleep 10
+            COUNTER=$((COUNTER+1))
+          done
+          
+          echo "ready=true" >> $GITHUB_OUTPUT
+      - name: Setup E2E Environment
+        if: steps.check-deployment.outputs.ready == 'true'
+        run: |
+          oc set env deployment/api E2E_TESTING=true USE_MOCKS=true
+          
+          # Wait for rollouts to complete
+          oc rollout status deployment/api
+
+
+
+  e2e-tests:
+    needs: wait-for-deployment
+    if: needs.wait-for-deployment.outputs.deployment-ready == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js with NPM Cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Cache Node Modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Cache Cypress Binary
+        id: cache-cypress-binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
+
+      # Login to OpenShift and reset database
+      - name: Reset Database
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+          API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
+          echo "Found API pod: $API_POD"
+          oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
+
+       # Cache restore steps
+      - name: Restore Node Modules Cache
+        id: cache-node-modules-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Restore Cypress Binary Cache
+        id: cache-cypress-binary-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
+
+      # Install dependencies if cache miss
+      - name: Install Root Dependencies
+        if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts
+        env:
+          HUSKY: 0
+
+      # Install cypress dependencies if cache miss
+      - name: Install Cypress Dependencies
+        if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
+        run: |
+          npm ci --ignore-scripts
+          npx cypress install
+        working-directory: ./apps/jobstore-cypress
+        env:
+          HUSKY: 0
+
+      # Save caches immediately after installation
+      - name: Save Node Modules Cache
+        if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Save Cypress Binary Cache
+        if: steps.cache-cypress-binary-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./apps/jobstore-cypress
+          browser: edge
+          headless: true
+          install: false
+          config: 'video=true'
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+          CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
+          CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.CYPRESS_VITE_KEYCLOAK_CLIENT_ID }}
+          CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
+          CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}
+
+      # Upload screenshots if tests fail
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: ./apps/jobstore-cypress/cypress/screenshots
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Upload Videos
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-videos
+          path: ./apps/jobstore-cypress/cypress/videos
+          retention-days: 3
+          if-no-files-found: ignore
+
+
+  cleanup-e2e:
+    needs: [wait-for-deployment, e2e-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+    steps:
+      - name: Cleanup E2E Environment
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+          
+          # Remove environment variables
+          oc set env deployment/api E2E_TESTING- USE_MOCKS-
+          
+  restore-database:
+      needs: [wait-for-deployment, e2e-tests]
+      if: always()
+      uses: ./.github/workflows/db-restore.yml
+      with:
+        restore_timestamp: ${{ needs.wait-for-deployment.outputs.test-start-time }}
+        environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+        cluster_name: 'api-postgres-beta'
+      secrets: inherit

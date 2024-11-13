@@ -1,5 +1,6 @@
 {
   "employees": [
+    { "id": "00132136", "name": "Testing User", "status": "Active" },
     { "id": "00123456", "name": "Alice Johnson", "status": "Active" },
     { "id": "00765432", "name": "Bob Smith", "status": "Active" },
     { "id": "00234567", "name": "Charlie Brown", "status": "Active" },
@@ -656,6 +657,25 @@
       "A.BUSINESS_UNIT": "BC112",
       "A.DEPTID": "112-0074",
       "B.DESCR": "DO Talent and Capacity",
+      "A.JOBCODE": "185005",
+      "A.POSN_STATUS": "Approved",
+      "A.STATUS_DT": "2023-02-14",
+      "A.REPORTS_TO": "00210987",
+      "A.SAL_ADMIN_PLAN": "MGT",
+      "A.TGB_E_CLASS": "E26271",
+      "A.LOCATION": "V8X4S800",
+      "A.UPDATE_INCUMBENTS": "N"
+    },
+    {
+      "attr:rownumber": 25,
+      "A.POSITION_NBR": "00132136",
+      "A.EFFDT": "2024-07-20",
+      "A.EFF_STATUS": "Active",
+      "A.DESCR": "Testing User Position",
+      "A.DESCRSHORT": "Band 5",
+      "A.BUSINESS_UNIT": "BC112",
+      "A.DEPTID": "112-0074",
+      "B.DESCR": "Informational Resource Management",
       "A.JOBCODE": "185005",
       "A.POSN_STATUS": "Approved",
       "A.STATUS_DT": "2023-02-14",

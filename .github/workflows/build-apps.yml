@@ -8,6 +8,7 @@ jobs:
   metadata:
     name: Get Metadata
     runs-on: ubuntu-20.04
+
     outputs:
       changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
       short-sha: ${{ steps.get-short-sha.outputs.sha }}
@@ -81,6 +82,7 @@ jobs:
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
           build-args: |
+            GITHUB_SHA=${{ github.sha }}
             VITE_KEYCLOAK_REDIRECT_URL=${{ secrets.KEYCLOAK_REDIRECT_URL }}
             VITE_KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
             VITE_KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
@@ -98,14 +100,21 @@ jobs:
             KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
 
   trigger_migration:
-    needs: build-apps
+    needs: [metadata, build-apps]  # Add metadata to needs
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Migration
-        run: |
-          curl \
-            -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/dispatches \
-            -d '{"event_type": "migrate-trigger", "client_payload": { "ref": "${{ github.ref }}", "ref_name": "${{ github.ref_name }}"}}"'
+      - name: Trigger Migration Workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'migrate-db.yml',
+              ref: '${{ github.ref }}',
+              inputs: {
+                sha: '${{ github.sha }}',
+                changed_apps: '${{ needs.metadata.outputs.changed-apps }}'
+              }
+            });

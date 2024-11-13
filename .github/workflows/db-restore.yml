@@ -1,0 +1,163 @@
+name: Database In-Place PITR
+on:
+  workflow_call:
+    inputs:
+      restore_timestamp:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      cluster_name:
+        required: true
+        type: string
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        run: |
+          echo "NAMESPACE=f3c07a-${{ inputs.environment }}" >> $GITHUB_ENV
+          echo "RESTORE_TIMESTAMP=${{ inputs.restore_timestamp }}" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=${{ inputs.cluster_name }}" >> $GITHUB_ENV
+
+      - name: Debug - Show Environment Variables
+        run: |
+          echo "Current environment variables:"
+          echo "NAMESPACE: ${{ env.NAMESPACE }}"
+          echo "RESTORE_TIMESTAMP: ${{ env.RESTORE_TIMESTAMP }}"
+          echo "CLUSTER_NAME: ${{ env.CLUSTER_NAME }}"
+
+      - name: Login to OpenShift
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} \
+            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
+            --insecure-skip-tls-verify=true
+          oc project ${{ env.NAMESPACE }}
+
+      - name: Debug - Show Current Cluster Configuration
+        run: |
+          echo "Current base postgrescluster.yml content:"
+          cat deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+          echo "\nCurrent patch.yml content (if exists):"
+          cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml || echo "patch.yml doesn't exist yet"
+          echo "\nCurrent kustomization.yml content:"
+          cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/kustomization.yml
+
+      - name: Update cluster names and patch
+        run: |
+          # Update only metadata.name in base postgrescluster.yml
+          sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' \
+            deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+          
+          # Use yq to append only the restore section
+          yq eval -i '.spec.backups.pgbackrest.restore = {
+            "enabled": true,
+            "repoName": "repo1",
+            "options": [
+              "--type=time",
+              "--target=\"${{ env.RESTORE_TIMESTAMP }}\""
+            ]
+          }' deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
+
+      - name: Debug - Show Updated Configuration
+        run: |
+          echo "Updated base postgrescluster.yml content:"
+          cat deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+          echo "\nUpdated patch.yml content:"
+          cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
+          echo "\nDebug kustomize build output:"
+          oc kustomize deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}
+
+      - name: Apply restore configuration
+        run: |
+          oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
+            -n ${{ env.NAMESPACE }}
+
+      - name: Trigger restore with annotation
+        run: |
+          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+            --overwrite \
+            postgres-operator.crunchydata.com/pgbackrest-restore="restore-$(date +%Y%m%d-%H%M%S)" \
+            -n ${{ env.NAMESPACE }}
+
+      - name: Wait for restore completion
+        run: |
+          oc wait --for=condition=PostgresDataInitialized=true \
+            postgrescluster/${{ env.CLUSTER_NAME }} \
+            -n ${{ env.NAMESPACE }} --timeout=30m
+
+  cleanup:
+    needs: restore
+    if: always()
+    environment:
+      name: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        run: |
+          echo "NAMESPACE=f3c07a-${{ inputs.environment }}" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=${{ inputs.cluster_name }}" >> $GITHUB_ENV
+
+      - name: Login to OpenShift
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} \
+            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
+            --insecure-skip-tls-verify=true
+          oc project ${{ env.NAMESPACE }}
+
+      - name: Remove restore annotation
+        continue-on-error: true
+        run: |
+          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+            postgres-operator.crunchydata.com/pgbackrest-restore- \
+            -n ${{ env.NAMESPACE }}
+            
+      - name: Remove restore configuration
+        continue-on-error: true
+        run: |
+          # First verify the patch file exists
+          if [ -f "deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml" ]; then
+            # Remove the restore configuration
+            yq -i 'del(.spec.backups.pgbackrest.restore)' \
+              deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
+            
+            # Apply the updated configuration
+            oc kustomize deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} | \
+              oc apply -f -
+          else
+            echo "Patch file does not exist, skipping restore configuration removal"
+          fi
+
+# TO CONVERT TO MANUAL TRIGGER LATER:
+# 1. Comment out the current 'on.push' section
+# 2. Add workflow_dispatch with inputs:
+#    workflow_dispatch:
+#      inputs:
+#        restore_timestamp:
+#          description: 'Restore point timestamp (YYYY-MM-DD HH:MM:SS TZ)'
+#          required: true
+#        environment:
+#          description: 'Environment to restore in'
+#          required: true
+#          default: 'dev'
+#        cluster_name:
+#          description: 'PostgreSQL cluster name'
+#          required: true
+#          default: 'api-postgres-alpha'
+# 3. Remove the 'if: github.ref == 'refs/heads/develop'' condition
+# 4. Update environment variables section to:
+#    echo "NAMESPACE=${{ github.ref_name == 'main' && 'f3c07a-prod' || 
+#          github.ref_name == 'stage' && 'f3c07a-test' || 'f3c07a-dev' }}" >> $GITHUB_ENV
+#    echo "RESTORE_TIMESTAMP=${{ github.event.inputs.restore_timestamp }}" >> $GITHUB_ENV
+#    echo "CLUSTER_NAME=${{ github.event.inputs.cluster_name }}" >> $GITHUB_ENV

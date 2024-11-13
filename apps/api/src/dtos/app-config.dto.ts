@@ -79,4 +79,7 @@ export class AppConfigDto {
 
   @IsString()
   USE_MOCKS: string;
+
+  @IsString()
+  E2E_TESTING: string;
 }

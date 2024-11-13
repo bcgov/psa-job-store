@@ -17,6 +17,7 @@ import {
   useLazyGetSharedPositionRequestQuery,
   useLazyPositionNeedsRivewQuery,
 } from '../../redux/services/graphql-api/position-request.api';
+import { useTestUser } from '../../utils/useTestUser';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
 import { OrgChart } from '../org-chart/components/org-chart';
@@ -271,9 +272,11 @@ export const PositionRequestPage = () => {
     navigate('/'); // Replace with the path where the user should be redirected
   };
 
+  const isTestUser = useTestUser();
+
   const handleCopy = (copyData: any) => {
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(copyData);
+    if (!isTestUser) copy(copyData);
     message.success('Link copied to clipboard!');
   };
 

@@ -38,6 +38,7 @@ import {
   useUpdateJobProfileStateMutation,
 } from '../../../redux/services/graphql-api/job-profile.api';
 import { formatDateTime } from '../../../utils/Utils';
+import { useTestUser } from '../../../utils/useTestUser';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -543,12 +544,15 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       },
     });
   };
+
+  const isTestUser = useTestUser();
+
   const handleCopyLink = (record: any) => {
     // Dynamically construct the link to include the current base URL
     const linkToCopy = `${window.location.origin}${link}${record.id}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    if (!isTestUser) copy(linkToCopy);
     message.success('Link copied to clipboard!');
     setSelectedKeys([]);
   };

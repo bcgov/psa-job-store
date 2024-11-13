@@ -1,5 +1,5 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Layout } from 'antd';
+import { Button, Layout } from 'antd';
 import { useAuth } from 'react-oidc-context';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
@@ -36,7 +36,20 @@ export const AppLayout = () => {
             role="navigation"
             style={{ boxShadow: '2px 0 5px 0 #CCC', zIndex: 1000 }}
             theme="light"
-            trigger={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
+            trigger={
+              <Button
+                data-testid="menu-toggle-btn"
+                aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+                icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
+                onClick={() => setCollapsed(!collapsed)}
+                type="link"
+                style={{
+                  color: '#000',
+                  fontSize: '16px',
+                  margin: '0.5rem 0 0.5rem 0.75rem',
+                }}
+              />
+            }
           >
             <NavMenu collapsed={collapsed} />
           </Sider>

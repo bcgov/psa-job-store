@@ -281,6 +281,8 @@ export class PositionRequestApiService {
     // retrieve position we just created from peoplesoft
     let positionObj: Record<string, any> | null;
     try {
+      // console.log('getting position from peoplesoft: ', positionNumber);
+
       const result = await this.peoplesoftService.getPosition(positionNumber);
       const rows = result?.data?.query?.rows;
       positionObj = (rows ?? []).length > 0 ? rows[0] : null;
@@ -347,6 +349,13 @@ export class PositionRequestApiService {
 
     try {
       // determine the status for the position request based on CRM status + peoplesoft status
+      // console.log('getALStatus args: ', {
+      //   category: crm_category,
+      //   crm_status: crm_status,
+      //   ps_status: positionObj['A.POSN_STATUS'],
+      //   ps_effective_status: positionObj['EFF_STATUS'],
+      // });
+
       const incomingPositionRequestStatus = getALStatus({
         category: crm_category,
         crm_status: crm_status,
@@ -386,6 +395,8 @@ export class PositionRequestApiService {
   private async submitPositionRequest_updateOrgChart(positionObj, positionRequest: PositionRequest, id) {
     // get classification for this new position
     const classification = await this.classificationService.getClassificationForPeoplesoftPosition(positionObj);
+
+    // console.log('positionObj: ', positionObj);
 
     // get department in which this position was created
     const department = await this.departmentService.getDepartment({ where: { id: positionObj['A.DEPTID'] } });
@@ -1614,6 +1625,8 @@ export class PositionRequestApiService {
           },
         });
       }
+
+      // console.log('incident is ', incident);
 
       return incident;
     } catch (error) {

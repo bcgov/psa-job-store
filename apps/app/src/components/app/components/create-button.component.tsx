@@ -43,6 +43,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
   const renderButton = useMemo(
     () => (menuItems: MenuItemType[]) => (
       <Flex
+        data-testid="create-new-btn"
         justify={collapsed ? 'left' : 'center'}
         style={{ width: '100%' }}
         role="button"

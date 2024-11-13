@@ -3,6 +3,24 @@ kind: PostgresCluster
 metadata:
   name: api-postgres-beta
 spec:
+  # patroni:
+  #     dynamicConfiguration:
+  #     # This is to prevent WAL overflowing when running backup restore multiple times
+  #       postgresql:
+  #         parameters:
+  #          # More restrictive WAL settings
+  #         wal_keep_segments: 3            
+  #         max_wal_size: '256MB'          
+  #         min_wal_size: '32MB'           
+  #         wal_level: 'minimal'           
+  #         archive_mode: 'off'            # Disable archiving to save space
+  #         # Conservative memory settings
+  #         shared_buffers: '128MB'        
+  #         work_mem: '1MB'                
+  #         maintenance_work_mem: '8MB'     
+  #         temp_buffers: '1MB'
+  #         max_connections: 20            # Limit concurrent connections
+
   backups:
     pgbackrest:
       global:

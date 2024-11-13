@@ -100,6 +100,7 @@ import { useGetJobRolesQuery } from '../../../redux/services/graphql-api/job-rol
 import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
 import { useLazyGetPositionRequestsCountQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { FormItem } from '../../../utils/FormItem';
+import { useTestUser } from '../../../utils/useTestUser';
 import {
   JobProfileValidationModel,
   OverviewField,
@@ -302,12 +303,15 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   } else {
     link = '/job-profiles/manage/published/';
   }
+
+  const isTestUser = useTestUser();
+
   const handleCopyLink = () => {
     // Dynamically construct the link to include the current base URL
     const linkToCopy = `${window.location.origin}${link}${jobProfileData?.jobProfile.id}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    if (!isTestUser) copy(linkToCopy);
     message.success('Link copied to clipboard!');
     setSelectedKeys([]);
   };

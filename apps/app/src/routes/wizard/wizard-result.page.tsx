@@ -26,6 +26,7 @@ import {
   useSubmitPositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
+import { useTestUser } from '../../utils/useTestUser';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -223,6 +224,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     setIsModalVisible(false);
   };
 
+  const isTestUser = useTestUser();
+
   const handleOk = async () => {
     // User pressed next on the review screen
     // A modal appeared with terms
@@ -249,9 +252,9 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
         if (!isActionRequiredState)
           try {
-            png = await generatePNGBase64(getNodes);
+            png = !isTestUser ? await generatePNGBase64(getNodes) : '';
           } catch (error) {
-            console.error('Error generating PNG: ', error);
+            console.error('Error generating PNG..: ', error);
           }
 
         const result = await submitPositionRequest({
@@ -429,7 +432,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             </div>,
             <AccessiblePopoverMenu
               key="menu"
-              triggerButton={<Button tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+              triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
               content={getMenuContent()}
               ariaLabel="Open position request menu"
             ></AccessiblePopoverMenu>,
@@ -962,7 +965,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                 </Button>,
               ]}
             >
-              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start' }} data-testid="verification-confirmation-dialog">
                 <div>
                   Once submitted, you won’t be able to cancel the request from the job store. Are you sure you wish to
                   proceed?

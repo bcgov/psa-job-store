@@ -34,6 +34,8 @@ export class SearchService {
 
   async resetIndex() {
     try {
+      // console.log('resetting index..');
+
       const indexExists = await this.elasticService.indices.exists({ index: SearchIndex.JobProfile });
       if (indexExists === true) {
         await this.elasticService.indices.delete({ index: SearchIndex.JobProfile });
@@ -72,6 +74,8 @@ export class SearchService {
   // }
 
   async searchJobProfiles(value: string) {
+    // console.log('searchProfiles: ', value);
+
     const results = await this.elasticService.search({
       index: SearchIndex.JobProfile,
       query: {

@@ -430,7 +430,7 @@ export const DynamicOrgChart = ({
   else console.log('rendering');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }} data-testid="org-chart">
       <Row gutter={[8, 8]} justify="space-between" style={{ margin: '0.5rem 1rem' }}>
         <Col xs={24} md={{ offset: 12, span: 12 }}>
           <Space direction="vertical" style={{ width: '100%' }}>
@@ -457,7 +457,10 @@ export const DynamicOrgChart = ({
         </Col>
       </Row>
       {orgChartDataIsFetching || !initialized ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
+        <div
+          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}
+          data-testid="org-chart-loading"
+        >
           <Spin spinning style={{ margin: 'auto' }} />
         </div>
       ) : (
