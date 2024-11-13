@@ -63,7 +63,8 @@ jobs:
             "repoName": "repo1",
             "options": [
               "--type=time",
-              "--target=\"${{ env.RESTORE_TIMESTAMP }}\""
+              "--target=\"${{ env.RESTORE_TIMESTAMP }}\"",
+              "--target-timeline=current"
             ]
           }' deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
 
@@ -138,26 +139,3 @@ jobs:
           else
             echo "Patch file does not exist, skipping restore configuration removal"
           fi
-
-# TO CONVERT TO MANUAL TRIGGER LATER:
-# 1. Comment out the current 'on.push' section
-# 2. Add workflow_dispatch with inputs:
-#    workflow_dispatch:
-#      inputs:
-#        restore_timestamp:
-#          description: 'Restore point timestamp (YYYY-MM-DD HH:MM:SS TZ)'
-#          required: true
-#        environment:
-#          description: 'Environment to restore in'
-#          required: true
-#          default: 'dev'
-#        cluster_name:
-#          description: 'PostgreSQL cluster name'
-#          required: true
-#          default: 'api-postgres-alpha'
-# 3. Remove the 'if: github.ref == 'refs/heads/develop'' condition
-# 4. Update environment variables section to:
-#    echo "NAMESPACE=${{ github.ref_name == 'main' && 'f3c07a-prod' || 
-#          github.ref_name == 'stage' && 'f3c07a-test' || 'f3c07a-dev' }}" >> $GITHUB_ENV
-#    echo "RESTORE_TIMESTAMP=${{ github.event.inputs.restore_timestamp }}" >> $GITHUB_ENV
-#    echo "CLUSTER_NAME=${{ github.event.inputs.cluster_name }}" >> $GITHUB_ENV

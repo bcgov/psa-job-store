@@ -246,5 +246,5 @@ jobs:
       with:
         restore_timestamp: ${{ needs.wait-for-deployment.outputs.test-start-time }}
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-        cluster_name: 'api-postgres-beta'
+        cluster_name: 'api-postgres-clone'
       secrets: inherit
