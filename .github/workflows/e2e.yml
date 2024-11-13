@@ -15,6 +15,8 @@ jobs:
 
   wait-for-deployment:
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     outputs:
       deployment-ready: ${{ steps.check-deployment.outputs.ready }}
       test-start-time: ${{ steps.set-time.outputs.time }}
@@ -234,10 +236,6 @@ jobs:
           oc set env deployment/api E2E_TESTING- USE_MOCKS-
           oc set env deployment/app VITE_TEST_ENV-
           
-          # Wait for rollouts to complete
-          oc rollout status deployment/api
-          oc rollout status deployment/app
-
   restore-database:
       needs: [wait-for-deployment, e2e-tests]
       if: always()
