@@ -35,6 +35,9 @@ jobs:
           # Wait for rollouts to complete
           oc rollout status deployment/api
           oc rollout status deployment/app
+      - name: Sleep for 15 seconds
+        run: sleep 15s
+        shell: bash
       - name: Wait for GIT sha
         id: check-deployment
         run: |
@@ -95,6 +98,10 @@ jobs:
           # Wait for rollouts to complete
           oc rollout status deployment/api
 
+      - name: Sleep for 15 seconds
+        run: sleep 15s
+        shell: bash
+        
       - name: Reset elastic search index
         run: |
           response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
