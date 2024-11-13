@@ -127,15 +127,25 @@ jobs:
       - name: Remove restore configuration
         continue-on-error: true
         run: |
-          # First verify the patch file exists
-          if [ -f "deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml" ]; then
-            # Remove the restore configuration
-            yq -i 'del(.spec.backups.pgbackrest.restore)' \
-              deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
+          PATCH_FILE="deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml"
+          
+          if [ -f "$PATCH_FILE" ]; then
+            echo "Current patch file content:"
+            cat "$PATCH_FILE"
             
-            # Apply the updated configuration
-            oc kustomize deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} | \
-              oc apply -f -
+            echo -e "\nRemoving restore configuration..."
+            yq -i 'del(.spec.backups.pgbackrest.restore)' "$PATCH_FILE"
+            
+            echo -e "\nUpdated patch file content:"
+            cat "$PATCH_FILE"
+            
+            echo -e "\nPreview of kustomize output:"
+            oc kustomize deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}
+            
+            echo -e "\nApplying configuration..."
+            oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
+              -n ${{ env.NAMESPACE }}
           else
-            echo "Patch file does not exist, skipping restore configuration removal"
+            echo "Patch file $PATCH_FILE does not exist"
+            exit 1
           fi
