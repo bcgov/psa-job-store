@@ -51,48 +51,48 @@ jobs:
           echo "\nCurrent kustomization.yml content:"
           cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/kustomization.yml
 
-      # - name: Update cluster names and patch
-      #   run: |
-      #     # Update only metadata.name in base postgrescluster.yml
-      #     sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' \
-      #       deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+      - name: Update cluster names and patch
+        run: |
+          # Update only metadata.name in base postgrescluster.yml
+          sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' \
+            deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
           
-      #     # Use yq to append only the restore section
-      #     yq eval -i '.spec.backups.pgbackrest.restore = {
-      #       "enabled": true,
-      #       "repoName": "repo1",
-      #       "options": [
-      #         "--type=time",
-      #         "--target=\"${{ env.RESTORE_TIMESTAMP }}\""
-      #       ]
-      #     }' deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
+          # Use yq to append only the restore section
+          yq eval -i '.spec.backups.pgbackrest.restore = {
+            "enabled": true,
+            "repoName": "repo1",
+            "options": [
+              "--type=time",
+              "--target=\"${{ env.RESTORE_TIMESTAMP }}\""
+            ]
+          }' deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
 
-      # - name: Debug - Show Updated Configuration
-      #   run: |
-      #     echo "Updated base postgrescluster.yml content:"
-      #     cat deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
-      #     echo "\nUpdated patch.yml content:"
-      #     cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
-      #     echo "\nDebug kustomize build output:"
-      #     oc kustomize deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}
+      - name: Debug - Show Updated Configuration
+        run: |
+          echo "Updated base postgrescluster.yml content:"
+          cat deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+          echo "\nUpdated patch.yml content:"
+          cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
+          echo "\nDebug kustomize build output:"
+          oc kustomize deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}
 
-      # - name: Apply restore configuration
-      #   run: |
-      #     oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
-      #       -n ${{ env.NAMESPACE }}
+      - name: Apply restore configuration
+        run: |
+          oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
+            -n ${{ env.NAMESPACE }}
 
-      # - name: Trigger restore with annotation
-      #   run: |
-      #     oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
-      #       --overwrite \
-      #       postgres-operator.crunchydata.com/pgbackrest-restore="restore-$(date +%Y%m%d-%H%M%S)" \
-      #       -n ${{ env.NAMESPACE }}
+      - name: Trigger restore with annotation
+        run: |
+          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+            --overwrite \
+            postgres-operator.crunchydata.com/pgbackrest-restore="restore-$(date +%Y%m%d-%H%M%S)" \
+            -n ${{ env.NAMESPACE }}
 
-      # - name: Wait for restore completion
-      #   run: |
-      #     oc wait --for=condition=PostgresDataInitialized=true \
-      #       postgrescluster/${{ env.CLUSTER_NAME }} \
-      #       -n ${{ env.NAMESPACE }} --timeout=30m
+      - name: Wait for restore completion
+        run: |
+          oc wait --for=condition=PostgresDataInitialized=true \
+            postgrescluster/${{ env.CLUSTER_NAME }} \
+            -n ${{ env.NAMESPACE }} --timeout=30m
 
   cleanup:
     needs: restore
@@ -104,33 +104,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # - name: Set environment variables
-      #   run: |
-      #     echo "NAMESPACE=f3c07a-${{ inputs.environment }}" >> $GITHUB_ENV
-      #     echo "CLUSTER_NAME=${{ inputs.cluster_name }}" >> $GITHUB_ENV
+      - name: Set environment variables
+        run: |
+          echo "NAMESPACE=f3c07a-${{ inputs.environment }}" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=${{ inputs.cluster_name }}" >> $GITHUB_ENV
 
-      # - name: Login to OpenShift
-      #   run: |
-      #     oc login ${{ secrets.OPENSHIFT_SERVER }} \
-      #       --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
-      #       --insecure-skip-tls-verify=true
-      #     oc project ${{ env.NAMESPACE }}
+      - name: Login to OpenShift
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} \
+            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
+            --insecure-skip-tls-verify=true
+          oc project ${{ env.NAMESPACE }}
 
-      # - name: Remove restore annotation
-      #   continue-on-error: true
-      #   run: |
-      #     oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
-      #       postgres-operator.crunchydata.com/pgbackrest-restore- \
-      #       -n ${{ env.NAMESPACE }}
+      - name: Remove restore annotation
+        continue-on-error: true
+        run: |
+          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+            postgres-operator.crunchydata.com/pgbackrest-restore- \
+            -n ${{ env.NAMESPACE }}
             
-      # - name: Remove restore configuration
-      #   continue-on-error: true
-      #   run: |
-      #     yq eval -i 'del(.spec.backups.pgbackrest.restore)' \
-      #       deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
+      - name: Remove restore configuration
+        continue-on-error: true
+        run: |
+          yq eval -i 'del(.spec.backups.pgbackrest.restore)' \
+            deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
           
-      #     oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
-      #       -n ${{ env.NAMESPACE }}
+          oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
+            -n ${{ env.NAMESPACE }}
 
 # TO CONVERT TO MANUAL TRIGGER LATER:
 # 1. Comment out the current 'on.push' section
