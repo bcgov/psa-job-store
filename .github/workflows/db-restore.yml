@@ -126,11 +126,18 @@ jobs:
       - name: Remove restore configuration
         continue-on-error: true
         run: |
-          yq eval -i 'del(.spec.backups.pgbackrest.restore)' \
-            deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
-          
-          oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
-            -n ${{ env.NAMESPACE }}
+          # First verify the patch file exists
+          if [ -f "deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml" ]; then
+            # Remove the restore configuration
+            yq -i 'del(.spec.backups.pgbackrest.restore)' \
+              deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
+            
+            # Apply the updated configuration
+            oc kustomize deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} | \
+              oc apply -f -
+          else
+            echo "Patch file does not exist, skipping restore configuration removal"
+          fi
 
 # TO CONVERT TO MANUAL TRIGGER LATER:
 # 1. Comment out the current 'on.push' section

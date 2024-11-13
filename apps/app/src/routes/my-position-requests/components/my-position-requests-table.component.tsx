@@ -27,6 +27,7 @@ import {
   useLazyGetPositionRequestsQuery,
 } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime, formatDuration } from '../../../utils/Utils';
+import { useTestUser } from '../../../utils/useTestUser';
 import StatusIndicator from '../../wizard/components/wizard-position-request-status-indicator';
 import NoResultsView from './no-results.component';
 
@@ -74,6 +75,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   requestingFeature,
   ...props
 }) => {
+  const isTestUser = useTestUser();
   const [trigger, { data, isLoading, error: fetchError, isFetching }] = useLazyGetPositionRequestsQuery();
   const [deletePositionRequest] = useDeletePositionRequestMutation();
   const [searchParams] = useSearchParams();
@@ -93,7 +95,6 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   const [selectedRowKeys] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(initialPage);
-  // const [pageSize, setPageSize] = useState(import.meta.env.VITE_TEST_ENV === 'true' ? 2 : initialPageSize);
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [sortField, setSortField] = useState(initialSortField);
   const [sortOrder, setSortOrder] = useState(initialSortOrder);
@@ -150,7 +151,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
     const linkToCopy = `${window.location.origin}/requests/positions/share/${record.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    if (!isTestUser) copy(linkToCopy);
     message.success('Link copied to clipboard!');
     setSelectedKeys([]);
   };
@@ -512,7 +513,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                         background: 'transparent',
                       }}
                       onClick={() => {
-                        if (import.meta.env.VITE_TEST_ENV !== 'true') copy(valueString);
+                        if (!isTestUser) copy(valueString);
                         message.success('Position number copied!');
                       }}
                     />

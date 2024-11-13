@@ -4,13 +4,15 @@ import LoadingComponent from '../../components/app/common/components/loading.com
 import { PageHeader } from '../../components/app/page-header.component';
 import ContentWrapper from '../../components/content-wrapper.component';
 import { useGetSavedJobProfileIdsQuery } from '../../redux/services/graphql-api/saved-job-profile.api';
+import { useTestUser } from '../../utils/useTestUser';
 import JobProfiles from './components/job-profiles.component';
 
 export const SavedJobProfilesPage = () => {
   const { number } = useParams();
   const [searchParams] = useSearchParams();
   const { data: savedJobProfileIds, isLoading: isSavedJobProfileIdsLoading, refetch } = useGetSavedJobProfileIdsQuery();
-  const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
+  const isTestUser = useTestUser();
+  const page_size = isTestUser ? 2 : 10;
 
   useEffect(() => {
     refetch();
