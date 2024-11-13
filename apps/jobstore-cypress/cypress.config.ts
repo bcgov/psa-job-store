@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-require-imports -- Required for Cypress configuration which doesn't fully support ES modules */
 const { defineConfig } = require('cypress');
 const createBundler = require('@bahmutov/cypress-esbuild-preprocessor');
@@ -7,7 +6,7 @@ const { createEsbuildPlugin } = require('@badeball/cypress-cucumber-preprocessor
 const fs = require('fs');
 require('dotenv').config();
 
-async function setupNodeEvents(on:any, config:any) {
+async function setupNodeEvents(on, config) {
   await addCucumberPreprocessorPlugin(on, config);
 
   on(
@@ -18,18 +17,16 @@ async function setupNodeEvents(on:any, config:any) {
   );
 
   // Add video cleanup logic
-  on('after:spec', (_spec:any, results:any) => {
+  on('after:spec', (_spec, results) => {
     if (results && results.video) {
       // Check for failures in any retry attempts
-      const failures = results.tests.some((test:any) =>
-        test.attempts.some((attempt:any) => attempt.state === 'failed')
-      );
+      const failures = results.tests.some((test) => test.attempts.some((attempt) => attempt.state === 'failed'));
       if (!failures) {
         // Delete the video if the spec passed and no tests retried
-        try{
-        fs.unlinkSync(results.video);
+        try {
+          fs.unlinkSync(results.video);
         } catch (e) {
-          console.log('Error deleting video: ', e);
+          console.error('Error deleting video:', e);
         }
       }
     }
