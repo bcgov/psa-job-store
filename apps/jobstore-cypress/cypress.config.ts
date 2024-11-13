@@ -7,7 +7,7 @@ const { createEsbuildPlugin } = require('@badeball/cypress-cucumber-preprocessor
 const fs = require('fs');
 require('dotenv').config();
 
-async function setupNodeEvents(on, config) {
+async function setupNodeEvents(on:any, config:any) {
   await addCucumberPreprocessorPlugin(on, config);
 
   on(
