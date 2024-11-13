@@ -26,7 +26,16 @@ jobs:
         run: |
           START_TIME=$(date -u -d '5 minutes ago' "+%Y-%m-%d %H:%M:%S+00")
           echo "time=$START_TIME" >> $GITHUB_OUTPUT
-      - name: Wait for Deployment
+      - name: Login to OpenShift
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+      - name: Wait for deployments
+        run: |
+          # Wait for rollouts to complete
+          oc rollout status deployment/api
+          oc rollout status deployment/app
+      - name: Configure environments for deployments
         id: check-deployment
         run: |
           MAX_RETRIES=30
@@ -80,10 +89,6 @@ jobs:
       - name: Setup E2E Environment
         if: steps.check-deployment.outputs.ready == 'true'
         run: |
-          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
-          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-          
-          # Set environment variables for deployments
           oc set env deployment/api E2E_TESTING=true USE_MOCKS=true
           oc set env deployment/app VITE_TEST_ENV=true
           
