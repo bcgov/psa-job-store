@@ -3,6 +3,7 @@ const { defineConfig } = require('cypress');
 const createBundler = require('@bahmutov/cypress-esbuild-preprocessor');
 const { addCucumberPreprocessorPlugin } = require('@badeball/cypress-cucumber-preprocessor');
 const { createEsbuildPlugin } = require('@badeball/cypress-cucumber-preprocessor/esbuild');
+const fs = require('fs');
 require('dotenv').config();
 
 async function setupNodeEvents(on, config) {
@@ -14,6 +15,24 @@ async function setupNodeEvents(on, config) {
       plugins: [createEsbuildPlugin(config)],
     }),
   );
+
+  // Add video cleanup logic
+  on('after:spec', (spec, results) => {
+    if (results && results.video) {
+      // Check for failures in any retry attempts
+      const failures = results.tests.some((test) =>
+        test.attempts.some((attempt) => attempt.state === 'failed')
+      );
+      if (!failures) {
+        // Delete the video if the spec passed and no tests retried
+        try{
+        fs.unlinkSync(results.video);
+        } catch (e) {
+          console.log('Error deleting video: ', e);
+        }
+      }
+    }
+  });
 
   if (process.env.CYPRESS_BASE_URL) {
     config.baseUrl = process.env.CYPRESS_BASE_URL;
