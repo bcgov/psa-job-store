@@ -73,12 +73,12 @@ jobs:
     if: ${{inputs.changed_apps != '[]' && inputs.changed_apps != ''}}
     runs-on: ubuntu-20.04
     environment:
-      name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: ${{ github.ref_name }}
       - name: Trigger Deployments
         uses: ./.github/actions/trigger-deploy
         with:
