@@ -35,7 +35,7 @@ jobs:
           # Wait for rollouts to complete
           oc rollout status deployment/api
           oc rollout status deployment/app
-      - name: Configure environments for deployments
+      - name: Wait for GIT sha
         id: check-deployment
         run: |
           MAX_RETRIES=30
@@ -86,6 +86,7 @@ jobs:
           done
           
           echo "ready=true" >> $GITHUB_OUTPUT
+
       - name: Setup E2E Environment
         if: steps.check-deployment.outputs.ready == 'true'
         run: |
@@ -94,6 +95,14 @@ jobs:
           # Wait for rollouts to complete
           oc rollout status deployment/api
 
+      - name: Reset elastic search index
+        run: |
+          response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
+          if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
+            echo "Failed to reset elastic search index. Response: $response"
+            exit 1
+          fi
+        shell: bash
 
 
   e2e-tests:
