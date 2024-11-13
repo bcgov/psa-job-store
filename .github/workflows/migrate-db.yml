@@ -18,7 +18,6 @@ jobs:
 
     outputs:
       needs-migration: ${{ steps.get-migrations.outputs.changes }}
-      sha: ${{ steps.get-sha.outputs.sha }}
     steps:
       - name: Debug Info
         run: |
