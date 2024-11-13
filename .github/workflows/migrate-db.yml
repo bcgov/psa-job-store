@@ -94,7 +94,7 @@ jobs:
       runs-on: ubuntu-20.04
       if: |
         always() &&
-        github.ref_name == 'develop' &&
+        (github.ref_name == 'develop' || github.ref_name == 'stage') &&
         (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
       steps:
         - name: Trigger E2E Tests

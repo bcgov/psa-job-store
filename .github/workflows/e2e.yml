@@ -22,7 +22,7 @@ jobs:
       - name: Set Test Start Time
         id: set-time
         run: |
-          START_TIME=$(date -u "+%Y-%m-%d %H:%M:%S+00")
+          START_TIME=$(date -u -d '5 minutes ago' "+%Y-%m-%d %H:%M:%S+00")
           echo "time=$START_TIME" >> $GITHUB_OUTPUT
       - name: Wait for Deployment
         id: check-deployment
