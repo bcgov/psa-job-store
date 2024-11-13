@@ -26,6 +26,7 @@ import { PageHeader } from '../../components/app/page-header.component';
 import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
+import { useTestUser } from '../../utils/useTestUser';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import StatusIndicator from '../wizard/components/wizard-position-request-status-indicator';
@@ -41,6 +42,7 @@ const { Text } = Typography;
 // Import your API service to fetch position request
 
 export const ClassificationTaskPage = () => {
+  const isTestUser = useTestUser();
   const { positionRequestId } = useParams();
   const [activeTabKey, setActiveTabKey] = useState('1');
 
@@ -60,7 +62,7 @@ export const ClassificationTaskPage = () => {
     const linkToCopy = `${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    if (!isTestUser) copy(linkToCopy);
     message.success('Link copied to clipboard!');
   };
 

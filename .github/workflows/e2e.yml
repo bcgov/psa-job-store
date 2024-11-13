@@ -90,11 +90,10 @@ jobs:
         if: steps.check-deployment.outputs.ready == 'true'
         run: |
           oc set env deployment/api E2E_TESTING=true USE_MOCKS=true
-          oc set env deployment/app VITE_TEST_ENV=true
           
           # Wait for rollouts to complete
           oc rollout status deployment/api
-          oc rollout status deployment/app
+
 
 
   e2e-tests:
@@ -239,7 +238,6 @@ jobs:
           
           # Remove environment variables
           oc set env deployment/api E2E_TESTING- USE_MOCKS-
-          oc set env deployment/app VITE_TEST_ENV-
           
   restore-database:
       needs: [wait-for-deployment, e2e-tests]

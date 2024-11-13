@@ -26,6 +26,7 @@ import {
   useSubmitPositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
+import { useTestUser } from '../../utils/useTestUser';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { generatePNGBase64 } from '../org-chart/components/org-chart/download-button.component';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -223,6 +224,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     setIsModalVisible(false);
   };
 
+  const isTestUser = useTestUser();
+
   const handleOk = async () => {
     // User pressed next on the review screen
     // A modal appeared with terms
@@ -249,7 +252,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
         if (!isActionRequiredState)
           try {
-            png = import.meta.env.VITE_TEST_ENV !== 'true' ? await generatePNGBase64(getNodes): '';
+            png = !isTestUser ? await generatePNGBase64(getNodes) : '';
           } catch (error) {
             console.error('Error generating PNG..: ', error);
           }

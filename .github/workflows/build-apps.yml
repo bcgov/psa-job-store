@@ -89,7 +89,6 @@ jobs:
             VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
             VITE_SUPPORT_EMAIL=${{ secrets.VITE_SUPPORT_EMAIL }}
             VITE_ENV=${{ secrets.VITE_ENV }}
-            VITE_TEST_ENV=${{ secrets.VITE_TEST_ENV }}
             SSO_ENVIRONMENT=${{ secrets.SSO_ENVIRONMENT }}
             SSO_INTEGRATION_ID=${{ secrets.SSO_INTEGRATION_ID }}
             CSS_API_CLIENT_ID=${{ secrets.CSS_API_CLIENT_ID }}

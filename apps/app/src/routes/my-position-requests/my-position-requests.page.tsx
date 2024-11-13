@@ -11,6 +11,7 @@ import { PageHeader } from '../../components/app/page-header.component';
 import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
 import ContentWrapper from '../../components/content-wrapper.component';
 import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
+import { useTestUser } from '../../utils/useTestUser';
 import MyPositionsTable from './components/my-position-requests-table.component';
 
 export const MyPositionsPage = () => {
@@ -22,7 +23,8 @@ export const MyPositionsPage = () => {
   }, []);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(import.meta.env.VITE_TEST_ENV !== 'true' ? 10 : 2);
+  const isTestUser = useTestUser();
+  const [pageSize, setPageSize] = useState(!isTestUser ? 10 : 2);
   const [sortField, setSortField] = useState<null | string>(null);
   const [sortOrder, setSortOrder] = useState<null | string>(null);
 
@@ -110,7 +112,7 @@ export const MyPositionsPage = () => {
     }
   }, [initialSelectionSet, setInitialSelectionSet, searchParams]);
 
-  const defaultPageSize = import.meta.env.VITE_TEST_ENV !== 'true' ? 10 : 2;
+  const defaultPageSize = !isTestUser ? 10 : 2;
 
   useEffect(() => {
     // Sync state with URL parameters for selections and pagination
@@ -377,7 +379,7 @@ export const MyPositionsPage = () => {
           style={{ marginTop: '1rem', flexGrow: '1', display: 'flex', flexDirection: 'column' }}
           handleTableChangeCallback={handleTableChangeCallback}
           requestingFeature={'myPositions'}
-          itemsPerPage={import.meta.env.VITE_TEST_ENV !== 'true' ? undefined : pageSize}
+          itemsPerPage={!isTestUser ? undefined : pageSize}
         ></MyPositionsTable>
       </ContentWrapper>
     </>

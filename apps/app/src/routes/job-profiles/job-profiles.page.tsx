@@ -1,12 +1,14 @@
 import { useParams, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/app/page-header.component';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { useTestUser } from '../../utils/useTestUser';
 import JobProfiles from './components/job-profiles.component';
 
 export const JobProfilesPage = () => {
   const { number } = useParams();
   const [searchParams] = useSearchParams();
-  const page_size = import.meta.env.VITE_TEST_ENV === 'true' ? 2 : 10;
+  const isTestUser = useTestUser();
+  const page_size = isTestUser ? 2 : 10;
 
   return (
     <>
