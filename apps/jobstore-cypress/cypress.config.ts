@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-require-imports -- Required for Cypress configuration which doesn't fully support ES modules */
 const { defineConfig } = require('cypress');
 const createBundler = require('@bahmutov/cypress-esbuild-preprocessor');
@@ -17,11 +18,11 @@ async function setupNodeEvents(on, config) {
   );
 
   // Add video cleanup logic
-  on('after:spec', (spec, results) => {
+  on('after:spec', (_spec:any, results:any) => {
     if (results && results.video) {
       // Check for failures in any retry attempts
-      const failures = results.tests.some((test) =>
-        test.attempts.some((attempt) => attempt.state === 'failed')
+      const failures = results.tests.some((test:any) =>
+        test.attempts.some((attempt:any) => attempt.state === 'failed')
       );
       if (!failures) {
         // Delete the video if the spec passed and no tests retried
