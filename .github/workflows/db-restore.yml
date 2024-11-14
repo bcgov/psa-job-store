@@ -2,13 +2,16 @@ name: Database In-Place PITR
 on:
   workflow_call:
     inputs:
-      restore_timestamp:
-        required: true
-        type: string
+      # restore_timestamp:
+      #   required: true
+      #   type: string
       environment:
         required: true
         type: string
       cluster_name:
+        required: true
+        type: string
+      backup_id:
         required: true
         type: string
 
@@ -25,14 +28,14 @@ jobs:
       - name: Set environment variables
         run: |
           echo "NAMESPACE=f3c07a-${{ inputs.environment }}" >> $GITHUB_ENV
-          echo "RESTORE_TIMESTAMP=${{ inputs.restore_timestamp }}" >> $GITHUB_ENV
+          # echo "RESTORE_TIMESTAMP=${{ inputs.restore_timestamp }}" >> $GITHUB_ENV
           echo "CLUSTER_NAME=${{ inputs.cluster_name }}" >> $GITHUB_ENV
 
       - name: Debug - Show Environment Variables
         run: |
           echo "Current environment variables:"
           echo "NAMESPACE: ${{ env.NAMESPACE }}"
-          echo "RESTORE_TIMESTAMP: ${{ env.RESTORE_TIMESTAMP }}"
+          # echo "RESTORE_TIMESTAMP: ${{ env.RESTORE_TIMESTAMP }}"
           echo "CLUSTER_NAME: ${{ env.CLUSTER_NAME }}"
 
       - name: Login to OpenShift
@@ -56,15 +59,14 @@ jobs:
           # Update only metadata.name in base postgrescluster.yml
           sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' \
             deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
-          
+
           # Use yq to append only the restore section
           yq eval -i '.spec.backups.pgbackrest.restore = {
             "enabled": true,
             "repoName": "repo1",
             "options": [
-              "--type=time",
-              "--target=\"${{ env.RESTORE_TIMESTAMP }}\"",
-              "--target-timeline=current"
+              "--set=${{ inputs.backup_id }}",
+              "--type=immediate"
             ]
           }' deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
 
@@ -122,7 +124,7 @@ jobs:
             sleep 10
             timeout=$((timeout-10))
           done
-          
+
           echo "Restore timed out"
           exit 1
 
@@ -154,7 +156,7 @@ jobs:
           oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
             postgres-operator.crunchydata.com/pgbackrest-restore- \
             -n ${{ env.NAMESPACE }}
-            
+
       - name: Remove restore configuration
         continue-on-error: true
         run: |
