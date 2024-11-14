@@ -86,6 +86,8 @@ jobs:
           exit 1
 
   wait-for-deployment:
+    # wait for db backup, otherwise may not have enough OC resources
+    needs: [backup-database]
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
@@ -318,8 +320,7 @@ jobs:
           oc set env deployment/api E2E_TESTING- USE_MOCKS-
           
   restore-database:
-      needs: [wait-for-deployment, e2e-tests, backup-database]
-      if: always()
+      needs: [e2e-tests]
       uses: ./.github/workflows/db-restore.yml
       with:
         restore_timestamp: ${{ needs.backup-database.outputs.test-start-time }}
