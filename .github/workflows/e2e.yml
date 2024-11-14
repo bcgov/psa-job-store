@@ -98,20 +98,6 @@ jobs:
           # Wait for rollouts to complete
           oc rollout status deployment/api
 
-      - name: Sleep for 15 seconds
-        run: sleep 15s
-        shell: bash
-        
-      - name: Reset elastic search index
-        run: |
-          response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
-          if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
-            echo "Failed to reset elastic search index. Response: $response"
-            exit 1
-          fi
-        shell: bash
-
-
   e2e-tests:
     needs: wait-for-deployment
     if: needs.wait-for-deployment.outputs.deployment-ready == 'true'
@@ -154,6 +140,15 @@ jobs:
           echo "Found API pod: $API_POD"
           oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
 
+      - name: Reset elastic search index
+        run: |
+          response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
+          if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
+            echo "Failed to reset elastic search index. Response: $response"
+            exit 1
+          fi
+        shell: bash
+        
        # Cache restore steps
       - name: Restore Node Modules Cache
         id: cache-node-modules-restore
