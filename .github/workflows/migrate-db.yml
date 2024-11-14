@@ -110,7 +110,8 @@ jobs:
                   ref: '${{ github.ref }}',
                   inputs: {
                     sha: '${{ inputs.sha }}',
-                    changed_apps: '${{ inputs.changed_apps }}'
+                    changed_apps: '${{ inputs.changed_apps }}',
+                    cluster_name: 'api-postgres-clone'
                   }
                 });
                 console.log('E2E tests triggered successfully');

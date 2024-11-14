@@ -1,9 +1,10 @@
 name: E2E Tests
-env:
-  CLUSTER_NAME: api-postgres-clone
 on:
   workflow_dispatch:
     inputs:
+      cluster_name:
+        required: true
+        type: string
       sha:
         description: 'Git SHA to verify'
         required: true
@@ -44,12 +45,12 @@ jobs:
 
       - name: Configure Manual Backup
         run: |
-          oc patch postgrescluster ${{ env.CLUSTER_NAME }} --type merge \
+          oc patch postgrescluster ${{ inputs.cluster_name }} --type merge \
             -p '{"spec":{"backups":{"pgbackrest":{"manual":{"repoName":"repo1","options":["--type=full"]}}}}}'
 
       - name: Trigger Backup
         run: |
-          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+          oc annotate postgrescluster ${{ inputs.cluster_name }} \
             --overwrite \
             postgres-operator.crunchydata.com/pgbackrest-backup="${{ steps.set-backup-id.outputs.id }}"
 
@@ -57,7 +58,7 @@ jobs:
         run: |
           timeout=600  # 10 minutes timeout
           while [ $timeout -gt 0 ]; do
-            status=$(oc get postgrescluster ${{ env.CLUSTER_NAME }} \
+            status=$(oc get postgrescluster ${{ inputs.cluster_name }} \
               -o jsonpath='{.status.pgbackrest.manualBackup}')
             
             if [ -n "$status" ]; then
@@ -166,7 +167,7 @@ jobs:
           oc rollout status deployment/api
 
   e2e-tests:
-    needs: wait-for-deployment
+    needs: [wait-for-deployment, backup-database]
     if: needs.wait-for-deployment.outputs.deployment-ready == 'true'
     runs-on: ubuntu-latest
     environment:
@@ -323,5 +324,5 @@ jobs:
       with:
         restore_timestamp: ${{ needs.backup-database.outputs.test-start-time }}
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-        cluster_name: ${{ env.CLUSTER_NAME }}
+        cluster_name:${{ inputs.cluster_name }}
       secrets: inherit
