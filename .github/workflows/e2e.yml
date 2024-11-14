@@ -13,12 +13,12 @@ on:
 
 jobs:
 
-  wait-for-deployment:
+  backup-database:
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     outputs:
-      deployment-ready: ${{ steps.check-deployment.outputs.ready }}
+      backup-id: ${{ steps.set-backup-id.outputs.id }}
       test-start-time: ${{ steps.set-time.outputs.time }}
     steps:
       - name: Set Test Start Time
@@ -26,6 +26,71 @@ jobs:
         run: |
           START_TIME=$(date -u -d '5 minutes ago' "+%Y-%m-%d %H:%M:%S+00")
           echo "time=$START_TIME" >> $GITHUB_OUTPUT
+      
+      - name: Set Backup ID
+        id: set-backup-id
+        run: |
+          BACKUP_ID=$(date '+%F_%H:%M:%S')
+          echo "id=$BACKUP_ID" >> $GITHUB_OUTPUT
+
+      - name: Login to OpenShift
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} \
+            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
+            --insecure-skip-tls-verify=true
+          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+
+      - name: Configure Manual Backup
+        run: |
+          oc patch postgrescluster ${{ env.CLUSTER_NAME }} --type merge \
+            -p '{"spec":{"backups":{"pgbackrest":{"manual":{"repoName":"repo1","options":["--type=full"]}}}}}'
+
+      - name: Trigger Backup
+        run: |
+          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+            --overwrite \
+            postgres-operator.crunchydata.com/pgbackrest-backup="${{ steps.set-backup-id.outputs.id }}"
+
+      - name: Wait for backup completion
+        run: |
+          timeout=600  # 10 minutes timeout
+          while [ $timeout -gt 0 ]; do
+            status=$(oc get postgrescluster ${{ env.CLUSTER_NAME }} \
+              -o jsonpath='{.status.pgbackrest.manualBackup}')
+            
+            if [ -n "$status" ]; then
+              # Check if this is our backup
+              echo "Current status: $status"
+              if echo "$status" | grep -q "${{ steps.set-backup-id.outputs.id }}"; then
+                if echo "$status" | grep -q '"finished":true'; then
+                  if echo "$status" | grep -q '"succeeded":1'; then
+                    echo "Backup completed successfully"
+                    exit 0
+                  else
+                    echo "Backup failed"
+                    exit 1
+                  fi
+                fi
+              fi
+            fi
+            
+            echo "Backup in progress..."
+            sleep 10
+            timeout=$((timeout-10))
+          done
+          
+          echo "Backup timed out"
+          exit 1
+
+  wait-for-deployment:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+    outputs:
+      deployment-ready: ${{ steps.check-deployment.outputs.ready }}
+      
+    steps:
+      
       - name: Login to OpenShift
         run: |
           oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
