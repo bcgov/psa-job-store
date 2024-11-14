@@ -82,36 +82,48 @@ jobs:
           oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }} \
             -n ${{ env.NAMESPACE }}
 
+      - name: Set Restore ID
+        id: set-restore-id
+        run: |
+          RESTORE_ID="restore-$(date '+%Y%m%d-%H%M%S')"
+          echo "id=$RESTORE_ID" >> $GITHUB_OUTPUT
+
       - name: Trigger restore with annotation
         run: |
           oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
             --overwrite \
-            postgres-operator.crunchydata.com/pgbackrest-restore="restore-$(date +%Y%m%d-%H%M%S)" \
+            postgres-operator.crunchydata.com/pgbackrest-restore="${{ steps.set-restore-id.outputs.id }}" \
             -n ${{ env.NAMESPACE }}
 
-      - name: Sleep for 15 seconds
-        run: sleep 15s
-        shell: bash
-        
-      - name: Wait for restore completion
+      - name: Wait for specific restore completion
         run: |
-          max_attempts=180  # 30 minutes with 10-second intervals
-          attempt=0
-          
-          while [ $attempt -lt $max_attempts ]; do
-            status=$(oc get postgrescluster/${{ env.CLUSTER_NAME }} -n ${{ env.NAMESPACE }} -o jsonpath='{.status.conditions[?(@.type=="PostgresDataInitialized")].status}')
+          timeout=600 # 10 minutes timeout
+          while [ $timeout -gt 0 ]; do
+            status=$(oc get postgrescluster ${{ env.CLUSTER_NAME }} \
+              -n ${{ env.NAMESPACE }} \
+              -o jsonpath='{.status.pgbackrest.restore}')
             
-            if [ "$status" = "True" ]; then
-              echo "Restore completed successfully"
-              exit 0
+            if [ -n "$status" ]; then
+              echo "Current restore status: $status"
+              
+              # Parse JSON and check ID
+              restore_id=$(echo "$status" | jq -r '.id')
+              finished=$(echo "$status" | jq -r '.finished')
+              
+              if [ "$restore_id" = "${{ steps.set-restore-id.outputs.id }}" ]; then
+                if [ "$finished" = "true" ]; then
+                  echo "Restore completed successfully"
+                  exit 0
+                fi
+              fi
             fi
             
-            echo "Waiting for restore to complete... Attempt $attempt of $max_attempts"
-            attempt=$((attempt + 1))
+            echo "Restore in progress..."
             sleep 10
+            timeout=$((timeout-10))
           done
           
-          echo "Restore did not complete within the timeout period"
+          echo "Restore timed out"
           exit 1
 
   cleanup:

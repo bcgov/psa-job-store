@@ -178,46 +178,46 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js with NPM Cache
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.1'
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+      # - name: Setup Node.js with NPM Cache
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20.11.1'
+      #     cache: 'npm'
+      #     cache-dependency-path: '**/package-lock.json'
 
-      - name: Cache Node Modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            */*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      # - name: Cache Node Modules
+      #   id: cache-node-modules
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       node_modules
+      #       */*/node_modules
+      #     key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Cache Cypress Binary
-        id: cache-cypress-binary
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
+      # - name: Cache Cypress Binary
+      #   id: cache-cypress-binary
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.cache/Cypress
+      #     key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
 
-      # Login to OpenShift and reset database
-      - name: Reset Database
-        run: |
-          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
-          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-          API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
-          echo "Found API pod: $API_POD"
-          oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
+      # # Login to OpenShift and reset database
+      # - name: Reset Database
+      #   run: |
+      #     oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+      #     oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+      #     API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
+      #     echo "Found API pod: $API_POD"
+      #     oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
 
-      - name: Reset elastic search index
-        run: |
-          response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
-          if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
-            echo "Failed to reset elastic search index. Response: $response"
-            exit 1
-          fi
-        shell: bash
+      # - name: Reset elastic search index
+      #   run: |
+      #     response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
+      #     if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
+      #       echo "Failed to reset elastic search index. Response: $response"
+      #       exit 1
+      #     fi
+      #   shell: bash
         
       #  # Cache restore steps
       # - name: Restore Node Modules Cache
