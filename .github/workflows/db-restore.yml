@@ -89,6 +89,10 @@ jobs:
             postgres-operator.crunchydata.com/pgbackrest-restore="restore-$(date +%Y%m%d-%H%M%S)" \
             -n ${{ env.NAMESPACE }}
 
+      - name: Sleep for 15 seconds
+        run: sleep 15s
+        shell: bash
+        
       - name: Wait for restore completion
         run: |
           max_attempts=180  # 30 minutes with 10-second intervals
