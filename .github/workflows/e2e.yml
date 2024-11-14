@@ -324,5 +324,5 @@ jobs:
       with:
         restore_timestamp: ${{ needs.backup-database.outputs.test-start-time }}
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-        cluster_name:${{ inputs.cluster_name }}
+        cluster_name: ${{ inputs.cluster_name }}
       secrets: inherit
