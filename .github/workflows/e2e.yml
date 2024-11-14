@@ -166,141 +166,141 @@ jobs:
   #         # Wait for rollouts to complete
   #         oc rollout status deployment/api
 
-  # e2e-tests:
-  #   needs: [wait-for-deployment, backup-database]
-  #   if: needs.wait-for-deployment.outputs.deployment-ready == 'true'
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  e2e-tests:
+    needs: [wait-for-deployment, backup-database]
+    if: needs.wait-for-deployment.outputs.deployment-ready == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Setup Node.js with NPM Cache
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '20.11.1'
-  #         cache: 'npm'
-  #         cache-dependency-path: '**/package-lock.json'
+      # - name: Setup Node.js with NPM Cache
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20.11.1'
+      #     cache: 'npm'
+      #     cache-dependency-path: '**/package-lock.json'
 
-  #     - name: Cache Node Modules
-  #       id: cache-node-modules
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: |
-  #           node_modules
-  #           */*/node_modules
-  #         key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      # - name: Cache Node Modules
+      #   id: cache-node-modules
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       node_modules
+      #       */*/node_modules
+      #     key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-  #     - name: Cache Cypress Binary
-  #       id: cache-cypress-binary
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ~/.cache/Cypress
-  #         key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
+      # - name: Cache Cypress Binary
+      #   id: cache-cypress-binary
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.cache/Cypress
+      #     key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
 
-  #     # Login to OpenShift and reset database
-  #     - name: Reset Database
-  #       run: |
-  #         oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
-  #         oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-  #         API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
-  #         echo "Found API pod: $API_POD"
-  #         oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
+      # # Login to OpenShift and reset database
+      # - name: Reset Database
+      #   run: |
+      #     oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+      #     oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+      #     API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
+      #     echo "Found API pod: $API_POD"
+      #     oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
 
-  #     - name: Reset elastic search index
-  #       run: |
-  #         response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
-  #         if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
-  #           echo "Failed to reset elastic search index. Response: $response"
-  #           exit 1
-  #         fi
-  #       shell: bash
+      # - name: Reset elastic search index
+      #   run: |
+      #     response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
+      #     if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
+      #       echo "Failed to reset elastic search index. Response: $response"
+      #       exit 1
+      #     fi
+      #   shell: bash
 
-  #       # Cache restore steps
-  #     - name: Restore Node Modules Cache
-  #       id: cache-node-modules-restore
-  #       uses: actions/cache/restore@v4
-  #       with:
-  #         path: |
-  #           node_modules
-  #           */*/node_modules
-  #         key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      #   # Cache restore steps
+      # - name: Restore Node Modules Cache
+      #   id: cache-node-modules-restore
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     path: |
+      #       node_modules
+      #       */*/node_modules
+      #     key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-  #     - name: Restore Cypress Binary Cache
-  #       id: cache-cypress-binary-restore
-  #       uses: actions/cache/restore@v4
-  #       with:
-  #         path: ~/.cache/Cypress
-  #         key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
+      # - name: Restore Cypress Binary Cache
+      #   id: cache-cypress-binary-restore
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     path: ~/.cache/Cypress
+      #     key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
 
-  #     # Install dependencies if cache miss
-  #     - name: Install Root Dependencies
-  #       if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
-  #       run: npm ci --ignore-scripts
-  #       env:
-  #         HUSKY: 0
+      # # Install dependencies if cache miss
+      # - name: Install Root Dependencies
+      #   if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
+      #   run: npm ci --ignore-scripts
+      #   env:
+      #     HUSKY: 0
 
-  #     # Install cypress dependencies if cache miss
-  #     - name: Install Cypress Dependencies
-  #       if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
-  #       run: |
-  #         npm ci --ignore-scripts
-  #         npx cypress install
-  #       working-directory: ./apps/jobstore-cypress
-  #       env:
-  #         HUSKY: 0
+      # # Install cypress dependencies if cache miss
+      # - name: Install Cypress Dependencies
+      #   if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
+      #   run: |
+      #     npm ci --ignore-scripts
+      #     npx cypress install
+      #   working-directory: ./apps/jobstore-cypress
+      #   env:
+      #     HUSKY: 0
 
-  #     # Save caches immediately after installation
-  #     - name: Save Node Modules Cache
-  #       if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
-  #       uses: actions/cache/save@v4
-  #       with:
-  #         path: |
-  #           node_modules
-  #           */*/node_modules
-  #         key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      # # Save caches immediately after installation
+      # - name: Save Node Modules Cache
+      #   if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
+      #   uses: actions/cache/save@v4
+      #   with:
+      #     path: |
+      #       node_modules
+      #       */*/node_modules
+      #     key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-  #     - name: Save Cypress Binary Cache
-  #       if: steps.cache-cypress-binary-restore.outputs.cache-hit != 'true'
-  #       uses: actions/cache/save@v4
-  #       with:
-  #         path: ~/.cache/Cypress
-  #         key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
+      # - name: Save Cypress Binary Cache
+      #   if: steps.cache-cypress-binary-restore.outputs.cache-hit != 'true'
+      #   uses: actions/cache/save@v4
+      #   with:
+      #     path: ~/.cache/Cypress
+      #     key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
 
-  #     - name: Cypress run
-  #       uses: cypress-io/github-action@v6
-  #       with:
-  #         working-directory: ./apps/jobstore-cypress
-  #         browser: edge
-  #         headless: true
-  #         install: false
-  #         config: 'video=true'
-  #       env:
-  #         CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-  #         CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
-  #         CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.CYPRESS_VITE_KEYCLOAK_CLIENT_ID }}
-  #         CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
-  #         CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}
+      # - name: Cypress run
+      #   uses: cypress-io/github-action@v6
+      #   with:
+      #     working-directory: ./apps/jobstore-cypress
+      #     browser: edge
+      #     headless: true
+      #     install: false
+      #     config: 'video=true'
+      #   env:
+      #     CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+      #     CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
+      #     CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.CYPRESS_VITE_KEYCLOAK_CLIENT_ID }}
+      #     CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
+      #     CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}
 
-  #     # Upload screenshots if tests fail
-  #     - name: Upload Screenshots
-  #       uses: actions/upload-artifact@v4
-  #       if: failure()
-  #       with:
-  #         name: cypress-screenshots
-  #         path: ./apps/jobstore-cypress/cypress/screenshots
-  #         retention-days: 3
-  #         if-no-files-found: ignore
+      # # Upload screenshots if tests fail
+      # - name: Upload Screenshots
+      #   uses: actions/upload-artifact@v4
+      #   if: failure()
+      #   with:
+      #     name: cypress-screenshots
+      #     path: ./apps/jobstore-cypress/cypress/screenshots
+      #     retention-days: 3
+      #     if-no-files-found: ignore
 
-  #     - name: Upload Videos
-  #       uses: actions/upload-artifact@v4
-  #       if: failure()
-  #       with:
-  #         name: cypress-videos
-  #         path: ./apps/jobstore-cypress/cypress/videos
-  #         retention-days: 3
-  #         if-no-files-found: ignore
+      # - name: Upload Videos
+      #   uses: actions/upload-artifact@v4
+      #   if: failure()
+      #   with:
+      #     name: cypress-videos
+      #     path: ./apps/jobstore-cypress/cypress/videos
+      #     retention-days: 3
+      #     if-no-files-found: ignore
 
   # cleanup-e2e:
   #   needs: [wait-for-deployment, e2e-tests]
