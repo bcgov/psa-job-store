@@ -32,7 +32,7 @@ jobs:
       - name: Set Backup ID
         id: set-backup-id
         run: |
-          BACKUP_ID=$(date '+%Y%m%d-%H%M%SF')
+          BACKUP_ID=$(date '+%Y%m%d-%H%M%S')
           echo "id=$BACKUP_ID" >> $GITHUB_OUTPUT
 
       - name: Login to OpenShift
@@ -45,7 +45,7 @@ jobs:
       - name: Configure Manual Backup
         run: |
           oc patch postgrescluster ${{ inputs.cluster_name }} --type merge \
-            -p '{"spec":{"backups":{"pgbackrest":{"manual":{"repoName":"repo1","options":["--type=full"]}}}}}'
+            -p '{"spec":{"backups":{"pgbackrest":{"manual":{"repoName":"repo1","options":["--type=full","--annotation=source=${{ steps.set-backup-id.outputs.id }}"]}}}}}'
 
       - name: Trigger Backup
         run: |

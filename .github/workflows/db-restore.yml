@@ -54,6 +54,22 @@ jobs:
           echo "\nCurrent kustomization.yml content:"
           cat deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/kustomization.yml
 
+      - name: Get Backup ID
+        run: |
+          # Get the pod name
+          POSTGRES_POD=$(oc get pods -l postgres-operator.crunchydata.com/role=master -o jsonpath='{.items[0].metadata.name}')
+
+          # Run pgbackrest info and filter for the backup with matching annotation
+          BACKUP_ID=$(oc exec $POSTGRES_POD -- pgbackrest info \
+            --output=json \
+            | jq -r '.[] | select(.backup[] != null) | .backup[] 
+            | select(.annotation.source == "${{ inputs.backup_id }}") 
+            | .label' \
+            | tail -n1)
+
+          # Set the backup ID as an output
+          echo "BACKUP_ID=$BACKUP_ID" >> $GITHUB_ENV
+
       - name: Update cluster names and patch
         run: |
           # Update only metadata.name in base postgrescluster.yml
@@ -65,7 +81,7 @@ jobs:
             "enabled": true,
             "repoName": "repo1",
             "options": [
-              "--set=${{ inputs.backup_id }}",
+              "--set=${{ env.BACKUP_ID }}",
               "--type=immediate"
             ]
           }' deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
