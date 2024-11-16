@@ -24,6 +24,10 @@
       "path": "apps/app"
     },
     {
+      "name": "apps/report-mailer",
+      "path": "apps/report-mailer"
+    },
+    {
       "name": "packages/common-kit",
       "path": "packages/common-kit"
     },
