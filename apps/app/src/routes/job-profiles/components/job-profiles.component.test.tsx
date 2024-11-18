@@ -26,7 +26,7 @@ describe('JobProfiles', () => {
     (Grid.useBreakpoint as jest.Mock).mockReturnValue({ xl: true });
     const { getByTestId } = render(
       <MemoryRouter>
-        <JobProfiles searchParams={new URLSearchParams()} />
+        <JobProfiles />
       </MemoryRouter>,
     );
     expect(getByTestId('job-profile-search')).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe('JobProfiles', () => {
     await act(async () => {
       render(
         <MemoryRouter>
-          <JobProfiles searchParams={searchParams} />
+          <JobProfiles />
         </MemoryRouter>,
       );
     });
@@ -58,7 +58,7 @@ describe('JobProfiles', () => {
     (useParams as jest.Mock).mockReturnValue({ id: '123' });
     const { getByTestId } = render(
       <MemoryRouter>
-        <JobProfiles searchParams={new URLSearchParams()} />
+        <JobProfiles />
       </MemoryRouter>,
     );
     expect(getByTestId('job-profile')).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe('JobProfiles', () => {
     (useParams as jest.Mock).mockReturnValue({});
     const { getByText } = render(
       <MemoryRouter>
-        <JobProfiles searchParams={new URLSearchParams()} />
+        <JobProfiles />
       </MemoryRouter>,
     );
     expect(getByText('Select a Job Profile')).toBeInTheDocument();
@@ -83,7 +83,7 @@ describe('JobProfiles', () => {
 
     const { getByTestId } = render(
       <MemoryRouter>
-        <JobProfiles searchParams={new URLSearchParams()} />
+        <JobProfiles />
       </MemoryRouter>,
     );
 
@@ -112,7 +112,7 @@ describe('JobProfiles', () => {
     (useParams as jest.Mock).mockReturnValue({});
     const { queryAllByText } = render(
       <MemoryRouter>
-        <JobProfiles searchParams={new URLSearchParams()} />
+        <JobProfiles />
       </MemoryRouter>,
     );
 
@@ -141,7 +141,7 @@ describe('JobProfiles', () => {
     // Render the component under test for xl screen
     const { getByTestId: getByTestIdXL, unmount: unmountXL } = render(
       <MemoryRouter>
-        <JobProfiles searchParams={new URLSearchParams()} />
+        <JobProfiles />
       </MemoryRouter>,
     );
 
@@ -158,7 +158,7 @@ describe('JobProfiles', () => {
     // Render the component under test for non-xl screen
     const { getByTestId: getByTestIdNonXL, queryByTestId: queryByTestIdNonXL } = render(
       <MemoryRouter>
-        <JobProfiles searchParams={new URLSearchParams()} />
+        <JobProfiles />
       </MemoryRouter>,
     );
 
@@ -178,7 +178,7 @@ describe('JobProfiles', () => {
     // Render the component under test for xl screen
     const { getByTestId: getByTestIdXL, unmount: unmountXL } = render(
       <MemoryRouter>
-        <JobProfiles searchParams={new URLSearchParams()} />
+        <JobProfiles />
       </MemoryRouter>,
     );
 
@@ -195,7 +195,7 @@ describe('JobProfiles', () => {
     // Render the component under test for non-xl screen
     const { getByTestId: getByTestIdNonXL, queryByTestId: queryByTestIdNonXL } = render(
       <MemoryRouter>
-        <JobProfiles searchParams={new URLSearchParams()} />
+        <JobProfiles />
       </MemoryRouter>,
     );
 
