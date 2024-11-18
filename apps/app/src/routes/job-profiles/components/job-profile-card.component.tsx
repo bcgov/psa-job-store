@@ -15,9 +15,10 @@ const { Title, Text, Paragraph } = Typography;
 
 export interface JobProfileCardProps {
   data: JobProfileModel;
+  onSavedCallback?: (isSaved: boolean, data: JobProfileModel) => void;
 }
 
-export const JobProfileCard = ({ data }: JobProfileCardProps) => {
+export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) => {
   const [searchParams] = useSearchParams();
   const [saveJobProfile] = useSaveJobProfileMutation();
   const [removeSavedJobProfile] = useRemoveSavedJobProfileMutation();
@@ -35,8 +36,9 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
     event.stopPropagation();
     event.preventDefault();
     try {
-      saveJobProfile({ jobProfileId: data.id });
+      await saveJobProfile({ jobProfileId: data.id });
       setIsSaved(true);
+      onSavedCallback?.(true, data);
     } catch (error) {
       console.error('Failed to save job profile:', error);
     }
@@ -46,7 +48,8 @@ export const JobProfileCard = ({ data }: JobProfileCardProps) => {
     event.stopPropagation();
     event.preventDefault();
     try {
-      removeSavedJobProfile({ jobProfileId: data.id });
+      await removeSavedJobProfile({ jobProfileId: data.id });
+      onSavedCallback?.(false, data);
       setIsSaved(false);
     } catch (error) {
       console.error('Failed to remove saved job profile:', error);

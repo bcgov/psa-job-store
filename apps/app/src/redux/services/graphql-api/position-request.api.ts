@@ -66,6 +66,7 @@ export interface GetPositionRequestResponseContent {
   approved_at?: string;
   updated_at?: string;
   submitted_at?: string;
+  resubmitted_at?: string;
   shareUUID?: string;
   parent_job_profile?: {
     number: number;
@@ -259,6 +260,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 submission_id
                 status
                 updated_at
+                resubmitted_at
                 submitted_at
                 time_to_approve
                 approval_type
@@ -323,6 +325,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   submission_id
                   status
                   updated_at
+                  resubmitted_at
                   submitted_at
                   department_id
                   approved_at
@@ -372,6 +375,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   submission_id
                   status
                   updated_at
+                  resubmitted_at
                   submitted_at
                   department_id
                   approved_at
@@ -435,6 +439,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 submission_id
                 status
                 updated_at
+                resubmitted_at
                 submitted_at
                 department_id
                 approved_at
@@ -490,6 +495,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 position_number
                 status
                 updated_at
+                resubmitted_at
                 submitted_at
                 department_id
                 approved_at

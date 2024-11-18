@@ -936,15 +936,33 @@ export class JobProfileService {
     // always set updatedBy to current user
     const updatedBy = userId;
 
-    //for net new profile creation - we increment in the create statement
-    const doesExist = await this.prisma.jobProfile.findUnique({
-      // if the profile has been used, that means it has been published at some point and linked to a PR.
-      // We must create a new profile version in this case.
-      // if it has an id but it has not been used, regardless of state, we can simply update the existing record.
+    // check that none of the current profiles already have this jobstore number
+    const existingProfiles = await this.prisma.currentJobProfile.count({
       where: {
-        id_version: { id: id, version: version },
+        ...(data.id !== 0 && {
+          // only add the NOT condition if we're updating an existing profile
+          NOT: {
+            id: id,
+          },
+        }),
+        number: data.number,
+        state: 'PUBLISHED',
       },
     });
+
+    if (existingProfiles > 0) {
+      throw AlexandriaError('A job profile with this number already exists');
+    }
+
+    // //for net new profile creation - we increment in the create statement
+    // const doesExist = await this.prisma.jobProfile.findUnique({
+    //   // if the profile has been used, that means it has been published at some point and linked to a PR.
+    //   // We must create a new profile version in this case.
+    //   // if it has an id but it has not been used, regardless of state, we can simply update the existing record.
+    //   where: {
+    //     id_version: { id: id, version: version },
+    //   },
+    // });
 
     // console.log('doesExist ', doesExist);
     const result = await this.prisma.jobProfile.upsert({

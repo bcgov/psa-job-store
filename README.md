@@ -200,6 +200,8 @@ If on local:
 
 `psql -U postgres -d api -f /home/backup.sql -h localhost -p 5432 -U admin`
 
+`npx -w api prisma migrate deploy`
+
 Clear position requests:
 
 `TRUNCATE TABLE position_request;`

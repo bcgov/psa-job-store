@@ -74,6 +74,7 @@ model PositionRequest {
   classification_employee_group_id String?
   classification_peoplesoft_id     String?
   submission_id                    String?
+  resubmitted_at                   DateTime? // keeps track of when the position was resubmitted for verification
   submitted_at                     DateTime               @default(now())
   approved_at                      DateTime?
   time_to_approve                  Int?

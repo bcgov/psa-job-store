@@ -317,6 +317,7 @@ export class PositionRequestApiService {
         data: {
           reports_to_position: reportsTo,
           excluded_manager_position: excludedMgr,
+          resubmitted_at: new Date(),
         },
       });
     } catch (error) {
@@ -525,6 +526,7 @@ export class PositionRequestApiService {
         submission_id: true,
         status: true,
         updated_at: true,
+        resubmitted_at: true,
         parent_job_profile: true,
         approved_at: true,
         submitted_at: true,
