@@ -14,6 +14,7 @@ import {
 } from '../../redux/services/graphql-api/position-request.api';
 import { useTestUser } from '../../utils/useTestUser';
 import JobProfiles from '../job-profiles/components/job-profiles.component';
+import { useJobProfilesProvider } from '../job-profiles/components/job-profiles.context';
 import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
@@ -45,7 +46,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const [selectedProfileVersion, setSelectedProfileVersion] = useState<string | null>(null);
   const [selectedProfileNumber, setSelectedProfileNumber] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | null>(null);
-
+  const { setShouldFetch, setClearingFilters } = useJobProfilesProvider();
   const [selectProfileNumber, setSelectProfileNumber] = useState<string | null>(null);
 
   // stores searchParams for when user navigates back from edit page
@@ -159,8 +160,9 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               const searchParams = new URLSearchParams(previousSearchState.current);
               if (searchParams.get('search')) searchParams.delete('search');
 
-              searchParams.set('fetch', 'true');
-              searchParams.set('clearFilters', 'true');
+              setShouldFetch(true);
+              setClearingFilters(true);
+              // searchParams.set('clearFilters', 'true');
               const page = parseInt(searchParams.get('page') || '1', 10);
               jobProfileSearchResultsRef.current.handlePageChange(page);
 
@@ -439,7 +441,6 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         <JobProfiles
           key={'WizardProfiles'}
           ref={jobProfileSearchResultsRef}
-          searchParams={searchParams}
           onSelectProfile={onSelectProfile}
           page_size={page_size}
           selectProfileNumber={selectProfileNumber}

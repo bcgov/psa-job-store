@@ -14,7 +14,6 @@ import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
-import { SavedJobProfilesPage } from '../routes/job-profiles/saved-job-profiles.page';
 import { MyPositionsRoute } from '../routes/my-position-requests';
 import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
 import { OrgChartRoute } from '../routes/org-chart';
@@ -120,26 +119,26 @@ export const router = createBrowserRouter([
                       icon: <FileTextOutlined />,
                     },
                   },
-                  {
-                    path: 'saved',
-                    element: <JobProfilesRoute />,
-                    handle: {
-                      icon: <FileTextOutlined />,
-                    },
-                    children: [
-                      {
-                        index: true,
-                        element: <SavedJobProfilesPage />,
-                      },
-                      {
-                        path: ':number',
-                        element: <SavedJobProfilesPage />,
-                        handle: {
-                          icon: <FileTextOutlined />,
-                        },
-                      },
-                    ],
-                  },
+                  // {
+                  //   path: 'saved',
+                  //   element: <JobProfilesRoute />,
+                  //   handle: {
+                  //     icon: <FileTextOutlined />,
+                  //   },
+                  //   children: [
+                  //     {
+                  //       index: true,
+                  //       element: <SavedJobProfilesPage />,
+                  //     },
+                  //     {
+                  //       path: ':number',
+                  //       element: <SavedJobProfilesPage />,
+                  //       handle: {
+                  //         icon: <FileTextOutlined />,
+                  //       },
+                  //     },
+                  //   ],
+                  // },
                   {
                     path: 'manage',
                     children: [
