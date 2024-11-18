@@ -156,15 +156,15 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                       }),
                     ]
                   : []),
-                ...(userCanAccess(auth.user, ['user'])
-                  ? [
-                      createMenuItem({
-                        key: '/job-profiles/saved',
-                        icon: <FileDoneOutlined aria-hidden />,
-                        label: 'Saved Profiles',
-                      }),
-                    ]
-                  : []),
+                // ...(userCanAccess(auth.user, ['user'])
+                //   ? [
+                //       createMenuItem({
+                //         key: '/job-profiles/saved',
+                //         icon: <FileDoneOutlined aria-hidden />,
+                //         label: 'Saved Profiles',
+                //       }),
+                //     ]
+                //   : []),
                 ...(userCanAccess(auth.user, ['total-compensation'])
                   ? [
                       createSubMenu({
