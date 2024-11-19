@@ -92,7 +92,7 @@ Run `npx -w jobstore-cypress cypress open`
 
 To run in same environment as GitHub actions: `npx cypress run --browser edge --headless`
 
-## Running component tests
+## Running React component tests
 
 Run `npx -w app jest`
 

@@ -31,14 +31,14 @@ jobs:
             */*/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-      # - name: Restore Node Modules Cache
-      #   id: cache-node-modules-restore
-      #   uses: actions/cache/restore@v4
-      #   with:
-      #     path: |
-      #       node_modules
-      #       */*/node_modules
-      #     key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Restore Node Modules Cache
+        id: cache-node-modules-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install Root Dependencies
         if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
