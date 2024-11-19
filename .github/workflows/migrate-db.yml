@@ -73,12 +73,12 @@ jobs:
     if: ${{inputs.changed_apps != '[]' && inputs.changed_apps != ''}}
     runs-on: ubuntu-20.04
     environment:
-      name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: ${{ github.ref_name }}
       - name: Trigger Deployments
         uses: ./.github/actions/trigger-deploy
         with:
@@ -109,7 +109,8 @@ jobs:
                 ref: '${{ github.ref }}',
                 inputs: {
                   sha: '${{ inputs.sha }}',
-                  changed_apps: '${{ inputs.changed_apps }}'
+                  changed_apps: '${{ inputs.changed_apps }}',
+                  cluster_name: 'api-postgres-clone'
                 }
               });
               console.log('E2E tests triggered successfully');
@@ -124,7 +125,7 @@ jobs:
     runs-on: ubuntu-20.04
     if: |
       always() &&
-      (github.ref_name == 'dev') &&
+      (github.ref_name == 'develop') &&
       (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
     steps:
       - name: Trigger Unit Tests

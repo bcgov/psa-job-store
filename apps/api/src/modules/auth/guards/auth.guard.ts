@@ -17,7 +17,12 @@ export class AuthGuard extends PassportAuthGuard('keycloak') {
     const request = this.getRequest(context);
     // Bypass auth for the health check endpoint
     // or for the e2e-auth/token endpoint (it gets checked with the E2EAuthGuard + TestEnvironmentGuard)
-    if (request.url === '/health/check' || request.url === '/health/gitsha' || request.url == '/e2e-auth/token') {
+    if (
+      request.url === '/health/check' ||
+      request.url === '/health/gitsha' ||
+      request.url == '/e2e-auth/token' ||
+      request.url == '/health/resetIndex'
+    ) {
       return true;
     }
     const res = super.canActivate(context);
