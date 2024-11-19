@@ -59,9 +59,8 @@ jobs:
         run: npx -w app jest
 
       - name: Run NestJS Tests
+        if: always()
         run: npx -w api jest
-        env:
-          NODE_ENV: test
 
       - name: Upload Test Results
         if: always()
