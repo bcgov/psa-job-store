@@ -1,6 +1,9 @@
 name: Unit Tests
 on:
   workflow_dispatch:
+  push: # Add automatic trigger
+    branches:
+      - develop # Only run on develop branch pushes
 
 jobs:
   unit-tests:
