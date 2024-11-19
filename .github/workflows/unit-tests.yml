@@ -1,9 +1,9 @@
 name: Unit Tests
 on:
   workflow_dispatch:
-  push: # Add automatic trigger
+  push:
     branches:
-      - develop # Only run on develop branch pushes
+      - develop
 
 jobs:
   unit-tests:
@@ -31,14 +31,14 @@ jobs:
             */*/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Restore Node Modules Cache
-        id: cache-node-modules-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            node_modules
-            */*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      # - name: Restore Node Modules Cache
+      #   id: cache-node-modules-restore
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     path: |
+      #       node_modules
+      #       */*/node_modules
+      #     key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install Root Dependencies
         if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
@@ -55,8 +55,13 @@ jobs:
             */*/node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Run Jest Tests
+      - name: Run React Tests
         run: npx -w app jest
+
+      - name: Run NestJS Tests
+        run: npx -w api jest
+        env:
+          NODE_ENV: test
 
       - name: Upload Test Results
         if: always()
@@ -64,5 +69,6 @@ jobs:
         with:
           name: test-results
           path: |
-            # apps/app/coverage
             apps/app/junit.xml
+            apps/api/junit.xml
+            apps/api/coverage
