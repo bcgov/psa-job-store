@@ -151,12 +151,12 @@ export class PositionRequestApiResolver {
     return this.positionRequestService.getPositionRequests(args, user.id, user.roles, requestingFeature);
   }
 
-  @Query(() => PositionRequest, { name: 'positionRequest' })
+  @Query(() => PositionRequest, { name: 'positionRequest', nullable: true })
   async getPositionRequest(@CurrentUser() user: Express.User, @Args('id') id: number) {
     return this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
   }
 
-  @Query(() => PositionRequest, { name: 'sharedPositionRequest' })
+  @Query(() => PositionRequest, { name: 'sharedPositionRequest', nullable: true })
   async getSharedPositionRequest(@Args('uuid') uuid: string) {
     return this.positionRequestService.getSharedPositionRequest(uuid);
   }

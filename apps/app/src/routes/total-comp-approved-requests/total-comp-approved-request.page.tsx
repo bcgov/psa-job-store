@@ -16,6 +16,7 @@ import { useGetPositionQuery } from '../../redux/services/graphql-api/position.a
 import { formatDateTime } from '../../utils/Utils';
 import { useTestUser } from '../../utils/useTestUser';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
+import NotFoundComponent from '../not-found/404';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -29,7 +30,7 @@ export const TotalCompApprovedRequestPage = () => {
 
   if (!positionRequestId) throw 'No position request provided';
 
-  const { data } = useGetPositionRequestQuery({
+  const { data, isLoading } = useGetPositionRequestQuery({
     id: parseInt(positionRequestId),
   });
 
@@ -275,6 +276,8 @@ export const TotalCompApprovedRequestPage = () => {
   // };
 
   const isTestUser = useTestUser();
+
+  if (!data?.positionRequest && !isLoading) return <NotFoundComponent entity="position request" />;
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here

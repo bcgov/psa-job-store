@@ -1,8 +1,9 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import { useAuth } from 'react-oidc-context';
-import { Outlet, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
+import { ErrorBoundaryLayout } from '../../routes/not-found/error';
 import { AppHeader } from '../app/header.component';
 import { NavMenu } from './components/nav-menu.component';
 
@@ -14,7 +15,7 @@ const RenderOutlet = () => {
 
   // Render the <Outlet /> if user is on the login/logout page, or is logged in.
   return ['/auth/login', '/auth/logout'].some((path) => path.includes(location.pathname)) || auth.isAuthenticated ? (
-    <Outlet />
+    <ErrorBoundaryLayout />
   ) : (
     <></>
   );
