@@ -2,11 +2,13 @@ import { Controller, Post, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { E2EAuthGuard } from './guards/e2e-auth.guard';
 import { TestEnvironmentGuard } from './guards/test-environment.guard';
+import { PublicRoute } from './decorators/public-route.decorator';
 
 @Controller('e2e-auth')
 export class E2EAuthController {
   constructor(private jwtService: JwtService) {}
 
+  @PublicRoute()
   @Post('token')
   @UseGuards(TestEnvironmentGuard, E2EAuthGuard)
   // to access this endpoint, the request must have the correct E2E_AUTH_KEY key in the header and the environment must be set to E2E_TESTING
