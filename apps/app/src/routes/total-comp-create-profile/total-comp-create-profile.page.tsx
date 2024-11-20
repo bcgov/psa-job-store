@@ -2,11 +2,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
 import '../../components/app/common/css/filtered-table.page.css';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
+import NotFoundComponent from '../not-found/404';
 import { TotalCompCreateProfileComponent } from './components/total-comp-create-profile.component';
 
 export const TotalCompCreateProfilePage = () => {
@@ -15,7 +16,8 @@ export const TotalCompCreateProfilePage = () => {
   const [id, setId] = useState(urlId);
   const [version, setVersion] = useState('');
 
-  const [trigger, { data: jobProfileData, isFetching }] = useLazyGetJobProfileQuery();
+  const [trigger, { data: jobProfileData, isFetching, isError, error }] = useLazyGetJobProfileQuery();
+  const navigate = useNavigate();
 
   // Refetch data when the component mounts or the id changes
   useEffect(() => {
@@ -33,9 +35,17 @@ export const TotalCompCreateProfilePage = () => {
     }
   }, [urlId, version, setSearchParams, searchParams, trigger, id]);
 
+  useEffect(() => {
+    if (isError) {
+      console.log(error);
+      navigate('/not-found');
+    }
+  });
   if (isFetching) return <LoadingComponent />;
 
-  return (
+  return !jobProfileData ? (
+    <NotFoundComponent entity="profile" />
+  ) : (
     <TotalCompCreateProfileComponent
       jobProfileData={jobProfileData}
       id={id}

@@ -887,7 +887,7 @@ export class PositionRequestApiService {
           updateData.parent_job_profile.connect.id_version.version,
         );
         // if we have a department, try to filter for multiple classifications
-        if (parentJobProfile.classifications.length > 1) {
+        if (parentJobProfile?.classifications.length > 1) {
           const getClassification = async (parentJobProfile: any, department_id: string) => {
             const isExcluded = (await this.departmentService.getDepartment({ where: { id: department_id } })).metadata
               .is_statutorily_excluded;
@@ -908,7 +908,7 @@ export class PositionRequestApiService {
               },
             },
           };
-        } else if (parentJobProfile.classifications && parentJobProfile.classifications.length > 0) {
+        } else if (parentJobProfile?.classifications && parentJobProfile?.classifications.length > 0) {
           const classification = parentJobProfile.classifications[0].classification;
           updatePayload.classification = {
             connect: {
