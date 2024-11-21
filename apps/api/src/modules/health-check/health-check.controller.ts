@@ -51,7 +51,7 @@ export class HealthCheckController {
       );
 
       if (stderr) {
-        throw new Error(`Schema dump failed: ${stderr}`);
+        throw new Error(`Schema dump failed...: ${stderr}`);
       }
 
       // Read the generated file
