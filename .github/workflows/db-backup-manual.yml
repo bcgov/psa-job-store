@@ -1,0 +1,89 @@
+name: Database Backup
+
+on:
+  workflow_dispatch:
+    inputs:
+      cluster_name:
+        description: 'PostgreSQL Cluster Name'
+        required: true
+        type: string
+      environment:
+        description: 'Environment to backup'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - stage
+          - main
+
+jobs:
+  backup-database:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
+    outputs:
+      backup-id: ${{ steps.set-backup-id.outputs.id }}
+      test-start-time: ${{ steps.set-time.outputs.time }}
+
+    steps:
+      - name: Set Test Start Time
+        id: set-time
+        run: |
+          START_TIME=$(date -u -d '5 minutes ago' "+%Y-%m-%d %H:%M:%S+00")
+          echo "time=$START_TIME" >> $GITHUB_OUTPUT
+
+      - name: Set Backup ID
+        id: set-backup-id
+        run: |
+          BACKUP_ID=$(date '+%Y%m%d-%H%M%S')
+          echo "id=$BACKUP_ID" >> $GITHUB_OUTPUT
+
+      - name: Login to OpenShift
+        run: |
+          oc login ${{ secrets.OPENSHIFT_SERVER }} \
+            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
+            --insecure-skip-tls-verify=true
+          oc project ${{ secrets.OPENSHIFT_PROJECT }}-${{ github.event.inputs.environment }}
+
+      - name: Configure Manual Backup
+        run: |
+          oc patch postgrescluster ${{ inputs.cluster_name }} --type merge \
+            -p '{"spec":{"backups":{"pgbackrest":{"manual":{"repoName":"repo1","options":["--type=full","--annotation=source=${{ steps.set-backup-id.outputs.id }}"]}}}}}'
+
+      - name: Trigger Backup
+        run: |
+          oc annotate postgrescluster ${{ inputs.cluster_name }} \
+            --overwrite \
+            postgres-operator.crunchydata.com/pgbackrest-backup="${{ steps.set-backup-id.outputs.id }}"
+
+      - name: Wait for backup completion
+        run: |
+          timeout=1200  # 20 minutes timeout
+          while [ $timeout -gt 0 ]; do
+            status=$(oc get postgrescluster ${{ inputs.cluster_name }} \
+              -o jsonpath='{.status.pgbackrest.manualBackup}')
+
+            if [ -n "$status" ]; then
+              # Check if this is our backup
+              echo "Current status: $status"
+              if echo "$status" | grep -q "${{ steps.set-backup-id.outputs.id }}"; then
+                if echo "$status" | grep -q '"finished":true'; then
+                  if echo "$status" | grep -q '"succeeded":1'; then
+                    echo "Backup completed successfully"
+                    exit 0
+                  else
+                    echo "Backup failed"
+                    exit 1
+                  fi
+                fi
+              fi
+            fi
+
+            echo "Backup in progress..."
+            sleep 10
+            timeout=$((timeout-10))
+          done
+
+          echo "Backup timed out"
+          exit 1

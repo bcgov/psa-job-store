@@ -1,6 +1,5 @@
 import { PGlite } from '@electric-sql/pglite';
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { promises as fs } from 'fs';
 import { PrismaPGlite } from 'pglite-prisma-adapter';
 import { seed } from '../../utils/e2e-test-data-seed';
 import { SearchService } from '../search/search.service';
@@ -46,9 +45,14 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
 
     console.log('reading schema file');
 
+    console.log('process.env.DB_SCHEMA is: ');
+    console.log(process.env.DB_SCHEMA);
+
     const sqlString =
-      (await fs.readFile('/tmp/schema.sql', 'utf8')) +
-      `
+      //   (await fs.readFile('/tmp/schema.sql', 'utf8')) +
+      process.env.DB_SCHEMA ??
+      '' +
+        `
         CREATE OR REPLACE VIEW public.current_job_profiles
      AS
      SELECT jp.id,
