@@ -47,7 +47,7 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
     console.log('reading schema file');
 
     const sqlString =
-      (await fs.readFile('schema.sql', 'utf8')) +
+      (await fs.readFile('/tmp/schema.sql', 'utf8')) +
       `
         CREATE OR REPLACE VIEW public.current_job_profiles
      AS
