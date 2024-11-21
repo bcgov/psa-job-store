@@ -182,7 +182,7 @@ jobs:
           oc set env deployment/api \
             E2E_TESTING=true \
             USE_MOCKS=true \
-            DATABASE_URL="
+            DATABASE_URL=
 
           # Wait for rollouts to complete
           oc rollout status deployment/api
