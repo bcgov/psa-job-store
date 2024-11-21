@@ -48,9 +48,11 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
     console.log('process.env.DB_SCHEMA is..: ');
     console.log(process.env.DB_SCHEMA);
 
+    const schema = process.env.DB_SCHEMA;
+
     const sqlString =
       //(await fs.promises.readFile('/tmp/log/schema.sql', 'utf8')) +
-      process.env.DB_SCHEMA +
+      schema +
       `
         CREATE OR REPLACE VIEW public.current_job_profiles
      AS
@@ -95,6 +97,8 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
               GROUP BY job_profile.id) current_table ON jp.id = current_table.id AND jp.version = current_table.max_version;
         `;
 
+    console.log('full schema: ', sqlString);
+
     // Split the string into individual commands and filter out empty ones
     // First remove all comments
     const withoutComments = sqlString
@@ -102,11 +106,15 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
       .filter((line) => !line.trim().startsWith('--'))
       .join('\n');
 
+    console.log('withoutComments: ', withoutComments);
+
     // Then split by semicolon and clean up
     const commands = withoutComments
       .split(';')
       .map((cmd) => cmd.trim())
       .filter((cmd) => cmd.length > 0);
+
+    console.log('commands: ', commands);
 
     // console.log('commands: ', commands);
     console.log('executing create commands...');
