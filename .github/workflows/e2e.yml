@@ -169,9 +169,11 @@ jobs:
             echo "Failed to dump schema. Response: $response"
             exit 1
           fi
-          # Extract schema and escape newlines for GitHub environment
-          schema=$(echo $response | jq -r '.schema' | awk '{printf "%s\\n", $0}')
-          echo "schema=$schema" >> $GITHUB_OUTPUT
+          # Extract schema and escape it properly while preserving quotes
+          schema=$(echo $response | jq -r '.schema' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}')
+          echo "schema<<EOF" >> $GITHUB_OUTPUT
+          echo "$schema" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Setup E2E Environment
@@ -181,7 +183,7 @@ jobs:
             E2E_TESTING=true \
             USE_MOCKS=true \
             DATABASE_URL= \
-            DB_SCHEMA='${{ steps.dump-schema.outputs.schema }}'
+            "DB_SCHEMA=${{ steps.dump-schema.outputs.schema }}"
 
           # Wait for rollouts to complete
           oc rollout status deployment/api
