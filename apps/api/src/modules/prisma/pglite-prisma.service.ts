@@ -1,5 +1,6 @@
 import { PGlite } from '@electric-sql/pglite';
 import { Injectable, OnModuleInit } from '@nestjs/common';
+import * as fs from 'fs';
 import { PrismaPGlite } from 'pglite-prisma-adapter';
 import { seed } from '../../utils/e2e-test-data-seed';
 import { SearchService } from '../search/search.service';
@@ -49,10 +50,10 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
     console.log(process.env.DB_SCHEMA);
 
     const sqlString =
-      //   (await fs.readFile('/tmp/schema.sql', 'utf8')) +
-      process.env.DB_SCHEMA ??
-      '' +
-        `
+      (await fs.promises.readFile('/tmp/log/schema.sql', 'utf8')) +
+      // process.env.DB_SCHEMA ??
+      // '' +
+      `
         CREATE OR REPLACE VIEW public.current_job_profiles
      AS
      SELECT jp.id,
@@ -115,7 +116,7 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
     // Execute each command in a transaction
     await this.$transaction(async (tx) => {
       for (const command of commands) {
-        // console.log(`Executing: ${command}`);
+        console.log(`Executing: ${command}`);
         await tx.$executeRawUnsafe(command);
       }
     });

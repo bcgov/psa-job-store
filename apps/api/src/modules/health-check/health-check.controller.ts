@@ -43,7 +43,7 @@ export class HealthCheckController {
   @UseGuards(E2EAuthGuard)
   async dumpCreateSchema() {
     try {
-      const tempFile = '/tmp/schema.sql';
+      const tempFile = '/tmp/log/schema.sql';
 
       // Generate the schema SQL file
       const { stderr } = await execAsync(
