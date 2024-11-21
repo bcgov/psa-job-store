@@ -6,7 +6,7 @@ import {
   Prisma,
   PrismaClient,
 } from '@prisma/client';
-import { ExtendedPrismaClientType } from '../src/modules/prisma/extended-prisma-client.impl';
+import { ExtendedPrismaClientType } from '../modules/prisma/extended-prisma-client.impl';
 
 const prismaBlank = new PrismaClient();
 

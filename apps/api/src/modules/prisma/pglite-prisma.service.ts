@@ -2,7 +2,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { promises as fs } from 'fs';
 import { PrismaPGlite } from 'pglite-prisma-adapter';
-import { seed } from '../../../prisma/e2e-test-data-seed';
+import { seed } from '../../utils/e2e-test-data-seed';
 import { SearchService } from '../search/search.service';
 import { ExtendedPrismaClient } from './extended-prisma-client.impl';
 
