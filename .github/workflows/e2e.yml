@@ -182,7 +182,8 @@ jobs:
           oc set env deployment/api \
             E2E_TESTING=true \
             USE_MOCKS=true \
-            DATABASE_URL=
+            DATABASE_URL= \
+            "DB_SCHEMA=${{ steps.dump-schema.outputs.schema }}"
 
           # Wait for rollouts to complete
           oc rollout status deployment/api
@@ -336,7 +337,7 @@ jobs:
           oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
 
           # Remove environment variables
-          oc set env deployment/api E2E_TESTING- USE_MOCKS- DATABASE_URL-
+          oc set env deployment/api E2E_TESTING- USE_MOCKS- DATABASE_URL- DB_SCHEMA-
 
   # restore-database:
   #   needs: [e2e-tests, backup-database]
