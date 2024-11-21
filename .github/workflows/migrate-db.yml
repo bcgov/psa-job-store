@@ -87,34 +87,34 @@ jobs:
           project: ${{ inputs.changed_apps }}
           environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
 
-  # trigger-e2e:
-  #     name: Trigger E2E Tests
-  #     needs: [metadata, deploy]
-  #     runs-on: ubuntu-20.04
-  #     if: |
-  #       always() &&
-  #       (github.ref_name == 'develop' || github.ref_name == 'stage') &&
-  #       (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
-  #     steps:
-  #       - name: Trigger E2E Tests
-  #         uses: actions/github-script@v6
-  #         with:
-  #           script: |
-  #             try {
-  #               console.log('Attempting to trigger E2E tests');
-  #               await github.rest.actions.createWorkflowDispatch({
-  #                 owner: context.repo.owner,
-  #                 repo: context.repo.repo,
-  #                 workflow_id: 'e2e.yml',
-  #                 ref: '${{ github.ref }}',
-  #                 inputs: {
-  #                   sha: '${{ inputs.sha }}',
-  #                   changed_apps: '${{ inputs.changed_apps }}',
-  #                   cluster_name: 'api-postgres-clone'
-  #                 }
-  #               });
-  #               console.log('E2E tests triggered successfully');
-  #             } catch (error) {
-  #               console.log('Error triggering E2E tests:', error);
-  #               throw error;
-  #             }
+  trigger-e2e:
+    name: Trigger E2E Tests
+    needs: [metadata, deploy]
+    runs-on: ubuntu-20.04
+    if: |
+      always() &&
+      (github.ref_name == 'develop' || github.ref_name == 'stage') &&
+      (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
+    steps:
+      - name: Trigger E2E Tests
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              console.log('Attempting to trigger E2E tests');
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'e2e.yml',
+                ref: '${{ github.ref }}',
+                inputs: {
+                  sha: '${{ inputs.sha }}',
+                  changed_apps: '${{ inputs.changed_apps }}',
+                  cluster_name: 'api-postgres-clone'
+                }
+              });
+              console.log('E2E tests triggered successfully');
+            } catch (error) {
+              console.log('Error triggering E2E tests:', error);
+              throw error;
+            }
