@@ -162,18 +162,26 @@ jobs:
           echo "ready=true" >> $GITHUB_OUTPUT
 
       - name: Dump Schema
+        id: dump-schema
         run: |
           response=$(curl -s -H "X-E2E-Key: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}" "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/dumpCreateSchema")
           if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
             echo "Failed to dump schema. Response: $response"
             exit 1
           fi
+          # Extract schema and escape newlines for GitHub environment
+          schema=$(echo $response | jq -r '.schema' | awk '{printf "%s\\n", $0}')
+          echo "schema=$schema" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Setup E2E Environment
         if: steps.check-deployment.outputs.ready == 'true'
         run: |
-          oc set env deployment/api E2E_TESTING=true USE_MOCKS=true DATABASE_URL=
+          oc set env deployment/api \
+            E2E_TESTING=true \
+            USE_MOCKS=true \
+            DATABASE_URL= \
+            DB_SCHEMA='${{ steps.dump-schema.outputs.schema }}'
 
           # Wait for rollouts to complete
           oc rollout status deployment/api

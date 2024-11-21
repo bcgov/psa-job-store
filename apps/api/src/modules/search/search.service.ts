@@ -20,7 +20,6 @@ export class SearchService {
   async onApplicationBootstrap() {
     // onApplicationBootstrap fires later in the lifecycle than onModuleInit
     // this way prisma client is fully initialized before we start using it.
-    console.log('search service init, resetIndex (used to be in module constructor)');
     await this.resetIndex();
   }
 
