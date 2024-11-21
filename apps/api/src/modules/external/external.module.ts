@@ -48,7 +48,6 @@ import { PositionService } from './position.service';
     OrganizationResolver,
     OrganizationService,
     PositionResolver,
-    PrismaService,
     OrgChartResolver,
     MockIncidentResolver,
     MockPeopleSoftResolver,

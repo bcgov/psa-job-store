@@ -33,6 +33,8 @@ export class E2EAuthGuard implements CanActivate {
     // This should be set in the .env file or environment configuration
     const expectedSecret = this.configService.get<string>('E2E_AUTH_KEY');
 
+    if (expectedSecret == '') throw new UnauthorizedException('E2E_AUTH_KEY not set in environment variables');
+
     // Validate the authentication header
     // Both the header must exist and match the expected secret
     if (!authHeader || authHeader !== expectedSecret) {

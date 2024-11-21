@@ -1,9 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ElasticsearchModule, ElasticsearchService } from '@nestjs/elasticsearch';
+import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaModule } from '../prisma/prisma.module';
-import { PrismaService } from '../prisma/prisma.service';
 import { SearchService } from './search.service';
 
 @Module({
@@ -22,19 +21,15 @@ import { SearchService } from './search.service';
       }),
       inject: [ConfigService],
     }),
-    PrismaModule,
+    forwardRef(() => PrismaModule),
   ],
   providers: [SearchService],
   exports: [ElasticsearchModule, SearchService],
 })
 export class SearchModule {
-  constructor(
-    private readonly elasticService: ElasticsearchService,
-    private readonly prisma: PrismaService,
-    private readonly searchService: SearchService,
-  ) {
-    (async () => {
-      await searchService.resetIndex();
-    })();
-  }
+  // constructor(private readonly searchService: SearchService) {
+  //   (async () => {
+  //     await searchService.resetIndex();
+  //   })();
+  // }
 }

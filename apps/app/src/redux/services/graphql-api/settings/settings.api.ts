@@ -40,7 +40,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
         document: gql`
           query GetDepartmentsForSettings(
             $where: DepartmentWhereInput
-            $orderBy: [DepartmentOrderByWithRelationAndSearchRelevanceInput!]
+            $orderBy: [DepartmentOrderByWithRelationInput!]
             $take: Int
             $skip: Int
           ) {
@@ -141,7 +141,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
         document: gql`
           query GetUsersForSettings(
             $where: UserWhereInput
-            $orderBy: [UserOrderByWithRelationAndSearchRelevanceInput!]
+            $orderBy: [UserOrderByWithRelationInput!]
             $take: Int
             $skip: Int
           ) {

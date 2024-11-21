@@ -6,13 +6,12 @@ import { PeoplesoftService } from '../external/peoplesoft.service';
 import { KeycloakModule } from '../keycloak/keycloak.module';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaModule } from '../prisma/prisma.module';
-import { PrismaService } from '../prisma/prisma.service';
 import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
 
 @Module({
-  imports: [ExternalModule, HttpModule, KeycloakModule, PrismaModule],
-  providers: [KeycloakService, PeoplesoftService, PeoplesoftV2Service, PrismaService, UserService, UserResolver],
+  imports: [ExternalModule, HttpModule, KeycloakModule, PrismaModule, PrismaModule],
+  providers: [KeycloakService, PeoplesoftService, PeoplesoftV2Service, UserService, UserResolver],
   exports: [KeycloakService, PeoplesoftV2Service],
 })
 export class UserModule {}
