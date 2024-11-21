@@ -24,10 +24,16 @@ export class PositionService {
     private readonly peoplesoftV2Service: PeoplesoftV2Service,
     private readonly organizationService: OrganizationService,
   ) {
-    (async () => {
-      this.classifications = await this.classificationService.getClassifications({});
-      this.departments = await this.departmentService.getDepartments();
-    })();
+    // (async () => {
+    //   console.log('Loading classifications and departments');
+    //   this.classifications = await this.classificationService.getClassifications({});
+    //   this.departments = await this.departmentService.getDepartments();
+    // })();
+  }
+
+  async onModuleInit() {
+    this.classifications = await this.classificationService.getClassifications({});
+    this.departments = await this.departmentService.getDepartments();
   }
 
   async getPosition(args?: FindUniquePositionArgs) {

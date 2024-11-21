@@ -21,7 +21,8 @@ export class AuthGuard extends PassportAuthGuard('keycloak') {
       request.url === '/health/check' ||
       request.url === '/health/gitsha' ||
       request.url == '/e2e-auth/token' ||
-      request.url == '/health/resetIndex'
+      request.url == '/health/resetIndex' ||
+      request.url == '/health/dumpCreateSchema'
     ) {
       return true;
     }

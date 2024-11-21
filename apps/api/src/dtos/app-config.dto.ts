@@ -22,9 +22,8 @@ export class AppConfigDto {
   @IsString()
   CRM_PASSWORD: string;
 
-  @IsNotEmpty()
   @IsString()
-  DATABASE_URL: string;
+  DATABASE_URL: string; // can be empty when doing e2e testing
 
   @IsNotEmpty()
   @IsString()
