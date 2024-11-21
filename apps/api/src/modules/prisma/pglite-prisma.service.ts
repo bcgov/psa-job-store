@@ -45,7 +45,7 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
 
     console.log('reading schema file');
 
-    console.log('process.env.DB_SCHEMA is: ');
+    console.log('process.env.DB_SCHEMA is..: ');
     console.log(process.env.DB_SCHEMA);
 
     const sqlString =
