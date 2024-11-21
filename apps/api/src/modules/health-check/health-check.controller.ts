@@ -57,9 +57,6 @@ export class HealthCheckController {
       // Read the generated file
       const schemaContent = await fs.promises.readFile(tempFile, 'utf8');
 
-      // Clean up the temporary file
-      await fs.promises.unlink(tempFile);
-
       return {
         status: 'ok',
         schema: schemaContent,
