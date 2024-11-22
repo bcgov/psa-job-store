@@ -11,7 +11,8 @@ import { PrismaService } from './prisma.service';
     {
       provide: PrismaService,
       useFactory: (searchService: SearchService) => {
-        if (process.env.E2E_TESTING === 'true') return new PGLitePrismaService(searchService);
+        if (process.env.E2E_TESTING === 'true' && process.env.NODE_ENV != 'development')
+          return new PGLitePrismaService(searchService);
         else return new PrismaService(searchService);
       },
       inject: [SearchService],

@@ -228,7 +228,7 @@ jobs:
       #     oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
       #     API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
       #     echo "Found API pod: $API_POD"
-      #     oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
+      #     oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/run-e2e-seed.ts && npx prisma migrate reset  --force --skip-generate"
       - name: Reset elastic search index
         run: |
           response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
