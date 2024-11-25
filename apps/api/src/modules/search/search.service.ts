@@ -1,5 +1,5 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { JobProfileState, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,8 +13,15 @@ export enum SearchIndex {
 export class SearchService {
   constructor(
     private readonly elasticService: ElasticsearchService,
+    @Inject(forwardRef(() => PrismaService))
     private readonly prisma: PrismaService,
   ) {}
+
+  async onApplicationBootstrap() {
+    // onApplicationBootstrap fires later in the lifecycle than onModuleInit
+    // this way prisma client is fully initialized before we start using it.
+    await this.resetIndex();
+  }
 
   async indexDocument(index: SearchIndex, id: string, document: Record<string, any>) {
     await this.elasticService.index({ index, id, document });

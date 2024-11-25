@@ -39,7 +39,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               $where: JobProfileWhereInput
               $take: Int
               $skip: Int
-              $orderBy: [JobProfileOrderByWithRelationAndSearchRelevanceInput!]
+              $orderBy: [JobProfileOrderByWithRelationInput!]
               $sortByClassificationName: Boolean
               $sortByJobFamily: Boolean
               $sortByOrganization: Boolean
@@ -176,7 +176,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               $where: JobProfileWhereInput
               $take: Int
               $skip: Int
-              $orderBy: [JobProfileOrderByWithRelationAndSearchRelevanceInput!]
+              $orderBy: [JobProfileOrderByWithRelationInput!]
               $sortByClassificationName: Boolean
               $sortByJobFamily: Boolean
               $sortByOrganization: Boolean
@@ -289,7 +289,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               $where: JobProfileWhereInput
               $take: Int
               $skip: Int
-              $orderBy: [JobProfileOrderByWithRelationAndSearchRelevanceInput!]
+              $orderBy: [JobProfileOrderByWithRelationInput!]
               $sortByClassificationName: Boolean
               $sortByJobFamily: Boolean
               $sortByOrganization: Boolean
