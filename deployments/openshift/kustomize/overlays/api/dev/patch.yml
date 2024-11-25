@@ -1,3 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: api
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: api
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: api
+        resources:
+          requests:
+            cpu: 300m 
+            memory: 600Mi 
+          limits:
+            cpu: 500m 
+            memory: 1000Mi
+---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:

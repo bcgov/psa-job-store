@@ -1672,7 +1672,7 @@ export class PositionRequestApiService {
     try {
       position = await this.peoplesoftService.createPosition(data as PositionCreateInput);
       if (position.positionNbr == null || position.positionNbr === '') {
-        this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage ?? '');
+        this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage);
         throw AlexandriaError('Failed to create position in PeopleSoft');
       }
     } catch (error) {

@@ -29,6 +29,11 @@ spec:
                   ports:
                       - containerPort: 8081
                   env:
+                  - name: ENV
+                    valueFrom:
+                      secretKeyRef:
+                        name: secrets
+                        key: KEYCLOAK_API_ENVIRONMENT
                   - name: DISCOVERY
                     valueFrom:
                       secretKeyRef:
