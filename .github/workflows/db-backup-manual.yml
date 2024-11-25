@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Set environment variables
         run: |
-          echo "NAMESPACE=f3c07a-${{ inputs.environment }}" >> $GITHUB_ENV
+          echo "NAMESPACE=f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}" >> $GITHUB_ENV
 
       - name: Set Cluster Name
         id: set-cluster
