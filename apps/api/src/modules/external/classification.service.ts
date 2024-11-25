@@ -132,9 +132,7 @@ export class ClassificationService {
     let tree = this.convertToNestedArray(grouped);
     tree = this.unwrapSingleChildGroups(tree);
     tree = this.simplifyStructure(tree);
-    // console.log('tree before sort: ', JSON.stringify(tree));
     tree = this.sortItemsByName(tree);
-    // console.log('tree after sort: ', JSON.stringify(tree));
 
     // add (Grade - X) to entries that have same names but different grades so they are not confused
     tree = await this.includeDuplicateGrades(tree);

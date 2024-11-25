@@ -49,14 +49,4 @@ export const TotalCompCreateProfilePage = () => {
       setVersion={setVersion}
     ></TotalCompCreateProfileComponent>
   );
-  // !jobProfileData && !isFetching ? (
-  //   <NotFoundComponent entity="profile" />
-  // ) : (
-  // <TotalCompCreateProfileComponent
-  //   jobProfileData={jobProfileData}
-  //   id={id}
-  //   setId={setId}
-  //   setVersion={setVersion}
-  // ></TotalCompCreateProfileComponent>
-  // );
 };
