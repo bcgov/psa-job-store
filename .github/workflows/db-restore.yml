@@ -63,7 +63,7 @@ jobs:
           echo "Current environment variables:"
           echo "NAMESPACE: ${{ env.NAMESPACE }}"
           # echo "RESTORE_TIMESTAMP: ${{ env.RESTORE_TIMESTAMP }}"
-          echo "CLUSTER_NAME: ${{ env.CLUSTER_NAME }}"
+          echo "CLUSTER_NAME: ${{ steps.set-cluster.outputs.cluster_name }}"
 
       - name: Login to OpenShift
         run: |
@@ -100,7 +100,7 @@ jobs:
       - name: Update cluster names and patch
         run: |
           # Update only metadata.name in base postgrescluster.yml
-          sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' \
+          sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
             deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
 
           # Use yq to append only the restore section
@@ -135,7 +135,7 @@ jobs:
 
       - name: Trigger restore with annotation
         run: |
-          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+          oc annotate postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
             --overwrite \
             postgres-operator.crunchydata.com/pgbackrest-restore="${{ steps.set-restore-id.outputs.id }}" \
             -n ${{ env.NAMESPACE }}
@@ -144,7 +144,7 @@ jobs:
         run: |
           timeout=600 # 10 minutes timeout
           while [ $timeout -gt 0 ]; do
-            status=$(oc get postgrescluster ${{ env.CLUSTER_NAME }} \
+            status=$(oc get postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
               -n ${{ env.NAMESPACE }} \
               -o jsonpath='{.status.pgbackrest.restore}')
             
@@ -204,7 +204,7 @@ jobs:
       - name: Remove restore annotation
         continue-on-error: true
         run: |
-          oc annotate postgrescluster ${{ env.CLUSTER_NAME }} \
+          oc annotate postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
             postgres-operator.crunchydata.com/pgbackrest-restore- \
             -n ${{ env.NAMESPACE }}
 
@@ -212,7 +212,7 @@ jobs:
         continue-on-error: true
         run: |
           # Update only metadata.name in base postgrescluster.yml
-          sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' \
+          sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
             deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
 
       - name: Apply configuration
