@@ -1,15 +1,21 @@
-import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { ExternalModule } from '../external/external.module';
-import { PrismaModule } from '../prisma/prisma.module';
-import { UserModule } from '../user/user.module';
-import { AuthService } from './auth.service';
-import { ProfileResolver } from './profile.resolver';
-import { KeycloakStrategy } from './strategies/keycloak.strategy';
+import { PassportModule } from '@nestjs/passport';
+import { AuthController } from './controllers/auth.controller';
+import { OIDCStrategyFactory } from './factories/oidc-strategy.factory';
+import { PublicRouteBypassGuard } from './guards/public-route-bypass.guard';
+import { SessionAuthGuard } from './guards/session-auth.guard';
+import { SessionSerializer } from './serializers/session.serializer';
+import { AuthService } from './services/auth.service';
 
 @Module({
-  imports: [HttpModule, PrismaModule, ExternalModule, UserModule],
-  providers: [AuthService, ProfileResolver, KeycloakStrategy],
-  exports: [AuthService],
+  imports: [
+    PassportModule.register({
+      defaultStrategy: 'oidc',
+      // keepSessionInfo: true,
+      session: true,
+    }),
+  ],
+  providers: [AuthService, OIDCStrategyFactory, PublicRouteBypassGuard, SessionAuthGuard, SessionSerializer],
+  controllers: [AuthController],
 })
 export class AuthModule {}
