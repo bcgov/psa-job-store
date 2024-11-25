@@ -51,7 +51,6 @@ jobs:
       - name: Set environment variables
         run: |
           echo "NAMESPACE=f3c07a-${{ env.ENVIRONMENT }}" >> $GITHUB_ENV
-          # echo "RESTORE_TIMESTAMP=${{ inputs.restore_timestamp }}" >> $GITHUB_ENV
 
       - name: Set Cluster Name
         id: set-cluster
@@ -119,7 +118,7 @@ jobs:
         if: env.RESTORE_TIMESTAMP != ''
         run: |
           # Update only metadata.name in base postgrescluster.yml
-          sed -i '0,/name:/{s/name: .*/name: '"${{ env.CLUSTER_NAME }}"'/}' \
+          sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
             deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
 
           # Use yq to append only the restore section
