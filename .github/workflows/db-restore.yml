@@ -1,7 +1,7 @@
 name: Database In-Place PITR
 on:
-  # push:
-  #   branches: ['stage', 'development']
+  push:
+    branches: ['stage', 'development']
   workflow_dispatch:
     inputs:
       cluster_name:
@@ -36,7 +36,7 @@ on:
 
 env:
   ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
-  backup_id: 'sdfsd'
+  BACKUP_ANNOTATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id || '20241125-163544' }}
 
 jobs:
   restore:
@@ -92,7 +92,7 @@ jobs:
           BACKUP_ID=$(oc exec $POSTGRES_POD -- pgbackrest info \
             --output=json \
             | jq -r '.[] | select(.backup[] != null) | .backup[] 
-            | select(.annotation.source == "${{ inputs.backup_id }}") 
+            | select(.annotation.source == "${{ env.BACKUP_ANNOTATION }}") 
             | .label' \
             | tail -n1)
 
