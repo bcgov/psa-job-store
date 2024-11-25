@@ -97,8 +97,6 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
               GROUP BY job_profile.id) current_table ON jp.id = current_table.id AND jp.version = current_table.max_version;
         `;
 
-    console.log('full schema: ', sqlString);
-
     // Split the string into individual commands and filter out empty ones
     // First remove all comments
     const withoutComments = sqlString
@@ -106,30 +104,20 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
       .filter((line) => !line.trim().startsWith('--'))
       .join('\n');
 
-    console.log('withoutComments: ', withoutComments);
-
     // Then split by semicolon and clean up
     const commands = withoutComments
       .split(';')
       .map((cmd) => cmd.trim())
       .filter((cmd) => cmd.length > 0);
 
-    console.log('commands: ', commands);
-
-    // console.log('commands: ', commands);
-    console.log('executing create commands...');
-
     // Execute each command in a transaction
     await this.$transaction(async (tx) => {
       for (const command of commands) {
-        console.log(`Executing: ${command}`);
         await tx.$executeRawUnsafe(command);
       }
     });
 
-    console.log('applying seed...');
     await seed(this);
-    console.log('seed applied');
 
     // reset index
     await this.searchService.resetIndex();
