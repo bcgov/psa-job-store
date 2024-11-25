@@ -26,7 +26,7 @@ export const NotFoundComponent: React.FC<NotFoundComponentProps> = ({ entity }) 
   const navigate = useNavigate();
 
   const redirect = entites.find((e) => e.entity == entity)?.redirect ?? '/';
-  const icon = entites.find((e) => e.entity == entity)?.icon ?? '/';
+  const icon = entites.find((e) => e.entity == entity)?.icon ?? ErrorPage;
   return (
     <Result
       title={'Not found'}
