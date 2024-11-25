@@ -1,4 +1,8 @@
 {
   "extends": "tsconfig/vite-node.json",
-  "include": ["vite.config.ts"]
+  "compilerOptions": {
+    "composite": true
+  },
+  "include": ["vite.config.ts"],
+  "exclude": ["**/*.d.ts"]
 }

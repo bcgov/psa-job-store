@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-20.04
     if: |
       always() &&
-      (github.ref_name == 'stage') &&
+      (github.ref_name == 'develop' || github.ref_name == 'stage') &&
       (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
     steps:
       - name: Trigger E2E Tests
@@ -118,30 +118,3 @@ jobs:
               console.log('Error triggering E2E tests:', error);
               throw error;
             }
-
-  # trigger-unit-tests:
-  #   name: Trigger Unit Tests
-  #   needs: [metadata, deploy]
-  #   runs-on: ubuntu-20.04
-  #   if: |
-  #     always() &&
-  #     (github.ref_name == 'develop') &&
-  #     (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
-  #   steps:
-  #     - name: Trigger Unit Tests
-  #       uses: actions/github-script@v6
-  #       with:
-  #         script: |
-  #           try {
-  #             console.log('Attempting to trigger unit tests');
-  #             await github.rest.actions.createWorkflowDispatch({
-  #               owner: context.repo.owner,
-  #               repo: context.repo.repo,
-  #               workflow_id: 'react-unit-tests.yml',
-  #               ref: 'develop',
-  #             });
-  #             console.log('Unit tests triggered successfully');
-  #           } catch (error) {
-  #             console.log('Error triggering unit tests:', error);
-  #             throw error;
-  #           }

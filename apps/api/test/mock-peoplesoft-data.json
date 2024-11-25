@@ -684,6 +684,25 @@
       "A.TGB_E_CLASS": "E26271",
       "A.LOCATION": "V8X4S800",
       "A.UPDATE_INCUMBENTS": "N"
+    },
+    {
+      "attr:rownumber": 26,
+      "A.POSITION_NBR": "00121521",
+      "A.EFFDT": "2024-07-20",
+      "A.EFF_STATUS": "Active",
+      "A.DESCR": "Manager",
+      "A.DESCRSHORT": "Band 5",
+      "A.BUSINESS_UNIT": "BC112",
+      "A.DEPTID": "112-0074",
+      "B.DESCR": "Informational Resource Management",
+      "A.JOBCODE": "185005",
+      "A.POSN_STATUS": "Approved",
+      "A.STATUS_DT": "2023-02-14",
+      "A.REPORTS_TO": "00210987",
+      "A.SAL_ADMIN_PLAN": "MGT",
+      "A.TGB_E_CLASS": "E26271",
+      "A.LOCATION": "V8X4S800",
+      "A.UPDATE_INCUMBENTS": "N"
     }
   ]
 }

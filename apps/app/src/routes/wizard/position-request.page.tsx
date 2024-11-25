@@ -20,6 +20,7 @@ import {
 import { useTestUser } from '../../utils/useTestUser';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
+import { NotFoundComponent } from '../not-found/404';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -162,9 +163,11 @@ export const PositionRequestPage = () => {
       // If it's a shared route, set modes or perform actions accordingly
       setMode('readonly');
     }
-
+    console.log(positionRequestData);
     setPositionRequestData(
-      isSharedRoute ? positionRequestData?.sharedPositionRequest ?? null : positionRequestData?.positionRequest ?? null,
+      isSharedRoute
+        ? (positionRequestData?.sharedPositionRequest ?? null)
+        : (positionRequestData?.positionRequest ?? null),
     );
   }, [
     positionRequestId,
@@ -264,7 +267,12 @@ export const PositionRequestPage = () => {
     //   currentStep,
     //   isBlocking.current,
     // );
-    return currentLocation.pathname !== nextLocation.pathname && currentStep != 5 && isBlocking.current;
+    return (
+      currentLocation.pathname !== nextLocation.pathname &&
+      currentStep != 5 &&
+      isBlocking.current &&
+      !positionRequestData
+    );
   });
 
   const disableBlockingAndNavigateHome = () => {
@@ -686,7 +694,9 @@ export const PositionRequestPage = () => {
 
   if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
 
-  return (
+  return !wizardContextPositionRequestData ? (
+    <NotFoundComponent entity="position request" />
+  ) : (
     <>
       {mode === 'readonly' && (
         <>

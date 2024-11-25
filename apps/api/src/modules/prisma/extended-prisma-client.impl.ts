@@ -17,4 +17,5 @@ const ExtendedPrismaClient = UntypedExtendedClient as unknown as new (
   options?: ConstructorParameters<typeof PrismaClient>[0],
 ) => ReturnType<typeof extendClient>;
 
+export type ExtendedPrismaClientType = ReturnType<typeof extendClient>;
 export { ExtendedPrismaClient };

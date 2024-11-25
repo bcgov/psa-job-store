@@ -1,7 +1,7 @@
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
-  name: api-postgres-alpha
+  name: api-postgres-beta
 spec:
   shutdown: false
   instances:
@@ -49,10 +49,10 @@ spec:
       repoHost:
         resources:
           requests:
-            cpu: 1m
+            cpu: 10m
             memory: 64Mi
           limits:
-            cpu: 50m
+            cpu: 100m
             memory: 128Mi
       sidecars:
         pgbackrest:

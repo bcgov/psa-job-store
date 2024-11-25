@@ -16,6 +16,7 @@ import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
 import { MyPositionsRoute } from '../routes/my-position-requests';
 import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
+import NotFoundComponent from '../routes/not-found/404';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { SettingsRoute } from '../routes/settings';
@@ -299,22 +300,16 @@ export const router = createBrowserRouter([
                           {
                             index: true,
                             element: <PositionRequestPage />,
-                            handle: {
-                              icon: <FileTextOutlined />,
-                            },
                           },
                         ],
                       },
                       {
-                        path: 'share/:positionRequestId',
+                        path: 'share/:positionRequestId([A-Za-z0-9-]+)',
                         element: <WizardRoute />,
                         children: [
                           {
                             index: true,
                             element: <PositionRequestPage />,
-                            handle: {
-                              icon: <FileTextOutlined />,
-                            },
                           },
                         ],
                       },
@@ -410,352 +405,26 @@ export const router = createBrowserRouter([
                 path: '/classification-tasks/:id',
                 element: <Redirect to="/requests/positions/manage/:id" replace />,
               },
+              {
+                path: '*',
+                element: <Redirect to="/not-found" replace />,
+              },
+              {
+                path: '/not-found',
+                element: <NotFoundComponent />, // This will handle all unmatched routes
+              },
             ],
           },
         ],
       },
     ],
   },
-  // {
-  //   element: <RouteGuard />,
-  //   children: [
-  //     {
-  //       element: <AppLayout />,
-  //       children: [
-  //         {
-  //           path: '/',
-  //           element: <HomeRoute />,
-  //           children: [
-  //             {
-  //               index: true,
-  //               handle: {
-  //                 // breadcrumb: () => 'My tasks',
-  //               },
-  //               element: (
-  //                 <RoleBasedRouting
-  //                   roleComponentMapping={{
-  //                     'super-admin': HomePage,
-  //                     classification: ClassificationTasksPage,
-  //                     'total-compensation': TotalCompDraftProfilesPage,
-  //                     'hiring-manager': HomePage,
-  //                     user: HomePage,
-  //                     default: UnauthorizedPage,
-  //                     // default: HomePage,
-  //                   }}
-  //                 />
-  //               ),
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           path: 'settings',
-  //           element: (
-  //             <RoleGuard roles={['super-admin']}>
-  //               <SettingsRoute />
-  //             </RoleGuard>
-  //           ),
-  //           children: [
-  //             {
-  //               path: 'departments',
-  //               handle: {
-  //                 breadcrumb: () => 'Departments',
-  //               },
-  //               children: [
-  //                 {
-  //                   index: true,
-  //                   element: <DepartmentListPage />,
-  //                 },
-  //                 {
-  //                   path: ':id',
-  //                   element: <DepartmentDetailPage />,
-  //                 },
-  //               ],
-  //             },
-  //             {
-  //               path: 'users',
-  //               handle: {
-  //                 breadcrumb: () => 'Users',
-  //               },
-  //               children: [
-  //                 {
-  //                   index: true,
-  //                   element: <UserListPage />,
-  //                 },
-  //                 {
-  //                   path: ':id',
-  //                   element: <UserDetailPage />,
-  //                 },
-  //               ],
-  //             },
-  //             {
-  //               path: 'widgets',
-  //               handle: {
-  //                 breadcrumb: () => 'Widgets',
-  //               },
-  //               children: [
-  //                 {
-  //                   index: true,
-  //                   element: <WidgetListPage />,
-  //                 },
-  //               ],
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           path: '/my-position-requests',
-  //           element: <MyPositionsRoute />,
-  //           handle: {
-  //             breadcrumb: () => 'My Position Requests',
-  //             icon: <UserAddOutlined />,
-  //           },
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <MyPositionsPage />,
-  //             },
-  //             {
-  //               path: 'create',
-  //               element: <WizardOrgChartPage />,
-  //             },
-  //             {
-  //               path: '/my-position-requests/:positionRequestId',
-  //               element: <WizardRoute />,
-  //               children: [
-  //                 {
-  //                   index: true,
-  //                   element: <PositionRequestPage />,
-  //                   handle: {
-  //                     icon: <FileTextOutlined />,
-  //                   },
-  //                 },
-  //               ],
-  //             },
-  //             {
-  //               path: 'share/:positionRequestId',
-  //               element: <WizardRoute />,
-  //               children: [
-  //                 {
-  //                   index: true,
-  //                   element: <PositionRequestPage />,
-  //                   handle: {
-  //                     breadcrumb: () => 'My position requests',
-  //                     icon: <FileTextOutlined />,
-  //                   },
-  //                 },
-  //               ],
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           path: '/org-chart',
-  //           element: <OrgChartRoute />,
-  //           handle: {
-  //             breadcrumb: () => 'My organizations',
-  //             icon: <PartitionOutlined />,
-  //           },
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <OrgChartPage />,
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           path: '/org-chart-old',
-  //           element: <OrgChartOldRoute />,
-  //           handle: {
-  //             breadcrumb: () => 'My organizations',
-  //             icon: <PartitionOutlined />,
-  //           },
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <OrgChartOldPage />,
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           path: '/job-profiles',
-  //           element: <JobProfilesRoute />,
-  //           handle: {
-  //             icon: <FileTextOutlined />,
-  //           },
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <JobProfilesPage />,
-  //             },
-  //             {
-  //               path: ':number',
-  //               element: <JobProfilesPage />,
-  //               handle: {
-  //                 icon: <FileTextOutlined />,
-  //               },
-  //             },
-  //           ],
-  //         },
-
-  //         {
-  //           path: '/saved-profiles',
-  //           element: <JobProfilesRoute />,
-  //           handle: {
-  //             icon: <FileTextOutlined />,
-  //           },
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <SavedJobProfilesPage />,
-  //             },
-  //             {
-  //               path: ':number',
-  //               element: <SavedJobProfilesPage />,
-  //               handle: {
-  //                 icon: <FileTextOutlined />,
-  //               },
-  //             },
-  //           ],
-  //         },
-
-  //         {
-  //           path: '/draft-job-profiles',
-  //           element: (
-  //             <RoleGuard roles={['total-compensation']}>
-  //               <TotalCompDraftProfilesRoute />
-  //             </RoleGuard>
-  //           ),
-  //           handle: {
-  //             breadcrumb: () => 'Draft Job Profiles',
-  //           },
-  //           children: [
-  //             {
-  //               path: 'create',
-  //               element: (
-  //                 <RoleGuard roles={['total-compensation']}>
-  //                   <TotalCompDraftProfilesRoute />
-  //                 </RoleGuard>
-  //               ),
-  //               children: [
-  //                 {
-  //                   index: true,
-  //                   element: <TotalCompCreateProfilePage />,
-  //                 },
-  //                 {
-  //                   path: ':id',
-  //                   element: <TotalCompCreateProfilePage />,
-  //                 },
-  //               ],
-  //             },
-  //             {
-  //               path: ':id',
-  //               element: <TotalCompCreateProfilePage />,
-  //             },
-  //             {
-  //               handle: {
-  //                 breadcrumb: () => 'Create profile',
-  //               },
-  //               index: true,
-  //               element: <TotalCompDraftProfilesPage />,
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           path: '/published-job-profiles',
-  //           element: (
-  //             <RoleGuard roles={['total-compensation']}>
-  //               <TotalCompPublishedProfilesRoute />
-  //             </RoleGuard>
-  //           ),
-  //           handle: {
-  //             breadcrumb: () => 'Published Job Profiles',
-  //           },
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <TotalCompPublishedProfilesPage />,
-  //             },
-  //             {
-  //               path: ':id',
-  //               element: <TotalCompCreateProfilePage />,
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           path: '/archived-job-profiles',
-  //           element: (
-  //             <RoleGuard roles={['total-compensation']}>
-  //               <TotalCompPublishedProfilesRoute />
-  //             </RoleGuard>
-  //           ),
-  //           handle: {
-  //             breadcrumb: () => 'Archived Job Profiles',
-  //           },
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <TotalCompArchivedProfilesPage />,
-  //             },
-  //             {
-  //               path: ':id',
-  //               element: <TotalCompCreateProfilePage />,
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           path: '/approved-requests',
-  //           element: (
-  //             <RoleGuard roles={['total-compensation']}>
-  //               <TotalCompApprovedRequestsRoute />
-  //             </RoleGuard>
-  //           ),
-  //           handle: {
-  //             breadcrumb: () => 'Approved requests',
-  //           },
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <TotalCompApprovedRequestsPage />,
-  //             },
-  //             {
-  //               path: ':positionRequestId',
-  //               element: <TotalCompApprovedRequestPage />,
-  //             },
-  //           ],
-  //         },
-
-  //         {
-  //           path: '/classification-tasks',
-  //           element: (
-  //             <RoleGuard roles={['classification']}>
-  //               <ClassificationTasksRoute />
-  //             </RoleGuard>
-  //           ),
-  //           handle: {
-  //             breadcrumb: () => 'My tasks',
-  //           },
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <ClassificationTasksPage />,
-  //             },
-  //             {
-  //               path: ':positionRequestId',
-  //               element: <ClassificationTaskPage />,
-  //             },
-  //           ],
-  //         },
-
-  //         {
-  //           path: '/unauthorized',
-  //           element: <UnauthorizedRoute />,
-  //           children: [
-  //             {
-  //               index: true,
-  //               element: <UnauthorizedPage />,
-  //             },
-  //           ],
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // },
+  {
+    path: '*',
+    element: <Redirect to="/not-found" replace />,
+  },
+  {
+    path: '/not-found',
+    element: <NotFoundComponent />, // This will handle all unmatched routes
+  },
 ]);

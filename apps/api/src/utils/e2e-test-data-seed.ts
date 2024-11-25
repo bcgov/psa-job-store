@@ -6,13 +6,29 @@ import {
   Prisma,
   PrismaClient,
 } from '@prisma/client';
+import { ExtendedPrismaClientType } from '../modules/prisma/extended-prisma-client.impl';
 
-const prisma = new PrismaClient();
+const prismaBlank = new PrismaClient();
 
 const SYSTEM_USER_ID = 'f1851282-d875-4f22-9590-6c0405d3bc78';
 const TEST_USER_ID = '88bd8bb6-c449-4c13-8204-d91539f548d4';
 
-async function seed() {
+export async function seed(prismaInp?: ExtendedPrismaClientType) {
+  const prisma = prismaInp || prismaBlank;
+
+  // console.log('Creating system user...');
+  // // Try create instead of upsert first
+  // await prisma.user.create({
+  //   data: {
+  //     id: SYSTEM_USER_ID,
+  //     name: 'SYSTEM USER',
+  //   },
+  // });
+
+  // console.log('System user created');
+  // const users = await prisma.user.findMany();
+  // console.log('Current users:', users);
+
   await prisma.user.upsert({
     where: { id: SYSTEM_USER_ID },
     create: {
@@ -4372,12 +4388,12 @@ async function seed() {
   });
 }
 
-seed()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+// seed()
+//   .then(async () => {
+//     await prisma.$disconnect();
+//   })
+//   .catch(async (e) => {
+//     console.error(e);
+//     await prisma.$disconnect();
+//     process.exit(1);
+//   });
