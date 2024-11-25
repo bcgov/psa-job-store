@@ -54,7 +54,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
   ) => {
     const dispatch = useAppDispatch();
     const [useData, setUseData] = useState<GetJobProfilesResponse | null>(null);
-    const [trigger, { data, isLoading, isFetching }] = useLazyGetJobProfilesQuery();
+    const [trigger, { data, isLoading, isFetching, isError, error }] = useLazyGetJobProfilesQuery();
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [classificationIdFilter, setClassificationIdFilter] = useState<string | null>(null);
@@ -137,6 +137,12 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     // useref to keep track of the profile number that ran with the pageNumberForSelectProfile query
     const selectProfileForPageNumber = useRef('');
 
+    useEffect(() => {
+      if (isError) {
+        console.log(error);
+        navigate('/not-found');
+      }
+    }, [isError, error, navigate]);
     /*
     AL-85 Code
     // Get Position Request

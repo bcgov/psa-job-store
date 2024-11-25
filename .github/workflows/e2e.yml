@@ -15,78 +15,78 @@ on:
         type: string
 
 jobs:
-  backup-database:
-    runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-    outputs:
-      backup-id: ${{ steps.set-backup-id.outputs.id }}
-      test-start-time: ${{ steps.set-time.outputs.time }}
-    steps:
-      - name: Set Test Start Time
-        id: set-time
-        run: |
-          START_TIME=$(date -u -d '5 minutes ago' "+%Y-%m-%d %H:%M:%S+00")
-          echo "time=$START_TIME" >> $GITHUB_OUTPUT
+  # backup-database:
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+  #   outputs:
+  #     backup-id: ${{ steps.set-backup-id.outputs.id }}
+  #     test-start-time: ${{ steps.set-time.outputs.time }}
+  #   steps:
+  #     - name: Set Test Start Time
+  #       id: set-time
+  #       run: |
+  #         START_TIME=$(date -u -d '5 minutes ago' "+%Y-%m-%d %H:%M:%S+00")
+  #         echo "time=$START_TIME" >> $GITHUB_OUTPUT
 
-      - name: Set Backup ID
-        id: set-backup-id
-        run: |
-          BACKUP_ID=$(date '+%Y%m%d-%H%M%S')
-          echo "id=$BACKUP_ID" >> $GITHUB_OUTPUT
+  #     - name: Set Backup ID
+  #       id: set-backup-id
+  #       run: |
+  #         BACKUP_ID=$(date '+%Y%m%d-%H%M%S')
+  #         echo "id=$BACKUP_ID" >> $GITHUB_OUTPUT
 
-      - name: Login to OpenShift
-        run: |
-          oc login ${{ secrets.OPENSHIFT_SERVER }} \
-            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
-            --insecure-skip-tls-verify=true
-          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+  #     - name: Login to OpenShift
+  #       run: |
+  #         oc login ${{ secrets.OPENSHIFT_SERVER }} \
+  #           --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
+  #           --insecure-skip-tls-verify=true
+  #         oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
 
-      - name: Configure Manual Backup
-        run: |
-          oc patch postgrescluster ${{ inputs.cluster_name }} --type merge \
-            -p '{"spec":{"backups":{"pgbackrest":{"manual":{"repoName":"repo1","options":["--type=full","--annotation=source=${{ steps.set-backup-id.outputs.id }}"]}}}}}'
+  #     - name: Configure Manual Backup
+  #       run: |
+  #         oc patch postgrescluster ${{ inputs.cluster_name }} --type merge \
+  #           -p '{"spec":{"backups":{"pgbackrest":{"manual":{"repoName":"repo1","options":["--type=full","--annotation=source=${{ steps.set-backup-id.outputs.id }}"]}}}}}'
 
-      - name: Trigger Backup
-        run: |
-          oc annotate postgrescluster ${{ inputs.cluster_name }} \
-            --overwrite \
-            postgres-operator.crunchydata.com/pgbackrest-backup="${{ steps.set-backup-id.outputs.id }}"
+  #     - name: Trigger Backup
+  #       run: |
+  #         oc annotate postgrescluster ${{ inputs.cluster_name }} \
+  #           --overwrite \
+  #           postgres-operator.crunchydata.com/pgbackrest-backup="${{ steps.set-backup-id.outputs.id }}"
 
-      - name: Wait for backup completion
-        run: |
-          timeout=1200  # 20 minutes timeout
-          while [ $timeout -gt 0 ]; do
-            status=$(oc get postgrescluster ${{ inputs.cluster_name }} \
-              -o jsonpath='{.status.pgbackrest.manualBackup}')
-            
-            if [ -n "$status" ]; then
-              # Check if this is our backup
-              echo "Current status: $status"
-              if echo "$status" | grep -q "${{ steps.set-backup-id.outputs.id }}"; then
-                if echo "$status" | grep -q '"finished":true'; then
-                  if echo "$status" | grep -q '"succeeded":1'; then
-                    echo "Backup completed successfully"
-                    exit 0
-                  else
-                    echo "Backup failed"
-                    exit 1
-                  fi
-                fi
-              fi
-            fi
-            
-            echo "Backup in progress..."
-            sleep 10
-            timeout=$((timeout-10))
-          done
+  #     - name: Wait for backup completion
+  #       run: |
+  #         timeout=1200  # 20 minutes timeout
+  #         while [ $timeout -gt 0 ]; do
+  #           status=$(oc get postgrescluster ${{ inputs.cluster_name }} \
+  #             -o jsonpath='{.status.pgbackrest.manualBackup}')
 
-          echo "Backup timed out"
-          exit 1
+  #           if [ -n "$status" ]; then
+  #             # Check if this is our backup
+  #             echo "Current status: $status"
+  #             if echo "$status" | grep -q "${{ steps.set-backup-id.outputs.id }}"; then
+  #               if echo "$status" | grep -q '"finished":true'; then
+  #                 if echo "$status" | grep -q '"succeeded":1'; then
+  #                   echo "Backup completed successfully"
+  #                   exit 0
+  #                 else
+  #                   echo "Backup failed"
+  #                   exit 1
+  #                 fi
+  #               fi
+  #             fi
+  #           fi
+
+  #           echo "Backup in progress..."
+  #           sleep 10
+  #           timeout=$((timeout-10))
+  #         done
+
+  #         echo "Backup timed out"
+  #         exit 1
 
   wait-for-deployment:
     # wait for db backup, otherwise may not have enough OC resources
-    needs: [backup-database]
+    # needs: [backup-database]
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
@@ -98,14 +98,17 @@ jobs:
         run: |
           oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
           oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+
       - name: Wait for deployments
         run: |
           # Wait for rollouts to complete
           oc rollout status deployment/api
           oc rollout status deployment/app
+
       - name: Sleep for 15 seconds
         run: sleep 15s
         shell: bash
+
       - name: Wait for GIT sha
         id: check-deployment
         run: |
@@ -158,16 +161,35 @@ jobs:
 
           echo "ready=true" >> $GITHUB_OUTPUT
 
+      - name: Dump Schema
+        id: dump-schema
+        run: |
+          response=$(curl -s -H "X-E2E-Key: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}" "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/dumpCreateSchema")
+          if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
+            echo "Failed to dump schema. Response: $response"
+            exit 1
+          fi
+          # Extract schema and escape it properly while preserving quotes
+          schema=$(echo $response | jq -r '.schema' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}')
+          echo "schema<<EOF" >> $GITHUB_OUTPUT
+          echo "$schema" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Setup E2E Environment
         if: steps.check-deployment.outputs.ready == 'true'
         run: |
-          oc set env deployment/api E2E_TESTING=true USE_MOCKS=true
+          oc set env deployment/api \
+            E2E_TESTING=true \
+            USE_MOCKS=true \
+            DATABASE_URL= \
+            "DB_SCHEMA=${{ steps.dump-schema.outputs.schema }}"
 
           # Wait for rollouts to complete
           oc rollout status deployment/api
 
   e2e-tests:
-    needs: [wait-for-deployment, backup-database]
+    needs: [wait-for-deployment] #, backup-database
     if: needs.wait-for-deployment.outputs.deployment-ready == 'true'
     runs-on: ubuntu-latest
     environment:
@@ -200,14 +222,13 @@ jobs:
           key: cypress-binary-${{ runner.os }}-${{ hashFiles('**/cypress.config.js') }}
 
       # Login to OpenShift and reset database
-      - name: Reset Database
-        run: |
-          oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
-          oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-          API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
-          echo "Found API pod: $API_POD"
-          oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/e2e-test-data-seed.ts && npx prisma migrate reset  --force --skip-generate"
-
+      # - name: Reset Database
+      #   run: |
+      #     oc login ${{ secrets.OPENSHIFT_SERVER }} --token=${{ secrets.OPENSHIFT_API_TOKEN }} --insecure-skip-tls-verify=true
+      #     oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+      #     API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
+      #     echo "Found API pod: $API_POD"
+      #     oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/run-e2e-seed.ts && npx prisma migrate reset  --force --skip-generate"
       - name: Reset elastic search index
         run: |
           response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
@@ -218,6 +239,7 @@ jobs:
         shell: bash
 
         # Cache restore steps
+
       - name: Restore Node Modules Cache
         id: cache-node-modules-restore
         uses: actions/cache/restore@v4
@@ -315,14 +337,14 @@ jobs:
           oc project f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
 
           # Remove environment variables
-          oc set env deployment/api E2E_TESTING- USE_MOCKS-
+          oc set env deployment/api E2E_TESTING- USE_MOCKS- DATABASE_URL- DB_SCHEMA-
 
-  restore-database:
-    needs: [e2e-tests, backup-database]
-    uses: ./.github/workflows/db-restore.yml
-    with:
-      # restore_timestamp: ${{ needs.backup-database.outputs.test-start-time }}
-      environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
-      cluster_name: ${{ inputs.cluster_name }}
-      backup_id: ${{ needs.backup-database.outputs.backup-id }}
-    secrets: inherit
+  # restore-database:
+  #   needs: [e2e-tests, backup-database]
+  #   uses: ./.github/workflows/db-restore.yml
+  #   with:
+  #     # restore_timestamp: ${{ needs.backup-database.outputs.test-start-time }}
+  #     environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+  #     cluster_name: ${{ inputs.cluster_name }}
+  #     backup_id: ${{ needs.backup-database.outputs.backup-id }}
+  #   secrets: inherit

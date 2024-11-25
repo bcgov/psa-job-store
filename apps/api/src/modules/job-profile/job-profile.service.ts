@@ -302,8 +302,8 @@ export class JobProfileService {
     // example of where:
     // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"organizations":{"some":{"organization_id":{"in":["BC026","ALL"]}}}}]}
     // Check if "ALL" is present in the organization_id array
-    const hasAllOrganization = where?.AND?.some(
-      (condition) => condition.organizations?.some?.organization_id?.in?.includes('ALL'),
+    const hasAllOrganization = where?.AND?.some((condition) =>
+      condition.organizations?.some?.organization_id?.in?.includes('ALL'),
     );
 
     // Modify the where query if "ALL" is present
@@ -543,7 +543,9 @@ export class JobProfileService {
             version: true,
           },
         })
-      )[0]._max.version;
+      )[0]?._max?.version;
+
+    if (maxVersion == null) return null;
     const jobProfile = await this.prisma.jobProfile.findUnique({
       where: { id_version: { id, version: maxVersion } },
       include: {
@@ -682,7 +684,7 @@ export class JobProfileService {
     }
     const jobProfile = currentJobProfiles[0];
     // if profile is not published and user is not total compensation, deny access
-    if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
+    if (jobProfile && jobProfile?.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
       throw AlexandriaError('You do not have permission to view this job profile');
     }
     return jobProfile;

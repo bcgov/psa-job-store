@@ -34,7 +34,7 @@ export class UserResolver {
   }
 
   @Roles('super-admin')
-  @Query(() => User, { name: 'user' })
+  @Query(() => User, { name: 'user', nullable: true })
   getUser(@Args() args?: FindUniqueUserArgs) {
     return this.userService.getUser(args);
   }
