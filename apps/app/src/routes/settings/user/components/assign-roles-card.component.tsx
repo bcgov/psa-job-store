@@ -41,7 +41,7 @@ export const AssignRolesCard = ({ user }: AssignRolesCardProps) => {
             onChange={handleChange}
             allowClear
             disabled={user == null}
-            loading={user == null ?? roleDataIsFetching}
+            loading={!user || roleDataIsFetching}
             mode="multiple"
             options={options}
             style={{ width: '100%' }}

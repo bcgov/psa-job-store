@@ -1,7 +1,7 @@
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
-  name: api-postgres-alpha
+  name: api-postgres-beta
 spec:
   shutdown: false
   instances:

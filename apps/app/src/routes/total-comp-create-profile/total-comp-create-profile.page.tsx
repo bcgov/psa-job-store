@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
-import 'react-quill/dist/quill.snow.css';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
