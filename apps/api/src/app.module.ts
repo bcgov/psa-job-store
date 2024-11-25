@@ -37,7 +37,11 @@ import { validateAppConfig } from './utils/validate-app-config.util';
 // import { RoleGuard } from './modules/auth/guards/role.guard';
 // import { APP_GUARD } from '@nestjs/core';
 // import { AppResolver } from './app.resolver';
+import { OrGuard } from '@nest-lab/or-guard';
+import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
+import { PublicRouteBypassGuard } from './modules/auth/guards/public-route-bypass.guard';
+import { SessionAuthGuard } from './modules/auth/guards/session-auth.guard';
 
 @Module({
   imports: [
@@ -85,6 +89,10 @@ import { AuthModule } from './modules/auth/auth.module';
   ],
   controllers: [],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: OrGuard([PublicRouteBypassGuard, SessionAuthGuard]),
+    },
     // { provide: APP_GUARD, useClass: AuthGuard },
     // { provide: APP_GUARD, useClass: RoleGuard },
   ],

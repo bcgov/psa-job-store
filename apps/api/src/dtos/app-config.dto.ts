@@ -64,6 +64,37 @@ export class AppConfigDto {
   @IsString()
   KEYCLOAK_CLIENT_ID_PUBLIC: string;
 
+  // NestJS
+  // @IsNumber()
+  // @IsNotEmpty()
+  // SERVER_PORT: number;
+
+  // Express Session
+  @IsString()
+  @IsNotEmpty()
+  SESSION_SECRET: string;
+
+  // Keycloak
+  // @IsString()
+  // @IsNotEmpty()
+  // KEYCLOAK_REALM_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  KEYCLOAK_CALLBACK_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  KEYCLOAK_LOGOUT_REDIRECT_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  KEYCLOAK_CLIENT_ID: string;
+
+  @IsString()
+  @IsNotEmpty()
+  KEYCLOAK_CLIENT_SECRET: string;
+
   @IsNotEmpty()
   @IsString()
   PEOPLESOFT_URL: string;
