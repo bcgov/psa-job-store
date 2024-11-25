@@ -24,7 +24,8 @@ jobs:
   backup-database:
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
+      # name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     outputs:
       backup-id: ${{ steps.set-backup-id.outputs.id }}
       test-start-time: ${{ steps.set-time.outputs.time }}
