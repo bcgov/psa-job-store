@@ -82,6 +82,7 @@ jobs:
           cat deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}/kustomization.yml
 
       - name: Get Backup ID
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id != ''
         run: |
           # Get the pod name
           POSTGRES_POD=$(oc get pods -l postgres-operator.crunchydata.com/role=master -o jsonpath='{.items[0].metadata.name}')
@@ -98,7 +99,7 @@ jobs:
           echo "BACKUP_ID=$BACKUP_ID" >> $GITHUB_ENV
 
       - name: Update cluster names and patch (Backup ID)
-        if: env.BACKUP_ANNOTATION != ''
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id != ''
         run: |
           # Update only metadata.name in base postgrescluster.yml
           sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
@@ -115,7 +116,7 @@ jobs:
           }' deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}/patch.yml
 
       - name: Update cluster names and patch (PITR)
-        if: env.RESTORE_TIMESTAMP != ''
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.timestamp != ''
         run: |
           # Update only metadata.name in base postgrescluster.yml
           sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
