@@ -9,7 +9,7 @@ import {
   Organization,
 } from '../../@generated/prisma-nestjs-graphql';
 import { AlexandriaError } from '../../utils/alexandria-error';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { GqlCurrentUser } from '../auth/decorators/gql-current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JobFamilyService } from '../job-family/job-family.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
@@ -135,14 +135,17 @@ export class JobProfileResolver {
 
   @Query(() => [JobProfile], { name: 'jobProfilesDrafts' })
   @Roles('total-compensation')
-  async getJobProfilesDrafts(@CurrentUser() { id: userId }: Express.User, @Args() args?: FindManyJobProfileWithSearch) {
+  async getJobProfilesDrafts(
+    @GqlCurrentUser() { id: userId }: Express.User,
+    @Args() args?: FindManyJobProfileWithSearch,
+  ) {
     return this.jobProfileService.getJobProfilesDrafts(args, userId);
   }
 
   @Query(() => Int, { name: 'jobProfilesDraftsCount' })
   @Roles('total-compensation')
   async jobProfilesDraftsCount(
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
     @Args() args?: FindManyJobProfileWithSearch,
   ) {
     return await this.jobProfileService.getJobProfilesDraftsCount(args, userId);
@@ -151,7 +154,7 @@ export class JobProfileResolver {
   @Query(() => [JobProfile], { name: 'jobProfilesArchived' })
   @Roles('total-compensation')
   async getJobProfilesArchived(
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
     @Args() args?: FindManyJobProfileWithSearch,
   ) {
     return this.jobProfileService.getJobProfilesArchived(args, userId);
@@ -160,7 +163,7 @@ export class JobProfileResolver {
   @Query(() => Int, { name: 'jobProfilesArchivedCount' })
   @Roles('total-compensation')
   async jobProfilesArchivedCount(
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
     @Args() args?: FindManyJobProfileWithSearch,
   ) {
     return await this.jobProfileService.getJobProfilesArchivedCount(args, userId);
@@ -168,13 +171,13 @@ export class JobProfileResolver {
 
   @Query(() => [Organization], { name: 'jobProfilesDraftsMinistries' })
   @Roles('total-compensation')
-  async getJobProfilesDraftsMinistries(@CurrentUser() { id: userId }: Express.User) {
+  async getJobProfilesDraftsMinistries(@GqlCurrentUser() { id: userId }: Express.User) {
     return this.jobProfileService.getJobProfilesDraftsMinistries(userId);
   }
 
   @Query(() => JobProfile, { name: 'jobProfile', nullable: true }) // so that share position request feature can fetch relevant data
   async getJobProfile(
-    @CurrentUser() user: Express.User,
+    @GqlCurrentUser() user: Express.User,
     @Args('id') id: number,
     @Args({ name: 'version', nullable: true }) version?: number,
   ) {
@@ -182,8 +185,8 @@ export class JobProfileResolver {
     return res;
   }
 
-  @Query(() => JobProfile, { name: 'jobProfileByNumber', nullable: true }) // so that share position request feature can fetch relevant data
-  async getJobProfileByNumber(@CurrentUser() user: Express.User, @Args('number') number: string) {
+  @Query(() => JobProfile, { name: 'jobProfileByNumber' }) // so that share position request feature can fetch relevant data
+  async getJobProfileByNumber(@GqlCurrentUser() user: Express.User, @Args('number') number: string) {
     const res = await this.jobProfileService.getJobProfileByNumber(+number, user.roles);
     return res;
   }
@@ -196,7 +199,7 @@ export class JobProfileResolver {
   // @Roles('total-compensation')
   // @UseGuards(RoleGuard)
   // @Query(() => [JobProfileCareerGroup], { name: 'jobProfilesDraftsCareerGroups' })
-  // async getJobProfilesDraftsCareerGroups(@CurrentUser() { id: userId }: Express.User) {
+  // async getJobProfilesDraftsCareerGroups(@GqlCurrentUser() { id: userId }: Express.User) {
   //   return this.jobProfileService.getJobProfilesDraftsCareerGroups(userId);
   // }
 
@@ -226,7 +229,7 @@ export class JobProfileResolver {
   @Mutation(() => Int)
   @Roles('total-compensation')
   async createOrUpdateJobProfile(
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
     @Args('id', { type: () => Int, nullable: true }) id: number | null,
     @Args({ name: 'data', type: () => ExtendedJobProfileCreateInput }) data: ExtendedJobProfileCreateInput,
   ) {
@@ -249,7 +252,7 @@ export class JobProfileResolver {
   @Mutation(() => Int)
   @Roles('total-compensation') // Adjust role as per your requirements
   async duplicateJobProfile(
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
     @Args('jobProfileVersion', { type: () => Int }) jobProfileVersion: number,
   ) {
@@ -259,7 +262,7 @@ export class JobProfileResolver {
   @Mutation(() => Int)
   @Roles('total-compensation') // Adjust role as per your requirements
   async deleteJobProfile(
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
   ) {
     return this.jobProfileService.deleteJobProfile(jobProfileId, userId);
@@ -268,7 +271,7 @@ export class JobProfileResolver {
   @Mutation(() => Int)
   @Roles('total-compensation') // Adjust role as per your requirements
   async unarchiveJobProfile(
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
   ) {
     return this.jobProfileService.unarchiveJobProfile(jobProfileId, userId);
@@ -277,7 +280,7 @@ export class JobProfileResolver {
   @Mutation(() => Boolean)
   @Roles('total-compensation')
   async updateJobProfileState(
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
     @Args('jobProfileId', { type: () => Int }) jobProfileId: number,
     @Args('jobProfileVersion', { type: () => Int }) jobProfileVersion: number,
 

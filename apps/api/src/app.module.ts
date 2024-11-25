@@ -2,17 +2,11 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/cache-manager';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from 'nestjs-pino';
-import { AppResolver } from './app.resolver';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { AppLogModule } from './modules/app-log/app-log.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { E2EAuthModule } from './modules/auth/e2e-auth.module';
-import { AuthGuard } from './modules/auth/guards/auth.guard';
-import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
 import { CommentModule } from './modules/comment/comment.module';
@@ -29,7 +23,6 @@ import { KeycloakModule } from './modules/keycloak/keycloak.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { PositionRequestModule } from './modules/position-request/position-request.module';
 import { SavedJobProfileModule } from './modules/saved-job-profile/saved-job-profile.module';
-import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
 import { SearchModule } from './modules/search/search.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { UserModule } from './modules/user/user.module';
@@ -38,6 +31,14 @@ import { apolloPinoLoggingPlugin } from './utils/logging/apolloPinoLoggingPlugin
 import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerOptions } from './utils/logging/logger.factory';
 import { validateAppConfig } from './utils/validate-app-config.util';
+// AL-1020
+// import { AuthModule } from './modules/auth/auth.module';
+// import { E2EAuthModule } from './modules/auth/e2e-auth.module';
+// import { AuthGuard } from './modules/auth/guards/auth.guard';
+// import { RoleGuard } from './modules/auth/guards/role.guard';
+// import { APP_GUARD } from '@nestjs/core';
+// import { AppResolver } from './app.resolver';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -59,7 +60,6 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     EventModule,
     HealthCheckModule,
     ScheduleModule.forRoot(),
-    AuthModule,
     PositionRequestModule,
     JobProfileModule,
     ClassificationModule,
@@ -74,16 +74,22 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobProfileScopeModule,
     JobProfileMinimumRequirementsModule,
     AppLogModule,
-    ScheduledTaskModule,
     SavedJobProfileModule,
     UserModule,
     KeycloakModule,
     SettingsModule,
     OrganizationModule,
-    E2EAuthModule,
+    AuthModule,
+    // AL-1020
+    // ScheduledTaskModule,
+    // AuthModule,
+    // E2EAuthModule,
   ],
   controllers: [],
-  providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
+  providers: [
+    // { provide: APP_GUARD, useClass: AuthGuard },
+    // { provide: APP_GUARD, useClass: RoleGuard },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
