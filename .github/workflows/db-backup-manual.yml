@@ -1,8 +1,8 @@
 name: Database Backup
 
 on:
-  push:
-    branches: ['stage', 'development']
+  # push:
+  #   branches: ['stage', 'development']
   workflow_dispatch:
     inputs:
       cluster_name:
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       # name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
-      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
+      name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
     outputs:
       backup-id: ${{ steps.set-backup-id.outputs.id }}
       test-start-time: ${{ steps.set-time.outputs.time }}
@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Set environment variables
         run: |
-          echo "NAMESPACE=f3c07a-${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}" >> $GITHUB_ENV
+          echo "NAMESPACE=f3c07a-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}" >> $GITHUB_ENV
 
       - name: Set Cluster Name
         id: set-cluster
@@ -52,6 +52,9 @@ jobs:
         run: |
           BACKUP_ID=$(date '+%Y%m%d-%H%M%S')
           echo "id=$BACKUP_ID" >> $GITHUB_OUTPUT
+
+      - name: Display Backup ID
+        run: echo "Generated Backup ID is ${{ steps.set-backup-id.outputs.id }}"
 
       - name: Login to OpenShift
         run: |
