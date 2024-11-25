@@ -1,7 +1,7 @@
 name: Database In-Place PITR
 on:
-  push:
-    branches: ['stage', 'development']
+  # push:
+  #   branches: ['stage', 'development']
   workflow_dispatch:
     inputs:
       cluster_name:
