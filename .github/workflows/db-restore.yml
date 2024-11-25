@@ -130,7 +130,7 @@ jobs:
               "--target=\"${{ env.RESTORE_TIMESTAMP }}\"",
               "--target-timeline=current"
             ]
-          }' deployments/openshift/kustomize/overlays/crunchy/${{ inputs.environment }}/patch.yml
+          }' deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}/patch.yml
 
       - name: Debug - Show Updated Configuration
         run: |
