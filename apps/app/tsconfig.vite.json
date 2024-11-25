@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "node",
+    "outDir": "./dist"
+  },
+  "include": ["vite.config.ts"],
+  "exclude": ["**/*.d.ts"] // Override to exclude only .d.ts files
+}

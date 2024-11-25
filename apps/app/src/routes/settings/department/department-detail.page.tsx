@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
 import ContentWrapper from '../../../components/content-wrapper.component';
 import { useLazyGetDepartmentForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
+import NotFoundComponent from '../../not-found/404';
 import { OtherDetailsCard } from './components/other-details-card.component';
 import { PrimaryActionsCard } from './components/primary-actions-card.component';
 
@@ -14,9 +15,11 @@ export const DepartmentDetailPage = () => {
 
   useEffect(() => {
     if (id != null) departmentTrigger({ where: { id } });
-  }, [id]);
+  }, [departmentTrigger, id]);
 
-  return (
+  return !departmentIsFetching && !data?.department ? (
+    <NotFoundComponent entity="department" />
+  ) : (
     <>
       <PageHeader
         title={departmentIsFetching ? <Spin spinning /> : data?.department?.name}

@@ -53,10 +53,10 @@ import {
 import copy from 'copy-to-clipboard';
 import DOMPurify from 'dompurify';
 import debounce from 'lodash.debounce';
+import 'quill/dist/quill.snow.css';
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import ReactQuill, { Quill } from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import StickyBox from 'react-sticky-box';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -2086,9 +2086,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       .filter((item: any) => {
         // for every selected classification check if this reports-to item matches
         const foundResult = selectedEmployeeClassificationGroups.find((c) => {
-          const classificationFound = `${c.classification?.split('.')[0]}.${c.classification?.split(
-            '.',
-          )[1]}.${c.classification?.split('.')[2]}`;
+          const classificationFound = `${c.classification?.split('.')[0]}.${
+            c.classification?.split('.')[1]
+          }.${c.classification?.split('.')[2]}`;
           return classificationFound == item.id;
         });
 
@@ -3210,7 +3210,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                                 placeholder="Add job context"
                                 value={value}
                                 onBlur={onBlur}
-                                onChange={(v) => {
+                                onChange={(v: any) => {
                                   onChange(v);
                                   triggerBasicDetailsValidation();
                                 }}
@@ -3226,7 +3226,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                               __html: DOMPurify.sanitize(
                                 typeof jobProfileData?.jobProfile?.context === 'string'
                                   ? jobProfileData?.jobProfile.context
-                                  : jobProfileData?.jobProfile.context ?? '',
+                                  : (jobProfileData?.jobProfile.context ?? ''),
                               ),
                             }}
                           ></span>

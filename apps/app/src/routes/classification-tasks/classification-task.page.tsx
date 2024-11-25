@@ -27,6 +27,7 @@ import { statusIconColorMap } from '../../components/app/utils/statusIconColorMa
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useTestUser } from '../../utils/useTestUser';
+import NotFoundComponent from '../not-found/404';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import StatusIndicator from '../wizard/components/wizard-position-request-status-indicator';
@@ -48,7 +49,7 @@ export const ClassificationTaskPage = () => {
 
   if (!positionRequestId) throw 'No position request provided';
 
-  const { data } = useGetPositionRequestQuery({
+  const { data, isLoading } = useGetPositionRequestQuery({
     id: parseInt(positionRequestId),
   });
 
@@ -85,7 +86,7 @@ export const ClassificationTaskPage = () => {
   }
 
   // console.log('positionRequest data: ', data);
-
+  if (!data.positionRequest && !isLoading) return <NotFoundComponent entity="position request" />;
   // END ACTIONS TAB DATA
   const snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
   const tabItems = [

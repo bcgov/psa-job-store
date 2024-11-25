@@ -887,7 +887,7 @@ export class PositionRequestApiService {
           updateData.parent_job_profile.connect.id_version.version,
         );
         // if we have a department, try to filter for multiple classifications
-        if (parentJobProfile.classifications.length > 1) {
+        if (parentJobProfile?.classifications.length > 1) {
           const getClassification = async (parentJobProfile: any, department_id: string) => {
             const isExcluded = (await this.departmentService.getDepartment({ where: { id: department_id } })).metadata
               .is_statutorily_excluded;
@@ -908,7 +908,7 @@ export class PositionRequestApiService {
               },
             },
           };
-        } else if (parentJobProfile.classifications && parentJobProfile.classifications.length > 0) {
+        } else if (parentJobProfile?.classifications && parentJobProfile?.classifications.length > 0) {
           const classification = parentJobProfile.classifications[0].classification;
           updatePayload.classification = {
             connect: {
@@ -1672,7 +1672,7 @@ export class PositionRequestApiService {
     try {
       position = await this.peoplesoftService.createPosition(data as PositionCreateInput);
       if (position.positionNbr == null || position.positionNbr === '') {
-        this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage ?? '');
+        this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage);
         throw AlexandriaError('Failed to create position in PeopleSoft');
       }
     } catch (error) {
