@@ -34,9 +34,6 @@ on:
   #       required: true
   #       type: string
 
-env:
-  DEFAULT_BACKUP_ANNOTATION: '20241125-163544'
-
 jobs:
   restore:
     runs-on: ubuntu-latest
@@ -44,7 +41,7 @@ jobs:
       name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
     env:
       ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
-      BACKUP_ANNOTATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id || env.DEFAULT_BACKUP_ANNOTATION }}
+      BACKUP_ANNOTATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id || '20241125-163544' }}
 
     steps:
       - name: Checkout repository
@@ -182,7 +179,7 @@ jobs:
       name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
     env:
       ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
-      BACKUP_ANNOTATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id || env.DEFAULT_BACKUP_ANNOTATION }}
+      BACKUP_ANNOTATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id || '20241125-163544' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
