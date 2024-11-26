@@ -82,8 +82,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           department_ids: ['112-0074', 'DEPT02'],
         },
         peoplesoft: {
-          employee_id: '188146',
-          position_id: '00132136',
+          employee_id: '188147',
+          position_id: '00132137',
           department_id: '112-0074',
           organization_id: 'BC112',
         },
@@ -91,6 +91,33 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
     update: {
       name: "D'Cruz, George CITZ:EX",
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { id: '0cd09b68-db66-4f29-9407-eba78d35230e' },
+    create: {
+      id: '0cd09b68-db66-4f29-9407-eba78d35230e',
+      name: 'Struk, Alex CITZ:EX',
+      roles: ['hiring-manager'],
+      metadata: {
+        crm: {
+          account_id: null,
+          contact_id: 231166,
+        },
+        org_chart: {
+          department_ids: ['112-0074', 'DEPT02'],
+        },
+        peoplesoft: {
+          employee_id: '188148',
+          position_id: '00132138',
+          department_id: '112-0074',
+          organization_id: 'BC112',
+        },
+      },
+    },
+    update: {
+      name: 'Struk, Alex CITZ:EX',
     },
   });
 
