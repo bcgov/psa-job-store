@@ -86,7 +86,7 @@ export const ClassificationTaskPage = () => {
   }
 
   // console.log('positionRequest data: ', data);
-  if (!data.positionRequest && !isLoading) return <NotFoundComponent entity="position request" />;
+  if (!data.positionRequest && !isLoading) return <NotFoundComponent entity="Position request" />;
   // END ACTIONS TAB DATA
   const snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
   const tabItems = [

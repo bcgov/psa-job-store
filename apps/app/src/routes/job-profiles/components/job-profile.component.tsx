@@ -539,7 +539,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     hideDisabled?: boolean,
   ): JSX.Element[] => {
     const comparisonResult: JSX.Element[] = [];
-    console.log('original/modified 52: ', original, modified);
     if (!modified) return comparisonResult;
 
     // Add this check to handle null original
@@ -1275,8 +1274,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     },
   ];
 
-  return !isLoading && !effectiveData ? (
-    <NotFoundComponent entity="profile" />
+  return (!isLoading && profileByNumber && !profileByNumber?.jobProfileByNumber) ||
+    (id && version && !isLoadingVersioned && versionedProfileData && !versionedProfileData?.jobProfile) ? (
+    <NotFoundComponent entity="Profile" />
   ) : (
     <div data-testid="job-profile" style={{ ...style }}>
       {screens.xl === false && showBackToResults ? (

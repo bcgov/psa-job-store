@@ -630,7 +630,7 @@ export class JobProfileService {
     //   });
 
     // if profile is not published and user is not total compensation, deny access
-    if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
+    if (jobProfile?.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
       throw AlexandriaError('You do not have permission to view this job profile');
     }
     return jobProfile;
