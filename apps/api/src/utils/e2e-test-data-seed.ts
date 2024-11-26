@@ -40,60 +40,59 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
   });
 
-  await prisma.user.upsert(
-    {
-      where: { id: TEST_USER_ID },
-      create: {
-        id: TEST_USER_ID,
-        name: 'xxxx',
-        roles: ['hiring-manager'],
-        metadata: {
-          crm: {
-            account_id: null,
-            contact_id: 231166,
-          },
-          org_chart: {
-            department_ids: ['112-0074', 'DEPT02'],
-          },
-          peoplesoft: {
-            employee_id: '188146',
-            position_id: '00132136',
-            department_id: '112-0074',
-            organization_id: 'BC112',
-          },
+  await prisma.user.upsert({
+    where: { id: TEST_USER_ID },
+    create: {
+      id: TEST_USER_ID,
+      name: 'xxxx',
+      roles: ['hiring-manager'],
+      metadata: {
+        crm: {
+          account_id: null,
+          contact_id: 231166,
+        },
+        org_chart: {
+          department_ids: ['112-0074', 'DEPT02'],
+        },
+        peoplesoft: {
+          employee_id: '188146',
+          position_id: '00132136',
+          department_id: '112-0074',
+          organization_id: 'BC112',
         },
       },
-      update: {
-        name: 'xxxx',
-      },
     },
-    {
-      where: { id: '95cfdf78-95a5-4586-9a18-ff74aedd1ef2' },
-      create: {
-        id: '95cfdf78-95a5-4586-9a18-ff74aedd1ef2',
-        name: "D'Cruz, George CITZ:EX",
-        roles: ['hiring-manager'],
-        metadata: {
-          crm: {
-            account_id: null,
-            contact_id: 231166,
-          },
-          org_chart: {
-            department_ids: ['112-0074', 'DEPT02'],
-          },
-          peoplesoft: {
-            employee_id: '188146',
-            position_id: '00132136',
-            department_id: '112-0074',
-            organization_id: 'BC112',
-          },
+    update: {
+      name: 'xxxx',
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { id: '95cfdf78-95a5-4586-9a18-ff74aedd1ef2' },
+    create: {
+      id: '95cfdf78-95a5-4586-9a18-ff74aedd1ef2',
+      name: "D'Cruz, George CITZ:EX",
+      roles: ['hiring-manager'],
+      metadata: {
+        crm: {
+          account_id: null,
+          contact_id: 231166,
+        },
+        org_chart: {
+          department_ids: ['112-0074', 'DEPT02'],
+        },
+        peoplesoft: {
+          employee_id: '188146',
+          position_id: '00132136',
+          department_id: '112-0074',
+          organization_id: 'BC112',
         },
       },
-      update: {
-        name: "D'Cruz, George CITZ:EX",
-      },
     },
-  );
+    update: {
+      name: "D'Cruz, George CITZ:EX",
+    },
+  });
 
   await prisma.jobProfileMinimumRequirements.createMany({
     data: [
