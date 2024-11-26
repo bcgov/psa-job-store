@@ -1275,8 +1275,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     },
   ];
 
-  return !isLoading && !effectiveData ? (
-    <NotFoundComponent entity="profile" />
+  return (!isLoading && profileByNumber && !profileByNumber?.jobProfileByNumber) ||
+    (id && version && !isLoadingVersioned && versionedProfileData && !versionedProfileData?.jobProfile) ? (
+    <NotFoundComponent entity="Profile" />
   ) : (
     <div data-testid="job-profile" style={{ ...style }}>
       {screens.xl === false && showBackToResults ? (

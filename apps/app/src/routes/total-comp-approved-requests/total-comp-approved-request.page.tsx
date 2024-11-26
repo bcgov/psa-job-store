@@ -277,7 +277,7 @@ export const TotalCompApprovedRequestPage = () => {
 
   const isTestUser = useTestUser();
 
-  if (!data?.positionRequest && !isLoading) return <NotFoundComponent entity="position request" />;
+  if (!data?.positionRequest && !isLoading) return <NotFoundComponent entity="Position request" />;
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here

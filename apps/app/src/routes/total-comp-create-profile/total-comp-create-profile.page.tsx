@@ -42,8 +42,8 @@ export const TotalCompCreateProfilePage = () => {
   });
   if (isFetching) return <LoadingComponent />;
 
-  return id && !jobProfileData?.jobProfile && !isFetching ? (
-    <NotFoundComponent entity="profile" />
+  return id && jobProfileData && !jobProfileData?.jobProfile && !isFetching ? (
+    <NotFoundComponent entity="Profile" />
   ) : (
     <TotalCompCreateProfileComponent
       jobProfileData={jobProfileData}

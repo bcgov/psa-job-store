@@ -165,7 +165,9 @@ export const PositionRequestPage = () => {
     }
     console.log(positionRequestData);
     setPositionRequestData(
-      isSharedRoute ? positionRequestData?.sharedPositionRequest ?? null : positionRequestData?.positionRequest ?? null,
+      isSharedRoute
+        ? (positionRequestData?.sharedPositionRequest ?? null)
+        : (positionRequestData?.positionRequest ?? null),
     );
   }, [
     positionRequestId,
@@ -269,7 +271,7 @@ export const PositionRequestPage = () => {
       currentLocation.pathname !== nextLocation.pathname &&
       currentStep != 5 &&
       isBlocking.current &&
-      !positionRequestData
+      !!(positionRequestData?.positionRequest || positionRequestData?.sharedPositionRequest)
     );
   });
 
@@ -693,7 +695,7 @@ export const PositionRequestPage = () => {
   if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
 
   return !wizardContextPositionRequestData ? (
-    <NotFoundComponent entity="position request" />
+    <NotFoundComponent entity="Position request" />
   ) : (
     <>
       {mode === 'readonly' && (

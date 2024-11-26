@@ -17,8 +17,8 @@ export const DepartmentDetailPage = () => {
     if (id != null) departmentTrigger({ where: { id } });
   }, [departmentTrigger, id]);
 
-  return !departmentIsFetching && !data?.department ? (
-    <NotFoundComponent entity="department" />
+  return !departmentIsFetching && data && !data?.department ? (
+    <NotFoundComponent entity="Department" />
   ) : (
     <>
       <PageHeader
