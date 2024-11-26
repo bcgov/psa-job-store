@@ -53,6 +53,14 @@ export class OrgChartService {
         : positionsWithIncumbentsIds,
     );
 
+    // const flatEmployees = Array.from(employees.entries()).flatMap(([positionId, empArray]) =>
+    //   empArray.map((emp) => ({
+    //     ...emp,
+    //     id: positionId,
+    //   })),
+    // );
+    // console.log('employees: ', JSON.stringify(flatEmployees, null, 2));
+
     // Loop through response and generate the tree for everyone in the _current department_
     filteredPositions.forEach((position) => {
       // In rare cases, positions do _not_ include a value for A.REPORTS_TO, which causes the org chart to crash.

@@ -163,7 +163,6 @@ export const PositionRequestPage = () => {
       // If it's a shared route, set modes or perform actions accordingly
       setMode('readonly');
     }
-    console.log(positionRequestData);
     setPositionRequestData(
       isSharedRoute
         ? (positionRequestData?.sharedPositionRequest ?? null)
