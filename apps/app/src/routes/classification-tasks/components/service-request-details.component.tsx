@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ExportOutlined } from '@ant-design/icons';
-import { Card, Col, Descriptions, Row, Typography } from 'antd';
+import { CopyOutlined, ExportOutlined } from '@ant-design/icons';
+import { Card, Col, Descriptions, message, Row, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
 import { useGetJobProfileMetaQuery } from '../../../redux/services/graphql-api/job-profile.api';
@@ -44,7 +44,18 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'ticketId',
       label: 'CRM service request',
-      children: <div>{positionRequestData?.positionRequest?.crm_lookup_name}</div>,
+      children: (
+        <div>
+          {positionRequestData?.positionRequest?.crm_lookup_name}{' '}
+          <CopyOutlined
+            onClick={() => {
+              navigator.clipboard.writeText(positionRequestData?.positionRequest?.crm_lookup_name || '');
+              message.success('CRM service request number copied to clipboard');
+            }}
+            style={{ cursor: 'pointer' }}
+          />
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -63,7 +74,18 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'positionNumber',
       label: 'Position Number',
-      children: <div>{positionRequestData?.positionRequest?.position_number}</div>,
+      children: (
+        <div>
+          {positionRequestData?.positionRequest?.position_number}
+          <CopyOutlined
+            onClick={() => {
+              navigator.clipboard.writeText(positionRequestData?.positionRequest?.position_number + '' || '');
+              message.success('Position number copied to clipboard');
+            }}
+            style={{ cursor: 'pointer' }}
+          />
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
