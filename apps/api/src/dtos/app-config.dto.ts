@@ -1,4 +1,4 @@
-import { IsBooleanString, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Environment } from '../enums/environment.enum';
 import { SSOEnvironment } from '../enums/sso-environment.enum';
 
@@ -110,7 +110,8 @@ export class AppConfigDto {
   @IsString()
   USE_MOCKS: string;
 
-  @IsBooleanString()
+  @IsBoolean()
+  @IsOptional()
   TEST_ENV?: boolean;
 
   @IsString()
