@@ -31,24 +31,13 @@ import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerOptions } from './utils/logging/logger.factory';
 import { validateAppConfig } from './utils/validate-app-config.util';
 // AL-1020
-// import { AuthModule } from './modules/auth/auth.module';
 // import { E2EAuthModule } from './modules/auth/e2e-auth.module';
-// import { AuthGuard } from './modules/auth/guards/auth.guard';
-// import { RoleGuard } from './modules/auth/guards/role.guard';
-// import { APP_GUARD } from '@nestjs/core';
-// import { AppResolver } from './app.resolver';
-import { AndGuard, OrGuard } from '@nest-lab/or-guard';
+import { OrGuard } from '@nest-lab/or-guard';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
 import { PublicRouteBypassGuard } from './modules/auth/guards/public-route-bypass.guard';
-import { RoleGuard } from './modules/auth/guards/role.guard';
 import { SessionAuthGuard } from './modules/auth/guards/session-auth.guard';
 import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
-
-const SessionRoleGuard = {
-  provide: 'AND_GUARD',
-  useClass: AndGuard([SessionAuthGuard, RoleGuard], { sequential: true }),
-};
 
 @Module({
   imports: [
@@ -98,7 +87,6 @@ const SessionRoleGuard = {
       provide: APP_GUARD,
       useClass: OrGuard([PublicRouteBypassGuard, SessionAuthGuard]),
     },
-    // { provide: APP_GUARD, useClass: AuthGuard },
   ],
 })
 export class AppModule implements NestModule {
