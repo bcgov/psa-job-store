@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import {
   Args,
   Field,
@@ -17,6 +18,7 @@ import {
   PositionRequestUpdateInput,
   UserCreateNestedOneWithoutPositionRequestInput,
 } from '../../@generated/prisma-nestjs-graphql';
+import { AppConfigDto } from '../../dtos/app-config.dto';
 import { GqlCurrentUser } from '../auth/decorators/gql-current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
@@ -137,7 +139,10 @@ export class SuggestedManager {
 
 @Resolver()
 export class PositionRequestApiResolver {
-  constructor(private positionRequestService: PositionRequestApiService) {}
+  constructor(
+    private readonly configService: ConfigService<AppConfigDto, true>,
+    private positionRequestService: PositionRequestApiService,
+  ) {}
 
   @Mutation(() => Int)
   async createPositionRequest(
@@ -267,7 +272,7 @@ export class PositionRequestApiResolver {
   ) {
     // This is only for e2e testing to simulate classifications changing status of sercie request
     // check for test node env flag, if not true, return false
-    if (process.env.TEST_ENV !== 'true') {
+    if (this.configService.get('TEST_ENV') !== 'true') {
       return false;
     }
 
