@@ -38,12 +38,18 @@ import { validateAppConfig } from './utils/validate-app-config.util';
 // import { RoleGuard } from './modules/auth/guards/role.guard';
 // import { APP_GUARD } from '@nestjs/core';
 // import { AppResolver } from './app.resolver';
-import { OrGuard } from '@nest-lab/or-guard';
+import { AndGuard, OrGuard } from '@nest-lab/or-guard';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
 import { PublicRouteBypassGuard } from './modules/auth/guards/public-route-bypass.guard';
+import { RoleGuard } from './modules/auth/guards/role.guard';
 import { SessionAuthGuard } from './modules/auth/guards/session-auth.guard';
 import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
+
+const SessionRoleGuard = {
+  provide: 'AND_GUARD',
+  useClass: AndGuard([SessionAuthGuard, RoleGuard], { sequential: true }),
+};
 
 @Module({
   imports: [
@@ -85,9 +91,7 @@ import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.mod
     SettingsModule,
     OrganizationModule,
     AuthModule,
-    // AL-1020
     ScheduledTaskModule,
-    // AuthModule,
     // E2EAuthModule,
   ],
   controllers: [],
@@ -97,7 +101,6 @@ import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.mod
       useClass: OrGuard([PublicRouteBypassGuard, SessionAuthGuard]),
     },
     // { provide: APP_GUARD, useClass: AuthGuard },
-    // { provide: APP_GUARD, useClass: RoleGuard },
   ],
 })
 export class AppModule implements NestModule {
