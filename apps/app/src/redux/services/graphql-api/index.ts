@@ -2,8 +2,8 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { graphqlRequestBaseQuery } from '@rtk-query/graphql-request-base-query';
 import { notification } from 'antd';
-import { VITE_BACKEND_URL, VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../../../../envConfig';
-import { oidcConfig } from '../../../main';
+import { GraphQLClient } from 'graphql-request';
+import { VITE_BACKEND_URL } from '../../../../envConfig';
 
 interface GraphQLError {
   message: string;
@@ -23,21 +23,9 @@ interface GraphQLResponseMeta {
   };
 }
 
-const rawBaseQuery = graphqlRequestBaseQuery({
-  url: `${VITE_BACKEND_URL}/graphql`,
-  prepareHeaders: async (headers) => {
-    const storageString =
-      (await oidcConfig.userStore?.get(`user:${VITE_KEYCLOAK_REALM_URL}:${VITE_KEYCLOAK_CLIENT_ID}`)) ?? '{}';
+export const client = new GraphQLClient(`${VITE_BACKEND_URL}/graphql`);
 
-    const { access_token } = JSON.parse(storageString);
-
-    if (access_token) {
-      headers.set('authorization', `Bearer ${access_token}`);
-    }
-
-    return headers;
-  },
-});
+const rawBaseQuery = graphqlRequestBaseQuery({ client: client as any });
 
 function checkForExpiredSessionError(response: any) {
   // Check if the errors array exists

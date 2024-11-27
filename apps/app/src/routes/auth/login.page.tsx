@@ -1,11 +1,9 @@
 import { LoginOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Divider, Row, Space, Typography } from 'antd';
-import { useAuth } from 'react-oidc-context';
 import { useMatch } from 'react-router-dom';
 
 export const LoginPage = () => {
   const { Title, Text, Link } = Typography;
-  const auth = useAuth();
   // const [searchParams] = useSearchParams();
   // const isLogoutPage = searchParams.get('logout') != null ? true : false;
 
@@ -29,7 +27,7 @@ export const LoginPage = () => {
               <Text>Use your IDIR to sign in to the Job Store.</Text>
               <Button
                 icon={<LoginOutlined />}
-                onClick={() => auth.signinRedirect()}
+                onClick={() => (window.location.href = 'http://localhost:4000/auth/login')}
                 type="primary"
                 style={{ marginTop: '0.5rem' }}
               >

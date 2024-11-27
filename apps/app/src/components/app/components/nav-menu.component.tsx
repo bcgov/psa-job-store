@@ -13,8 +13,8 @@ import {
 } from '@ant-design/icons';
 import { Flex, Menu } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { useLocation } from 'react-router-dom';
+import { useTypedSelector } from '../../../redux/redux.hooks';
 import { FileSettingOutlined } from '../../icons/file-setting-outlined';
 import { PartitionSettingOutlined } from '../../icons/partition-setting-outlined';
 import { PositionRequestOutlined } from '../../icons/position-request-outlined';
@@ -31,7 +31,7 @@ export interface NavMenuProps {
 }
 
 export const NavMenu = ({ collapsed }: NavMenuProps) => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
   const location = useLocation();
 
   // Function to get all parent keys of a menu item

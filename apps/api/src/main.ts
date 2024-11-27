@@ -12,6 +12,9 @@ import { AppConfigDto } from './dtos/app-config.dto';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const configService = app.get<ConfigService<AppConfigDto, true>>(ConfigService);
+  app.enableCors({
+    credentials: true,
+  });
 
   app.use(
     session({
@@ -28,7 +31,6 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.enableCors();
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe({ skipMissingProperties: false, transform: true }));
   app.use(json({ limit: '7000kb' })); // to allow large org charts to be submitted

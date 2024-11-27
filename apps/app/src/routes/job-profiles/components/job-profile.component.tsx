@@ -16,11 +16,11 @@ import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
 import { VersionSelect } from '../../../components/app/version-select.component';
+import { useTypedSelector } from '../../../redux/redux.hooks';
 import {
   AccountabilitiesModel,
   IdVersion,
@@ -410,8 +410,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   showBasicInfo = true,
   showVersions = false,
 }) => {
-  const auth = useAuth();
-  const roles = auth.user?.profile['client_roles'];
+  const auth = useTypedSelector((state) => state.authReducer);
+  const roles = auth.user?.roles;
   const [searchParams] = useSearchParams();
   const params = useParams();
   const jobNumber = params.number ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
