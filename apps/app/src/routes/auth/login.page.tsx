@@ -1,9 +1,11 @@
 import { LoginOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Divider, Row, Space, Typography } from 'antd';
+import { useState } from 'react';
 import { useMatch } from 'react-router-dom';
 
 export const LoginPage = () => {
   const { Title, Text, Link } = Typography;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   // const [searchParams] = useSearchParams();
   // const isLogoutPage = searchParams.get('logout') != null ? true : false;
 
@@ -26,10 +28,14 @@ export const LoginPage = () => {
               <Title level={5}>{isLoginPage ? 'Public Sector Employee' : 'A bit more to do?'}</Title>
               <Text>Use your IDIR to sign in to the Job Store.</Text>
               <Button
+                onClick={() => {
+                  setIsLoading(true);
+                  window.location.href = 'http://localhost:4000/auth/login';
+                }}
                 icon={<LoginOutlined />}
-                onClick={() => (window.location.href = 'http://localhost:4000/auth/login')}
-                type="primary"
+                loading={isLoading}
                 style={{ marginTop: '0.5rem' }}
+                type="primary"
               >
                 Log In Using IDIR
               </Button>

@@ -8,7 +8,7 @@ import { UserService } from './user.service';
 
 @Module({
   imports: [ExternalModule, HttpModule, KeycloakModule, PrismaModule],
-  providers: [UserService, UserResolver],
-  exports: [UserService],
+  providers: [KeycloakService, PeoplesoftService, PeoplesoftV2Service, UserService, UserResolver],
+  exports: [KeycloakService, PeoplesoftV2Service, UserService],
 })
 export class UserModule {}

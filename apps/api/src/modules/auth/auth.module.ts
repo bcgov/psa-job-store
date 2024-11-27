@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
+import { UserModule } from '../user/user.module';
 import { AuthController } from './controllers/auth.controller';
 import { OIDCStrategyFactory } from './factories/oidc-strategy.factory';
 import { PublicRouteBypassGuard } from './guards/public-route-bypass.guard';
@@ -14,6 +15,7 @@ import { AuthService } from './services/auth.service';
       // keepSessionInfo: true,
       session: true,
     }),
+    UserModule,
   ],
   providers: [AuthService, OIDCStrategyFactory, PublicRouteBypassGuard, SessionAuthGuard, SessionSerializer],
   controllers: [AuthController],
