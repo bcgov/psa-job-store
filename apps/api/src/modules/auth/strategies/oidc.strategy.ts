@@ -24,7 +24,10 @@ export class OIDCStrategy extends PassportStrategy(Strategy, 'oidc') {
   async validate(tokenSet: TokenSet) {
     const userinfo: UserinfoResponse = await this.oidcClient.userinfo(tokenSet);
 
-    await this.userService.syncUser(guidToUuid(userinfo.idir_user_guid as string));
+    const uuid = guidToUuid(userinfo.idir_user_guid as string);
+
+    await this.userService.syncUser(uuid);
+    const user = await this.userService.getUser({ where: { id: uuid } });
 
     try {
       return {
@@ -35,7 +38,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, 'oidc') {
         email: userinfo.email,
         username: userinfo.idir_username,
         roles: userinfo.client_roles ?? [],
-        metadata: {},
+        metadata: user.metadata ?? {},
       };
     } catch (error) {
       throw new UnauthorizedException();
