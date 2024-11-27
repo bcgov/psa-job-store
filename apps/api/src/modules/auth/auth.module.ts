@@ -4,6 +4,7 @@ import { UserModule } from '../user/user.module';
 import { AuthController } from './controllers/auth.controller';
 import { OIDCStrategyFactory } from './factories/oidc-strategy.factory';
 import { PublicRouteBypassGuard } from './guards/public-route-bypass.guard';
+import { RoleGuard } from './guards/role.guard';
 import { SessionAuthGuard } from './guards/session-auth.guard';
 import { SessionSerializer } from './serializers/session.serializer';
 import { AuthService } from './services/auth.service';
@@ -17,7 +18,7 @@ import { AuthService } from './services/auth.service';
     }),
     UserModule,
   ],
-  providers: [AuthService, OIDCStrategyFactory, PublicRouteBypassGuard, SessionAuthGuard, SessionSerializer],
+  providers: [AuthService, OIDCStrategyFactory, PublicRouteBypassGuard, RoleGuard, SessionAuthGuard, SessionSerializer],
   controllers: [AuthController],
 })
 export class AuthModule {}
