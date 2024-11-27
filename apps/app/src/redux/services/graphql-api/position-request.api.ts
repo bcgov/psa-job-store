@@ -227,7 +227,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               $where: PositionRequestWhereInput
               $take: Int
               $skip: Int
-              $orderBy: [PositionRequestOrderByWithRelationAndSearchRelevanceInput!]
+              $orderBy: [PositionRequestOrderByWithRelationInput!]
               $requestingFeature: RequestingFeature
             ) {
               positionRequests(

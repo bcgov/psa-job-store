@@ -16,6 +16,7 @@ import { SearchModule } from '../search/search.module';
 import { SearchService } from '../search/search.service';
 import { ClassificationResolver } from './classification.resolver';
 import { ClassificationService } from './classification.service';
+import { MockIncidentResolver } from './crm.mock.resolver';
 import { CrmService } from './crm.service';
 import { MockCrmService } from './crm.service.mock';
 import { LocationResolver } from './location.resolver';
@@ -23,6 +24,7 @@ import { LocationService } from './location.service';
 import { OrgChartResolver } from './org-chart.resolver';
 import { OrgChartService } from './org-chart.service';
 import { PeoplesoftV2Service } from './peoplesoft-v2.service';
+import { MockPeopleSoftResolver } from './peoplesoft.mock.resolver';
 import { PeoplesoftService } from './peoplesoft.service';
 import { MockPeoplesoftService } from './peoplesoft.service.mock';
 import { PositionResolver } from './position.resolver';
@@ -46,8 +48,9 @@ import { PositionService } from './position.service';
     OrganizationResolver,
     OrganizationService,
     PositionResolver,
-    PrismaService,
     OrgChartResolver,
+    MockIncidentResolver,
+    MockPeopleSoftResolver,
     OrgChartService,
     {
       provide: PeoplesoftService,

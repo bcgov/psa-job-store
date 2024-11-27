@@ -162,6 +162,11 @@ export class CrmService {
     return response;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async updateMockIncident(id: number, data: IncidentCreateUpdateInput) {}
+
+  async resetMockData() {}
+
   async getIncident(id: number) {
     const response = await firstValueFrom(
       this.request(

@@ -11,6 +11,7 @@ import { PageHeader } from '../../components/app/page-header.component';
 import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
 import ContentWrapper from '../../components/content-wrapper.component';
 import { useGetPositionRequestUserClassificationsQuery } from '../../redux/services/graphql-api/position-request.api';
+import { useTestUser } from '../../utils/useTestUser';
 import MyPositionsTable from './components/my-position-requests-table.component';
 
 export const MyPositionsPage = () => {
@@ -22,7 +23,8 @@ export const MyPositionsPage = () => {
   }, []);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const isTestUser = useTestUser();
+  const [pageSize, setPageSize] = useState(!isTestUser ? 10 : 2);
   const [sortField, setSortField] = useState<null | string>(null);
   const [sortOrder, setSortOrder] = useState<null | string>(null);
 
@@ -110,6 +112,8 @@ export const MyPositionsPage = () => {
     }
   }, [initialSelectionSet, setInitialSelectionSet, searchParams]);
 
+  const defaultPageSize = !isTestUser ? 10 : 2;
+
   useEffect(() => {
     // Sync state with URL parameters for selections and pagination
     const statusValues = allSelections
@@ -122,7 +126,7 @@ export const MyPositionsPage = () => {
       .join(',');
 
     const pageFromURL = parseInt(searchParams.get('page') || '1', 10);
-    const pageSizeFromURL = parseInt(searchParams.get('pageSize') || '10', 10);
+    const pageSizeFromURL = parseInt(searchParams.get('pageSize') || defaultPageSize.toString(), 10);
 
     // Update URL parameters if needed
     const newSearchParams = new URLSearchParams();
@@ -140,7 +144,7 @@ export const MyPositionsPage = () => {
 
     if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
 
-    if (pageSize != 10) newSearchParams.set('pageSize', pageSizeFromURL.toString());
+    if (pageSize != defaultPageSize) newSearchParams.set('pageSize', pageSizeFromURL.toString());
 
     const searchFromURL = searchParams.get('search');
     if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
@@ -180,6 +184,7 @@ export const MyPositionsPage = () => {
     sortOrder,
     setSortOrder,
     setSortField,
+    defaultPageSize,
   ]);
 
   const clearFilters = () => {
@@ -214,7 +219,7 @@ export const MyPositionsPage = () => {
     if (newPage !== 1) newSearchParams.set('page', newPage.toString());
     else newSearchParams.delete('page');
 
-    if (newPageSize !== 10) newSearchParams.set('pageSize', newPageSize.toString());
+    if (newPageSize !== defaultPageSize) newSearchParams.set('pageSize', newPageSize.toString());
     else newSearchParams.delete('pageSize');
 
     if (newSortOrder) {
@@ -374,6 +379,7 @@ export const MyPositionsPage = () => {
           style={{ marginTop: '1rem', flexGrow: '1', display: 'flex', flexDirection: 'column' }}
           handleTableChangeCallback={handleTableChangeCallback}
           requestingFeature={'myPositions'}
+          itemsPerPage={!isTestUser ? undefined : pageSize}
         ></MyPositionsTable>
       </ContentWrapper>
     </>

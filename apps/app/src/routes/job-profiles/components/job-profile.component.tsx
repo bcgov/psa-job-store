@@ -32,6 +32,7 @@ import {
   useLazyGetJobProfileByNumberQuery,
   useLazyGetJobProfileQuery,
 } from '../../../redux/services/graphql-api/job-profile.api';
+import NotFoundComponent from '../../not-found/404';
 import AccessibleDocumentFromDescriptions from './accessible-document-from-descriptions';
 import './job-profile.component.css';
 
@@ -426,7 +427,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
   // Using the lazy query to have control over when the fetch action is dispatched
   // (not dispatching if profileData was already provided)
-  const [triggerGetJobProfileByNumber, { data: profileByNumber, isLoading }] = useLazyGetJobProfileByNumberQuery();
+  const [triggerGetJobProfileByNumber, { data: profileByNumber, isLoading, isError: isProfileError }] =
+    useLazyGetJobProfileByNumberQuery();
   const [triggerGetJobProfile, { data: diffProfileData, isLoading: isLoadingDiff }] = useLazyGetJobProfileQuery();
   const [triggerGetJobProfileById, { data: versionedProfileData, isLoading: isLoadingVersioned }] =
     useLazyGetJobProfileQuery();
@@ -473,12 +475,12 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
   // useEffect to set effectiveData when data is fetched from the API
   useEffect(() => {
-    if (!profileData && profileByNumber && !isLoading) {
+    if (!profileData && profileByNumber && !isLoading && !isProfileError) {
       // Only set effectiveData from fetched data if profileData is not provided
       if (onProfileLoad) onProfileLoad(profileByNumber.jobProfileByNumber);
       setEffectiveData(profileByNumber.jobProfileByNumber);
       setEffectiveDataExtra(profileByNumber.jobProfileByNumber);
-    } else if (profileData && showDiff && profileByNumber && !isLoading) {
+    } else if (profileData && showDiff && profileByNumber && !isLoading && !isProfileError) {
       if (onProfileLoad) onProfileLoad(profileByNumber.jobProfileByNumber);
       // do diff between profile as it was submitted at the time, otherwise compare to the latest
       setOriginalData(profileByNumber.jobProfileByNumber); // for diff
@@ -487,7 +489,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       // do diff between profile as it was submitted at the time, otherwise compare to the latest
       setOriginalData(diffProfileData.jobProfile); // for diff
     }
-  }, [profileByNumber, isLoading, profileData, onProfileLoad, showDiff, diffProfileData, isLoadingDiff]);
+  }, [
+    profileByNumber,
+    isLoading,
+    profileData,
+    onProfileLoad,
+    showDiff,
+    diffProfileData,
+    isLoadingDiff,
+    isProfileError,
+  ]);
 
   const compareData = (original: string | undefined, modified: string | undefined): JSX.Element[] => {
     const blank: JSX.Element[] = [];
@@ -1263,7 +1274,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     },
   ];
 
-  return (
+  return (!isLoading && profileByNumber && !profileByNumber?.jobProfileByNumber) ||
+    (id && version && !isLoadingVersioned && versionedProfileData && !versionedProfileData?.jobProfile) ? (
+    <NotFoundComponent entity="Profile" />
+  ) : (
     <div data-testid="job-profile" style={{ ...style }}>
       {screens.xl === false && showBackToResults ? (
         <nav aria-label="Breadcrumb">

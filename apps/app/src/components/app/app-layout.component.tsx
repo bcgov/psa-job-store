@@ -1,8 +1,9 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Layout } from 'antd';
+import { Button, Layout } from 'antd';
 import { useAuth } from 'react-oidc-context';
-import { Outlet, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
+import { ErrorBoundaryLayout } from '../../routes/not-found/error';
 import { AppHeader } from '../app/header.component';
 import { NavMenu } from './components/nav-menu.component';
 
@@ -14,7 +15,7 @@ const RenderOutlet = () => {
 
   // Render the <Outlet /> if user is on the login/logout page, or is logged in.
   return ['/auth/login', '/auth/logout'].some((path) => path.includes(location.pathname)) || auth.isAuthenticated ? (
-    <Outlet />
+    <ErrorBoundaryLayout />
   ) : (
     <></>
   );
@@ -36,7 +37,20 @@ export const AppLayout = () => {
             role="navigation"
             style={{ boxShadow: '2px 0 5px 0 #CCC', zIndex: 1000 }}
             theme="light"
-            trigger={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
+            trigger={
+              <Button
+                data-testid="menu-toggle-btn"
+                aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+                icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
+                onClick={() => setCollapsed(!collapsed)}
+                type="link"
+                style={{
+                  color: '#000',
+                  fontSize: '16px',
+                  margin: '0.5rem 0 0.5rem 0.75rem',
+                }}
+              />
+            }
           >
             <NavMenu collapsed={collapsed} />
           </Sider>

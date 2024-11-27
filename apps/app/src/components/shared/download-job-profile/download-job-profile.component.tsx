@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DownloadOutlined, WarningFilled } from '@ant-design/icons';
-import { Button, Modal } from 'antd';
+import { Button, Modal, message } from 'antd';
 import { generateJobProfile } from 'common-kit';
 
 import { Packer } from 'docx';
@@ -84,6 +84,7 @@ export const DownloadJobProfileComponent = ({
         console.log('downloading..');
         Packer.toBlob(document).then((blob) => {
           saveAs(blob, title.current);
+          message.success('Your document is downloading!');
         });
       }
     },

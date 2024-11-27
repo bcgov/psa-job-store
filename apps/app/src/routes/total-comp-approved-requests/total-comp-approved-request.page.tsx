@@ -14,7 +14,9 @@ import { useGetJobProfileMetaQuery } from '../../redux/services/graphql-api/job-
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
 import { formatDateTime } from '../../utils/Utils';
+import { useTestUser } from '../../utils/useTestUser';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
+import NotFoundComponent from '../not-found/404';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { initialElements } from '../org-chart/constants/initial-elements.constant';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
@@ -28,7 +30,7 @@ export const TotalCompApprovedRequestPage = () => {
 
   if (!positionRequestId) throw 'No position request provided';
 
-  const { data } = useGetPositionRequestQuery({
+  const { data, isLoading } = useGetPositionRequestQuery({
     id: parseInt(positionRequestId),
   });
 
@@ -273,12 +275,16 @@ export const TotalCompApprovedRequestPage = () => {
   //   // Implement download functionality here
   // };
 
+  const isTestUser = useTestUser();
+
+  if (!data?.positionRequest && !isLoading) return <NotFoundComponent entity="Position request" />;
+
   const handleCopyURL = () => {
     // Implement URL copy functionality here
     const linkToCopy = `${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    if (!isTestUser) copy(linkToCopy);
     message.success('Link copied to clipboard!');
   };
 

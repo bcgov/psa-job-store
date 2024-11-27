@@ -84,13 +84,13 @@ Visit [http://localhost:5173/](http://localhost:5173/) to see the application!
 First, ensure that `TEST_ENV=true` is set in your `apps/api/.env` file. This disables verification
 step for the JWT token and enables passing of a mock token for authentication and does other API modifications.
 
-Also set `VITE_TEST_ENV=true` in `apps/app/.env` file. This applies minor UI changes to facilitate cypress automation
-
 Ensure that database has been reset to defaults with the special seed for e2e tests:
 
 `npx -w api npm run migrate:reset:e2e-test`
 
-Run `npm -w app run test-e2e`
+Run `npx -w jobstore-cypress cypress open`
+
+To run in same environment as GitHub actions: `npx cypress run --browser edge --headless`
 
 ## Running component tests
 

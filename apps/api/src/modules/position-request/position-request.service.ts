@@ -281,6 +281,8 @@ export class PositionRequestApiService {
     // retrieve position we just created from peoplesoft
     let positionObj: Record<string, any> | null;
     try {
+      // console.log('getting position from peoplesoft: ', positionNumber);
+
       const result = await this.peoplesoftService.getPosition(positionNumber);
       const rows = result?.data?.query?.rows;
       positionObj = (rows ?? []).length > 0 ? rows[0] : null;
@@ -347,6 +349,13 @@ export class PositionRequestApiService {
 
     try {
       // determine the status for the position request based on CRM status + peoplesoft status
+      // console.log('getALStatus args: ', {
+      //   category: crm_category,
+      //   crm_status: crm_status,
+      //   ps_status: positionObj['A.POSN_STATUS'],
+      //   ps_effective_status: positionObj['EFF_STATUS'],
+      // });
+
       const incomingPositionRequestStatus = getALStatus({
         category: crm_category,
         crm_status: crm_status,
@@ -386,6 +395,8 @@ export class PositionRequestApiService {
   private async submitPositionRequest_updateOrgChart(positionObj, positionRequest: PositionRequest, id) {
     // get classification for this new position
     const classification = await this.classificationService.getClassificationForPeoplesoftPosition(positionObj);
+
+    // console.log('positionObj: ', positionObj);
 
     // get department in which this position was created
     const department = await this.departmentService.getDepartment({ where: { id: positionObj['A.DEPTID'] } });
@@ -876,7 +887,7 @@ export class PositionRequestApiService {
           updateData.parent_job_profile.connect.id_version.version,
         );
         // if we have a department, try to filter for multiple classifications
-        if (parentJobProfile.classifications.length > 1) {
+        if (parentJobProfile?.classifications.length > 1) {
           const getClassification = async (parentJobProfile: any, department_id: string) => {
             const isExcluded = (await this.departmentService.getDepartment({ where: { id: department_id } })).metadata
               .is_statutorily_excluded;
@@ -897,7 +908,7 @@ export class PositionRequestApiService {
               },
             },
           };
-        } else if (parentJobProfile.classifications && parentJobProfile.classifications.length > 0) {
+        } else if (parentJobProfile?.classifications && parentJobProfile?.classifications.length > 0) {
           const classification = parentJobProfile.classifications[0].classification;
           updatePayload.classification = {
             connect: {
@@ -1615,6 +1626,8 @@ export class PositionRequestApiService {
         });
       }
 
+      // console.log('incident is ', incident);
+
       return incident;
     } catch (error) {
       if (error instanceof AlexandriaErrorClass) {
@@ -1659,7 +1672,7 @@ export class PositionRequestApiService {
     try {
       position = await this.peoplesoftService.createPosition(data as PositionCreateInput);
       if (position.positionNbr == null || position.positionNbr === '') {
-        this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage ?? '');
+        this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage);
         throw AlexandriaError('Failed to create position in PeopleSoft');
       }
     } catch (error) {

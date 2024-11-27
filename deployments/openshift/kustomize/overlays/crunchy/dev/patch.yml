@@ -3,6 +3,21 @@ kind: PostgresCluster
 metadata:
   name: api-postgres-beta
 spec:
+  instances:
+    - replicas: 2
+      resources:
+        requests:
+          cpu: '500m'
+          memory: '512Mi'
+        limits:
+          cpu: '1000m'
+          memory: '1024Mi'
+      dataVolumeClaimSpec:
+        accessModes:
+          - 'ReadWriteOnce'
+        resources:
+          requests:
+            storage: 1.5Gi # Adjust the storage size as per your requirement
   backups:
     pgbackrest:
       global:
@@ -21,3 +36,21 @@ spec:
               resources:
                 requests:
                   storage: 3.5Gi # Adjust as needed
+      repoHost:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      sidecars:
+        pgbackrest:
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '150Mi'
+            limits:
+              cpu: '200m'
+              memory: '256Mi'
+ 

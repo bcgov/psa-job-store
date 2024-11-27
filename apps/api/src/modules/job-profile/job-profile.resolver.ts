@@ -172,7 +172,7 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfilesDraftsMinistries(userId);
   }
 
-  @Query(() => JobProfile, { name: 'jobProfile' }) // so that share position request feature can fetch relevant data
+  @Query(() => JobProfile, { name: 'jobProfile', nullable: true }) // so that share position request feature can fetch relevant data
   async getJobProfile(
     @CurrentUser() user: Express.User,
     @Args('id') id: number,
@@ -182,7 +182,7 @@ export class JobProfileResolver {
     return res;
   }
 
-  @Query(() => JobProfile, { name: 'jobProfileByNumber' }) // so that share position request feature can fetch relevant data
+  @Query(() => JobProfile, { name: 'jobProfileByNumber', nullable: true }) // so that share position request feature can fetch relevant data
   async getJobProfileByNumber(@CurrentUser() user: Express.User, @Args('number') number: string) {
     const res = await this.jobProfileService.getJobProfileByNumber(+number, user.roles);
     return res;

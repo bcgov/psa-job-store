@@ -48,6 +48,7 @@ window.addEventListener('unhandledrejection', function (event) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    {/* <ErrorBoundary > */}
     <AuthProvider {...oidcConfig} automaticSilentRenew>
       <ReduxProvider store={store}>
         <ConfigProvider
@@ -87,14 +88,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <App>
               <Helmet defaultTitle="Job Store" titleTemplate="%s | Job Store" />
               <WizardProvider>
-                {/* <ErrorBoundary > */}
                 <RouterProvider router={router} />
-                {/* </ErrorBoundary> */}
               </WizardProvider>
             </App>
           </HelmetProvider>
         </ConfigProvider>
       </ReduxProvider>
     </AuthProvider>
+    {/* </ErrorBoundary> */}
   </React.StrictMode>,
 );
